@@ -12,7 +12,7 @@ const ACTIVE_KEY = 'wop-active' // which profile is logged in on this device
 
 // The two crewmates who share this app. Add more here if the crew grows.
 const SEED_PROFILES: ReadonlyArray<Pick<Profile, 'id' | 'name' | 'emoji'>> = [
-  { id: 'diogo', name: 'Diogo', emoji: '👒' },
+  { id: 'diogo', name: 'Diogo', emoji: '🏴‍☠️' },
   { id: 'ben', name: 'Ben', emoji: '⚔️' },
 ]
 
