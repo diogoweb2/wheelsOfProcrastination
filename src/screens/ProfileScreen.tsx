@@ -8,8 +8,9 @@ import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
 export function ProfileScreen() {
-  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent } = useStore()
+  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
+  const me = activeProfile()
 
   const today = dayKey()
   const week = Array.from({ length: 7 }, (_, i) => {
@@ -43,6 +44,26 @@ export function ProfileScreen() {
 
   return (
     <div className="screen">
+      {/* who's logged in */}
+      {me && (
+        <div className="card" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ fontSize: 36, lineHeight: 1 }}>{me.emoji}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 900, fontSize: 18 }}>{me.name}</div>
+            <div className="muted" style={{ fontSize: 12 }}>logged in on this device</div>
+          </div>
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              sfx.click()
+              logout()
+            }}
+          >
+            Switch crewmate
+          </button>
+        </div>
+      )}
+
       {/* streak hero */}
       <div className="card" style={{ textAlign: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 56, lineHeight: 1 }}>{streakAlive ? '🔥' : '🪦'}</div>
@@ -199,7 +220,7 @@ export function ProfileScreen() {
 
       <div style={{ textAlign: 'center', marginTop: 20 }}>
         <Luffy mood="cool" size={110} />
-        <p className="muted" style={{ fontSize: 12 }}>Wheels of Procrastination v1 · one captain, no servers</p>
+        <p className="muted" style={{ fontSize: 12 }}>Wheels of Procrastination v1 · {me ? `sailing as ${me.name}` : 'no servers'}</p>
       </div>
     </div>
   )

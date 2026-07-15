@@ -43,12 +43,18 @@ export interface BadgeAward {
 }
 
 export interface Settings {
-  pinHash: string | null
-  pinSalt: string
   reminderHour: number // 0-23
   soundOn: boolean
   streakGoal: number
   goalsReached: number[] // list of streak goals already rewarded
+}
+
+export interface Profile {
+  id: string
+  name: string
+  emoji: string
+  pinHash: string | null // SHA-256(salt:pin); null until this profile picks a code
+  pinSalt: string
 }
 
 export interface EconomyState {

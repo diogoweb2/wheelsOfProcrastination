@@ -1,6 +1,13 @@
 import { create } from 'zustand'
-import type { AppData, Completion, DayScope, Effort, EffortFilter, Priority, Task } from '../types'
-import { load, save } from './storage'
+import type { AppData, Completion, DayScope, Effort, EffortFilter, Priority, Profile, Task } from '../types'
+import {
+  defaultData,
+  getActiveProfileId,
+  hashPin,
+  seedProfiles,
+  setActiveProfileId,
+} from './storage'
+import { loadRoster, saveData, saveRoster, subscribeData, subscribeRoster } from './cloud'
 import { addDays, dayKey } from '../logic/dates'
 import {
   ABANDON_PENALTY,
@@ -26,11 +33,19 @@ export interface AppEvent {
 
 interface StoreState {
   data: AppData
-  unlocked: boolean
+  profiles: Profile[] // the crew roster (synced from Firestore)
+  activeProfileId: string | null // who's logged in on this device
+  ready: boolean // roster loaded from cloud
+  dataLoaded: boolean // active profile's data has arrived at least once (guards writes)
+  cloudError: string | null // set if Firestore/auth can't be reached
   events: AppEvent[]
 
+  activeProfile: () => Profile | null
+  login: (profileId: string, pin: string) => Promise<boolean>
+  setupPin: (profileId: string, pin: string) => Promise<void>
+  logout: () => void
+
   rollover: () => void
-  setUnlocked: (v: boolean) => void
   popEvent: () => void
   pushEvent: (e: AppEvent) => void
 
@@ -66,34 +81,106 @@ function checkBadges(data: AppData, events: AppEvent[]): void {
 }
 
 export const useStore = create<StoreState>((set, get) => {
-  const initial = load()
-  setMuted(!initial.settings.soundOn)
+  // Unsubscribe from the currently-watched profile doc (swapped on login/logout).
+  let unsubData: (() => void) | null = null
 
-  /** Clone-mutate-save helper. fn mutates a deep-enough copy of data and may push events. */
+  /**
+   * Live-sync a profile's world from Firestore. First snapshot flips dataLoaded
+   * and triggers a rollover; later snapshots are cross-device updates.
+   */
+  function watchProfile(id: string) {
+    unsubData?.()
+    let first = true
+    unsubData = subscribeData(id, (data) => {
+      setMuted(!data.settings.soundOn)
+      set({ data, dataLoaded: true })
+      if (first) {
+        first = false
+        get().rollover()
+      }
+    })
+  }
+
+  // Async bootstrap: sign in, load the roster, and (if someone's logged in here)
+  // start syncing their data. Runs once at startup.
+  void (async () => {
+    try {
+      const profiles = await loadRoster()
+      set({ profiles, ready: true })
+      subscribeRoster((p) => set({ profiles: p }))
+      const id = getActiveProfileId()
+      if (id && profiles.some((p) => p.id === id)) {
+        set({ activeProfileId: id })
+        watchProfile(id)
+      }
+    } catch (err) {
+      console.error('Firebase bootstrap failed', err)
+      set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
+    }
+  })()
+
+  /** Clone-mutate-sync helper. Mutates a copy of the active profile's data and writes through to Firestore. */
   function commit(fn: (data: AppData, events: AppEvent[]) => void) {
+    const id = get().activeProfileId
+    if (!id || !get().dataLoaded) return // never write before the cloud copy has loaded
     const data: AppData = JSON.parse(JSON.stringify(get().data))
     const events: AppEvent[] = []
     fn(data, events)
-    save(data)
     set((s) => ({ data, events: [...s.events, ...events] }))
+    void saveData(id, data) // onSnapshot echoes it back; local set keeps the UI instant
   }
 
   return {
-    data: initial,
-    unlocked: sessionStorage.getItem('wop-unlocked') === '1',
+    data: defaultData(),
+    profiles: seedProfiles(),
+    activeProfileId: null,
+    ready: false,
+    dataLoaded: false,
+    cloudError: null,
     events: [],
 
-    setUnlocked(v) {
-      sessionStorage.setItem('wop-unlocked', v ? '1' : '0')
-      set({ unlocked: v })
+    activeProfile() {
+      const { profiles, activeProfileId } = get()
+      return profiles.find((x) => x.id === activeProfileId) ?? null
     },
+
+    async login(profileId, pin) {
+      const prof = get().profiles.find((p) => p.id === profileId)
+      if (!prof || !prof.pinHash) return false
+      const hash = await hashPin(pin, prof.pinSalt)
+      if (hash !== prof.pinHash) return false
+      setActiveProfileId(profileId)
+      set({ activeProfileId: profileId, dataLoaded: false, events: [] })
+      watchProfile(profileId)
+      return true
+    },
+
+    async setupPin(profileId, pin) {
+      const profiles = get().profiles.map((p) => ({ ...p }))
+      const prof = profiles.find((p) => p.id === profileId)
+      if (!prof) return
+      prof.pinHash = await hashPin(pin, prof.pinSalt)
+      await saveRoster(profiles)
+      setActiveProfileId(profileId)
+      set({ profiles, activeProfileId: profileId, dataLoaded: false, events: [] })
+      watchProfile(profileId)
+    },
+
+    logout() {
+      unsubData?.()
+      unsubData = null
+      setActiveProfileId(null)
+      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [] })
+    },
+
     popEvent: () => set((s) => ({ events: s.events.slice(1) })),
     pushEvent: (e) => set((s) => ({ events: [...s.events, e] })),
 
     /** Process every day that ended since we last looked: freezes burn, streaks die. */
     rollover() {
       const today = dayKey()
-      const { data } = get()
+      const { data, activeProfileId, dataLoaded } = get()
+      if (!activeProfileId || !dataLoaded) return
       if (data.streak.lastRolloverDay === today && data.daily.day === today) return
       commit((d, events) => {
         const completedDays = new Set(d.completions.map((c) => c.day))

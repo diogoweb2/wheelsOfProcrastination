@@ -1,8 +1,24 @@
-// Persistence adapter. Today: localStorage. Later: swap `load`/`save` for Firestore.
-import type { AppData } from '../types'
+// Local helpers for the Firestore-backed store:
+//  - defaultData / mergeData: shape + forward-compat merge for an AppData blob
+//  - seedProfiles: the initial crew roster
+//  - the active login (which profile is signed in on THIS device) — kept local, per-device
+//  - readers for the previous localStorage data, used once to migrate up into Firestore
+import type { AppData, Profile } from '../types'
 import { dayKey } from '../logic/dates'
 
-const KEY = 'wheels-of-procrastination:v1'
+const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
+const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
+const ACTIVE_KEY = 'wop-active' // which profile is logged in on this device
+
+// The two crewmates who share this app. Add more here if the crew grows.
+const SEED_PROFILES: ReadonlyArray<Pick<Profile, 'id' | 'name' | 'emoji'>> = [
+  { id: 'diogo', name: 'Diogo', emoji: '👒' },
+  { id: 'ben', name: 'Ben', emoji: '⚔️' },
+]
+
+export function seedProfiles(): Profile[] {
+  return SEED_PROFILES.map((p) => ({ ...p, pinHash: null, pinSalt: crypto.randomUUID() }))
+}
 
 export function defaultData(): AppData {
   return {
@@ -11,8 +27,6 @@ export function defaultData(): AppData {
     frozenDays: [],
     badges: [],
     settings: {
-      pinHash: null,
-      pinSalt: crypto.randomUUID(),
       reminderHour: 19,
       soundOn: true,
       streakGoal: 7,
@@ -24,34 +38,59 @@ export function defaultData(): AppData {
   }
 }
 
-export function load(): AppData {
+/** Merge a stored (possibly older/partial) blob over fresh defaults so new fields never break old saves. */
+export function mergeData(parsed: Partial<AppData> | undefined): AppData {
+  const base = defaultData()
+  if (!parsed) return base
+  const merged = {
+    ...base,
+    ...parsed,
+    settings: { ...base.settings, ...parsed.settings },
+    economy: { ...base.economy, ...parsed.economy },
+    streak: { ...base.streak, ...parsed.streak },
+    daily: { ...base.daily, ...parsed.daily },
+  }
+  // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
+  const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick
+  if (!Array.isArray(merged.daily.pendingPicks)) merged.daily.pendingPicks = legacy ? [legacy] : []
+  // tasks predating start-date / day-scope default to always-available
+  for (const t of merged.tasks) if (!t.dayScope) t.dayScope = 'all'
+  return merged
+}
+
+// --- per-device login (who's signed in here) -------------------------------
+
+export function getActiveProfileId(): string | null {
+  return localStorage.getItem(ACTIVE_KEY)
+}
+
+export function setActiveProfileId(id: string | null): void {
+  if (id) localStorage.setItem(ACTIVE_KEY, id)
+  else localStorage.removeItem(ACTIVE_KEY)
+}
+
+// --- one-time migration source: the previous localStorage-backed data ------
+
+/** The local roster from the pre-Firebase build (incl. any PIN hashes already set), if present. */
+export function readLocalRoster(): Profile[] | null {
   try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return defaultData()
-    // merge over defaults so new fields added in updates don't break old saves
-    const parsed = JSON.parse(raw) as Partial<AppData>
-    const base = defaultData()
-    const merged = {
-      ...base,
-      ...parsed,
-      settings: { ...base.settings, ...parsed.settings },
-      economy: { ...base.economy, ...parsed.economy },
-      streak: { ...base.streak, ...parsed.streak },
-      daily: { ...base.daily, ...parsed.daily },
-    }
-    // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
-    const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick
-    if (!Array.isArray(merged.daily.pendingPicks)) merged.daily.pendingPicks = legacy ? [legacy] : []
-    // tasks predating start-date / day-scope default to always-available
-    for (const t of merged.tasks) if (!t.dayScope) t.dayScope = 'all'
-    return merged
+    const raw = localStorage.getItem(LEGACY_PROFILES_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as { profiles?: Profile[] }
+    return parsed.profiles?.length ? parsed.profiles : null
   } catch {
-    return defaultData()
+    return null
   }
 }
 
-export function save(data: AppData): void {
-  localStorage.setItem(KEY, JSON.stringify(data))
+/** One profile's local AppData blob from the pre-Firebase build, if present. */
+export function readLocalData(id: string): Partial<AppData> | null {
+  try {
+    const raw = localStorage.getItem(`${DATA_PREFIX}:${id}`)
+    return raw ? (JSON.parse(raw) as Partial<AppData>) : null
+  } catch {
+    return null
+  }
 }
 
 export async function hashPin(pin: string, salt: string): Promise<string> {

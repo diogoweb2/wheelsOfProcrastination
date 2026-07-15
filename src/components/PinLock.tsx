@@ -1,19 +1,34 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
-import { hashPin } from '../store/storage'
 import { Luffy } from './Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 
 export function PinLock() {
-  const { data, setSettings, setUnlocked } = useStore()
-  const settingUp = !data.settings.pinHash
+  const { profiles, login, setupPin } = useStore()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [entry, setEntry] = useState('')
   const [firstPin, setFirstPin] = useState<string | null>(null)
   const [error, setError] = useState(false)
   const [line] = useState(() => crewSays('pin'))
 
+  const selected = profiles.find((p) => p.id === selectedId) ?? null
+  const settingUp = selected ? !selected.pinHash : false
+
+  function reset() {
+    setEntry('')
+    setFirstPin(null)
+  }
+
+  function fail() {
+    setError(true)
+    sfx.error()
+    reset()
+    window.setTimeout(() => setError(false), 500)
+  }
+
   async function submit(pin: string) {
+    if (!selected) return
     if (settingUp) {
       if (!firstPin) {
         setFirstPin(pin)
@@ -21,27 +36,18 @@ export function PinLock() {
         return
       }
       if (firstPin !== pin) {
-        setError(true)
-        sfx.error()
-        setFirstPin(null)
-        setEntry('')
-        window.setTimeout(() => setError(false), 500)
+        fail()
         return
       }
-      setSettings({ pinHash: await hashPin(pin, data.settings.pinSalt) })
+      await setupPin(selected.id, pin)
       sfx.fanfare()
-      setUnlocked(true)
       return
     }
-    const hash = await hashPin(pin, data.settings.pinSalt)
-    if (hash === data.settings.pinHash) {
+    const ok = await login(selected.id, pin)
+    if (ok) {
       sfx.gem()
-      setUnlocked(true)
     } else {
-      setError(true)
-      sfx.error()
-      setEntry('')
-      window.setTimeout(() => setError(false), 500)
+      fail()
     }
   }
 
@@ -52,12 +58,48 @@ export function PinLock() {
     if (next.length === 4) void submit(next)
   }
 
+  // Step 1: pick a profile.
+  if (!selected) {
+    return (
+      <div className="app" style={{ justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+        <div>
+          <Luffy mood="cool" size={130} className="float" />
+          <h1 className="h1" style={{ marginTop: 8 }}>
+            Wheels of Procrastination
+          </h1>
+          <p className="muted">Who's setting sail? 👒</p>
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
+            {profiles.map((p) => (
+              <button
+                key={p.id}
+                className="card"
+                style={{ width: 120, padding: 18, cursor: 'pointer', textAlign: 'center', border: 'none' }}
+                onClick={() => {
+                  sfx.click()
+                  reset()
+                  setSelectedId(p.id)
+                }}
+              >
+                <div style={{ fontSize: 44, lineHeight: 1 }}>{p.emoji}</div>
+                <div style={{ fontWeight: 900, marginTop: 8 }}>{p.name}</div>
+                <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+                  {p.pinHash ? 'tap to log in' : 'new — set a code'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: set or enter the 4-digit PIN.
   return (
     <div className="app" style={{ justifyContent: 'center', padding: 24, textAlign: 'center' }}>
       <div>
-        <Luffy mood={error ? 'shocked' : 'idle'} size={130} className="float" />
+        <Luffy mood={error ? 'shocked' : 'idle'} size={120} className="float" />
         <h1 className="h1" style={{ marginTop: 8 }}>
-          Wheels of Procrastination
+          {selected.emoji} {selected.name}
         </h1>
         <p className="muted">
           {settingUp ? (firstPin ? 'Say it again — pirate’s honor!' : 'Pick a 4-digit code to guard your treasure.') : line}
@@ -81,6 +123,17 @@ export function PinLock() {
             ),
           )}
         </div>
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ marginTop: 16 }}
+          onClick={() => {
+            sfx.click()
+            reset()
+            setSelectedId(null)
+          }}
+        >
+          ← Not you? Switch crewmate
+        </button>
       </div>
     </div>
   )

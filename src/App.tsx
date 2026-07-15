@@ -21,8 +21,9 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
 ]
 
 export default function App() {
-  const { data, unlocked, rollover } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
+  const unlocked = activeProfileId !== null
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
   useEffect(() => {
@@ -43,6 +44,33 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlocked, data.settings.reminderHour, data.completions.length])
+
+  if (cloudError) {
+    return (
+      <div className="app" style={{ justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+        <div>
+          <div style={{ fontSize: 48 }}>🌊🚫</div>
+          <h1 className="h1" style={{ marginTop: 8 }}>Can’t reach the crew’s log</h1>
+          <p className="muted" style={{ maxWidth: 320, margin: '8px auto' }}>
+            Couldn’t connect to Firebase. Check your connection — and that the Firebase config, Firestore, and
+            Anonymous sign-in are set up.
+          </p>
+          <p className="muted" style={{ fontSize: 11, marginTop: 12 }}>{cloudError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!ready) {
+    return (
+      <div className="app" style={{ justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+        <div>
+          <div className="float" style={{ fontSize: 56 }}>👒</div>
+          <p className="muted" style={{ marginTop: 12 }}>Hoisting the sails…</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!unlocked) return <PinLock />
 

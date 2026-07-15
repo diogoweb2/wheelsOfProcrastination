@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Basic gate: any signed-in client (the app signs in anonymously).
+    // Two trusted crewmates share this app; the PIN is the per-profile UX lock.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
