@@ -2,17 +2,15 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 
-// ⚠️ FILL ME IN — copy this from the Firebase console:
-//   Project settings (gear) → General → "Your apps" → Web app → SDK setup and configuration → Config.
-//   (If no web app is registered yet, click "Add app → Web" first.)
-//   These values are NOT secret — like the Spmkt project, they ship in the client. The PIN never lives here.
+// Web app config from the Firebase console (Project settings → Your apps → Web).
+// These values are NOT secret — like the Spmkt project, they ship in the client. The PIN never lives here.
 const firebaseConfig = {
-  apiKey: 'PASTE_API_KEY',
+  apiKey: 'AIzaSyAeCyBJ-P2e6E5LDHwC2yBGKb3uYITo_V4',
   authDomain: 'spinningwheel-6ff51.firebaseapp.com',
   projectId: 'spinningwheel-6ff51',
   storageBucket: 'spinningwheel-6ff51.firebasestorage.app',
-  messagingSenderId: 'PASTE_SENDER_ID',
-  appId: 'PASTE_APP_ID',
+  messagingSenderId: '30669970378',
+  appId: '1:30669970378:web:e15a8d3b24d87bacd28d33',
 }
 
 const app = initializeApp(firebaseConfig)
