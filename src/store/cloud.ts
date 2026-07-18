@@ -5,7 +5,7 @@
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, MarketData, Profile, QuizQuestion } from '../types'
+import type { AppData, Idea, MarketData, Profile, QuizQuestion } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -96,6 +96,23 @@ export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () =
 export async function saveQuizBank(questions: QuizQuestion[]): Promise<void> {
   await ensureAuth()
   await setDoc(bankRef(), { questions })
+}
+
+// --- ideas (shared wishlist both crewmates write to) ------------------------
+
+const ideasRef = () => doc(firestore, 'app', 'ideas')
+
+/** Live-sync the shared idea list. Fires on load and whenever the other crewmate writes. */
+export function subscribeIdeas(cb: (ideas: Idea[]) => void): () => void {
+  return onSnapshot(ideasRef(), (snap) => {
+    const data = snap.data() as { ideas?: Idea[] } | undefined
+    cb(data?.ideas ?? [])
+  })
+}
+
+export async function saveIdeas(ideas: Idea[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(ideasRef(), { ideas })
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

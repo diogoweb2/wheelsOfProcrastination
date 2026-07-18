@@ -7,13 +7,14 @@ import { AdminSection } from '../components/AdminSection'
 import { Luffy } from '../components/Luffy'
 import { HabitsSection } from '../components/HabitsSection'
 import { MapSection } from '../components/MapSection'
+import { IdeasSection } from '../components/IdeasSection'
 import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
 export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
   const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
-  const [section, setSection] = useState<'me' | 'voyage' | 'settings' | 'admin'>('me')
+  const [section, setSection] = useState<'me' | 'voyage' | 'ideas' | 'settings' | 'admin'>('me')
   const me = activeProfile()
 
   const today = dayKey()
@@ -76,6 +77,9 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
         </button>
         <button className={section === 'voyage' ? 'on' : ''} onClick={() => { sfx.click(); setSection('voyage') }}>
           🗺️ Voyage
+        </button>
+        <button className={section === 'ideas' ? 'on' : ''} onClick={() => { sfx.click(); setSection('ideas') }}>
+          💡 Ideas
         </button>
         <button className={section === 'settings' ? 'on' : ''} onClick={() => { sfx.click(); setSection('settings') }}>
           ⚙️ Settings
@@ -219,6 +223,8 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
       )}
         </>
       )}
+
+      {section === 'ideas' && <IdeasSection />}
 
       {section === 'settings' && (
         <>

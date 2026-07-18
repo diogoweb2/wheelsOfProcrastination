@@ -90,6 +90,19 @@ export interface BackgroundsState {
   active: string | null // equipped background; null = default solid color
 }
 
+// --- Ideas (shared wishlist, Firestore app/ideas) ---------------------------
+
+/** One idea anyone in the crew wrote down. Shared by both profiles, checklist-style. */
+export interface Idea {
+  id: string
+  text: string
+  authorId: string // profile id who wrote it
+  authorName: string // snapshotted so the list reads fine even if the roster changes
+  done: boolean
+  createdAt: string
+  doneAt?: string
+}
+
 // --- Quiz (Grand Line Academy) ---------------------------------------------
 
 export type QuizQuestionType = 'choice' | 'write' | 'match' | 'order'

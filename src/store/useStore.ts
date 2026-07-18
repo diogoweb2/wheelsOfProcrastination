@@ -7,6 +7,7 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  Idea,
   MarketData,
   Priority,
   Profile,
@@ -27,9 +28,11 @@ import {
   loadQuizBank,
   loadRoster,
   saveData,
+  saveIdeas,
   saveQuizBank,
   saveRoster,
   subscribeData,
+  subscribeIdeas,
   subscribeMarketData,
   subscribeQuizBank,
   subscribeRoster,
@@ -78,8 +81,12 @@ interface StoreState {
   quizBankLoaded: boolean
   kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
+  ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
 
   activeProfile: () => Profile | null
+  addIdea: (text: string) => void
+  toggleIdea: (id: string) => void
+  deleteIdea: (id: string) => void
   login: (profileId: string, pin: string) => Promise<boolean>
   setupPin: (profileId: string, pin: string) => Promise<void>
   logout: () => void
@@ -220,6 +227,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeQuizBank((qs) => set({ quizBank: qs, quizBankLoaded: true }))
       // shared market series (fetched monthly by the bank:market script)
       subscribeMarketData((m) => set({ market: m }))
+      // shared idea list — no seeding needed, an empty doc is a valid empty list
+      subscribeIdeas((ideas) => set({ ideas }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -260,6 +269,11 @@ export const useStore = create<StoreState>((set, get) => {
     void saveData(KID_ID, data)
   }
 
+  function saveIdeaList(ideas: Idea[]) {
+    set({ ideas })
+    void saveIdeas(ideas)
+  }
+
   function saveBank(questions: QuizQuestion[]) {
     set({ quizBank: questions })
     void saveQuizBank(questions)
@@ -277,10 +291,48 @@ export const useStore = create<StoreState>((set, get) => {
     quizBankLoaded: false,
     kidData: null,
     market: null,
+    ideas: [],
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
       return profiles.find((x) => x.id === activeProfileId) ?? null
+    },
+
+    // --- ideas (shared list; local set keeps the UI instant, onSnapshot echoes back) ---
+
+    addIdea(text) {
+      const body = text.trim()
+      const me = get().activeProfile()
+      if (!body || !me) return
+      saveIdeaList([
+        ...get().ideas,
+        {
+          id: `idea-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          text: body,
+          authorId: me.id,
+          authorName: me.name,
+          done: false,
+          createdAt: new Date().toISOString(),
+        },
+      ])
+    },
+
+    toggleIdea(id) {
+      // doneAt is dropped rather than set to undefined — Firestore rejects undefined values
+      saveIdeaList(
+        get().ideas.map((i) => {
+          if (i.id !== id) return i
+          if (i.done) {
+            const { doneAt: _drop, ...rest } = i
+            return { ...rest, done: false }
+          }
+          return { ...i, done: true, doneAt: new Date().toISOString() }
+        }),
+      )
+    },
+
+    deleteIdea(id) {
+      saveIdeaList(get().ideas.filter((i) => i.id !== id))
     },
 
     async login(profileId, pin) {
