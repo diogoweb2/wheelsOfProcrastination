@@ -61,6 +61,7 @@ export interface EconomyState {
   gems: number
   freezes: number // stocked streak freezes, max 2
   totalGemsEarned: number
+  devilFruits: number // 🍇 Devil Fruits — won by passing official final tests; spent on gift cards
 }
 
 export interface StreakState {
@@ -87,6 +88,67 @@ export interface BackgroundsState {
   active: string | null // equipped background; null = default solid color
 }
 
+// --- Quiz (Grand Line Academy) ---------------------------------------------
+
+export type QuizQuestionType = 'choice' | 'write' | 'match' | 'order'
+
+/** One question in the shared bank (Firestore app/quizBank). Removed questions stay, flagged, so AI regeneration can avoid repeats. */
+export interface QuizQuestion {
+  id: string
+  topicId: string
+  type: QuizQuestionType
+  prompt: string
+  emoji?: string // little mood-setter shown next to the prompt
+  image?: string // optional illustration URL (e.g. a flag)
+  choices?: string[] // choice: the options
+  answer?: string // choice: the correct option
+  accept?: string[] // write: accepted answers (first one is the canonical shown in reviews)
+  pairs?: { left: string; right: string }[] // match: correct pairings
+  sequence?: string[] // order: items in the correct order
+  weight: number // 2 = core knowledge (provinces/capitals/languages), 1 = fun extras
+  points: number // Berries for a first-ever correct answer in training
+  funFact?: string // shown after answering in training
+  status: 'active' | 'removed' | 'pending' // pending = AI-regenerated, awaiting parent review
+  createdAt: string
+}
+
+/** Per-question training history (lives in the kid's AppData). Drives rewards, adaptive picking and test-length estimates. */
+export interface QuizStat {
+  seen: number
+  correct: number
+  wrong: number
+  everCorrect: boolean // once true, later rewards are halved
+  lastRewardDay: string | null // Berries at most once per question per day
+  avgTimeMs: number // rolling average time to answer
+}
+
+export interface QuizTestRecord {
+  id: string
+  topicId: string
+  day: string // YYYY-MM-DD
+  official: boolean // true = parent-launched, counts for the Devil Fruit
+  results: { qid: string; correct: boolean }[]
+  scorePct: number
+  passed: boolean // scorePct >= 80
+}
+
+export interface QuizState {
+  stats: Record<string, QuizStat> // by question id
+  tests: QuizTestRecord[]
+  passedTopics: string[] // official pass → big checkmark + one-time Devil Fruit
+  unlockedTopics: string[] // parent-managed; locked topics are visible but not playable
+  bonusFruits: Record<string, number> // parent-granted extra 🍇 per topic (a log, fruits go to economy)
+}
+
+export interface GiftCardPurchase {
+  id: string
+  itemId: string // e.g. "roblox10"
+  label: string // e.g. "Roblox $10"
+  day: string // YYYY-MM-DD of purchase
+  at: string // ISO
+  paidAt: string | null // set when the parent taps "Paid"
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]
@@ -97,4 +159,6 @@ export interface AppData {
   streak: StreakState
   daily: DailyState
   backgrounds: BackgroundsState
+  quiz: QuizState
+  giftcards: GiftCardPurchase[]
 }

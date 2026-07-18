@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useStore } from './store/useStore'
+import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { TasksScreen } from './screens/TasksScreen'
+import { QuizScreen } from './screens/QuizScreen'
 import { BadgesScreen } from './screens/BadgesScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { scheduleDailyReminder } from './notifications'
@@ -12,19 +14,20 @@ import { backgroundUrl } from './logic/backgrounds'
 import { BerryCoin } from './components/BerryCoin'
 import { sfx } from './audio'
 
-type Tab = 'spin' | 'store' | 'tasks' | 'badges' | 'me'
+type Tab = 'spin' | 'store' | 'quiz' | 'badges' | 'me'
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
   { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
-  { id: 'tasks', icon: '📋', label: 'Tasks' },
+  { id: 'quiz', icon: '🧭', label: 'Quiz' },
   { id: 'badges', icon: '🏅', label: 'Badges' },
   { id: 'me', icon: '👒', label: 'Me' },
 ]
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
+  const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
@@ -82,6 +85,9 @@ export default function App() {
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
 
+  // parent-only persistent warning: Ben bought a gift card that isn't settled yet
+  const unpaidGift = activeProfileId === PARENT_ID ? kidData?.giftcards.find((p) => !p.paidAt) : undefined
+
   return (
     <div
       className="app"
@@ -100,16 +106,72 @@ export default function App() {
         <div className="stat stat--ice" title="streak freezes">
           🧊 <span className="num">{data.economy.freezes}</span>
         </div>
+        {activeProfileId === KID_ID && (
+          <div className="stat stat--fruit" title="Devil Fruits (3 = gift card)">
+            🍇 <span className="num">{data.economy.devilFruits}</span>
+          </div>
+        )}
         <div className="stat stat--gem" title="Berries">
           🪙 <span className="num">{data.economy.gems}</span>
         </div>
       </header>
 
+      {unpaidGift && (
+        <div className="banner">
+          <span style={{ fontSize: 20 }}>🎁</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Ben bought: {unpaidGift.label}</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>ordered {unpaidGift.day} · buy the real card, then tap Paid</div>
+          </div>
+          <button
+            className="btn btn--small"
+            onClick={() => {
+              sfx.gem()
+              markGiftCardPaid(unpaidGift.id)
+            }}
+          >
+            ✓ Paid
+          </button>
+        </div>
+      )}
+
       {tab === 'spin' && <SpinScreen />}
       {tab === 'store' && <StoreScreen />}
-      {tab === 'tasks' && <TasksScreen goSpin={() => setTab('spin')} />}
+      {tab === 'quiz' && <QuizScreen />}
       {tab === 'badges' && <BadgesScreen />}
       {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}
+
+      {/* the quest log moved behind a Material-style floating "+" */}
+      {!tasksOpen && (
+        <button
+          className="fab"
+          title="Quest log"
+          onClick={() => {
+            sfx.click()
+            setTasksOpen(true)
+          }}
+        >
+          +
+        </button>
+      )}
+      {tasksOpen && (
+        <div className="tasks-overlay">
+          <div className="quiz-full-head">
+            <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>📋 Quest log</div>
+            <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setTasksOpen(false) }}>
+              ✕
+            </button>
+          </div>
+          <div className="tasks-overlay-body">
+            <TasksScreen
+              goSpin={() => {
+                setTasksOpen(false)
+                setTab('spin')
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <nav className="tabbar">
         {TABS.map((t) => (

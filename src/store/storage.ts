@@ -16,6 +16,11 @@ const SEED_PROFILES: ReadonlyArray<Pick<Profile, 'id' | 'name' | 'emoji'>> = [
   { id: 'ben', name: 'Ben', emoji: '⚔️' },
 ]
 
+// Family roles: the parent runs official final tests, unlocks topics and settles
+// gift cards; the kid's profile holds the quiz stats, Devil Fruits and purchases.
+export const PARENT_ID = 'diogo'
+export const KID_ID = 'ben'
+
 export function seedProfiles(): Profile[] {
   return SEED_PROFILES.map((p) => ({ ...p, pinHash: null, pinSalt: crypto.randomUUID() }))
 }
@@ -32,10 +37,12 @@ export function defaultData(): AppData {
       streakGoal: 7,
       goalsReached: [],
     },
-    economy: { gems: 0, freezes: 0, totalGemsEarned: 0 },
+    economy: { gems: 0, freezes: 0, totalGemsEarned: 0, devilFruits: 0 },
     streak: { current: 0, best: 0, lastCompletionDay: null, lastRolloverDay: dayKey() },
     daily: { day: dayKey(), completionsToday: 0, respinsToday: 0, pendingPicks: [] },
     backgrounds: { owned: [], active: null },
+    quiz: { stats: {}, tests: [], passedTopics: [], unlockedTopics: ['canada-geography'], bonusFruits: {} },
+    giftcards: [],
   }
 }
 
@@ -51,6 +58,8 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     streak: { ...base.streak, ...parsed.streak },
     daily: { ...base.daily, ...parsed.daily },
     backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
+    quiz: { ...base.quiz, ...parsed.quiz },
+    giftcards: parsed.giftcards ?? base.giftcards,
   }
   // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
   const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick

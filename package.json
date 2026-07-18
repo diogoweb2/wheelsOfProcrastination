@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "backgrounds": "node scripts/backgrounds.mjs",
+    "quiz:regen": "node scripts/quiz-regenerate.mjs",
     "assets": "claude --model opus --allowedTools \"Bash,Read,Write,Edit,Glob,Grep\" -p \"$(cat scripts/optimize-assets.md)\"",
     "predev": "npm run backgrounds",
     "dev": "vite",

@@ -1,14 +1,17 @@
-// Firestore data layer. Two shapes:
+// Firestore data layer. Three shapes:
 //   app/roster            → { profiles: Profile[] }     the crew + their PIN hashes (synced across devices)
+//   app/quizBank          → { questions: QuizQuestion[] } the shared question bank (incl. removed/pending flags)
 //   profiles/{id}         → AppData                     one whole world per crewmate
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, Profile } from '../types'
+import type { AppData, Profile, QuizQuestion } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
+import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 
 const rosterRef = () => doc(firestore, 'app', 'roster')
 const dataRef = (id: string) => doc(firestore, 'profiles', id)
+const bankRef = () => doc(firestore, 'app', 'quizBank')
 
 /**
  * Load the roster, seeding Firestore on first run. If the cloud roster is
@@ -56,4 +59,38 @@ export function subscribeData(id: string, cb: (data: AppData) => void): () => vo
 export async function saveData(id: string, data: AppData): Promise<void> {
   await ensureAuth()
   await setDoc(dataRef(id), data)
+}
+
+// --- quiz bank -------------------------------------------------------------
+
+/**
+ * Make sure the bank exists and holds the bundled seed topics, then return the
+ * questions. Seeding only ADDS questions whose ids aren't in the cloud yet, so
+ * removals/edits/regenerated questions in Firestore always win.
+ */
+export async function loadQuizBank(): Promise<QuizQuestion[]> {
+  await ensureAuth()
+  const snap = await getDoc(bankRef())
+  const existing: QuizQuestion[] = snap.exists() ? ((snap.data() as { questions?: QuizQuestion[] }).questions ?? []) : []
+  const known = new Set(existing.map((q) => q.id))
+  const missing = CANADA_GEOGRAPHY_SEED.filter((q) => !known.has(q.id))
+  if (missing.length > 0) {
+    const questions = [...existing, ...missing]
+    await setDoc(bankRef(), { questions })
+    return questions
+  }
+  return existing
+}
+
+/** Live bank updates (another device removing/approving questions, or the regen script). */
+export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () => void {
+  return onSnapshot(bankRef(), (snap) => {
+    const data = snap.data() as { questions?: QuizQuestion[] } | undefined
+    if (data?.questions) cb(data.questions)
+  })
+}
+
+export async function saveQuizBank(questions: QuizQuestion[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(bankRef(), { questions })
 }

@@ -129,3 +129,26 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 ## 13. Tone
 
 Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots for you, treats every task as an "adventure/quest", celebrates loudly, and shrugs off streak death with "we set sail again tomorrow". Examples live in `src/logic/crewLines.ts`.
+
+## 14. Quiz — "Grand Line Academy" (tab replaces Tasks; Tasks live behind a floating "+" FAB)
+
+Learning quizzes for Ben (born Feb 2014 — pitch everything at Ontario grade-6 level). One Piece-themed presentation; the *content* is school material, not One Piece trivia.
+
+- **Topics** (registry in `src/logic/quiz.ts`): Canada Geography (live, 50 questions), Science, Critical Thinking (scams/fake news), Logic — grade 6, coming later, plus ~5 more Ontario grade-6 topics eventually. Diogo locks/unlocks topics from his profile; only Canada Geography starts unlocked.
+- **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/canadaGeographySeed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. Provinces/capitals/languages carry `weight: 2` (core); famous cities/landmarks/flags `weight: 1` (fun).
+- **Training (Ben's profile)**: instant right/wrong feedback, fun facts, confetti. Berries: full `points` on the first-ever correct answer, **half** on any later correct answers, and **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions.
+- **Final test**:
+  - *Official* — launched from **Diogo's profile** (topic card → runs on the spot, hand Ben the device). Results recorded to Ben's data.
+  - *Simulation* — Ben can rehearse any unlocked topic from his own profile; no rewards.
+  - Size is chosen automatically from Ben's real per-question answer times (10–14 questions, ≤ ~13 min budget).
+  - Selection targets ~80%: ~60% questions he's strong at + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is his strongest remaining ("possible to fail, but don't fail too hard").
+  - Score revealed **only at the end**, with a review of mistakes + correct answers. Pass = **80%+** → big "CONQUERED" stamp on the topic + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day (not the same day) with different questions (previous attempt's questions excluded).
+- **Devil Fruits 🍇** = the diamond currency. Sources: one per first official topic pass + parent bonus grants ("+1 🍇" per topic on Diogo's profile, for topics that turn out hard).
+- **Question curation (Diogo)**: view every Q&A, remove bad ones (flagged `status: "removed"` in the DB row — kept so AI regen won't recreate them). `npm run quiz:regen` (claude CLI) refills topics to target; new questions arrive `status: "pending"` and show as a review warning on Diogo's Quiz tab with approve/remove.
+
+## 15. Store tabs & Gift Cards
+
+- Store now has tabs: **Backgrounds** (the existing mystery gacha) and **Gift Cards**.
+- Gift cards: Roblox $10, AliExpress $10, Amazon $10 — each costs **3 🍇**. Limit **1 per 30 days** (counter in the store shows days left); also only one unpaid order at a time.
+- Buying creates an unpaid purchase on Ben's data. **Diogo sees a persistent banner** at the top of the app ("Ben bought X" + **Paid** button); tapping Paid settles it. The 30-day window runs from the purchase date.
+- The gift-card wallet shown in the Store is always Ben's, whichever profile is browsing.

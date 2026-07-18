@@ -1,13 +1,35 @@
 import { create } from 'zustand'
-import type { AppData, Completion, DayScope, Effort, EffortFilter, Priority, Profile, Task } from '../types'
+import type {
+  AppData,
+  Completion,
+  DayScope,
+  Effort,
+  EffortFilter,
+  Priority,
+  Profile,
+  QuizQuestion,
+  QuizTestRecord,
+  Task,
+} from '../types'
 import {
+  KID_ID,
+  PARENT_ID,
   defaultData,
   getActiveProfileId,
   hashPin,
   seedProfiles,
   setActiveProfileId,
 } from './storage'
-import { loadRoster, saveData, saveRoster, subscribeData, subscribeRoster } from './cloud'
+import {
+  loadQuizBank,
+  loadRoster,
+  saveData,
+  saveQuizBank,
+  saveRoster,
+  subscribeData,
+  subscribeQuizBank,
+  subscribeRoster,
+} from './cloud'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import {
@@ -24,15 +46,12 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
+import { GIFT_CARDS, GIFT_CARD_COST, PASS_PCT, giftCardDaysLeft, trainingReward, updatedStat } from '../logic/quiz'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
 // registered: no pendingPicks entry, no pick counters, nothing saved to Firestore.
-const TEST_DISABLE_SPIN_TRACKING = true
-// TEMP (local testing only — do not commit as true): Store purchases ignore the
-// Berries balance so infinite items can be bought while QA-ing.
-const TEST_FREE_SHOPPING = true
-
+const TEST_DISABLE_SPIN_TRACKING = false
 export interface AppEvent {
   type: 'badge' | 'goal' | 'streakDead' | 'frozen' | 'penalty'
   title: string
@@ -48,6 +67,9 @@ interface StoreState {
   dataLoaded: boolean // active profile's data has arrived at least once (guards writes)
   cloudError: string | null // set if Firestore/auth can't be reached
   events: AppEvent[]
+  quizBank: QuizQuestion[] // shared question bank (app/quizBank), live-synced
+  quizBankLoaded: boolean
+  kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
 
   activeProfile: () => Profile | null
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -77,6 +99,19 @@ interface StoreState {
   dropPendingPick: (taskId: string) => void
   completeTask: (taskId: string) => number
 
+  // --- quiz ---
+  /** Log a quiz answer to Ben's stats (works from either profile). `rewarded` = training mode pays Berries. Returns Berries earned. */
+  recordQuizAnswer: (qid: string, correct: boolean, timeMs: number, rewarded: boolean) => number
+  /** Store a finished final test (official or simulation). Official pass → topic checkmark + one-time Devil Fruit. */
+  finishQuizTest: (topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
+  setTopicUnlocked: (topicId: string, unlocked: boolean) => void // parent
+  grantDevilFruit: (topicId: string) => void // parent bonus 🍇
+  removeQuizQuestion: (qid: string) => void // parent: flag removed (stays in db so AI won't regenerate it)
+  approveQuizQuestion: (qid: string) => void // parent: pending → active
+  // --- gift cards ---
+  buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown' | 'pending'
+  markGiftCardPaid: (purchaseId: string) => void // parent settles Ben's purchase
+
   buyFreeze: () => boolean
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
   buyBackground: () => string | 'broke' | 'complete'
@@ -96,10 +131,13 @@ function checkBadges(data: AppData, events: AppEvent[]): void {
 export const useStore = create<StoreState>((set, get) => {
   // Unsubscribe from the currently-watched profile doc (swapped on login/logout).
   let unsubData: (() => void) | null = null
+  // Parent-only second subscription: Ben's doc (gift-card banner, official tests, grants).
+  let unsubKid: (() => void) | null = null
 
   /**
    * Live-sync a profile's world from Firestore. First snapshot flips dataLoaded
    * and triggers a rollover; later snapshots are cross-device updates.
+   * The parent additionally watches the kid's world.
    */
   function watchProfile(id: string) {
     unsubData?.()
@@ -112,6 +150,11 @@ export const useStore = create<StoreState>((set, get) => {
         get().rollover()
       }
     })
+    unsubKid?.()
+    unsubKid = null
+    if (id === PARENT_ID) {
+      unsubKid = subscribeData(KID_ID, (data) => set({ kidData: data }))
+    }
   }
 
   // Async bootstrap: sign in, load the roster, and (if someone's logged in here)
@@ -126,6 +169,10 @@ export const useStore = create<StoreState>((set, get) => {
         set({ activeProfileId: id })
         watchProfile(id)
       }
+      // shared question bank: seed if needed, then live-sync
+      const questions = await loadQuizBank()
+      set({ quizBank: questions, quizBankLoaded: true })
+      subscribeQuizBank((qs) => set({ quizBank: qs, quizBankLoaded: true }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -143,6 +190,36 @@ export const useStore = create<StoreState>((set, get) => {
     void saveData(id, data) // onSnapshot echoes it back; local set keeps the UI instant
   }
 
+  /**
+   * Mutate BEN's world regardless of who is logged in: from Ben's own session it
+   * is a normal commit; from the parent's session (official tests, grants,
+   * unlocks, "paid") it writes through the kidData subscription instead.
+   */
+  function commitBen(fn: (data: AppData, events: AppEvent[]) => void) {
+    if (get().activeProfileId === KID_ID) {
+      commit(fn)
+      return
+    }
+    const kid = get().kidData
+    if (!kid) return // not loaded yet — parent UI disables these actions until it is
+    const data: AppData = JSON.parse(JSON.stringify(kid))
+    const events: AppEvent[] = []
+    fn(data, events)
+    set((s) => ({ kidData: data, events: [...s.events, ...events] }))
+    void saveData(KID_ID, data)
+  }
+
+  /** Ben's world from wherever we're standing (own session or the parent's live copy). */
+  function benData(): AppData | null {
+    const s = get()
+    return s.activeProfileId === KID_ID ? s.data : s.kidData
+  }
+
+  function saveBank(questions: QuizQuestion[]) {
+    set({ quizBank: questions })
+    void saveQuizBank(questions)
+  }
+
   return {
     data: defaultData(),
     profiles: seedProfiles(),
@@ -151,6 +228,9 @@ export const useStore = create<StoreState>((set, get) => {
     dataLoaded: false,
     cloudError: null,
     events: [],
+    quizBank: [],
+    quizBankLoaded: false,
+    kidData: null,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -182,8 +262,10 @@ export const useStore = create<StoreState>((set, get) => {
     logout() {
       unsubData?.()
       unsubData = null
+      unsubKid?.()
+      unsubKid = null
       setActiveProfileId(null)
-      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [] })
+      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [], kidData: null })
     },
 
     popEvent: () => set((s) => ({ events: s.events.slice(1) })),
@@ -390,6 +472,110 @@ export const useStore = create<StoreState>((set, get) => {
       return earned
     },
 
+    // --- quiz ----------------------------------------------------------------
+
+    recordQuizAnswer(qid, correct, timeMs, rewarded) {
+      const today = dayKey()
+      const q = get().quizBank.find((x) => x.id === qid)
+      if (!q) return 0
+      let earned = 0
+      commitBen((d) => {
+        const stat = d.quiz.stats[qid]
+        if (rewarded && correct) {
+          earned = trainingReward(q, stat, today)
+          if (earned > 0) {
+            d.economy.gems += earned
+            d.economy.totalGemsEarned += earned
+          }
+        }
+        const next = updatedStat(stat, correct, timeMs)
+        if (rewarded && correct && earned > 0) next.lastRewardDay = today
+        d.quiz.stats[qid] = next
+      })
+      return earned
+    },
+
+    finishQuizTest(topicId, official, results) {
+      const scorePct = results.length === 0 ? 0 : Math.round((results.filter((r) => r.correct).length / results.length) * 100)
+      const record: QuizTestRecord = {
+        id: crypto.randomUUID(),
+        topicId,
+        day: dayKey(),
+        official,
+        results,
+        scorePct,
+        passed: scorePct >= PASS_PCT,
+      }
+      commitBen((d, events) => {
+        d.quiz.tests.push(record)
+        if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60) // keep the blob small
+        if (official && record.passed && !d.quiz.passedTopics.includes(topicId)) {
+          d.quiz.passedTopics.push(topicId)
+          d.economy.devilFruits += 1
+          events.push({
+            type: 'goal',
+            emoji: '🍇',
+            title: 'Devil Fruit won!',
+            description: `Final test conquered with ${scorePct}%! A Devil Fruit joins the treasure — 3 buy a gift card.`,
+          })
+        }
+      })
+      return record
+    },
+
+    setTopicUnlocked(topicId, unlocked) {
+      commitBen((d) => {
+        const has = d.quiz.unlockedTopics.includes(topicId)
+        if (unlocked && !has) d.quiz.unlockedTopics.push(topicId)
+        if (!unlocked && has) d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((t) => t !== topicId)
+      })
+    },
+
+    grantDevilFruit(topicId) {
+      commitBen((d) => {
+        d.economy.devilFruits += 1
+        d.quiz.bonusFruits[topicId] = (d.quiz.bonusFruits[topicId] ?? 0) + 1
+      })
+    },
+
+    removeQuizQuestion(qid) {
+      saveBank(get().quizBank.map((q) => (q.id === qid ? { ...q, status: 'removed' as const } : q)))
+    },
+
+    approveQuizQuestion(qid) {
+      saveBank(get().quizBank.map((q) => (q.id === qid ? { ...q, status: 'active' as const } : q)))
+    },
+
+    // --- gift cards ----------------------------------------------------------
+
+    buyGiftCard(itemId) {
+      const item = GIFT_CARDS.find((g) => g.id === itemId)
+      const d = benData()
+      if (!item || !d) return 'broke'
+      if (d.giftcards.some((p) => !p.paidAt)) return 'pending' // one open order at a time
+      if (giftCardDaysLeft(d) > 0) return 'cooldown'
+      if (d.economy.devilFruits < GIFT_CARD_COST) return 'broke'
+      commitBen((b) => {
+        b.economy.devilFruits -= GIFT_CARD_COST
+        b.giftcards.push({
+          id: crypto.randomUUID(),
+          itemId: item.id,
+          label: item.label,
+          day: dayKey(),
+          at: new Date().toISOString(),
+          paidAt: null,
+        })
+      })
+      return 'ok'
+    },
+
+    markGiftCardPaid(purchaseId) {
+      commitBen((d) => {
+        const p = d.giftcards.find((x) => x.id === purchaseId)
+        if (p && !p.paidAt) p.paidAt = new Date().toISOString()
+      })
+    },
+
     buyFreeze() {
       const { data } = get()
       if (data.economy.freezes >= MAX_FREEZES || data.economy.gems < FREEZE_COST) return false
@@ -404,7 +590,7 @@ export const useStore = create<StoreState>((set, get) => {
       const { data } = get()
       const unowned = BACKGROUND_CATALOG.filter((id) => !data.backgrounds.owned.includes(id))
       if (unowned.length === 0) return 'complete'
-      if (!TEST_FREE_SHOPPING && data.economy.gems < BACKGROUND_COST) return 'broke'
+      if (data.economy.gems < BACKGROUND_COST) return 'broke'
       const won = unowned[Math.floor(Math.random() * unowned.length)]
       commit((d) => {
         d.economy.gems = Math.max(0, d.economy.gems - BACKGROUND_COST)
