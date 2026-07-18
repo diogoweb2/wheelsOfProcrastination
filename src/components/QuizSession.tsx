@@ -11,8 +11,8 @@ import {
   PASS_PCT,
   activeQuestions,
   buildFinalTest,
-  checkWrite,
   correctAnswerText,
+  gradeWrite,
   isFresh,
   lastOfficialAttempt,
   nextTestQuestion,
@@ -24,7 +24,13 @@ import { sfx } from '../audio'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
 
-const OOPS = ['Not this time…', 'Even Luffy misses sometimes!', 'The Log Pose slipped…', 'So close! Check this out:']
+/** What the player actually gave, so feedback can show it back to them. */
+export interface Given {
+  /** Their answer, rendered as text. Absent when there's nothing meaningful to echo. */
+  text?: string
+  /** Right answer, but misspelled — full points, gentle spelling nudge. */
+  nearMiss?: boolean
+}
 
 interface Props {
   mode: QuizMode
@@ -60,7 +66,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   const [sessionEarned, setSessionEarned] = useState(0)
   const [answered, setAnswered] = useState(0)
   // training: wrong answers pause on a correction card; right answers just flow on
-  const [feedback, setFeedback] = useState<{ q: QuizQuestion } | null>(null)
+  const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
   const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
   const [current, setCurrent] = useState<QuizQuestion | null>(() =>
@@ -113,7 +119,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     setCurrent(pickTraining(remainingPool, stats, shown))
   }
 
-  function submit(correct: boolean) {
+  function submit(correct: boolean, given: Given = {}) {
     if (!question) return
     const timeMs = Date.now() - startRef.current
     const earned = preview ? 0 : recordQuizAnswer(targetId, question.id, correct, timeMs, mode === 'training')
@@ -123,8 +129,10 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
         // no modal — the store animates the berries to the topbar; next question slides in
         setSessionEarned((t) => t + earned)
         sfx.gem()
+        // a misspelled-but-right answer still pays, it just gets the spelling shown
+        const base = preview ? '✓ Correct (preview)' : earned > 0 ? `+${earned} 🪙` : '✓ Correct — already earned today'
         setFlash({
-          text: preview ? '✓ Correct (preview)' : earned > 0 ? `+${earned} 🪙` : '✓ Correct — already earned today',
+          text: given.nearMiss ? `${base} · almost! it's “${correctAnswerText(question)}”` : base,
           muted: earned === 0,
           key: Date.now(),
         })
@@ -134,7 +142,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
         window.setTimeout(() => advanceTraining(q, correctIds), 350)
       } else {
         sfx.error()
-        setFeedback({ q: question })
+        setFeedback({ q: question, given })
       }
     } else {
       sfx.click()
@@ -219,13 +227,16 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
       {/* training: only WRONG answers pause the flow, so the right answer sinks in */}
       {feedback && (
         <div className="card quiz-feedback" style={{ borderColor: 'var(--red)' }}>
-          <div style={{ fontSize: 44, textAlign: 'center' }}>🙈</div>
-          <div style={{ fontWeight: 900, fontSize: 18, textAlign: 'center' }}>
-            {OOPS[Math.floor(Math.random() * OOPS.length)]}
+          {feedback.given.text && (
+            <div className="quiz-answer quiz-answer--wrong">
+              <div className="quiz-answer-label">You said</div>
+              <div className="quiz-answer-text">❌ {feedback.given.text}</div>
+            </div>
+          )}
+          <div className="quiz-answer quiz-answer--right">
+            <div className="quiz-answer-label">Right answer</div>
+            <div className="quiz-answer-text quiz-answer-text--big">✅ {correctAnswerText(feedback.q)}</div>
           </div>
-          <p style={{ textAlign: 'center', marginTop: 6 }}>
-            Right answer: <b>{correctAnswerText(feedback.q)}</b>
-          </p>
           {feedback.q.funFact && (
             <p className="muted" style={{ fontSize: 13, marginTop: 10, textAlign: 'center' }}>
               💡 {feedback.q.funFact}
@@ -308,7 +319,7 @@ function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; 
 
 // --- question renderers ----------------------------------------------------
 
-function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean) => void; instantMark: boolean }) {
+function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
   return (
     <div className="card">
       {fresh && (
@@ -336,7 +347,7 @@ function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fr
   )
 }
 
-function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean) => void; instantMark: boolean }) {
+function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
   const options = useMemo(() => shuffle(q.choices ?? []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picked, setPicked] = useState<string | null>(null)
   return (
@@ -352,7 +363,7 @@ function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: 
             style={mark ? { borderColor: opt === q.answer ? 'var(--green)' : 'var(--red)' } : undefined}
             onClick={() => {
               setPicked(opt)
-              window.setTimeout(() => onAnswer(opt === q.answer), instantMark ? 250 : 120)
+              window.setTimeout(() => onAnswer(opt === q.answer, { text: opt }), instantMark ? 250 : 120)
             }}
           >
             {opt}
@@ -363,13 +374,14 @@ function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: 
   )
 }
 
-function WriteQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => void }) {
+function WriteQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void }) {
   const [text, setText] = useState('')
   const [done, setDone] = useState(false)
   function go() {
     if (done || !text.trim()) return
     setDone(true)
-    onAnswer(checkWrite(q, text))
+    const verdict = gradeWrite(q, text)
+    onAnswer(verdict !== 'wrong', { text: text.trim(), nearMiss: verdict === 'close' })
   }
   return (
     <div>

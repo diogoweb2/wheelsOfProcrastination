@@ -144,9 +144,48 @@ export function normalizeAnswer(s: string): string {
     .trim()
 }
 
-export function checkWrite(q: QuizQuestion, input: string): boolean {
+/** Edit distance, capped-cheap enough for short answers. */
+function editDistance(a: string, b: string): number {
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0]
+    prev[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j]
+      prev[j] = Math.min(prev[j] + 1, prev[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1))
+      diag = tmp
+    }
+  }
+  return prev[b.length]
+}
+
+/** How many typos we forgive: longer words get a little more slack. */
+function typoBudget(len: number): number {
+  if (len <= 3) return 0
+  if (len <= 7) return 1
+  return 2
+}
+
+export type WriteVerdict = 'exact' | 'close' | 'wrong'
+
+/**
+ * Grade a typed answer. "Tornto" counts as Toronto — a near miss scores the
+ * full points, we just tell him the correct spelling.
+ */
+export function gradeWrite(q: QuizQuestion, input: string): WriteVerdict {
   const got = normalizeAnswer(input)
-  return got.length > 0 && (q.accept ?? []).some((a) => normalizeAnswer(a) === got)
+  if (!got) return 'wrong'
+  const accepted = (q.accept ?? []).map(normalizeAnswer)
+  if (accepted.some((a) => a === got)) return 'exact'
+  // same first letter required: "Nome" for "Rome" is a wrong answer, not a typo
+  const close = accepted.some(
+    (a) => a[0] === got[0] && editDistance(a, got) <= typoBudget(Math.max(a.length, got.length)),
+  )
+  return close ? 'close' : 'wrong'
+}
+
+export function checkWrite(q: QuizQuestion, input: string): boolean {
+  return gradeWrite(q, input) !== 'wrong'
 }
 
 /** The canonical correct answer, for feedback and review screens. */

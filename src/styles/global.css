@@ -658,6 +658,29 @@ input, select { font-family: inherit; }
 
 .quiz-feedback { animation: pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
 
+/* wrong answer vs right answer, stacked and colour-coded */
+.quiz-answer {
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  text-align: center;
+  word-break: break-word;
+}
+.quiz-answer--wrong { background: color-mix(in srgb, var(--red) 14%, transparent); border: 2px solid var(--red); }
+.quiz-answer--right { background: color-mix(in srgb, var(--green) 14%, transparent); border: 2px solid var(--green); margin-bottom: 0; }
+.quiz-answer-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.quiz-answer-text { font-weight: 900; font-size: 17px; }
+.quiz-answer--wrong .quiz-answer-text { color: var(--red); text-decoration: line-through; text-decoration-thickness: 2px; }
+.quiz-answer--right .quiz-answer-text { color: var(--green); }
+.quiz-answer-text--big { font-size: 24px; line-height: 1.25; }
+
 /* prize logos spin like the Luffy tab icon */
 .prize-logo { object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; flex-shrink: 0; }
 
