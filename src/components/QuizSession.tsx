@@ -20,7 +20,6 @@ import {
   shuffle,
   topicById,
 } from '../logic/quiz'
-import { flyBerries } from '../logic/fx'
 import { sfx } from '../audio'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
@@ -66,7 +65,6 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     mode === 'training' ? pickTraining(pool, stats, []) : null,
   )
   const startRef = useRef(Date.now())
-  const cardRef = useRef<HTMLDivElement>(null)
 
   // ---- test: serve next question (mercy rule: no 3 misses in a row) ----
   const remaining = useMemo(() => plan.filter((q) => !results.some((r) => r.qid === q.id)), [plan, results])
@@ -112,10 +110,9 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     setAnswered((n) => n + 1)
     if (mode === 'training') {
       if (correct) {
-        // no modal — berries fly to the topbar and the next question slides in
+        // no modal — the store animates the berries to the topbar; next question slides in
         setSessionEarned((t) => t + earned)
         sfx.gem()
-        if (earned > 0) flyBerries(cardRef.current, earned)
         setFlash({
           text: preview ? '✓ Correct (preview)' : earned > 0 ? `+${earned} 🪙` : '✓ Correct — already earned today',
           muted: earned === 0,
@@ -177,9 +174,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
       )}
 
       {question && !feedback && (
-        <div ref={cardRef}>
-          <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
-        </div>
+        <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
       )}
 
       {/* training: only WRONG answers pause the flow, so the right answer sinks in */}

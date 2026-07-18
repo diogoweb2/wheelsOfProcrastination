@@ -47,6 +47,7 @@ import {
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
+import { flyBerries } from '../logic/fx'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -198,11 +199,14 @@ export const useStore = create<StoreState>((set, get) => {
   function commit(fn: (data: AppData, events: AppEvent[]) => void) {
     const id = get().activeProfileId
     if (!id || !get().dataLoaded) return // never write before the cloud copy has loaded
+    const before = get().data.economy.gems
     const data: AppData = JSON.parse(JSON.stringify(get().data))
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ data, events: [...s.events, ...events] }))
     void saveData(id, data) // onSnapshot echoes it back; local set keeps the UI instant
+    // ANY Berry gain, wherever it came from (tasks, streak goals, quiz…), gets the same fly-to-topbar animation
+    if (data.economy.gems > before) flyBerries(null, data.economy.gems - before)
   }
 
   /**
