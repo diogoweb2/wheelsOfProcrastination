@@ -69,6 +69,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
           config: { ...base.bank.config, ...parsed.bank.config },
           split: { ...base.bank.split, ...parsed.bank.split },
           accounts: { ...base.bank.accounts, ...parsed.bank.accounts },
+          shock: { ...base.bank.shock, ...parsed.bank.shock },
         }
       : base.bank,
   }

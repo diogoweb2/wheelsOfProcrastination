@@ -10,10 +10,13 @@ import type { AppData, BankAccountId, BankTxn } from '../types'
 import {
   ACCOUNT_IDS,
   ACCOUNT_META,
+  CRASH_PCT,
   DAY_NAMES,
   PROJECTION_YEARS,
   QQQ_MER,
   XGRO_MER,
+  crashWorthwhile,
+  daysWithoutCrash,
   fmt$,
   partyName,
   projectAccount,
@@ -134,11 +137,20 @@ type KidModal =
   | null
 
 function BankKid() {
-  const { data } = useStore()
+  const { data, celebrateBankBounce } = useStore()
   const [modal, setModal] = useState<KidModal>(null)
+  const [crashDismissed, setCrashDismissed] = useState(false) // "let me think" hides the alert until the next visit
   const quote = useMemo(() => randomLuffyQuote(), [])
   const bank = data.bank
   const pendingPaybacks = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
+  const crashPending = !!bank.shock.crashedDay && bank.shock.decision === null
+
+  // a held position recovered since last visit → one-shot celebration popup
+  const bounced = !!bank.shock.bounce
+  useEffect(() => {
+    if (bounced) celebrateBankBounce()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bounced])
 
   return (
     <div className="screen">
@@ -187,6 +199,7 @@ function BankKid() {
       {modal?.kind === 'move' && <MoveModal from={modal.from} onClose={() => setModal(null)} />}
       {modal?.kind === 'sell' && <SellModal from={modal.from} onClose={() => setModal(null)} />}
       {modal?.kind === 'payDad' && <PayDadModal onClose={() => setModal(null)} />}
+      {crashPending && !crashDismissed && <CrashModal onThink={() => setCrashDismissed(true)} />}
     </div>
   )
 }
@@ -206,8 +219,12 @@ function AccountCard({
 }) {
   const meta = ACCOUNT_META[id]
   const a = data.bank.accounts[id]
+  const shock = data.bank.shock
+  const crashed = id === 'qqq' && !!shock.crashedDay && shock.decision === null
+  const holding = id === 'qqq' && shock.decision === 'hold' && !!shock.recoverDay
+  const calmDays = id === 'qqq' && !crashed && !holding ? daysWithoutCrash(data.bank) : null
   return (
-    <div className="card" style={{ marginBottom: 10 }}>
+    <div className="card" style={{ marginBottom: 10, borderColor: crashed ? 'var(--red)' : undefined }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <div style={{ fontSize: 30, lineHeight: 1 }}>{meta.emoji}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -223,6 +240,18 @@ function AccountCard({
         </div>
       </div>
       <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{meta.blurb}</div>
+
+      {crashed && (
+        <div className="bank-crash-chip">🚨 CRASHED −{CRASH_PCT}%! A big decision is waiting…</div>
+      )}
+      {holding && (
+        <div className="bank-hold-chip">💪 Holding the line — real pirates ride out the storm</div>
+      )}
+      {calmDays !== null && (
+        <div className="muted" style={{ fontSize: 11, marginTop: 6, fontWeight: 800 }}>
+          ☀️ {calmDays} day{calmDays === 1 ? '' : 's'} without a market storm
+        </div>
+      )}
 
       {id === 'college' && (
         <div className="bank-resp">
@@ -470,6 +499,70 @@ function PayDadModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+/** The Shock Test alert: panic-sell at the bottom, or hold for the bounce. */
+function CrashModal({ onThink }: { onThink: () => void }) {
+  const { data, resolveBankCrash, pushEvent } = useStore()
+  const shock = data.bank.shock
+  const qqqLeft = data.bank.accounts.qqq.balance
+  useEffect(() => {
+    sfx.error()
+  }, [])
+  return (
+    <div className="overlay overlay--center">
+      <div className="sheet bank-crash-sheet">
+        {Array.from({ length: 8 }, (_, i) => (
+          <span key={i} className="bank-chart-fall" style={{ left: `${8 + i * 12}%`, animationDelay: `${(i % 4) * 0.3}s` }}>📉</span>
+        ))}
+        <div style={{ fontSize: 44, textAlign: 'center' }} className="shake">🚨</div>
+        <div style={{ fontWeight: 900, fontSize: 20, textAlign: 'center', color: 'var(--red)' }}>MARKET CRASH!</div>
+        <p style={{ fontSize: 14, fontWeight: 800, textAlign: 'center', margin: '8px 0' }}>
+          Tech stocks just took a dive! Your Rocket Ship 🚀 lost <span style={{ color: 'var(--red)' }}>{fmt$(shock.crashAmount)}</span> overnight (−{CRASH_PCT}%).
+        </p>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', margin: '10px 0' }}>
+          <Luffy state="hard" size={64} />
+          <div className="bubble" style={{ fontSize: 12, flex: 1 }}>
+            Storms happen on the Grand Line! The ship is damaged, not sunk. What&rsquo;s your call, Captain?
+          </div>
+        </div>
+        <button
+          className="btn btn--blue"
+          onClick={() => {
+            sfx.gem()
+            resolveBankCrash('hold')
+            pushEvent({
+              type: 'goal',
+              emoji: '💪⚓',
+              title: 'HOLDING THE LINE!',
+              description: 'Anchors steady! Markets that dive usually climb back — keep watching the Rocket Ship in the next weeks…',
+            })
+          }}
+        >
+          💪 HOLD THE LINE — ride out the storm
+        </button>
+        <button
+          className="btn btn--red"
+          style={{ marginTop: 8 }}
+          onClick={() => {
+            sfx.error()
+            resolveBankCrash('panic')
+            pushEvent({
+              type: 'penalty',
+              emoji: '😱',
+              title: `Panic sold for ${fmt$(qqqLeft)}`,
+              description: `You jumped ship at the bottom — the ${fmt$(shock.crashAmount)} the storm took is gone FOREVER. Next storm, remember: the sea always calms down.`,
+            })
+          }}
+        >
+          😱 PANIC SELL — jump ship with what&rsquo;s left
+        </button>
+        <button className="btn btn--ghost btn--small" style={{ marginTop: 10, width: '100%' }} onClick={() => { sfx.click(); onThink() }}>
+          🤔 I need to think (ask Dad)
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /** Allowance auto-split: % of every payday routed to each chest, remainder → pocket. */
 function AutoSplitCard() {
   const { data, setBankSplit, pushEvent } = useStore()
@@ -592,6 +685,7 @@ function BankAdmin() {
       <p className="muted" style={{ marginBottom: 14 }}>Ben’s real-money world — you set the rules, he makes the calls.</p>
 
       <AdminPaybacks kidData={kidData} />
+      <AdminShock kidData={kidData} />
       <AdminBalances kidData={kidData} />
       <AdminConfig kidData={kidData} />
       <AdminAdjust />
@@ -616,6 +710,67 @@ function AdminPaybacks({ kidData }: { kidData: AppData }) {
           <button className="btn btn--small" onClick={() => { sfx.gem(); ackBankPayback(t.id) }}>✓ Got it</button>
         </div>
       ))}
+    </div>
+  )
+}
+
+/** The Shock Test control room: days-without-crash counter + the manual crash lever. */
+function AdminShock({ kidData }: { kidData: AppData }) {
+  const { triggerBankCrash, pushEvent } = useStore()
+  const [armed, setArmed] = useState(false) // two-tap confirm on the crash lever
+  const s = kidData.bank.shock
+  const calm = daysWithoutCrash(kidData.bank)
+  const pending = !!s.crashedDay && s.decision === null
+  const holding = s.decision === 'hold' && !!s.recoverDay
+  const canTrigger = s.crashCount >= 1 && !pending && !holding && crashWorthwhile(kidData.bank)
+
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: pending ? 'var(--red)' : 'var(--line)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 900 }}>📉 Shock Test</div>
+          <div className="muted" style={{ fontSize: 11 }}>
+            {pending && `Crashed ${s.crashedDay} (−${fmt$(s.crashAmount)}) — waiting for Ben’s call`}
+            {holding && `Ben is HOLDING — bounce-back lands ${s.recoverDay}`}
+            {!pending && !holding && s.scheduledDay && `First auto-crash armed for ${s.scheduledDay} (needs QQQ money aboard)`}
+            {!pending && !holding && !s.scheduledDay && s.crashCount === 0 && 'Arms itself ~1 month after his first QQQ deposit'}
+            {!pending && !holding && !s.scheduledDay && s.crashCount > 0 && `${s.crashCount} crash${s.crashCount > 1 ? 'es' : ''} so far · sea is calm`}
+          </div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 900, fontSize: 26, color: 'var(--gold)' }}>{calm ?? '—'}</div>
+          <div className="muted" style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase' }}>days without<br />a crash</div>
+        </div>
+      </div>
+      {s.crashCount >= 1 && (
+        <button
+          className={`btn btn--small ${armed ? 'btn--red' : 'btn--ghost'}`}
+          style={{ marginTop: 10, width: '100%' }}
+          disabled={!canTrigger}
+          onClick={() => {
+            if (!armed) {
+              sfx.click()
+              setArmed(true)
+              return
+            }
+            setArmed(false)
+            if (triggerBankCrash()) {
+              sfx.error()
+              pushEvent({
+                type: 'penalty',
+                emoji: '📉',
+                title: 'Market correction unleashed',
+                description: `Ben’s Rocket Ship just dropped ${CRASH_PCT}%. He’ll face the panic-or-hold choice on his next visit.`,
+              })
+            }
+          }}
+        >
+          {armed ? '⚠️ Sure? Tap again to crash the market' : `📉 Trigger a −${CRASH_PCT}% Market Correction`}
+        </button>
+      )}
+      {s.crashCount >= 1 && !canTrigger && !pending && !holding && (
+        <p className="muted" style={{ fontSize: 10, marginTop: 6 }}>Needs real money on the Rocket Ship to matter.</p>
+      )}
     </div>
   )
 }
@@ -755,6 +910,8 @@ const TXN_ICON: Record<BankTxn['type'], string> = {
   match: '🎓',
   payback: '📨',
   adjust: '✏️',
+  crash: '📉',
+  recover: '📈',
 }
 
 /** Every decision Ben makes, newest first — the coaching goldmine. */

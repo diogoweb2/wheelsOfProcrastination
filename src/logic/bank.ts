@@ -17,6 +17,15 @@ const QQQ_DAILY_VOL = 1.1
 const HISTORY_DAYS = 30
 const MAX_TXNS = 250
 
+// The Shock Test: a scripted QQQ market correction.
+export const CRASH_PCT = 20 // −20% overnight
+export const BOUNCE_MULT = 1.325 // undoes the −20% and lands ~6% higher — holding must WIN
+const CRASH_MIN_DAYS = 21 // first auto-crash arms 3–5 weeks after the first QQQ deposit
+const CRASH_SPREAD_DAYS = 14
+const RECOVER_MIN_DAYS = 14 // held positions bounce back 2–3 weeks after the decision
+const RECOVER_SPREAD_DAYS = 8
+const CRASH_MIN_BALANCE = 0.5 // don't waste the lesson on pennies
+
 export const ACCOUNT_IDS: BankAccountId[] = ['chequing', 'savings', 'xgro', 'qqq', 'college']
 
 /** One Piece skin for each account. `risk` drives the little risk meter. */
@@ -52,6 +61,20 @@ export function defaultBankState(): BankState {
     },
     txns: [],
     lastDay: dayKey(),
+    shock: defaultShockState(),
+  }
+}
+
+export function defaultShockState(): BankState['shock'] {
+  return {
+    scheduledDay: null,
+    crashedDay: null,
+    crashAmount: 0,
+    decision: null,
+    recoverDay: null,
+    bounce: null,
+    crashCount: 0,
+    lastCrashDay: null,
   }
 }
 
@@ -111,12 +134,62 @@ export function pushTxn(bank: BankState, txn: Omit<BankTxn, 'id' | 'at'> & { at?
   if (bank.txns.length > MAX_TXNS) bank.txns = bank.txns.slice(-MAX_TXNS)
 }
 
+/** Arm the one-and-only automatic Shock Test crash, ~1 month out. No-op after crash #1. */
+export function armFirstShock(bank: BankState, fromDay: string, rand01: number): void {
+  const s = bank.shock
+  if (s.crashCount > 0 || s.scheduledDay || s.crashedDay) return
+  s.scheduledDay = addDays(fromDay, CRASH_MIN_DAYS + Math.floor(rand01 * CRASH_SPREAD_DAYS))
+}
+
+/** The overnight −20% hit on the Rocket Ship. Returns the dollars wiped (0 = nothing to crash). */
+export function applyCrash(bank: BankState, day: string): number {
+  const a = bank.accounts.qqq
+  const loss = round2(a.balance * (CRASH_PCT / 100))
+  if (loss <= 0) return 0
+  a.balance -= loss
+  a.growth -= loss
+  const s = bank.shock
+  s.scheduledDay = null
+  s.crashedDay = day
+  s.crashAmount = loss
+  s.decision = null
+  s.recoverDay = null
+  s.crashCount += 1
+  s.lastCrashDay = day
+  pushTxn(bank, { day, type: 'crash', to: 'qqq', amount: -loss, note: `Market correction! Tech stocks dove ${CRASH_PCT}% overnight` })
+  return loss
+}
+
+/** Pick the bounce-back date for a freshly-held position: 2–3 weeks out. */
+export function pickRecoverDay(fromDay: string): string {
+  return addDays(fromDay, RECOVER_MIN_DAYS + Math.floor(Math.random() * RECOVER_SPREAD_DAYS))
+}
+
+/** True when the Rocket Ship holds enough money for a crash to mean something. */
+export function crashWorthwhile(bank: BankState): boolean {
+  return bank.accounts.qqq.balance >= CRASH_MIN_BALANCE
+}
+
+/** Days since the last crash (the "safety sign" counter), or null if it never crashed. */
+export function daysWithoutCrash(bank: BankState, today: string = dayKey()): number | null {
+  if (!bank.shock.lastCrashDay) return null
+  return Math.max(0, Math.round((parseDay(today).getTime() - parseDay(bank.shock.lastCrashDay).getTime()) / 86_400_000))
+}
+
+/** Popup-worthy things that happened while catching the bank up (crash landing, bounce-back…). */
+export interface BankSimEvent {
+  emoji: string
+  title: string
+  description: string
+}
+
 /**
  * Catch the bank up to `today`: daily interest/market moves, allowance on payday
- * (auto-split, college part matched by dad), and a balance snapshot per day.
- * Idempotent per day thanks to `lastDay` + deterministic randomness.
+ * (auto-split, college part matched by dad), Shock-Test crashes/recoveries, and
+ * a balance snapshot per day. Idempotent per day thanks to `lastDay` +
+ * deterministic randomness.
  */
-export function simulateBank(bank: BankState, today: string = dayKey()): void {
+export function simulateBank(bank: BankState, today: string = dayKey(), onEvent?: (e: BankSimEvent) => void): void {
   let day = bank.lastDay
   while (day < today) {
     day = addDays(day, 1)
@@ -128,6 +201,35 @@ export function simulateBank(bank: BankState, today: string = dayKey()): void {
       const delta = a.balance * dailyRate(id, day, bank.config)
       a.balance += delta
       a.growth += delta
+    }
+
+    // 1b) Shock Test — the scheduled first crash fires on the first day with real money aboard
+    const shock = bank.shock
+    if (shock.scheduledDay && !shock.crashedDay && day >= shock.scheduledDay && bank.accounts.qqq.balance >= CRASH_MIN_BALANCE) {
+      applyCrash(bank, day)
+      onEvent?.({
+        emoji: '📉🚨',
+        title: 'MARKET CRASH!',
+        description: 'Tech stocks just took a dive! Check the Rocket Ship in the Bank — a big decision is waiting.',
+      })
+    }
+    // 1c) a held position bounces back HIGHER — the whole point of the lesson
+    if (shock.decision === 'hold' && shock.recoverDay && day >= shock.recoverDay) {
+      const a = bank.accounts.qqq
+      const gain = round2(a.balance * (BOUNCE_MULT - 1))
+      a.balance += gain
+      a.growth += gain
+      pushTxn(bank, { day, type: 'recover', to: 'qqq', amount: gain, note: 'HOLD THE LINE paid off — the market bounced back higher!' })
+      shock.crashedDay = null
+      shock.crashAmount = 0
+      shock.decision = null
+      shock.recoverDay = null
+      shock.bounce = { day, gain }
+      onEvent?.({
+        emoji: '🚀📈',
+        title: 'The Rocket Ship is BACK!',
+        description: `Holding through the storm paid off: +${fmt$(gain)}. Panic sells, patience wins.`,
+      })
     }
 
     // 2) allowance day → auto-split lands
@@ -147,6 +249,7 @@ export function simulateBank(bank: BankState, today: string = dayKey()): void {
         bank.accounts[p.id].balance += p.amt
         bank.accounts[p.id].deposited += p.amt
         pushTxn(bank, { day, at: `${day}T12:00:00.000Z`, type: 'allowance', from: 'allowance', to: p.id, amount: p.amt })
+        if (p.id === 'qqq') armFirstShock(bank, day, hash01(`${day}:arm-shock`)) // first QQQ money quietly starts the crash countdown
         if (p.id === 'college') {
           bank.accounts.college.balance += p.amt
           bank.accounts.college.deposited += p.amt

@@ -153,7 +153,7 @@ export interface BankTxn {
   id: string
   day: string // YYYY-MM-DD
   at: string // ISO
-  type: 'allowance' | 'transfer' | 'match' | 'payback' | 'adjust'
+  type: 'allowance' | 'transfer' | 'match' | 'payback' | 'adjust' | 'crash' | 'recover'
   from?: BankAccountId | 'dad' | 'allowance'
   to?: BankAccountId | 'dad'
   amount: number // dollars
@@ -185,12 +185,30 @@ export interface BankConfig {
   respBalance: number // dad's real RESP $ (manually updated; shown on the College Chest, never matched)
 }
 
+/**
+ * The Shock Test — a scripted QQQ "Market Correction" (−20% overnight).
+ * First crash auto-arms ~1 month after the first QQQ deposit; after that,
+ * only dad's manual crash button fires new ones. Ben must choose:
+ * PANIC SELL (loss locked in forever) or HOLD THE LINE (bounces back higher).
+ */
+export interface BankShockState {
+  scheduledDay: string | null // auto first-crash date; fires on the first day ≥ this with real QQQ money
+  crashedDay: string | null // a crash happened and Ben hasn't decided yet (drives his alert modal)
+  crashAmount: number // dollars wiped by the pending crash (for the alert copy)
+  decision: 'hold' | 'panic' | null // last decision; 'hold' keeps recoverDay armed
+  recoverDay: string | null // when the held position bounces back
+  bounce: { day: string; gain: number } | null // one-shot flag: recovery landed, celebrate on Ben's next visit
+  crashCount: number // ≥1 unlocks dad's manual crash button
+  lastCrashDay: string | null // drives the "days without a crash" counter
+}
+
 export interface BankState {
   config: BankConfig
   split: BankSplit
   accounts: Record<BankAccountId, BankAccountState>
   txns: BankTxn[] // newest last, capped
   lastDay: string // bank simulated through this day (YYYY-MM-DD)
+  shock: BankShockState
 }
 
 export interface GiftCardPurchase {

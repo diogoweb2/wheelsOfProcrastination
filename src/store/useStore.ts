@@ -52,7 +52,7 @@ import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../log
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
-import { pushTxn, round2, simulateBank } from '../logic/bank'
+import { applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -127,6 +127,13 @@ interface StoreState {
   setBankSplit: (split: BankSplit) => void // Ben's allowance auto-split
   setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
   bankAdjust: (acct: BankAccountId, delta: number, note: string) => void // admin: manual correction / paper-money import
+  // Shock Test:
+  /** Ben answers the crash alert: panic-sell everything at the bottom, or hold for the bounce. */
+  resolveBankCrash: (choice: 'hold' | 'panic') => void
+  /** Admin: manually fire a market correction (unlocked after the first auto-crash). */
+  triggerBankCrash: () => boolean
+  /** Ben's session: pop the one-shot "it bounced back!" celebration if a recovery landed. */
+  celebrateBankBounce: () => void
 
   /** Buy back the just-died streak (freezes the missed days). Returns false if too broke. */
   repairStreak: () => boolean
@@ -312,12 +319,12 @@ export const useStore = create<StoreState>((set, get) => {
       // The banker keeps Ben's bank ticking even when Ben hasn't opened the app:
       // deterministic day-based sim, so whichever device catches up writes the same numbers.
       if (activeProfileId === PARENT_ID && get().kidData && get().kidData!.bank.lastDay < today) {
-        commitFor(KID_ID, (d) => simulateBank(d.bank, today))
+        commitFor(KID_ID, (d, events) => simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e })))
       }
       const bankBehind = activeProfileId === KID_ID && data.bank.lastDay < today
       if (data.streak.lastRolloverDay === today && data.daily.day === today && !bankBehind) return
       commit((d, events) => {
-        if (activeProfileId === KID_ID) simulateBank(d.bank, today)
+        if (activeProfileId === KID_ID) simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
         const completedDays = new Set(d.completions.map((c) => c.day))
         const frozen = new Set(d.frozenDays.map((f) => f.day))
         let cur = d.streak.lastRolloverDay ?? today
@@ -631,6 +638,7 @@ export const useStore = create<StoreState>((set, get) => {
         d.bank.accounts[to].balance += amt
         d.bank.accounts[to].deposited += amt
         pushTxn(d.bank, { day, type: 'transfer', from, to, amount: amt })
+        if (to === 'qqq') armFirstShock(d.bank, day, Math.random()) // first QQQ money quietly starts the crash countdown
         if (to === 'college') {
           d.bank.accounts.college.balance += amt
           d.bank.accounts.college.deposited += amt
@@ -683,6 +691,62 @@ export const useStore = create<StoreState>((set, get) => {
         if (amt > 0) a.deposited += amt
         else a.deposited = Math.max(0, a.deposited + amt)
         pushTxn(d.bank, { day: dayKey(), type: 'adjust', to: acct, amount: amt, note: note.trim() || 'Banker adjustment' })
+        if (acct === 'qqq' && amt > 0) armFirstShock(d.bank, dayKey(), Math.random())
+      })
+    },
+
+    resolveBankCrash(choice) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      if (!world || !world.bank.shock.crashedDay || world.bank.shock.decision !== null) return
+      commitFor(KID_ID, (d) => {
+        const s = d.bank.shock
+        if (!s.crashedDay || s.decision !== null) return
+        if (choice === 'panic') {
+          // sell EVERYTHING at the bottom — the loss becomes real and never comes back
+          const a = d.bank.accounts.qqq
+          const amt = round2(a.balance)
+          if (amt > 0) {
+            a.balance -= amt
+            a.deposited = Math.max(0, a.deposited - amt)
+            d.bank.accounts.chequing.balance += amt
+            d.bank.accounts.chequing.deposited += amt
+            pushTxn(d.bank, { day: dayKey(), type: 'transfer', from: 'qqq', to: 'chequing', amount: amt, note: 'PANIC SOLD during the crash 😱' })
+          }
+          s.decision = 'panic'
+          s.crashedDay = null
+          s.crashAmount = 0
+          s.recoverDay = null
+        } else {
+          s.decision = 'hold'
+          s.recoverDay = pickRecoverDay(dayKey())
+        }
+      })
+    },
+
+    triggerBankCrash() {
+      const kid = get().kidData
+      if (!kid) return false
+      const s = kid.bank.shock
+      // unlocked only after the scripted first crash; never stack crashes on a pending decision or an armed recovery
+      if (s.crashCount < 1 || s.crashedDay || s.recoverDay || !crashWorthwhile(kid.bank)) return false
+      commitFor(KID_ID, (d) => {
+        applyCrash(d.bank, dayKey())
+      })
+      return true
+    },
+
+    celebrateBankBounce() {
+      if (get().activeProfileId !== KID_ID) return
+      const b = get().data.bank.shock.bounce
+      if (!b) return
+      commit((d, events) => {
+        d.bank.shock.bounce = null
+        events.push({
+          type: 'goal',
+          emoji: '🚀📈',
+          title: `It bounced back! +${fmt$(b.gain)}`,
+          description: 'You HELD THE LINE through the storm and the Rocket Ship came back HIGHER. Panic sells at the bottom — patience gets the treasure!',
+        })
       })
     },
 
