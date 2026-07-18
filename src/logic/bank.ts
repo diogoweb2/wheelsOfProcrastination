@@ -34,11 +34,19 @@ export const ACCOUNT_IDS: BankAccountId[] = ['chequing', 'xgro', 'qqq', 'college
 export const INVEST_IDS: BankAccountId[] = ['xgro', 'qqq'] // freely movable growth chests
 
 /**
- * His own money: the chest balances he can actually cash out. Dad's `respBalance`
- * is display-only and deliberately excluded — it's never his to move.
+ * HIS money only. Two separate Dad contributions are excluded:
+ *  - `college.matched` — the dollars Dad doubles into the College Chest. They sit
+ *    inside that chest's balance, but they're Dad's and burn if Ben withdraws.
+ *  - `config.respBalance` — Dad's real external RESP, display-only (see `totalWithDad`).
  */
 export function totalTreasure(bank: BankState): number {
-  return ACCOUNT_IDS.reduce((sum, id) => sum + bank.accounts[id].balance, 0)
+  const chests = ACCOUNT_IDS.reduce((sum, id) => sum + bank.accounts[id].balance, 0)
+  return round2(chests - bank.accounts.college.matched)
+}
+
+/** Everything with Dad's side counted: his match plus the real RESP. */
+export function totalWithDad(bank: BankState): number {
+  return round2(totalTreasure(bank) + bank.accounts.college.matched + bank.config.respBalance)
 }
 
 /** One Piece skin for each account. `risk` drives the little risk meter. */

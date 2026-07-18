@@ -27,6 +27,7 @@ import {
   randomLuffyQuote,
   round2,
   totalTreasure,
+  totalWithDad,
 } from '../logic/bank'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
@@ -180,10 +181,10 @@ function BankKid() {
           <Money value={totalTreasure(data.bank)} size={40} />
         </div>
         <div className="muted" style={{ fontSize: 11 }}>yours to sell — the chests you can cash out</div>
-        {bank.config.respBalance > 0 && (
+        {totalWithDad(bank) > totalTreasure(bank) && (
           <div style={{ fontSize: 15, fontWeight: 800, marginTop: 8, color: 'var(--text)' }}>
-            {fmt$(totalTreasure(data.bank) + bank.config.respBalance)}{' '}
-            <span className="muted" style={{ fontSize: 11, fontWeight: 600 }}>with Dad’s college treasure (RESP)</span>
+            {fmt$(totalWithDad(bank))}{' '}
+            <span className="muted" style={{ fontSize: 11, fontWeight: 600 }}>with Dad’s match + college treasure (RESP)</span>
           </div>
         )}
         <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>
