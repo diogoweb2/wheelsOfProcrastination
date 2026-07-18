@@ -106,9 +106,10 @@ export default function App() {
         <div className="stat stat--ice" title="streak freezes">
           🧊 <span className="num">{data.economy.freezes}</span>
         </div>
-        {activeProfileId === KID_ID && (
-          <div className="stat stat--fruit" title="Devil Fruits (3 = gift card)">
-            🍇 <span className="num">{data.economy.devilFruits}</span>
+        {/* Devil Fruits sit right next to the Berries; the parent sees Ben's count */}
+        {(activeProfileId === KID_ID || kidData) && (
+          <div className="stat stat--fruit" title="Ben's Devil Fruits (3 = gift card)">
+            🍇 <span className="num">{activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)}</span>
           </div>
         )}
         <div className="stat stat--gem" title="Berries">

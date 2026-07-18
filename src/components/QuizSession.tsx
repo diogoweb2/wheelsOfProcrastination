@@ -31,10 +31,12 @@ interface Props {
   topicId: string
   /** Ben's per-question stats (from his own data, or kidData when the parent runs an official test). */
   stats: Record<string, QuizStat>
+  /** Parent trying out the training UI: nothing is recorded, no Berries move. */
+  preview?: boolean
   onClose: () => void
 }
 
-export function QuizSession({ mode, topicId, stats, onClose }: Props) {
+export function QuizSession({ mode, topicId, stats, preview = false, onClose }: Props) {
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest } = useStore()
   const topic = topicById(topicId)
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
@@ -77,7 +79,7 @@ export function QuizSession({ mode, topicId, stats, onClose }: Props) {
 
   // ---- test: finish when all answered ----
   useEffect(() => {
-    if (mode !== 'training' && plan.length > 0 && results.length === plan.length && !finished) {
+    if (mode !== 'training' && !preview && plan.length > 0 && results.length === plan.length && !finished) {
       const record = finishQuizTest(topicId, mode === 'official', results)
       setFinished(record)
       if (record.passed) {
@@ -93,7 +95,7 @@ export function QuizSession({ mode, topicId, stats, onClose }: Props) {
   function submit(correct: boolean) {
     if (!question) return
     const timeMs = Date.now() - startRef.current
-    const earned = recordQuizAnswer(question.id, correct, timeMs, mode === 'training')
+    const earned = preview ? 0 : recordQuizAnswer(question.id, correct, timeMs, mode === 'training')
     setAnswered((n) => n + 1)
     if (mode === 'training') {
       if (correct) {
@@ -141,7 +143,9 @@ export function QuizSession({ mode, topicId, stats, onClose }: Props) {
 
   const header =
     mode === 'training'
-      ? `${topic.emoji} Training · +🪙${sessionEarned}`
+      ? preview
+        ? `${topic.emoji} Training (preview — nothing saved)`
+        : `${topic.emoji} Training · +🪙${sessionEarned}`
       : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Test practice'} · ${results.length + 1}/${plan.length}`
 
   return (
@@ -170,7 +174,9 @@ export function QuizSession({ mode, topicId, stats, onClose }: Props) {
           </div>
           {feedback.correct ? (
             <p style={{ textAlign: 'center', marginTop: 6 }}>
-              {feedback.earned > 0 ? (
+              {preview ? (
+                <span className="muted">Preview mode — no Berries, no stats touched.</span>
+              ) : feedback.earned > 0 ? (
                 <span style={{ color: 'var(--gold)', fontWeight: 900 }}>+{feedback.earned} 🪙</span>
               ) : (
                 <span className="muted">Already earned Berries for this one today — come back tomorrow!</span>
@@ -190,7 +196,7 @@ export function QuizSession({ mode, topicId, stats, onClose }: Props) {
             Next question ➜
           </button>
           <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
-            Done for now (+🪙{sessionEarned})
+            {preview ? 'Done previewing' : `Done for now (+🪙${sessionEarned})`}
           </button>
         </div>
       )}

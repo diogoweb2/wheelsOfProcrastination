@@ -46,7 +46,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { GIFT_CARDS, GIFT_CARD_COST, PASS_PCT, giftCardDaysLeft, trainingReward, updatedStat } from '../logic/quiz'
+import { GIFT_CARDS, GIFT_CARD_COST, PASS_PCT, giftCardDaysLeft, syncQuizTasks, trainingReward, updatedStat } from '../logic/quiz'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -148,6 +148,13 @@ export const useStore = create<StoreState>((set, get) => {
       if (first) {
         first = false
         get().rollover()
+        // Ben's wheel mirrors his unlocked topics as daily quiz habits.
+        // Only write if something actually changes (avoids a no-op save every login).
+        if (id === KID_ID) {
+          const probe: AppData = JSON.parse(JSON.stringify(get().data))
+          syncQuizTasks(probe)
+          if (JSON.stringify(probe) !== JSON.stringify(get().data)) commit(syncQuizTasks)
+        }
       }
     })
     unsubKid?.()
@@ -528,6 +535,7 @@ export const useStore = create<StoreState>((set, get) => {
         const has = d.quiz.unlockedTopics.includes(topicId)
         if (unlocked && !has) d.quiz.unlockedTopics.push(topicId)
         if (!unlocked && has) d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((t) => t !== topicId)
+        syncQuizTasks(d) // keep Ben's wheel habits in step with the locks
       })
     },
 

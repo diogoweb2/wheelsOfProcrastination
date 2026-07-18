@@ -50,7 +50,7 @@ function KidQuiz() {
 }
 
 function KidTopicCard({ topic, data, bank, onStart }: { topic: QuizTopic; data: AppData; bank: QuizQuestion[]; onStart: (mode: QuizMode) => void }) {
-  const unlocked = data.quiz.unlockedTopics.includes(topic.id) && !topic.comingSoon
+  const unlocked = data.quiz.unlockedTopics.includes(topic.id)
   const passed = data.quiz.passedTopics.includes(topic.id)
   const pool = activeQuestions(bank, topic.id)
   const mastered = pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length
@@ -84,9 +84,14 @@ function KidTopicCard({ topic, data, bank, onStart }: { topic: QuizTopic; data: 
           </div>
         </>
       )}
+      {unlocked && pool.length === 0 && (
+        <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+          🚧 Unlocked, but the crew is still writing the questions!
+        </div>
+      )}
       {!unlocked && (
         <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-          {topic.comingSoon ? '🚧 Coming soon — the crew is still writing these!' : '🔒 Locked — ask Dad to open this sea.'}
+          🔒 Locked — ask Dad to open this sea.
         </div>
       )}
     </div>
@@ -97,13 +102,22 @@ function KidTopicCard({ topic, data, bank, onStart }: { topic: QuizTopic; data: 
 
 function ParentQuiz() {
   const { kidData, quizBank, quizBankLoaded } = useStore()
-  const [session, setSession] = useState<string | null>(null) // topicId of a running official test
+  // official = real final test; preview = Diogo trying the training UI (nothing recorded)
+  const [session, setSession] = useState<{ kind: 'official' | 'preview'; topicId: string } | null>(null)
   const [managing, setManaging] = useState<string | null>(null) // topicId of open question manager
 
   const pending = quizBank.filter((q) => q.status === 'pending')
 
   if (session && kidData) {
-    return <QuizSession mode="official" topicId={session} stats={kidData.quiz.stats} onClose={() => setSession(null)} />
+    return (
+      <QuizSession
+        mode={session.kind === 'official' ? 'official' : 'training'}
+        preview={session.kind === 'preview'}
+        topicId={session.topicId}
+        stats={kidData.quiz.stats}
+        onClose={() => setSession(null)}
+      />
+    )
   }
   if (managing) {
     return <QuestionManager topicId={managing} onClose={() => setManaging(null)} />
@@ -124,7 +138,8 @@ function ParentQuiz() {
         <ParentTopicCard
           key={t.id}
           topic={t}
-          onTest={() => setSession(t.id)}
+          onTest={() => setSession({ kind: 'official', topicId: t.id })}
+          onPreview={() => setSession({ kind: 'preview', topicId: t.id })}
           onManage={() => setManaging(t.id)}
         />
       ))}
@@ -154,7 +169,7 @@ function PendingReview({ pending }: { pending: QuizQuestion[] }) {
   )
 }
 
-function ParentTopicCard({ topic, onTest, onManage }: { topic: QuizTopic; onTest: () => void; onManage: () => void }) {
+function ParentTopicCard({ topic, onTest, onPreview, onManage }: { topic: QuizTopic; onTest: () => void; onPreview: () => void; onManage: () => void }) {
   const { kidData, quizBank, setTopicUnlocked, grantDevilFruit, pushEvent } = useStore()
   const pool = activeQuestions(quizBank, topic.id)
   const unlocked = kidData?.quiz.unlockedTopics.includes(topic.id) ?? false
@@ -177,7 +192,7 @@ function ParentTopicCard({ topic, onTest, onManage }: { topic: QuizTopic; onTest
         </div>
         <button
           className={`btn btn--small ${unlocked ? 'btn--ghost' : 'btn--blue'}`}
-          disabled={!kidData || topic.comingSoon}
+          disabled={!kidData}
           onClick={() => { sfx.click(); setTopicUnlocked(topic.id, !unlocked) }}
         >
           {unlocked ? '🔓 Open' : '🔒 Locked'}
@@ -190,6 +205,9 @@ function ParentTopicCard({ topic, onTest, onManage }: { topic: QuizTopic; onTest
             🎓 {failedToday ? 'Retry tomorrow' : 'Final Test (hand Ben the phone)'}
           </button>
         )}
+        <button className="btn btn--ghost btn--small" disabled={!kidData || pool.length === 0} onClick={() => { sfx.click(); onPreview() }}>
+          ⚔️ Preview
+        </button>
         <button
           className="btn btn--blue btn--small"
           style={{ flex: 1 }}
@@ -202,7 +220,7 @@ function ParentTopicCard({ topic, onTest, onManage }: { topic: QuizTopic; onTest
         >
           +1 🍇 bonus
         </button>
-        <button className="btn btn--ghost btn--small" disabled={pool.length === 0} onClick={() => { sfx.click(); onManage() }}>
+        <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onManage() }}>
           📋 Questions
         </button>
       </div>
@@ -211,7 +229,7 @@ function ParentTopicCard({ topic, onTest, onManage }: { topic: QuizTopic; onTest
 }
 
 function QuestionManager({ topicId, onClose }: { topicId: string; onClose: () => void }) {
-  const { quizBank, removeQuizQuestion } = useStore()
+  const { quizBank, removeQuizQuestion, approveQuizQuestion } = useStore()
   const topic = QUIZ_TOPICS.find((t) => t.id === topicId)
   const visible = quizBank.filter((q) => q.topicId === topicId && q.status !== 'removed')
   const removed = quizBank.filter((q) => q.topicId === topicId && q.status === 'removed')
@@ -226,6 +244,9 @@ function QuestionManager({ topicId, onClose }: { topicId: string; onClose: () =>
         {visible.length} in play · {removed.length} removed. Removing flags the question in the DB so the AI won’t regenerate it.
         Run <b>npm run quiz:regen</b> to refill the bank; new questions land here as “pending review”.
       </p>
+      {visible.length === 0 && removed.length === 0 && (
+        <p className="muted">No questions for this topic yet — they’ll appear here once generated.</p>
+      )}
       {visible.map((q) => (
         <div key={q.id} className="card" style={{ marginBottom: 8, borderColor: q.status === 'pending' ? 'var(--orange)' : 'var(--line)' }}>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -243,6 +264,27 @@ function QuestionManager({ topicId, onClose }: { topicId: string; onClose: () =>
           </div>
         </div>
       ))}
+
+      {removed.length > 0 && (
+        <>
+          <div className="h2">🗑 Removed ({removed.length}) — the AI won’t recreate these</div>
+          {removed.map((q) => (
+            <div key={q.id} className="card" style={{ marginBottom: 8, opacity: 0.6 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14 }}>{q.emoji} {q.prompt}</div>
+                  <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                    {q.type} · weight {q.weight} — <b>{correctAnswerText(q)}</b>
+                  </div>
+                </div>
+                <button className="btn btn--ghost btn--small" style={{ alignSelf: 'center' }} onClick={() => { sfx.click(); approveQuizQuestion(q.id) }}>
+                  ↩ Restore
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   )
 }

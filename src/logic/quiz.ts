@@ -259,6 +259,43 @@ export function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
+// --- quiz habits on the wheel ----------------------------------------------
+
+export const QUIZ_TASK_PREFIX = 'quiz-'
+
+/**
+ * Every unlocked topic is also a daily habit on Ben's wheel: medium effort,
+ * high priority. Locking a topic archives its habit (history survives).
+ * Runs against BEN's data on his login and whenever the parent toggles a lock.
+ */
+export function syncQuizTasks(d: AppData): void {
+  for (const t of QUIZ_TOPICS) {
+    const id = QUIZ_TASK_PREFIX + t.id
+    const unlocked = d.quiz.unlockedTopics.includes(t.id)
+    const task = d.tasks.find((x) => x.id === id)
+    if (unlocked) {
+      if (!task) {
+        d.tasks.push({
+          id,
+          name: `${t.emoji} ${t.title} quiz training`,
+          repeats: true,
+          effort: 'medium',
+          priority: 'urgent',
+          dayScope: 'all',
+          createdAt: new Date().toISOString(),
+          archived: false,
+          spinsSinceLastPicked: 0,
+          timesPicked: 0,
+        })
+      } else if (task.archived) {
+        task.archived = false
+      }
+    } else if (task && !task.archived) {
+      task.archived = true
+    }
+  }
+}
+
 /** The most recent official attempt for a topic (drives the retry-next-day rule). */
 export function lastOfficialAttempt(data: AppData, topicId: string) {
   for (let i = data.quiz.tests.length - 1; i >= 0; i--) {
