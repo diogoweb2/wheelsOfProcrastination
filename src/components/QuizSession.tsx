@@ -483,6 +483,7 @@ function Full({ title, onClose, confirmClose, children }: { title: string; onClo
         <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>{title}</div>
         <button
           className="btn btn--ghost btn--small"
+          style={{ whiteSpace: 'nowrap' }}
           onClick={() => {
             if (confirmClose && !confirming) {
               setConfirming(true)
@@ -492,7 +493,7 @@ function Full({ title, onClose, confirmClose, children }: { title: string; onClo
             onClose()
           }}
         >
-          {confirming ? 'Quit test?!' : '✕'}
+          {confirming ? '⛵ Abandon ship?!' : '⚓ Back to the ship'}
         </button>
       </div>
       <div className="quiz-full-body">{children}</div>
