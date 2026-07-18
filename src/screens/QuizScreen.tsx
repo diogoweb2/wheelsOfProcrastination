@@ -8,6 +8,7 @@ import { PARENT_ID } from '../store/storage'
 import type { AppData, QuizQuestion } from '../types'
 import { activeQuestions, isFresh, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
 import { QuizSession, type QuizMode } from '../components/QuizSession'
+import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
 
@@ -40,7 +41,7 @@ export function QuizScreen() {
           : 'Train your brain, earn Berries. Pass Dad’s final test to win a Devil Fruit!'}
       </p>
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <div style={{ fontSize: 30 }}>🍇</div>
+        <DevilFruit size={34} />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 900 }}>{data.economy.devilFruits} Devil Fruit{data.economy.devilFruits === 1 ? '' : 's'}</div>
           <div className="muted" style={{ fontSize: 12 }}>Spend them on real treasures in the Store!</div>

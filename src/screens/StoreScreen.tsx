@@ -5,6 +5,7 @@ import { BACKGROUND_CATALOG, backgroundUrl } from '../logic/backgrounds'
 import { BACKGROUND_COST } from '../logic/economy'
 import { giftCardDaysLeft, prizesFor } from '../logic/quiz'
 import { BerryCoin } from '../components/BerryCoin'
+import { DevilFruit } from '../components/DevilFruit'
 import { sfx } from '../audio'
 
 const FLASHES = 26 // how many backgrounds flash by before the reveal
@@ -235,7 +236,7 @@ function TreasuresTab() {
   return (
     <div>
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <div style={{ fontSize: 30 }}>🍇</div>
+        <DevilFruit size={34} />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 900 }}>{fruits} Devil Fruit{fruits === 1 ? '' : 's'}</div>
           <div className="muted" style={{ fontSize: 12 }}>Win them by passing official final tests at the Academy.</div>

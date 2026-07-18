@@ -13,6 +13,9 @@ import { ProfileScreen } from './screens/ProfileScreen'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
 import { BerryCoin } from './components/BerryCoin'
+import { DevilFruit } from './components/DevilFruit'
+import { Beli } from './components/Beli'
+import { fmt$, totalTreasure } from './logic/bank'
 import { sfx } from './audio'
 
 type Tab = 'spin' | 'store' | 'quiz' | 'bank' | 'me'
@@ -154,10 +157,19 @@ export default function App() {
         <div className="stat stat--ice" title="streak freezes">
           🧊 <span className="num">{data.economy.freezes}</span>
         </div>
+        {/* Ben's own bank money — chests he can cash out, never Dad's RESP */}
+        {(activeProfileId === KID_ID || kidData) && (
+          <div className="stat stat--beli" title="Ben's money (his chests — not Dad's RESP)">
+            <Beli size={18} />{' '}
+            <span className="num">
+              {fmt$(totalTreasure(activeProfileId === KID_ID ? data.bank : kidData!.bank))}
+            </span>
+          </div>
+        )}
         {/* Devil Fruits sit right next to the Berries; the parent sees Ben's count */}
         {(activeProfileId === KID_ID || kidData) && (
           <div className="stat stat--fruit" title="Ben's Devil Fruits (3 = gift card)">
-            🍇 <span className="num"><AnimatedNum value={activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)} /></span>
+            <DevilFruit size={18} /> <span className="num"><AnimatedNum value={activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)} /></span>
           </div>
         )}
         <div className="stat stat--gem" title="Berries">

@@ -515,6 +515,8 @@ input, select { font-family: inherit; }
 /* ===== Quiz / Academy, FAB & gift cards ==================================== */
 
 .stat--fruit { color: #c58cff; }
+/* Beli = real bank dollars; bronze keeps it distinct from the gold Berries beside it */
+.stat--beli { color: var(--bronze); }
 
 /* persistent parent warning under the topbar (unpaid gift card) */
 .banner {

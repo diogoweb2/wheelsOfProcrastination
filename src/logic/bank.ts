@@ -33,6 +33,14 @@ const CRASH_MIN_BALANCE = 0.5 // don't waste the lesson on pennies
 export const ACCOUNT_IDS: BankAccountId[] = ['chequing', 'xgro', 'qqq', 'college']
 export const INVEST_IDS: BankAccountId[] = ['xgro', 'qqq'] // freely movable growth chests
 
+/**
+ * His own money: the chest balances he can actually cash out. Dad's `respBalance`
+ * is display-only and deliberately excluded — it's never his to move.
+ */
+export function totalTreasure(bank: BankState): number {
+  return ACCOUNT_IDS.reduce((sum, id) => sum + bank.accounts[id].balance, 0)
+}
+
 /** One Piece skin for each account. `risk` drives the little risk meter. */
 export const ACCOUNT_META: Record<
   BankAccountId,

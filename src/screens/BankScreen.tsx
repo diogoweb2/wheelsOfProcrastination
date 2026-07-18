@@ -26,6 +26,7 @@ import {
   projectAccount,
   randomLuffyQuote,
   round2,
+  totalTreasure,
 } from '../logic/bank'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
@@ -51,10 +52,6 @@ function projectedMonthGrowth(acct: BankAccountId, data: AppData): number {
   const c = data.bank.config
   const pct = acct === 'qqq' ? c.qqqMonthly : c.xgroMonthly
   return round2(data.bank.accounts[acct].balance * (pct / 100))
-}
-
-function totalTreasure(data: AppData): number {
-  return ACCOUNT_IDS.reduce((sum, id) => sum + data.bank.accounts[id].balance, 0)
 }
 
 /** A dollar amount that visibly counts to its new value. */
@@ -180,12 +177,12 @@ function BankKid() {
           Your whole treasure
         </div>
         <div style={{ color: 'var(--gold)' }}>
-          <Money value={totalTreasure(data)} size={40} />
+          <Money value={totalTreasure(data.bank)} size={40} />
         </div>
         <div className="muted" style={{ fontSize: 11 }}>yours to sell — the chests you can cash out</div>
         {bank.config.respBalance > 0 && (
           <div style={{ fontSize: 15, fontWeight: 800, marginTop: 8, color: 'var(--text)' }}>
-            {fmt$(totalTreasure(data) + bank.config.respBalance)}{' '}
+            {fmt$(totalTreasure(data.bank) + bank.config.respBalance)}{' '}
             <span className="muted" style={{ fontSize: 11, fontWeight: 600 }}>with Dad’s college treasure (RESP)</span>
           </div>
         )}
@@ -929,7 +926,7 @@ function AdminBalances({ kidData }: { kidData: AppData }) {
   return (
     <div className="card" style={{ marginBottom: 10 }}>
       <div style={{ fontWeight: 900, marginBottom: 6 }}>
-        💰 Ben’s chests · total <span style={{ color: 'var(--gold)' }}>{fmt$(totalTreasure(kidData))}</span>
+        💰 Ben’s chests · total <span style={{ color: 'var(--gold)' }}>{fmt$(totalTreasure(kidData.bank))}</span>
       </div>
       {ACCOUNT_IDS.map((id) => {
         const a = kidData.bank.accounts[id]
