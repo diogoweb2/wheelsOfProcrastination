@@ -20,11 +20,11 @@ import {
   shuffle,
   topicById,
 } from '../logic/quiz'
+import { flyBerries } from '../logic/fx'
 import { sfx } from '../audio'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
 
-const CHEERS = ['Nice one!', 'Gomu Gomu no… CORRECT!', 'Navigator-level answer!', 'Even Nami is impressed!', 'SUPER!!', 'That’s the spirit of adventure!']
 const OOPS = ['Not this time…', 'Even Luffy misses sometimes!', 'The Log Pose slipped…', 'So close! Check this out:']
 
 interface Props {
@@ -58,12 +58,15 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   const [recent, setRecent] = useState<string[]>([]) // training: recently shown, to avoid instant repeats
   const [sessionEarned, setSessionEarned] = useState(0)
   const [answered, setAnswered] = useState(0)
-  const [feedback, setFeedback] = useState<{ correct: boolean; earned: number; q: QuizQuestion } | null>(null)
+  // training: wrong answers pause on a correction card; right answers just flow on
+  const [feedback, setFeedback] = useState<{ q: QuizQuestion } | null>(null)
+  const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
   const [current, setCurrent] = useState<QuizQuestion | null>(() =>
     mode === 'training' ? pickTraining(pool, stats, []) : null,
   )
   const startRef = useRef(Date.now())
+  const cardRef = useRef<HTMLDivElement>(null)
 
   // ---- test: serve next question (mercy rule: no 3 misses in a row) ----
   const remaining = useMemo(() => plan.filter((q) => !results.some((r) => r.qid === q.id)), [plan, results])
@@ -95,6 +98,13 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results.length])
 
+  function advanceTraining(q: QuizQuestion) {
+    const shown = [...recent, q.id]
+    setRecent(shown)
+    setFeedback(null)
+    setCurrent(pickTraining(pool, stats, shown))
+  }
+
   function submit(correct: boolean) {
     if (!question) return
     const timeMs = Date.now() - startRef.current
@@ -102,25 +112,25 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     setAnswered((n) => n + 1)
     if (mode === 'training') {
       if (correct) {
+        // no modal — berries fly to the topbar and the next question slides in
         setSessionEarned((t) => t + earned)
         sfx.gem()
-        if (earned > 0) confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 }, scalar: 0.8 })
+        if (earned > 0) flyBerries(cardRef.current, earned)
+        setFlash({
+          text: preview ? '✓ Correct (preview)' : earned > 0 ? `+${earned} 🪙` : '✓ Correct — already earned today',
+          muted: earned === 0,
+          key: Date.now(),
+        })
+        const q = question
+        window.setTimeout(() => advanceTraining(q), 350)
       } else {
         sfx.error()
+        setFeedback({ q: question })
       }
-      setFeedback({ correct, earned, q: question })
     } else {
       sfx.click()
       setResults((r) => [...r, { qid: question.id, correct }])
     }
-  }
-
-  function nextTraining() {
-    if (!feedback) return
-    const shown = [...recent, feedback.q.id]
-    setRecent(shown)
-    setFeedback(null)
-    setCurrent(pickTraining(pool, stats, shown))
   }
 
   // ---- guards ----
@@ -149,7 +159,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
       ? preview
         ? `${topic.emoji} Training (preview — nothing saved)`
         : `${topic.emoji} Training · +🪙${sessionEarned}`
-      : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Test practice'} · ${results.length + 1}/${plan.length}`
+      : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
 
   return (
     <Full onClose={onClose} title={header} confirmClose={mode !== 'training' && results.length > 0}>
@@ -167,42 +177,39 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
       )}
 
       {question && !feedback && (
-        <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
+        <div ref={cardRef}>
+          <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
+        </div>
       )}
 
-      {/* training feedback */}
+      {/* training: only WRONG answers pause the flow, so the right answer sinks in */}
       {feedback && (
-        <div className="card quiz-feedback" style={{ borderColor: feedback.correct ? 'var(--green)' : 'var(--red)' }}>
-          <div style={{ fontSize: 44, textAlign: 'center' }}>{feedback.correct ? '🎉' : '🙈'}</div>
+        <div className="card quiz-feedback" style={{ borderColor: 'var(--red)' }}>
+          <div style={{ fontSize: 44, textAlign: 'center' }}>🙈</div>
           <div style={{ fontWeight: 900, fontSize: 18, textAlign: 'center' }}>
-            {feedback.correct ? CHEERS[Math.floor(Math.random() * CHEERS.length)] : OOPS[Math.floor(Math.random() * OOPS.length)]}
+            {OOPS[Math.floor(Math.random() * OOPS.length)]}
           </div>
-          {feedback.correct ? (
-            <p style={{ textAlign: 'center', marginTop: 6 }}>
-              {preview ? (
-                <span className="muted">Preview mode — no Berries, no stats touched.</span>
-              ) : feedback.earned > 0 ? (
-                <span style={{ color: 'var(--gold)', fontWeight: 900 }}>+{feedback.earned} 🪙</span>
-              ) : (
-                <span className="muted">Already earned Berries for this one today — come back tomorrow!</span>
-              )}
-            </p>
-          ) : (
-            <p style={{ textAlign: 'center', marginTop: 6 }}>
-              Right answer: <b>{correctAnswerText(feedback.q)}</b>
-            </p>
-          )}
+          <p style={{ textAlign: 'center', marginTop: 6 }}>
+            Right answer: <b>{correctAnswerText(feedback.q)}</b>
+          </p>
           {feedback.q.funFact && (
             <p className="muted" style={{ fontSize: 13, marginTop: 10, textAlign: 'center' }}>
               💡 {feedback.q.funFact}
             </p>
           )}
-          <button className="btn" style={{ marginTop: 12 }} onClick={nextTraining}>
+          <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q)}>
             Next question ➜
           </button>
           <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
             {preview ? 'Done previewing' : `Done for now (+🪙${sessionEarned})`}
           </button>
+        </div>
+      )}
+
+      {/* non-blocking result flash (training correct answers) */}
+      {flash && (
+        <div key={flash.key} className={`quiz-flash ${flash.muted ? 'quiz-flash--muted' : ''}`}>
+          {flash.text}
         </div>
       )}
 
@@ -217,7 +224,7 @@ function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; 
   const byId = new Map(plan.map((q) => [q.id, q]))
   const right = record.results.filter((r) => r.correct).length
   return (
-    <Full onClose={onClose} title={mode === 'official' ? '🎓 Final Test — result' : '🧪 Practice — result'}>
+    <Full onClose={onClose} title={mode === 'official' ? '🎓 Final Test — result' : '🧪 Mock Final Test — result'}>
       <div className="card" style={{ textAlign: 'center', marginBottom: 14, borderColor: record.passed ? 'var(--green)' : 'var(--orange)' }}>
         <div style={{ fontSize: 56 }}>{record.passed ? '🏴‍☠️' : '⛈️'}</div>
         <div style={{ fontSize: 44, fontWeight: 900, color: record.passed ? 'var(--green)' : 'var(--orange)' }}>{record.scorePct}%</div>

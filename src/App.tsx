@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from './store/useStore'
 import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
@@ -23,6 +23,28 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'badges', icon: '🏅', label: 'Badges' },
   { id: 'me', icon: '👒', label: 'Me' },
 ]
+
+/** Renders a number that visibly counts up/down to its new value (topbar currencies). */
+function AnimatedNum({ value }: { value: number }) {
+  const [shown, setShown] = useState(value)
+  const prev = useRef(value)
+  useEffect(() => {
+    const from = prev.current
+    prev.current = value
+    if (from === value) return
+    const start = performance.now()
+    const dur = 700
+    let raf = 0
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur)
+      setShown(Math.round(from + (value - from) * p))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <>{shown}</>
+}
 
 export default function App() {
   const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid } = useStore()
@@ -115,11 +137,11 @@ export default function App() {
         {/* Devil Fruits sit right next to the Berries; the parent sees Ben's count */}
         {(activeProfileId === KID_ID || kidData) && (
           <div className="stat stat--fruit" title="Ben's Devil Fruits (3 = gift card)">
-            🍇 <span className="num">{activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)}</span>
+            🍇 <span className="num"><AnimatedNum value={activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)} /></span>
           </div>
         )}
         <div className="stat stat--gem" title="Berries">
-          🪙 <span className="num">{data.economy.gems}</span>
+          🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
         </div>
       </header>
 

@@ -139,11 +139,11 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - **Diogo** (senior frontend dev; goal = practical AI-for-dev market edge, NO ML training theory): AI in Software Dev, GitHub Copilot, Claude Code (live, ~20 seed questions each, target 50 — `quiz:regen` tops them up).
   - On a profile's first login its own non-comingSoon topics auto-unlock once (`quiz.selfInit`); after that locks are fully admin-managed.
 - **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/*Seed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. `weight: 2` = core material, `weight: 1` = fun/nice-to-know.
-- **Training (own profile)**: instant right/wrong feedback, fun facts, confetti. Berries: full `points` on the first-ever correct answer, **half** on later correct answers, **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions and ✨ fresh ones (see weekly review, §16).
+- **Training (own profile)**: correct answers never interrupt the flow — Berries fly to the topbar counter (which counts up) with a small "+N 🪙" flash, and the next question appears immediately; only WRONG answers pause on a correction card (right answer + fun fact). Berries: full `points` on the first-ever correct answer, **half** on later correct answers, **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions and ✨ fresh ones (see weekly review, §16).
 - **Final test**:
   - *Official (Ben)* — launched from **Diogo's Admin desk** (runs on the spot, hand Ben the device); recorded to Ben's data.
   - *Official (Diogo)* — self-serve from his own Quiz tab (admin approves his own tests).
-  - *Simulation/practice* — anyone, any unlocked topic, no rewards.
+  - *Mock Final Test* (labelled that way to contrast with "Train") — anyone, any unlocked topic, no rewards.
   - Size auto-chosen from real per-question answer times (10–14 questions, ≤ ~13 min budget).
   - Selection targets ~80%: ~60% strong + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is the strongest remaining ("possible to fail, but don't fail too hard").
   - Score revealed **only at the end**, with a mistakes review. Pass = **80%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).

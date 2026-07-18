@@ -658,3 +658,41 @@ input, select { font-family: inherit; }
 
 /* prize logos spin like the Luffy tab icon */
 .prize-logo { object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; flex-shrink: 0; }
+
+/* berries flying from the quiz to the topbar counter */
+.berry-fly {
+  position: fixed;
+  z-index: 999;
+  pointer-events: none;
+  font-size: 20px;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+.stat-bump { animation: stat-bump 0.3s ease-out; }
+@keyframes stat-bump {
+  50% { transform: scale(1.35); }
+}
+
+/* transient non-blocking result flash in training */
+.quiz-flash {
+  position: fixed;
+  left: 50%;
+  bottom: 110px;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: var(--card);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-weight: 900;
+  font-size: 16px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: quiz-flash 1.3s ease-out forwards;
+}
+.quiz-flash--muted { color: var(--muted); border-color: var(--line); }
+@keyframes quiz-flash {
+  0% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  15%, 75% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}

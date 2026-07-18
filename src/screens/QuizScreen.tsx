@@ -115,7 +115,7 @@ function TopicCard({
               ⚔️ Train
             </button>
             <button className="btn btn--blue btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); onStart('simulation') }}>
-              🧪 Practice
+              🧪 Mock Final Test
             </button>
             {selfOfficial && !passed && (
               <button
