@@ -6,6 +6,7 @@ import { dayKey, daysUntil } from './dates'
 
 export interface QuizTopic {
   id: string
+  owner: 'ben' | 'diogo' // whose academy this topic belongs to (KID_ID / PARENT_ID)
   title: string
   emoji: string
   description: string
@@ -14,8 +15,10 @@ export interface QuizTopic {
 }
 
 export const QUIZ_TOPICS: QuizTopic[] = [
+  // --- Ben (grade 6, born Feb 2014) ---
   {
     id: 'canada-geography',
+    owner: 'ben',
     title: 'Canada Geography',
     emoji: '🍁',
     description: 'Provinces, capitals, languages, flags and famous places of Canada.',
@@ -23,6 +26,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   },
   {
     id: 'science-6',
+    owner: 'ben',
     title: 'Science',
     emoji: '🔬',
     description: 'Grade 6 science: space, electricity, flight, biodiversity.',
@@ -31,6 +35,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   },
   {
     id: 'critical-thinking-6',
+    owner: 'ben',
     title: 'Critical Thinking',
     emoji: '🧠',
     description: 'Spot scams, fake news and tricky ads. Think like a detective.',
@@ -39,11 +44,37 @@ export const QUIZ_TOPICS: QuizTopic[] = [
   },
   {
     id: 'logic-6',
+    owner: 'ben',
     title: 'Logic',
     emoji: '🧩',
     description: 'Riddles, patterns and puzzles. No math calculations, promise.',
     targetCount: 50,
     comingSoon: true,
+  },
+  // --- Diogo (senior frontend dev going deep on AI-assisted development) ---
+  {
+    id: 'ai-software-dev',
+    owner: 'diogo',
+    title: 'AI in Software Dev',
+    emoji: '🤖',
+    description: 'Tokens, context, prompting, agents, orchestration, MCP — the practical craft.',
+    targetCount: 50,
+  },
+  {
+    id: 'copilot-ai',
+    owner: 'diogo',
+    title: 'GitHub Copilot',
+    emoji: '🧑‍✈️',
+    description: 'Chat participants, slash commands, custom instructions, agent mode, Copilot at work.',
+    targetCount: 50,
+  },
+  {
+    id: 'claude-code-ai',
+    owner: 'diogo',
+    title: 'Claude Code',
+    emoji: '🟠',
+    description: 'CLAUDE.md, plan mode, subagents, hooks, MCP, headless -p, token-efficient workflows.',
+    targetCount: 50,
   },
 ]
 
@@ -51,22 +82,41 @@ export function topicById(id: string): QuizTopic | undefined {
   return QUIZ_TOPICS.find((t) => t.id === id)
 }
 
+export function topicsFor(ownerId: string): QuizTopic[] {
+  return QUIZ_TOPICS.filter((t) => t.owner === ownerId)
+}
+
 // --- economy ---------------------------------------------------------------
 
 export const REPEAT_FACTOR = 0.5 // reward halves once a question has ever been answered correctly
 export const PASS_PCT = 80
-export const GIFT_CARD_COST = 3 // Devil Fruits 🍇
-export const GIFT_CARD_COOLDOWN_DAYS = 30 // 1 gift card per month
+export const GIFT_CARD_COOLDOWN_DAYS = 30 // 1 prize per month (per profile)
 export const TEST_TIME_BUDGET_MS = 13 * 60_000 // keep the whole test under ~15 min
 export const TEST_MIN_QUESTIONS = 10
 export const TEST_MAX_QUESTIONS = 14
 export const DEFAULT_ANSWER_TIME_MS = 45_000 // assumed pace for questions he's never trained on
 
-export const GIFT_CARDS = [
-  { id: 'roblox10', label: 'Roblox $10', emoji: '🎮' },
-  { id: 'aliexpress10', label: 'AliExpress $10', emoji: '📦' },
-  { id: 'amazon10', label: 'Amazon $10', emoji: '🛒' },
-] as const
+export interface Prize {
+  id: string
+  label: string
+  emoji: string
+  cost: number // Devil Fruits 🍇
+  logo: string // /prizes/*.png — spins like the Luffy tab icon
+}
+
+/** Each profile shops from its own catalog. Duplicates accumulate as separate purchases. */
+export const PRIZES: Record<string, Prize[]> = {
+  ben: [
+    { id: 'roblox10', label: 'Roblox $10', emoji: '🎮', cost: 3, logo: '/prizes/roblox.png' },
+    { id: 'dollarama-candy', label: 'Dollarama candy', emoji: '🍬', cost: 2, logo: '/prizes/dollarama.png' },
+    { id: 'costco-sushi', label: 'Costco Sushi', emoji: '🍣', cost: 6, logo: '/prizes/costco.png' },
+  ],
+  diogo: [{ id: 'lcbo10', label: 'LCBO $10', emoji: '🍷', cost: 3, logo: '/prizes/lcbo.png' }],
+}
+
+export function prizesFor(ownerId: string): Prize[] {
+  return PRIZES[ownerId] ?? []
+}
 
 /** Berries a training answer pays right now (0 if already rewarded today). */
 export function trainingReward(q: QuizQuestion, stat: QuizStat | undefined, today: string = dayKey()): number {
@@ -125,9 +175,16 @@ export function successRate(stat: QuizStat | undefined): number {
   return (stat.correct + 1) / (stat.seen + 2)
 }
 
+/** True while a question added/updated by the weekly AI review hasn't been seen since — drives the "NEW" badge + training priority. */
+export function isFresh(q: QuizQuestion, stat: QuizStat | undefined): boolean {
+  if (!q.freshAt) return false
+  return !stat?.lastSeenAt || stat.lastSeenAt < q.freshAt
+}
+
 export function updatedStat(stat: QuizStat | undefined, correct: boolean, timeMs: number): QuizStat {
   const s: QuizStat = stat ? { ...s0(stat) } : { seen: 0, correct: 0, wrong: 0, everCorrect: false, lastRewardDay: null, avgTimeMs: 0 }
   s.seen += 1
+  s.lastSeenAt = new Date().toISOString() // clears any "NEW" badge for this question
   if (correct) {
     s.correct += 1
     s.everCorrect = true
@@ -171,7 +228,8 @@ export function pickTraining(
     const stat = stats[q.id]
     const novelty = !stat || stat.seen === 0 ? 2.5 : 1
     const struggle = 1.6 - successRate(stat) // weak questions come back more often
-    return q.weight * novelty * struggle
+    const fresh = isFresh(q, stat) ? 3 : 1 // weekly-review additions/updates jump the queue
+    return q.weight * novelty * struggle * fresh
   })
   return weightedPick(candidates, weights)
 }
@@ -264,12 +322,12 @@ export function shuffle<T>(arr: T[]): T[] {
 export const QUIZ_TASK_PREFIX = 'quiz-'
 
 /**
- * Every unlocked topic is also a daily habit on Ben's wheel: medium effort,
- * high priority. Locking a topic archives its habit (history survives).
- * Runs against BEN's data on his login and whenever the parent toggles a lock.
+ * Every unlocked topic is also a daily habit on the owner's wheel: medium
+ * effort, high priority. Locking a topic archives its habit (history survives).
+ * Runs against the owner's data on login and whenever a lock is toggled.
  */
-export function syncQuizTasks(d: AppData): void {
-  for (const t of QUIZ_TOPICS) {
+export function syncQuizTasks(d: AppData, ownerId: string): void {
+  for (const t of topicsFor(ownerId)) {
     const id = QUIZ_TASK_PREFIX + t.id
     const unlocked = d.quiz.unlockedTopics.includes(t.id)
     const task = d.tasks.find((x) => x.id === id)

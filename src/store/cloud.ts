@@ -8,6 +8,9 @@ import { ensureAuth, firestore } from '../lib/firebase'
 import type { AppData, Profile, QuizQuestion } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
+import { AI_DEV_SEED } from '../quiz/aiDevSeed'
+
+const ALL_SEEDS = [...CANADA_GEOGRAPHY_SEED, ...AI_DEV_SEED]
 
 const rosterRef = () => doc(firestore, 'app', 'roster')
 const dataRef = (id: string) => doc(firestore, 'profiles', id)
@@ -73,7 +76,7 @@ export async function loadQuizBank(): Promise<QuizQuestion[]> {
   const snap = await getDoc(bankRef())
   const existing: QuizQuestion[] = snap.exists() ? ((snap.data() as { questions?: QuizQuestion[] }).questions ?? []) : []
   const known = new Set(existing.map((q) => q.id))
-  const missing = CANADA_GEOGRAPHY_SEED.filter((q) => !known.has(q.id))
+  const missing = ALL_SEEDS.filter((q) => !known.has(q.id))
   if (missing.length > 0) {
     const questions = [...existing, ...missing]
     await setDoc(bankRef(), { questions })

@@ -85,8 +85,14 @@ export default function App() {
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
 
-  // parent-only persistent warning: Ben bought a gift card that isn't settled yet
-  const unpaidGift = activeProfileId === PARENT_ID ? kidData?.giftcards.find((p) => !p.paidAt) : undefined
+  // admin-only persistent warning: unsettled prize purchases (Ben's and Diogo's own)
+  const unpaidGifts =
+    activeProfileId === PARENT_ID
+      ? [
+          ...(kidData?.giftcards.filter((p) => !p.paidAt).map((p) => ({ who: 'Ben', targetId: KID_ID, p })) ?? []),
+          ...data.giftcards.filter((p) => !p.paidAt).map((p) => ({ who: 'You', targetId: PARENT_ID, p })),
+        ]
+      : []
 
   return (
     <div
@@ -117,24 +123,24 @@ export default function App() {
         </div>
       </header>
 
-      {unpaidGift && (
-        <div className="banner">
+      {unpaidGifts.map(({ who, targetId, p }) => (
+        <div className="banner" key={p.id}>
           <span style={{ fontSize: 20 }}>🎁</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 900, fontSize: 13 }}>Ben bought: {unpaidGift.label}</div>
-            <div style={{ fontSize: 11, opacity: 0.85 }}>ordered {unpaidGift.day} · buy the real card, then tap Paid</div>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>{who === 'You' ? 'You bought' : `${who} bought`}: {p.label}</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>ordered {p.day} · get the real prize, then tap Paid</div>
           </div>
           <button
             className="btn btn--small"
             onClick={() => {
               sfx.gem()
-              markGiftCardPaid(unpaidGift.id)
+              markGiftCardPaid(targetId, p.id)
             }}
           >
             ✓ Paid
           </button>
         </div>
-      )}
+      ))}
 
       {tab === 'spin' && <SpinScreen />}
       {tab === 'store' && <StoreScreen />}

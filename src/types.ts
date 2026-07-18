@@ -110,6 +110,7 @@ export interface QuizQuestion {
   funFact?: string // shown after answering in training
   status: 'active' | 'removed' | 'pending' // pending = AI-regenerated, awaiting parent review
   createdAt: string
+  freshAt?: string // set when the weekly AI review adds/updates a question → "NEW" badge + training priority until seen again
 }
 
 /** Per-question training history (lives in the kid's AppData). Drives rewards, adaptive picking and test-length estimates. */
@@ -120,6 +121,7 @@ export interface QuizStat {
   everCorrect: boolean // once true, later rewards are halved
   lastRewardDay: string | null // Berries at most once per question per day
   avgTimeMs: number // rolling average time to answer
+  lastSeenAt?: string // ISO — clears the "NEW" badge once the question is seen after a freshAt update
 }
 
 export interface QuizTestRecord {
@@ -136,17 +138,19 @@ export interface QuizState {
   stats: Record<string, QuizStat> // by question id
   tests: QuizTestRecord[]
   passedTopics: string[] // official pass → big checkmark + one-time Devil Fruit
-  unlockedTopics: string[] // parent-managed; locked topics are visible but not playable
-  bonusFruits: Record<string, number> // parent-granted extra 🍇 per topic (a log, fruits go to economy)
+  unlockedTopics: string[] // admin-managed; locked topics are visible but not playable
+  bonusFruits: Record<string, number> // admin-granted extra 🍇 per topic (a log, fruits go to economy)
+  selfInit?: boolean // one-time flag: this profile's own default topics were unlocked
 }
 
 export interface GiftCardPurchase {
   id: string
   itemId: string // e.g. "roblox10"
   label: string // e.g. "Roblox $10"
+  cost?: number // Devil Fruits paid (older purchases may miss it)
   day: string // YYYY-MM-DD of purchase
   at: string // ISO
-  paidAt: string | null // set when the parent taps "Paid"
+  paidAt: string | null // set when the admin taps "Paid" (duplicates of one item accumulate as separate rows)
 }
 
 export interface AppData {

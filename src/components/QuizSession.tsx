@@ -13,6 +13,7 @@ import {
   buildFinalTest,
   checkWrite,
   correctAnswerText,
+  isFresh,
   lastOfficialAttempt,
   nextTestQuestion,
   pickTraining,
@@ -29,25 +30,27 @@ const OOPS = ['Not this time…', 'Even Luffy misses sometimes!', 'The Log Pose 
 interface Props {
   mode: QuizMode
   topicId: string
-  /** Ben's per-question stats (from his own data, or kidData when the parent runs an official test). */
+  /** Whose data this session reads/writes: the active profile, or Ben when the admin runs his official test. */
+  targetId: string
+  /** The target profile's per-question stats. */
   stats: Record<string, QuizStat>
-  /** Parent trying out the training UI: nothing is recorded, no Berries move. */
+  /** Admin trying out the training UI: nothing is recorded, no Berries move. */
   preview?: boolean
   onClose: () => void
 }
 
-export function QuizSession({ mode, topicId, stats, preview = false, onClose }: Props) {
+export function QuizSession({ mode, topicId, targetId, stats, preview = false, onClose }: Props) {
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest } = useStore()
   const topic = topicById(topicId)
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
 
-  // Ben's data from wherever we stand, for retry-exclusion
-  const ben = activeProfileId === KID_ID ? data : kidData
+  // the target's data from wherever we stand, for retry-exclusion
+  const target = activeProfileId === targetId ? data : targetId === KID_ID ? kidData : null
 
   // ---- test plan (fixed once per session) ----
   const [plan] = useState<QuizQuestion[]>(() => {
     if (mode === 'training') return []
-    const exclude = mode === 'official' && ben ? (lastOfficialAttempt(ben, topicId)?.results.map((r) => r.qid) ?? []) : []
+    const exclude = mode === 'official' && target ? (lastOfficialAttempt(target, topicId)?.results.map((r) => r.qid) ?? []) : []
     return buildFinalTest(pool, stats, exclude).questions
   })
 
@@ -80,7 +83,7 @@ export function QuizSession({ mode, topicId, stats, preview = false, onClose }: 
   // ---- test: finish when all answered ----
   useEffect(() => {
     if (mode !== 'training' && !preview && plan.length > 0 && results.length === plan.length && !finished) {
-      const record = finishQuizTest(topicId, mode === 'official', results)
+      const record = finishQuizTest(targetId, topicId, mode === 'official', results)
       setFinished(record)
       if (record.passed) {
         sfx.bigWin()
@@ -95,7 +98,7 @@ export function QuizSession({ mode, topicId, stats, preview = false, onClose }: 
   function submit(correct: boolean) {
     if (!question) return
     const timeMs = Date.now() - startRef.current
-    const earned = preview ? 0 : recordQuizAnswer(question.id, correct, timeMs, mode === 'training')
+    const earned = preview ? 0 : recordQuizAnswer(targetId, question.id, correct, timeMs, mode === 'training')
     setAnswered((n) => n + 1)
     if (mode === 'training') {
       if (correct) {
@@ -163,7 +166,9 @@ export function QuizSession({ mode, topicId, stats, preview = false, onClose }: 
         </p>
       )}
 
-      {question && !feedback && <QuestionCard key={question.id} q={question} onAnswer={submit} instantMark={mode === 'training'} />}
+      {question && !feedback && (
+        <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
+      )}
 
       {/* training feedback */}
       {feedback && (
@@ -262,9 +267,14 @@ function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; 
 
 // --- question renderers ----------------------------------------------------
 
-function QuestionCard({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (correct: boolean) => void; instantMark: boolean }) {
+function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean) => void; instantMark: boolean }) {
   return (
     <div className="card">
+      {fresh && (
+        <span className="chip" style={{ background: 'var(--green)', color: '#06121f', marginBottom: 8, display: 'inline-block' }}>
+          ✨ NEW
+        </span>
+      )}
       <div style={{ fontWeight: 900, fontSize: 17, marginBottom: 10 }}>
         {q.emoji && <span style={{ marginRight: 6 }}>{q.emoji}</span>}
         {q.prompt}

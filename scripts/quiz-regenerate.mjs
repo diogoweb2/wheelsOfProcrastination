@@ -30,7 +30,25 @@ const TOPICS = [
     brief:
       'Canada geography for a 12-year-old (born Feb 2014, Ontario grade 6): provinces, territories, capitals, official languages (weight 2 — the core), plus fun famous cities/landmarks/flags (weight 1). Fun tone, light One Piece flavor in funFact only (never in the question itself).',
   },
-  // When a new topic goes live, add it here AND flip comingSoon in src/logic/quiz.ts:
+  {
+    id: 'ai-software-dev',
+    target: 50,
+    brief:
+      'Practical AI-assisted software development for a senior frontend developer who wants to out-skill the market: tokens & cost control, context windows, prompt engineering, prompt caching, RAG, MCP, agents & orchestration (planner/subagent patterns), headless/CI usage, verification habits. NO ML training theory. funFact = a concrete pro tip.',
+  },
+  {
+    id: 'copilot-ai',
+    target: 50,
+    brief:
+      'GitHub Copilot mastery for a senior frontend dev using it daily at work: inline completions, Copilot Chat, slash commands, chat participants (@workspace/@terminal), context variables (#file), custom instructions files, Copilot Edits, agent mode, coding agent on GitHub.com, model picker, CLI, code review, content exclusions. Current, practical, no fluff.',
+  },
+  {
+    id: 'claude-code-ai',
+    target: 50,
+    brief:
+      'Claude Code mastery for a senior frontend dev using it for personal projects: CLAUDE.md, /init, plan mode, subagents, hooks, MCP, headless -p and piping, /compact vs /clear, --continue/--resume, permissions allowlists, custom slash commands/skills, git worktrees, model selection, token-efficient workflows, extended thinking. funFact = a concrete pro tip.',
+  },
+  // When a new Ben topic goes live, add it here AND flip comingSoon in src/logic/quiz.ts:
   // { id: 'science-6', target: 50, brief: 'Ontario grade 6 science: space, electricity, flight, biodiversity…' },
 ]
 

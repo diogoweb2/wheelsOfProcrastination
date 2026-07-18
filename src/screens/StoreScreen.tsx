@@ -3,14 +3,14 @@ import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import { BACKGROUND_CATALOG, backgroundUrl } from '../logic/backgrounds'
 import { BACKGROUND_COST } from '../logic/economy'
-import { GIFT_CARDS, GIFT_CARD_COST, giftCardDaysLeft } from '../logic/quiz'
+import { giftCardDaysLeft, prizesFor } from '../logic/quiz'
 import { BerryCoin } from '../components/BerryCoin'
 import { sfx } from '../audio'
 
 const FLASHES = 26 // how many backgrounds flash by before the reveal
 
 export function StoreScreen() {
-  const [tab, setTab] = useState<'backgrounds' | 'giftcards'>('backgrounds')
+  const [tab, setTab] = useState<'backgrounds' | 'treasures'>('backgrounds')
   return (
     <div className="screen">
       <div className="h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -23,11 +23,11 @@ export function StoreScreen() {
         <button className={tab === 'backgrounds' ? 'on' : ''} onClick={() => { sfx.click(); setTab('backgrounds') }}>
           🖼️ Backgrounds
         </button>
-        <button className={tab === 'giftcards' ? 'on' : ''} onClick={() => { sfx.click(); setTab('giftcards') }}>
-          🎁 Gift Cards
+        <button className={tab === 'treasures' ? 'on' : ''} onClick={() => { sfx.click(); setTab('treasures') }}>
+          🏴‍☠️ Treasures
         </button>
       </div>
-      {tab === 'backgrounds' ? <BackgroundsTab /> : <GiftCardsTab />}
+      {tab === 'backgrounds' ? <BackgroundsTab /> : <TreasuresTab />}
     </div>
   )
 }
@@ -201,36 +201,33 @@ function BackgroundsTab() {
   )
 }
 
-// --- gift cards (paid with Devil Fruits from final tests) -------------------
+// --- treasures (real prizes paid with Devil Fruits from final tests) --------
 
-function GiftCardsTab() {
-  const { data, activeProfileId, kidData, buyGiftCard } = useStore()
+function TreasuresTab() {
+  const { data, activeProfileId, buyGiftCard } = useStore()
   const [confirming, setConfirming] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
 
-  // The gift-card wallet is always BEN's, whoever is looking at the shop.
-  const ben = activeProfileId === KID_ID ? data : kidData
-  if (!ben) return <p className="muted">Loading Ben’s treasure from the cloud…</p>
+  // each profile shops from its own catalog with its own 🍇
+  const catalog = prizesFor(activeProfileId ?? '')
+  const fruits = data.economy.devilFruits
+  const unpaidCount = data.giftcards.filter((p) => !p.paidAt).length
+  const daysLeft = giftCardDaysLeft(data)
+  const history = [...data.giftcards].reverse()
+  const isAdmin = activeProfileId !== KID_ID
 
-  const fruits = ben.economy.devilFruits
-  const unpaid = ben.giftcards.find((p) => !p.paidAt)
-  const daysLeft = giftCardDaysLeft(ben)
-  const history = [...ben.giftcards].reverse()
-
-  function buy(itemId: string) {
+  function buy(itemId: string, cost: number) {
     const result = buyGiftCard(itemId)
     setConfirming(null)
     if (result === 'ok') {
       sfx.bigWin()
-      setMsg('Ordered! Dad got the signal — he’ll sort out the real card. 🏴‍☠️')
+      setMsg(isAdmin ? 'Ordered! It’s on your Captain’s desk to settle. 🏴‍☠️' : 'Ordered! Dad got the signal — he’ll sort out the real prize. 🏴‍☠️')
     } else {
       sfx.error()
       setMsg(
         result === 'broke'
-          ? `You need ${GIFT_CARD_COST} 🍇 — pass final tests at the Academy to earn them!`
-          : result === 'pending'
-            ? 'You already have an order waiting for Dad to pay. One treasure at a time!'
-            : `The merchant ship returns in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. One gift card per month!`,
+          ? `You need ${cost} 🍇 for that — pass official final tests at the Academy!`
+          : `The merchant ship returns in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. One treasure per month!`,
       )
     }
   }
@@ -243,45 +240,46 @@ function GiftCardsTab() {
           <div style={{ fontWeight: 900 }}>{fruits} Devil Fruit{fruits === 1 ? '' : 's'}</div>
           <div className="muted" style={{ fontSize: 12 }}>Win them by passing official final tests at the Academy.</div>
         </div>
-        {daysLeft > 0 && !unpaid && (
+        {daysLeft > 0 && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontWeight: 900, fontSize: 20, color: 'var(--orange)' }}>{daysLeft}</div>
-            <div className="muted" style={{ fontSize: 10 }}>days until next<br />gift card</div>
+            <div className="muted" style={{ fontSize: 10 }}>days until next<br />treasure</div>
           </div>
         )}
       </div>
 
-      {unpaid && (
+      {unpaidCount > 0 && (
         <div className="card" style={{ marginBottom: 14, borderColor: 'var(--yellow)' }}>
-          <div style={{ fontWeight: 900 }}>⏳ {unpaid.label} — waiting for Dad</div>
+          <div style={{ fontWeight: 900 }}>⏳ {unpaidCount} treasure{unpaidCount > 1 ? 's' : ''} waiting to be handed over</div>
           <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            Ordered on {unpaid.day}. Dad has a big warning on his profile — he’ll mark it “paid” when the real card is in your hands.
+            {isAdmin ? 'Settle them from your Captain’s desk (Me tab).' : 'Dad has a big warning on his profile — he’ll mark it “paid” when it’s in your hands.'}
+            {' '}They stack up if more arrive — nothing is lost.
           </div>
         </div>
       )}
 
-      {GIFT_CARDS.map((g) => (
+      {catalog.map((g) => (
         <div key={g.id} className="card" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 32 }}>{g.emoji}</div>
+          <img src={g.logo} alt={g.label} width={46} height={46} draggable={false} className="spin-loop prize-logo" />
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 900 }}>{g.label}</div>
-            <div className="muted" style={{ fontSize: 12 }}>A real gift card. Limit: 1 per month.</div>
+            <div style={{ fontWeight: 900 }}>{g.emoji} {g.label}</div>
+            <div className="muted" style={{ fontSize: 12 }}>A real treasure. Limit: 1 purchase per month.</div>
           </div>
           {confirming === g.id ? (
-            <button className="btn btn--red btn--small" onClick={() => buy(g.id)}>
-              Confirm 🍇{GIFT_CARD_COST}
+            <button className="btn btn--red btn--small" onClick={() => buy(g.id, g.cost)}>
+              Confirm 🍇{g.cost}
             </button>
           ) : (
             <button
               className="btn btn--small"
-              disabled={fruits < GIFT_CARD_COST || !!unpaid || daysLeft > 0}
+              disabled={fruits < g.cost || daysLeft > 0}
               onClick={() => {
                 sfx.click()
                 setConfirming(g.id)
                 window.setTimeout(() => setConfirming((c) => (c === g.id ? null : c)), 3000)
               }}
             >
-              🍇{GIFT_CARD_COST}
+              🍇{g.cost}
             </button>
           )}
         </div>

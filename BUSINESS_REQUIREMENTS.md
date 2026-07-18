@@ -132,23 +132,41 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 ## 14. Quiz — "Grand Line Academy" (tab replaces Tasks; Tasks live behind a floating "+" FAB)
 
-Learning quizzes for Ben (born Feb 2014 — pitch everything at Ontario grade-6 level). One Piece-themed presentation; the *content* is school material, not One Piece trivia.
+**Each profile has its own academy.** The Quiz tab always shows the ACTIVE profile's topics; Diogo is additionally the **admin** (see §16). One Piece-themed presentation; the *content* is real learning material.
 
-- **Topics** (registry in `src/logic/quiz.ts`): Canada Geography (live, 50 questions), Science, Critical Thinking (scams/fake news), Logic — grade 6, coming later, plus ~5 more Ontario grade-6 topics eventually. Diogo locks/unlocks topics from his profile; only Canada Geography starts unlocked.
-- **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/canadaGeographySeed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. Provinces/capitals/languages carry `weight: 2` (core); famous cities/landmarks/flags `weight: 1` (fun).
-- **Training (Ben's profile)**: instant right/wrong feedback, fun facts, confetti. Berries: full `points` on the first-ever correct answer, **half** on any later correct answers, and **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions.
+- **Topics** (registry in `src/logic/quiz.ts`, each with an `owner`):
+  - **Ben** (born Feb 2014 — Ontario grade-6 level): Canada Geography (live, 50 questions), Science, Critical Thinking (scams/fake news), Logic — coming later, plus ~5 more Ontario grade-6 topics eventually.
+  - **Diogo** (senior frontend dev; goal = practical AI-for-dev market edge, NO ML training theory): AI in Software Dev, GitHub Copilot, Claude Code (live, ~20 seed questions each, target 50 — `quiz:regen` tops them up).
+  - On a profile's first login its own non-comingSoon topics auto-unlock once (`quiz.selfInit`); after that locks are fully admin-managed.
+- **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/*Seed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. `weight: 2` = core material, `weight: 1` = fun/nice-to-know.
+- **Training (own profile)**: instant right/wrong feedback, fun facts, confetti. Berries: full `points` on the first-ever correct answer, **half** on later correct answers, **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions and ✨ fresh ones (see weekly review, §16).
 - **Final test**:
-  - *Official* — launched from **Diogo's profile** (topic card → runs on the spot, hand Ben the device). Results recorded to Ben's data.
-  - *Simulation* — Ben can rehearse any unlocked topic from his own profile; no rewards.
-  - Size is chosen automatically from Ben's real per-question answer times (10–14 questions, ≤ ~13 min budget).
-  - Selection targets ~80%: ~60% questions he's strong at + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is his strongest remaining ("possible to fail, but don't fail too hard").
-  - Score revealed **only at the end**, with a review of mistakes + correct answers. Pass = **80%+** → big "CONQUERED" stamp on the topic + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day (not the same day) with different questions (previous attempt's questions excluded).
-- **Devil Fruits 🍇** = the diamond currency. Sources: one per first official topic pass + parent bonus grants ("+1 🍇" per topic on Diogo's profile, for topics that turn out hard).
-- **Question curation (Diogo)**: view every Q&A, remove bad ones (flagged `status: "removed"` in the DB row — kept so AI regen won't recreate them). `npm run quiz:regen` (claude CLI) refills topics to target; new questions arrive `status: "pending"` and show as a review warning on Diogo's Quiz tab with approve/remove.
+  - *Official (Ben)* — launched from **Diogo's Admin desk** (runs on the spot, hand Ben the device); recorded to Ben's data.
+  - *Official (Diogo)* — self-serve from his own Quiz tab (admin approves his own tests).
+  - *Simulation/practice* — anyone, any unlocked topic, no rewards.
+  - Size auto-chosen from real per-question answer times (10–14 questions, ≤ ~13 min budget).
+  - Selection targets ~80%: ~60% strong + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is the strongest remaining ("possible to fail, but don't fail too hard").
+  - Score revealed **only at the end**, with a mistakes review. Pass = **80%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).
+- **Devil Fruits 🍇** = the diamond currency, per profile. Sources: first official topic pass + admin bonus grants. Shown in the topbar next to Berries (the admin sees Ben's count on his own topbar too).
+- **Wheel integration**: every unlocked topic is auto-synced onto the owner's wheel as a daily habit ("<emoji> <topic> quiz training", medium effort, ⚡ high priority); locking archives the habit.
 
-## 15. Store tabs & Gift Cards
+## 15. Store tabs & Treasures (prizes)
 
-- Store now has tabs: **Backgrounds** (the existing mystery gacha) and **Gift Cards**.
-- Gift cards: Roblox $10, AliExpress $10, Amazon $10 — each costs **3 🍇**. Limit **1 per 30 days** (counter in the store shows days left); also only one unpaid order at a time.
-- Buying creates an unpaid purchase on Ben's data. **Diogo sees a persistent banner** at the top of the app ("Ben bought X" + **Paid** button); tapping Paid settles it. The 30-day window runs from the purchase date.
-- The gift-card wallet shown in the Store is always Ben's, whichever profile is browsing.
+- Store tabs: **Backgrounds** (mystery gacha) and **🏴‍☠️ Treasures**. Each profile shops from its OWN catalog with its OWN 🍇 (`PRIZES` in `src/logic/quiz.ts`); prize logos live in `public/prizes/` and spin like the Luffy tab icon.
+  - **Ben**: Roblox $10 (3 🍇), Dollarama candy (2 🍇), Costco Sushi (6 🍇).
+  - **Diogo**: LCBO $10 (3 🍇).
+- Limit **1 purchase per 30 days per profile** (store shows a days-left counter). Unpaid purchases **accumulate** — duplicates of the same item are fine, each is its own row; nothing blocks a new purchase except the 30-day window and the 🍇 balance.
+- Buying creates an unpaid purchase on the buyer's data. **Diogo sees persistent banners** at the top of the app for every unsettled purchase (Ben's and his own) with a **Paid** button; they're also listed in the Admin desk under "Prizes to settle".
+
+## 16. Admin (Diogo) — the "Captain's desk" in his Me tab
+
+All management moved out of the Quiz tab into **Me → 🛠️ Captain's desk** (`src/components/AdminSection.tsx`):
+
+- Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher, ⚔️ preview of Ben's training (records nothing).
+- Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
+- Prize settlement: "Prizes to settle" list + topbar banners (see §15).
+- **Scripts** (both talk to Firestore via the public web config + anonymous auth):
+  - `npm run quiz:regen` (claude CLI, opus) — refills every live topic to its target after removals; new questions land `pending`.
+  - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
+
+> Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

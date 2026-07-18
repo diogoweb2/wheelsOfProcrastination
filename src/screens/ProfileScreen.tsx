@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
+import { PARENT_ID } from '../store/storage'
 import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
+import { AdminSection } from '../components/AdminSection'
 import { Luffy } from '../components/Luffy'
 import { HabitsSection } from '../components/HabitsSection'
 import { MapSection } from '../components/MapSection'
@@ -64,6 +66,9 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
           </button>
         </div>
       )}
+
+      {/* admin tools — only on the captain's profile */}
+      {me?.id === PARENT_ID && <AdminSection />}
 
       {/* streak hero */}
       <div className="card" style={{ textAlign: 'center', marginBottom: 14 }}>

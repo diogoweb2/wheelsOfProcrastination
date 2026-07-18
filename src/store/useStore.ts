@@ -46,7 +46,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { GIFT_CARDS, GIFT_CARD_COST, PASS_PCT, giftCardDaysLeft, syncQuizTasks, trainingReward, updatedStat } from '../logic/quiz'
+import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -99,18 +99,18 @@ interface StoreState {
   dropPendingPick: (taskId: string) => void
   completeTask: (taskId: string) => number
 
-  // --- quiz ---
-  /** Log a quiz answer to Ben's stats (works from either profile). `rewarded` = training mode pays Berries. Returns Berries earned. */
-  recordQuizAnswer: (qid: string, correct: boolean, timeMs: number, rewarded: boolean) => number
-  /** Store a finished final test (official or simulation). Official pass → topic checkmark + one-time Devil Fruit. */
-  finishQuizTest: (topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
-  setTopicUnlocked: (topicId: string, unlocked: boolean) => void // parent
-  grantDevilFruit: (topicId: string) => void // parent bonus 🍇
-  removeQuizQuestion: (qid: string) => void // parent: flag removed (stays in db so AI won't regenerate it)
-  approveQuizQuestion: (qid: string) => void // parent: pending → active
-  // --- gift cards ---
-  buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown' | 'pending'
-  markGiftCardPaid: (purchaseId: string) => void // parent settles Ben's purchase
+  // --- quiz (every action names the profile it touches; admin can target Ben from Diogo's session) ---
+  /** Log a quiz answer to `targetId`'s stats. `rewarded` = training mode pays Berries. Returns Berries earned. */
+  recordQuizAnswer: (targetId: string, qid: string, correct: boolean, timeMs: number, rewarded: boolean) => number
+  /** Store a finished final test for `targetId`. Official pass → topic checkmark + one-time Devil Fruit. */
+  finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
+  setTopicUnlocked: (targetId: string, topicId: string, unlocked: boolean) => void // admin
+  grantDevilFruit: (targetId: string, topicId: string) => void // admin bonus 🍇
+  removeQuizQuestion: (qid: string) => void // admin: flag removed (stays in db so AI won't regenerate it)
+  approveQuizQuestion: (qid: string) => void // admin: pending → active (also restores removed)
+  // --- prizes (each profile buys from its own catalog with its own 🍇) ---
+  buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown'
+  markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
 
   buyFreeze: () => boolean
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
@@ -148,13 +148,21 @@ export const useStore = create<StoreState>((set, get) => {
       if (first) {
         first = false
         get().rollover()
-        // Ben's wheel mirrors his unlocked topics as daily quiz habits.
+        // On login: one-time unlock of this profile's own default topics, and
+        // keep the wheel's quiz habits in step with the unlocked topics.
         // Only write if something actually changes (avoids a no-op save every login).
-        if (id === KID_ID) {
-          const probe: AppData = JSON.parse(JSON.stringify(get().data))
-          syncQuizTasks(probe)
-          if (JSON.stringify(probe) !== JSON.stringify(get().data)) commit(syncQuizTasks)
+        const ensure = (d: AppData) => {
+          if (!d.quiz.selfInit) {
+            for (const t of topicsFor(id)) {
+              if (!t.comingSoon && !d.quiz.unlockedTopics.includes(t.id)) d.quiz.unlockedTopics.push(t.id)
+            }
+            d.quiz.selfInit = true
+          }
+          syncQuizTasks(d, id)
         }
+        const probe: AppData = JSON.parse(JSON.stringify(get().data))
+        ensure(probe)
+        if (JSON.stringify(probe) !== JSON.stringify(get().data)) commit(ensure)
       }
     })
     unsubKid?.()
@@ -198,28 +206,23 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   /**
-   * Mutate BEN's world regardless of who is logged in: from Ben's own session it
-   * is a normal commit; from the parent's session (official tests, grants,
-   * unlocks, "paid") it writes through the kidData subscription instead.
+   * Mutate a specific profile's world: the active profile commits normally;
+   * the admin (Diogo) can also write BEN's world through the kidData
+   * subscription (official tests, grants, unlocks, "paid").
    */
-  function commitBen(fn: (data: AppData, events: AppEvent[]) => void) {
-    if (get().activeProfileId === KID_ID) {
+  function commitFor(targetId: string, fn: (data: AppData, events: AppEvent[]) => void) {
+    if (get().activeProfileId === targetId) {
       commit(fn)
       return
     }
+    if (targetId !== KID_ID) return // only Ben's world can be edited from another session
     const kid = get().kidData
-    if (!kid) return // not loaded yet — parent UI disables these actions until it is
+    if (!kid) return // not loaded yet — admin UI disables these actions until it is
     const data: AppData = JSON.parse(JSON.stringify(kid))
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ kidData: data, events: [...s.events, ...events] }))
     void saveData(KID_ID, data)
-  }
-
-  /** Ben's world from wherever we're standing (own session or the parent's live copy). */
-  function benData(): AppData | null {
-    const s = get()
-    return s.activeProfileId === KID_ID ? s.data : s.kidData
   }
 
   function saveBank(questions: QuizQuestion[]) {
@@ -481,12 +484,12 @@ export const useStore = create<StoreState>((set, get) => {
 
     // --- quiz ----------------------------------------------------------------
 
-    recordQuizAnswer(qid, correct, timeMs, rewarded) {
+    recordQuizAnswer(targetId, qid, correct, timeMs, rewarded) {
       const today = dayKey()
       const q = get().quizBank.find((x) => x.id === qid)
       if (!q) return 0
       let earned = 0
-      commitBen((d) => {
+      commitFor(targetId, (d) => {
         const stat = d.quiz.stats[qid]
         if (rewarded && correct) {
           earned = trainingReward(q, stat, today)
@@ -502,7 +505,7 @@ export const useStore = create<StoreState>((set, get) => {
       return earned
     },
 
-    finishQuizTest(topicId, official, results) {
+    finishQuizTest(targetId, topicId, official, results) {
       const scorePct = results.length === 0 ? 0 : Math.round((results.filter((r) => r.correct).length / results.length) * 100)
       const record: QuizTestRecord = {
         id: crypto.randomUUID(),
@@ -513,7 +516,7 @@ export const useStore = create<StoreState>((set, get) => {
         scorePct,
         passed: scorePct >= PASS_PCT,
       }
-      commitBen((d, events) => {
+      commitFor(targetId, (d, events) => {
         d.quiz.tests.push(record)
         if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60) // keep the blob small
         if (official && record.passed && !d.quiz.passedTopics.includes(topicId)) {
@@ -523,24 +526,24 @@ export const useStore = create<StoreState>((set, get) => {
             type: 'goal',
             emoji: '🍇',
             title: 'Devil Fruit won!',
-            description: `Final test conquered with ${scorePct}%! A Devil Fruit joins the treasure — 3 buy a gift card.`,
+            description: `Final test conquered with ${scorePct}%! A Devil Fruit joins the treasure — spend them in the Store.`,
           })
         }
       })
       return record
     },
 
-    setTopicUnlocked(topicId, unlocked) {
-      commitBen((d) => {
+    setTopicUnlocked(targetId, topicId, unlocked) {
+      commitFor(targetId, (d) => {
         const has = d.quiz.unlockedTopics.includes(topicId)
         if (unlocked && !has) d.quiz.unlockedTopics.push(topicId)
         if (!unlocked && has) d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((t) => t !== topicId)
-        syncQuizTasks(d) // keep Ben's wheel habits in step with the locks
+        syncQuizTasks(d, targetId) // keep the owner's wheel habits in step with the locks
       })
     },
 
-    grantDevilFruit(topicId) {
-      commitBen((d) => {
+    grantDevilFruit(targetId, topicId) {
+      commitFor(targetId, (d) => {
         d.economy.devilFruits += 1
         d.quiz.bonusFruits[topicId] = (d.quiz.bonusFruits[topicId] ?? 0) + 1
       })
@@ -557,18 +560,20 @@ export const useStore = create<StoreState>((set, get) => {
     // --- gift cards ----------------------------------------------------------
 
     buyGiftCard(itemId) {
-      const item = GIFT_CARDS.find((g) => g.id === itemId)
-      const d = benData()
-      if (!item || !d) return 'broke'
-      if (d.giftcards.some((p) => !p.paidAt)) return 'pending' // one open order at a time
-      if (giftCardDaysLeft(d) > 0) return 'cooldown'
-      if (d.economy.devilFruits < GIFT_CARD_COST) return 'broke'
-      commitBen((b) => {
-        b.economy.devilFruits -= GIFT_CARD_COST
+      const me = get().activeProfileId
+      if (!me) return 'broke'
+      const item = prizesFor(me).find((g) => g.id === itemId)
+      const d = get().data
+      if (!item) return 'broke'
+      if (giftCardDaysLeft(d) > 0) return 'cooldown' // 1 per 30 days; duplicates simply accumulate over months
+      if (d.economy.devilFruits < item.cost) return 'broke'
+      commit((b) => {
+        b.economy.devilFruits -= item.cost
         b.giftcards.push({
           id: crypto.randomUUID(),
           itemId: item.id,
           label: item.label,
+          cost: item.cost,
           day: dayKey(),
           at: new Date().toISOString(),
           paidAt: null,
@@ -577,8 +582,8 @@ export const useStore = create<StoreState>((set, get) => {
       return 'ok'
     },
 
-    markGiftCardPaid(purchaseId) {
-      commitBen((d) => {
+    markGiftCardPaid(targetId, purchaseId) {
+      commitFor(targetId, (d) => {
         const p = d.giftcards.find((x) => x.id === purchaseId)
         if (p && !p.paidAt) p.paidAt = new Date().toISOString()
       })
