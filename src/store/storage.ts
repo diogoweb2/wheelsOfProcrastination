@@ -4,7 +4,7 @@
 //  - the active login (which profile is signed in on THIS device) — kept local, per-device
 //  - readers for the previous localStorage data, used once to migrate up into Firestore
 import type { AppData, Profile } from '../types'
-import { dayKey } from '../logic/dates'
+import { addDays, dayKey, parseDay } from '../logic/dates'
 import { defaultBankState } from '../logic/bank'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
@@ -84,6 +84,17 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
   if (legacySavings?.balance) {
     merged.bank.accounts.chequing.balance += legacySavings.balance
     merged.bank.accounts.chequing.deposited += legacySavings.deposited ?? legacySavings.balance
+  }
+  // one-time fix: a bank seeded ON its own payday used to skip that day's allowance,
+  // because the sim only pays days *after* lastDay. If it never ran (no history, no
+  // allowance yet) and lastDay is a payday, roll lastDay back a day so the next
+  // catch-up pays it. Guarded tightly so it can't double-pay on later loads.
+  const b = merged.bank
+  const neverRan = b.accounts.chequing.history.length === 0 && b.accounts.xgro.history.length === 0
+    && b.accounts.qqq.history.length === 0 && b.accounts.college.history.length === 0
+  if (neverRan && b.pending.weeks === 0 && b.pending.amount === 0
+      && b.config.weeklyAmount > 0 && parseDay(b.lastDay).getDay() === b.config.payday) {
+    b.lastDay = addDays(b.lastDay, -1)
   }
   // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
   const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick

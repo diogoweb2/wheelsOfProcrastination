@@ -62,7 +62,9 @@ export function defaultBankState(): BankState {
     },
     pending: { amount: 0, weeks: 0, since: null },
     txns: [],
-    lastDay: dayKey(),
+    // Seed to yesterday so the very first sim runs *through* today — otherwise a
+    // bank created on payday (Saturday) would skip that day's allowance entirely.
+    lastDay: addDays(dayKey(), -1),
     shock: defaultShockState(),
   }
 }
