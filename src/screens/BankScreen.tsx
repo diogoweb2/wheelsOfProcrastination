@@ -182,7 +182,14 @@ function BankKid() {
         <div style={{ color: 'var(--gold)' }}>
           <Money value={totalTreasure(data)} size={40} />
         </div>
-        <div className="muted" style={{ fontSize: 11 }}>
+        <div className="muted" style={{ fontSize: 11 }}>yours to sell — the chests you can cash out</div>
+        {bank.config.respBalance > 0 && (
+          <div style={{ fontSize: 15, fontWeight: 800, marginTop: 8, color: 'var(--text)' }}>
+            {fmt$(totalTreasure(data) + bank.config.respBalance)}{' '}
+            <span className="muted" style={{ fontSize: 11, fontWeight: 600 }}>with Dad’s college treasure (RESP)</span>
+          </div>
+        )}
+        <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>
           Allowance: {fmt$(bank.config.weeklyAmount)} every {DAY_NAMES[bank.config.payday]}
         </div>
       </div>
