@@ -160,7 +160,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 ## 16. Admin (Diogo) — the "Captain's desk" in his Me tab
 
-All management moved out of the Quiz tab into **Me → 🛠️ Captain's desk** (`src/components/AdminSection.tsx`):
+The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):
 
 - Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher, ⚔️ preview of Ben's training (records nothing).
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.

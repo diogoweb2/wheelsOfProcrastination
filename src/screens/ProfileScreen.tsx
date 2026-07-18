@@ -13,6 +13,7 @@ import { ensurePermission, scheduleDailyReminder } from '../notifications'
 export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
   const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
+  const [section, setSection] = useState<'me' | 'voyage' | 'settings' | 'admin'>('me')
   const me = activeProfile()
 
   const today = dayKey()
@@ -44,6 +45,7 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
   }
 
   const streakAlive = data.streak.current > 0
+  const isAdmin = me?.id === PARENT_ID
 
   return (
     <div className="screen">
@@ -67,10 +69,29 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
         </div>
       )}
 
-      {/* admin tools — only on the captain's profile */}
-      {me?.id === PARENT_ID && <AdminSection />}
+      {/* sub-sections keep this screen sane: daily stuff first, admin last */}
+      <div className="seg" style={{ marginBottom: 14 }}>
+        <button className={section === 'me' ? 'on' : ''} onClick={() => { sfx.click(); setSection('me') }}>
+          👤 Me
+        </button>
+        <button className={section === 'voyage' ? 'on' : ''} onClick={() => { sfx.click(); setSection('voyage') }}>
+          🗺️ Voyage
+        </button>
+        <button className={section === 'settings' ? 'on' : ''} onClick={() => { sfx.click(); setSection('settings') }}>
+          ⚙️ Settings
+        </button>
+        {isAdmin && (
+          <button className={section === 'admin' ? 'on' : ''} onClick={() => { sfx.click(); setSection('admin') }}>
+            🛠️ Admin
+          </button>
+        )}
+      </div>
 
-      {/* streak hero */}
+      {section === 'admin' && isAdmin && <AdminSection />}
+
+      {section === 'me' && (
+        <>
+          {/* streak hero */}
       <div className="card" style={{ textAlign: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 56, lineHeight: 1 }}>{streakAlive ? '🔥' : '🪦'}</div>
         <div style={{ fontSize: 44, fontWeight: 900, color: streakAlive ? 'var(--orange)' : 'var(--muted)' }}>
@@ -149,7 +170,11 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
           🪙{FREEZE_COST}
         </button>
       </div>
+        </>
+      )}
 
+      {section === 'voyage' && (
+        <>
       {/* stats */}
       <div className="h2">📈 Lifetime</div>
       <div className="card" style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
@@ -172,8 +197,11 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
 
       {/* habits training log */}
       <HabitsSection />
+        </>
+      )}
 
-      {/* settings */}
+      {section === 'settings' && (
+        <>
       <div className="h2">⚙️ Settings</div>
       <div className="card">
         <div className="field">
@@ -219,6 +247,8 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
         <Luffy mood="cool" size={110} />
         <p className="muted" style={{ fontSize: 12 }}>Wheels of Procrastination v1 · {me ? `sailing as ${me.name}` : 'no servers'}</p>
       </div>
+        </>
+      )}
     </div>
   )
 }
