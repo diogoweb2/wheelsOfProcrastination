@@ -3,6 +3,7 @@ import { useStore } from './store/useStore'
 import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
+import { StreakPrompts } from './components/StreakPrompts'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { TasksScreen } from './screens/TasksScreen'
@@ -229,6 +230,7 @@ export default function App() {
       </nav>
 
       <EventModal />
+      <StreakPrompts />
     </div>
   )
 }

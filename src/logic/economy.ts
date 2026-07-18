@@ -5,7 +5,6 @@ import { daysUntil } from './dates'
 export const BASE_REWARD: Record<Effort, number> = { low: 10, medium: 20, high: 35 }
 export const URGENT_MULTIPLIER = 1.5
 export const FIRST_OF_DAY_BONUS = 5
-export const STREAK_GOAL_BONUS = 50
 export const FREEZE_COST = 150
 export const MAX_FREEZES = 2
 export const RESPIN_CHEAP = 15
@@ -41,3 +40,16 @@ export function manualPickCost(task: Task, today?: string): number {
 export function respinCost(respinsToday: number, completionsToday: number): number {
   return respinsToday === 0 && completionsToday === 0 ? RESPIN_CHEAP : RESPIN_EXPENSIVE
 }
+
+/** Hitting a streak goal pays 10 🪙 per goal day — bigger ambition, visibly bigger treasure. */
+export function streakGoalBonus(goal: number): number {
+  return goal * 10
+}
+
+/** Reviving a freshly-dead streak: 15 🪙 per lost day, clamped so it stings but never bankrupts. */
+export function streakRepairCost(deadDays: number): number {
+  return Math.min(Math.max(deadDays * 15, 30), 450)
+}
+
+/** Days between goal-nudge prompts ("check your streak goal" modal). */
+export const GOAL_PROMPT_EVERY_DAYS = 7

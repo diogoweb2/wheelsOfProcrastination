@@ -38,11 +38,12 @@ import {
   FREEZE_COST,
   MAX_FREEZES,
   MAX_PENDING,
-  STREAK_GOAL_BONUS,
   isEffectivelyUrgent,
   manualPickCost,
   respinCost,
   rewardFor,
+  streakGoalBonus,
+  streakRepairCost,
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
@@ -112,6 +113,10 @@ interface StoreState {
   // --- prizes (each profile buys from its own catalog with its own 🍇) ---
   buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown'
   markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
+
+  /** Buy back the just-died streak (freezes the missed days). Returns false if too broke. */
+  repairStreak: () => boolean
+  dismissStreakRepair: () => void // "let it sink"
 
   buyFreeze: () => boolean
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
@@ -308,12 +313,8 @@ export const useStore = create<StoreState>((set, get) => {
                 description: `You ghosted ${cur}. A freeze bravely sacrificed itself. ${d.economy.freezes} left.`,
               })
             } else {
-              events.push({
-                type: 'streakDead',
-                emoji: '💀',
-                title: `RIP streak (${d.streak.current} days)`,
-                description: 'It fought bravely against your couch. The couch won. Start again today.',
-              })
+              // no popup here — the death becomes a standing repair offer (StreakPrompts modal)
+              d.streak.deadStreak = { value: d.streak.current, day: cur }
               d.streak.current = 0
             }
           }
@@ -470,14 +471,15 @@ export const useStore = create<StoreState>((set, get) => {
           d.streak.best = Math.max(d.streak.best, d.streak.current)
           const goal = d.settings.streakGoal
           if (d.streak.current >= goal && !d.settings.goalsReached.includes(goal)) {
+            const bonus = streakGoalBonus(goal)
             d.settings.goalsReached.push(goal)
-            d.economy.gems += STREAK_GOAL_BONUS
-            d.economy.totalGemsEarned += STREAK_GOAL_BONUS
+            d.economy.gems += bonus
+            d.economy.totalGemsEarned += bonus
             events.push({
               type: 'goal',
               emoji: '🏆',
               title: `Streak goal: ${goal} days!`,
-              description: `+${STREAK_GOAL_BONUS} Berries! Set a new goal and keep the adventure going!`,
+              description: `+${bonus} Berries! Set a bigger goal for a bigger bounty!`,
             })
           }
         }
@@ -590,6 +592,42 @@ export const useStore = create<StoreState>((set, get) => {
       commitFor(targetId, (d) => {
         const p = d.giftcards.find((x) => x.id === purchaseId)
         if (p && !p.paidAt) p.paidAt = new Date().toISOString()
+      })
+    },
+
+    repairStreak() {
+      const { data } = get()
+      const dead = data.streak.deadStreak
+      if (!dead) return false
+      const cost = streakRepairCost(dead.value)
+      if (data.economy.gems < cost) return false
+      const today = dayKey()
+      commit((d, events) => {
+        d.economy.gems -= cost
+        // freeze every uncovered day since the streak broke, so rollover won't re-kill it
+        const completed = new Set(d.completions.map((c) => c.day))
+        const frozen = new Set(d.frozenDays.map((f) => f.day))
+        let cur = dead.day
+        while (cur < today) {
+          if (!completed.has(cur) && !frozen.has(cur)) d.frozenDays.push({ day: cur })
+          cur = addDays(cur, 1)
+        }
+        d.streak.current = dead.value
+        d.streak.best = Math.max(d.streak.best, dead.value)
+        d.streak.deadStreak = null
+        events.push({
+          type: 'frozen',
+          emoji: '⚡🔥',
+          title: `Streak revived! (${dead.value} days)`,
+          description: `Chopper worked his miracle for 🪙${cost}. Complete a quest today to keep it burning!`,
+        })
+      })
+      return true
+    },
+
+    dismissStreakRepair() {
+      commit((d) => {
+        d.streak.deadStreak = null
       })
     },
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS } from '../logic/economy'
+import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS, streakGoalBonus } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
 import { AdminSection } from '../components/AdminSection'
 import { Luffy } from '../components/Luffy'
@@ -133,7 +133,7 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
       {/* streak goal */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <div style={{ fontWeight: 900, flex: 1 }}>🎯 Streak goal — +50 🪙 when you hit it</div>
+          <div style={{ fontWeight: 900, flex: 1 }}>🎯 Streak goal — +🪙{streakGoalBonus(data.settings.streakGoal)} when you hit it</div>
           <img src="/nami.png" width={48} height={48} alt="Nami" draggable={false} style={{ objectFit: 'contain', flexShrink: 0 }} />
         </div>
         <div className="seg">

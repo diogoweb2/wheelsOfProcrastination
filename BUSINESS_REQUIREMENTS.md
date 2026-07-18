@@ -62,7 +62,7 @@ Rewards per completion:
 Modifiers:
 - Urgent (or date-escalated urgent): × 1.5, rounded.
 - First completion of the day: +5 bonus.
-- Streak-goal reached: +50 one-time bonus per goal reached.
+- Streak-goal reached: one-time bonus of **10 🪙 per goal day** (7→70, 14→140, 30→300, 50→500, 100→1000) — bigger goals visibly pay more.
 
 Costs:
 - **Streak Freeze**: 150 gems, may stock at most **2** at a time (like Duolingo). Auto-consumed on a missed day.
@@ -79,7 +79,8 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 - No completion by end of day ⇒ day is **skipped**:
   - If a freeze is stocked → freeze auto-consumed, streak survives (shown as frozen day).
   - Else → streak resets to 0. The sloth will have opinions.
-- **Streak goal**: user picks a goal (7 / 14 / 30 / 50 / 100). Reaching it pays +50 gems and a celebration; then user is prompted to set the next one.
+- **Streak goal**: user picks a goal (7 / 14 / 30 / 50 / 100). Reaching it pays **goal × 10 🪙** and a celebration. A **goal check-in modal** resurfaces the goal (with the bonus per option) every ~7 days, so it's no longer buried in the profile.
+- **Streak repair**: if days were skipped and the streak died (no freezes left), the next app open shows a standing **repair offer**: revive the dead streak for **15 🪙 per lost day** (min 30, max 450). Repairing freezes the missed days; declining ("let it sink") clears the offer and the streak restarts from 0.
 - Streak UI mimics Duolingo (flame, number, calendar of the week).
 
 ## 7. Map ("path of shame and glory")

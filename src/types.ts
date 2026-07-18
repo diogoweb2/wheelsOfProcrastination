@@ -47,6 +47,7 @@ export interface Settings {
   soundOn: boolean
   streakGoal: number
   goalsReached: number[] // list of streak goals already rewarded
+  lastGoalPromptDay?: string // YYYY-MM-DD — the periodic "check your streak goal" nudge throttle
 }
 
 export interface Profile {
@@ -69,6 +70,7 @@ export interface StreakState {
   best: number
   lastCompletionDay: string | null // YYYY-MM-DD
   lastRolloverDay: string | null // last day we processed rollover up to
+  deadStreak?: { value: number; day: string } | null // a streak that just died — offered for Berry repair until repaired/dismissed
 }
 
 export interface PendingPick {
