@@ -25,7 +25,7 @@ export function eligibleTasks(
   return tasks.filter(
     (t) =>
       !t.archived &&
-      (filter === 'all' || t.effort === filter) &&
+      (filter.length === 0 || filter.includes(t.effort)) &&
       !completedTodayIds.has(t.id) &&
       isAvailableOn(t, today),
   )

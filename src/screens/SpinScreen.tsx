@@ -1,24 +1,30 @@
 import { useMemo, useRef, useState, type CSSProperties } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
-import type { EffortFilter, Task } from '../types'
+import type { Effort, EffortFilter, Task } from '../types'
 import { Wheel } from '../components/Wheel'
-import { Luffy, type LuffyMood } from '../components/Luffy'
+import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { eligibleTasks } from '../logic/wheel'
 import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
 
-const FILTERS: { id: EffortFilter; label: string }[] = [
+const FILTERS: { id: Effort; label: string }[] = [
   { id: 'low', label: 'Low' },
   { id: 'medium', label: 'Med' },
   { id: 'high', label: 'High' },
-  { id: 'all', label: 'All' },
 ]
 
 export function SpinScreen() {
   const { data, spin, respin, completeTask, completedTodayIds, pushEvent } = useStore()
-  const [filter, setFilter] = useState<EffortFilter>('all')
+  const [filter, setFilter] = useState<EffortFilter>([])
+
+  function toggleEffort(effort: Effort) {
+    setFilter((f) => {
+      const next = f.includes(effort) ? f.filter((e) => e !== effort) : [...f, effort]
+      return next.length === FILTERS.length ? [] : next // all three ticked = "All"
+    })
+  }
   const [targetId, setTargetId] = useState<string | null>(null)
   const [spinToken, setSpinToken] = useState(0)
   const [spinning, setSpinning] = useState(false)
@@ -77,7 +83,7 @@ export function SpinScreen() {
   function onWheelDone() {
     setSpinning(false)
     setShowResult(true)
-    setLine(crewSays('landed'))
+    setLine(crewSays(resultTask?.effort === 'high' ? 'landedHard' : 'landedEasy'))
     setMood('cool')
     sfx.fanfare()
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.5 }, scalar: 0.9 })
@@ -125,6 +131,14 @@ export function SpinScreen() {
 
   const respinPrice = respinCost(data.daily.respinsToday, data.daily.completionsToday)
   const doneToday = data.daily.completionsToday > 0
+  // which Luffy shows: nervous gif mid-spin, effort-based reaction once the wheel lands
+  const luffyState: LuffyState = spinning
+    ? 'spinning'
+    : showResult && resultTask
+      ? resultTask.effort === 'high'
+        ? 'hard'
+        : 'easy'
+      : 'default'
   const plateFull = pendingTasks.length >= MAX_PENDING
   // Nothing left to spin (and no animation in flight) — hide the wheel entirely.
   const nothingToSpin = pool.length === 0 && !spinning
@@ -133,7 +147,7 @@ export function SpinScreen() {
     <div className="screen">
       {/* Luffy + bubble */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 8 }}>
-        <Luffy mood={doneToday && !spinning ? 'happy' : mood} size={104} className="float" />
+        <Luffy state={luffyState} mood={doneToday && !spinning ? 'happy' : mood} size={104} />
         <div className="bubble" style={{ flex: 1, marginBottom: 26 }}>
           {line}
         </div>
@@ -155,15 +169,24 @@ export function SpinScreen() {
         {FILTERS.map((f) => (
           <button
             key={f.id}
-            className={filter === f.id ? 'on' : ''}
+            className={filter.includes(f.id) ? 'on' : ''}
             onClick={() => {
               sfx.click()
-              setFilter(f.id)
+              toggleEffort(f.id)
             }}
           >
             {f.label}
           </button>
         ))}
+        <button
+          className={filter.length === 0 ? 'on' : ''}
+          onClick={() => {
+            sfx.click()
+            setFilter([])
+          }}
+        >
+          All
+        </button>
       </div>
 
       {!nothingToSpin && <Wheel tasks={pool} targetId={targetId} spinToken={spinToken} onDone={onWheelDone} />}
@@ -201,6 +224,7 @@ export function SpinScreen() {
           onClick={() => {
             setShowResult(false)
             setTargetId(null)
+            setLine(crewSays('greeting')) // back to default Luffy → back to default chatter
           }}
         >
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -216,6 +240,7 @@ export function SpinScreen() {
               onLater={() => {
                 setShowResult(false)
                 setTargetId(null) // card moves to the plate; its wheel segment retires
+                setLine(crewSays('greeting'))
               }}
               showRespin
             />

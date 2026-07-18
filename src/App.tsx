@@ -3,25 +3,27 @@ import { useStore } from './store/useStore'
 import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
 import { SpinScreen } from './screens/SpinScreen'
-import { MapScreen } from './screens/MapScreen'
+import { StoreScreen } from './screens/StoreScreen'
 import { TasksScreen } from './screens/TasksScreen'
-import { ReportsScreen } from './screens/ReportsScreen'
+import { BadgesScreen } from './screens/BadgesScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { scheduleDailyReminder } from './notifications'
+import { backgroundUrl } from './logic/backgrounds'
+import { BerryCoin } from './components/BerryCoin'
 import { sfx } from './audio'
 
-type Tab = 'spin' | 'map' | 'tasks' | 'reports' | 'me'
+type Tab = 'spin' | 'store' | 'tasks' | 'badges' | 'me'
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: 'spin', icon: '🎡', label: 'Spin' },
-  { id: 'map', icon: '🗺️', label: 'Map' },
+  { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
+  { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
   { id: 'tasks', icon: '📋', label: 'Tasks' },
-  { id: 'reports', icon: '📊', label: 'Habits' },
+  { id: 'badges', icon: '🏅', label: 'Badges' },
   { id: 'me', icon: '👒', label: 'Me' },
 ]
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const unlocked = activeProfileId !== null
 
@@ -75,9 +77,22 @@ export default function App() {
   if (!unlocked) return <PinLock />
 
   const streakAlive = data.streak.current > 0
+  const meIcon = activeProfile()?.emoji ?? '👒'
+
+  // whichever background the user equipped in the Store; none = plain solid color
+  const bg = data.backgrounds.active
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={
+        bg
+          ? {
+              background: `linear-gradient(rgb(12 35 56 / 35%), rgb(12 35 56 / 50%)), url(${backgroundUrl(bg)}) center / cover no-repeat var(--bg)`,
+            }
+          : undefined
+      }
+    >
       <header className="topbar">
         <div className={`stat stat--flame ${streakAlive ? '' : 'dead'}`} title="streak">
           🔥 <span className="num">{data.streak.current}</span>
@@ -91,10 +106,10 @@ export default function App() {
       </header>
 
       {tab === 'spin' && <SpinScreen />}
-      {tab === 'map' && <MapScreen goSpin={() => setTab('spin')} />}
+      {tab === 'store' && <StoreScreen />}
       {tab === 'tasks' && <TasksScreen goSpin={() => setTab('spin')} />}
-      {tab === 'reports' && <ReportsScreen />}
-      {tab === 'me' && <ProfileScreen />}
+      {tab === 'badges' && <BadgesScreen />}
+      {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}
 
       <nav className="tabbar">
         {TABS.map((t) => (
@@ -106,7 +121,17 @@ export default function App() {
               setTab(t.id)
             }}
           >
-            {t.icon}
+            <span className="tab-icon">
+              {t.id === 'me' ? (
+                meIcon
+              ) : t.id === 'store' ? (
+                <BerryCoin size={23} />
+              ) : t.id === 'spin' ? (
+                <img src="/luffy-spin-icon.png" className="spin-loop" width={26} alt="" draggable={false} style={{ display: 'block' }} />
+              ) : (
+                t.icon
+              )}
+            </span>
             <span>{t.label}</span>
           </button>
         ))}

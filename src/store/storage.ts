@@ -35,6 +35,7 @@ export function defaultData(): AppData {
     economy: { gems: 0, freezes: 0, totalGemsEarned: 0 },
     streak: { current: 0, best: 0, lastCompletionDay: null, lastRolloverDay: dayKey() },
     daily: { day: dayKey(), completionsToday: 0, respinsToday: 0, pendingPicks: [] },
+    backgrounds: { owned: [], active: null },
   }
 }
 
@@ -49,6 +50,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     economy: { ...base.economy, ...parsed.economy },
     streak: { ...base.streak, ...parsed.streak },
     daily: { ...base.daily, ...parsed.daily },
+    backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
   }
   // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
   const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick

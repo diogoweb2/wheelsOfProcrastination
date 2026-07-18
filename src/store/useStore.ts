@@ -9,8 +9,10 @@ import {
 } from './storage'
 import { loadRoster, saveData, saveRoster, subscribeData, subscribeRoster } from './cloud'
 import { addDays, dayKey } from '../logic/dates'
+import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import {
   ABANDON_PENALTY,
+  BACKGROUND_COST,
   FREEZE_COST,
   MAX_FREEZES,
   MAX_PENDING,
@@ -23,6 +25,13 @@ import {
 import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
 import { setMuted } from '../audio'
+
+// TEMP (local testing only — do not commit as true): when set, spins are not
+// registered: no pendingPicks entry, no pick counters, nothing saved to Firestore.
+const TEST_DISABLE_SPIN_TRACKING = true
+// TEMP (local testing only — do not commit as true): Store purchases ignore the
+// Berries balance so infinite items can be bought while QA-ing.
+const TEST_FREE_SHOPPING = true
 
 export interface AppEvent {
   type: 'badge' | 'goal' | 'streakDead' | 'frozen' | 'penalty'
@@ -69,6 +78,10 @@ interface StoreState {
   completeTask: (taskId: string) => number
 
   buyFreeze: () => boolean
+  /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
+  buyBackground: () => string | 'broke' | 'complete'
+  /** Equip an owned background as the app background; null = default solid color. */
+  equipBackground: (id: string | null) => void
   setStreakGoal: (goal: number) => void
   setSettings: (patch: Partial<AppData['settings']>) => void
 }
@@ -281,6 +294,7 @@ export const useStore = create<StoreState>((set, get) => {
       const pool = eligibleTasks(data.tasks, filter, excluded)
       if (pool.length === 0) return null
       const picked = pickWeighted(buildEntries(pool))
+      if (TEST_DISABLE_SPIN_TRACKING) return picked
       commit((d) => {
         for (const t of d.tasks) {
           if (!pool.some((p) => p.id === t.id)) continue
@@ -384,6 +398,25 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.freezes += 1
       })
       return true
+    },
+
+    buyBackground() {
+      const { data } = get()
+      const unowned = BACKGROUND_CATALOG.filter((id) => !data.backgrounds.owned.includes(id))
+      if (unowned.length === 0) return 'complete'
+      if (!TEST_FREE_SHOPPING && data.economy.gems < BACKGROUND_COST) return 'broke'
+      const won = unowned[Math.floor(Math.random() * unowned.length)]
+      commit((d) => {
+        d.economy.gems = Math.max(0, d.economy.gems - BACKGROUND_COST)
+        d.backgrounds.owned.push(won)
+      })
+      return won
+    },
+
+    equipBackground(id) {
+      commit((d) => {
+        d.backgrounds.active = id !== null && d.backgrounds.owned.includes(id) ? id : null
+      })
     },
 
     setStreakGoal(goal) {

@@ -12,6 +12,8 @@ export const RESPIN_CHEAP = 15
 export const RESPIN_EXPENSIVE = 60
 export const MANUAL_PICK_MULTIPLIER = 1.5
 export const STREAK_GOAL_OPTIONS = [7, 14, 30, 50, 100]
+/** Mystery background from the Store. SPECIAL feature — priced like a luxury, not a habit. */
+export const BACKGROUND_COST = 500
 export const MAX_PENDING = 3
 /** Gems lost per pending pick abandoned at end of day (half the base reward, rounded up). */
 export const ABANDON_PENALTY: Record<Effort, number> = { low: 5, medium: 10, high: 18 }

@@ -71,7 +71,7 @@ input, select { font-family: inherit; }
   justify-content: space-between;
   gap: 8px;
   padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
-  background: linear-gradient(var(--bg) 80%, transparent);
+  background: linear-gradient(rgb(12 35 56 / 85%) 70%, transparent);
 }
 
 .stat {
@@ -117,6 +117,19 @@ input, select { font-family: inherit; }
   transition: opacity 0.15s, transform 0.1s;
 }
 .tabbar button span { font-size: 10px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; }
+/* Luffy face on the Spin tab twirls forever (around the vertical axis, coin-style) */
+.spin-loop { animation: spin-loop 3.5s linear infinite; }
+@keyframes spin-loop { to { transform: perspective(120px) rotateY(360deg); } }
+
+/* emoji and svg icons center identically inside a fixed box */
+.tabbar button .tab-icon {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+}
 .tabbar button.active { opacity: 1; }
 .tabbar button:active { transform: scale(0.92); }
 
@@ -390,6 +403,29 @@ input, select { font-family: inherit; }
 
 .float { animation: float 3.5s ease-in-out infinite; }
 .shake { animation: shake 0.4s; }
+
+/* Luffy mascot states */
+@keyframes luffy-idle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-1deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-1px) rotate(1deg); }
+}
+@keyframes luffy-nervous {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-2px, 1px) rotate(-2deg); }
+  40% { transform: translate(2px, -1px) rotate(2deg); }
+  60% { transform: translate(-2px, -1px) rotate(-1.5deg); }
+  80% { transform: translate(2px, 1px) rotate(1.5deg); }
+}
+@keyframes luffy-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.luffy-idle { animation: luffy-idle 4s ease-in-out infinite; }
+.luffy-nervous { animation: luffy-nervous 0.25s linear infinite; }
+.luffy-pop { animation: luffy-pop 0.55s cubic-bezier(0.2, 0.8, 0.3, 1.1); }
 
 .gem-fly {
   position: fixed;

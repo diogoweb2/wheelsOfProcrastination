@@ -3,11 +3,12 @@ import { useStore } from '../store/useStore'
 import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
 import { Luffy } from '../components/Luffy'
-import { Chopper, Nami } from '../components/Crew'
+import { HabitsSection } from '../components/HabitsSection'
+import { MapSection } from '../components/MapSection'
 import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
-export function ProfileScreen() {
+export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
   const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
   const me = activeProfile()
@@ -107,7 +108,7 @@ export function ProfileScreen() {
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <div style={{ fontWeight: 900, flex: 1 }}>🎯 Streak goal — +50 🪙 when you hit it</div>
-          <Nami size={48} />
+          <img src="/nami.png" width={48} height={48} alt="Nami" draggable={false} style={{ objectFit: 'contain', flexShrink: 0 }} />
         </div>
         <div className="seg">
           {STREAK_GOAL_OPTIONS.map((g) => (
@@ -128,7 +129,7 @@ export function ProfileScreen() {
 
       {/* freeze shop */}
       <div className="card" style={{ marginBottom: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
-        <Chopper size={54} />
+        <img src="/chopper.webp" width={54} height={66} alt="Chopper" draggable={false} style={{ objectFit: 'contain', flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 900 }}>Streak Freeze ({data.economy.freezes}/{MAX_FREEZES})</div>
           <div className="muted" style={{ fontSize: 13 }}>
@@ -143,21 +144,6 @@ export function ProfileScreen() {
           🪙{FREEZE_COST}
         </button>
       </div>
-
-      {/* badges */}
-      <div className="h2">🏅 Trophy shelf ({data.badges.length})</div>
-      {data.badges.length === 0 ? (
-        <p className="muted">Empty shelf. Very minimalist. Very sad.</p>
-      ) : (
-        <div className="badge-shelf">
-          {[...data.badges].reverse().map((b) => (
-            <div key={b.id} className="badge-tile" title={b.description}>
-              <div className="e">{b.emoji}</div>
-              <div className="t">{b.title}</div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* stats */}
       <div className="h2">📈 Lifetime</div>
@@ -175,6 +161,12 @@ export function ProfileScreen() {
           <div className="muted" style={{ fontSize: 11 }}>best streak</div>
         </div>
       </div>
+
+      {/* voyage map (used to be its own tab) */}
+      <MapSection goSpin={goSpin} />
+
+      {/* habits training log */}
+      <HabitsSection />
 
       {/* settings */}
       <div className="h2">⚙️ Settings</div>

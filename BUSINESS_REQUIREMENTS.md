@@ -69,6 +69,7 @@ Costs:
 - Re-spin: 15 first/day (pre-completion), 60 after. A re-spin replaces that card on the plate.
 - Manual pick of non-urgent task: ceil(reward × 1.5).
 - Abandoned pick at end of day: −5 / −10 / −18 gems (low/med/high), per pick (see §3).
+- **Mystery Background** (Store tab): **500 gems**. A SPECIAL luxury purchase — deliberately hard to afford. Buying one grants a **random** background the user doesn't own yet (gacha: the preview flashes through the whole catalog, slot-machine style, before revealing the prize). The catalog is generated from `public/backgrounds/`. The user **equips** one owned background at a time by tapping it in the Store collection (tap again to unequip); with nothing equipped the app shows the default solid color. Once all are owned the item is sold out.
 
 Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not too hard.
 
@@ -83,6 +84,7 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 
 ## 7. Map ("path of shame and glory")
 
+- Lives as a collapsible section inside the **Me/Profile** screen (its former tab slot is now the Store).
 - Duolingo-style vertical snaking path of **completed tasks**, newest at the top, grouped by day.
 - Each node: circle with a checkmark, colored by effort (low = blue, medium = yellow, high = red), task name next to it.
 - Urgent tasks get a special indicator (⚡ + glowing ring).

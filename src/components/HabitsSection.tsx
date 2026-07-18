@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useStore } from '../store/useStore'
 import type { Completion, Task } from '../types'
 import { addDays, dayKey, parseDay } from '../logic/dates'
-import { Zoro } from '../components/Crew'
 
 interface HabitStats {
   task: Task
@@ -61,7 +60,7 @@ function computeStats(task: Task, completions: Completion[]): HabitStats {
   return { task, total: days.size, currentStreak: cur, bestStreak: best, last30, weekly }
 }
 
-export function ReportsScreen() {
+export function HabitsSection() {
   const { data } = useStore()
   const habits = useMemo(
     () => data.tasks.filter((t) => t.repeats).map((t) => computeStats(t, data.completions)),
@@ -69,18 +68,18 @@ export function ReportsScreen() {
   )
 
   return (
-    <div className="screen">
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div className="h1" style={{ flex: 1 }}>Training log</div>
-        <Zoro size={46} />
+        <div className="h2" style={{ flex: 1 }}>📊 Training log</div>
+        <img src="/zoro.png" width={46} height={61} alt="Zoro" draggable={false} style={{ objectFit: 'contain' }} />
       </div>
       <p className="muted" style={{ marginBottom: 16 }}>
         Only repeating quests (habits) show up here. One-shot quests sail off once done.
       </p>
 
       {habits.length === 0 && (
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
-          <Zoro size={150} />
+        <div style={{ textAlign: 'center', margin: '20px 0' }}>
+          <img src="/zoro.png" width={110} height={147} alt="Zoro" draggable={false} className="float" style={{ objectFit: 'contain' }} />
           <p className="muted" style={{ marginTop: 10 }}>
             No habits yet. Real strength is built one rep at a time — add a repeating quest.
           </p>

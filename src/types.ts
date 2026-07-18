@@ -1,6 +1,6 @@
 export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
-export type EffortFilter = Effort | 'all'
+export type EffortFilter = Effort[] // selected efforts; empty = all
 export type DayScope = 'all' | 'weekdays' | 'weekends' // which days a task is allowed on the wheel
 
 export interface Task {
@@ -82,6 +82,11 @@ export interface DailyState {
   pendingPicks: PendingPick[] // newest first; each unfinished one is penalized at rollover
 }
 
+export interface BackgroundsState {
+  owned: string[] // catalog filenames (e.g. "bg7.jpg")
+  active: string | null // equipped background; null = default solid color
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]
@@ -91,4 +96,5 @@ export interface AppData {
   economy: EconomyState
   streak: StreakState
   daily: DailyState
+  backgrounds: BackgroundsState
 }
