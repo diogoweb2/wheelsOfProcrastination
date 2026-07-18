@@ -1,21 +1,25 @@
 // 🏦 Grand Line Bank — real CAD dollars.
-// Ben sees his chests (chequing / savings / XGRO / QQQ / College), moves money,
-// sets his allowance auto-split, pays dad back and watches projections.
-// Diogo sees the banker's desk: rates, allowance config, adjustments and the
-// full decision log. Luffy is the guide; animations keep it fun, numbers keep it honest.
+// Ben decides EVERY dollar himself (no auto-invest) so the habit forms: he moves
+// money between the Pocket Chest, Merchant Ship (XGRO), Rocket Ship (QQQ) and the
+// College Chest, pays Dad back, and allocates each payday. Withdrawing from an
+// investment brings a concerned Luffy (growth he's giving up); pulling from
+// College brings a panic Luffy (Dad's matched money burns). Diogo runs the
+// banker's desk: rates, market status, the Shock Test lever and the full ledger.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import type { AppData, BankAccountId, BankTxn } from '../types'
+import type { AppData, BankAccountId, BankTxn, MarketData } from '../types'
 import {
   ACCOUNT_IDS,
   ACCOUNT_META,
   CRASH_PCT,
   DAY_NAMES,
+  INVEST_IDS,
   PROJECTION_YEARS,
   QQQ_MER,
   XGRO_MER,
   crashWorthwhile,
+  daysToRecover,
   daysWithoutCrash,
   fmt$,
   partyName,
@@ -26,24 +30,27 @@ import {
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
 
-const INVESTABLE: BankAccountId[] = ['savings', 'xgro', 'qqq', 'college']
-const SELLABLE: BankAccountId[] = ['savings', 'xgro', 'qqq']
-
-/** Yearly-ish growth label for an account, from the admin-set rates. */
-function rateLabel(acct: BankAccountId, data: AppData): string {
+/** Live-or-fallback growth label for an account. */
+function rateLabel(acct: BankAccountId, data: AppData, market: MarketData | null): string {
   const c = data.bank.config
+  const live = market && market.status === 'ok' && market.asOfDay
   switch (acct) {
-    case 'savings':
-      return `${c.savingsApr}%/year interest`
     case 'college':
-      return `${c.savingsApr}%/year + Dad doubles deposits`
+      return 'Dad DOUBLES what you add · grows over time'
     case 'xgro':
-      return `~${c.xgroMonthly}%/month lately · fee ${XGRO_MER}%/yr`
+      return live ? `real market · fee ${XGRO_MER}%/yr` : `~${c.xgroMonthly}%/month · fee ${XGRO_MER}%/yr`
     case 'qqq':
-      return `~${c.qqqMonthly}%/month lately · fee ${QQQ_MER}%/yr`
+      return live ? `real market · fee ${QQQ_MER}%/yr` : `~${c.qqqMonthly}%/month · fee ${QQQ_MER}%/yr`
     default:
-      return 'no interest — money sleeps here'
+      return 'no growth — everyday money'
   }
+}
+
+/** Rough "you'd make about this much next month at this pace" for an invested chest. */
+function projectedMonthGrowth(acct: BankAccountId, data: AppData): number {
+  const c = data.bank.config
+  const pct = acct === 'qqq' ? c.qqqMonthly : c.xgroMonthly
+  return round2(data.bank.accounts[acct].balance * (pct / 100))
 }
 
 function totalTreasure(data: AppData): number {
@@ -100,7 +107,7 @@ function RiskMeter({ level }: { level: 0 | 1 | 2 | 3 }) {
   )
 }
 
-/** New-money vs interest split bar: green = you saved it, gold = the money worked. */
+/** New-money vs growth split bar: blue = you saved it, gold = the money worked. */
 function GrowthBar({ deposited, growth }: { deposited: number; growth: number }) {
   const total = deposited + Math.max(0, growth)
   if (total <= 0) return null
@@ -133,6 +140,7 @@ export function BankScreen() {
 type KidModal =
   | { kind: 'move'; from: BankAccountId }
   | { kind: 'sell'; from: BankAccountId }
+  | { kind: 'college' }
   | { kind: 'payDad' }
   | null
 
@@ -144,6 +152,7 @@ function BankKid() {
   const bank = data.bank
   const pendingPaybacks = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
   const crashPending = !!bank.shock.crashedDay && bank.shock.decision === null
+  const needsAllocation = bank.pending.amount > 0
 
   // a held position recovered since last visit → one-shot celebration popup
   const bounced = !!bank.shock.bounce
@@ -190,16 +199,26 @@ function BankKid() {
 
       {/* the chests */}
       {ACCOUNT_IDS.map((id) => (
-        <AccountCard key={id} id={id} data={data} onMove={() => setModal({ kind: 'move', from: id })} onSell={() => setModal({ kind: 'sell', from: id })} onPayDad={() => setModal({ kind: 'payDad' })} />
+        <AccountCard
+          key={id}
+          id={id}
+          data={data}
+          onMove={() => setModal({ kind: 'move', from: id })}
+          onSell={() => setModal({ kind: 'sell', from: id })}
+          onCollege={() => setModal({ kind: 'college' })}
+          onPayDad={() => setModal({ kind: 'payDad' })}
+        />
       ))}
 
-      <AutoSplitCard />
       <ProjectionCard />
 
+      {/* payday decision is mandatory: no dismiss, it just sits until allocated */}
+      {needsAllocation && <PaydayModal />}
       {modal?.kind === 'move' && <MoveModal from={modal.from} onClose={() => setModal(null)} />}
       {modal?.kind === 'sell' && <SellModal from={modal.from} onClose={() => setModal(null)} />}
+      {modal?.kind === 'college' && <CollegeWithdrawModal onClose={() => setModal(null)} />}
       {modal?.kind === 'payDad' && <PayDadModal onClose={() => setModal(null)} />}
-      {crashPending && !crashDismissed && <CrashModal onThink={() => setCrashDismissed(true)} />}
+      {crashPending && !crashDismissed && !needsAllocation && <CrashModal onThink={() => setCrashDismissed(true)} />}
     </div>
   )
 }
@@ -209,19 +228,23 @@ function AccountCard({
   data,
   onMove,
   onSell,
+  onCollege,
   onPayDad,
 }: {
   id: BankAccountId
   data: AppData
   onMove: () => void
   onSell: () => void
+  onCollege: () => void
   onPayDad: () => void
 }) {
+  const { market } = useStore()
   const meta = ACCOUNT_META[id]
   const a = data.bank.accounts[id]
   const shock = data.bank.shock
   const crashed = id === 'qqq' && !!shock.crashedDay && shock.decision === null
   const holding = id === 'qqq' && shock.decision === 'hold' && !!shock.recoverDay
+  const recoverIn = holding ? daysToRecover(data.bank) : null
   const calmDays = id === 'qqq' && !crashed && !holding ? daysWithoutCrash(data.bank) : null
   return (
     <div className="card" style={{ marginBottom: 10, borderColor: crashed ? 'var(--red)' : undefined }}>
@@ -232,7 +255,7 @@ function AccountCard({
             <div style={{ fontWeight: 900, fontSize: 15, flex: 1 }}>{meta.name}</div>
             <RiskMeter level={meta.risk} />
           </div>
-          <div className="muted" style={{ fontSize: 11 }}>{rateLabel(id, data)}</div>
+          <div className="muted" style={{ fontSize: 11 }}>{rateLabel(id, data, market)}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <Money value={a.balance} size={20} />
@@ -241,11 +264,11 @@ function AccountCard({
       </div>
       <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{meta.blurb}</div>
 
-      {crashed && (
-        <div className="bank-crash-chip">🚨 CRASHED −{CRASH_PCT}%! A big decision is waiting…</div>
-      )}
+      {crashed && <div className="bank-crash-chip">🚨 CRASHED −{CRASH_PCT}%! A big decision is waiting…</div>}
       {holding && (
-        <div className="bank-hold-chip">💪 Holding the line — real pirates ride out the storm</div>
+        <div className="bank-hold-chip">
+          💪 Holding the line — {recoverIn === 0 ? 'bouncing back any moment now!' : `about ${recoverIn} day${recoverIn === 1 ? '' : 's'} to full recovery`}
+        </div>
       )}
       {calmDays !== null && (
         <div className="muted" style={{ fontSize: 11, marginTop: 6, fontWeight: 800 }}>
@@ -256,11 +279,13 @@ function AccountCard({
       {id === 'college' && (
         <div className="bank-resp">
           🎓 Dad’s real college treasure for you (RESP): <b>{fmt$(data.bank.config.respBalance)}</b>
-          <div className="muted" style={{ fontSize: 10, marginTop: 2 }}>That one Dad fills — your chest above is YOUR part. Deposits here are doubled, but never come back out!</div>
+          <div className="muted" style={{ fontSize: 10, marginTop: 2 }}>
+            Of the chest above, {fmt$(a.matched)} is Dad’s matched money. Pull YOUR part out and an equal chunk of his burns up forever! 🔥
+          </div>
         </div>
       )}
 
-      <GrowthBar deposited={a.deposited} growth={a.growth} />
+      <GrowthBar deposited={a.deposited + (id === 'college' ? a.matched : 0)} growth={a.growth} />
 
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
         {id === 'chequing' && (
@@ -273,9 +298,14 @@ function AccountCard({
             </button>
           </>
         )}
-        {SELLABLE.includes(id) && (
+        {INVEST_IDS.includes(id) && (
           <button className="btn btn--ghost btn--small" style={{ flex: 1 }} disabled={a.balance <= 0} onClick={() => { sfx.click(); onSell() }}>
             💰 Sell → Pocket Chest
+          </button>
+        )}
+        {id === 'college' && (
+          <button className="btn btn--ghost btn--small" style={{ flex: 1, color: 'var(--red)' }} disabled={a.deposited <= 0} onClick={() => { sfx.click(); onCollege() }}>
+            🔥 Take my part out
           </button>
         )}
       </div>
@@ -284,11 +314,11 @@ function AccountCard({
 }
 
 /** Shared amount picker: quick chips + free input, validated against `max`. */
-function AmountPicker({ max, amount, setAmount }: { max: number; amount: string; setAmount: (v: string) => void }) {
+function AmountPicker({ max, amount, setAmount, label }: { max: number; amount: string; setAmount: (v: string) => void; label?: string }) {
   const chips = [1, 2, 5, 10].filter((c) => c <= max)
   return (
     <div className="field" style={{ marginBottom: 10 }}>
-      <label>Amount (you have {fmt$(max)})</label>
+      <label>{label ?? `Amount (you have ${fmt$(max)})`}</label>
       <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
         {chips.map((c) => (
           <button key={c} className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); setAmount(String(c)) }}>
@@ -309,12 +339,82 @@ function amountOk(amount: string, max: number): boolean {
   return Number.isFinite(n) && n > 0 && n <= max + 0.001
 }
 
-/** Chequing → anywhere. Instant, no fees. College shows the double-up promise. */
+// --- payday: the mandatory allocation modal ---------------------------------
+
+function PaydayModal() {
+  const { data, bankAllocate, pushEvent } = useStore()
+  const pool = round2(data.bank.pending.amount)
+  const weeks = data.bank.pending.weeks
+  const [alloc, setAlloc] = useState<Record<BankAccountId, string>>({ chequing: '', xgro: '', qqq: '', college: '' })
+  const used = round2(ACCOUNT_IDS.reduce((s, id) => s + (Number(alloc[id]) || 0), 0))
+  const left = round2(pool - used)
+  const over = left < -0.001
+
+  function set(id: BankAccountId, v: string) {
+    setAlloc((a) => ({ ...a, [id]: v }))
+  }
+
+  return (
+    <div className="overlay overlay--center">
+      <div className="sheet bank-payday-sheet">
+        <div style={{ textAlign: 'center', fontSize: 40 }} className="float">🎉</div>
+        <div style={{ fontWeight: 900, fontSize: 20, textAlign: 'center' }}>PAYDAY!</div>
+        <p style={{ fontSize: 13, textAlign: 'center', margin: '6px 0 4px' }}>
+          {weeks > 1 ? `${weeks} paydays stacked up — ` : ''}You’ve got <b style={{ color: 'var(--gold)' }}>{fmt$(pool)}</b> to place.
+        </p>
+        <p className="muted" style={{ fontSize: 11, textAlign: 'center', marginBottom: 10 }}>
+          Every dollar needs a home. Leftover stays in your Pocket Chest — but YOU decide. Doing nothing isn’t a pirate’s way!
+        </p>
+        {ACCOUNT_IDS.map((id) => (
+          <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 20 }}>{ACCOUNT_META[id].emoji}</span>
+            <span style={{ flex: 1, fontWeight: 800, fontSize: 13 }}>
+              {ACCOUNT_META[id].name}
+              {id === 'college' && Number(alloc.college) > 0 && (
+                <span style={{ color: 'var(--green)', fontWeight: 800 }}> → {fmt$(Number(alloc.college) * 2)} after match!</span>
+              )}
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.25"
+              min={0}
+              value={alloc[id]}
+              onChange={(e) => set(id, e.target.value)}
+              placeholder="0"
+              style={{ width: 80 }}
+            />
+          </div>
+        ))}
+        <div style={{ textAlign: 'center', fontWeight: 900, fontSize: 13, color: over ? 'var(--red)' : left > 0.001 ? 'var(--muted)' : 'var(--green)', margin: '6px 0 10px' }}>
+          {over ? `That’s ${fmt$(-left)} too much!` : left > 0.001 ? `${fmt$(left)} will rest in your Pocket Chest` : 'All placed! ⚓'}
+        </div>
+        <button
+          className="btn btn--blue"
+          disabled={over || pool <= 0}
+          onClick={() => {
+            const payload: Partial<Record<BankAccountId, number>> = {}
+            for (const id of ACCOUNT_IDS) if (Number(alloc[id]) > 0) payload[id] = Number(alloc[id])
+            if (bankAllocate(payload) === 'ok') {
+              sfx.gem()
+              pushEvent({ type: 'goal', emoji: '⚓', title: 'Allowance placed!', description: 'Smart captain. Every Berry has its orders now!' })
+            } else sfx.error()
+          }}
+        >
+          ⚓ Set my treasure!
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Chequing → an investment or College. Instant, no fees. College shows the double-up. */
 function MoveModal({ from, onClose }: { from: BankAccountId; onClose: () => void }) {
   const { data, bankTransfer, pushEvent } = useStore()
-  const [to, setTo] = useState<BankAccountId>('savings')
+  const [to, setTo] = useState<BankAccountId>('xgro')
   const [amount, setAmount] = useState('')
   const max = data.bank.accounts[from].balance
+  const dests: BankAccountId[] = ['xgro', 'qqq', 'college']
   return (
     <div className="overlay overlay--center" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -322,7 +422,7 @@ function MoveModal({ from, onClose }: { from: BankAccountId; onClose: () => void
         <div className="field" style={{ marginBottom: 10 }}>
           <label>Where to?</label>
           <div className="seg" style={{ flexWrap: 'wrap' }}>
-            {INVESTABLE.map((id) => (
+            {dests.map((id) => (
               <button key={id} className={to === id ? 'on' : ''} onClick={() => { sfx.click(); setTo(id) }}>
                 {ACCOUNT_META[id].emoji} {ACCOUNT_META[id].name.split(' ')[0]}
               </button>
@@ -332,15 +432,14 @@ function MoveModal({ from, onClose }: { from: BankAccountId; onClose: () => void
         <AmountPicker max={max} amount={amount} setAmount={setAmount} />
         {to === 'college' && amountOk(amount, max) && (
           <p style={{ fontSize: 12, fontWeight: 800, color: 'var(--green)', marginBottom: 8 }}>
-            🎓 Dad doubles it: {fmt$(Number(amount))} becomes {fmt$(Number(amount) * 2)} — but it stays locked for future-you!
+            🎓 Dad doubles it: {fmt$(Number(amount))} becomes {fmt$(Number(amount) * 2)} — future-you’s treasure!
           </p>
         )}
         <button
           className="btn btn--blue"
           disabled={!amountOk(amount, max)}
           onClick={() => {
-            const res = bankTransfer(from, to, Number(amount))
-            if (res === 'ok') {
+            if (bankTransfer(from, to, Number(amount)) === 'ok') {
               sfx.gem()
               pushEvent({
                 type: 'goal',
@@ -362,12 +461,14 @@ function MoveModal({ from, onClose }: { from: BankAccountId; onClose: () => void
   )
 }
 
-/** Selling an investment: pick the amount, then a 10s One-Piece deal animation. */
+/** Selling an investment: concerned-Luffy warning → pick amount → 10s deal animation. */
 function SellModal({ from, onClose }: { from: BankAccountId; onClose: () => void }) {
   const { data, bankTransfer } = useStore()
   const [amount, setAmount] = useState('')
   const [selling, setSelling] = useState<number | null>(null)
-  const max = data.bank.accounts[from].balance
+  const a = data.bank.accounts[from]
+  const max = a.balance
+  const nextMonth = projectedMonthGrowth(from, data)
 
   if (selling !== null) {
     return <SellingOverlay from={from} amount={selling} onClose={onClose} />
@@ -376,9 +477,14 @@ function SellModal({ from, onClose }: { from: BankAccountId; onClose: () => void
     <div className="overlay overlay--center" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div style={{ fontWeight: 900, fontSize: 17, marginBottom: 6 }}>💰 Sell from the {ACCOUNT_META[from].name}</div>
-        <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-          No selling charge — the money sails back to your Pocket Chest.
-        </p>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', margin: '4px 0 10px' }}>
+          <Luffy mood="judging" state="hard" size={60} />
+          <div className="bubble bubble--concern" style={{ fontSize: 12, flex: 1 }}>
+            Sure, nakama? This ship already made you <b>{fmt$(Math.max(0, a.growth))}</b>. At this pace it’d make about{' '}
+            <b>{fmt$(nextMonth)}</b> more next month. Selling stops that treasure!
+          </div>
+        </div>
+        <p className="muted" style={{ fontSize: 11, marginBottom: 8 }}>No selling charge — the money sails back to your Pocket Chest.</p>
         <AmountPicker max={max} amount={amount} setAmount={setAmount} />
         <button
           className="btn btn--red"
@@ -392,10 +498,61 @@ function SellModal({ from, onClose }: { from: BankAccountId; onClose: () => void
             }
           }}
         >
-          🏴‍☠️ Sell!
+          🏴‍☠️ Sell anyway
         </button>
         <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={() => { sfx.click(); onClose() }}>
-          Cancel
+          Keep it growing 🌱
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** College withdrawal — panic Luffy, Dad's matched money burns. His contribution only. */
+function CollegeWithdrawModal({ onClose }: { onClose: () => void }) {
+  const { data, bankTransfer, pushEvent } = useStore()
+  const a = data.bank.accounts.college
+  const max = a.deposited // only his own contributions
+  const [amount, setAmount] = useState('')
+  const burn = amountOk(amount, max) ? round2(Math.min(a.matched, Number(amount))) : 0
+  return (
+    <div className="overlay overlay--center" onClick={onClose}>
+      <div className="sheet bank-crash-sheet" onClick={(e) => e.stopPropagation()}>
+        <div style={{ textAlign: 'center', fontSize: 40 }} className="shake">😱</div>
+        <div style={{ fontWeight: 900, fontSize: 18, textAlign: 'center', color: 'var(--red)' }}>WAIT!! FREE MONEY!</div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', margin: '8px 0' }}>
+          <Luffy mood="shocked" state="hard" size={64} />
+          <div className="bubble bubble--panic" style={{ fontSize: 12, flex: 1 }}>
+            Nooo don’t do it!! Every dollar YOU take out makes Dad’s matched dollar go up in <b>smoke</b> 🔥. That’s free treasure GONE forever!
+          </div>
+        </div>
+        <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          You can only take back your own contributions ({fmt$(max)}). Dad’s match isn’t yours to sail away with.
+        </p>
+        <AmountPicker max={max} amount={amount} setAmount={setAmount} label={`How much of YOUR part? (max ${fmt$(max)})`} />
+        {burn > 0 && (
+          <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--red)', marginBottom: 8 }}>🔥 This burns {fmt$(burn)} of Dad’s free money!</p>
+        )}
+        <button
+          className="btn btn--red"
+          disabled={!amountOk(amount, max)}
+          onClick={() => {
+            if (bankTransfer('college', 'chequing', Number(amount)) === 'ok') {
+              sfx.error()
+              pushEvent({
+                type: 'penalty',
+                emoji: '🔥',
+                title: `Burned ${fmt$(burn)} of free money`,
+                description: 'You pulled from College and Dad’s matched treasure went up in smoke. Future-you felt that one…',
+              })
+            } else sfx.error()
+            onClose()
+          }}
+        >
+          😤 Do it anyway (burn the free money)
+        </button>
+        <button className="btn btn--blue" style={{ marginTop: 8 }} onClick={() => { sfx.gem(); onClose() }}>
+          🎓 Keep the free treasure!
         </button>
       </div>
     </div>
@@ -499,7 +656,62 @@ function PayDadModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-/** The Shock Test alert: panic-sell at the bottom, or hold for the bounce. */
+const CONTRIB_CHIPS = [0, 1, 2, 5]
+
+/** "At this pace…" — the compound-interest telescope with a habit-deposit dial. */
+function ProjectionCard() {
+  const { data } = useStore()
+  const [acct, setAcct] = useState<BankAccountId>('xgro')
+  const [weekly, setWeekly] = useState(2)
+  const rows = PROJECTION_YEARS.map((y) => projectAccount(acct, data.bank, y, weekly))
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ fontWeight: 900, marginBottom: 2 }}>🔭 Treasure telescope</div>
+      <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        If you keep adding money to the {ACCOUNT_META[acct].name}, here’s how big it grows:
+      </div>
+      <div className="seg" style={{ marginBottom: 8, flexWrap: 'wrap' }}>
+        {ACCOUNT_IDS.map((id) => (
+          <button key={id} className={acct === id ? 'on' : ''} onClick={() => { sfx.click(); setAcct(id) }}>
+            {ACCOUNT_META[id].emoji}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <span className="muted" style={{ fontSize: 11, fontWeight: 800 }}>add / week:</span>
+        {CONTRIB_CHIPS.map((c) => (
+          <button key={c} className={`btn btn--ghost btn--small ${weekly === c ? 'on' : ''}`} style={{ flex: 1, ...(weekly === c ? { background: 'var(--card2)', color: 'var(--text)' } : {}) }} onClick={() => { sfx.click(); setWeekly(c) }}>
+            ${c}
+          </button>
+        ))}
+      </div>
+      {rows.map((r) => {
+        const interestPct = r.total > 0 ? Math.max(0, r.interest) / r.total : 0
+        return (
+          <div key={r.years} style={{ padding: '6px 0', borderTop: '1px solid var(--line)' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontWeight: 800, fontSize: 12, width: 64 }}>in {r.years} year{r.years > 1 ? 's' : ''}</span>
+              <span style={{ fontWeight: 900, fontSize: 15, flex: 1, color: 'var(--gold)' }}>{fmt$(r.total)}</span>
+              <span className="muted" style={{ fontSize: 10 }}>
+                {fmt$(r.newMoney)} saved + <b style={{ color: 'var(--gold)' }}>{fmt$(r.interest)} made by money</b>
+              </span>
+            </div>
+            <div className="bank-growbar" style={{ marginTop: 3 }}>
+              <div style={{ flex: Math.max(0.02, 1 - interestPct), background: 'var(--blue)' }} />
+              <div style={{ flex: Math.max(0.02, interestPct), background: 'var(--gold)' }} />
+            </div>
+          </div>
+        )
+      })}
+      <p className="muted" style={{ fontSize: 10, marginTop: 8 }}>
+        🔵 money you save · 🟡 money your money makes — the longer you wait, the more gold. That’s compound interest!
+      </p>
+    </div>
+  )
+}
+
+// --- the crash decision alert ----------------------------------------------
+
 function CrashModal({ onThink }: { onThink: () => void }) {
   const { data, resolveBankCrash, pushEvent } = useStore()
   const shock = data.bank.shock
@@ -521,7 +733,7 @@ function CrashModal({ onThink }: { onThink: () => void }) {
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', margin: '10px 0' }}>
           <Luffy state="hard" size={64} />
           <div className="bubble" style={{ fontSize: 12, flex: 1 }}>
-            Storms happen on the Grand Line! The ship is damaged, not sunk. What&rsquo;s your call, Captain?
+            Storms happen on the Grand Line! The ship is damaged, not sunk. Hold on and it usually climbs back — even higher. What&rsquo;s your call, Captain?
           </div>
         </div>
         <button
@@ -533,7 +745,7 @@ function CrashModal({ onThink }: { onThink: () => void }) {
               type: 'goal',
               emoji: '💪⚓',
               title: 'HOLDING THE LINE!',
-              description: 'Anchors steady! Markets that dive usually climb back — keep watching the Rocket Ship in the next weeks…',
+              description: 'Anchors steady! Watch the Rocket Ship — it should recover (and then some) over the next couple of weeks.',
             })
           }}
         >
@@ -563,105 +775,6 @@ function CrashModal({ onThink }: { onThink: () => void }) {
   )
 }
 
-/** Allowance auto-split: % of every payday routed to each chest, remainder → pocket. */
-function AutoSplitCard() {
-  const { data, setBankSplit, pushEvent } = useStore()
-  const split = data.bank.split
-  const remainder = 100 - split.savings - split.xgro - split.qqq - split.college
-  const weekly = data.bank.config.weeklyAmount
-
-  function bump(key: keyof typeof split, delta: number) {
-    const next = { ...split, [key]: Math.max(0, split[key] + delta) }
-    const rem = 100 - next.savings - next.xgro - next.qqq - next.college
-    if (rem < 0) {
-      sfx.error()
-      return
-    }
-    sfx.click()
-    setBankSplit(next)
-    if (delta > 0 && rem === 0) {
-      pushEvent({
-        type: 'goal',
-        emoji: '💯',
-        title: 'Every Berry has a job!',
-        description: 'Your whole allowance is invested automatically. Future-you is cheering!',
-      })
-    }
-  }
-
-  return (
-    <div className="card" style={{ marginBottom: 10 }}>
-      <div style={{ fontWeight: 900, marginBottom: 2 }}>⚙️ Allowance auto-split</div>
-      <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-        Every {DAY_NAMES[data.bank.config.payday]} your {fmt$(weekly)} splits itself. Pay future-you FIRST!
-      </div>
-      {(['savings', 'xgro', 'qqq', 'college'] as const).map((id) => (
-        <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '1px solid var(--line)' }}>
-          <span style={{ fontSize: 18 }}>{ACCOUNT_META[id].emoji}</span>
-          <span style={{ flex: 1, fontWeight: 800, fontSize: 13 }}>
-            {ACCOUNT_META[id].name}
-            <span className="muted" style={{ fontWeight: 700 }}> · {fmt$((weekly * split[id]) / 100)}{id === 'college' ? ' ×2' : ''}</span>
-          </span>
-          <button className="btn btn--ghost btn--small" style={{ padding: '4px 10px' }} disabled={split[id] === 0} onClick={() => bump(id, -5)}>−</button>
-          <span style={{ fontWeight: 900, width: 40, textAlign: 'center' }}>{split[id]}%</span>
-          <button className="btn btn--ghost btn--small" style={{ padding: '4px 10px' }} disabled={remainder < 5} onClick={() => bump(id, 5)}>+</button>
-        </div>
-      ))}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderTop: '1px solid var(--line)' }}>
-        <span style={{ fontSize: 18 }}>👛</span>
-        <span style={{ flex: 1, fontWeight: 800, fontSize: 13 }}>
-          Pocket Chest keeps the rest
-          <span className="muted" style={{ fontWeight: 700 }}> · {fmt$((weekly * remainder) / 100)}</span>
-        </span>
-        <span style={{ fontWeight: 900, width: 40, textAlign: 'center' }}>{remainder}%</span>
-      </div>
-    </div>
-  )
-}
-
-/** "At this pace…" — the compound-interest telescope. */
-function ProjectionCard() {
-  const { data } = useStore()
-  const [acct, setAcct] = useState<BankAccountId>('savings')
-  const rows = PROJECTION_YEARS.map((y) => projectAccount(acct, data.bank, y))
-  return (
-    <div className="card" style={{ marginBottom: 10 }}>
-      <div style={{ fontWeight: 900, marginBottom: 2 }}>🔭 Treasure telescope</div>
-      <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-        At this pace (your auto-split, allowance growing a little every 6 months), the {ACCOUNT_META[acct].name} holds:
-      </div>
-      <div className="seg" style={{ marginBottom: 10, flexWrap: 'wrap' }}>
-        {ACCOUNT_IDS.map((id) => (
-          <button key={id} className={acct === id ? 'on' : ''} onClick={() => { sfx.click(); setAcct(id) }}>
-            {ACCOUNT_META[id].emoji}
-          </button>
-        ))}
-      </div>
-      {rows.map((r) => {
-        const interestPct = r.total > 0 ? Math.max(0, r.interest) / r.total : 0
-        return (
-          <div key={r.years} style={{ padding: '6px 0', borderTop: '1px solid var(--line)' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontWeight: 800, fontSize: 12, width: 64 }}>in {r.years} year{r.years > 1 ? 's' : ''}</span>
-              <span style={{ fontWeight: 900, fontSize: 15, flex: 1, color: 'var(--gold)' }}>{fmt$(r.total)}</span>
-              <span className="muted" style={{ fontSize: 10 }}>
-                {fmt$(r.newMoney)} saved + <b style={{ color: 'var(--gold)' }}>{fmt$(r.interest)} made by money</b>
-              </span>
-            </div>
-            <div className="bank-growbar" style={{ marginTop: 3 }}>
-              <div style={{ flex: Math.max(0.02, 1 - interestPct), background: 'var(--blue)' }} />
-              <div style={{ flex: Math.max(0.02, interestPct), background: 'var(--gold)' }} />
-            </div>
-          </div>
-        )
-      })}
-      <p className="muted" style={{ fontSize: 10, marginTop: 8 }}>
-        🔵 money you save · 🟡 money your money makes — the longer you wait, the more gold the bar. That’s compound interest!
-      </p>
-    </div>
-  )
-}
-
 // ============================================================================
 // Diogo's banker desk
 // ============================================================================
@@ -682,14 +795,42 @@ function BankAdmin() {
         <div className="h1" style={{ flex: 1 }}>Banker’s desk</div>
         <div style={{ fontSize: 40 }}>🏦</div>
       </div>
-      <p className="muted" style={{ marginBottom: 14 }}>Ben’s real-money world — you set the rules, he makes the calls.</p>
+      <p className="muted" style={{ marginBottom: 14 }}>Ben’s real-money world — you set the rules, he makes every call.</p>
 
+      <AdminMarket />
       <AdminPaybacks kidData={kidData} />
       <AdminShock kidData={kidData} />
       <AdminBalances kidData={kidData} />
       <AdminConfig kidData={kidData} />
       <AdminAdjust />
       <AdminLog kidData={kidData} />
+    </div>
+  )
+}
+
+/** Market-feed health: green when fresh, red when the monthly fetch is failing. */
+function AdminMarket() {
+  const { market } = useStore()
+  const failed = market?.status === 'failed'
+  const missing = !market
+  if (!failed && !missing) {
+    return (
+      <div className="card" style={{ marginBottom: 10, borderColor: 'var(--green)' }}>
+        <div style={{ fontWeight: 900, fontSize: 13 }}>📈 Market feed live</div>
+        <div className="muted" style={{ fontSize: 11 }}>
+          Real XGRO/QQQ moves as of {market!.asOfDay} · updated {new Date(market!.updatedAt).toLocaleDateString()}
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: 'var(--red)' }}>
+      <div style={{ fontWeight: 900, fontSize: 13, color: 'var(--red)' }}>⚠️ Market feed {missing ? 'not set up yet' : 'FAILED'}</div>
+      <div className="muted" style={{ fontSize: 11 }}>
+        {missing
+          ? 'Run npm run bank:market to fetch the first 30-day XGRO/QQQ series. Until then the sim uses your fallback monthly rates below.'
+          : `Last attempt ${market?.lastAttemptDay ?? '—'} failed${market?.lastError ? `: ${market.lastError}` : ''}. It retries daily; falling back to your monthly rates.`}
+      </div>
     </div>
   )
 }
@@ -722,6 +863,7 @@ function AdminShock({ kidData }: { kidData: AppData }) {
   const calm = daysWithoutCrash(kidData.bank)
   const pending = !!s.crashedDay && s.decision === null
   const holding = s.decision === 'hold' && !!s.recoverDay
+  const recoverIn = holding ? daysToRecover(kidData.bank) : null
   const canTrigger = s.crashCount >= 1 && !pending && !holding && crashWorthwhile(kidData.bank)
 
   return (
@@ -731,7 +873,7 @@ function AdminShock({ kidData }: { kidData: AppData }) {
           <div style={{ fontWeight: 900 }}>📉 Shock Test</div>
           <div className="muted" style={{ fontSize: 11 }}>
             {pending && `Crashed ${s.crashedDay} (−${fmt$(s.crashAmount)}) — waiting for Ben’s call`}
-            {holding && `Ben is HOLDING — bounce-back lands ${s.recoverDay}`}
+            {holding && `Ben is HOLDING — recovers in ~${recoverIn} day${recoverIn === 1 ? '' : 's'} (${s.recoverDay})`}
             {!pending && !holding && s.scheduledDay && `First auto-crash armed for ${s.scheduledDay} (needs QQQ money aboard)`}
             {!pending && !holding && !s.scheduledDay && s.crashCount === 0 && 'Arms itself ~1 month after his first QQQ deposit'}
             {!pending && !holding && !s.scheduledDay && s.crashCount > 0 && `${s.crashCount} crash${s.crashCount > 1 ? 'es' : ''} so far · sea is calm`}
@@ -776,6 +918,7 @@ function AdminShock({ kidData }: { kidData: AppData }) {
 }
 
 function AdminBalances({ kidData }: { kidData: AppData }) {
+  const pending = kidData.bank.pending
   return (
     <div className="card" style={{ marginBottom: 10 }}>
       <div style={{ fontWeight: 900, marginBottom: 6 }}>
@@ -788,26 +931,27 @@ function AdminBalances({ kidData }: { kidData: AppData }) {
             <span>{ACCOUNT_META[id].emoji}</span>
             <span style={{ flex: 1, fontWeight: 800 }}>{ACCOUNT_META[id].name}</span>
             <span className="muted" style={{ fontSize: 11 }}>
-              in {fmt$(a.deposited)} · grew {fmt$(a.growth)}
+              in {fmt$(a.deposited)}{id === 'college' ? ` +${fmt$(a.matched)} match` : ''} · grew {fmt$(a.growth)}
             </span>
             <span style={{ fontWeight: 900, width: 76, textAlign: 'right' }}>{fmt$(a.balance)}</span>
           </div>
         )
       })}
-      <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-        Auto-split: vault {kidData.bank.split.savings}% · XGRO {kidData.bank.split.xgro}% · QQQ {kidData.bank.split.qqq}% · college {kidData.bank.split.college}% · pocket keeps the rest
-      </div>
+      {pending.amount > 0 && (
+        <div className="muted" style={{ fontSize: 11, marginTop: 6, color: 'var(--orange)' }}>
+          🎉 {fmt$(pending.amount)} allowance ({pending.weeks} payday{pending.weeks > 1 ? 's' : ''}) waiting for him to allocate.
+        </div>
+      )}
     </div>
   )
 }
 
-/** Local-draft number field that saves through on blur / Save. */
+/** Local-draft number field that saves through on Save. */
 function AdminConfig({ kidData }: { kidData: AppData }) {
   const { setBankConfig, pushEvent } = useStore()
   const c = kidData.bank.config
   const [draft, setDraft] = useState({
     weeklyAmount: String(c.weeklyAmount),
-    savingsApr: String(c.savingsApr),
     xgroMonthly: String(c.xgroMonthly),
     qqqMonthly: String(c.qqqMonthly),
     respBalance: String(c.respBalance),
@@ -817,7 +961,6 @@ function AdminConfig({ kidData }: { kidData: AppData }) {
     const num = (s: string, fallback: number) => (Number.isFinite(Number(s)) && s !== '' ? Number(s) : fallback)
     setBankConfig({
       weeklyAmount: Math.max(0, num(draft.weeklyAmount, c.weeklyAmount)),
-      savingsApr: num(draft.savingsApr, c.savingsApr),
       xgroMonthly: num(draft.xgroMonthly, c.xgroMonthly),
       qqqMonthly: num(draft.qqqMonthly, c.qqqMonthly),
       respBalance: Math.max(0, num(draft.respBalance, c.respBalance)),
@@ -846,9 +989,8 @@ function AdminConfig({ kidData }: { kidData: AppData }) {
           ))}
         </select>
       </div>
-      {field('savingsApr', 'Savings interest (%/year)', 'Tangerine-style reference — update when the real rate moves')}
-      {field('xgroMonthly', 'XGRO avg growth (%/month)', `Check real XGRO ~monthly; ${XGRO_MER}%/yr MER is charged automatically`)}
-      {field('qqqMonthly', 'QQQ avg growth (%/month)', `Check real QQQ ~monthly; ${QQQ_MER}%/yr MER is charged automatically`)}
+      {field('xgroMonthly', 'XGRO fallback (%/month)', 'Only used if the live market feed is down')}
+      {field('qqqMonthly', 'QQQ fallback (%/month)', 'Only used if the live market feed is down')}
       {field('respBalance', 'Real RESP balance ($)', 'Shown on his College Chest for motivation — never matched')}
       <button className="btn btn--blue" onClick={save}>💾 Save rules</button>
     </div>

@@ -147,7 +147,8 @@ export interface QuizState {
 
 // --- Grand Line Bank (real CAD dollars — Ben's allowance world, admin = Diogo) ---
 
-export type BankAccountId = 'chequing' | 'savings' | 'xgro' | 'qqq' | 'college'
+// Simplified to three real chests + the College/RESP one. No savings account.
+export type BankAccountId = 'chequing' | 'xgro' | 'qqq' | 'college'
 
 export interface BankTxn {
   id: string
@@ -163,26 +164,29 @@ export interface BankTxn {
 
 export interface BankAccountState {
   balance: number // stored unrounded so tiny daily interest still compounds; round on display
-  deposited: number // lifetime net "new money" put in (drives the new-money-vs-interest split)
-  growth: number // lifetime interest / market growth earned
+  deposited: number // lifetime net "new money" HE put in (drives the new-money-vs-growth split)
+  growth: number // lifetime market growth earned
+  matched: number // college only: Dad's matched dollars currently in the chest (burned if he withdraws)
   history: { day: string; balance: number }[] // last ~30 daily snapshots for the sparkline
-}
-
-/** % of the weekly allowance auto-routed to each account; the remainder lands in chequing. */
-export interface BankSplit {
-  savings: number
-  xgro: number
-  qqq: number
-  college: number
 }
 
 export interface BankConfig {
   weeklyAmount: number // dollars per allowance day
   payday: number // 0 = Sunday … 6 = Saturday
-  savingsApr: number // %/year (Tangerine-style reference, admin-updated)
-  xgroMonthly: number // avg %/month — admin updates ~monthly from real XGRO performance
-  qqqMonthly: number // avg %/month — admin updates ~monthly from real QQQ performance
-  respBalance: number // dad's real RESP $ (manually updated; shown on the College Chest, never matched)
+  xgroMonthly: number // fallback avg %/month if the live market series is unavailable
+  qqqMonthly: number // fallback avg %/month if the live market series is unavailable
+  respBalance: number // dad's real RESP $ (manually updated; shown on the College Chest, never his to move)
+}
+
+/**
+ * Allowance he's received but hasn't placed yet. Payday drops money here; a
+ * mandatory 🎉 modal makes him decide where every dollar goes (chequing counts
+ * as a decision). Accumulates across weeks he forgets to open the app.
+ */
+export interface BankPending {
+  amount: number // dollars waiting to be allocated
+  weeks: number // how many paydays are stacked up
+  since: string | null // first unallocated payday (YYYY-MM-DD)
 }
 
 /**
@@ -196,16 +200,34 @@ export interface BankShockState {
   crashedDay: string | null // a crash happened and Ben hasn't decided yet (drives his alert modal)
   crashAmount: number // dollars wiped by the pending crash (for the alert copy)
   decision: 'hold' | 'panic' | null // last decision; 'hold' keeps recoverDay armed
-  recoverDay: string | null // when the held position bounces back
+  recoverDay: string | null // when the held position finishes bouncing back
+  recoverTo: number // target QQQ balance on recoverDay (~6% above pre-crash) — 0 when not recovering
   bounce: { day: string; gain: number } | null // one-shot flag: recovery landed, celebrate on Ben's next visit
   crashCount: number // ≥1 unlocks dad's manual crash button
   lastCrashDay: string | null // drives the "days without a crash" counter
 }
 
+/**
+ * Live market returns fetched monthly by `npm run bank:market` (Claude reads the
+ * last 30 days of real XGRO/QQQ daily % moves). The sim replays them for the
+ * next 30 days, looping if the next month's fetch hasn't landed. Shared across
+ * the app (Firestore app/marketData), NOT per-kid. `status`/`lastError` drive
+ * the admin failure banner.
+ */
+export interface MarketData {
+  xgro: number[] // ~30 daily returns, in percent (e.g. 0.4 = +0.4%)
+  qqq: number[]
+  asOfDay: string // first day this series applies from (YYYY-MM-DD)
+  updatedAt: string // ISO of the last successful fetch
+  status: 'ok' | 'failed'
+  lastError?: string
+  lastAttemptDay?: string // YYYY-MM-DD of the last run (success or fail) — throttles the daily retry
+}
+
 export interface BankState {
   config: BankConfig
-  split: BankSplit
   accounts: Record<BankAccountId, BankAccountState>
+  pending: BankPending
   txns: BankTxn[] // newest last, capped
   lastDay: string // bank simulated through this day (YYYY-MM-DD)
   shock: BankShockState

@@ -3,11 +3,11 @@ import type {
   AppData,
   BankAccountId,
   BankConfig,
-  BankSplit,
   Completion,
   DayScope,
   Effort,
   EffortFilter,
+  MarketData,
   Priority,
   Profile,
   QuizQuestion,
@@ -30,6 +30,7 @@ import {
   saveQuizBank,
   saveRoster,
   subscribeData,
+  subscribeMarketData,
   subscribeQuizBank,
   subscribeRoster,
 } from './cloud'
@@ -52,7 +53,7 @@ import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../log
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
-import { applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
+import { ACCOUNT_IDS, BOUNCE_MULT, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -76,6 +77,7 @@ interface StoreState {
   quizBank: QuizQuestion[] // shared question bank (app/quizBank), live-synced
   quizBankLoaded: boolean
   kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
+  market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
 
   activeProfile: () => Profile | null
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -119,12 +121,13 @@ interface StoreState {
   markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
 
   // --- Grand Line Bank (the bank lives in BEN's world; admin edits reach it via kidData) ---
-  /** Move real dollars between Ben's chests. College deposits are matched by dad; college never gives back. */
-  bankTransfer: (from: BankAccountId, to: BankAccountId, amount: number) => 'ok' | 'broke' | 'locked'
+  /** Move real dollars between Ben's chests. Fully free — College deposits get Dad's match; College withdrawals burn it. */
+  bankTransfer: (from: BankAccountId, to: BankAccountId, amount: number) => 'ok' | 'broke'
+  /** Allocate the pending payday pool across the chests (must total the pool; chequing is a valid choice). */
+  bankAllocate: (alloc: Partial<Record<BankAccountId, number>>) => 'ok' | 'bad'
   /** Interac-style payback to dad, from the Pocket Chest only. Dad sees it until he taps "Got it". */
   bankPayDad: (amount: number, note: string) => 'ok' | 'broke'
   ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback
-  setBankSplit: (split: BankSplit) => void // Ben's allowance auto-split
   setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
   bankAdjust: (acct: BankAccountId, delta: number, note: string) => void // admin: manual correction / paper-money import
   // Shock Test:
@@ -215,6 +218,8 @@ export const useStore = create<StoreState>((set, get) => {
       const questions = await loadQuizBank()
       set({ quizBank: questions, quizBankLoaded: true })
       subscribeQuizBank((qs) => set({ quizBank: qs, quizBankLoaded: true }))
+      // shared market series (fetched monthly by the bank:market script)
+      subscribeMarketData((m) => set({ market: m }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -271,6 +276,7 @@ export const useStore = create<StoreState>((set, get) => {
     quizBank: [],
     quizBankLoaded: false,
     kidData: null,
+    market: null,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -319,12 +325,12 @@ export const useStore = create<StoreState>((set, get) => {
       // The banker keeps Ben's bank ticking even when Ben hasn't opened the app:
       // deterministic day-based sim, so whichever device catches up writes the same numbers.
       if (activeProfileId === PARENT_ID && get().kidData && get().kidData!.bank.lastDay < today) {
-        commitFor(KID_ID, (d, events) => simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e })))
+        commitFor(KID_ID, (d, events) => simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }), get().market))
       }
       const bankBehind = activeProfileId === KID_ID && data.bank.lastDay < today
       if (data.streak.lastRolloverDay === today && data.daily.day === today && !bankBehind) return
       commit((d, events) => {
-        if (activeProfileId === KID_ID) simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
+        if (activeProfileId === KID_ID) simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }), get().market)
         const completedDays = new Set(d.completions.map((c) => c.day))
         const frozen = new Set(d.frozenDays.map((f) => f.day))
         let cur = d.streak.lastRolloverDay ?? today
@@ -629,21 +635,66 @@ export const useStore = create<StoreState>((set, get) => {
       const world = get().activeProfileId === KID_ID ? get().data : get().kidData
       const amt = round2(amount)
       if (!world || amt <= 0 || from === to) return 'broke'
-      if (from === 'college') return 'locked' // the College Chest never gives back
-      if (world.bank.accounts[from].balance < amt - 0.001) return 'broke'
+      // College withdrawals can only pull HIS own contributions (Dad's match isn't his to move)
+      const maxFrom = from === 'college' ? world.bank.accounts.college.deposited : world.bank.accounts[from].balance
+      if (maxFrom < amt - 0.001) return 'broke'
       commitFor(KID_ID, (d) => {
         const day = dayKey()
-        d.bank.accounts[from].balance -= amt
-        d.bank.accounts[from].deposited = Math.max(0, d.bank.accounts[from].deposited - amt)
-        d.bank.accounts[to].balance += amt
-        d.bank.accounts[to].deposited += amt
+        const src = d.bank.accounts[from]
+        src.balance -= amt
+        src.deposited = Math.max(0, src.deposited - amt)
+        if (from === 'college') {
+          // burn an equal slice of Dad's matched money — free money going up in smoke
+          const burn = round2(Math.min(src.matched, amt))
+          if (burn > 0) {
+            src.matched = round2(src.matched - burn)
+            src.balance -= burn
+            pushTxn(d.bank, { day, type: 'adjust', from: 'college', amount: -burn, note: `🔥 Dad's matched ${fmt$(burn)} burned — you pulled from College` })
+          }
+        }
+        const dst = d.bank.accounts[to]
+        dst.balance += amt
+        dst.deposited += amt
         pushTxn(d.bank, { day, type: 'transfer', from, to, amount: amt })
         if (to === 'qqq') armFirstShock(d.bank, day, Math.random()) // first QQQ money quietly starts the crash countdown
         if (to === 'college') {
-          d.bank.accounts.college.balance += amt
-          d.bank.accounts.college.deposited += amt
+          dst.balance += amt // Dad matches it 1:1
+          dst.matched = round2(dst.matched + amt)
           pushTxn(d.bank, { day, type: 'match', from: 'dad', to: 'college', amount: amt, note: 'Dad matches your college deposit' })
         }
+      })
+      return 'ok'
+    },
+
+    bankAllocate(alloc) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      if (!world) return 'bad'
+      const pool = round2(world.bank.pending.amount)
+      const entries = ACCOUNT_IDS.map((id) => [id, round2(alloc[id] ?? 0)] as const).filter(([, v]) => v > 0)
+      const sum = round2(entries.reduce((s, [, v]) => s + v, 0))
+      if (pool <= 0 || sum > pool + 0.001 || entries.some(([, v]) => v < 0)) return 'bad'
+      commitFor(KID_ID, (d) => {
+        const day = dayKey()
+        // any unallocated remainder stays as everyday money in the Pocket Chest
+        const remainder = round2(pool - sum)
+        for (const [id, v] of entries) {
+          const dst = d.bank.accounts[id]
+          dst.balance += v
+          dst.deposited += v
+          pushTxn(d.bank, { day, type: 'allowance', from: 'allowance', to: id, amount: v })
+          if (id === 'qqq') armFirstShock(d.bank, day, Math.random())
+          if (id === 'college') {
+            dst.balance += v
+            dst.matched = round2(dst.matched + v)
+            pushTxn(d.bank, { day, type: 'match', from: 'dad', to: 'college', amount: v, note: 'Dad matches your college deposit' })
+          }
+        }
+        if (remainder > 0) {
+          d.bank.accounts.chequing.balance += remainder
+          d.bank.accounts.chequing.deposited += remainder
+          pushTxn(d.bank, { day, type: 'allowance', from: 'allowance', to: 'chequing', amount: remainder })
+        }
+        d.bank.pending = { amount: 0, weeks: 0, since: null }
       })
       return 'ok'
     },
@@ -664,15 +715,6 @@ export const useStore = create<StoreState>((set, get) => {
       commitFor(KID_ID, (d) => {
         const t = d.bank.txns.find((x) => x.id === txnId)
         if (t && t.type === 'payback' && !t.ackAt) t.ackAt = new Date().toISOString()
-      })
-    },
-
-    setBankSplit(split) {
-      commitFor(KID_ID, (d) => {
-        const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
-        const s = { savings: clamp(split.savings), xgro: clamp(split.xgro), qqq: clamp(split.qqq), college: clamp(split.college) }
-        if (s.savings + s.xgro + s.qqq + s.college > 100) return // remainder must stay ≥ 0 (it lands in chequing)
-        d.bank.split = s
       })
     },
 
@@ -719,6 +761,7 @@ export const useStore = create<StoreState>((set, get) => {
         } else {
           s.decision = 'hold'
           s.recoverDay = pickRecoverDay(dayKey())
+          s.recoverTo = round2(d.bank.accounts.qqq.balance * BOUNCE_MULT) // ~6% above the pre-crash value
         }
       })
     },

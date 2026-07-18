@@ -103,20 +103,22 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 
 Goal: teach Ben (12, zero personal-finance background, loves One Piece) savings, investing and the power of compound interest. Replaces the paper sheet where Diogo adds $7 every Saturday. Luffy is the guide; animations keep it fun.
 
+Design principle: **Ben decides every dollar himself — no auto-invest, no auto-split.** The point is to build the habit of making a choice each week.
+
 - **The bank lives in Ben's profile data** (`AppData.bank`). Ben sees the kid bank; Diogo's Bank tab is the **Banker's desk** (admin).
-- **Chests (accounts)**, all in real dollars:
-  - **Pocket Chest** (chequing) — default landing account, no interest.
-  - **Treasure Vault** (savings) — Tangerine-style reference APR, admin-set, interest accrues daily, no losses.
-  - **Merchant Ship** (XGRO) — medium risk. Admin updates the avg %/month from real XGRO ~monthly; the app simulates deterministic daily variance around it. Real MER (0.20%/yr) charged; buy/sell itself is free.
-  - **Rocket Ship** (QQQ) — high risk, same mechanics with bigger daily swings; real MER 0.20%/yr.
-  - **College Chest** — one-way: deposits are **automatically matched 1:1 by Dad**, money can never be taken out. Also shows Dad's real **RESP balance** (admin-updated manually, never matched) for motivation.
-- **Allowance**: admin sets weekly amount (default $7) + payday (default Saturday). On payday the allowance auto-splits by Ben's **auto-split percentages** (savings/XGRO/QQQ/college; remainder → Pocket Chest). Ben edits the split freely in 5% steps.
-- **Moving money**: chequing → any chest is instant. Leaving an investment requires **selling**: pick an amount, then a ~10s One Piece "making the deal" animation ends in a "DONE DEAL" stamp + coin rain; proceeds land in chequing. No sell/buy charges.
-- **Pay Dad back** (Interac-style): from the Pocket Chest only, with an optional note. Diogo gets a banner (and best-effort local notification) until he taps "Got it".
-- **Teaching UI**: every chest shows a 30-day sparkline plus a split bar of "money you put in" (blue) vs "money your money made" (gold). The **Treasure telescope** projects each chest at 1/2/3/5/10/20/50 years at the current pace (assumes allowance grows +$1/week every 6 months), splitting new money vs interest. Luffy quotes motivate saving.
-- **Banker's desk (Diogo)**: pending paybacks, Ben's balances, bank rules (weekly amount, payday, savings APR, XGRO/QQQ monthly rates, RESP balance), manual adjustments (e.g. importing the paper-sheet money) and the **Captain's ledger** — a full log of every move Ben makes, for coaching.
-- **Simulation** is deterministic per calendar day (seeded by date), so any device catching the bank up computes identical numbers; the parent's session also advances Ben's bank so it never falls behind.
-- **The Shock Test** (the risk lesson): the first time money lands in QQQ, a hidden "Market Correction" arms itself for a random day 3–5 weeks later — the Rocket Ship drops **20% overnight**. Ben gets a dramatic alert: **PANIC SELL** (everything sells at the bottom to chequing; the loss is locked in forever) or **HOLD THE LINE** (2–3 weeks later the position bounces back ~6% above its pre-crash value, with a celebration popup). A "let me think / ask Dad" option defers the choice. After the first crash, further crashes are **manual only**: Diogo's banker desk gets a two-tap "Trigger Market Correction" lever plus a **"days without a crash"** counter (also mirrored on Ben's QQQ card as "days without a market storm"). Crashes/recoveries appear in the ledger as 📉/📈 entries.
+- **Chests (accounts)** — three real ones plus College (no more Savings account):
+  - **Pocket Chest** (chequing) — everyday money, no growth.
+  - **Merchant Ship** (XGRO) — medium risk. Real MER (0.20%/yr) charged; buy/sell is free.
+  - **Rocket Ship** (QQQ) — high risk, bigger swings; real MER 0.20%/yr.
+  - **College Chest / RESP** — deposits are **matched 1:1 by Dad**. He *can* withdraw, but only **his own contributions**, and every dollar he pulls out **burns an equal dollar of Dad's match forever** (panic Luffy). Also shows Dad's real **RESP balance** (admin-updated, never his to move) for motivation.
+- **Real market moves**: `npm run bank:market` (monthly cron, Claude sonnet) fetches ~30 days of real XGRO/QQQ daily % returns into Firestore `app/marketData`; the sim replays them for the next ~30 days (looping if the next fetch is late). On failure it flags `status:"failed"` (keeping the last good series), retries daily, and the app shows a **red banner on Diogo's dashboard + Banker's desk**. When no series is available the sim falls back to the admin's monthly-rate estimates.
+- **Allowance / payday**: admin sets weekly amount (default $7) + payday (default Saturday). On payday the money drops into a **pending pool** (accumulates across missed weeks) and a big **🎉 PAYDAY event** fires. On his next Bank visit a **mandatory allocation modal** makes him place every dollar across the chests — "all to Pocket Chest" is a valid choice, but doing nothing is not an option (no dismiss until allocated).
+- **Moving money is fully free**: chequing → any chest is instant. Leaving an investment = **Sell**: a concerned-Luffy warning (shows growth earned + projected next-month growth he'd give up), then the ~10s One Piece "making the deal" animation → "DONE DEAL" stamp + coin rain → proceeds land in chequing.
+- **Pay Dad back** (Interac-style): from the Pocket Chest only, optional note. Diogo gets a banner + best-effort local notification until he taps "Got it".
+- **The Shock Test** (unchanged from before, QQQ only): first crash auto-arms ~1 month after the first QQQ money; −20% overnight; PANIC SELL (loss locked in) vs HOLD THE LINE. **On HOLD, Ben is told roughly how many days to full recovery**, and during that window the sim **ignores the market series and uses random realistic up/down moves** trending back to ~6% above the pre-crash value. After crash #1, Diogo's desk gets a manual crash lever + "days without a crash" counter.
+- **Teaching UI**: every chest shows a 30-day sparkline + a blue/gold "money you put in vs money your money made" bar. The **Treasure telescope** projects any chest at 1/2/3/5/10/20/50 years with a kid-adjustable "add $X/week" habit dial (College doubles it), splitting new money vs growth. Luffy quotes motivate saving.
+- **Banker's desk (Diogo)**: market-feed health, pending paybacks, Shock Test control, Ben's balances (+ pending allowance), bank rules (weekly amount, payday, XGRO/QQQ fallback rates, RESP balance), manual adjustments (e.g. importing the paper-sheet money) and the **Captain's ledger** — every move Ben makes, for coaching.
+- **Simulation** is deterministic per calendar day (seeded by date), so any device catching the bank up computes identical numbers; the parent's session also advances Ben's bank so it never falls behind. Crashes/recoveries appear in the ledger as 📉/📈 entries.
 
 ## 9. Reports
 

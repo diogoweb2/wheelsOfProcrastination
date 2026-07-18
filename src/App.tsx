@@ -48,7 +48,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -164,6 +164,18 @@ export default function App() {
           🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
         </div>
       </header>
+
+      {activeProfileId === PARENT_ID && market?.status === 'failed' && (
+        <div className="banner" style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>📉</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Market feed update failed</div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              last try {market.lastAttemptDay ?? '—'} · retries daily · sim uses fallback rates meanwhile
+            </div>
+          </div>
+        </div>
+      )}
 
       {pendingPaybacks.map((t) => (
         <div className="banner" key={t.id}>

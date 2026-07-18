@@ -819,3 +819,7 @@ input, select { font-family: inherit; }
   font-weight: 900;
   font-size: 12px;
 }
+
+.bubble--concern { border-color: var(--orange); }
+.bubble--panic { border-color: var(--red); }
+.bank-payday-sheet { border: 2px solid var(--gold) !important; }

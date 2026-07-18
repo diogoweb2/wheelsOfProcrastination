@@ -5,7 +5,7 @@
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, Profile, QuizQuestion } from '../types'
+import type { AppData, MarketData, Profile, QuizQuestion } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -96,4 +96,15 @@ export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () =
 export async function saveQuizBank(questions: QuizQuestion[]): Promise<void> {
   await ensureAuth()
   await setDoc(bankRef(), { questions })
+}
+
+// --- market data (shared XGRO/QQQ return series, fetched monthly) -----------
+
+const marketRef = () => doc(firestore, 'app', 'marketData')
+
+/** Live-sync the shared market series (fetched by scripts/bank-market.mjs). null until it exists. */
+export function subscribeMarketData(cb: (m: MarketData | null) => void): () => void {
+  return onSnapshot(marketRef(), (snap) => {
+    cb(snap.exists() ? (snap.data() as MarketData) : null)
+  })
 }

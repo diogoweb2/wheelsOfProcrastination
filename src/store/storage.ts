@@ -67,11 +67,23 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
           ...base.bank,
           ...parsed.bank,
           config: { ...base.bank.config, ...parsed.bank.config },
-          split: { ...base.bank.split, ...parsed.bank.split },
-          accounts: { ...base.bank.accounts, ...parsed.bank.accounts },
+          pending: { ...base.bank.pending, ...parsed.bank.pending },
+          accounts: {
+            // rebuild from the current account list so a dropped account (savings) can't linger
+            chequing: { ...base.bank.accounts.chequing, ...parsed.bank.accounts?.chequing },
+            xgro: { ...base.bank.accounts.xgro, ...parsed.bank.accounts?.xgro },
+            qqq: { ...base.bank.accounts.qqq, ...parsed.bank.accounts?.qqq },
+            college: { ...base.bank.accounts.college, ...parsed.bank.accounts?.college },
+          },
           shock: { ...base.bank.shock, ...parsed.bank.shock },
         }
       : base.bank,
+  }
+  // bank v1 → v2: the old Savings account is gone; fold any leftover balance into chequing
+  const legacySavings = (parsed.bank as { accounts?: { savings?: { balance?: number; deposited?: number } } } | undefined)?.accounts?.savings
+  if (legacySavings?.balance) {
+    merged.bank.accounts.chequing.balance += legacySavings.balance
+    merged.bank.accounts.chequing.deposited += legacySavings.deposited ?? legacySavings.balance
   }
   // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
   const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick
