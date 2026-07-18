@@ -55,6 +55,8 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
 
   const [results, setResults] = useState<{ qid: string; correct: boolean }[]>([])
   const [recent, setRecent] = useState<string[]>([]) // training: recently shown, to avoid instant repeats
+  const [sessionCorrect, setSessionCorrect] = useState<string[]>([]) // training: answered right this session — never re-asked today's run
+  const [trainingDone, setTrainingDone] = useState(false) // training: whole topic cleared this session
   const [sessionEarned, setSessionEarned] = useState(0)
   const [answered, setAnswered] = useState(0)
   // training: wrong answers pause on a correction card; right answers just flow on
@@ -96,11 +98,19 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results.length])
 
-  function advanceTraining(q: QuizQuestion) {
+  function advanceTraining(q: QuizQuestion, correctIds: string[]) {
+    // questions answered RIGHT this session don't come back; wrong ones may return for another try
+    const remainingPool = pool.filter((x) => !correctIds.includes(x.id))
+    setFeedback(null)
+    if (remainingPool.length === 0) {
+      setTrainingDone(true)
+      sfx.bigWin()
+      confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } })
+      return
+    }
     const shown = [...recent, q.id]
     setRecent(shown)
-    setFeedback(null)
-    setCurrent(pickTraining(pool, stats, shown))
+    setCurrent(pickTraining(remainingPool, stats, shown))
   }
 
   function submit(correct: boolean) {
@@ -119,7 +129,9 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
           key: Date.now(),
         })
         const q = question
-        window.setTimeout(() => advanceTraining(q), 350)
+        const correctIds = [...sessionCorrect, q.id]
+        setSessionCorrect(correctIds)
+        window.setTimeout(() => advanceTraining(q, correctIds), 350)
       } else {
         sfx.error()
         setFeedback({ q: question })
@@ -149,6 +161,33 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   // ---- results screen (tests) ----
   if (finished) {
     return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} />
+  }
+
+  // ---- training: whole topic cleared this session ----
+  if (trainingDone) {
+    return (
+      <Full onClose={onClose} title={`${topic.emoji} Training`}>
+        <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: 'var(--gold)' }}>
+          <div style={{ fontSize: 56 }}>🍖😴</div>
+          <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>NICE WORK, PIRATE!</div>
+          <p style={{ marginTop: 8, fontWeight: 800 }}>
+            You conquered every question on this sea! Even Luffy takes a nap after a great feast — give that brain a rest.
+          </p>
+          {!preview && (
+            <p style={{ marginTop: 8 }}>
+              <span style={{ color: 'var(--gold)', fontWeight: 900 }}>+🪙{sessionEarned}</span>{' '}
+              <span className="muted">earned this voyage.</span>
+            </p>
+          )}
+          <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+            Sail back anytime for another round — repeated questions pay half Berries.
+          </p>
+          <button className="btn" style={{ marginTop: 14 }} onClick={onClose}>
+            ⚓ Back to the ship
+          </button>
+        </div>
+      </Full>
+    )
   }
 
   const header =
@@ -192,7 +231,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
               💡 {feedback.q.funFact}
             </p>
           )}
-          <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q)}>
+          <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q, sessionCorrect)}>
             Next question ➜
           </button>
           <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
