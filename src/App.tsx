@@ -8,20 +8,20 @@ import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
-import { BadgesScreen } from './screens/BadgesScreen'
+import { BankScreen } from './screens/BankScreen'
 import { ProfileScreen } from './screens/ProfileScreen'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
 import { BerryCoin } from './components/BerryCoin'
 import { sfx } from './audio'
 
-type Tab = 'spin' | 'store' | 'quiz' | 'badges' | 'me'
+type Tab = 'spin' | 'store' | 'quiz' | 'bank' | 'me'
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
   { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
   { id: 'quiz', icon: '🧭', label: 'Quiz' },
-  { id: 'badges', icon: '🏅', label: 'Badges' },
+  { id: 'bank', icon: '🏦', label: 'Bank' }, // real-dollar Grand Line Bank (badges moved to Me → Voyage)
   { id: 'me', icon: '👒', label: 'Me' },
 ]
 
@@ -48,7 +48,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -72,6 +72,21 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlocked, data.settings.reminderHour, data.completions.length])
+
+  // best-effort local ping when a new payback from Ben lands while Diogo's app is open
+  const paybackCount =
+    activeProfileId === PARENT_ID ? (kidData?.bank.txns.filter((t) => t.type === 'payback' && !t.ackAt).length ?? 0) : 0
+  const prevPaybacks = useRef(paybackCount)
+  useEffect(() => {
+    if (paybackCount > prevPaybacks.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('📨 Ben paid you back!', { body: 'Open the Bank tab to see it and tap “Got it”.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevPaybacks.current = paybackCount
+  }, [paybackCount])
 
   if (cloudError) {
     return (
@@ -107,6 +122,10 @@ export default function App() {
 
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
+
+  // admin-only: Ben's Interac-style paybacks waiting for a "Got it"
+  const pendingPaybacks =
+    activeProfileId === PARENT_ID ? (kidData?.bank.txns.filter((t) => t.type === 'payback' && !t.ackAt) ?? []) : []
 
   // admin-only persistent warning: unsettled prize purchases (Ben's and Diogo's own)
   const unpaidGifts =
@@ -146,6 +165,25 @@ export default function App() {
         </div>
       </header>
 
+      {pendingPaybacks.map((t) => (
+        <div className="banner" key={t.id}>
+          <span style={{ fontSize: 20 }}>📨</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Ben paid you ${t.amount.toFixed(2)}{t.note ? ` — ${t.note}` : ''}</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>sent {t.day} · straight from his Pocket Chest</div>
+          </div>
+          <button
+            className="btn btn--small"
+            onClick={() => {
+              sfx.gem()
+              ackBankPayback(t.id)
+            }}
+          >
+            ✓ Got it
+          </button>
+        </div>
+      ))}
+
       {unpaidGifts.map(({ who, targetId, p }) => (
         <div className="banner" key={p.id}>
           <span style={{ fontSize: 20 }}>🎁</span>
@@ -168,7 +206,7 @@ export default function App() {
       {tab === 'spin' && <SpinScreen />}
       {tab === 'store' && <StoreScreen />}
       {tab === 'quiz' && <QuizScreen />}
-      {tab === 'badges' && <BadgesScreen />}
+      {tab === 'bank' && <BankScreen />}
       {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}
 
       {/* the quest log moved behind a Material-style floating "+" */}

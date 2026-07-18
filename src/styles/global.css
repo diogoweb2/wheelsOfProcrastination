@@ -259,7 +259,7 @@ input, select { font-family: inherit; }
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .field label { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.field input[type='text'], .field input[type='date'], .field select {
+.field input[type='text'], .field input[type='date'], .field input[type='number'], .field select {
   background: var(--bg2);
   border: 2px solid var(--line);
   border-radius: 12px;
@@ -695,4 +695,89 @@ input, select { font-family: inherit; }
   0% { opacity: 0; transform: translateX(-50%) translateY(12px); }
   15%, 75% { opacity: 1; transform: translateX(-50%) translateY(0); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* --- Grand Line Bank ------------------------------------------------------ */
+
+.bank-total {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, var(--card), rgb(255 200 60 / 8%));
+}
+
+.bank-spark { display: block; margin-top: 4px; opacity: 0.9; }
+
+/* new-money (blue) vs money-made (gold) split bar */
+.bank-growbar {
+  display: flex;
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--bg2);
+}
+.bank-growbar-shine { animation: pulse-soft 2.4s infinite; }
+
+.bank-resp {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px dashed var(--gold);
+  font-size: 12px;
+  background: rgb(255 200 60 / 7%);
+}
+
+/* selling: rocking ship + 10s progress bar + DONE DEAL stamp + coin rain */
+.bank-ship {
+  font-size: 34px;
+  animation: bank-ship-rock 1.4s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+@keyframes bank-ship-rock {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  50% { transform: rotate(8deg) translateY(-4px); }
+}
+
+.bank-dealbar {
+  height: 10px;
+  border-radius: 99px;
+  background: var(--bg2);
+  overflow: hidden;
+  margin-top: 12px;
+}
+.bank-dealbar > div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--blue), var(--gold));
+  animation: bank-deal-fill 10s linear forwards;
+}
+@keyframes bank-deal-fill { to { width: 100%; } }
+
+.bank-stamp {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 18px;
+  border: 3px solid var(--red);
+  border-radius: 10px;
+  color: var(--red);
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 1px;
+  transform: rotate(-6deg);
+  animation: bank-stamp-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes bank-stamp-in {
+  0% { transform: rotate(-6deg) scale(3); opacity: 0; }
+  60% { transform: rotate(-6deg) scale(0.9); opacity: 1; }
+  100% { transform: rotate(-6deg) scale(1); }
+}
+
+.bank-coin {
+  position: absolute;
+  top: -30px;
+  font-size: 20px;
+  pointer-events: none;
+  animation: bank-coin-fall 1.6s ease-in infinite;
+}
+@keyframes bank-coin-fall {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(320px) rotate(300deg); opacity: 0; }
 }

@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import type {
   AppData,
+  BankAccountId,
+  BankConfig,
+  BankSplit,
   Completion,
   DayScope,
   Effort,
@@ -49,6 +52,7 @@ import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../log
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
+import { pushTxn, round2, simulateBank } from '../logic/bank'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -113,6 +117,16 @@ interface StoreState {
   // --- prizes (each profile buys from its own catalog with its own 🍇) ---
   buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown'
   markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
+
+  // --- Grand Line Bank (the bank lives in BEN's world; admin edits reach it via kidData) ---
+  /** Move real dollars between Ben's chests. College deposits are matched by dad; college never gives back. */
+  bankTransfer: (from: BankAccountId, to: BankAccountId, amount: number) => 'ok' | 'broke' | 'locked'
+  /** Interac-style payback to dad, from the Pocket Chest only. Dad sees it until he taps "Got it". */
+  bankPayDad: (amount: number, note: string) => 'ok' | 'broke'
+  ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback
+  setBankSplit: (split: BankSplit) => void // Ben's allowance auto-split
+  setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
+  bankAdjust: (acct: BankAccountId, delta: number, note: string) => void // admin: manual correction / paper-money import
 
   /** Buy back the just-died streak (freezes the missed days). Returns false if too broke. */
   repairStreak: () => boolean
@@ -295,8 +309,15 @@ export const useStore = create<StoreState>((set, get) => {
       const today = dayKey()
       const { data, activeProfileId, dataLoaded } = get()
       if (!activeProfileId || !dataLoaded) return
-      if (data.streak.lastRolloverDay === today && data.daily.day === today) return
+      // The banker keeps Ben's bank ticking even when Ben hasn't opened the app:
+      // deterministic day-based sim, so whichever device catches up writes the same numbers.
+      if (activeProfileId === PARENT_ID && get().kidData && get().kidData!.bank.lastDay < today) {
+        commitFor(KID_ID, (d) => simulateBank(d.bank, today))
+      }
+      const bankBehind = activeProfileId === KID_ID && data.bank.lastDay < today
+      if (data.streak.lastRolloverDay === today && data.daily.day === today && !bankBehind) return
       commit((d, events) => {
+        if (activeProfileId === KID_ID) simulateBank(d.bank, today)
         const completedDays = new Set(d.completions.map((c) => c.day))
         const frozen = new Set(d.frozenDays.map((f) => f.day))
         let cur = d.streak.lastRolloverDay ?? today
@@ -592,6 +613,76 @@ export const useStore = create<StoreState>((set, get) => {
       commitFor(targetId, (d) => {
         const p = d.giftcards.find((x) => x.id === purchaseId)
         if (p && !p.paidAt) p.paidAt = new Date().toISOString()
+      })
+    },
+
+    // --- Grand Line Bank ------------------------------------------------------
+
+    bankTransfer(from, to, amount) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      const amt = round2(amount)
+      if (!world || amt <= 0 || from === to) return 'broke'
+      if (from === 'college') return 'locked' // the College Chest never gives back
+      if (world.bank.accounts[from].balance < amt - 0.001) return 'broke'
+      commitFor(KID_ID, (d) => {
+        const day = dayKey()
+        d.bank.accounts[from].balance -= amt
+        d.bank.accounts[from].deposited = Math.max(0, d.bank.accounts[from].deposited - amt)
+        d.bank.accounts[to].balance += amt
+        d.bank.accounts[to].deposited += amt
+        pushTxn(d.bank, { day, type: 'transfer', from, to, amount: amt })
+        if (to === 'college') {
+          d.bank.accounts.college.balance += amt
+          d.bank.accounts.college.deposited += amt
+          pushTxn(d.bank, { day, type: 'match', from: 'dad', to: 'college', amount: amt, note: 'Dad matches your college deposit' })
+        }
+      })
+      return 'ok'
+    },
+
+    bankPayDad(amount, note) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      const amt = round2(amount)
+      if (!world || amt <= 0 || world.bank.accounts.chequing.balance < amt - 0.001) return 'broke'
+      commitFor(KID_ID, (d) => {
+        d.bank.accounts.chequing.balance -= amt
+        d.bank.accounts.chequing.deposited = Math.max(0, d.bank.accounts.chequing.deposited - amt)
+        pushTxn(d.bank, { day: dayKey(), type: 'payback', from: 'chequing', to: 'dad', amount: amt, note: note.trim() || undefined, ackAt: null })
+      })
+      return 'ok'
+    },
+
+    ackBankPayback(txnId) {
+      commitFor(KID_ID, (d) => {
+        const t = d.bank.txns.find((x) => x.id === txnId)
+        if (t && t.type === 'payback' && !t.ackAt) t.ackAt = new Date().toISOString()
+      })
+    },
+
+    setBankSplit(split) {
+      commitFor(KID_ID, (d) => {
+        const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
+        const s = { savings: clamp(split.savings), xgro: clamp(split.xgro), qqq: clamp(split.qqq), college: clamp(split.college) }
+        if (s.savings + s.xgro + s.qqq + s.college > 100) return // remainder must stay ≥ 0 (it lands in chequing)
+        d.bank.split = s
+      })
+    },
+
+    setBankConfig(patch) {
+      commitFor(KID_ID, (d) => {
+        Object.assign(d.bank.config, patch)
+      })
+    },
+
+    bankAdjust(acct, delta, note) {
+      const amt = round2(delta)
+      if (amt === 0) return
+      commitFor(KID_ID, (d) => {
+        const a = d.bank.accounts[acct]
+        a.balance = Math.max(0, a.balance + amt)
+        if (amt > 0) a.deposited += amt
+        else a.deposited = Math.max(0, a.deposited + amt)
+        pushTxn(d.bank, { day: dayKey(), type: 'adjust', to: acct, amount: amt, note: note.trim() || 'Banker adjustment' })
       })
     },
 

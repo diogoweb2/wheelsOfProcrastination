@@ -97,6 +97,25 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 - Per-habit milestones (repeating tasks only): 10, 30, 50, 100 completions (e.g. "10 reading days").
 - Total completions: 10, 50, 100, 250.
 - Badges are surfaced with a celebration modal + kept in a trophy shelf.
+- The trophy shelf lives inside **Me → Voyage** (its former tab slot is now the Bank).
+
+## 8b. Grand Line Bank (tab replaces Badges) — real CAD dollars
+
+Goal: teach Ben (12, zero personal-finance background, loves One Piece) savings, investing and the power of compound interest. Replaces the paper sheet where Diogo adds $7 every Saturday. Luffy is the guide; animations keep it fun.
+
+- **The bank lives in Ben's profile data** (`AppData.bank`). Ben sees the kid bank; Diogo's Bank tab is the **Banker's desk** (admin).
+- **Chests (accounts)**, all in real dollars:
+  - **Pocket Chest** (chequing) — default landing account, no interest.
+  - **Treasure Vault** (savings) — Tangerine-style reference APR, admin-set, interest accrues daily, no losses.
+  - **Merchant Ship** (XGRO) — medium risk. Admin updates the avg %/month from real XGRO ~monthly; the app simulates deterministic daily variance around it. Real MER (0.20%/yr) charged; buy/sell itself is free.
+  - **Rocket Ship** (QQQ) — high risk, same mechanics with bigger daily swings; real MER 0.20%/yr.
+  - **College Chest** — one-way: deposits are **automatically matched 1:1 by Dad**, money can never be taken out. Also shows Dad's real **RESP balance** (admin-updated manually, never matched) for motivation.
+- **Allowance**: admin sets weekly amount (default $7) + payday (default Saturday). On payday the allowance auto-splits by Ben's **auto-split percentages** (savings/XGRO/QQQ/college; remainder → Pocket Chest). Ben edits the split freely in 5% steps.
+- **Moving money**: chequing → any chest is instant. Leaving an investment requires **selling**: pick an amount, then a ~10s One Piece "making the deal" animation ends in a "DONE DEAL" stamp + coin rain; proceeds land in chequing. No sell/buy charges.
+- **Pay Dad back** (Interac-style): from the Pocket Chest only, with an optional note. Diogo gets a banner (and best-effort local notification) until he taps "Got it".
+- **Teaching UI**: every chest shows a 30-day sparkline plus a split bar of "money you put in" (blue) vs "money your money made" (gold). The **Treasure telescope** projects each chest at 1/2/3/5/10/20/50 years at the current pace (assumes allowance grows +$1/week every 6 months), splitting new money vs interest. Luffy quotes motivate saving.
+- **Banker's desk (Diogo)**: pending paybacks, Ben's balances, bank rules (weekly amount, payday, savings APR, XGRO/QQQ monthly rates, RESP balance), manual adjustments (e.g. importing the paper-sheet money) and the **Captain's ledger** — a full log of every move Ben makes, for coaching.
+- **Simulation** is deterministic per calendar day (seeded by date), so any device catching the bank up computes identical numbers; the parent's session also advances Ben's bank so it never falls behind.
 
 ## 9. Reports
 

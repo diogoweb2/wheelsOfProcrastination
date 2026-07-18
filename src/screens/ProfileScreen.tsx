@@ -197,6 +197,26 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
 
       {/* habits training log */}
       <HabitsSection />
+
+      {/* trophy shelf (used to be the Badges tab — the tabbar spot went to the Bank) */}
+      <div className="h2">🏅 Trophy shelf — {data.badges.length} collected</div>
+      {data.badges.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 44 }}>🏝️</div>
+          <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+            Empty shelf. Very minimalist. Very sad. Go earn some badges!
+          </p>
+        </div>
+      ) : (
+        <div className="badge-shelf">
+          {[...data.badges].reverse().map((b) => (
+            <div key={b.id} className="badge-tile" title={b.description}>
+              <div className="e">{b.emoji}</div>
+              <div className="t">{b.title}</div>
+            </div>
+          ))}
+        </div>
+      )}
         </>
       )}
 

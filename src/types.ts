@@ -145,6 +145,54 @@ export interface QuizState {
   selfInit?: boolean // one-time flag: this profile's own default topics were unlocked
 }
 
+// --- Grand Line Bank (real CAD dollars — Ben's allowance world, admin = Diogo) ---
+
+export type BankAccountId = 'chequing' | 'savings' | 'xgro' | 'qqq' | 'college'
+
+export interface BankTxn {
+  id: string
+  day: string // YYYY-MM-DD
+  at: string // ISO
+  type: 'allowance' | 'transfer' | 'match' | 'payback' | 'adjust'
+  from?: BankAccountId | 'dad' | 'allowance'
+  to?: BankAccountId | 'dad'
+  amount: number // dollars
+  note?: string
+  ackAt?: string | null // paybacks only: set when dad taps "Got it"
+}
+
+export interface BankAccountState {
+  balance: number // stored unrounded so tiny daily interest still compounds; round on display
+  deposited: number // lifetime net "new money" put in (drives the new-money-vs-interest split)
+  growth: number // lifetime interest / market growth earned
+  history: { day: string; balance: number }[] // last ~30 daily snapshots for the sparkline
+}
+
+/** % of the weekly allowance auto-routed to each account; the remainder lands in chequing. */
+export interface BankSplit {
+  savings: number
+  xgro: number
+  qqq: number
+  college: number
+}
+
+export interface BankConfig {
+  weeklyAmount: number // dollars per allowance day
+  payday: number // 0 = Sunday … 6 = Saturday
+  savingsApr: number // %/year (Tangerine-style reference, admin-updated)
+  xgroMonthly: number // avg %/month — admin updates ~monthly from real XGRO performance
+  qqqMonthly: number // avg %/month — admin updates ~monthly from real QQQ performance
+  respBalance: number // dad's real RESP $ (manually updated; shown on the College Chest, never matched)
+}
+
+export interface BankState {
+  config: BankConfig
+  split: BankSplit
+  accounts: Record<BankAccountId, BankAccountState>
+  txns: BankTxn[] // newest last, capped
+  lastDay: string // bank simulated through this day (YYYY-MM-DD)
+}
+
 export interface GiftCardPurchase {
   id: string
   itemId: string // e.g. "roblox10"
@@ -167,4 +215,5 @@ export interface AppData {
   backgrounds: BackgroundsState
   quiz: QuizState
   giftcards: GiftCardPurchase[]
+  bank: BankState
 }

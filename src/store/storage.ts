@@ -5,6 +5,7 @@
 //  - readers for the previous localStorage data, used once to migrate up into Firestore
 import type { AppData, Profile } from '../types'
 import { dayKey } from '../logic/dates'
+import { defaultBankState } from '../logic/bank'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -43,6 +44,7 @@ export function defaultData(): AppData {
     backgrounds: { owned: [], active: null },
     quiz: { stats: {}, tests: [], passedTopics: [], unlockedTopics: ['canada-geography'], bonusFruits: {} },
     giftcards: [],
+    bank: defaultBankState(),
   }
 }
 
@@ -60,6 +62,15 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
     quiz: { ...base.quiz, ...parsed.quiz },
     giftcards: parsed.giftcards ?? base.giftcards,
+    bank: parsed.bank
+      ? {
+          ...base.bank,
+          ...parsed.bank,
+          config: { ...base.bank.config, ...parsed.bank.config },
+          split: { ...base.bank.split, ...parsed.bank.split },
+          accounts: { ...base.bank.accounts, ...parsed.bank.accounts },
+        }
+      : base.bank,
   }
   // migrate pre-stack saves: daily.pendingPick (single) → daily.pendingPicks (array)
   const legacy = (parsed.daily as { pendingPick?: { taskId: string; via: 'wheel' | 'manual' } } | undefined)?.pendingPick
