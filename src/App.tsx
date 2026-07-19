@@ -128,7 +128,7 @@ export default function App() {
     return (
       <div className="app" style={{ justifyContent: 'center', padding: 24, textAlign: 'center' }}>
         <div>
-          <div className="float" style={{ fontSize: 56 }}>👒</div>
+          <img src="/luffy-spinning.gif" alt="" className="float" style={{ width: 120, height: 120, objectFit: 'contain' }} />
           <p className="muted" style={{ marginTop: 12 }}>Hoisting the sails…</p>
         </div>
       </div>
