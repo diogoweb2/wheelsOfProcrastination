@@ -12,14 +12,35 @@ import {
   spareCount,
   spares,
   stickerById,
+  type StickerDef,
   tradeableFor,
 } from '../logic/album'
 import { dayKey } from '../logic/dates'
 import { Sticker } from '../components/Sticker'
+import { StickerDetail } from '../components/StickerDetail'
 import { PackOpening } from '../components/PackOpening'
 import { BerryCoin } from '../components/BerryCoin'
 import { sfx } from '../audio'
 import type { StickerTrade } from '../types'
+
+/**
+ * Tap-to-zoom plumbing: remembers which sticker was tapped and the on-screen
+ * rect of the thumbnail, so the detail view can grow out of that exact spot.
+ */
+function useStickerZoom() {
+  const [sticker, setSticker] = useState<StickerDef | null>(null)
+  const [origin, setOrigin] = useState<DOMRect | null>(null)
+  return {
+    sticker,
+    origin,
+    open(s: StickerDef, e: React.MouseEvent<HTMLElement>) {
+      sfx.click()
+      setOrigin(e.currentTarget.getBoundingClientRect())
+      setSticker(s)
+    },
+    close: () => setSticker(null),
+  }
+}
 
 export function AlbumScreen() {
   const [tab, setTab] = useState<'album' | 'packs' | 'trade'>('album')
@@ -69,8 +90,10 @@ export function AlbumScreen() {
 // --- album ------------------------------------------------------------------
 
 function AlbumTab() {
-  const { data, mateAlbum } = useStore()
+  const { data, mateAlbum, profiles, activeProfileId } = useStore()
   const album = data.album
+  const zoom = useStickerZoom()
+  const mateName = profiles.find((p) => p.id !== activeProfileId)?.name ?? 'your crewmate'
 
   const specials = STICKER_CATALOG.filter((s) => s.rarity === 'special')
   const vaultGot = specials.filter((s) => ownsSticker(album, s.id)).length
@@ -78,6 +101,16 @@ function AlbumTab() {
 
   return (
     <>
+      {zoom.sticker && (
+        <StickerDetail
+          sticker={zoom.sticker}
+          album={album}
+          mateAlbum={mateAlbum}
+          mateName={mateName}
+          origin={zoom.origin}
+          onClose={zoom.close}
+        />
+      )}
       {/* Red rares get their own gilded shelf at the top — they're the prize of
           the album, not something to hunt for inside a crew page. */}
       {specials.length > 0 && (
@@ -101,6 +134,7 @@ function AlbumTab() {
                   count={n}
                   size="sm"
                   badge={mateHas ? '🤝' : undefined}
+                  onClick={(e) => zoom.open(s, e)}
                 />
               )
             })}
@@ -136,6 +170,7 @@ function AlbumTab() {
                     count={n}
                     size="sm"
                     badge={mateHas ? '🤝' : undefined}
+                    onClick={(e) => zoom.open(s, e)}
                   />
                 )
               })}
@@ -228,6 +263,7 @@ function TradeTab() {
   const [give, setGive] = useState<string[]>([])
   const [want, setWant] = useState<string[]>([])
   const [msg, setMsg] = useState<string | null>(null)
+  const zoom = useStickerZoom()
 
   const mateId = profiles.find((p) => p.id !== activeProfileId)?.id
   const mate = profiles.find((p) => p.id === mateId)
@@ -286,6 +322,16 @@ function TradeTab() {
 
   return (
     <>
+      {zoom.sticker && (
+        <StickerDetail
+          sticker={zoom.sticker}
+          album={data.album}
+          mateAlbum={mateAlbum}
+          mateName={mateName}
+          origin={zoom.origin}
+          onClose={zoom.close}
+        />
+      )}
       {/* offers waiting on me */}
       {incoming.map((t) => (
         <TradeOffer
@@ -294,10 +340,11 @@ function TradeTab() {
           mine={false}
           onAccept={() => { sfx.bigWin(); answerTrade(t.id, true) }}
           onDecline={() => { sfx.sad(); answerTrade(t.id, false) }}
+          onPeek={zoom.open}
         />
       ))}
       {outgoing.map((t) => (
-        <TradeOffer key={t.id} trade={t} mine onCancel={() => { sfx.click(); cancelTrade(t.id) }} />
+        <TradeOffer key={t.id} trade={t} mine onCancel={() => { sfx.click(); cancelTrade(t.id) }} onPeek={zoom.open} />
       ))}
 
       <div className="trade-radar">
@@ -333,6 +380,7 @@ function TradeTab() {
                   size="sm"
                   selected={want.includes(s.id)}
                   onClick={() => toggle(want, setWant, s.id)}
+                  onLongPress={(e) => zoom.open(s, e)}
                 />
               ))}
             </div>
@@ -355,6 +403,7 @@ function TradeTab() {
                   selected={give.includes(sticker.id)}
                   wanted={!ownsSticker(mateAlbum, sticker.id)}
                   onClick={() => toggle(give, setGive, sticker.id)}
+                  onLongPress={(e) => zoom.open(sticker, e)}
                 />
               ))}
             </div>
@@ -366,7 +415,7 @@ function TradeTab() {
             <span className={balanced ? 'is-ok' : ''}>You get {wantVal}</span>
           </div>
           <p className="muted" style={{ fontSize: 11, textAlign: 'center' }}>
-            ★ red rare = 2 · white = 1
+            ★ red rare = 2 · white = 1 · hold a card to see it big
           </p>
 
           <button className="btn" style={{ width: '100%', marginTop: 10 }} disabled={!balanced} onClick={send}>
@@ -402,17 +451,22 @@ function TradeOffer({
   onAccept,
   onDecline,
   onCancel,
+  onPeek,
 }: {
   trade: StickerTrade
   mine: boolean
   onAccept?: () => void
   onDecline?: () => void
   onCancel?: () => void
+  onPeek?: (s: StickerDef, e: React.MouseEvent<HTMLElement>) => void
 }) {
   const cards = (ids: string[]) =>
     ids.map((id, i) => {
       const s = stickerById(id)
-      return s ? <Sticker key={`${id}-${i}`} sticker={s} size="sm" /> : null
+      // nothing else to tap on an offer card, so a plain tap zooms in
+      return s ? (
+        <Sticker key={`${id}-${i}`} sticker={s} size="sm" onClick={onPeek && ((e) => onPeek(s, e))} />
+      ) : null
     })
 
   return (

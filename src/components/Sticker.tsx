@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { stickerUrl, type StickerDef } from '../logic/album'
 
 /**
@@ -13,6 +14,7 @@ export function Sticker({
   count = 0,
   size = 'md',
   onClick,
+  onLongPress,
   selected = false,
   badge,
   wanted = false,
@@ -21,7 +23,9 @@ export function Sticker({
   state?: 'owned' | 'missing' | 'reveal'
   count?: number // copies owned; >1 shows the spare pill
   size?: 'sm' | 'md' | 'lg'
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void
+  /** Hold to peek at the full-size card, where a plain tap already means something else (trade picking). */
+  onLongPress?: (e: React.MouseEvent<HTMLElement>) => void
   selected?: boolean
   badge?: string // small corner label (e.g. "NEW", "×2")
   wanted?: boolean // the other crewmate is missing this one — the whole card lights up
@@ -41,10 +45,44 @@ export function Sticker({
 
   // Not a <button> when it isn't tappable: a disabled button swallows clicks,
   // which would block the tap-anywhere overlay during a pack reveal.
-  const Tag = onClick ? 'button' : 'div'
+  const Tag = onClick || onLongPress ? 'button' : 'div'
+
+  // Long-press to peek. Held presses suppress the click that follows, so a peek
+  // on the trade screen doesn't also toggle the card into the offer.
+  const held = useRef(false)
+  const timer = useRef<number | null>(null)
+  const clearHold = () => {
+    if (timer.current) window.clearTimeout(timer.current)
+    timer.current = null
+  }
+  const startHold = (e: React.MouseEvent<HTMLElement>) => {
+    if (!onLongPress) return
+    held.current = false
+    const el = e.currentTarget
+    clearHold()
+    timer.current = window.setTimeout(() => {
+      held.current = true
+      onLongPress({ ...e, currentTarget: el } as React.MouseEvent<HTMLElement>)
+    }, 380)
+  }
 
   return (
-    <Tag type={onClick ? 'button' : undefined} className={cls} onClick={onClick} title={sticker.name}>
+    <Tag
+      type={Tag === 'button' ? 'button' : undefined}
+      className={cls}
+      title={sticker.name}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        if (held.current) {
+          held.current = false // this press was a peek, not a pick
+          return
+        }
+        onClick?.(e)
+      }}
+      onPointerDown={startHold}
+      onPointerUp={clearHold}
+      onPointerLeave={clearHold}
+      onContextMenu={(e: React.MouseEvent) => onLongPress && e.preventDefault()}
+    >
       <div className="sticker-art">
         {state === 'missing' ? (
           <span className="sticker-ghost">?</span>

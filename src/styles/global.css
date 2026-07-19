@@ -1179,3 +1179,74 @@ input, select { font-family: inherit; }
   color: #0c2338; background: var(--yellow);
   padding: 1px 7px; border-radius: 999px;
 }
+
+/* ---- sticker detail (tap a card to zoom in) ------------------------------ */
+
+.detail-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgb(6 17 29 / 0%);
+  transition: background 260ms ease-out;
+}
+.detail-overlay.is-open { background: rgb(6 17 29 / 88%); }
+
+/* starts scaled/translated onto the tapped thumbnail, then flies to center */
+.detail-card {
+  position: relative; width: 230px; max-width: 76vw;
+  transform-origin: center center;
+  transition:
+    transform 340ms cubic-bezier(0.2, 0.9, 0.3, 1.15),
+    opacity 200ms ease-out;
+}
+.detail-overlay.is-open .detail-card { transform: none; opacity: 1; }
+
+.detail-art {
+  position: relative; overflow: hidden;
+  aspect-ratio: 45 / 62; border-radius: 12px;
+  border: 5px solid #fff; background: linear-gradient(160deg, #7fd4ff, #2e63a4);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 65%);
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-art.sticker--special {
+  border-color: var(--red);
+  background: linear-gradient(160deg, #ffce00, #af6528);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 65%), 0 0 34px rgb(255 206 0 / 45%);
+}
+.detail-art.is-missing { background: var(--bg2); border-color: var(--card2); }
+.detail-art img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.detail-ghost { font-size: 72px; font-weight: 900; color: var(--line); }
+
+/* slow foil sweep on a legendary */
+.detail-shine {
+  position: absolute; top: -60%; left: -45%; width: 38%; height: 220%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 55%), transparent);
+  transform: rotate(18deg); animation: pack-shine 3.4s ease-in-out infinite;
+}
+
+.detail-close {
+  position: absolute; top: -14px; right: -14px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--card2); color: var(--text);
+  border: 2px solid var(--line); font-size: 15px; font-weight: 900;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 50%);
+}
+.detail-close:active { transform: scale(0.9); }
+
+.detail-body { margin-top: 14px; text-align: center; }
+.detail-name { font-weight: 900; font-size: 18px; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px; }
+.detail-chip {
+  font-size: 10px; font-weight: 900; padding: 3px 9px; border-radius: 999px;
+  background: var(--card); color: var(--muted); border: 1px solid var(--line);
+}
+.detail-chip.is-special { background: var(--red); color: #fff; border-color: var(--red); }
+.detail-chip.is-common { background: var(--card2); color: var(--text); }
+.detail-status {
+  margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--muted);
+  background: var(--card); border-radius: 12px; padding: 9px 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-card { transition: opacity 160ms ease-out; transform: none !important; }
+  .detail-shine { animation: none; }
+}
