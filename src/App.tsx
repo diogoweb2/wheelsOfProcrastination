@@ -162,7 +162,7 @@ export default function App() {
       style={
         bg
           ? {
-              background: `linear-gradient(rgb(12 35 56 / 35%), rgb(12 35 56 / 50%)), url(${backgroundUrl(bg)}) center / cover no-repeat var(--bg)`,
+              background: `linear-gradient(rgb(12 35 56 / 35%), rgb(12 35 56 / 50%)), url(${backgroundUrl(bg)}) center / 420px repeat fixed var(--bg)`,
             }
           : undefined
       }
