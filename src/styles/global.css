@@ -1143,3 +1143,39 @@ input, select { font-family: inherit; }
   background: var(--red); color: #fff; border-radius: 999px;
   font-size: 10px; font-weight: 900; line-height: 16px;
 }
+
+/* ---- album: legendary vault + trade indicators --------------------------- */
+
+.album-vault {
+  padding: 12px; border-radius: var(--radius);
+  background: linear-gradient(160deg, rgb(215 0 0 / 22%), rgb(175 101 40 / 14%));
+  border: 2px solid var(--red);
+  box-shadow: 0 0 22px rgb(215 0 0 / 22%);
+}
+.album-vault .album-crew-head { border-bottom-color: var(--red); }
+.album-vault .album-crew-name { color: var(--yellow); }
+.album-vault-note { font-size: 11px; color: var(--muted); margin: -3px 0 9px; }
+
+/* copies-owned pill: left corner, so a badge can never hide it */
+.sticker-count {
+  position: absolute; bottom: 15px; left: 2px;
+  background: var(--bg2); color: var(--text);
+  font-size: 8px; font-weight: 900; padding: 1px 4px; border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+/* "the other crewmate is missing this" — the loudest thing on the trade screen */
+.sticker--wanted { border-color: var(--yellow); box-shadow: 0 0 0 2px var(--yellow), 0 2px 10px rgb(255 206 0 / 45%); }
+.sticker-wanted {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--yellow); color: #0c2338;
+  font-size: 7px; font-weight: 900; letter-spacing: 0.3px;
+  padding: 2px 0; text-align: center;
+}
+.sticker--wanted .sticker-name { padding-bottom: 12px; }
+
+.trade-head-note {
+  float: right; font-size: 10px; font-weight: 900;
+  color: #0c2338; background: var(--yellow);
+  padding: 1px 7px; border-radius: 999px;
+}

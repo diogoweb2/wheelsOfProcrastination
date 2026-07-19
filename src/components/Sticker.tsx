@@ -15,6 +15,7 @@ export function Sticker({
   onClick,
   selected = false,
   badge,
+  wanted = false,
 }: {
   sticker: StickerDef
   state?: 'owned' | 'missing' | 'reveal'
@@ -23,6 +24,7 @@ export function Sticker({
   onClick?: () => void
   selected?: boolean
   badge?: string // small corner label (e.g. "NEW", "×2")
+  wanted?: boolean // the other crewmate is missing this one — the whole card lights up
 }) {
   const cls = [
     'sticker',
@@ -30,6 +32,7 @@ export function Sticker({
     `sticker--${sticker.rarity}`,
     state === 'missing' ? 'sticker--missing' : '',
     state === 'reveal' ? 'sticker--reveal' : '',
+    wanted ? 'sticker--wanted' : '',
     selected ? 'sticker--selected' : '',
     onClick ? 'sticker--tappable' : '',
   ]
@@ -51,8 +54,10 @@ export function Sticker({
       </div>
       <div className="sticker-name">{state === 'missing' ? '???' : sticker.name}</div>
       {sticker.rarity === 'special' && state !== 'missing' && <span className="sticker-star">★</span>}
+      {/* count sits on the left so a badge never hides how many spares you hold */}
+      {count > 1 && <span className="sticker-count">×{count}</span>}
       {badge && <span className="sticker-badge">{badge}</span>}
-      {count > 1 && !badge && <span className="sticker-badge">×{count}</span>}
+      {wanted && <span className="sticker-wanted">WANTS IT</span>}
     </Tag>
   )
 }

@@ -72,10 +72,44 @@ function AlbumTab() {
   const { data, mateAlbum } = useStore()
   const album = data.album
 
+  const specials = STICKER_CATALOG.filter((s) => s.rarity === 'special')
+  const vaultGot = specials.filter((s) => ownsSticker(album, s.id)).length
+  const vaultDone = specials.length > 0 && vaultGot === specials.length
+
   return (
     <>
+      {/* Red rares get their own gilded shelf at the top — they're the prize of
+          the album, not something to hunt for inside a crew page. */}
+      {specials.length > 0 && (
+        <div className="album-crew album-vault">
+          <div className="album-crew-head">
+            <span className="album-crew-name">★ Legendary Vault</span>
+            <span className={`album-crew-count ${vaultDone ? 'is-done' : ''}`}>
+              {vaultDone ? '★ COMPLETE' : `${vaultGot}/${specials.length}`}
+            </span>
+          </div>
+          <p className="album-vault-note">Red borders · worth 2 whites in a trade</p>
+          <div className="album-grid">
+            {specials.map((s) => {
+              const n = album.counts[s.id] ?? 0
+              const mateHas = n === 0 && mateAlbum ? spareCount(mateAlbum, s.id) > 0 : false
+              return (
+                <Sticker
+                  key={s.id}
+                  sticker={s}
+                  state={n > 0 ? 'owned' : 'missing'}
+                  count={n}
+                  size="sm"
+                  badge={mateHas ? '🤝' : undefined}
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {STICKER_CREWS.map((crew) => {
-        const cards = STICKER_CATALOG.filter((s) => s.crew === crew.id)
+        const cards = STICKER_CATALOG.filter((s) => s.crew === crew.id && s.rarity === 'common')
         if (cards.length === 0) return null
         const got = cards.filter((s) => ownsSticker(album, s.id)).length
         const done = got === cards.length
@@ -199,7 +233,17 @@ function TradeTab() {
   const mate = profiles.find((p) => p.id === mateId)
   const mateName = mate?.name ?? 'your crewmate'
 
-  const mySpares = spares(data.album)
+  // spares the mate is missing float to the top — those are the ones worth offering
+  const mySpares = useMemo(() => {
+    const all = spares(data.album)
+    if (!mateAlbum) return all
+    return [...all].sort((a, b) => {
+      const aw = ownsSticker(mateAlbum, a.sticker.id) ? 1 : 0
+      const bw = ownsSticker(mateAlbum, b.sticker.id) ? 1 : 0
+      return aw - bw
+    })
+  }, [data.album, mateAlbum])
+  const wantedSpares = mateAlbum ? mySpares.filter((s) => !ownsSticker(mateAlbum, s.sticker.id)).length : 0
   // what each side can actually offer the other
   const iCanHelp = mateAlbum ? tradeableFor(data.album, mateAlbum) : []
   const theyCanHelp = mateAlbum ? tradeableFor(mateAlbum, data.album) : []
@@ -294,25 +338,25 @@ function TradeTab() {
             </div>
           )}
 
-          <div className="trade-head">🎁 You give from your spares</div>
+          <div className="trade-head">
+            🎁 You give from your spares
+            {wantedSpares > 0 && <span className="trade-head-note">{wantedSpares} {mateName} needs</span>}
+          </div>
           {mySpares.length === 0 ? (
             <p className="muted" style={{ fontSize: 12 }}>No spares yet — open a pack or two.</p>
           ) : (
             <div className="album-grid">
-              {mySpares.map(({ sticker, count }) => {
-                const needed = !ownsSticker(mateAlbum, sticker.id)
-                return (
-                  <Sticker
-                    key={sticker.id}
-                    sticker={sticker}
-                    size="sm"
-                    count={count}
-                    selected={give.includes(sticker.id)}
-                    badge={needed ? '🎯' : undefined}
-                    onClick={() => toggle(give, setGive, sticker.id)}
-                  />
-                )
-              })}
+              {mySpares.map(({ sticker, count }) => (
+                <Sticker
+                  key={sticker.id}
+                  sticker={sticker}
+                  size="sm"
+                  count={count}
+                  selected={give.includes(sticker.id)}
+                  wanted={!ownsSticker(mateAlbum, sticker.id)}
+                  onClick={() => toggle(give, setGive, sticker.id)}
+                />
+              ))}
             </div>
           )}
 
