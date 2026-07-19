@@ -137,6 +137,8 @@ export interface QuizStat {
   lastRewardDay: string | null // Berries at most once per question per day
   avgTimeMs: number // rolling average time to answer
   lastSeenAt?: string // ISO — clears the "NEW" badge once the question is seen after a freshAt update
+  streak?: number // consecutive correct answers; a wrong answer resets it to 0
+  dueDay?: string | null // YYYY-MM-DD — training hides the question until this day (spaced repetition)
 }
 
 export interface QuizTestRecord {

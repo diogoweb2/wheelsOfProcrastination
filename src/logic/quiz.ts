@@ -220,6 +220,23 @@ export function isFresh(q: QuizQuestion, stat: QuizStat | undefined): boolean {
   return !stat?.lastSeenAt || stat.lastSeenAt < q.freshAt
 }
 
+/**
+ * Spaced repetition ladder: how many days a question rests after N consecutive
+ * correct answers. Get it right and it fades out; get it wrong and it's back
+ * tomorrow, so training loops on the mistakes.
+ */
+const REST_DAYS = [2, 5, 14, 30]
+
+function restDaysFor(streak: number): number {
+  return REST_DAYS[Math.min(streak, REST_DAYS.length) - 1] ?? REST_DAYS[0]
+}
+
+/** True when training may show this question today (never answered right, or its rest is over). */
+export function isDue(stat: QuizStat | undefined, today: string = dayKey()): boolean {
+  if (!stat?.dueDay) return true
+  return stat.dueDay <= today
+}
+
 export function updatedStat(stat: QuizStat | undefined, correct: boolean, timeMs: number): QuizStat {
   const s: QuizStat = stat ? { ...s0(stat) } : { seen: 0, correct: 0, wrong: 0, everCorrect: false, lastRewardDay: null, avgTimeMs: 0 }
   s.seen += 1
@@ -227,8 +244,14 @@ export function updatedStat(stat: QuizStat | undefined, correct: boolean, timeMs
   if (correct) {
     s.correct += 1
     s.everCorrect = true
+    s.streak = (s.streak ?? 0) + 1
+    const rest = new Date()
+    rest.setDate(rest.getDate() + restDaysFor(s.streak))
+    s.dueDay = dayKey(rest)
   } else {
     s.wrong += 1
+    s.streak = 0
+    s.dueDay = null // missed → straight back into the rotation
   }
   // rolling average, clamped so one bathroom break doesn't wreck the estimate
   const t = Math.min(Math.max(timeMs, 1000), 4 * 60_000)
@@ -245,24 +268,37 @@ function s0(stat: QuizStat): QuizStat {
     everCorrect: stat.everCorrect ?? false,
     lastRewardDay: stat.lastRewardDay ?? null,
     avgTimeMs: stat.avgTimeMs ?? 0,
+    lastSeenAt: stat.lastSeenAt,
+    streak: stat.streak ?? 0,
+    dueDay: stat.dueDay ?? null,
   }
 }
 
 // --- training question picker ----------------------------------------------
 
+/** The questions training may serve today: unmastered, or past their spaced-repetition rest. */
+export function duePool(pool: QuizQuestion[], stats: Record<string, QuizStat>): QuizQuestion[] {
+  const today = dayKey()
+  return pool.filter((q) => isDue(stats[q.id], today))
+}
+
 /**
  * Pick the next training question: unseen first-ish, then the ones he struggles
  * with, core (weight 2) material favoured. Avoids the last few shown.
+ * Questions resting after a correct answer are skipped unless `ignoreRest`.
  */
 export function pickTraining(
   pool: QuizQuestion[],
   stats: Record<string, QuizStat>,
   recentIds: string[],
+  ignoreRest = false,
 ): QuizQuestion | null {
   if (pool.length === 0) return null
+  const due = ignoreRest ? pool : duePool(pool, stats)
+  if (due.length === 0) return null
   const recent = new Set(recentIds.slice(-6))
-  let candidates = pool.filter((q) => !recent.has(q.id))
-  if (candidates.length === 0) candidates = pool
+  let candidates = due.filter((q) => !recent.has(q.id))
+  if (candidates.length === 0) candidates = due
   const weights = candidates.map((q) => {
     const stat = stats[q.id]
     const novelty = !stat || stat.seen === 0 ? 2.5 : 1

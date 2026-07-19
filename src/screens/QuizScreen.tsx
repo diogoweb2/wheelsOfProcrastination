@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import type { AppData, QuizQuestion } from '../types'
-import { activeQuestions, isFresh, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
+import { activeQuestions, duePool, isFresh, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
 import { QuizSession, type QuizMode } from '../components/QuizSession'
 import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
@@ -82,6 +82,7 @@ function TopicCard({
   const pool = activeQuestions(bank, topic.id)
   const mastered = pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length
   const freshCount = pool.filter((q) => isFresh(q, data.quiz.stats[q.id])).length
+  const dueCount = duePool(pool, data.quiz.stats).length
   const last = lastOfficialAttempt(data, topic.id)
   const failedToday = !!last && !last.passed && last.day === dayKey()
 
@@ -110,6 +111,7 @@ function TopicCard({
           </div>
           <div className="muted" style={{ fontSize: 11, marginTop: 3 }}>
             {mastered}/{pool.length} questions mastered
+            {dueCount > 0 ? ` · ${dueCount} to practise today` : ' · all caught up today 😴'}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <button className="btn btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); onStart('training') }}>

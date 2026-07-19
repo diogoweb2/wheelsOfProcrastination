@@ -69,6 +69,8 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
   const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
+  // training: true once he opts to keep practising past the spaced-repetition rest
+  const [ignoreRest, setIgnoreRest] = useState(false)
   const [current, setCurrent] = useState<QuizQuestion | null>(() =>
     mode === 'training' ? pickTraining(pool, stats, []) : null,
   )
@@ -108,15 +110,26 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     // questions answered RIGHT this session don't come back; wrong ones may return for another try
     const remainingPool = pool.filter((x) => !correctIds.includes(x.id))
     setFeedback(null)
-    if (remainingPool.length === 0) {
+    const shown = [...recent, q.id]
+    const next = pickTraining(remainingPool, stats, shown, ignoreRest)
+    if (!next) {
+      // nothing left that's due today — the topic is clear (for now)
       setTrainingDone(true)
       sfx.bigWin()
       confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } })
       return
     }
-    const shown = [...recent, q.id]
     setRecent(shown)
-    setCurrent(pickTraining(remainingPool, stats, shown))
+    setCurrent(next)
+  }
+
+  /** "Practice anyway" from the caught-up screen: drop the rest filter and keep going. */
+  function practiceAnyway() {
+    const next = pickTraining(pool.filter((x) => !sessionCorrect.includes(x.id)), stats, recent, true)
+    if (!next) return
+    setIgnoreRest(true)
+    setTrainingDone(false)
+    setCurrent(next)
   }
 
   function submit(correct: boolean, given: Given = {}) {
@@ -171,15 +184,17 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} />
   }
 
-  // ---- training: whole topic cleared this session ----
-  if (trainingDone) {
+  // ---- training: nothing due (cleared this session, or all resting) ----
+  if (mode === 'training' && (trainingDone || !current)) {
     return (
       <Full onClose={onClose} title={`${topic.emoji} Training`}>
         <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: 'var(--gold)' }}>
           <div style={{ fontSize: 56 }}>🍖😴</div>
           <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>NICE WORK, PIRATE!</div>
           <p style={{ marginTop: 8, fontWeight: 800 }}>
-            You conquered every question on this sea! Even Luffy takes a nap after a great feast — give that brain a rest.
+            {trainingDone
+              ? 'You conquered every question on this sea! Even Luffy takes a nap after a great feast — give that brain a rest.'
+              : 'All caught up! Every question here is resting — they come back later so you remember them for good.'}
           </p>
           {!preview && (
             <p style={{ marginTop: 8 }}>
@@ -188,10 +203,13 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
             </p>
           )}
           <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-            Sail back anytime for another round — repeated questions pay half Berries.
+            Questions you nail rest a few days before returning; ones you miss come straight back. Repeats pay half Berries.
           </p>
           <button className="btn" style={{ marginTop: 14 }} onClick={onClose}>
             ⚓ Back to the ship
+          </button>
+          <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={practiceAnyway}>
+            💪 Practice anyway
           </button>
         </div>
       </Full>
