@@ -4,6 +4,7 @@ import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
 import { StreakPrompts } from './components/StreakPrompts'
+import { RequiredDeadline } from './components/RequiredDeadline'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
@@ -21,13 +22,13 @@ import { sfx } from './audio'
 
 type Tab = 'spin' | 'store' | 'album' | 'quiz' | 'bank' | 'me'
 
-const TABS: { id: Tab; icon: string; label: string }[] = [
+const TABS: { id: Tab; icon: string; label?: string }[] = [
   { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
   { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
   { id: 'album', icon: '📖', label: 'Album' },
   { id: 'quiz', icon: '🧭', label: 'Quiz' },
   { id: 'bank', icon: '🏦', label: 'Bank' }, // real-dollar Grand Line Bank (badges moved to Me → Voyage)
-  { id: 'me', icon: '👒', label: 'Me' },
+  { id: 'me', icon: '👒' },
 ]
 
 /** Renders a number that visibly counts up/down to its new value (topbar currencies). */
@@ -270,12 +271,13 @@ export default function App() {
         <button
           className="fab"
           title="Quest log"
+          aria-label="Quest log"
           onClick={() => {
             sfx.click()
             setTasksOpen(true)
           }}
         >
-          +
+          <img src="/quest-log.webp" alt="" draggable={false} />
         </button>
       )}
       {tasksOpen && (
@@ -318,13 +320,15 @@ export default function App() {
                 t.icon
               )}
             </span>
-            <span>{t.label}</span>
+            <span>{t.id === 'me' ? activeProfile()?.name : t.label}</span>
           </button>
         ))}
       </nav>
 
       <EventModal />
       <StreakPrompts />
+      {/* mandatory decision — rendered last so it sits above the other prompts */}
+      <RequiredDeadline />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import type { DayScope, Effort, Priority, Task } from '../types'
-import { isEffectivelyUrgent, manualPickCost, rewardFor } from '../logic/economy'
+import { REQUIRED_REWARD, isEffectivelyUrgent, manualPickCost, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { dayKey, daysUntil } from '../logic/dates'
@@ -73,6 +73,8 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               <div className="name">{t.name}</div>
               <div className="meta">
                 <span className="chip chip--effort">{t.effort}</span>
+                {t.required && <span className="chip chip--required">✅ must-do</span>}
+                {t.required && t.requiredUntil && <span className="chip">🏁 until {t.requiredUntil}</span>}
                 {urgent && <span className="chip chip--urgent">⚡ urgent</span>}
                 {t.repeats && <span className="chip">🔁</span>}
                 {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
@@ -93,6 +95,9 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               <span className="chip" style={{ background: 'var(--purple)', color: '#fff' }}>
                 🎯 on plate
               </span>
+            ) : t.required ? (
+              // must-dos are ticked off in the checklist beside the wheel, never picked
+              <span className="chip chip--required">✅ checklist</span>
             ) : !available ? (
               <span className="chip" title="Not on today's wheel">
                 💤 not today
@@ -168,6 +173,9 @@ function TaskForm(props: {
     dueDate?: string
     startDate?: string
     dayScope: DayScope
+    required?: boolean
+    requiredFrom?: string
+    requiredUntil?: string
   }) => void
   onClose: () => void
   onDelete?: () => void
@@ -180,7 +188,15 @@ function TaskForm(props: {
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? '')
   const [startDate, setStartDate] = useState(initial?.startDate ?? '')
   const [dayScope, setDayScope] = useState<DayScope>(initial?.dayScope ?? 'all')
+  const [required, setRequired] = useState(initial?.required ?? false)
+  const [requiredFrom, setRequiredFrom] = useState(initial?.requiredFrom ?? '')
+  const [requiredUntil, setRequiredUntil] = useState(initial?.requiredUntil ?? '')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Dates are the advanced corner of this form — folded away by default so the
+  // everyday "name + must-do + effort" path stays short enough for a kid.
+  const [datesOpen, setDatesOpen] = useState(
+    Boolean(initial?.dueDate || initial?.startDate || initial?.requiredFrom || initial?.requiredUntil),
+  )
 
   const preview = rewardFor(
     {
@@ -209,6 +225,23 @@ function TaskForm(props: {
         <div className="field">
           <label>What must be done?</label>
           <input type="text" value={name} maxLength={60} placeholder='e.g. "Read for 10 min"' onChange={(e) => setName(e.target.value)} />
+        </div>
+
+        <div className="field">
+          <label>Required every day? (skips the wheel)</label>
+          <div className="seg">
+            <button className={!required ? 'on' : ''} onClick={() => setRequired(false)}>
+              🎡 On the wheel
+            </button>
+            <button className={required ? 'on' : ''} onClick={() => setRequired(true)}>
+              ✅ Must-do
+            </button>
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+            {required
+              ? `Lives in the must-do checklist beside the wheel. Pays 🪙${REQUIRED_REWARD[effort]} per tick — and costs 🪙${REQUIRED_REWARD[effort]} for every day you skip it.`
+              : 'Normal quest — the wheel can land on it.'}
+          </p>
         </div>
 
         <div className="field">
@@ -246,18 +279,58 @@ function TaskForm(props: {
           </div>
         </div>
 
+        {/* One dates drawer. Only ever two dates: a start and an end — the pair
+            shown depends on whether this is a must-do or a wheel quest. */}
         <div className="field">
-          <label>Deadline (optional — it gets scarier as it nears)</label>
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-        </div>
+          <button className="dates-toggle" onClick={() => setDatesOpen((o) => !o)}>
+            <span>📅 Dates (optional)</span>
+            <span className="muted">{datesOpen ? '▲' : '▼'}</span>
+          </button>
 
-        <div className="field">
-          <label>Start date (optional — hidden from the wheel until then)</label>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          {startDate && (
-            <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => setStartDate('')}>
-              Clear start date
-            </button>
+          {datesOpen && (
+            <div className="dates-body">
+              {required ? (
+                <>
+                  <label>Starts on — ignored until this day</label>
+                  <input type="date" value={requiredFrom} onChange={(e) => setRequiredFrom(e.target.value)} />
+                  {requiredFrom && (
+                    <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => setRequiredFrom('')}>
+                      Clear
+                    </button>
+                  )}
+
+                  <label style={{ marginTop: 12 }}>Last day — required every day up to here</label>
+                  <input type="date" value={requiredUntil} onChange={(e) => setRequiredUntil(e.target.value)} />
+                  {requiredUntil ? (
+                    <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => setRequiredUntil('')}>
+                      Clear (require it forever)
+                    </button>
+                  ) : (
+                    <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                      No last day — required every day, indefinitely.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <label>Starts on — hidden from the wheel until this day</label>
+                  <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  {startDate && (
+                    <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => setStartDate('')}>
+                      Clear
+                    </button>
+                  )}
+
+                  <label style={{ marginTop: 12 }}>Deadline — it gets scarier as it nears</label>
+                  <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+                  {dueDate && (
+                    <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => setDueDate('')}>
+                      Clear
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           )}
         </div>
 
@@ -277,15 +350,31 @@ function TaskForm(props: {
         </div>
 
         <p className="muted" style={{ marginBottom: 12 }}>
-          Pays 🪙{preview} per completion{priority === 'urgent' ? ' (urgency bonus included)' : ''}.
+          {required
+            ? `Pays 🪙${REQUIRED_REWARD[effort]} per tick, −🪙${REQUIRED_REWARD[effort]} per skipped day.`
+            : `Pays 🪙${preview} per completion${priority === 'urgent' ? ' (urgency bonus included)' : ''}.`}
         </p>
 
         <button
           className="btn"
           disabled={!name.trim()}
-          onClick={() => onSave({ name, repeats, effort, priority, dueDate: dueDate || undefined, startDate: startDate || undefined, dayScope })}
+          onClick={() =>
+            onSave({
+              name,
+              repeats,
+              effort,
+              priority,
+              dueDate: dueDate || undefined,
+              startDate: startDate || undefined,
+              dayScope,
+              required,
+              // the window only means anything for a requirement
+              requiredFrom: required ? requiredFrom || undefined : undefined,
+              requiredUntil: required ? requiredUntil || undefined : undefined,
+            })
+          }
         >
-          {initial ? 'Save' : 'Add to the wheel'}
+          {initial ? 'Save' : required ? 'Add to must-dos' : 'Add to the wheel'}
         </button>
         {onDelete &&
           (confirmDelete ? (

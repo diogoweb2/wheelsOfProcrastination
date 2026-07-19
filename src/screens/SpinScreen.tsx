@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
 import type { Effort, EffortFilter, Task } from '../types'
 import { Wheel } from '../components/Wheel'
+import { RequiredList } from '../components/RequiredList'
 import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
@@ -21,7 +22,9 @@ export function SpinScreen() {
 
   function toggleEffort(effort: Effort) {
     setFilter((f) => {
-      const next = f.includes(effort) ? f.filter((e) => e !== effort) : [...f, effort]
+      // [] means "all on" — tapping a pip then must turn that one OFF, not solo it
+      const expanded = f.length === 0 ? FILTERS.map((x) => x.id) : f
+      const next = expanded.includes(effort) ? expanded.filter((e) => e !== effort) : [...expanded, effort]
       return next.length === FILTERS.length ? [] : next // all three ticked = "All"
     })
   }
@@ -140,7 +143,8 @@ export function SpinScreen() {
         : 'easy'
       : 'default'
   const plateFull = pendingTasks.length >= MAX_PENDING
-  // Nothing left to spin (and no animation in flight) — hide the wheel entirely.
+  // Nothing left to spin (and no animation in flight) — the wheel stays put,
+  // empty, with a happy Luffy in the hub.
   const nothingToSpin = pool.length === 0 && !spinning
 
   return (
@@ -165,57 +169,66 @@ export function SpinScreen() {
         />
       )}
 
-      <div className="seg" style={{ marginBottom: 10 }}>
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            className={filter.includes(f.id) ? 'on' : ''}
-            onClick={() => {
-              sfx.click()
-              toggleEffort(f.id)
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
-        <button
-          className={filter.length === 0 ? 'on' : ''}
-          onClick={() => {
-            sfx.click()
-            setFilter([])
-          }}
-        >
-          All
-        </button>
-      </div>
-
-      {!nothingToSpin && <Wheel tasks={pool} targetId={targetId} spinToken={spinToken} onDone={onWheelDone} />}
-
-      {justEarned !== null && (
-        <div className="gem-fly" style={{ left: '50%', top: '45%' }}>
-          +{justEarned} 🪙
+      {/* must-dos on top, then the wheel with its effort filter running down the side */}
+      <div className="spin-split">
+        <div className="spin-split-list">
+          <RequiredList />
         </div>
-      )}
 
-      {!nothingToSpin && (
-        <button
-          className="btn"
-          style={{ marginTop: 10 }}
-          disabled={spinning || (plateFull && !spinning)}
-          onClick={startSpin}
-        >
-          {spinning ? 'Spinning…' : plateFull ? 'Plate full — finish one 👒' : 'SPIN THE WHEEL'}
-        </button>
-      )}
-      {nothingToSpin && (
-        <p className="muted" style={{ textAlign: 'center', marginTop: 10 }}>
-          {data.tasks.filter((t) => !t.archived).length === 0
-            ? 'Add quests in the Tasks tab. Adventure needs a destination!'
-            : pendingTasks.length > 0
-              ? 'Everything left is already on your plate. Deal with the cards above.'
-              : 'Everything matching this filter is done today. SUGEEE!'}
-        </p>
-      )}
+        <div className="wheel-row">
+          {/* no "All" button — ticking all three normalises to it anyway */}
+          <div className="effort-rail">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                className={`effort-pip effort-pip--${f.id}${
+                  filter.length === 0 || filter.includes(f.id) ? ' on' : ''
+                }`}
+                title={f.label}
+                aria-label={f.label}
+                onClick={() => {
+                  sfx.click()
+                  toggleEffort(f.id)
+                }}
+              >
+                {f.label.charAt(0).toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          <div className="spin-split-wheel">
+          <Wheel
+            tasks={nothingToSpin ? [] : pool}
+            targetId={targetId}
+            spinToken={spinToken}
+            onDone={onWheelDone}
+            onSpin={startSpin}
+            spinDisabled={plateFull}
+          />
+
+          {justEarned !== null && (
+            <div className="gem-fly" style={{ left: '50%', top: '45%' }}>
+              +{justEarned} 🪙
+            </div>
+          )}
+
+          {plateFull && !nothingToSpin && !spinning && (
+            <p className="muted" style={{ textAlign: 'center', marginTop: 6 }}>
+              Plate full — finish one 👒
+            </p>
+          )}
+          {nothingToSpin && (
+            <p className="muted" style={{ textAlign: 'center', marginTop: 10 }}>
+              {data.tasks.filter((t) => !t.archived).length === 0
+                ? 'Add quests in the Tasks tab. Adventure needs a destination!'
+                : pendingTasks.length > 0
+                  ? 'Everything left is already on your plate. Deal with the cards above.'
+                  : 'Everything matching this filter is done today. SUGEEE!'}
+            </p>
+          )}
+          </div>
+        </div>
+      </div>
 
       {/* result sheet right after a spin */}
       {showResult && resultTask && (

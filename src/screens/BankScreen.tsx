@@ -8,27 +8,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import type { AppData, BankAccountId, BankTxn, MarketData } from '../types'
+import type { AppData, BankAccountId, BankState, BankTxn, MarketData } from '../types'
 import {
   ACCOUNT_IDS,
   ACCOUNT_META,
   CRASH_PCT,
+  CURRENCIES,
   DAY_NAMES,
   INVEST_IDS,
   PROJECTION_YEARS,
   QQQ_MER,
   XGRO_MER,
+  converterActive,
+  converterDaysLeft,
   crashWorthwhile,
+  currencyMeta,
   daysToRecover,
   daysWithoutCrash,
   fmt$,
+  getConverter,
   partyName,
   projectAccount,
   randomLuffyQuote,
   round2,
+  toCad,
   totalTreasure,
   totalWithDad,
 } from '../logic/bank'
+import { addDays, dayKey } from '../logic/dates'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
 
@@ -191,6 +198,9 @@ function BankKid() {
           Allowance: {fmt$(bank.config.weeklyAmount)} every {DAY_NAMES[bank.config.payday]}
         </div>
       </div>
+
+      {/* trip mode sits right under the treasure total — it's what he reaches for in a shop */}
+      {converterActive(bank) && <ConverterCard bank={bank} />}
 
       {pendingPaybacks.length > 0 && (
         <div className="card" style={{ marginBottom: 12, borderColor: 'var(--blue)' }}>
@@ -661,6 +671,191 @@ function PayDadModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+/**
+ * Trip mode for Ben: type what the price tag says, see what it really costs in
+ * CAD — plus how much of his Pocket Chest that is, which is the whole point.
+ */
+function ConverterCard({ bank }: { bank: BankState }) {
+  const conv = getConverter(bank)
+  const meta = currencyMeta(conv.currency)
+  const [amount, setAmount] = useState('')
+  const daysLeft = converterDaysLeft(bank)
+
+  const local = Number(amount)
+  const ok = amount.trim() !== '' && Number.isFinite(local) && local >= 0
+  const cad = ok ? toCad(local, conv.rate) : 0
+  const pocket = bank.accounts.chequing.balance
+  const affordable = cad <= pocket + 0.001
+
+  return (
+    // converter on the left, scratch calculator on the right — add up a basket
+    // of price tags, then send the total straight across to be converted
+    <div className="trip-split">
+      <div className="card" style={{ borderColor: 'var(--gold)' }}>
+        <div style={{ fontWeight: 900, marginBottom: 2 }}>{meta.flag} Money Converter</div>
+        <div className="muted" style={{ fontSize: 11, marginBottom: 10 }}>
+          You’re on a trip! Type a price in {meta.name} and I’ll tell you what it costs in real dollars.
+        </div>
+
+        <div className="field" style={{ marginBottom: 10 }}>
+          <label>Price on the tag ({conv.currency})</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            placeholder={`e.g. ${meta.symbol}100`}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+
+        <div style={{ textAlign: 'center', padding: '10px 0' }}>
+          <div className="muted" style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+            That’s really
+          </div>
+          <div style={{ color: 'var(--gold)' }}>
+            <Money value={cad} size={34} />
+          </div>
+          {ok && local > 0 && (
+            <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
+              {affordable
+                ? `Your Pocket Chest (${fmt$(pocket)}) covers it — ${fmt$(pocket - cad)} left after.`
+                : `Your Pocket Chest only has ${fmt$(pocket)} — that’s ${fmt$(cad - pocket)} short!`}
+            </div>
+          )}
+        </div>
+
+        <div className="muted" style={{ fontSize: 10, textAlign: 'center' }}>
+          Dad’s rate: 1 CAD = {conv.rate} {conv.currency} · {daysLeft} day{daysLeft === 1 ? '' : 's'} left
+        </div>
+      </div>
+
+      <Calculator currency={conv.currency} onSend={(v) => setAmount(String(v))} />
+    </div>
+  )
+}
+
+// +, −, × and % only, as asked — no division key.
+const CALC_KEYS = ['7', '8', '9', '%', '4', '5', '6', '×', '1', '2', '3', '−', '0', '.', '=', '+'] as const
+
+/**
+ * A plain four-function scratch pad for adding up price tags before converting.
+ * Deliberately simple: no operator precedence — each operator key settles the
+ * pending operation first, the way a pocket calculator does.
+ */
+function Calculator({ currency, onSend }: { currency: string; onSend: (value: number) => void }) {
+  const [display, setDisplay] = useState('0')
+  const [acc, setAcc] = useState<number | null>(null) // left-hand value
+  const [op, setOp] = useState<string | null>(null)
+  const [fresh, setFresh] = useState(true) // next digit starts a new number
+
+  function apply(a: number, b: number, o: string): number {
+    if (o === '+') return a + b
+    if (o === '−') return a - b
+    if (o === '×') return a * b
+    if (o === '%') return b === 0 ? NaN : a % b
+    return b
+  }
+
+  function pressDigit(k: string) {
+    sfx.click()
+    if (k === '.' && !fresh && display.includes('.')) return
+    if (fresh) setDisplay(k === '.' ? '0.' : k)
+    else setDisplay(display === '0' && k !== '.' ? k : display + k)
+    setFresh(false)
+  }
+
+  function pressOp(k: string) {
+    sfx.click()
+    const cur = Number(display)
+    if (acc !== null && op && !fresh) {
+      const r = apply(acc, cur, op)
+      setAcc(r)
+      setDisplay(fmtCalc(r))
+    } else {
+      setAcc(cur)
+    }
+    setOp(k)
+    setFresh(true)
+  }
+
+  function pressEquals() {
+    sfx.click()
+    if (acc === null || !op) return
+    const r = apply(acc, Number(display), op)
+    setDisplay(fmtCalc(r))
+    setAcc(null)
+    setOp(null)
+    setFresh(true)
+  }
+
+  function clear() {
+    sfx.click()
+    setDisplay('0')
+    setAcc(null)
+    setOp(null)
+    setFresh(true)
+  }
+
+  const value = Number(display)
+  const sendable = Number.isFinite(value) && value > 0
+
+  return (
+    <div className="card calc-card">
+      <div style={{ fontWeight: 900, marginBottom: 2 }}>🧮 Calculator</div>
+      <div className="muted" style={{ fontSize: 11, marginBottom: 8 }}>
+        Add up a few price tags, then send the total over to be converted.
+      </div>
+
+      <div className="calc-display">
+        {op && <span className="calc-op">{op}</span>}
+        <span className="calc-value">{display}</span>
+      </div>
+
+      <div className="calc-pad">
+        <button className="calc-key calc-key--fn calc-key--wide" onClick={clear}>C</button>
+        <button
+          className="calc-key calc-key--fn"
+          onClick={() => {
+            sfx.click()
+            // backspace, falling back to a clean zero
+            setDisplay((d) => (d.length <= 1 ? '0' : d.slice(0, -1)))
+          }}
+        >
+          ⌫
+        </button>
+        {CALC_KEYS.map((k) =>
+          k === '=' ? (
+            <button key={k} className="calc-key calc-key--eq" onClick={pressEquals}>=</button>
+          ) : '%×−+'.includes(k) ? (
+            <button key={k} className="calc-key calc-key--op" onClick={() => pressOp(k)}>{k}</button>
+          ) : (
+            <button key={k} className="calc-key" onClick={() => pressDigit(k)}>{k}</button>
+          ),
+        )}
+      </div>
+
+      <button
+        className="btn btn--blue btn--small"
+        style={{ width: '100%', marginTop: 10 }}
+        disabled={!sendable}
+        onClick={() => {
+          sfx.gem()
+          onSend(value)
+        }}
+      >
+        ↑ Convert this ({currency})
+      </button>
+    </div>
+  )
+}
+
+/** Trim calculator results to something readable (no 0.30000000000000004). */
+function fmtCalc(n: number): string {
+  if (!Number.isFinite(n)) return 'Error'
+  return String(Math.round(n * 1e6) / 1e6)
+}
+
 const CONTRIB_CHIPS = [0, 1, 2, 5]
 
 /** "At this pace…" — the compound-interest telescope with a habit-deposit dial. */
@@ -807,6 +1002,7 @@ function BankAdmin() {
       <AdminShock kidData={kidData} />
       <AdminBalances kidData={kidData} />
       <AdminConfig kidData={kidData} />
+      <AdminConverter kidData={kidData} />
       <AdminAdjust />
       <AdminLog kidData={kidData} />
     </div>
@@ -998,6 +1194,85 @@ function AdminConfig({ kidData }: { kidData: AppData }) {
       {field('qqqMonthly', 'QQQ fallback (%/month)', 'Only used if the live market feed is down')}
       {field('respBalance', 'Real RESP balance ($)', 'Shown on his College Chest for motivation — never matched')}
       <button className="btn btn--blue" onClick={save}>💾 Save rules</button>
+    </div>
+  )
+}
+
+/** Trip mode: turn on the Money Converter for N days at a rate you set. */
+function AdminConverter({ kidData }: { kidData: AppData }) {
+  const { setBankConverter, pushEvent } = useStore()
+  const conv = getConverter(kidData.bank)
+  const live = converterActive(kidData.bank)
+  const daysLeft = converterDaysLeft(kidData.bank)
+  const [currency, setCurrency] = useState(conv.currency)
+  const [rate, setRate] = useState(String(conv.rate))
+  const [days, setDays] = useState('14')
+
+  const rateNum = Number(rate)
+  const rateOk = Number.isFinite(rateNum) && rateNum > 0
+  const daysNum = Number(days)
+  const daysOk = Number.isInteger(daysNum) && daysNum > 0 && daysNum <= 365
+  const meta = currencyMeta(currency)
+
+  function start() {
+    if (!rateOk || !daysOk) return
+    setBankConverter({ enabled: true, currency, rate: rateNum, days: daysNum })
+    sfx.gem()
+    pushEvent({
+      type: 'goal',
+      emoji: '🧭',
+      title: 'Money Converter is ON',
+      description: `Ben can now turn ${meta.name} into CAD for ${daysNum} day${daysNum === 1 ? '' : 's'}.`,
+    })
+  }
+
+  function stop() {
+    setBankConverter({ enabled: false, until: null })
+    sfx.click()
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: live ? 'var(--green)' : undefined }}>
+      <div style={{ fontWeight: 900, marginBottom: 4 }}>🧭 Money Converter (trip mode)</div>
+      <div className="muted" style={{ fontSize: 11, marginBottom: 10 }}>
+        {live
+          ? `Live: ${meta.flag} 1 CAD = ${conv.rate} ${conv.currency} · ${daysLeft} day${daysLeft === 1 ? '' : 's'} left (until ${conv.until})`
+          : 'Off — Ben doesn’t see the converter. Turn it on before a trip.'}
+      </div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>Currency</label>
+        <select value={currency} onChange={(e) => { setCurrency(e.target.value); sfx.click() }}>
+          {CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>{`${c.flag} ${c.code} — ${c.name}`}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>Rate — how many {currency} in 1 CAD?</label>
+        <input type="number" inputMode="decimal" step="0.0001" value={rate} onChange={(e) => setRate(e.target.value)} />
+        <span className="muted" style={{ fontSize: 10 }}>
+          {rateOk ? `1 CAD = ${rateNum} ${currency} · 100 ${currency} = ${fmt$(toCad(100, rateNum))}` : 'Enter a rate above 0'}
+        </span>
+      </div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>Enabled for how many days?</label>
+        <input type="number" inputMode="numeric" step="1" value={days} onChange={(e) => setDays(e.target.value)} />
+        <span className="muted" style={{ fontSize: 10 }}>
+          {daysOk ? `Turns itself off after ${addDays(dayKey(), daysNum - 1)}` : '1–365 days'}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn btn--blue" style={{ flex: 1 }} disabled={!rateOk || !daysOk} onClick={start}>
+          {live ? '💾 Update converter' : '🧭 Turn it on'}
+        </button>
+        {live && (
+          <button className="btn btn--ghost" onClick={stop}>Stop</button>
+        )}
+      </div>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import type {
   AppData,
   BankAccountId,
   BankConfig,
+  BankConverterState,
   Completion,
   DayScope,
   Effort,
@@ -54,14 +55,16 @@ import {
   manualPickCost,
   respinCost,
   rewardFor,
+  requiredPenalty,
+  requiredReward,
   streakGoalBonus,
   streakRepairCost,
 } from '../logic/economy'
-import { buildEntries, eligibleTasks, isAvailableOn, pickWeighted } from '../logic/wheel'
+import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
-import { ACCOUNT_IDS, BOUNCE_MULT, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
+import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
@@ -111,11 +114,20 @@ interface StoreState {
     dueDate?: string
     startDate?: string
     dayScope: DayScope
+    required?: boolean
+    requiredFrom?: string
+    requiredUntil?: string
   }) => void
   updateTask: (id: string, patch: Partial<Task>) => void
   deleteTask: (id: string) => void
 
   completedTodayIds: () => Set<string>
+  /** Tick a required checklist item off for today (pays the reduced flat reward). */
+  completeRequired: (taskId: string) => number
+  /** Last-day escape hatch: push a requirement's deadline out by `days`. */
+  postponeRequired: (taskId: string, days: number) => void
+  /** Last-day escape hatch: stop requiring this task forever (it stays as a normal quest). */
+  dropRequired: (taskId: string) => void
   spin: (filter: EffortFilter) => Task | null | 'full'
   respin: (filter: EffortFilter, replaceTaskId: string) => Task | null | 'broke' | 'full'
   manualPick: (taskId: string) => 'ok' | 'broke' | 'full'
@@ -145,6 +157,8 @@ interface StoreState {
   ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback
   setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
   bankAdjust: (acct: BankAccountId, delta: number, note: string) => void // admin: manual correction / paper-money import
+  /** Admin: turn the trip money converter on/off, set the currency, rate and how many days it lives. */
+  setBankConverter: (patch: Partial<BankConverterState> & { days?: number }) => void
   // Shock Test:
   /** Ben answers the crash alert: panic-sell everything at the bottom, or hold for the bounce. */
   resolveBankCrash: (choice: 'hold' | 'panic') => void
@@ -421,8 +435,18 @@ export const useStore = create<StoreState>((set, get) => {
         if (activeProfileId === KID_ID) simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }), get().market)
         const completedDays = new Set(d.completions.map((c) => c.day))
         const frozen = new Set(d.frozenDays.map((f) => f.day))
+        // "task X was done on day Y" — required items are judged per task, per day
+        const donePerDay = new Set(d.completions.map((c) => `${c.day}|${c.taskId}`))
+        let missedRequired = 0
+        const missedNames: string[] = []
         let cur = d.streak.lastRolloverDay ?? today
         while (cur < today) {
+          // Every requirement that was live that day and never ticked off costs Berries.
+          for (const t of d.tasks) {
+            if (!isRequiredOn(t, cur) || donePerDay.has(`${cur}|${t.id}`)) continue
+            missedRequired += requiredPenalty(t)
+            if (!missedNames.includes(t.name)) missedNames.push(t.name)
+          }
           const dayDone = completedDays.has(cur) || frozen.has(cur)
           if (!dayDone && d.streak.current > 0) {
             if (d.economy.freezes > 0) {
@@ -441,6 +465,15 @@ export const useStore = create<StoreState>((set, get) => {
             }
           }
           cur = addDays(cur, 1)
+        }
+        if (missedRequired > 0) {
+          d.economy.gems = Math.max(0, d.economy.gems - missedRequired)
+          events.push({
+            type: 'penalty',
+            emoji: '🪥',
+            title: `Skipped the must-dos: −${missedRequired} 🪙`,
+            description: `${missedNames.join(', ')} — these aren't optional, captain. Every skipped day costs exactly what doing it would have paid.`,
+          })
         }
         d.streak.lastRolloverDay = today
         if (d.daily.day !== today) {
@@ -483,6 +516,10 @@ export const useStore = create<StoreState>((set, get) => {
           archived: false,
           spinsSinceLastPicked: 0,
           timesPicked: 0,
+          // omitted entirely when unset — Firestore rejects undefined values
+          ...(t.required ? { required: true } : {}),
+          ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
+          ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
         })
       })
     },
@@ -490,7 +527,14 @@ export const useStore = create<StoreState>((set, get) => {
     updateTask(id, patch) {
       commit((d) => {
         const t = d.tasks.find((x) => x.id === id)
-        if (t) Object.assign(t, patch)
+        if (!t) return
+        // An explicit `undefined` means "clear this field" — delete the key rather
+        // than assigning undefined, which Firestore rejects.
+        const row = t as unknown as Record<string, unknown>
+        for (const [k, v] of Object.entries(patch)) {
+          if (v === undefined) delete row[k]
+          else row[k] = v
+        }
       })
     },
 
@@ -504,6 +548,61 @@ export const useStore = create<StoreState>((set, get) => {
     completedTodayIds() {
       const today = dayKey()
       return new Set(get().data.completions.filter((c) => c.day === today).map((c) => c.taskId))
+    },
+
+    completeRequired(taskId) {
+      const today = dayKey()
+      let earned = 0
+      commit((d, events) => {
+        const task = d.tasks.find((t) => t.id === taskId)
+        if (!task || !isRequiredOn(task, today)) return
+        if (d.completions.some((c) => c.day === today && c.taskId === taskId)) return // already ticked
+        earned = requiredReward(task)
+        d.completions.push({
+          id: crypto.randomUUID(),
+          taskId: task.id,
+          taskName: task.name,
+          effort: task.effort,
+          wasUrgent: isEffectivelyUrgent(task),
+          day: today,
+          at: new Date().toISOString(),
+          gemsEarned: earned,
+          via: 'manual',
+        })
+        d.economy.gems += earned
+        d.economy.totalGemsEarned += earned
+        d.daily.completionsToday += 1
+        // A one-shot requirement with a deadline is finished for good once it's done.
+        if (!task.repeats) task.archived = true
+
+        if (d.streak.lastCompletionDay !== today) {
+          d.streak.current += 1
+          d.streak.lastCompletionDay = today
+          d.streak.best = Math.max(d.streak.best, d.streak.current)
+        }
+        checkBadges(d, events)
+      })
+      return earned
+    },
+
+    postponeRequired(taskId, days) {
+      commit((d) => {
+        const t = d.tasks.find((x) => x.id === taskId)
+        if (!t) return
+        // Push the deadline out from today, so postponing an already-late item still buys real time.
+        t.requiredUntil = addDays(dayKey(), Math.max(1, days))
+      })
+    },
+
+    dropRequired(taskId) {
+      commit((d) => {
+        const t = d.tasks.find((x) => x.id === taskId)
+        if (!t) return
+        // It stops being a requirement but survives as a normal wheel quest.
+        t.required = false
+        delete t.requiredFrom
+        delete t.requiredUntil
+      })
     },
 
     spin(filter) {
@@ -809,6 +908,18 @@ export const useStore = create<StoreState>((set, get) => {
     setBankConfig(patch) {
       commitFor(KID_ID, (d) => {
         Object.assign(d.bank.config, patch)
+      })
+    },
+
+    setBankConverter(patch) {
+      commitFor(KID_ID, (d) => {
+        const cur = d.bank.converter ?? { ...DEFAULT_CONVERTER }
+        const { days, ...rest } = patch
+        const next: BankConverterState = { ...cur, ...rest }
+        // `days` is the friendly input — turn it into the concrete last day it works.
+        if (days !== undefined) next.until = days > 0 ? addDays(dayKey(), days - 1) : null
+        if (rest.rate !== undefined || days !== undefined) next.setAt = new Date().toISOString()
+        d.bank.converter = next
       })
     },
 

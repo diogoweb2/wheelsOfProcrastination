@@ -28,6 +28,11 @@
   --font: 'Nunito', 'Avenir Next Rounded', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+/* App shell width: phone-sized by default, roomier once there's screen to spare. */
+:root { --app-w: 480px; }
+@media (min-width: 820px) { :root { --app-w: 820px; } }
+@media (min-width: 1200px) { :root { --app-w: 1040px; } }
+
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body { height: 100%; }
@@ -47,7 +52,8 @@ button { font-family: inherit; border: none; cursor: pointer; color: inherit; ba
 input, select { font-family: inherit; }
 
 .app {
-  max-width: 480px;
+  /* wider on tablets/desktop so the split screen stays readable */
+  max-width: var(--app-w);
   margin: 0 auto;
   min-height: 100dvh;
   display: flex;
@@ -97,7 +103,7 @@ input, select { font-family: inherit; }
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 480px;
+  max-width: var(--app-w);
   display: flex;
   background: var(--bg2);
   border-top: 2px solid var(--line);
@@ -258,6 +264,23 @@ input, select { font-family: inherit; }
 
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+/* Collapsible "Dates" drawer in the task form — keeps the page short by default. */
+.dates-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--bg2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+.dates-body { display: flex; flex-direction: column; gap: 6px; padding: 10px 2px 2px; }
+
 .field label { font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .field input[type='text'], .field input[type='date'], .field input[type='number'], .field select, .field textarea {
   background: var(--bg2);
@@ -300,7 +323,9 @@ input, select { font-family: inherit; }
 .overlay--center .sheet { border-radius: 24px; border: 2px solid var(--line); animation: pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
 
 /* ---------- wheel ---------- */
-.wheel-wrap { position: relative; width: min(88vw, 360px); margin: 8px auto; }
+/* Sized by its flex column, not the viewport — it shrinks to leave room for
+   the effort rail and never bleeds past the screen's right padding. */
+.wheel-wrap { position: relative; width: min(100%, 360px); margin: 8px auto; }
 .wheel-pointer {
   position: absolute;
   top: -6px;
@@ -325,6 +350,59 @@ input, select { font-family: inherit; }
   align-items: center;
   justify-content: center;
   overflow: visible;
+}
+
+/* The hub IS the spin button. Margin-centred (not transform-centred) so the
+   keyframes are free to scale-bounce it. Yellow ring + 3D ledge = "press me". */
+.wheel-hub--btn {
+  cursor: pointer;
+  padding: 0;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
+  transform: none;
+  border: 4px solid var(--yellow);
+  background: radial-gradient(circle at 32% 26%, #1d4a75, var(--bg2) 72%);
+  box-shadow: 0 4px 0 var(--yellow-dark), 0 8px 18px rgb(0 0 0 / 45%);
+  animation: hub-bounce 2.4s ease-in-out infinite;
+}
+/* expanding glow ring on its own layer so it can't fight the bounce */
+.wheel-hub--btn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: hub-pulse 2.4s ease-out infinite;
+}
+.wheel-hub--btn:active:not(:disabled) {
+  animation: none;
+  transform: translateY(3px) scale(0.94);
+  box-shadow: 0 1px 0 var(--yellow-dark), 0 4px 10px rgb(0 0 0 / 40%);
+}
+.wheel-hub--btn:disabled { animation: none; opacity: 0.55; cursor: default; }
+.wheel-hub--btn:disabled::after { animation: none; }
+@keyframes hub-bounce {
+  0%, 55%, 100% { transform: scale(1); }
+  62% { transform: scale(1.1); }
+  72% { transform: scale(0.95); }
+  82% { transform: scale(1.05); }
+  90% { transform: scale(1); }
+}
+@keyframes hub-pulse {
+  0% { box-shadow: 0 0 0 0 rgb(255 206 0 / 70%); }
+  65% { box-shadow: 0 0 0 18px rgb(255 206 0 / 0%); }
+  100% { box-shadow: 0 0 0 0 rgb(255 206 0 / 0%); }
+}
+
+/* Empty wheel: happy Luffy fills the hub instead of the spin skull */
+.wheel-hub--empty { overflow: hidden; }
+.wheel-hub--empty img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  animation: pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
 
 /* Straw Hat Jolly Roger in the wheel hub */
@@ -544,17 +622,20 @@ input, select { font-family: inherit; }
   border: none;
   background: var(--yellow);
   color: #3a2000;
-  font-size: 34px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 0 var(--yellow-dark), 0 8px 20px rgb(0 0 0 / 40%);
+  /* the icon is a round badge — a soft drop shadow, not the 3D ledge, or the
+     ledge reads as a stray border under the circle */
+  box-shadow: 0 6px 16px rgb(0 0 0 / 45%);
+  border: 3px solid var(--yellow-dark);
   z-index: 40;
-  padding-bottom: 4px;
 }
-.fab:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--yellow-dark), 0 4px 12px rgb(0 0 0 / 40%); }
+.fab:active { transform: scale(0.92); box-shadow: 0 3px 8px rgb(0 0 0 / 40%); }
+.fab img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
 /* full-screen overlay hosting the tasks screen */
 .tasks-overlay {
@@ -1250,3 +1331,231 @@ input, select { font-family: inherit; }
   .detail-card { transition: opacity 160ms ease-out; transform: none !important; }
   .detail-shine { animation: none; }
 }
+
+/* ---------- spin screen: must-dos stacked above the wheel ---------- */
+/* Side-by-side squeezed the wheel until its labels collided with the panel;
+   full width for both reads far better on a phone. */
+.spin-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+@media (min-width: 820px) { .spin-split { gap: 20px; } }
+
+.spin-split-wheel { min-width: 0; flex: 1; }
+.spin-split-list { min-width: 0; }
+
+/* The effort filter belongs to the wheel, so it rides alongside it as a
+   vertical L/M/H rail — colour carries the meaning, letters just confirm it. */
+.wheel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.effort-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.effort-pip {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--bg2);
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.effort-pip:active { transform: scale(0.92); }
+
+/* Off = drained to a hint; on = the effort's own colour. */
+.effort-pip--low.on { background: var(--blue); border-color: var(--blue); color: #04182e; }
+.effort-pip--medium.on { background: var(--yellow); border-color: var(--yellow); color: #2e2200; }
+.effort-pip--high.on { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* ---------- required (must-do) checklist ---------- */
+.required-panel {
+  background: var(--bg2);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.required-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-weight: 900;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.required-count {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--text);
+}
+.required-count--done { background: var(--green); color: #10230a; }
+
+/* Scrolls once the must-dos outgrow the panel; titles never truncate. */
+.required-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  /* Never eats more than half the screen — the wheel keeps the other half. */
+  max-height: 50dvh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.required-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 8px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+.required-row:active:not(:disabled) { transform: scale(0.97); }
+.required-row--warn { border-color: var(--orange); }
+.required-row--done { opacity: 0.55; border-color: var(--green); }
+.required-row--done .required-name { text-decoration: line-through; }
+
+/* Exit ceremony: hold the green ✓ + berries for a beat, then slide out and
+   collapse so the rows below glide up into place. */
+.required-row--leaving {
+  overflow: hidden;
+  opacity: 1;
+  animation: req-leave 0.55s ease-in 0.65s forwards;
+}
+@keyframes req-leave {
+  0% { opacity: 1; transform: translateX(0); max-height: 140px; }
+  55% { opacity: 0; transform: translateX(70px); max-height: 140px; }
+  100% {
+    opacity: 0;
+    transform: translateX(70px);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    margin-top: -6px; /* swallow the flex gap above */
+  }
+}
+
+.required-box {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+  color: #10230a;
+}
+.required-box--on { background: var(--green); border-color: var(--green); }
+
+.required-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+/* multi-line on purpose: the whole task title must always be readable */
+.required-name {
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.required-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.required-earned { color: var(--green); font-weight: 800; }
+.required-deadline { font-weight: 800; color: var(--muted); }
+.required-deadline--warn { color: var(--orange); }
+
+.required-clear {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--green);
+}
+
+.chip--required { background: var(--green); color: #10230a; }
+
+/* ---------- trip mode: converter | calculator ---------- */
+.trip-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+@media (min-width: 820px) { .trip-split { gap: 16px; } }
+/* stacked on narrow phones — a 4-column keypad in half a phone is unusable */
+@media (max-width: 560px) { .trip-split { grid-template-columns: minmax(0, 1fr); } }
+
+.calc-card { border-color: var(--blue); }
+
+.calc-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--bg);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  min-height: 48px;
+  overflow-x: auto;
+}
+.calc-op { color: var(--blue); font-weight: 900; font-size: 15px; flex: none; }
+.calc-value {
+  font-weight: 900;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+.calc-key {
+  padding: 12px 0;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 2px solid var(--line);
+  font-weight: 900;
+  font-size: 17px;
+  color: var(--text);
+  transition: transform 0.06s ease, filter 0.12s ease;
+}
+.calc-key:active { transform: translateY(2px); filter: brightness(1.25); }
+.calc-key--op { background: var(--line); color: #eaf4ff; }
+.calc-key--fn { background: var(--bg2); color: var(--muted); font-size: 15px; }
+.calc-key--wide { grid-column: span 3; }
+.calc-key--eq { background: var(--yellow); color: #0c2338; border-color: var(--yellow-dark); }

@@ -7,8 +7,8 @@
 // the habit forms. Three chests + the College/RESP one. Market moves come from a
 // monthly-fetched real series (see scripts/bank-market.mjs); we fall back to the
 // admin's monthly-rate estimate when the series is missing.
-import type { BankAccountId, BankConfig, BankState, BankTxn, MarketData } from '../types'
-import { addDays, dayKey, parseDay } from './dates'
+import type { BankAccountId, BankConfig, BankConverterState, BankState, BankTxn, MarketData } from '../types'
+import { addDays, dayKey, daysUntil, parseDay } from './dates'
 
 // Real admin fees (MER, %/year) — buying/selling itself is free, like we promised.
 export const XGRO_MER = 0.2
@@ -370,3 +370,59 @@ export function partyName(p: BankTxn['from'] | BankTxn['to']): string {
 }
 
 export const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+// --- Money Converter (trip mode) -------------------------------------------
+
+/** The currencies we're realistically ever standing in front of a price tag in. */
+export const CURRENCIES: { code: string; name: string; symbol: string; flag: string }[] = [
+  { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
+  { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
+  { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', flag: '🇧🇷' },
+  { code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧' },
+  { code: 'MXN', name: 'Mexican Peso', symbol: '$', flag: '🇲🇽' },
+  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', flag: '🇯🇵' },
+  { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr', flag: '🇨🇭' },
+  { code: 'AUD', name: 'Australian Dollar', symbol: '$', flag: '🇦🇺' },
+  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', flag: '🇨🇳' },
+  { code: 'INR', name: 'Indian Rupee', symbol: '₹', flag: '🇮🇳' },
+  { code: 'KRW', name: 'South Korean Won', symbol: '₩', flag: '🇰🇷' },
+  { code: 'THB', name: 'Thai Baht', symbol: '฿', flag: '🇹🇭' },
+  { code: 'TRY', name: 'Turkish Lira', symbol: '₺', flag: '🇹🇷' },
+  { code: 'PTE', name: 'Portugal (Euro)', symbol: '€', flag: '🇵🇹' },
+]
+
+export function currencyMeta(code: string) {
+  return CURRENCIES.find((c) => c.code === code) ?? { code, name: code, symbol: '', flag: '🌍' }
+}
+
+export const DEFAULT_CONVERTER: BankConverterState = {
+  enabled: false,
+  currency: 'BRL',
+  rate: 4,
+  until: null,
+  setAt: null,
+}
+
+/** Older saves have no `converter` key — read through this everywhere. */
+export function getConverter(bank: BankState): BankConverterState {
+  return bank.converter ?? DEFAULT_CONVERTER
+}
+
+/** On for Ben only while dad enabled it, the rate is sane, and today is still inside the window. */
+export function converterActive(bank: BankState, today: string = dayKey()): boolean {
+  const c = getConverter(bank)
+  return c.enabled && c.rate > 0 && !!c.until && today <= c.until
+}
+
+/** Whole days left including today; 0 once it has lapsed. */
+export function converterDaysLeft(bank: BankState, today: string = dayKey()): number {
+  const c = getConverter(bank)
+  if (!c.until) return 0
+  return Math.max(0, daysUntil(c.until, today) + 1)
+}
+
+/** Local money → CAD. `rate` is local-per-CAD, so we divide. */
+export function toCad(amountLocal: number, rate: number): number {
+  if (!(rate > 0)) return 0
+  return round2(amountLocal / rate)
+}

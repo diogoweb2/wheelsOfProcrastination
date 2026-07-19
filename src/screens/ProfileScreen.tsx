@@ -73,7 +73,7 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
       {/* sub-sections keep this screen sane: daily stuff first, admin last */}
       <div className="seg" style={{ marginBottom: 14 }}>
         <button className={section === 'me' ? 'on' : ''} onClick={() => { sfx.click(); setSection('me') }}>
-          👤 Me
+          👤 {me?.name}
         </button>
         <button className={section === 'voyage' ? 'on' : ''} onClick={() => { sfx.click(); setSection('voyage') }}>
           🗺️ Voyage

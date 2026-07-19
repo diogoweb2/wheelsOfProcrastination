@@ -16,6 +16,20 @@ export interface Task {
   archived: boolean // non-repeating tasks get archived once done
   spinsSinceLastPicked: number // fairness counter
   timesPicked: number
+  /**
+   * Non-negotiables (floss, brush teeth). A required task leaves the wheel
+   * entirely and lives in the daily checklist beside it: one tap = done.
+   * Pays a reduced flat reward; skipping it costs the SAME amount at rollover.
+   */
+  required?: boolean
+  /**
+   * Optional window for a required task. `requiredUntil` is the hard deadline:
+   * as it nears the checklist warns, and on the last day the app forces a
+   * decision (do it / postpone / drop). `requiredFrom` keeps it dormant until
+   * the window opens. Both YYYY-MM-DD. Absent = required every day, forever.
+   */
+  requiredFrom?: string
+  requiredUntil?: string
 }
 
 export interface Completion {
@@ -239,6 +253,20 @@ export interface MarketData {
   lastAttemptDay?: string // YYYY-MM-DD of the last run (success or fail) — throttles the daily retry
 }
 
+/**
+ * Trip mode — the Money Converter. Dad turns it on before a trip, picks the
+ * local currency and the rate, and it expires on its own after N days so it
+ * doesn't linger with a stale rate. Ben types a local amount and sees the CAD.
+ * `rate` is LOCAL per 1 CAD (e.g. 1 CAD = 4.05 BRL → rate 4.05).
+ */
+export interface BankConverterState {
+  enabled: boolean
+  currency: string // ISO code, e.g. "BRL", "EUR", "USD"
+  rate: number // units of `currency` per 1 CAD
+  until: string | null // YYYY-MM-DD — last day it's usable; null = never enabled
+  setAt: string | null // ISO — when dad last saved the rate (shown to Ben as "rate set …")
+}
+
 export interface BankState {
   config: BankConfig
   accounts: Record<BankAccountId, BankAccountState>
@@ -246,6 +274,7 @@ export interface BankState {
   txns: BankTxn[] // newest last, capped
   lastDay: string // bank simulated through this day (YYYY-MM-DD)
   shock: BankShockState
+  converter?: BankConverterState // trip-mode money converter (absent on older saves)
 }
 
 export interface GiftCardPurchase {

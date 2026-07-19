@@ -10,7 +10,6 @@ import {
   offerValue,
   ownsSticker,
   spareCount,
-  spares,
   stickerById,
   type StickerDef,
   tradeableFor,
@@ -269,17 +268,6 @@ function TradeTab() {
   const mate = profiles.find((p) => p.id === mateId)
   const mateName = mate?.name ?? 'your crewmate'
 
-  // spares the mate is missing float to the top — those are the ones worth offering
-  const mySpares = useMemo(() => {
-    const all = spares(data.album)
-    if (!mateAlbum) return all
-    return [...all].sort((a, b) => {
-      const aw = ownsSticker(mateAlbum, a.sticker.id) ? 1 : 0
-      const bw = ownsSticker(mateAlbum, b.sticker.id) ? 1 : 0
-      return aw - bw
-    })
-  }, [data.album, mateAlbum])
-  const wantedSpares = mateAlbum ? mySpares.filter((s) => !ownsSticker(mateAlbum, s.sticker.id)).length : 0
   // what each side can actually offer the other
   const iCanHelp = mateAlbum ? tradeableFor(data.album, mateAlbum) : []
   const theyCanHelp = mateAlbum ? tradeableFor(mateAlbum, data.album) : []
@@ -388,20 +376,22 @@ function TradeTab() {
 
           <div className="trade-head">
             🎁 You give from your spares
-            {wantedSpares > 0 && <span className="trade-head-note">{wantedSpares} {mateName} needs</span>}
+            {iCanHelp.length > 0 && <span className="trade-head-note">{iCanHelp.length} {mateName} needs</span>}
           </div>
-          {mySpares.length === 0 ? (
-            <p className="muted" style={{ fontSize: 12 }}>No spares yet — open a pack or two.</p>
+          {iCanHelp.length === 0 ? (
+            <p className="muted" style={{ fontSize: 12 }}>
+              None of your spares are ones {mateName} needs right now.
+            </p>
           ) : (
             <div className="album-grid">
-              {mySpares.map(({ sticker, count }) => (
+              {iCanHelp.map((sticker) => (
                 <Sticker
                   key={sticker.id}
                   sticker={sticker}
                   size="sm"
-                  count={count}
+                  count={spareCount(data.album, sticker.id)}
                   selected={give.includes(sticker.id)}
-                  wanted={!ownsSticker(mateAlbum, sticker.id)}
+                  wanted
                   onClick={() => toggle(give, setGive, sticker.id)}
                   onLongPress={(e) => zoom.open(sticker, e)}
                 />

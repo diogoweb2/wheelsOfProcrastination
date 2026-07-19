@@ -12,10 +12,31 @@ export const RESPIN_EXPENSIVE = 60
 export const MANUAL_PICK_MULTIPLIER = 1.5
 export const STREAK_GOAL_OPTIONS = [7, 14, 30, 50, 100]
 /** Mystery background from the Store. SPECIAL feature — priced like a luxury, not a habit. */
-export const BACKGROUND_COST = 500
+export const BACKGROUND_COST = 20
 export const MAX_PENDING = 3
 /** Gems lost per pending pick abandoned at end of day (half the base reward, rounded up). */
 export const ABANDON_PENALTY: Record<Effort, number> = { low: 5, medium: 10, high: 18 }
+
+/**
+ * Required (checklist) tasks pay a flat, reduced amount — there's no wheel risk
+ * involved, so they can't out-earn a spin. Skipping one costs the SAME amount at
+ * rollover, which is what makes them feel non-negotiable.
+ */
+export const REQUIRED_REWARD: Record<Effort, number> = { low: 4, medium: 8, high: 14 }
+/** Warn in the checklist once a dated requirement is this close to its last day. */
+export const REQUIRED_WARN_DAYS = 3
+/** Postpone options (days) offered by the last-day decision modal. */
+export const POSTPONE_OPTIONS = [1, 3, 7, 14]
+
+/** Berries paid for ticking a required item off the checklist. */
+export function requiredReward(task: Task): number {
+  return REQUIRED_REWARD[task.effort]
+}
+
+/** Berries docked at rollover for a required item left undone that day. */
+export function requiredPenalty(task: Task): number {
+  return REQUIRED_REWARD[task.effort]
+}
 
 /** A task counts as urgent if flagged urgent OR due within 48h / overdue. */
 export function isEffectivelyUrgent(task: Task, today?: string): boolean {

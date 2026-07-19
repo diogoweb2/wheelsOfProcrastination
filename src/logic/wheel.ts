@@ -16,6 +16,30 @@ export function isAvailableOn(task: Task, today: string): boolean {
   return true
 }
 
+/**
+ * Is this required task actually being asked for on `today`? A requirement can
+ * carry a window (`requiredFrom`…`requiredUntil`); outside it the task is
+ * dormant — off the checklist, and no penalty for not doing it.
+ */
+export function isRequiredOn(task: Task, today: string = dayKey()): boolean {
+  if (!task.required || task.archived) return false
+  if (task.requiredFrom && today < task.requiredFrom) return false
+  if (task.requiredUntil && today > task.requiredUntil) return false
+  return isAvailableOn(task, today)
+}
+
+/** Today's checklist: every active requirement in its window, urgent ones first. */
+export function requiredToday(tasks: Task[], today: string = dayKey()): Task[] {
+  return tasks
+    .filter((t) => isRequiredOn(t, today))
+    .sort((a, b) => {
+      // the closest deadline leads; undated requirements sit at the bottom
+      const da = a.requiredUntil ?? '9999-12-31'
+      const db = b.requiredUntil ?? '9999-12-31'
+      return da.localeCompare(db) || a.name.localeCompare(b.name)
+    })
+}
+
 export function eligibleTasks(
   tasks: Task[],
   filter: EffortFilter,
@@ -25,6 +49,8 @@ export function eligibleTasks(
   return tasks.filter(
     (t) =>
       !t.archived &&
+      // required items are checklist-only — they never take a wheel segment
+      !t.required &&
       (filter.length === 0 || filter.includes(t.effort)) &&
       !completedTodayIds.has(t.id) &&
       isAvailableOn(t, today),

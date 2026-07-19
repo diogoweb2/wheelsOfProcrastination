@@ -15,6 +15,9 @@ interface Props {
   targetId: string | null
   spinToken: number // increments to trigger a new spin even for same target
   onDone: () => void
+  /** the hub is the spin button now — tap the skull to spin */
+  onSpin: () => void
+  spinDisabled: boolean
 }
 
 const SIZE = 360
@@ -30,7 +33,7 @@ function arcPath(startAngle: number, endAngle: number): string {
   return `M ${R} ${R} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`
 }
 
-export function Wheel({ tasks, targetId, spinToken, onDone }: Props) {
+export function Wheel({ tasks, targetId, spinToken, onDone, onSpin, spinDisabled }: Props) {
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
   const rotationRef = useRef(0)
@@ -103,11 +106,7 @@ export function Wheel({ tasks, targetId, spinToken, onDone }: Props) {
         }}
       >
         <circle cx={R} cy={R} r={R - 2} fill="#123252" stroke="#2e63a4" strokeWidth="4" />
-        {tasks.length === 0 ? (
-          <text x={R} y={R} textAnchor="middle" fill="#8fb4dc" fontSize="18" fontWeight="800">
-            no quests 👒
-          </text>
-        ) : (
+        {tasks.length === 0 ? null : (
           segments.map(({ task, start, end, mid }, i) => {
             const [fill, dark] = EFFORT_FILL[task.effort]
             const shape =
@@ -158,9 +157,22 @@ export function Wheel({ tasks, targetId, spinToken, onDone }: Props) {
           return <circle key={i} cx={R + (R - 10) * Math.sin(a)} cy={R - (R - 10) * Math.cos(a)} r="4" fill="#eef7ef" opacity="0.85" />
         })}
       </svg>
-      <div className="wheel-hub">
-        <JollyRoger size={64} spinning={spinning} />
-      </div>
+      {tasks.length === 0 ? (
+        // nothing to spin — a happy Luffy takes the hub instead of the spin button
+        <div className="wheel-hub wheel-hub--empty">
+          <img src="/luffy-easy.png" alt="All done!" draggable={false} />
+        </div>
+      ) : (
+        <button
+          className="wheel-hub wheel-hub--btn"
+          aria-label="Spin the wheel"
+          title="Spin the wheel"
+          disabled={spinDisabled || spinning}
+          onClick={onSpin}
+        >
+          <JollyRoger size={64} spinning={spinning} />
+        </button>
+      )}
     </div>
   )
 }
