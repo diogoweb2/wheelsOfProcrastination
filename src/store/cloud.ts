@@ -5,7 +5,7 @@
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, Idea, MarketData, Profile, QuizQuestion } from '../types'
+import type { AppData, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -113,6 +113,23 @@ export function subscribeIdeas(cb: (ideas: Idea[]) => void): () => void {
 export async function saveIdeas(ideas: Idea[]): Promise<void> {
   await ensureAuth()
   await setDoc(ideasRef(), { ideas })
+}
+
+// --- sticker trades (shared swap table both crewmates read and write) -------
+
+const tradesRef = () => doc(firestore, 'app', 'stickerTrades')
+
+/** Live-sync the shared trade table. Fires when the other crewmate offers/answers a swap. */
+export function subscribeStickerTrades(cb: (trades: StickerTrade[]) => void): () => void {
+  return onSnapshot(tradesRef(), (snap) => {
+    const data = snap.data() as { trades?: StickerTrade[] } | undefined
+    cb(data?.trades ?? [])
+  })
+}
+
+export async function saveStickerTrades(trades: StickerTrade[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(tradesRef(), { trades })
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

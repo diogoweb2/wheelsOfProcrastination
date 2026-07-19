@@ -181,6 +181,23 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - Limit **1 purchase per 30 days per profile** (store shows a days-left counter). Unpaid purchases **accumulate** — duplicates of the same item are fine, each is its own row; nothing blocks a new purchase except the 30-day window and the 🍇 balance.
 - Buying creates an unpaid purchase on the buyer's data. **Diogo sees persistent banners** at the top of the app for every unsettled purchase (Ben's and his own) with a **Paid** button; they're also listed in the Admin desk under "Prizes to settle".
 
+## 15b. Sticker album — "Grand Line Log Book" (own tab, after Store)
+
+A Panini-style collection both crewmates fill and trade from. Rules live in `src/logic/album.ts`.
+
+- **Packs** (`📖 Album → 🎁 Packs`): **70 🪙 for 7 stickers**, unlimited. Plus **one free pack per calendar day** ("Daily Delivery" from the News Coo) — `album.lastFreePackDay` throttles it.
+- **Opening ceremony**: tap the sealed pack → cards come out one at a time, face-down, and flip on tap. New cards read **NEW!**, repeats read **SPARE** ("trade bait"), red rares fire confetti + `sfx.bigWin()`. Ends on a summary of the 7 with a new/to-trade tally.
+- **Rarity comes from the source folder**, not the data: `public/Album/` → **common (white border)**, `public/Album/special stickers/` → **special (red border)**. Reds appear at `SPECIAL_CHANCE` (~6% per slot, so ~1 pack in 3 holds one) and are marked with a ★.
+- **Repeats are deliberate and common** — trading is the point. `REPEAT_FLOOR` (40%) of every pack is forced to be a card you already own, from the very first pack. The remaining slots draw at true random from the whole pool, so the last few cards get genuinely hard and trading becomes the fastest way to finish (~40+ packs to complete a 65-card album).
+- **Crews**: cards are grouped into 6 One Piece crews (Straw Hats, Emperors, Marines, Warlords, Worst Generation, Revolutionaries) shown as album sections with a `got/total` counter and a ★ COMPLETE marker. Assignment is a **stable hash of the sticker id, dealt round-robin** so crews stay evenly sized and **adding images never reshuffles cards anyone already owns**.
+- **Trading** (`🤝 Trade`, shared `app/stickerTrades` doc, live-synced both ways):
+  - Only **spares** (copies beyond the one glued in the album) can be offered.
+  - **Value must balance: 1 red = 2 whites** (`TRADE_VALUE`); the Send button stays disabled until both sides are worth the same.
+  - Flow: propose → the other crewmate gets a **topbar banner + notification** ("wants to trade!") and a dot on the Album tab → **🤝 Shake on it!** / **✕ No deal**. Accepting moves the cards in **both** albums (the accepter writes the other profile's doc; both sides are re-checked for the promised spares first, and the swap is cancelled if either no longer holds them). The proposer can withdraw while it's pending; one open offer per person at a time.
+  - **Trade radar** always shows *"N cards {mate} can spare that you need"* and *"N of your spares that {mate} needs"* — so the answer to "can we trade?" is visible before asking. When neither holds anything the other needs, the screen says so instead of offering an impossible swap. 🎯 marks a spare the mate is missing; 🤝 marks an album gap the mate can fill.
+
+**Adding stickers later**: drop images into `public/Album/` (or `public/Album/special stickers/`) and run **`npm run stickers`** (also runs automatically before `dev`/`build`). It normalizes every image to one card ratio on a transparent canvas, compresses to webp (~34 KB each, output in `public/stickers/`, originals untouched), and regenerates `src/logic/stickerCatalog.generated.ts`. Card names come from `scripts/sticker-names.json` — the script prints any sticker still using a guessed name so it can be curated.
+
 ## 16. Admin (Diogo) — the "Captain's desk" in his Me tab
 
 The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):

@@ -6,6 +6,7 @@
 import type { AppData, Profile } from '../types'
 import { addDays, dayKey, parseDay } from '../logic/dates'
 import { defaultBankState } from '../logic/bank'
+import { defaultAlbumState } from '../logic/album'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -45,6 +46,7 @@ export function defaultData(): AppData {
     quiz: { stats: {}, tests: [], passedTopics: [], unlockedTopics: ['canada-geography'], bonusFruits: {} },
     giftcards: [],
     bank: defaultBankState(),
+    album: defaultAlbumState(),
   }
 }
 
@@ -62,6 +64,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
     quiz: { ...base.quiz, ...parsed.quiz },
     giftcards: parsed.giftcards ?? base.giftcards,
+    album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     bank: parsed.bank
       ? {
           ...base.bank,

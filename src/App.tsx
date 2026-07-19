@@ -6,6 +6,7 @@ import { EventModal } from './components/EventModal'
 import { StreakPrompts } from './components/StreakPrompts'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
+import { AlbumScreen } from './screens/AlbumScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
@@ -18,11 +19,12 @@ import { Beli } from './components/Beli'
 import { fmt$, totalTreasure } from './logic/bank'
 import { sfx } from './audio'
 
-type Tab = 'spin' | 'store' | 'quiz' | 'bank' | 'me'
+type Tab = 'spin' | 'store' | 'album' | 'quiz' | 'bank' | 'me'
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
   { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
+  { id: 'album', icon: '📖', label: 'Album' },
   { id: 'quiz', icon: '🧭', label: 'Quiz' },
   { id: 'bank', icon: '🏦', label: 'Bank' }, // real-dollar Grand Line Bank (badges moved to Me → Voyage)
   { id: 'me', icon: '👒', label: 'Me' },
@@ -51,7 +53,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -90,6 +92,20 @@ export default function App() {
     }
     prevPaybacks.current = paybackCount
   }, [paybackCount])
+
+  // ping when a sticker swap offer lands while the app is open
+  const openTrades = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId)
+  const prevTrades = useRef(openTrades.length)
+  useEffect(() => {
+    if (openTrades.length > prevTrades.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Album tab.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevTrades.current = openTrades.length
+  }, [openTrades.length])
 
   if (cloudError) {
     return (
@@ -189,6 +205,21 @@ export default function App() {
         </div>
       )}
 
+      {openTrades.map((t) => (
+        <div className="banner" key={t.id} style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>🤝</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>{t.fromName} wants to trade stickers!</div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              {t.give.length} for {t.want.length} · tap to see the deal
+            </div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); setTab('album') }}>
+            See it
+          </button>
+        </div>
+      ))}
+
       {pendingPaybacks.map((t) => (
         <div className="banner" key={t.id}>
           <span style={{ fontSize: 20 }}>📨</span>
@@ -229,6 +260,7 @@ export default function App() {
 
       {tab === 'spin' && <SpinScreen />}
       {tab === 'store' && <StoreScreen />}
+      {tab === 'album' && <AlbumScreen />}
       {tab === 'quiz' && <QuizScreen />}
       {tab === 'bank' && <BankScreen />}
       {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}

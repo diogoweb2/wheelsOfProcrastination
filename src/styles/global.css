@@ -849,3 +849,297 @@ input, select { font-family: inherit; }
 .bubble--concern { border-color: var(--orange); }
 .bubble--panic { border-color: var(--red); }
 .bank-payday-sheet { border: 2px solid var(--gold) !important; }
+
+/* ---- Sticker album (Grand Line Log Book) --------------------------------- */
+
+.album-progress { display: flex; align-items: center; gap: 10px; }
+.album-progress-bar {
+  flex: 1; height: 12px; border-radius: 999px; overflow: hidden;
+  background: var(--bg2); box-shadow: inset 0 2px 4px rgb(0 0 0 / 40%);
+}
+.album-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  transition: width 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.album-progress-label { font-size: 12px; font-weight: 900; color: var(--muted); white-space: nowrap; }
+
+.album-crew { margin-bottom: 18px; }
+.album-crew-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid var(--line);
+}
+.album-crew-name { font-weight: 900; font-size: 14px; }
+.album-crew-count { font-size: 11px; font-weight: 900; color: var(--muted); }
+.album-crew-count.is-done { color: var(--yellow); }
+
+.album-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+/* one Panini-style card */
+.sticker {
+  position: relative; display: flex; flex-direction: column;
+  border-radius: 8px; padding: 3px; text-align: center;
+  background: #fff; box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+  border: 3px solid #fff; overflow: hidden;
+}
+.sticker--special { border-color: var(--red); background: var(--red); }
+.sticker-art {
+  aspect-ratio: 45 / 62; width: 100%; border-radius: 5px; overflow: hidden;
+  background: linear-gradient(160deg, #7fd4ff, #2e63a4);
+  display: flex; align-items: center; justify-content: center;
+}
+.sticker--special .sticker-art { background: linear-gradient(160deg, #ffce00, #af6528); }
+.sticker-art img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sticker-name {
+  font-size: 8px; font-weight: 900; color: #0c2338; line-height: 1.15;
+  padding: 3px 1px 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sticker--special .sticker-name { color: #fff; }
+
+.sticker--missing { background: var(--card); border-color: var(--card2); box-shadow: none; }
+.sticker--missing .sticker-art { background: var(--bg2); }
+.sticker--missing .sticker-name { color: var(--muted); }
+.sticker-ghost { font-size: 26px; font-weight: 900; color: var(--line); }
+
+.sticker-star {
+  position: absolute; top: 2px; left: 3px; font-size: 11px; color: var(--yellow);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 60%);
+}
+.sticker-badge {
+  position: absolute; top: 2px; right: 2px;
+  background: var(--yellow); color: #0c2338;
+  font-size: 8px; font-weight: 900; padding: 1px 4px; border-radius: 999px;
+}
+.sticker--tappable { cursor: pointer; transition: transform 120ms; }
+.sticker--tappable:active { transform: scale(0.94); }
+.sticker--selected { outline: 3px solid var(--yellow); outline-offset: 1px; transform: translateY(-3px); }
+
+.sticker--sm { width: 100%; }
+.sticker--lg { width: 190px; }
+.sticker--reveal { box-shadow: 0 0 34px rgb(255 206 0 / 55%), 0 8px 20px rgb(0 0 0 / 50%); }
+.sticker--lg .sticker-name { font-size: 13px; padding: 6px 2px 3px; }
+
+/* ---- pack opening -------------------------------------------------------- */
+
+.pack-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: radial-gradient(circle at 50% 45%, #14304d, #06111d 75%);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+/* full-screen tap target so ANY tap advances — sits under the visuals */
+.pack-tap { position: absolute; inset: 0; z-index: 1; background: none; }
+.pack-stage {
+  position: relative; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  width: 100%; max-width: 340px;
+}
+.pack-stage .btn { pointer-events: auto; }
+
+/* the sealed pack */
+.pack-wrap {
+  position: relative; overflow: hidden;
+  width: 190px; aspect-ratio: 3 / 4; border-radius: 14px;
+  background: linear-gradient(150deg, var(--red), #7a0000 60%, var(--bronze));
+  border: 3px solid var(--yellow);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 60%), 0 0 40px rgb(215 0 0 / 35%);
+  animation: pack-bob 2.2s ease-in-out infinite;
+}
+@keyframes pack-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+/* a light sweep across the foil */
+.pack-shine {
+  position: absolute; top: -60%; left: -40%; width: 40%; height: 220%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 45%), transparent);
+  transform: rotate(18deg); animation: pack-shine 2.6s ease-in-out infinite;
+}
+@keyframes pack-shine { 0% { left: -40%; } 60%, 100% { left: 130%; } }
+
+/* tearing it open */
+.pack-wrap.is-tearing { animation: pack-shake 160ms linear 3, pack-pop 300ms ease-in 480ms forwards; }
+@keyframes pack-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-7px, 3px) rotate(-4deg); }
+  75% { transform: translate(7px, -3px) rotate(4deg); }
+}
+@keyframes pack-pop {
+  to { transform: scale(1.5); opacity: 0; filter: brightness(2.4); }
+}
+.pack-burst {
+  position: absolute; inset: 0; border-radius: 14px;
+  background: radial-gradient(circle, #fff, var(--yellow) 40%, transparent 70%);
+  animation: pack-burst 620ms ease-out forwards;
+}
+@keyframes pack-burst {
+  0% { opacity: 0; transform: scale(0.2); }
+  55% { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.4); }
+}
+
+.pack-jolly { font-size: 54px; filter: drop-shadow(0 3px 5px rgb(0 0 0 / 50%)); }
+.pack-title { font-weight: 900; font-size: 15px; letter-spacing: 1px; color: var(--yellow); }
+.pack-sub { font-size: 11px; color: #ffd9d9; }
+.pack-hint { font-size: 12px; color: var(--muted); animation: pulse-hint 1.6s ease-in-out infinite; }
+@keyframes pulse-hint { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+.pack-counter { font-size: 12px; font-weight: 900; color: var(--muted); }
+
+/* card stage */
+.pack-flip-shell { position: relative; display: flex; align-items: center; justify-content: center; }
+
+/* glow that swells while the card "charges" */
+.pack-aura {
+  position: absolute; width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, rgb(96 191 245 / 55%), transparent 68%);
+  animation: aura-pulse 620ms ease-in-out infinite;
+}
+.pack-aura.is-rare {
+  background: radial-gradient(circle, rgb(255 206 0 / 75%), rgb(215 0 0 / 30%) 55%, transparent 72%);
+  animation: aura-pulse 420ms ease-in-out infinite;
+}
+@keyframes aura-pulse {
+  0%, 100% { transform: scale(0.82); opacity: 0.5; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+/* spinning god-rays behind a legendary pull */
+.pack-rays {
+  position: absolute; width: 460px; height: 460px; border-radius: 50%;
+  background: repeating-conic-gradient(
+    rgb(255 206 0 / 40%) 0deg 10deg, transparent 10deg 20deg
+  );
+  animation: rays-spin 7s linear infinite, rays-in 520ms ease-out;
+  mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+}
+@keyframes rays-spin { to { transform: rotate(360deg); } }
+@keyframes rays-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; } }
+
+.pack-flip {
+  position: relative; perspective: 1000px; width: 190px; aspect-ratio: 45 / 62;
+  animation: card-in 340ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes card-in { from { transform: translateY(46px) scale(0.78); opacity: 0; } to { transform: none; opacity: 1; } }
+/* suspense wobble — rares shake harder and faster */
+.pack-flip.is-charging { animation: card-in 340ms cubic-bezier(0.2, 0.9, 0.3, 1), card-wobble 620ms ease-in-out 340ms infinite; }
+.pack-flip.is-charging-rare { animation: card-in 340ms cubic-bezier(0.2, 0.9, 0.3, 1), card-wobble-rare 190ms ease-in-out 340ms infinite; }
+@keyframes card-wobble {
+  0%, 100% { transform: rotate(-1.5deg) scale(1); }
+  50% { transform: rotate(1.5deg) scale(1.03); }
+}
+@keyframes card-wobble-rare {
+  0%, 100% { transform: rotate(-3.5deg) scale(1.02) translateX(-3px); }
+  50% { transform: rotate(3.5deg) scale(1.07) translateX(3px); }
+}
+.pack-flip-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform 560ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.pack-flip.is-flipped .pack-flip-inner { transform: rotateY(180deg); }
+.pack-face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; }
+.pack-face--back {
+  border-radius: 10px; border: 3px solid var(--yellow);
+  background: repeating-linear-gradient(45deg, #123252, #123252 8px, #163a5f 8px, #163a5f 16px);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 55%);
+}
+.pack-face--front { transform: rotateY(180deg); }
+/* the card itself jumps out on a legendary */
+.pack-flip-shell.is-legendary .pack-flip { animation: legendary-pop 620ms cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes legendary-pop {
+  0% { transform: scale(0.9); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+.pack-tease {
+  font-size: 12px; font-weight: 900; letter-spacing: 0.5px; color: var(--yellow);
+  animation: tease-throb 500ms ease-in-out infinite;
+}
+@keyframes tease-throb { 0%, 100% { opacity: 0.5; transform: scale(0.97); } 50% { opacity: 1; transform: scale(1.05); } }
+
+.pack-verdict { font-weight: 900; font-size: 15px; animation: verdict-pop 380ms cubic-bezier(0.2, 1.5, 0.4, 1); }
+.pack-verdict.is-new { color: var(--yellow); }
+.pack-verdict.is-dupe { color: var(--muted); }
+.pack-verdict.is-legendary {
+  font-size: 22px; color: var(--yellow);
+  text-shadow: 0 0 14px rgb(255 206 0 / 90%), 0 2px 4px rgb(0 0 0 / 60%);
+  animation: verdict-pop 380ms cubic-bezier(0.2, 1.5, 0.4, 1), legendary-throb 900ms ease-in-out 380ms infinite;
+}
+@keyframes legendary-throb { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+@keyframes verdict-pop { from { transform: scale(0.5); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.pack-summary-title { font-weight: 900; font-size: 20px; color: var(--yellow); }
+.pack-summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; }
+.pack-summary-stats { display: flex; gap: 12px; font-size: 13px; font-weight: 900; }
+.pack-stat--new { color: var(--yellow); }
+.pack-stat--dupe { color: var(--muted); }
+.pack-stat--rare { color: var(--red); }
+
+/* respect reduced-motion: keep the reveal, drop the shaking */
+@media (prefers-reduced-motion: reduce) {
+  .pack-wrap, .pack-shine, .pack-aura, .pack-rays,
+  .pack-flip.is-charging, .pack-flip.is-charging-rare, .pack-tease,
+  .pack-verdict.is-legendary, .pack-hint { animation: none; }
+}
+
+/* ---- trading ------------------------------------------------------------- */
+
+.pack-shop { display: flex; flex-direction: column; gap: 10px; }
+.pack-card {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  background: var(--card); border-radius: var(--radius); border: 2px solid var(--line);
+}
+.pack-card.is-spent { opacity: 0.55; }
+.pack-card.is-ready { border-color: var(--yellow); }
+.pack-card-art { font-size: 32px; }
+.pack-card-body { flex: 1; min-width: 0; }
+.pack-card-title { font-weight: 900; font-size: 14px; }
+
+.trade-radar {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
+  padding: 12px; background: var(--card); border-radius: var(--radius); border: 2px solid var(--line);
+}
+.trade-radar-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+.trade-radar-num {
+  min-width: 30px; text-align: center; font-size: 17px; font-weight: 900;
+  color: var(--yellow); background: var(--bg2); border-radius: 8px; padding: 2px 6px;
+}
+
+.trade-head { font-weight: 900; font-size: 13px; margin: 16px 0 8px; }
+
+.trade-scale {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 14px; padding: 10px 12px; background: var(--card); border-radius: 12px;
+  font-size: 12px; font-weight: 900; color: var(--muted);
+}
+.trade-scale .is-ok { color: var(--yellow); }
+.trade-scale-mid { font-size: 11px; }
+
+.trade-offer {
+  padding: 12px; margin-bottom: 12px;
+  background: var(--card); border: 2px solid var(--yellow); border-radius: var(--radius);
+}
+.trade-offer-head { font-weight: 900; font-size: 13px; margin-bottom: 10px; }
+.trade-offer-sides { display: flex; align-items: center; gap: 8px; }
+.trade-offer-sides > div:first-child, .trade-offer-sides > div:last-child { flex: 1; min-width: 0; }
+.trade-offer-label { font-size: 10px; font-weight: 900; color: var(--muted); margin-bottom: 4px; }
+.trade-offer-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.trade-offer-row .sticker { width: 46px; }
+.trade-offer-arrow { font-size: 20px; color: var(--yellow); }
+.trade-offer-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+
+.trade-log {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
+  background: var(--card); border-radius: 10px; color: var(--muted);
+}
+.trade-log-status { font-weight: 900; }
+.trade-log-status.is-accepted { color: var(--green); }
+.trade-log-status.is-declined, .trade-log-status.is-cancelled { color: var(--muted); }
+
+.tab-dot {
+  display: inline-block; min-width: 16px; margin-left: 4px; padding: 0 4px;
+  background: var(--red); color: #fff; border-radius: 999px;
+  font-size: 10px; font-weight: 900; line-height: 16px;
+}

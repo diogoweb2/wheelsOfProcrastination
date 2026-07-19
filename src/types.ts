@@ -256,6 +256,40 @@ export interface GiftCardPurchase {
   paidAt: string | null // set when the admin taps "Paid" (duplicates of one item accumulate as separate rows)
 }
 
+// --- Sticker album (Grand Line Log Book) -----------------------------------
+
+/**
+ * One crewmate's album. `counts` holds how many copies of each sticker they've
+ * pulled — 1 = glued in the album, anything above that is a spare they can
+ * trade. Trades live in the SHARED app/stickerTrades doc, not here; `trades`
+ * only exists so a profile keeps a local history of settled swaps.
+ */
+export interface AlbumState {
+  counts: Record<string, number> // sticker id → copies owned
+  packsOpened: number
+  lastFreePackDay: string | null // YYYY-MM-DD — the daily free pack throttle
+  trades: string[] // ids of trades this profile has already seen resolved (dedupes the celebration)
+}
+
+/**
+ * A swap between the two crewmates, in the shared app/stickerTrades doc so both
+ * sides see it live. The sender offers spares and names the cards they want; the
+ * receiver accepts or declines. Values must balance (1 red = 2 whites).
+ */
+export interface StickerTrade {
+  id: string
+  fromId: string // profile who proposed
+  fromName: string
+  toId: string // profile who must answer
+  toName: string
+  give: string[] // sticker ids the sender hands over
+  want: string[] // sticker ids the sender is asking for
+  status: 'pending' | 'accepted' | 'declined' | 'cancelled'
+  createdAt: string
+  resolvedAt?: string
+  note?: string // optional one-liner from the sender
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]
@@ -269,4 +303,5 @@ export interface AppData {
   quiz: QuizState
   giftcards: GiftCardPurchase[]
   bank: BankState
+  album: AlbumState
 }

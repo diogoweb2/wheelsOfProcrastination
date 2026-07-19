@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type {
+  AlbumState,
   AppData,
   BankAccountId,
   BankConfig,
@@ -13,6 +14,7 @@ import type {
   Profile,
   QuizQuestion,
   QuizTestRecord,
+  StickerTrade,
   Task,
 } from '../types'
 import {
@@ -31,14 +33,17 @@ import {
   saveIdeas,
   saveQuizBank,
   saveRoster,
+  saveStickerTrades,
   subscribeData,
   subscribeIdeas,
+  subscribeStickerTrades,
   subscribeMarketData,
   subscribeQuizBank,
   subscribeRoster,
 } from './cloud'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
+import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -82,6 +87,9 @@ interface StoreState {
   kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
+  trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
+  mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
+  mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
 
   activeProfile: () => Profile | null
   addIdea: (text: string) => void
@@ -151,6 +159,16 @@ interface StoreState {
 
   buyFreeze: () => boolean
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
+  // --- sticker album ---
+  /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries. Returns the drawn sticker ids. */
+  openPack: (kind: 'free' | 'buy') => string[] | 'broke' | 'used'
+  /** Offer a swap to the other crewmate. Values must balance (1 red = 2 whites). */
+  proposeTrade: (give: string[], want: string[], note?: string) => 'ok' | 'unbalanced' | 'busy'
+  /** Answer a swap addressed to me. Accepting moves the cards in BOTH albums. */
+  answerTrade: (tradeId: string, accept: boolean) => void
+  /** Withdraw a swap I proposed and that hasn't been answered yet. */
+  cancelTrade: (tradeId: string) => void
+
   buyBackground: () => string | 'broke' | 'complete'
   /** Equip an owned background as the app background; null = default solid color. */
   equipBackground: (id: string | null) => void
@@ -170,6 +188,9 @@ export const useStore = create<StoreState>((set, get) => {
   let unsubData: (() => void) | null = null
   // Parent-only second subscription: Ben's doc (gift-card banner, official tests, grants).
   let unsubKid: (() => void) | null = null
+  // The other crewmate's doc — always watched, so sticker trading can read their
+  // album and write the swap into it when it's accepted.
+  let unsubMate: (() => void) | null = null
 
   /**
    * Live-sync a profile's world from Firestore. First snapshot flips dataLoaded
@@ -207,6 +228,11 @@ export const useStore = create<StoreState>((set, get) => {
     if (id === PARENT_ID) {
       unsubKid = subscribeData(KID_ID, (data) => set({ kidData: data }))
     }
+    // The album is a two-player game: watch the other crewmate's world so we can
+    // show what they can spare, and so accepting a swap can write to their album.
+    unsubMate?.()
+    const mateId = id === PARENT_ID ? KID_ID : PARENT_ID
+    unsubMate = subscribeData(mateId, (data) => set({ mateAlbum: data.album, mateData: data }))
   }
 
   // Async bootstrap: sign in, load the roster, and (if someone's logged in here)
@@ -229,6 +255,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeMarketData((m) => set({ market: m }))
       // shared idea list — no seeding needed, an empty doc is a valid empty list
       subscribeIdeas((ideas) => set({ ideas }))
+      // shared sticker swap table (same deal — empty doc is a valid empty list)
+      subscribeStickerTrades((trades) => set({ trades }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -269,6 +297,11 @@ export const useStore = create<StoreState>((set, get) => {
     void saveData(KID_ID, data)
   }
 
+  function saveTradeList(trades: StickerTrade[]) {
+    set({ trades })
+    void saveStickerTrades(trades)
+  }
+
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
     void saveIdeas(ideas)
@@ -292,6 +325,9 @@ export const useStore = create<StoreState>((set, get) => {
     kidData: null,
     market: null,
     ideas: [],
+    trades: [],
+    mateAlbum: null,
+    mateData: null,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -889,6 +925,102 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.freezes += 1
       })
       return true
+    },
+
+    // --- sticker album ------------------------------------------------------
+
+    openPack(kind) {
+      const { data } = get()
+      const today = dayKey()
+      if (kind === 'free' && !freePackReady(data.album, today)) return 'used'
+      if (kind === 'buy' && data.economy.gems < PACK_COST) return 'broke'
+
+      const drawn = rollPack(data.album)
+      commit((d) => {
+        if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - PACK_COST)
+        else d.album.lastFreePackDay = today
+        for (const id of drawn) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
+        d.album.packsOpened += 1
+      })
+      return drawn
+    },
+
+    proposeTrade(give, want, note) {
+      const me = get().activeProfile()
+      const mateId = get().activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
+      const mate = get().profiles.find((p) => p.id === mateId)
+      if (!me || !mate) return 'busy'
+      if (give.length === 0 || want.length === 0 || !isBalanced(give, want)) return 'unbalanced'
+      // one open offer at a time in each direction keeps the swap table readable
+      if (get().trades.some((t) => t.status === 'pending' && t.fromId === me.id)) return 'busy'
+
+      const trade: StickerTrade = {
+        id: `trade-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        fromId: me.id,
+        fromName: me.name,
+        toId: mate.id,
+        toName: mate.name,
+        give,
+        want,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        ...(note ? { note } : {}),
+      }
+      saveTradeList([...get().trades, trade])
+      return 'ok'
+    },
+
+    answerTrade(tradeId, accept) {
+      const { trades, activeProfileId, mateData } = get()
+      const trade = trades.find((t) => t.id === tradeId)
+      // only the addressee can answer, and only while it's still open
+      if (!trade || trade.status !== 'pending' || trade.toId !== activeProfileId) return
+
+      if (!accept) {
+        saveTradeList(
+          trades.map((t) => (t.id === tradeId ? { ...t, status: 'declined' as const, resolvedAt: new Date().toISOString() } : t)),
+        )
+        return
+      }
+      if (!mateData) return // their world hasn't loaded; the UI keeps Accept disabled until it has
+
+      // Re-check both sides still hold the spares they promised — either album
+      // may have changed since the offer was made (packs opened, other swaps).
+      const senderOk = trade.give.every((id) => spareCount(mateData.album, id) > 0)
+      const meOk = trade.want.every((id) => spareCount(get().data.album, id) > 0)
+      if (!senderOk || !meOk) {
+        saveTradeList(
+          trades.map((t) =>
+            t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t,
+          ),
+        )
+        return
+      }
+
+      // my side: hand over what they wanted, receive what they offered
+      commit((d) => {
+        for (const id of trade.want) d.album.counts[id] = (d.album.counts[id] ?? 0) - 1
+        for (const id of trade.give) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
+      })
+      // their side: mirror image, written straight into their doc
+      const theirs: AppData = JSON.parse(JSON.stringify(mateData))
+      for (const id of trade.give) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
+      for (const id of trade.want) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
+      set({ mateData: theirs, mateAlbum: theirs.album })
+      void saveData(trade.fromId, theirs)
+
+      saveTradeList(
+        trades.map((t) => (t.id === tradeId ? { ...t, status: 'accepted' as const, resolvedAt: new Date().toISOString() } : t)),
+      )
+    },
+
+    cancelTrade(tradeId) {
+      const { trades, activeProfileId } = get()
+      const trade = trades.find((t) => t.id === tradeId)
+      if (!trade || trade.status !== 'pending' || trade.fromId !== activeProfileId) return
+      saveTradeList(
+        trades.map((t) => (t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t)),
+      )
     },
 
     buyBackground() {
