@@ -29,7 +29,10 @@
 }
 
 /* App shell width: phone-sized by default, roomier once there's screen to spare. */
-:root { --app-w: 480px; }
+/* Fluid below 820px: phones (Pixel 7 ≈ 412px) already fill the screen, and
+   tablets (Redmagic Astra portrait lands between 480 and 820) now do too
+   instead of showing dead gutters. Wide screens keep a readable cap. */
+:root { --app-w: 100%; }
 @media (min-width: 820px) { :root { --app-w: 820px; } }
 @media (min-width: 1200px) { :root { --app-w: 1040px; } }
 
@@ -637,6 +640,9 @@ input, select { font-family: inherit; }
 .fab:active { transform: scale(0.92); box-shadow: 0 3px 8px rgb(0 0 0 / 40%); }
 .fab img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
+/* calculator FAB — sits to the left of the quest log FAB, only shown on the bank screen */
+.fab--calc { right: 86px; font-size: 24px; }
+
 /* full-screen overlay hosting the tasks screen */
 .tasks-overlay {
   position: fixed;
@@ -950,7 +956,12 @@ input, select { font-family: inherit; }
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid var(--line);
 }
-.album-crew-name { font-weight: 900; font-size: 14px; }
+.album-crew-name { font-weight: 900; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.crew-flag { width: 20px; height: auto; border-radius: 2px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15); }
+.album-images-wanted {
+  margin: 4px 0 10px; text-align: center;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+}
 .album-crew-count { font-size: 11px; font-weight: 900; color: var(--muted); }
 .album-crew-count.is-done { color: var(--yellow); }
 

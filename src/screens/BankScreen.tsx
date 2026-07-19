@@ -153,6 +153,7 @@ function BankKid() {
   const { data, celebrateBankBounce } = useStore()
   const [modal, setModal] = useState<KidModal>(null)
   const [crashDismissed, setCrashDismissed] = useState(false) // "let me think" hides the alert until the next visit
+  const [calcOpen, setCalcOpen] = useState(false) // standalone calculator modal, shown when trip mode is off
   const quote = useMemo(() => randomLuffyQuote(), [])
   const bank = data.bank
   const pendingPaybacks = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
@@ -201,6 +202,25 @@ function BankKid() {
 
       {/* trip mode sits right under the treasure total — it's what he reaches for in a shop */}
       {converterActive(bank) && <ConverterCard bank={bank} />}
+
+      {/* trip mode is off → the calculator lives behind a floating icon instead */}
+      {!converterActive(bank) && (
+        <button
+          className="fab fab--calc"
+          title="Calculator"
+          aria-label="Calculator"
+          onClick={() => { sfx.click(); setCalcOpen(true) }}
+        >
+          🧮
+        </button>
+      )}
+      {calcOpen && (
+        <div className="overlay overlay--center" onClick={() => setCalcOpen(false)}>
+          <div className="sheet" style={{ maxWidth: 340 }} onClick={(e) => e.stopPropagation()}>
+            <Calculator standalone />
+          </div>
+        </div>
+      )}
 
       {pendingPaybacks.length > 0 && (
         <div className="card" style={{ marginBottom: 12, borderColor: 'var(--blue)' }}>
@@ -743,7 +763,7 @@ const CALC_KEYS = ['7', '8', '9', '%', '4', '5', '6', '×', '1', '2', '3', '−'
  * Deliberately simple: no operator precedence — each operator key settles the
  * pending operation first, the way a pocket calculator does.
  */
-function Calculator({ currency, onSend }: { currency: string; onSend: (value: number) => void }) {
+function Calculator({ currency, onSend, standalone }: { currency?: string; onSend?: (value: number) => void; standalone?: boolean }) {
   const [display, setDisplay] = useState('0')
   const [acc, setAcc] = useState<number | null>(null) // left-hand value
   const [op, setOp] = useState<string | null>(null)
@@ -804,7 +824,7 @@ function Calculator({ currency, onSend }: { currency: string; onSend: (value: nu
     <div className="card calc-card">
       <div style={{ fontWeight: 900, marginBottom: 2 }}>🧮 Calculator</div>
       <div className="muted" style={{ fontSize: 11, marginBottom: 8 }}>
-        Add up a few price tags, then send the total over to be converted.
+        {standalone ? 'Add up whatever you need.' : 'Add up a few price tags, then send the total over to be converted.'}
       </div>
 
       <div className="calc-display">
@@ -835,17 +855,19 @@ function Calculator({ currency, onSend }: { currency: string; onSend: (value: nu
         )}
       </div>
 
-      <button
-        className="btn btn--blue btn--small"
-        style={{ width: '100%', marginTop: 10 }}
-        disabled={!sendable}
-        onClick={() => {
-          sfx.gem()
-          onSend(value)
-        }}
-      >
-        ↑ Convert this ({currency})
-      </button>
+      {!standalone && onSend && (
+        <button
+          className="btn btn--blue btn--small"
+          style={{ width: '100%', marginTop: 10 }}
+          disabled={!sendable}
+          onClick={() => {
+            sfx.gem()
+            onSend(value)
+          }}
+        >
+          ↑ Convert this ({currency})
+        </button>
+      )}
     </div>
   )
 }

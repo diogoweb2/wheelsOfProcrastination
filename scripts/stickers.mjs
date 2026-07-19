@@ -37,14 +37,55 @@ const EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 // back to the guesser, and the run prints them so they're easy to fix up.
 const NAMES = JSON.parse(await readFile(new URL('./sticker-names.json', import.meta.url), 'utf8'))
 
-/** The crews a sticker can belong to. Add more and the album grows sections. */
-const CREWS = [
-  { id: 'straw-hats', name: 'Straw Hat Pirates', emoji: '🏴‍☠️' },
-  { id: 'emperors', name: 'Emperors of the Sea', emoji: '👑' },
-  { id: 'marines', name: 'Marine Headquarters', emoji: '⚓' },
-  { id: 'warlords', name: 'Seven Warlords', emoji: '⚔️' },
-  { id: 'worst-generation', name: 'The Worst Generation', emoji: '💀' },
-  { id: 'revolutionaries', name: 'Revolutionary Army', emoji: '🔥' },
+// Album sections are World Cup 2026 teams, best-ranked first. Only as many
+// teams as the catalog needs are active (~CARDS_PER_TEAM cards each), so
+// dropping new images in unlocks the next country automatically. `code` is the
+// flagcdn.com code — the flag is downloaded to public/flags/<code>.webp on
+// first use.
+const CARDS_PER_TEAM = 8
+const WC2026_TEAMS = [
+  { id: 'argentina', name: 'Argentina', code: 'ar' },
+  { id: 'spain', name: 'Spain', code: 'es' },
+  { id: 'france', name: 'France', code: 'fr' },
+  { id: 'england', name: 'England', code: 'gb-eng' },
+  { id: 'brazil', name: 'Brazil', code: 'br' },
+  { id: 'portugal', name: 'Portugal', code: 'pt' },
+  { id: 'netherlands', name: 'Netherlands', code: 'nl' },
+  { id: 'belgium', name: 'Belgium', code: 'be' },
+  { id: 'germany', name: 'Germany', code: 'de' },
+  { id: 'croatia', name: 'Croatia', code: 'hr' },
+  { id: 'morocco', name: 'Morocco', code: 'ma' },
+  { id: 'colombia', name: 'Colombia', code: 'co' },
+  { id: 'mexico', name: 'Mexico', code: 'mx' },
+  { id: 'usa', name: 'USA', code: 'us' },
+  { id: 'uruguay', name: 'Uruguay', code: 'uy' },
+  { id: 'switzerland', name: 'Switzerland', code: 'ch' },
+  { id: 'senegal', name: 'Senegal', code: 'sn' },
+  { id: 'japan', name: 'Japan', code: 'jp' },
+  { id: 'ecuador', name: 'Ecuador', code: 'ec' },
+  { id: 'canada', name: 'Canada', code: 'ca' },
+  { id: 'australia', name: 'Australia', code: 'au' },
+  { id: 'south-korea', name: 'South Korea', code: 'kr' },
+  { id: 'austria', name: 'Austria', code: 'at' },
+  { id: 'norway', name: 'Norway', code: 'no' },
+  { id: 'iran', name: 'Iran', code: 'ir' },
+  { id: 'paraguay', name: 'Paraguay', code: 'py' },
+  { id: 'tunisia', name: 'Tunisia', code: 'tn' },
+  { id: 'egypt', name: 'Egypt', code: 'eg' },
+  { id: 'algeria', name: 'Algeria', code: 'dz' },
+  { id: 'ivory-coast', name: 'Ivory Coast', code: 'ci' },
+  { id: 'scotland', name: 'Scotland', code: 'gb-sct' },
+  { id: 'panama', name: 'Panama', code: 'pa' },
+  { id: 'saudi-arabia', name: 'Saudi Arabia', code: 'sa' },
+  { id: 'qatar', name: 'Qatar', code: 'qa' },
+  { id: 'uzbekistan', name: 'Uzbekistan', code: 'uz' },
+  { id: 'jordan', name: 'Jordan', code: 'jo' },
+  { id: 'ghana', name: 'Ghana', code: 'gh' },
+  { id: 'south-africa', name: 'South Africa', code: 'za' },
+  { id: 'cape-verde', name: 'Cape Verde', code: 'cv' },
+  { id: 'new-zealand', name: 'New Zealand', code: 'nz' },
+  { id: 'haiti', name: 'Haiti', code: 'ht' },
+  { id: 'curacao', name: 'Curaçao', code: 'cw' },
 ]
 
 /** Stable 32-bit hash — same string always lands on the same crew, across runs and machines. */
@@ -97,6 +138,53 @@ function displayName(file) {
     .slice(0, 28)
 }
 
+/**
+ * Many clipart downloads have the transparency checkerboard baked into the
+ * pixels instead of a real alpha channel. Detect that (opaque, light-gray
+ * border) and strip it with a flood fill from the edges, so only
+ * background-connected pixels go transparent — white parts of the character
+ * itself are safe.
+ */
+async function ensureTransparent(buf) {
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  const { width: w, height: h } = info
+  const isBg = (i) => {
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3]
+    const min = Math.min(r, g, b), max = Math.max(r, g, b)
+    return a > 200 && min >= 175 && max - min <= 22
+  }
+  // only bother when the border actually looks like a baked-in checkerboard
+  let bgBorder = 0, border = 0
+  for (let x = 0; x < w; x++) {
+    border += 2
+    if (isBg((x + 0) * 4)) bgBorder++
+    if (isBg(((h - 1) * w + x) * 4)) bgBorder++
+  }
+  for (let y = 0; y < h; y++) {
+    border += 2
+    if (isBg(y * w * 4)) bgBorder++
+    if (isBg((y * w + w - 1) * 4)) bgBorder++
+  }
+  if (bgBorder / border < 0.5) return buf
+
+  const visited = new Uint8Array(w * h)
+  const stack = []
+  for (let x = 0; x < w; x++) stack.push(x, (h - 1) * w + x)
+  for (let y = 0; y < h; y++) stack.push(y * w, y * w + w - 1)
+  while (stack.length) {
+    const p = stack.pop()
+    if (visited[p] || !isBg(p * 4)) continue
+    visited[p] = 1
+    data[p * 4 + 3] = 0
+    const x = p % w
+    if (x > 0) stack.push(p - 1)
+    if (x < w - 1) stack.push(p + 1)
+    if (p >= w) stack.push(p - w)
+    if (p < w * (h - 1)) stack.push(p + w)
+  }
+  return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer()
+}
+
 async function collect(dir, rarity) {
   let entries = []
   try {
@@ -130,7 +218,7 @@ for (const { file, full, rarity } of sources) {
 
   // Fit the character inside the card without cropping heads off, on a
   // transparent canvas — the card frame behind it supplies the colour.
-  const img = sharp(await readFile(full))
+  const img = sharp(await ensureTransparent(await readFile(full)))
     .rotate()
     .resize({
       width: CARD_W,
@@ -155,6 +243,31 @@ for (const { file, full, rarity } of sources) {
     rarity,
     kb: Math.round(out.length / 1024),
   })
+}
+
+// Activate just enough teams for the catalog, best-ranked first — new images
+// eventually unlock the next country in the list.
+const commonCount = catalog.filter((c) => c.rarity === 'common').length
+const CREWS = WC2026_TEAMS.slice(
+  0,
+  Math.min(WC2026_TEAMS.length, Math.max(1, Math.ceil(commonCount / CARDS_PER_TEAM))),
+).map((t) => ({ id: t.id, name: t.name, code: t.code, flag: `/flags/${t.code}.webp` }))
+
+// Fetch any flag we don't have yet (flagcdn.com, public domain) and store it
+// small — it renders at ~20 CSS px next to the team name.
+const FLAGS_DIR = new URL('../public/flags/', import.meta.url).pathname
+await mkdir(FLAGS_DIR, { recursive: true })
+for (const crew of CREWS) {
+  const flagPath = path.join(FLAGS_DIR, `${crew.code}.webp`)
+  try {
+    await readFile(flagPath)
+  } catch {
+    const res = await fetch(`https://flagcdn.com/w80/${crew.code}.png`)
+    if (!res.ok) throw new Error(`flag download failed for ${crew.name}: HTTP ${res.status}`)
+    const png = Buffer.from(await res.arrayBuffer())
+    await writeFile(flagPath, await sharp(png).webp({ quality: 80 }).toBuffer())
+    console.log(`⬇  downloaded flag ${crew.code}.webp (${crew.name})`)
+  }
 }
 
 // Crew assignment: sort by hash (stable, filename-derived) and deal the cards
@@ -183,10 +296,21 @@ export interface StickerDef {
 export interface CrewDef {
   id: string
   name: string
-  emoji: string
+  /** path under public/ to the team's flag, e.g. /flags/br.webp */
+  flag: string
 }
 
-export const STICKER_CREWS: CrewDef[] = ${JSON.stringify(CREWS, null, 2)}
+/** Cards each team holds — the album is "complete-able" in blocks of this. */
+export const CARDS_PER_TEAM = ${CARDS_PER_TEAM}
+
+/** Every country that played the World Cup 2026 — teams still waiting for images. */
+export const TOTAL_WC_TEAMS = ${WC2026_TEAMS.length}
+
+export const STICKER_CREWS: CrewDef[] = ${JSON.stringify(
+  CREWS.map(({ id, name, flag }) => ({ id, name, flag })),
+  null,
+  2,
+)}
 
 export const STICKER_CATALOG: StickerDef[] = ${JSON.stringify(
   catalog.map(({ id, name, rarity, crew }) => ({ id, name, rarity, crew })),
@@ -196,7 +320,7 @@ export const STICKER_CATALOG: StickerDef[] = ${JSON.stringify(
 `
 await writeFile(CATALOG, ts)
 
-const byCrew = CREWS.map((c) => `${c.emoji} ${c.name}: ${catalog.filter((s) => s.crew === c.id).length}`).join('\n  ')
+const byCrew = CREWS.map((c) => `${c.name}: ${catalog.filter((s) => s.crew === c.id).length}`).join('\n  ')
 console.log(`${catalog.length} stickers (${commons} common, ${specials} special)\n  ${byCrew}`)
 
 // New drops usually need a hand-written name — surface them instead of shipping

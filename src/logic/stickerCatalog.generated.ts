@@ -11,39 +11,56 @@ export interface StickerDef {
 export interface CrewDef {
   id: string
   name: string
-  emoji: string
+  /** path under public/ to the team's flag, e.g. /flags/br.webp */
+  flag: string
 }
+
+/** Cards each team holds — the album is "complete-able" in blocks of this. */
+export const CARDS_PER_TEAM = 8
+
+/** Every country that played the World Cup 2026 — teams still waiting for images. */
+export const TOTAL_WC_TEAMS = 42
 
 export const STICKER_CREWS: CrewDef[] = [
   {
-    "id": "straw-hats",
-    "name": "Straw Hat Pirates",
-    "emoji": "🏴‍☠️"
+    "id": "argentina",
+    "name": "Argentina",
+    "flag": "/flags/ar.webp"
   },
   {
-    "id": "emperors",
-    "name": "Emperors of the Sea",
-    "emoji": "👑"
+    "id": "spain",
+    "name": "Spain",
+    "flag": "/flags/es.webp"
   },
   {
-    "id": "marines",
-    "name": "Marine Headquarters",
-    "emoji": "⚓"
+    "id": "france",
+    "name": "France",
+    "flag": "/flags/fr.webp"
   },
   {
-    "id": "warlords",
-    "name": "Seven Warlords",
-    "emoji": "⚔️"
+    "id": "england",
+    "name": "England",
+    "flag": "/flags/gb-eng.webp"
   },
   {
-    "id": "worst-generation",
-    "name": "The Worst Generation",
-    "emoji": "💀"
+    "id": "brazil",
+    "name": "Brazil",
+    "flag": "/flags/br.webp"
   },
   {
-    "id": "revolutionaries",
-    "name": "Revolutionary Army",
-    "emoji": "🔥"
+    "id": "portugal",
+    "name": "Portugal",
+    "flag": "/flags/pt.webp"
+  },
+  {
+    "id": "netherlands",
+    "name": "Netherlands",
+    "flag": "/flags/nl.webp"
+  },
+  {
+    "id": "belgium",
+    "name": "Belgium",
+    "flag": "/flags/be.webp"
   }
 ]
 
@@ -52,390 +69,390 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "6c224f4a20a4462309f75700c378650e0cf3d7ca7904-3-4",
     "name": "Smoker",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "spain"
   },
   {
     "id": "7a094561ead54385afc5120f89988e5d",
     "name": "Trafalgar D. Water Law",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "portugal"
   },
   {
     "id": "9c04c508408a164911c0a0c44bf17851",
     "name": "Dracule Mihawk",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "netherlands"
   },
   {
     "id": "196-1967259-zoro-and-nami-chopper-transparent-on",
     "name": "Zoro, Nami & Chopper",
     "rarity": "special",
-    "crew": "worst-generation"
+    "crew": "argentina"
   },
   {
     "id": "502-5029965-dead-bones-brook-sabo-one-piece-png",
     "name": "Brook & Sabo",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "spain"
   },
   {
     "id": "853b05215a6172af49ec86605791bb08",
     "name": "Sanji · Raid Suit",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "portugal"
   },
   {
     "id": "8523302-eb2874b406880a99ca39ec0cc06b4dc4",
     "name": "Kozuki Oden",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "france"
   },
   {
     "id": "ace-and-luffy-png-clipart",
     "name": "Ace & Luffy",
     "rarity": "special",
-    "crew": "straw-hats"
+    "crew": "argentina"
   },
   {
     "id": "akainu-borsalino-one-piece-admiral-character-png",
     "name": "Akainu & Borsalino",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "netherlands"
   },
   {
     "id": "bartholomew-kuma-render",
     "name": "Bartholomew Kuma",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "belgium"
   },
   {
     "id": "blackbeard-posttimeskip-original-fix",
     "name": "Marshall D. Teach",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "england"
   },
   {
     "id": "brook",
     "name": "Brook",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "spain"
   },
   {
     "id": "charlotte-katakuri-2",
     "name": "Charlotte Katakuri",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "netherlands"
   },
   {
     "id": "cmelxgmy7wi4gxlhg9nswkxiwzi71nxwgm57a1x2n1whxuhz",
     "name": "Jinbe · Warlord",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "belgium"
   },
   {
     "id": "d4fty22-efc79fb4-86ee-4950-81f8-da8e362ba5ee",
     "name": "Tony Tony Chopper",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "portugal"
   },
   {
     "id": "dellinger-dorsal-fin",
     "name": "Dellinger",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "portugal"
   },
   {
     "id": "denjiro-one-piece",
     "name": "Denjiro",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "england"
   },
   {
     "id": "edwardnew",
     "name": "Edward Newgate",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "belgium"
   },
   {
     "id": "eustass-kid",
     "name": "Eustass Kid",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "england"
   },
   {
     "id": "franky-2-years-later",
     "name": "Franky",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "england"
   },
   {
     "id": "gomu-gomu-no-mi",
     "name": "Gomu Gomu no Mi",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "netherlands"
   },
   {
     "id": "hybrid-queen",
     "name": "Queen · Hybrid",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "brazil"
   },
   {
     "id": "images-1",
     "name": "Usopp",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "england"
   },
   {
     "id": "images",
     "name": "Portgas D. Ace",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "england"
   },
   {
     "id": "images-ir3h",
     "name": "Luffy · World Cup",
     "rarity": "special",
-    "crew": "revolutionaries"
+    "crew": "portugal"
   },
   {
     "id": "imgbin-donquixote-doflamingo-one-piece-unlimited",
     "name": "Donquixote Doflamingo",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "brazil"
   },
   {
     "id": "jinbe",
     "name": "Jinbe",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "argentina"
   },
   {
     "id": "kaidoh",
     "name": "Kaido",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "brazil"
   },
   {
     "id": "kaidou-dragonform-original-enhanced",
     "name": "Kaido · Dragon Form",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "argentina"
   },
   {
     "id": "katakuri-2nd-son-of-the-charlotte-family-png-cli",
     "name": "Katakuri",
     "rarity": "special",
-    "crew": "straw-hats"
+    "crew": "netherlands"
   },
   {
     "id": "kawamatsu",
     "name": "Kawamatsu",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "belgium"
   },
   {
     "id": "killer-post-timeskip-render",
     "name": "Killer",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "brazil"
   },
   {
     "id": "king-original",
     "name": "King",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "brazil"
   },
   {
     "id": "kody29-onepiece",
     "name": "Straw Hat Crew",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "spain"
   },
   {
     "id": "kyoshiro-one-piece",
     "name": "Kyoshiro",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "belgium"
   },
   {
     "id": "loki-anime-concept-art-copy",
     "name": "Loki",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "france"
   },
   {
     "id": "lucci-cp0-1",
     "name": "Rob Lucci",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "netherlands"
   },
   {
     "id": "lucci-cp0",
     "name": "Rob Lucci · CP0",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "portugal"
   },
   {
     "id": "luffygear5",
     "name": "Luffy · Gear 5",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "france"
   },
   {
     "id": "marco-the-phoenix",
     "name": "Marco the Phoenix",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "brazil"
   },
   {
     "id": "mihawk-render",
     "name": "Mihawk · Hawk Eyes",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "brazil"
   },
   {
     "id": "momong",
     "name": "Kozuki Momonosuke",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "france"
   },
   {
     "id": "monkey-d-luffy-gear-4-render-11563147961xnnsgtzk",
     "name": "Luffy · Gear 4",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "portugal"
   },
   {
     "id": "monkey-d-luffy-one-piece-monkey-d-luffy-wallpape",
     "name": "Monkey D. Luffy",
     "rarity": "special",
-    "crew": "warlords"
+    "crew": "england"
   },
   {
     "id": "nami-onigashima-official-by-monkeyoflife-dje6rrx",
     "name": "Nami · Onigashima",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "spain"
   },
   {
     "id": "new-shogun-kozuki-momonosuke-by-robirh-df6kq3l-f",
     "name": "Shogun Momonosuke",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "argentina"
   },
   {
     "id": "o-lin-jumputi",
     "name": "Charlotte Linlin",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "france"
   },
   {
     "id": "one-piece-monkey-d-luffy-512x512",
     "name": "Luffy · Straw Hat",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "england"
   },
   {
     "id": "perona-render-01",
     "name": "Perona",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "belgium"
   },
   {
     "id": "pica-render",
     "name": "Pica",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "netherlands"
   },
   {
     "id": "png-clipart-boa-hancock-nico-robin-one-piece-mon",
     "name": "Boa Hancock & Nico Robin",
     "rarity": "common",
-    "crew": "warlords"
+    "crew": "spain"
   },
   {
     "id": "png-clipart-monkey-d-luffy-monkey-d-garp-gol-d-r",
     "name": "Luffy, Garp & Roger",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "spain"
   },
   {
     "id": "queen-original",
     "name": "Queen",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "belgium"
   },
   {
     "id": "rob-lucci-by-orochimarusama1-by-staxkiller-d8rj4",
     "name": "Rob Lucci · Leopard",
     "rarity": "common",
-    "crew": "revolutionaries"
+    "crew": "spain"
   },
   {
     "id": "robin-render",
     "name": "Nico Robin",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "portugal"
   },
   {
     "id": "roronoa-zoro",
     "name": "Roronoa Zoro",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "argentina"
   },
   {
     "id": "roronoa-zoro-png-clipart",
     "name": "Zoro · Three Swords",
     "rarity": "special",
-    "crew": "straw-hats"
+    "crew": "brazil"
   },
   {
     "id": "sanji-sanji-new-world-full-body-115633029592ajtk",
     "name": "Vinsmoke Sanji",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "argentina"
   },
   {
     "id": "shanks",
     "name": "Red-Haired Shanks",
     "rarity": "common",
-    "crew": "marines"
+    "crew": "netherlands"
   },
   {
     "id": "top-20-strongest-one-piece-characters-powerscali",
     "name": "Legends of the Sea",
     "rarity": "common",
-    "crew": "emperors"
+    "crew": "belgium"
   },
   {
     "id": "urouge",
     "name": "Urouge",
     "rarity": "common",
-    "crew": "straw-hats"
+    "crew": "france"
   },
   {
     "id": "usopp-one-piece-usopp-wallpaper-png-clipart",
     "name": "Sogeking",
     "rarity": "special",
-    "crew": "marines"
+    "crew": "argentina"
   },
   {
     "id": "uta-one-piece",
     "name": "Uta",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "france"
   },
   {
     "id": "vinsmoke-sanji-one-piece-treasure-cruise-monkey-",
     "name": "Sanji · Black Leg",
     "rarity": "special",
-    "crew": "straw-hats"
+    "crew": "argentina"
   },
   {
     "id": "yasopp-render",
     "name": "Yasopp",
     "rarity": "common",
-    "crew": "worst-generation"
+    "crew": "france"
   }
 ]

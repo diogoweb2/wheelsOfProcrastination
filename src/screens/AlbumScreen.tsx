@@ -14,6 +14,7 @@ import {
   type StickerDef,
   tradeableFor,
 } from '../logic/album'
+import { CARDS_PER_TEAM, TOTAL_WC_TEAMS } from '../logic/stickerCatalog.generated'
 import { dayKey } from '../logic/dates'
 import { Sticker } from '../components/Sticker'
 import { StickerDetail } from '../components/StickerDetail'
@@ -150,7 +151,7 @@ function AlbumTab() {
           <div key={crew.id} className="album-crew">
             <div className="album-crew-head">
               <span className="album-crew-name">
-                {crew.emoji} {crew.name}
+                <img className="crew-flag" src={crew.flag} alt="" /> {crew.name}
               </span>
               <span className={`album-crew-count ${done ? 'is-done' : ''}`}>
                 {done ? '★ COMPLETE' : `${got}/${cards.length}`}
@@ -177,7 +178,23 @@ function AlbumTab() {
           </div>
         )
       })}
+
+      <ImagesWantedNote />
     </>
+  )
+}
+
+/** How far the collection is from fielding every World Cup 2026 country, in
+    full squads of CARDS_PER_TEAM — a note for whoever curates the images. */
+function ImagesWantedNote() {
+  const commons = STICKER_CATALOG.filter((s) => s.rarity === 'common').length
+  const missing = TOTAL_WC_TEAMS * CARDS_PER_TEAM - commons
+  if (missing <= 0) return null
+  return (
+    <p className="album-images-wanted">
+      🌍 Add {missing} more image{missing === 1 ? '' : 's'} to field all {TOTAL_WC_TEAMS} World Cup
+      2026 teams ({CARDS_PER_TEAM} players each)
+    </p>
   )
 }
 

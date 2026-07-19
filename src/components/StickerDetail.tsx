@@ -83,7 +83,7 @@ export function StickerDetail({
           <div className="detail-meta">
             {crew && (
               <span className="detail-chip">
-                {crew.emoji} {crew.name}
+                <img className="crew-flag" src={crew.flag} alt="" /> {crew.name}
               </span>
             )}
             <span className={`detail-chip ${sticker.rarity === 'special' ? 'is-special' : 'is-common'}`}>
