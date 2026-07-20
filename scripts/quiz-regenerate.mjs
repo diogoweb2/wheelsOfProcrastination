@@ -57,7 +57,7 @@ const SCHEMA = `Each question is a JSON object:
   "type": "choice" | "write" | "match" | "order",
   "prompt": string,                     // the question, kid-friendly
   "emoji": string,                      // one fitting emoji
-  "choices": string[],                  // choice only: 4 options
+  "choices": string[],                  // choice only: the correct answer + 6 plausible wrong ones (7 total). The app shows 4 at a time, sampled at random, so every wrong option must be genuinely wrong and believable on its own.
   "answer": string,                     // choice only: the correct option (must be one of choices)
   "accept": string[],                   // write only: accepted answers, canonical first; answers must be 1-2 simple words
   "pairs": [{"left": string, "right": string}], // match only: 3-4 pairs

@@ -16,6 +16,7 @@ import {
   isFresh,
   lastOfficialAttempt,
   nextTestQuestion,
+  pickChoiceOptions,
   pickTraining,
   shuffle,
   topicById,
@@ -366,7 +367,7 @@ function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fr
 }
 
 function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
-  const options = useMemo(() => shuffle(q.choices ?? []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const options = useMemo(() => pickChoiceOptions(q), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picked, setPicked] = useState<string | null>(null)
   return (
     <div style={{ display: 'grid', gap: 8 }}>

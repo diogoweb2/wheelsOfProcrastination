@@ -31,7 +31,6 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     emoji: '🔬',
     description: 'Grade 6 science: space, electricity, flight, biodiversity.',
     targetCount: 50,
-    comingSoon: true,
   },
   {
     id: 'critical-thinking-6',
@@ -40,7 +39,6 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     emoji: '🧠',
     description: 'Spot scams, fake news and tricky ads. Think like a detective.',
     targetCount: 50,
-    comingSoon: true,
   },
   {
     id: 'logic-6',
@@ -49,7 +47,6 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     emoji: '🧩',
     description: 'Riddles, patterns and puzzles. No math calculations, promise.',
     targetCount: 50,
-    comingSoon: true,
   },
   // --- Diogo (senior frontend dev going deep on AI-assisted development) ---
   {
@@ -381,6 +378,25 @@ export function nextTestQuestion(
 ): QuizQuestion {
   if (!lastTwoWrong || remaining.length === 1) return remaining[0]
   return [...remaining].sort((a, b) => successRate(stats[b.id]) - successRate(stats[a.id]))[0]
+}
+
+/** How many options a choice question shows on screen, however big its distractor pool is. */
+export const CHOICE_OPTIONS_SHOWN = 4
+
+/**
+ * Pick the options for one showing of a choice question.
+ *
+ * `q.choices` is a *pool* — it may hold far more wrong answers than fit on
+ * screen. We keep the correct answer, sample the rest at random and shuffle, so
+ * both the position AND the set of distractors change every time. That's what
+ * stops "the answer is the 3rd button" memorisation.
+ */
+export function pickChoiceOptions(q: QuizQuestion, shown: number = CHOICE_OPTIONS_SHOWN): string[] {
+  const pool = q.choices ?? []
+  const answer = q.answer
+  if (!answer) return shuffle(pool).slice(0, shown)
+  const distractors = shuffle(pool.filter((c) => c !== answer)).slice(0, Math.max(0, shown - 1))
+  return shuffle([answer, ...distractors])
 }
 
 export function shuffle<T>(arr: T[]): T[] {
