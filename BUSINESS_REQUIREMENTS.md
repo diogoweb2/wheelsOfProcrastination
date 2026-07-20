@@ -138,6 +138,11 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
   - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests` and `onStickerTradeWrite` watches `app/stickerTrades`. Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
+- **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
+  - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
+  - **Diogo gets a second, separate push about Ben's** leftovers ("👦 Ben still has 2 must-dos") so he can remind him before bed.
+  - **Silent when nothing is outstanding** — a clean day never buzzes, so the ping keeps meaning something.
+  - The function mirrors `isAvailableOn`/`isRequiredOn` from `src/logic/wheel.ts` in plain JS (kept in sync by hand — changing the required-window or dayScope rules means updating both).
   - The public VAPID key comes from `VITE_FCM_VAPID_KEY` (see `.env.example`); it ships in the client bundle by design. Deploy the senders with `firebase deploy --only functions` (requires the Blaze plan).
 
 ## 11. Security / Access
