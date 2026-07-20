@@ -47,6 +47,7 @@ export function defaultData(): AppData {
     giftcards: [],
     bank: defaultBankState(),
     album: defaultAlbumState(),
+    pushTokens: [],
   }
 }
 
@@ -64,6 +65,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
     quiz: { ...base.quiz, ...parsed.quiz },
     giftcards: parsed.giftcards ?? base.giftcards,
+    pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     bank: parsed.bank
       ? {

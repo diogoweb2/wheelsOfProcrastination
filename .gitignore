@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 scripts/.bank-market.log
+
+# local env (holds VITE_FCM_VAPID_KEY — see .env.example)
+.env
+functions/node_modules

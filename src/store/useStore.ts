@@ -70,6 +70,16 @@ import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, traini
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
+import { enablePush } from '../push'
+
+/** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
+function deviceLabel(): string {
+  const ua = navigator.userAgent
+  for (const [re, name] of [[/iPhone/, 'iPhone'], [/iPad/, 'iPad'], [/Android/, 'Android'], [/Macintosh/, 'Mac'], [/Windows/, 'Windows']] as const) {
+    if (re.test(ua)) return name
+  }
+  return 'this device'
+}
 
 // TEMP (local testing only — do not commit as true): when set, spins are not
 // registered: no pendingPicks entry, no pick counters, nothing saved to Firestore.
@@ -194,6 +204,9 @@ interface StoreState {
   declineFreezeRequest: (requestId: string) => void
   /** Kid: mark a gift's celebration as shown so it only fires once. */
   markFreezeGiftSeen: (giftId: string) => void
+
+  /** Register this device for web push so a CLOSED app still gets pinged. Returns an error message, or null on success. */
+  registerPushDevice: () => Promise<string | null>
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
   // --- sticker album ---
   /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries. Returns the drawn sticker ids. */
@@ -1158,6 +1171,22 @@ export const useStore = create<StoreState>((set, get) => {
         freezeRequests,
         freezeGifts.map((g) => (g.id === giftId ? { ...g, seenAt: new Date().toISOString() } : g)),
       )
+    },
+
+    async registerPushDevice() {
+      try {
+        const token = await enablePush()
+        if (get().data.pushTokens.some((t) => t.token === token)) return null // already registered
+        commit((d) => {
+          d.pushTokens = [
+            ...d.pushTokens,
+            { token, label: deviceLabel(), addedAt: new Date().toISOString() },
+          ]
+        })
+        return null
+      } catch (err) {
+        return (err as Error)?.message ?? 'Could not turn on push notifications.'
+      }
     },
 
     // --- sticker album ------------------------------------------------------

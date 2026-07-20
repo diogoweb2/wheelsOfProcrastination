@@ -8,6 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
+      // the FCM worker registers itself on its own scope (see src/push.ts) —
+      // Workbox must not precache or serve it
+      workbox: { globIgnores: ['**/firebase-messaging-sw.js'] },
       manifest: {
         name: 'Wheels of Procrastination',
         short_name: 'WheelsOP',

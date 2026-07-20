@@ -64,6 +64,13 @@ export interface Settings {
   lastGoalPromptDay?: string // YYYY-MM-DD — the periodic "check your streak goal" nudge throttle
 }
 
+/** One device registered for web push, so a closed app can still be reached. */
+export interface PushToken {
+  token: string // the FCM registration token
+  label: string // rough device hint (e.g. "iPhone"), just for the settings list
+  addedAt: string // ISO
+}
+
 export interface Profile {
   id: string
   name: string
@@ -370,4 +377,5 @@ export interface AppData {
   giftcards: GiftCardPurchase[]
   bank: BankState
   album: AlbumState
+  pushTokens: PushToken[] // devices this profile has registered for web push
 }

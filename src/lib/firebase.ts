@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: '1:30669970378:web:e15a8d3b24d87bacd28d33',
 }
 
-const app = initializeApp(firebaseConfig)
+export const app = initializeApp(firebaseConfig)
 
 // Offline-first: Firestore keeps a local IndexedDB cache, so the app works
 // with no network and writes flush when it comes back.

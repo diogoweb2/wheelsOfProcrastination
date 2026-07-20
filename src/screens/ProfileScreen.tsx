@@ -13,9 +13,12 @@ import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
 export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
-  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout, freezeRequests, askForFreeze, cancelFreezeRequest, activeProfileId } = useStore()
+  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout, freezeRequests, askForFreeze, cancelFreezeRequest, activeProfileId, registerPushDevice } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
   const [freezeReason, setFreezeReason] = useState('')
+  const [pushState, setPushState] = useState<string | null>(null)
+  const [pushBusy, setPushBusy] = useState(false)
+  const registered = data.pushTokens.length > 0
   const askedFreeze = freezeRequests.some((r) => r.status === 'pending' && r.fromId === activeProfileId)
   const [section, setSection] = useState<'me' | 'voyage' | 'ideas' | 'timezone' | 'settings' | 'admin'>('me')
   const me = activeProfile()
@@ -40,6 +43,15 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
     } else {
       sfx.error()
     }
+  }
+
+  async function onEnablePush() {
+    setPushBusy(true)
+    const err = await registerPushDevice()
+    setPushBusy(false)
+    setPushState(err ?? 'Push is on for this device! 📲 Even with the app closed.')
+    if (err) sfx.error()
+    else sfx.gem()
   }
 
   async function enableNotifications() {
@@ -304,8 +316,27 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
           </p>
         )}
         <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>
-          Note: until Firebase push is wired up, reminders fire best-effort while the app is installed/open.
+          Daily reminders fire while the app is installed/open. For pings that reach you with the app CLOSED
+          (freeze asks, trades), turn on push below.
         </p>
+
+        {/* web push — the only thing that reaches a closed app */}
+        <div style={{ borderTop: '1px solid var(--line)', marginTop: 12, paddingTop: 12 }}>
+          <div style={{ fontWeight: 900, marginBottom: 4 }}>📲 Push to this device</div>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+            {registered
+              ? `On for ${data.pushTokens.length} device${data.pushTokens.length === 1 ? '' : 's'}. Turn it on once per device you use.`
+              : 'Get pinged even when the app is closed. On iPhone, add the app to your Home Screen first.'}
+          </p>
+          <button className="btn btn--blue" disabled={pushBusy} onClick={onEnablePush}>
+            {pushBusy ? 'Asking…' : registered ? '➕ Register this device too' : '📲 Turn on push'}
+          </button>
+          {pushState && (
+            <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>
+              {pushState}
+            </p>
+          )}
+        </div>
         <button
           className="btn btn--ghost"
           style={{ marginTop: 10 }}

@@ -134,7 +134,11 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 
 - Daily local reminder (user picks the hour) to do 1 task.
 - If yesterday was missed: message motivates AND warns to buy a freeze before the streak dies.
-- Current limitation (pre-Firebase): true scheduled push needs a server; until FCM is wired, reminders are best-effort local notifications (fire when the PWA/service worker is alive). FCM integration is planned with the Firebase setup.
+- The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
+- **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
+  - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
+  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests` and `onStickerTradeWrite` watches `app/stickerTrades`. Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
+  - The public VAPID key comes from `VITE_FCM_VAPID_KEY` (see `.env.example`); it ships in the client bundle by design. Deploy the senders with `firebase deploy --only functions` (requires the Blaze plan).
 
 ## 11. Security / Access
 
@@ -153,7 +157,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
   - `src/store/storage.ts` — now local-only helpers: default/merge of an `AppData` blob, the seed roster, the per-device active login, and one-time readers for migrating an old localStorage save up to the cloud.
   - Auth is **anonymous** (`signInAnonymously`); Firestore rules (`firestore.rules`) require `request.auth != null`. Deploy config in `firebase.json` / `.firebaserc`.
 - All art is original inline SVG (Luffy mascot with mood poses in `src/components/Luffy.tsx`; Zoro/Chopper/Nami busts in `src/components/Crew.tsx`; the Straw Hat Jolly Roger in the wheel hub in `src/components/JollyRoger.tsx`, which does a silly squash-and-wobble while the wheel spins); all sounds synthesized with WebAudio (no external assets). No official One Piece artwork is bundled — everything is hand-drawn fan art, fine for this private, unpublished app.
-- FCM push notifications still planned but NOT wired yet (see §10).
+- FCM web push is wired for the cross-crew pings (freeze asks/grants, trade offers) via Cloud Functions in `functions/` — see §10. The daily reminder remains local-only.
 
 ## 13. Tone
 
