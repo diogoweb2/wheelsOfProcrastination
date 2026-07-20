@@ -13,8 +13,10 @@ import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
 export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
-  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout } = useStore()
+  const { data, buyFreeze, setStreakGoal, setSettings, pushEvent, activeProfile, logout, freezeRequests, askForFreeze, cancelFreezeRequest, activeProfileId } = useStore()
   const [notifState, setNotifState] = useState<string | null>(null)
+  const [freezeReason, setFreezeReason] = useState('')
+  const askedFreeze = freezeRequests.some((r) => r.status === 'pending' && r.fromId === activeProfileId)
   const [section, setSection] = useState<'me' | 'voyage' | 'ideas' | 'timezone' | 'settings' | 'admin'>('me')
   const me = activeProfile()
 
@@ -178,6 +180,47 @@ export function ProfileScreen({ goSpin }: { goSpin: () => void }) {
           🪙{FREEZE_COST}
         </button>
       </div>
+
+      {/* the kid can always ask Dad to cover a day he couldn't be here for */}
+      {me?.id !== PARENT_ID && (
+        <div className="card" style={{ marginBottom: 14 }}>
+          {askedFreeze ? (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ fontSize: 26 }}>📨</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 900 }}>Dad got your message</div>
+                <div className="muted" style={{ fontSize: 13 }}>He’ll send a freeze if it’s fair. Hang tight!</div>
+              </div>
+              <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); cancelFreezeRequest() }}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div className="field">
+              <label>Couldn’t be here? Ask Dad</label>
+              <input
+                type="text"
+                value={freezeReason}
+                maxLength={120}
+                placeholder="I was on a trip and had no wifi…"
+                onChange={(e) => setFreezeReason(e.target.value)}
+                style={{ marginTop: 4 }}
+              />
+              <button
+                className="btn btn--blue btn--small"
+                style={{ marginTop: 8, alignSelf: 'flex-start' }}
+                onClick={() => {
+                  sfx.click()
+                  askForFreeze(freezeReason)
+                  setFreezeReason('')
+                }}
+              >
+                🆘 Ask for a free freeze
+              </button>
+            </div>
+          )}
+        </div>
+      )}
         </>
       )}
 

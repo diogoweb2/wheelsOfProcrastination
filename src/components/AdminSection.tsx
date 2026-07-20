@@ -38,6 +38,8 @@ export function AdminSection() {
     <>
       <div className="h2">🛠️ Captain’s desk (admin)</div>
 
+      <FreezeDesk />
+
       {pending.length > 0 && <PendingReview pending={pending} />}
 
       <PendingPrizes />
@@ -79,6 +81,90 @@ export function AdminSection() {
 }
 
 /** Unpaid purchases from both crewmates, each with a "Paid" settle button. */
+/**
+ * Free Streak Freezes for Ben. Shows his pending asks (with his reason) and an
+ * always-open form so Diogo can gift one unprompted — e.g. he already knows Ben
+ * was away on a trip. Granting also revives a streak that already sank.
+ */
+function FreezeDesk() {
+  const { kidData, freezeRequests, grantFreeze, declineFreezeRequest } = useStore()
+  const [message, setMessage] = useState('')
+  const [count, setCount] = useState(1)
+  const [open, setOpen] = useState(false)
+
+  const asks = freezeRequests.filter((r) => r.status === 'pending' && r.fromId === KID_ID)
+  const dead = kidData?.streak.deadStreak
+  const stock = kidData?.economy.freezes ?? 0
+
+  function send(requestId?: string) {
+    sfx.gem()
+    grantFreeze(count, message || 'Dad’s got your back. Go get ’em! 👒', requestId)
+    setMessage('')
+    setCount(1)
+    setOpen(false)
+  }
+
+  const showForm = open || asks.length > 0
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: asks.length > 0 ? 'var(--red)' : undefined }}>
+      <div style={{ fontWeight: 900, marginBottom: 6 }}>
+        🧊 Free freezes for Ben {asks.length > 0 && <span style={{ color: 'var(--red)' }}>· {asks.length} asking!</span>}
+      </div>
+
+      {asks.map((r) => (
+        <div key={r.id} style={{ borderTop: '1px solid var(--line)', padding: '8px 0' }}>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>🆘 {r.fromName} is asking for a freeze</div>
+          {r.reason && <div className="muted" style={{ fontSize: 13, fontStyle: 'italic' }}>“{r.reason}”</div>}
+          <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+            asked {new Date(r.createdAt).toLocaleString()}
+          </div>
+          <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => { sfx.click(); declineFreezeRequest(r.id) }}>
+            ✕ Not this time
+          </button>
+        </div>
+      ))}
+
+      <div className="muted" style={{ fontSize: 12, borderTop: '1px solid var(--line)', paddingTop: 8, marginTop: 4 }}>
+        Ben has 🧊{stock} stocked
+        {dead ? ` · his ${dead.value}-day streak is DEAD — granting revives it free` : ' · streak is alive'}
+      </div>
+
+      {!showForm ? (
+        <button className="btn btn--small" style={{ marginTop: 8 }} onClick={() => { sfx.click(); setOpen(true) }}>
+          🎁 Give Ben a free freeze
+        </button>
+      ) : (
+        <>
+          <div className="field" style={{ marginTop: 8 }}>
+            <label>Message for Ben</label>
+            <input
+              type="text"
+              value={message}
+              maxLength={160}
+              placeholder="Trips don’t break streaks. Proud of you!"
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
+            <span className="muted" style={{ fontSize: 13, fontWeight: 800 }}>How many</span>
+            <button className="btn btn--ghost btn--small" onClick={() => setCount((c) => Math.max(1, c - 1))}>−</button>
+            <b style={{ minWidth: 18, textAlign: 'center' }}>{count}</b>
+            <button className="btn btn--ghost btn--small" onClick={() => setCount((c) => Math.min(9, c + 1))}>+</button>
+            <button
+              className="btn btn--small"
+              style={{ marginLeft: 'auto' }}
+              disabled={!kidData}
+              onClick={() => send(asks[0]?.id)}
+            >
+              🧊 Send {count} free
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function PendingPrizes() {
   const { data, kidData, markGiftCardPaid } = useStore()
   const rows = [

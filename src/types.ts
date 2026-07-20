@@ -321,6 +321,41 @@ export interface StickerTrade {
   note?: string // optional one-liner from the sender
 }
 
+// --- Free freezes from Dad (shared app/freezeRequests doc) ------------------
+
+/**
+ * Ben asking Dad to cover a day he couldn't be at the app (a trip, being sick).
+ * Lives in the SHARED app/freezeRequests doc so Diogo sees it live and can
+ * answer from the Admin desk. `status` stays 'pending' until he grants or
+ * declines; a granted request records how many freezes were gifted.
+ */
+export interface FreezeRequest {
+  id: string
+  fromId: string // the kid asking
+  fromName: string
+  reason?: string // optional one-liner from the kid ("ski trip, no wifi")
+  status: 'pending' | 'granted' | 'declined'
+  createdAt: string
+  resolvedAt?: string
+  granted?: number // how many freezes Dad gave (only on 'granted')
+}
+
+/**
+ * A gift Dad handed out — the kid's side reads the newest unseen one and shows
+ * the celebration ("Dad gave you a free freeze!" + his custom note). Dad can
+ * gift with no request at all, so these are not tied to a FreezeRequest.
+ */
+export interface FreezeGift {
+  id: string
+  toId: string // the kid receiving
+  fromName: string // "Dad" — whoever granted it
+  count: number // how many freezes gifted
+  message: string // Dad's custom message, shown verbatim to the kid
+  revived: number | null // the streak value brought back to life, if any
+  createdAt: string
+  seenAt?: string // set once the kid's app has shown the celebration
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]

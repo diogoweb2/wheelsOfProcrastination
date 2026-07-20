@@ -81,6 +81,12 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
   - Else → streak resets to 0. The sloth will have opinions.
 - **Streak goal**: user picks a goal (7 / 14 / 30 / 50 / 100). Reaching it pays **goal × 10 🪙** and a celebration. A **goal check-in modal** resurfaces the goal (with the bonus per option) every ~7 days, so it's no longer buried in the profile.
 - **Streak repair**: if days were skipped and the streak died (no freezes left), the next app open shows a standing **repair offer**: revive the dead streak for **15 🪙 per lost day** (min 30, max 450). Repairing freezes the missed days; declining ("let it sink") clears the offer and the streak restarts from 0.
+- **Free freeze from Dad**: real life (trips, illness) shouldn't cost a streak, so Ben can ask Diogo to cover a day instead of paying the repair cost.
+  - Ben taps **🆘 Ask Dad for a free freeze** — on the streak-death modal, and on the freeze card in his Me tab (available any time, not just after a death) — with an optional one-line reason. One open ask at a time; he can cancel it.
+  - Diogo gets a **topbar banner + phone notification** ("Ben needs a Streak Freeze!", showing the reason) and answers from the **Admin desk** (`FreezeDesk` in `src/components/AdminSection.tsx`): pick how many freezes (1–9) and write a **custom message**. He can also gift unprompted, with no ask pending.
+  - Granting adds the freezes to Ben's stock — **deliberately bypassing the `MAX_FREEZES` shop cap**, since Dad is overriding it — and, if his streak is currently dead, **revives it and freezes the missed days for free** (same effect as `repairStreak`, no Berries charged).
+  - Ben's next app open shows a Chopper celebration: *"Dad sent you a free Streak Freeze!"* + Dad's message verbatim + the revived streak value. Shown once (`seenAt`), and it takes priority over the repair offer.
+  - Asks and gifts live in the shared Firestore doc **`app/freezeRequests`** (`{ requests: FreezeRequest[], gifts: FreezeGift[] }`), live-synced to both sides like sticker trades.
 - Streak UI mimics Duolingo (flame, number, calendar of the week).
 
 ## 7. Map ("path of shame and glory")
@@ -203,6 +209,7 @@ A Panini-style collection both crewmates fill and trade from. Rules live in `src
 The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):
 
 - Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher, ⚔️ preview of Ben's training (records nothing).
+- **🧊 Free freezes for Ben** (top of the desk): answer his freeze asks or gift unprompted — count + custom message, revives a dead streak for free. See §6.
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
 - Prize settlement: "Prizes to settle" list + topbar banners (see §15).
 - **Scripts** (both talk to Firestore via the public web config + anonymous auth):

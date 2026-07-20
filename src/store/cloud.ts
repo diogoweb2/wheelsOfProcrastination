@@ -5,7 +5,7 @@
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AppData, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -139,6 +139,25 @@ export function subscribeStickerTrades(cb: (trades: StickerTrade[]) => void): ()
 export async function saveStickerTrades(trades: StickerTrade[]): Promise<void> {
   await ensureAuth()
   await setDoc(tradesRef(), { trades })
+}
+
+// --- free freezes (shared: the kid's asks + Dad's gifts) -------------------
+
+const freezeRef = () => doc(firestore, 'app', 'freezeRequests')
+
+/** Live-sync the ask/gift table. Fires when the kid asks or when Dad grants. */
+export function subscribeFreezeDesk(
+  cb: (v: { requests: FreezeRequest[]; gifts: FreezeGift[] }) => void,
+): () => void {
+  return onSnapshot(freezeRef(), (snap) => {
+    const data = snap.data() as { requests?: FreezeRequest[]; gifts?: FreezeGift[] } | undefined
+    cb({ requests: data?.requests ?? [], gifts: data?.gifts ?? [] })
+  })
+}
+
+export async function saveFreezeDesk(requests: FreezeRequest[], gifts: FreezeGift[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(freezeRef(), { requests, gifts })
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

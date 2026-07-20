@@ -54,7 +54,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -107,6 +107,23 @@ export default function App() {
     }
     prevTrades.current = openTrades.length
   }, [openTrades.length])
+
+  // ping Diogo when Ben asks for a free freeze (his streak is usually on the line)
+  const freezeAsks =
+    activeProfileId === PARENT_ID ? freezeRequests.filter((r) => r.status === 'pending' && r.fromId === KID_ID) : []
+  const prevAsks = useRef(freezeAsks.length)
+  useEffect(() => {
+    if (freezeAsks.length > prevAsks.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('🆘 Ben needs a Streak Freeze!', {
+          body: 'His streak is on the line. Open the Me tab → Admin to send one.',
+        })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevAsks.current = freezeAsks.length
+  }, [freezeAsks.length])
 
   if (cloudError) {
     return (
@@ -205,6 +222,21 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {freezeAsks.map((r) => (
+        <div className="banner" key={r.id} style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>🆘</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>{r.fromName} needs a Streak Freeze!</div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              {r.reason ? `“${r.reason}”` : 'tap to send him one for free'}
+            </div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); setTab('me') }}>
+            Help him
+          </button>
+        </div>
+      ))}
 
       {openTrades.map((t) => (
         <div className="banner" key={t.id} style={{ background: 'var(--red)' }}>

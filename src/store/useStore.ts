@@ -9,6 +9,8 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  FreezeGift,
+  FreezeRequest,
   Idea,
   MarketData,
   Priority,
@@ -35,9 +37,11 @@ import {
   saveQuizBank,
   saveRoster,
   saveStickerTrades,
+  saveFreezeDesk,
   subscribeData,
   subscribeIdeas,
   subscribeStickerTrades,
+  subscribeFreezeDesk,
   subscribeMarketData,
   subscribeQuizBank,
   subscribeRoster,
@@ -91,6 +95,8 @@ interface StoreState {
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
+  freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
+  freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
   mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
 
@@ -172,6 +178,22 @@ interface StoreState {
   dismissStreakRepair: () => void // "let it sink"
 
   buyFreeze: () => boolean
+
+  // --- free freezes from Dad ---
+  /** Kid: ask Dad to cover a day he couldn't show up for. One open ask at a time. */
+  askForFreeze: (reason?: string) => 'ok' | 'busy'
+  /** Kid: withdraw my pending ask. */
+  cancelFreezeRequest: () => void
+  /**
+   * Admin: gift `count` free freezes to the kid with a custom message. If his
+   * streak is currently dead, it's revived and the missed days frozen — the
+   * same repair `repairStreak` does, but free. `requestId` resolves his ask.
+   */
+  grantFreeze: (count: number, message: string, requestId?: string) => void
+  /** Admin: turn down a pending ask. */
+  declineFreezeRequest: (requestId: string) => void
+  /** Kid: mark a gift's celebration as shown so it only fires once. */
+  markFreezeGiftSeen: (giftId: string) => void
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
   // --- sticker album ---
   /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries. Returns the drawn sticker ids. */
@@ -271,6 +293,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeIdeas((ideas) => set({ ideas }))
       // shared sticker swap table (same deal — empty doc is a valid empty list)
       subscribeStickerTrades((trades) => set({ trades }))
+      // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
+      subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -316,6 +340,11 @@ export const useStore = create<StoreState>((set, get) => {
     void saveStickerTrades(trades)
   }
 
+  function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
+    set({ freezeRequests: requests, freezeGifts: gifts })
+    void saveFreezeDesk(requests, gifts)
+  }
+
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
     void saveIdeas(ideas)
@@ -340,6 +369,8 @@ export const useStore = create<StoreState>((set, get) => {
     market: null,
     ideas: [],
     trades: [],
+    freezeRequests: [],
+    freezeGifts: [],
     mateAlbum: null,
     mateData: null,
 
@@ -1036,6 +1067,97 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.freezes += 1
       })
       return true
+    },
+
+    // --- free freezes from Dad ----------------------------------------------
+
+    askForFreeze(reason) {
+      const me = get().activeProfile()
+      if (!me) return 'busy'
+      const { freezeRequests, freezeGifts } = get()
+      if (freezeRequests.some((r) => r.status === 'pending' && r.fromId === me.id)) return 'busy'
+      const req: FreezeRequest = {
+        id: `freeze-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        fromId: me.id,
+        fromName: me.name,
+        reason: reason?.trim() || undefined,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      }
+      saveFreezeDeskList([...freezeRequests, req], freezeGifts)
+      return 'ok'
+    },
+
+    cancelFreezeRequest() {
+      const { freezeRequests, freezeGifts, activeProfileId } = get()
+      saveFreezeDeskList(
+        freezeRequests.filter((r) => !(r.status === 'pending' && r.fromId === activeProfileId)),
+        freezeGifts,
+      )
+    },
+
+    grantFreeze(count, message, requestId) {
+      const n = Math.max(1, Math.floor(count))
+      const giver = get().activeProfile()
+      const today = dayKey()
+      let revived: number | null = null
+
+      commitFor(KID_ID, (d) => {
+        // a gift deliberately overrides the shop's MAX_FREEZES cap — Dad decided
+        d.economy.freezes += n
+        const dead = d.streak.deadStreak
+        if (!dead) return
+        // same repair the kid could have bought, but free: cover every uncovered
+        // day since the streak broke so rollover won't re-kill it
+        const completed = new Set(d.completions.map((c) => c.day))
+        const frozen = new Set(d.frozenDays.map((f) => f.day))
+        let cur = dead.day
+        while (cur < today) {
+          if (!completed.has(cur) && !frozen.has(cur)) d.frozenDays.push({ day: cur })
+          cur = addDays(cur, 1)
+        }
+        d.streak.current = dead.value
+        d.streak.best = Math.max(d.streak.best, dead.value)
+        d.streak.deadStreak = null
+        revived = dead.value
+      })
+
+      const gift: FreezeGift = {
+        id: `gift-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        toId: KID_ID,
+        fromName: giver?.name ?? 'Dad',
+        count: n,
+        message: message.trim(),
+        revived,
+        createdAt: new Date().toISOString(),
+      }
+      const { freezeRequests, freezeGifts } = get()
+      saveFreezeDeskList(
+        freezeRequests.map((r) =>
+          r.id === requestId
+            ? { ...r, status: 'granted' as const, resolvedAt: new Date().toISOString(), granted: n }
+            : r,
+        ),
+        [...freezeGifts, gift],
+      )
+    },
+
+    declineFreezeRequest(requestId) {
+      const { freezeRequests, freezeGifts } = get()
+      saveFreezeDeskList(
+        freezeRequests.map((r) =>
+          r.id === requestId ? { ...r, status: 'declined' as const, resolvedAt: new Date().toISOString() } : r,
+        ),
+        freezeGifts,
+      )
+    },
+
+    markFreezeGiftSeen(giftId) {
+      const { freezeRequests, freezeGifts } = get()
+      saveFreezeDeskList(
+        freezeRequests,
+        freezeGifts.map((g) => (g.id === giftId ? { ...g, seenAt: new Date().toISOString() } : g)),
+      )
     },
 
     // --- sticker album ------------------------------------------------------
