@@ -94,6 +94,8 @@ input, select { font-family: inherit; }
 }
 .stat:active { transform: scale(0.95); }
 .stat .num { min-width: 1ch; }
+/* Marks a topbar stat that belongs to the OTHER crewmate (parent watching Ben's money) */
+.stat .stat-owner { font-size: 12px; opacity: 0.8; margin-right: -1px; }
 .stat--flame { color: var(--orange); }
 .stat--flame.dead { color: var(--muted); filter: grayscale(1); }
 .stat--gem { color: var(--gold); }

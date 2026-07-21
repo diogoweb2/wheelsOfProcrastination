@@ -191,21 +191,22 @@ export default function App() {
         <div className="stat stat--ice" title="streak freezes">
           🧊 <span className="num">{data.economy.freezes}</span>
         </div>
-        {/* Ben's own bank money — chests he can cash out, never Dad's RESP */}
+        {/* Ben's own bank money — chests he can cash out, never Dad's RESP.
+            This is the ONE stat that stays Ben's on the parent's topbar, so the
+            parent view tags it with ⚔️ to make clear it isn't his own money. */}
         {(activeProfileId === KID_ID || kidData) && (
-          <div className="stat stat--beli" title="Ben's money (his chests — not Dad's RESP)">
+          <div className="stat stat--beli" title={activeProfileId === KID_ID ? 'Your money (your chests — not Dad’s RESP)' : "Ben's money (his chests — not Dad's RESP)"}>
+            {activeProfileId !== KID_ID && <span className="stat-owner" aria-hidden>⚔️</span>}
             <Beli size={18} />{' '}
             <span className="num">
               {fmt$(totalTreasure(activeProfileId === KID_ID ? data.bank : kidData!.bank))}
             </span>
           </div>
         )}
-        {/* Devil Fruits sit right next to the Berries; the parent sees Ben's count */}
-        {(activeProfileId === KID_ID || kidData) && (
-          <div className="stat stat--fruit" title="Ben's Devil Fruits (3 = gift card)">
-            <DevilFruit size={18} /> <span className="num"><AnimatedNum value={activeProfileId === KID_ID ? data.economy.devilFruits : (kidData?.economy.devilFruits ?? 0)} /></span>
-          </div>
-        )}
+        {/* Devil Fruits: always the logged-in crewmate's OWN — everyone earns them from their own quizzes */}
+        <div className="stat stat--fruit" title="Your Devil Fruits (3 = gift card)">
+          <DevilFruit size={18} /> <span className="num"><AnimatedNum value={data.economy.devilFruits} /></span>
+        </div>
         <div className="stat stat--gem" title="Berries">
           🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
         </div>
