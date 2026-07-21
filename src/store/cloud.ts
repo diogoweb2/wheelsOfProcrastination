@@ -3,9 +3,23 @@
 //   app/quizBank          → { questions: QuizQuestion[] } the shared question bank (incl. removed/pending flags)
 //   profiles/{id}         → AppData                     one whole world per crewmate
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
-import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  deleteDoc,
+  getDocs,
+  doc,
+  getDoc,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AppData, AuditEntry, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -168,5 +182,58 @@ const marketRef = () => doc(firestore, 'app', 'marketData')
 export function subscribeMarketData(cb: (m: MarketData | null) => void): () => void {
   return onSnapshot(marketRef(), (snap) => {
     cb(snap.exists() ? (snap.data() as MarketData) : null)
+  })
+}
+
+// --- audit log (append-only trail of album/money/fruit/task changes) --------
+// One doc per change in the top-level `auditLog` collection. Each carries an
+// `expireAt` timestamp; a Firestore TTL policy on that field auto-deletes rows
+// ~7 days out, so the trail is self-cleaning and costs ~no storage.
+
+const AUDIT_TTL_DAYS = 7
+const auditCol = () => collection(firestore, 'auditLog')
+
+/** Append one audit entry. Fire-and-forget; never blocks or throws into the UI. */
+export function logAudit(entry: Omit<AuditEntry, 'id' | 'at' | 'expireAt'>): void {
+  const now = Date.now()
+  void ensureAuth()
+    .then(() =>
+      addDoc(auditCol(), {
+        ...entry,
+        at: Timestamp.fromMillis(now),
+        expireAt: Timestamp.fromMillis(now + AUDIT_TTL_DAYS * 86_400_000),
+      }),
+    )
+    .catch((e) => console.warn('audit log write failed', e))
+}
+
+/**
+ * Delete audit rows whose `expireAt` has already passed. On a paid (Blaze) plan
+ * a Firestore TTL policy on `expireAt` would do this server-side for free; this
+ * project is on Spark (no billing), where TTL policies aren't available, so the
+ * admin app prunes on load instead. Called once when the parent subscribes; the
+ * TTL field is written regardless, so enabling the real policy later is a no-op
+ * migration. Best-effort — swallows errors so it never disrupts the desk.
+ */
+export async function pruneExpiredAudit(): Promise<void> {
+  try {
+    await ensureAuth()
+    const snap = await getDocs(query(auditCol(), where('expireAt', '<=', Timestamp.now()), limit(300)))
+    await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)))
+  } catch (e) {
+    console.warn('audit prune failed', e)
+  }
+}
+
+/** Live-sync the most recent audit entries (newest first). Returns unsubscribe. */
+export function subscribeAudit(max: number, cb: (entries: AuditEntry[]) => void): () => void {
+  const q = query(auditCol(), orderBy('at', 'desc'), limit(max))
+  return onSnapshot(q, (snap) => {
+    cb(
+      snap.docs.map((d) => {
+        const v = d.data() as Omit<AuditEntry, 'id' | 'at'> & { at?: Timestamp }
+        return { ...v, id: d.id, at: v.at ? v.at.toMillis() : Date.now() } as AuditEntry
+      }),
+    )
   })
 }

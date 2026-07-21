@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
-import type { AppData, QuizQuestion } from '../types'
+import type { AppData, AuditCategory, QuizQuestion } from '../types'
 import { activeQuestions, correctAnswerText, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
 import { QuizSession } from './QuizSession'
 import { dayKey } from '../logic/dates'
@@ -39,6 +39,8 @@ export function AdminSection() {
       <div className="h2">🛠️ Captain’s desk (admin)</div>
 
       <FreezeDesk />
+
+      <AuditLog />
 
       {pending.length > 0 && <PendingReview pending={pending} />}
 
@@ -159,6 +161,78 @@ function FreezeDesk() {
               🧊 Send {count} free
             </button>
           </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// The audit trail: an append-only log of every change to a crewmate's album,
+// money (Berries + real bank $), Devil Fruits, and task roster. Rows self-delete
+// after ~7 days (Firestore TTL), so this is a "what changed recently" window,
+// not a full history — enough to catch a bad write (e.g. an AI update).
+const AUDIT_META: Record<AuditCategory, { icon: string; label: string }> = {
+  gems: { icon: '🪙', label: 'Berries' },
+  devilFruits: { icon: '🍇', label: 'Devil Fruits' },
+  freezes: { icon: '🧊', label: 'Freezes' },
+  bank: { icon: '💵', label: 'Bank $' },
+  album: { icon: '🃏', label: 'Album' },
+  tasks: { icon: '📋', label: 'Tasks' },
+}
+const AUDIT_FILTERS: (AuditCategory | 'all')[] = ['all', 'album', 'bank', 'gems', 'devilFruits', 'tasks']
+
+function AuditLog() {
+  const { audit, profiles } = useStore()
+  const [open, setOpen] = useState(false)
+  const [filter, setFilter] = useState<AuditCategory | 'all'>('all')
+
+  const nameFor = (id: string) => profiles.find((p) => p.id === id)?.name ?? id
+  const rows = filter === 'all' ? audit : audit.filter((r) => r.category === filter)
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <button
+        className="btn btn--ghost btn--small"
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        onClick={() => { sfx.click(); setOpen((o) => !o) }}
+      >
+        <span style={{ fontWeight: 900 }}>🕵️ Audit log</span>
+        <span className="muted" style={{ fontSize: 12 }}>{audit.length} recent · {open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <>
+          <p className="muted" style={{ fontSize: 11, margin: '8px 0' }}>
+            Every change to album, money, Devil Fruits &amp; tasks. Entries auto-delete after 7 days.
+          </p>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+            {AUDIT_FILTERS.map((f) => (
+              <button
+                key={f}
+                className={`btn btn--small ${filter === f ? '' : 'btn--ghost'}`}
+                style={{ fontSize: 11, padding: '2px 8px' }}
+                onClick={() => { sfx.click(); setFilter(f) }}
+              >
+                {f === 'all' ? 'All' : `${AUDIT_META[f].icon} ${AUDIT_META[f].label}`}
+              </button>
+            ))}
+          </div>
+          {rows.length === 0 ? (
+            <p className="muted" style={{ fontSize: 12 }}>Nothing logged yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 320, overflowY: 'auto' }}>
+              {rows.map((r) => (
+                <div key={r.id} style={{ fontSize: 12, lineHeight: 1.35, padding: '4px 0', borderBottom: '1px solid var(--line, rgba(255,255,255,0.08))' }}>
+                  <span title={AUDIT_META[r.category].label}>{AUDIT_META[r.category].icon}</span>{' '}
+                  <b>{nameFor(r.profileId)}</b>: {r.detail}
+                  <div className="muted" style={{ fontSize: 10 }}>
+                    {new Date(r.at).toLocaleString()}
+                    {r.actor !== r.profileId && ` · by ${nameFor(r.actor)}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

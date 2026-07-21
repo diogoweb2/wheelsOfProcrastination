@@ -32,6 +32,9 @@ import {
 import {
   loadQuizBank,
   loadRoster,
+  logAudit,
+  pruneExpiredAudit,
+  subscribeAudit,
   saveData,
   saveIdeas,
   saveQuizBank,
@@ -46,6 +49,7 @@ import {
   subscribeQuizBank,
   subscribeRoster,
 } from './cloud'
+import type { AuditCategory, AuditEntry } from '../types'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
@@ -81,6 +85,65 @@ function deviceLabel(): string {
   return 'this device'
 }
 
+/**
+ * Diff the audited slices of two AppData snapshots and append one audit-log row
+ * per meaningful change: Berries/Devil Fruits/freezes, real bank money (per
+ * account), the album (per sticker + packs), and the task roster. Called from
+ * the write funnels, so EVERY path (user, admin, nightly rollover) is captured
+ * without touching individual call sites. Fire-and-forget; never blocks the UI.
+ */
+function auditDiff(profileId: string, actor: string, before: AppData, after: AppData) {
+  const emit = (
+    category: AuditCategory,
+    detail: string,
+    extra?: { before?: number | string; after?: number | string; delta?: number },
+  ) => logAudit({ profileId, actor, category, detail, ...extra })
+
+  // --- non-real money: Berries (gems), Devil Fruits, streak freezes ---------
+  const num: [AuditCategory, string, number, number][] = [
+    ['gems', 'Berries', before.economy.gems, after.economy.gems],
+    ['devilFruits', 'Devil Fruits', before.economy.devilFruits, after.economy.devilFruits],
+    ['freezes', 'Streak freezes', before.economy.freezes, after.economy.freezes],
+  ]
+  for (const [category, label, b, a] of num) {
+    if (a !== b) emit(category, `${label} ${b} → ${a}`, { before: b, after: a, delta: a - b })
+  }
+
+  // --- real money: each bank account's balance -------------------------------
+  for (const id of ACCOUNT_IDS) {
+    const b = round2(before.bank.accounts[id].balance)
+    const a = round2(after.bank.accounts[id].balance)
+    if (a !== b) emit('bank', `${id} balance ${fmt$(b)} → ${fmt$(a)}`, { before: b, after: a, delta: round2(a - b) })
+  }
+
+  // --- album: per-sticker counts + packs opened ------------------------------
+  const ids = new Set([...Object.keys(before.album.counts), ...Object.keys(after.album.counts)])
+  for (const sid of ids) {
+    const b = before.album.counts[sid] ?? 0
+    const a = after.album.counts[sid] ?? 0
+    if (a !== b) emit('album', `sticker ${sid} ×${b} → ×${a}`, { before: b, after: a, delta: a - b })
+  }
+  if (after.album.packsOpened !== before.album.packsOpened) {
+    emit('album', `packs opened ${before.album.packsOpened} → ${after.album.packsOpened}`, {
+      before: before.album.packsOpened,
+      after: after.album.packsOpened,
+      delta: after.album.packsOpened - before.album.packsOpened,
+    })
+  }
+
+  // --- tasks: creations & removals (by id) -----------------------------------
+  const beforeTasks = new Map(before.tasks.map((t) => [t.id, t]))
+  const afterTasks = new Map(after.tasks.map((t) => [t.id, t]))
+  for (const [tid, t] of afterTasks) {
+    if (!beforeTasks.has(tid)) {
+      emit('tasks', `task created: "${t.name}" (${t.effort}${t.required ? ', required' : ''})`)
+    }
+  }
+  for (const [tid, t] of beforeTasks) {
+    if (!afterTasks.has(tid)) emit('tasks', `task deleted: "${t.name}"`)
+  }
+}
+
 // TEMP (local testing only — do not commit as true): when set, spins are not
 // registered: no pendingPicks entry, no pick counters, nothing saved to Firestore.
 const TEST_DISABLE_SPIN_TRACKING = false
@@ -109,6 +172,7 @@ interface StoreState {
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
   mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
+  audit: AuditEntry[] // recent audit-log rows (admin desk), live-synced; self-expiring after ~7d
 
   activeProfile: () => Profile | null
   addIdea: (text: string) => void
@@ -237,6 +301,8 @@ export const useStore = create<StoreState>((set, get) => {
   let unsubData: (() => void) | null = null
   // Parent-only second subscription: Ben's doc (gift-card banner, official tests, grants).
   let unsubKid: (() => void) | null = null
+  // Parent-only audit-log subscription (Captain's desk).
+  let unsubAudit: (() => void) | null = null
   // The other crewmate's doc — always watched, so sticker trading can read their
   // album and write the swap into it when it's accepted.
   let unsubMate: (() => void) | null = null
@@ -274,8 +340,14 @@ export const useStore = create<StoreState>((set, get) => {
     })
     unsubKid?.()
     unsubKid = null
+    unsubAudit?.()
+    unsubAudit = null
     if (id === PARENT_ID) {
       unsubKid = subscribeData(KID_ID, (data) => set({ kidData: data }))
+      // Audit trail lives on the Captain's desk only — one subscription, parent-side.
+      // Prune expired rows on load (no Firestore TTL on the free plan), then live-sync.
+      void pruneExpiredAudit()
+      unsubAudit = subscribeAudit(200, (audit) => set({ audit }))
     }
     // The album is a two-player game: watch the other crewmate's world so we can
     // show what they can spare, and so accepting a swap can write to their album.
@@ -318,12 +390,14 @@ export const useStore = create<StoreState>((set, get) => {
   function commit(fn: (data: AppData, events: AppEvent[]) => void) {
     const id = get().activeProfileId
     if (!id || !get().dataLoaded) return // never write before the cloud copy has loaded
-    const before = get().data.economy.gems
-    const data: AppData = JSON.parse(JSON.stringify(get().data))
+    const prev = get().data
+    const before = prev.economy.gems
+    const data: AppData = JSON.parse(JSON.stringify(prev))
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ data, events: [...s.events, ...events] }))
     void saveData(id, data) // onSnapshot echoes it back; local set keeps the UI instant
+    auditDiff(id, id, prev, data) // append audit rows for any audited change (actor == the active login)
     // ANY Berry gain, wherever it came from (tasks, streak goals, quiz…), gets the same fly-to-topbar animation
     if (data.economy.gems > before) flyBerries(null, data.economy.gems - before)
   }
@@ -346,6 +420,7 @@ export const useStore = create<StoreState>((set, get) => {
     fn(data, events)
     set((s) => ({ kidData: data, events: [...s.events, ...events] }))
     void saveData(KID_ID, data)
+    auditDiff(targetId, get().activeProfileId ?? 'unknown', kid, data) // actor = the admin acting on Ben's world
   }
 
   function saveTradeList(trades: StickerTrade[]) {
@@ -386,6 +461,7 @@ export const useStore = create<StoreState>((set, get) => {
     freezeGifts: [],
     mateAlbum: null,
     mateData: null,
+    audit: [],
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -456,8 +532,10 @@ export const useStore = create<StoreState>((set, get) => {
       unsubData = null
       unsubKid?.()
       unsubKid = null
+      unsubAudit?.()
+      unsubAudit = null
       setActiveProfileId(null)
-      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [], kidData: null })
+      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [], kidData: null, audit: [] })
     },
 
     popEvent: () => set((s) => ({ events: s.events.slice(1) })),
@@ -1270,6 +1348,7 @@ export const useStore = create<StoreState>((set, get) => {
       for (const id of trade.want) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
       set({ mateData: theirs, mateAlbum: theirs.album })
       void saveData(trade.fromId, theirs)
+      auditDiff(trade.fromId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's album change
 
       saveTradeList(
         trades.map((t) => (t.id === tradeId ? { ...t, status: 'accepted' as const, resolvedAt: new Date().toISOString() } : t)),

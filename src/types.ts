@@ -379,3 +379,25 @@ export interface AppData {
   album: AlbumState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
+
+/**
+ * One row in the append-only audit trail (`auditLog` collection). Written on any
+ * change to a crewmate's Berries/Devil Fruits/freezes, real bank money, album,
+ * or task roster, so a bad write (e.g. an AI update) can be spotted after the
+ * fact. Self-cleaning: a Firestore TTL policy deletes rows once `expireAt`
+ * passes (~7 days), so the log costs ~no storage.
+ */
+export type AuditCategory = 'gems' | 'devilFruits' | 'freezes' | 'bank' | 'album' | 'tasks'
+
+export interface AuditEntry {
+  id: string
+  profileId: string // whose world changed
+  actor: string // which logged-in profile made the change (may differ: Dad editing Ben)
+  category: AuditCategory
+  detail: string // human-readable summary, e.g. "Devil Fruits 0 → 1" or "pack opened (+3 stickers)"
+  before?: number | string
+  after?: number | string
+  delta?: number
+  at: number // epoch ms (server Timestamp on write, coerced to ms on read)
+  expireAt?: unknown // Firestore Timestamp; TTL field — never read in app code
+}
