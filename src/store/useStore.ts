@@ -221,6 +221,7 @@ interface StoreState {
   finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
   setTopicUnlocked: (targetId: string, topicId: string, unlocked: boolean) => void // admin
   grantDevilFruit: (targetId: string, topicId: string) => void // admin bonus 🍇
+  revokeDevilFruit: (targetId: string, topicId: string) => void // admin: undo a bonus 🍇 (never below 0)
   removeQuizQuestion: (qid: string) => void // admin: flag removed (stays in db so AI won't regenerate it)
   approveQuizQuestion: (qid: string) => void // admin: pending → active (also restores removed)
   // --- prizes (each profile buys from its own catalog with its own 🍇) ---
@@ -895,6 +896,14 @@ export const useStore = create<StoreState>((set, get) => {
       commitFor(targetId, (d) => {
         d.economy.devilFruits += 1
         d.quiz.bonusFruits[topicId] = (d.quiz.bonusFruits[topicId] ?? 0) + 1
+      })
+    },
+
+    revokeDevilFruit(targetId, topicId) {
+      commitFor(targetId, (d) => {
+        if (d.economy.devilFruits <= 0) return // nothing to take back
+        d.economy.devilFruits -= 1
+        d.quiz.bonusFruits[topicId] = Math.max(0, (d.quiz.bonusFruits[topicId] ?? 0) - 1)
       })
     },
 

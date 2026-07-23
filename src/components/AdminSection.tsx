@@ -300,7 +300,7 @@ function AdminTopicCard({
   onPreview?: () => void // Ben only: try his training without recording
   onManage: () => void
 }) {
-  const { quizBank, setTopicUnlocked, grantDevilFruit, pushEvent } = useStore()
+  const { quizBank, setTopicUnlocked, grantDevilFruit, revokeDevilFruit, pushEvent } = useStore()
   const pool = activeQuestions(quizBank, topic.id)
   const unlocked = targetData?.quiz.unlockedTopics.includes(topic.id) ?? false
   const passed = targetData?.quiz.passedTopics.includes(topic.id) ?? false
@@ -356,6 +356,23 @@ function AdminTopicCard({
           }}
         >
           +1 🍇
+        </button>
+        <button
+          className="btn btn--ghost btn--small"
+          disabled={!targetData || (targetData?.economy.devilFruits ?? 0) <= 0}
+          title="Undo a bonus Devil Fruit (mis-click safety)"
+          onClick={() => {
+            sfx.click()
+            revokeDevilFruit(targetId, topic.id)
+            pushEvent({
+              type: 'goal',
+              emoji: '🍇',
+              title: 'Devil Fruit taken back',
+              description: `${targetId === KID_ID ? 'Ben loses' : 'You lose'} −1 🍇 for ${topic.title}. Captain’s orders.`,
+            })
+          }}
+        >
+          −1 🍇
         </button>
         <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onManage() }}>
           📋 Questions
