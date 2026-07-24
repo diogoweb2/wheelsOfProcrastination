@@ -338,7 +338,7 @@ function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; 
 
 // --- question renderers ----------------------------------------------------
 
-function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
+export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
   return (
     <div className="card">
       {fresh && (

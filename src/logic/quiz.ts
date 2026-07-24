@@ -1,5 +1,5 @@
 // Grand Line Academy — quiz rules. Keep in sync with BUSINESS_REQUIREMENTS.md §14–15.
-import type { AppData, QuizQuestion, QuizStat } from '../types'
+import type { AppData, QuizQuestion, QuizState, QuizStat } from '../types'
 import { dayKey, daysUntil } from './dates'
 
 // --- topics ----------------------------------------------------------------
@@ -304,6 +304,42 @@ export function pickTraining(
     return q.weight * novelty * struggle * fresh
   })
   return weightedPick(candidates, weights)
+}
+
+// --- Question of the Day ----------------------------------------------------
+
+/** Berries a correct Question-of-the-Day answer wins. */
+export function qotdReward(q: QuizQuestion): number {
+  return q.points
+}
+
+/** Berries lost for a wrong Question-of-the-Day answer — or for ignoring it all day. */
+export function qotdPenalty(q: QuizQuestion): number {
+  return Math.max(1, Math.ceil(q.points * 0.5))
+}
+
+/**
+ * Choose the day's review question. It's drawn ONLY from questions this profile
+ * has ALREADY answered correctly at least once (`everCorrect`) in an unlocked,
+ * active topic — the whole point is keeping mastered material fresh (a passed
+ * topic still counts; passing doesn't lock it). Older + harder questions are
+ * favoured: the weight climbs with how long since it was last seen and how weak
+ * the success rate is. Returns null if nothing's been mastered yet.
+ */
+export function pickDailyQuestion(bank: QuizQuestion[], quiz: QuizState, today: string = dayKey()): string | null {
+  const candidates = bank.filter(
+    (q) => q.status === 'active' && quiz.unlockedTopics.includes(q.topicId) && quiz.stats[q.id]?.everCorrect,
+  )
+  if (candidates.length === 0) return null
+  const weights = candidates.map((q) => {
+    const stat = quiz.stats[q.id]
+    const struggle = Math.max(0.15, 1.7 - successRate(stat)) // weak (~1.2) beats strong (~0.7)
+    const lastSeen = stat?.lastSeenAt ? stat.lastSeenAt.slice(0, 10) : today
+    const age = Math.max(0, -daysUntil(lastSeen, today)) // days since last seen
+    const staleness = 1 + Math.min(age, 60) / 15 // up to ×5 for questions untouched for ~2 months
+    return struggle * staleness
+  })
+  return weightedPick(candidates, weights).id
 }
 
 function weightedPick<T>(items: T[], weights: number[]): T {

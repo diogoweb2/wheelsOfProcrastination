@@ -17,7 +17,7 @@ const FILTERS: { id: Effort; label: string }[] = [
 ]
 
 export function SpinScreen() {
-  const { data, spin, respin, completeTask, completedTodayIds, pushEvent } = useStore()
+  const { data, spin, respin, completeTask, completedTodayIds, pushEvent, openQotd } = useStore()
   const [filter, setFilter] = useState<EffortFilter>([])
 
   function toggleEffort(effort: Effort) {
@@ -167,6 +167,18 @@ export function SpinScreen() {
           onComplete={onComplete}
           onRespin={onRespin}
         />
+      )}
+
+      {/* parked Question of the Day — a card link back into the modal */}
+      {data.quiz.daily?.state === 'later' && (
+        <button className="qotd-link" onClick={() => { sfx.click(); openQotd() }}>
+          <span className="qotd-link-star" aria-hidden>⭐</span>
+          <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 14 }}>Question of the Day</div>
+            <div className="muted" style={{ fontSize: 12 }}>You saved it for later — answer it before midnight!</div>
+          </div>
+          <span style={{ fontWeight: 900, fontSize: 18 }}>▸</span>
+        </button>
       )}
 
       {/* must-dos on top, then the wheel with its effort filter running down the side */}

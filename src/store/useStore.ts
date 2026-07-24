@@ -70,7 +70,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { PASS_PCT, giftCardDaysLeft, prizesFor, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
+import { PASS_PCT, giftCardDaysLeft, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -173,6 +173,7 @@ interface StoreState {
   mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
   mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
   audit: AuditEntry[] // recent audit-log rows (admin desk), live-synced; self-expiring after ~7d
+  qotdOpen: boolean // is the Question-of-the-Day modal showing?
 
   activeProfile: () => Profile | null
   addIdea: (text: string) => void
@@ -219,6 +220,16 @@ interface StoreState {
   recordQuizAnswer: (targetId: string, qid: string, correct: boolean, timeMs: number, rewarded: boolean) => number
   /** Store a finished final test for `targetId`. Official pass → topic checkmark + one-time Devil Fruit. */
   finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
+  // --- Question of the Day (own profile only) ---
+  /** Make sure today's review question exists: penalize an ignored one from a past day, then pick a fresh one. */
+  refreshDailyQuiz: () => void
+  /** Open / close the Question-of-the-Day modal (shared so the Spin card can reopen a parked one). */
+  openQotd: () => void
+  closeQotd: () => void
+  /** Answer the Question of the Day. Wins full points, or loses half on a miss. Returns the Berry delta (+/−). */
+  answerDailyQuiz: (correct: boolean, timeMs: number) => number
+  /** "Do it later" — park the question on the Spin screen until it's answered (or midnight bites). */
+  postponeDailyQuiz: () => void
   setTopicUnlocked: (targetId: string, topicId: string, unlocked: boolean) => void // admin
   grantDevilFruit: (targetId: string, topicId: string) => void // admin bonus 🍇
   revokeDevilFruit: (targetId: string, topicId: string) => void // admin: undo a bonus 🍇 (never below 0)
@@ -463,6 +474,7 @@ export const useStore = create<StoreState>((set, get) => {
     mateAlbum: null,
     mateData: null,
     audit: [],
+    qotdOpen: false,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -881,6 +893,72 @@ export const useStore = create<StoreState>((set, get) => {
         }
       })
       return record
+    },
+
+    // --- Question of the Day -------------------------------------------------
+
+    refreshDailyQuiz() {
+      const today = dayKey()
+      const { data, quizBank, quizBankLoaded, dataLoaded, activeProfileId } = get()
+      if (!activeProfileId || !dataLoaded || !quizBankLoaded) return
+      const cur = data.quiz.daily
+      if (cur && cur.day === today) return // already set up for today
+      const qid = pickDailyQuestion(quizBank, data.quiz, today)
+      const needsPenalty = !!cur && cur.day < today && cur.state !== 'done'
+      if (!qid && !needsPenalty && !cur) return // nothing trained yet, nothing to clean up — skip the write
+      commit((d, events) => {
+        const prev = d.quiz.daily
+        if (prev && prev.day < today && prev.state !== 'done') {
+          const q = quizBank.find((x) => x.id === prev.qid)
+          if (q) {
+            const pen = qotdPenalty(q)
+            d.economy.gems = Math.max(0, d.economy.gems - pen)
+            events.push({
+              type: 'penalty',
+              emoji: '🕰️',
+              title: `Skipped the Question of the Day: −${pen} 🪙`,
+              description: 'Yesterday’s question drifted away unanswered. Catch today’s while it’s fresh, captain!',
+            })
+          }
+        }
+        if (qid) d.quiz.daily = { day: today, qid, state: 'unseen' }
+        else delete d.quiz.daily
+      })
+    },
+
+    openQotd: () => set({ qotdOpen: true }),
+    closeQotd: () => set({ qotdOpen: false }),
+
+    answerDailyQuiz(correct, timeMs) {
+      const today = dayKey()
+      const q = get().quizBank.find((x) => x.id === get().data.quiz.daily?.qid)
+      if (!q) return 0
+      let delta = 0
+      commit((d) => {
+        const dq = d.quiz.daily
+        if (!dq || dq.day !== today || dq.state === 'done') return
+        // it's a genuine review, so the training stats learn from it (no training Berries though)
+        d.quiz.stats[q.id] = updatedStat(d.quiz.stats[q.id], correct, timeMs)
+        if (correct) {
+          delta = qotdReward(q)
+          d.economy.gems += delta
+          d.economy.totalGemsEarned += delta
+        } else {
+          delta = -qotdPenalty(q)
+          d.economy.gems = Math.max(0, d.economy.gems + delta)
+        }
+        dq.state = 'done'
+        dq.answeredCorrect = correct
+      })
+      return delta
+    },
+
+    postponeDailyQuiz() {
+      commit((d) => {
+        const dq = d.quiz.daily
+        if (dq && dq.state === 'unseen') dq.state = 'later'
+      })
+      set({ qotdOpen: false })
     },
 
     setTopicUnlocked(targetId, topicId, unlocked) {

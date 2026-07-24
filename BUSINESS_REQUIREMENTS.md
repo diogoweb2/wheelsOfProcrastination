@@ -225,4 +225,18 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
   - `npm run quiz:regen` (claude CLI, opus) — refills every live topic to its target after removals; new questions land `pending`.
   - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
 
+## 17. Question of the Day
+
+One review question, per profile, resurfaced when the app opens — a light daily "keep it fresh" loop layered on top of the Academy (`src/components/QuestionOfTheDay.tsx`, state in `AppData.quiz.daily`, logic in `src/logic/quiz.ts`).
+
+- **What it asks**: drawn ONLY from questions this profile has **already answered correctly at least once** (`stat.everCorrect`) in an unlocked, active topic — never brand-new material. A **passed/conquered topic still counts** (passing a final test doesn't lock the topic, so its questions keep resurfacing). Selection favours the **old + hard**: weight rises with days since last seen (up to ~×5 at ~2 months) and with a weak success rate. Chosen once per local day and frozen (`quiz.daily.qid`).
+- **Same UI as the Academy, just one question** — reuses the `QuestionCard` renderer — wrapped in a big animated One-Piece-style "⭐ QUESTION OF THE DAY ⭐" hero (spinning golden rays).
+- **Auto-opens** on app open while `state: 'unseen'`. Three choices:
+  1. **Do it later** → `state: 'later'`; a gold card link appears on the Spin screen (below Today's quest) that reopens the modal.
+  2. **Answer correct** → win the question's full `points` 🪙.
+  3. **Answer wrong** → lose `qotdPenalty` = `ceil(points/2)` 🪙 (Berries floor at 0).
+- **Ignored all day**: a question still `unseen`/`later` at midnight costs `qotdPenalty` 🪙 at the next rollover/open, shown as a 🕰️ penalty event, then a fresh question is picked.
+- Answering also updates the training stat (it's a real review) but pays **no** training Berries — the win/lose Berries are the only economy effect. No Devil Fruits involved.
+- Only exists once the profile has answered at least one question correctly; until then there's no Question of the Day.
+
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

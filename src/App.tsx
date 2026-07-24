@@ -5,6 +5,7 @@ import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
 import { StreakPrompts } from './components/StreakPrompts'
 import { RequiredDeadline } from './components/RequiredDeadline'
+import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
@@ -54,7 +55,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -71,6 +72,12 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // set up (or catch up) today's Question of the Day once data + question bank are loaded
+  useEffect(() => {
+    refreshDailyQuiz()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataLoaded, quizBankLoaded, data.quiz.daily?.day])
 
   useEffect(() => {
     if (unlocked && 'Notification' in window && Notification.permission === 'granted') {
@@ -358,6 +365,7 @@ export default function App() {
         ))}
       </nav>
 
+      <QuestionOfTheDay />
       <EventModal />
       <StreakPrompts />
       {/* mandatory decision — rendered last so it sits above the other prompts */}

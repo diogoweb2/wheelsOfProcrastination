@@ -172,6 +172,20 @@ export interface QuizTestRecord {
   passed: boolean // scorePct >= 80
 }
 
+/**
+ * The Question of the Day. One review question, resurfaced when the app opens,
+ * drawn ONLY from topics the profile has already trained (keeps old material
+ * fresh, favouring the old + hard ones). Answer it to win Berries or lose some;
+ * "do it later" parks it on the Spin screen. Ignoring it all day costs Berries
+ * at rollover. Regenerated each local day.
+ */
+export interface DailyQuiz {
+  day: string // YYYY-MM-DD this question belongs to
+  qid: string // the chosen question in the shared bank
+  state: 'unseen' | 'later' | 'done' // unseen = auto-opens; later = parked on the Spin card; done = answered
+  answeredCorrect?: boolean // once done, whether they nailed it
+}
+
 export interface QuizState {
   stats: Record<string, QuizStat> // by question id
   tests: QuizTestRecord[]
@@ -179,6 +193,7 @@ export interface QuizState {
   unlockedTopics: string[] // admin-managed; locked topics are visible but not playable
   bonusFruits: Record<string, number> // admin-granted extra 🍇 per topic (a log, fruits go to economy)
   selfInit?: boolean // one-time flag: this profile's own default topics were unlocked
+  daily?: DailyQuiz // the Question of the Day (absent until the profile has trained something)
 }
 
 // --- Grand Line Bank (real CAD dollars — Ben's allowance world, admin = Diogo) ---
