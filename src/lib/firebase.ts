@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
+import { getFirestore } from 'firebase/firestore'
 
 // Web app config from the Firebase console (Project settings → Your apps → Web).
 // These values are NOT secret — like the Spmkt project, they ship in the client. The PIN never lives here.
@@ -15,11 +15,10 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 
-// Offline-first: Firestore keeps a local IndexedDB cache, so the app works
-// with no network and writes flush when it comes back.
-export const firestore = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-})
+// Always-online, no persisted IndexedDB cache: a stale local snapshot from a
+// previous day/device was overwriting fresh cross-device writes (rollover()
+// would act on it before the real server data arrived). No offline mode needed.
+export const firestore = getFirestore(app)
 
 const auth = getAuth(app)
 
