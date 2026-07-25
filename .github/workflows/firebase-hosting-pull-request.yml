@@ -17,6 +17,8 @@ jobs:
       # native dep; fall back to npm install so CI self-heals.
       - run: npm ci || npm install
       - run: npm run build
+        env:
+          VITE_FCM_VAPID_KEY: ${{ secrets.VITE_FCM_VAPID_KEY }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

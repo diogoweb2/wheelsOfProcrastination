@@ -56,7 +56,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded } = useStore()
+  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -79,6 +79,19 @@ export default function App() {
     refreshDailyQuiz()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoaded, quizBankLoaded, data.quiz.daily?.day])
+
+  // Ask for push on open, once we're past the PIN. 'default' means we've never
+  // asked, so this is the browser prompt; 'granted' just refreshes the device
+  // token (FCM rotates them) — registerPushDevice ignores one it already has.
+  // 'denied' is left alone: the browser won't re-prompt, and the Profile screen
+  // still has the manual button.
+  const askedPush = useRef(false)
+  useEffect(() => {
+    if (!unlocked || askedPush.current) return
+    if (!('Notification' in window) || Notification.permission === 'denied') return
+    askedPush.current = true
+    void registerPushDevice() // errors surface on the Profile screen's button instead
+  }, [unlocked, registerPushDevice])
 
   useEffect(() => {
     if (unlocked && 'Notification' in window && Notification.permission === 'granted') {
