@@ -19,7 +19,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, AuditEntry, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AppData, AuditEntry, FinalTestAuth, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -174,6 +174,23 @@ export function subscribeFreezeDesk(
 export async function saveFreezeDesk(requests: FreezeRequest[], gifts: FreezeGift[]): Promise<void> {
   await ensureAuth()
   await setDoc(freezeRef(), { requests, gifts })
+}
+
+// --- remote final tests (shared: Dad's authorisations + their results) ------
+
+const finalTestsRef = () => doc(firestore, 'app', 'finalTests')
+
+/** Live-sync the final-test desk. Fires when Dad authorises one, or when Ben's device reports the result. */
+export function subscribeFinalTests(cb: (tests: FinalTestAuth[]) => void): () => void {
+  return onSnapshot(finalTestsRef(), (snap) => {
+    const data = snap.data() as { tests?: FinalTestAuth[] } | undefined
+    cb(data?.tests ?? [])
+  })
+}
+
+export async function saveFinalTests(tests: FinalTestAuth[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(finalTestsRef(), { tests })
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

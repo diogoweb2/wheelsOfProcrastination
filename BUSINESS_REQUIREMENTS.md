@@ -184,12 +184,18 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/*Seed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. `weight: 2` = core material, `weight: 1` = fun/nice-to-know.
 - **Training (own profile)**: correct answers never interrupt the flow — Berries fly to the topbar counter (which counts up) with a small "+N 🪙" flash, and the next question appears immediately; only WRONG answers pause on a correction card (right answer + fun fact). Berries: full `points` on the first-ever correct answer, **half** on later correct answers, **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions and ✨ fresh ones (see weekly review, §16).
 - **Final test**:
-  - *Official (Ben)* — launched from **Diogo's Admin desk** (runs on the spot, hand Ben the device); recorded to Ben's data.
+  - *Official (Ben)* — launched from **Diogo's Admin desk**: either on the spot (hand Ben the device), or **remotely on Ben's own device** when Diogo isn't there (see below). Recorded to Ben's data either way.
   - *Official (Diogo)* — self-serve from his own Quiz tab (admin approves his own tests).
   - *Mock Final Test* (labelled that way to contrast with "Train") — anyone, any unlocked topic, no rewards.
   - Size auto-chosen from real per-question answer times (10–14 questions, ≤ ~13 min budget).
   - Selection targets ~80%: ~60% strong + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is the strongest remaining ("possible to fail, but don't fail too hard").
   - Score revealed **only at the end**, with a mistakes review. Pass = **80%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).
+- **Remote final test (a grown-up beside him, not Dad)** — shared `app/finalTests` doc, live-synced both ways:
+  - Diogo authorises ONE run from the Admin desk: he picks a **4-digit code** and writes a **note for the grown-up** ("~15 min, no help, no phone"). Only one open authorisation per topic — a new one replaces it. He can withdraw it while it's unused.
+  - Ben's device pops it up immediately: **do it now**, or **later** → a red top banner with **Start** nags until he does. Push notification reaches a closed app.
+  - Tapping Start shows the note + a PIN pad: Ben hands the phone over, the grown-up types the code. **The single attempt is burnt the moment the code checks out** — closing the app doesn't buy a second run. Walking out mid-test ends it as *abandoned*.
+  - Diogo is told the verdict (**push + a top banner with a dismiss button**) whether Ben passed, failed, or walked out.
+  - **A pass automatically opens his next topic**: the ladder's successor where there is one, otherwise the first still-locked topic in his catalog. Plus the usual 🍇 and CONQUERED stamp.
 - **Devil Fruits 🍇** = the diamond currency, per profile. Sources: first official topic pass + admin bonus grants. Shown in the topbar next to Berries (the admin sees Ben's count on his own topbar too).
 - **Wheel integration**: every unlocked topic is auto-synced onto the owner's wheel as a daily habit ("<emoji> <topic> quiz training", medium effort, ⚡ high priority); locking archives the habit.
 
@@ -222,7 +228,7 @@ A Panini-style collection both crewmates fill and trade from. Rules live in `src
 
 The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):
 
-- Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher, ⚔️ preview of Ben's training (records nothing).
+- Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher (on the spot **or** 📡 allowed on his device with a code + note for a nearby grown-up, result reported back here), ⚔️ preview of Ben's training (records nothing).
 - **🧊 Free freezes for Ben** (top of the desk): answer his freeze asks or gift unprompted — count + custom message, revives a dead streak for free. See §6.
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
 - Prize settlement: "Prizes to settle" list + topbar banners (see §15).

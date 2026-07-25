@@ -9,6 +9,7 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  FinalTestAuth,
   FreezeGift,
   FreezeRequest,
   Idea,
@@ -41,10 +42,12 @@ import {
   saveRoster,
   saveStickerTrades,
   saveFreezeDesk,
+  saveFinalTests,
   subscribeData,
   subscribeIdeas,
   subscribeStickerTrades,
   subscribeFreezeDesk,
+  subscribeFinalTests,
   subscribeMarketData,
   subscribeQuizBank,
   subscribeRoster,
@@ -70,7 +73,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { PASS_PCT, giftCardDaysLeft, nextLevelAfter, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
+import { PASS_PCT, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -170,6 +173,7 @@ interface StoreState {
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
   freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
+  finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
   mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
   mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
   audit: AuditEntry[] // recent audit-log rows (admin desk), live-synced; self-expiring after ~7d
@@ -220,8 +224,26 @@ interface StoreState {
   // --- quiz (every action names the profile it touches; admin can target Ben from Diogo's session) ---
   /** Log a quiz answer to `targetId`'s stats. `rewarded` = training mode pays Berries. Returns Berries earned. */
   recordQuizAnswer: (targetId: string, qid: string, correct: boolean, timeMs: number, rewarded: boolean) => number
-  /** Store a finished final test for `targetId`. Official pass → topic checkmark + one-time Devil Fruit. */
-  finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[]) => QuizTestRecord
+  /**
+   * Store a finished final test for `targetId`. Official pass → topic checkmark
+   * + one-time Devil Fruit + the next topic opens. `authId` ties it to a remote
+   * authorisation (see finalTests), which is closed out with the result.
+   */
+  finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
+
+  // --- remote final tests: Dad authorises, another grown-up invigilates on Ben's device ---
+  /** Admin: allow ONE official test on the target's device, guarded by a 4-digit code. */
+  authorizeFinalTest: (targetId: string, topicId: string, pin: string, note: string) => void
+  /** Admin: withdraw an authorisation he hasn't started yet. */
+  cancelFinalTest: (authId: string) => void
+  /** Kid: "later" — the popup becomes a nagging top banner. */
+  postponeFinalTest: (authId: string) => void
+  /** Kid: the code checked out. Burns the single attempt right away. */
+  startFinalTest: (authId: string) => void
+  /** Kid: walked out mid-test. The attempt is spent; Dad is told. */
+  abandonFinalTest: (authId: string) => void
+  /** Admin: dismiss a result banner. */
+  ackFinalTest: (authId: string) => void
   // --- Question of the Day (own profile only) ---
   /** Make sure today's review question exists: penalize an ignored one from a past day, then pick a fresh one. */
   refreshDailyQuiz: () => void
@@ -390,6 +412,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeStickerTrades((trades) => set({ trades }))
       // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
+      // remote final tests: Dad's authorisations and the results coming back
+      subscribeFinalTests((tests) => set({ finalTests: tests }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -443,6 +467,16 @@ export const useStore = create<StoreState>((set, get) => {
     void saveFreezeDesk(requests, gifts)
   }
 
+  function saveFinalTestList(tests: FinalTestAuth[]) {
+    set({ finalTests: tests })
+    void saveFinalTests(tests)
+  }
+
+  /** Patch one authorisation in the shared desk (local set + write-through). */
+  function patchFinalTest(authId: string, patch: Partial<FinalTestAuth>) {
+    saveFinalTestList(get().finalTests.map((t) => (t.id === authId ? { ...t, ...patch } : t)))
+  }
+
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
     void saveIdeas(ideas)
@@ -468,6 +502,7 @@ export const useStore = create<StoreState>((set, get) => {
     ideas: [],
     trades: [],
     freezeRequests: [],
+    finalTests: [],
     freezeGifts: [],
     mateAlbum: null,
     mateData: null,
@@ -867,7 +902,7 @@ export const useStore = create<StoreState>((set, get) => {
       return earned
     },
 
-    finishQuizTest(targetId, topicId, official, results) {
+    finishQuizTest(targetId, topicId, official, results, authId) {
       const scorePct = results.length === 0 ? 0 : Math.round((results.filter((r) => r.correct).length / results.length) * 100)
       const record: QuizTestRecord = {
         id: crypto.randomUUID(),
@@ -878,6 +913,7 @@ export const useStore = create<StoreState>((set, get) => {
         scorePct,
         passed: scorePct >= PASS_PCT,
       }
+      let unlockedTopicId: string | undefined
       commitFor(targetId, (d, events) => {
         d.quiz.tests.push(record)
         if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60) // keep the blob small
@@ -890,20 +926,79 @@ export const useStore = create<StoreState>((set, get) => {
             title: 'Devil Fruit won!',
             description: `Final test conquered with ${scorePct}%! A Devil Fruit joins the treasure — spend them in the Store.`,
           })
-          // Curriculum ladder: passing a level opens the next one.
-          const next = nextLevelAfter(topicId)
-          if (next && syncTopicUnlocks(d, targetId)) {
+          // The reward for a pass: the next topic opens. Diogo's ladder knows its
+          // own successor; Ben's flat topics just get the next locked one.
+          const next = nextTopicToUnlock(d, targetId, topicId)
+          if (next) {
+            syncTopicUnlocks(d, targetId) // ladder bookkeeping (autoUnlocked)
+            if (!d.quiz.unlockedTopics.includes(next.id)) d.quiz.unlockedTopics.push(next.id)
+            if (!d.quiz.autoUnlocked?.includes(next.id)) d.quiz.autoUnlocked = [...(d.quiz.autoUnlocked ?? []), next.id]
             syncQuizTasks(d, targetId)
+            unlockedTopicId = next.id
             events.push({
               type: 'goal',
               emoji: next.emoji,
-              title: `LEVEL ${next.level ?? ''} UNLOCKED`.trim(),
+              title: next.level ? `LEVEL ${next.level} UNLOCKED` : 'NEW SEA UNLOCKED',
               description: `${next.title} is open. ${next.outcome ?? ''}`.trim(),
             })
           }
         }
       })
+      // a remotely-authorised test closes its row with the verdict → Dad's banner + push
+      if (authId) {
+        patchFinalTest(authId, {
+          status: 'done',
+          finishedAt: new Date().toISOString(),
+          scorePct,
+          passed: record.passed,
+          unlockedTopicId,
+        })
+      }
       return record
+    },
+
+    // --- remote final tests --------------------------------------------------
+
+    authorizeFinalTest(targetId, topicId, pin, note) {
+      const me = get().activeProfile()
+      const auth: FinalTestAuth = {
+        id: `ft-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        targetId,
+        topicId,
+        pin,
+        note: note.trim(),
+        fromName: me?.name ?? 'Dad',
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+      }
+      // only one open authorisation per topic — a new one replaces the old
+      saveFinalTestList([
+        ...get().finalTests.filter(
+          (t) => !(t.targetId === targetId && t.topicId === topicId && (t.status === 'pending' || t.status === 'started')),
+        ),
+        auth,
+      ])
+    },
+
+    cancelFinalTest(authId) {
+      patchFinalTest(authId, { status: 'cancelled', finishedAt: new Date().toISOString() })
+    },
+
+    postponeFinalTest(authId) {
+      patchFinalTest(authId, { postponed: true })
+    },
+
+    startFinalTest(authId) {
+      // burnt the moment it opens: closing the app doesn't buy a second run
+      patchFinalTest(authId, { status: 'started', startedAt: new Date().toISOString() })
+    },
+
+    abandonFinalTest(authId) {
+      patchFinalTest(authId, { status: 'abandoned', finishedAt: new Date().toISOString() })
+    },
+
+    ackFinalTest(authId) {
+      patchFinalTest(authId, { ackAt: new Date().toISOString() })
     },
 
     // --- Question of the Day -------------------------------------------------

@@ -378,6 +378,108 @@ function AdminTopicCard({
           📋 Questions
         </button>
       </div>
+
+      {/* Ben only: let the test run on HIS device, with another grown-up invigilating */}
+      {onTest && !passed && <RemoteTestDesk topic={topic} targetId={targetId} disabled={!targetData || pool.length === 0} />}
+    </div>
+  )
+}
+
+/**
+ * "Let him take it over there": authorise ONE run of this final test on Ben's
+ * own device. Diogo picks a 4-digit code and writes a note; the grown-up beside
+ * Ben reads the note and types the code. The result comes straight back here.
+ */
+function RemoteTestDesk({ topic, targetId, disabled }: { topic: QuizTopic; targetId: string; disabled: boolean }) {
+  const { finalTests, authorizeFinalTest, cancelFinalTest } = useStore()
+  const [open, setOpen] = useState(false)
+  const [pin, setPin] = useState('')
+  const [note, setNote] = useState('')
+
+  const live = finalTests.find(
+    (t) => t.targetId === targetId && t.topicId === topic.id && (t.status === 'pending' || t.status === 'started'),
+  )
+
+  function send() {
+    if (pin.length !== 4) return
+    sfx.gem()
+    authorizeFinalTest(targetId, topic.id, pin, note)
+    setPin('')
+    setNote('')
+    setOpen(false)
+  }
+
+  if (live) {
+    return (
+      <div style={{ borderTop: '1px solid var(--line)', marginTop: 10, paddingTop: 8 }}>
+        <div style={{ fontWeight: 800, fontSize: 13 }}>
+          📡 Allowed on Ben’s device · code <b style={{ color: 'var(--gold)', letterSpacing: 2 }}>{live.pin}</b>
+        </div>
+        <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+          {live.status === 'started'
+            ? `he started it ${live.startedAt ? new Date(live.startedAt).toLocaleString() : ''} — the result lands here`
+            : live.postponed
+              ? 'he tapped “later” — a banner is nagging him'
+              : 'waiting for him to open it'}
+          {live.note ? ` · “${live.note}”` : ''}
+        </div>
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ marginTop: 6, color: 'var(--red)' }}
+          onClick={() => { sfx.click(); cancelFinalTest(live.id) }}
+        >
+          ✕ {live.status === 'started' ? 'Call it off' : 'Withdraw'}
+        </button>
+      </div>
+    )
+  }
+
+  if (!open) {
+    return (
+      <button
+        className="btn btn--ghost btn--small"
+        style={{ marginTop: 8 }}
+        disabled={disabled}
+        onClick={() => { sfx.click(); setOpen(true) }}
+      >
+        📡 Allow on his device (grown-up nearby)
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', marginTop: 10, paddingTop: 8 }}>
+      <div className="field">
+        <label>Code for the grown-up (4 digits)</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={pin}
+          placeholder="1234"
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+        />
+      </div>
+      <div className="field" style={{ marginTop: 8 }}>
+        <label>Note for the grown-up</label>
+        <input
+          type="text"
+          value={note}
+          maxLength={200}
+          placeholder="Hi Grandma! ~15 min, no help, no phone. Thanks!"
+          onChange={(e) => setNote(e.target.value)}
+        />
+      </div>
+      <p className="muted" style={{ fontSize: 11, margin: '6px 0 0' }}>
+        One attempt only. Passing wins the 🍇 and opens his next topic — you’ll get a notification either way.
+      </p>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setOpen(false) }}>
+          Cancel
+        </button>
+        <button className="btn btn--small" style={{ flex: 1 }} disabled={pin.length !== 4} onClick={send}>
+          📡 Allow the test
+        </button>
+      </div>
     </div>
   )
 }

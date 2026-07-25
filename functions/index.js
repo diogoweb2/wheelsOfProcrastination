@@ -184,6 +184,44 @@ export const nightlyLastCall = onSchedule(
   },
 )
 
+/**
+ * Remote final tests: ping Ben when Dad authorises one on his device, and ping
+ * Dad the moment it's over (passed, failed, or walked out of). Diffed by id +
+ * status so unrelated writes (a "later" tap, a dismissed banner) stay silent.
+ */
+export const onFinalTestWrite = onDocumentWritten('app/finalTests', async (event) => {
+  const before = new Map(((event.data?.before?.data() ?? {}).tests ?? []).map((t) => [t.id, t]))
+  const after = (event.data?.after?.data() ?? {}).tests ?? []
+
+  for (const t of after) {
+    const prev = before.get(t.id)
+    if (prev?.status === t.status) continue // nothing moved for this one
+
+    if (t.status === 'pending' && !prev) {
+      await pushTo(t.targetId, {
+        title: '🎓 Your final test is open!',
+        body: `${t.fromName} unlocked it — sit with a grown-up and open the app. One shot!`,
+      })
+    }
+
+    if (t.status === 'done') {
+      await pushTo(PARENT_ID, {
+        title: t.passed ? `🏴‍☠️ Ben PASSED — ${t.scorePct}%` : `⛈️ Ben missed it — ${t.scorePct}%`,
+        body: t.passed
+          ? 'Devil Fruit awarded and his next topic just opened. Open the app for the details.'
+          : 'He can train and retry another day. Open the app to see where the points went.',
+      })
+    }
+
+    if (t.status === 'abandoned') {
+      await pushTo(PARENT_ID, {
+        title: '🚪 Ben left the final test',
+        body: 'His single attempt is spent. Authorise a new one if it was an accident.',
+      })
+    }
+  }
+})
+
 /** Sticker trades: ping whoever has to answer a newly-offered swap. */
 export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', async (event) => {
   const before = event.data?.before?.data() ?? {}

@@ -6,6 +6,7 @@ import { EventModal } from './components/EventModal'
 import { StreakPrompts } from './components/StreakPrompts'
 import { RequiredDeadline } from './components/RequiredDeadline'
 import { QuestionOfTheDay } from './components/QuestionOfTheDay'
+import { FinalTest } from './components/FinalTest'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
@@ -230,6 +231,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* remote final tests: Ben's "start it" prompt, Dad's verdict banner */}
+      <FinalTest />
 
       {freezeAsks.map((r) => (
         <div className="banner" key={r.id} style={{ background: 'var(--red)' }}>

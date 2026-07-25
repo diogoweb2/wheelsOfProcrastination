@@ -440,6 +440,38 @@ export interface FreezeGift {
   seenAt?: string // set once the kid's app has shown the celebration
 }
 
+// --- Remote final tests (shared app/finalTests doc) -------------------------
+
+/**
+ * Diogo authorising ONE official final test to run on Ben's own device, with a
+ * grown-up sitting next to him instead of Dad. Lives in the SHARED
+ * app/finalTests doc so both sides see it live.
+ *
+ * The `pin` is never shown to Ben: he taps Start, hands the phone to the
+ * grown-up, who reads `note` and types the code. That's the invigilator.
+ *
+ * Exactly ONE attempt: the moment the test opens the row flips to 'started',
+ * so closing the app can't buy a second run. It ends 'done' (with the score) or
+ * 'abandoned' (he walked out mid-test) — either way Diogo gets told.
+ */
+export interface FinalTestAuth {
+  id: string
+  targetId: string // whose device runs it (Ben)
+  topicId: string
+  pin: string // 4 digits, shown ONLY on the admin desk
+  note: string // message for the grown-up ("Ben has 15 min, no phone")
+  fromName: string // who authorised it
+  createdAt: string
+  status: 'pending' | 'started' | 'done' | 'abandoned' | 'cancelled'
+  postponed?: boolean // he chose "later"; the top banner nags until he starts
+  startedAt?: string
+  finishedAt?: string
+  scorePct?: number // on 'done'
+  passed?: boolean // on 'done'
+  unlockedTopicId?: string // the topic his pass opened, if any
+  ackAt?: string // Diogo dismissed the result banner
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]

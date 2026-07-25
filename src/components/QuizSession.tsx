@@ -44,10 +44,12 @@ interface Props {
   stats: Record<string, QuizStat>
   /** Admin trying out the training UI: nothing is recorded, no Berries move. */
   preview?: boolean
+  /** Remote-authorised official test (see FinalTestAuth): the result is reported back to Dad's desk. */
+  authId?: string
   onClose: () => void
 }
 
-export function QuizSession({ mode, topicId, targetId, stats, preview = false, onClose }: Props) {
+export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onClose }: Props) {
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest } = useStore()
   const topic = topicById(topicId)
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
@@ -99,7 +101,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   // ---- test: finish when all answered ----
   useEffect(() => {
     if (mode !== 'training' && !preview && plan.length > 0 && results.length === plan.length && !finished) {
-      const record = finishQuizTest(targetId, topicId, mode === 'official', results)
+      const record = finishQuizTest(targetId, topicId, mode === 'official', results, authId)
       setFinished(record)
       if (record.passed) {
         sfx.bigWin()

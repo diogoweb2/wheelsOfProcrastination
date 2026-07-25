@@ -216,6 +216,18 @@ export function nextLevelAfter(topicId: string): QuizTopic | undefined {
   return QUIZ_TOPICS.find((t) => t.unlockAfter === topicId)
 }
 
+/**
+ * The reward for passing a final test: the next topic to open in the owner's
+ * academy. The ladder wins when there is one (Diogo's levels); otherwise — Ben's
+ * topics have no prerequisites, Dad just opens them one at a time — it's the
+ * first topic of his still sitting locked, in catalog order.
+ */
+export function nextTopicToUnlock(d: AppData, ownerId: string, passedTopicId: string): QuizTopic | undefined {
+  const ladder = nextLevelAfter(passedTopicId)
+  if (ladder) return ladder
+  return topicsFor(ownerId).find((t) => !t.comingSoon && t.id !== passedTopicId && !d.quiz.unlockedTopics.includes(t.id))
+}
+
 /** The prerequisite topic, for the "🔒 pass L2 first" hint on a locked card. */
 export function prerequisiteOf(topic: QuizTopic): QuizTopic | undefined {
   return topic.unlockAfter ? topicById(topic.unlockAfter) : undefined
