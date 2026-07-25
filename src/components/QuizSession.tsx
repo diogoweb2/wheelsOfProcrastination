@@ -22,6 +22,8 @@ import {
   topicById,
 } from '../logic/quiz'
 import { sfx } from '../audio'
+import { lessonById } from '../quiz/lessons'
+import { LessonView } from './Lesson'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
 
@@ -69,6 +71,8 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
   // training: wrong answers pause on a correction card; right answers just flow on
   const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
   const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
+  // the deep-dive lesson currently being read (opened from a wrong answer, or from the test review)
+  const [reading, setReading] = useState<{ lessonId: string; then: 'advance' | 'back' } | null>(null)
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
   // training: true once he opts to keep practising past the spaced-repetition rest
   const [ignoreRest, setIgnoreRest] = useState(false)
@@ -180,9 +184,24 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
     )
   }
 
+  // ---- the deep-dive lesson takes over the whole screen ----
+  const readingLesson = lessonById(reading?.lessonId)
+  if (reading && readingLesson) {
+    return (
+      <LessonView
+        lesson={readingLesson}
+        doneLabel={reading.then === 'advance' ? 'Got it — next question ➜' : 'Back to the review ➜'}
+        onDone={() => {
+          setReading(null)
+          if (reading.then === 'advance' && feedback) advanceTraining(feedback.q, sessionCorrect)
+        }}
+      />
+    )
+  }
+
   // ---- results screen (tests) ----
   if (finished) {
-    return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} />
+    return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} onRead={(id) => setReading({ lessonId: id, then: 'back' })} />
   }
 
   // ---- training: nothing due (cleared this session, or all resting) ----
@@ -261,6 +280,20 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
               💡 {feedback.q.funFact}
             </p>
           )}
+          {/* a miss is the best moment to actually learn the thing — offer the long version */}
+          {(() => {
+            const lesson = lessonById(feedback.q.lessonId)
+            if (!lesson) return null
+            return (
+              <button
+                className="btn btn--blue"
+                style={{ marginTop: 12 }}
+                onClick={() => { sfx.click(); setReading({ lessonId: lesson.id, then: 'advance' }) }}
+              >
+                📖 Explain this properly · {lesson.minutes} min
+              </button>
+            )
+          })()}
           <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q, sessionCorrect)}>
             Next question ➜
           </button>
@@ -284,7 +317,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, o
 
 // --- results ---------------------------------------------------------------
 
-function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; plan: QuizQuestion[]; mode: QuizMode; onClose: () => void }) {
+function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTestRecord; plan: QuizQuestion[]; mode: QuizMode; onClose: () => void; onRead: (lessonId: string) => void }) {
   const byId = new Map(plan.map((q) => [q.id, q]))
   const right = record.results.filter((r) => r.correct).length
   return (
@@ -323,6 +356,15 @@ function TestResults({ record, plan, mode, onClose }: { record: QuizTestRecord; 
                 )}
                 {!r.correct && q.funFact && (
                   <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>💡 {q.funFact}</div>
+                )}
+                {!r.correct && lessonById(q.lessonId) && (
+                  <button
+                    className="btn btn--ghost btn--small"
+                    style={{ marginTop: 8, width: 'auto' }}
+                    onClick={() => { sfx.click(); onRead(q.lessonId!) }}
+                  >
+                    📖 Read the lesson · {lessonById(q.lessonId)!.minutes} min
+                  </button>
                 )}
               </div>
             </div>

@@ -23,6 +23,7 @@ import type { AppData, AuditEntry, FreezeGift, FreezeRequest, Idea, MarketData, 
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
+import { AGENTS_SEED } from '../quiz/agentsSeed'
 import { SCIENCE_6_SEED } from '../quiz/science6Seed'
 import { CRITICAL_THINKING_6_SEED } from '../quiz/criticalThinking6Seed'
 import { LOGIC_6_SEED } from '../quiz/logic6Seed'
@@ -30,6 +31,7 @@ import { LOGIC_6_SEED } from '../quiz/logic6Seed'
 const ALL_SEEDS = [
   ...CANADA_GEOGRAPHY_SEED,
   ...AI_DEV_SEED,
+  ...AGENTS_SEED,
   ...SCIENCE_6_SEED,
   ...CRITICAL_THINKING_6_SEED,
   ...LOGIC_6_SEED,

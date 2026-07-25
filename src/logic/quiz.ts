@@ -12,7 +12,26 @@ export interface QuizTopic {
   description: string
   targetCount: number // how many active questions the bank should hold
   comingSoon?: boolean // registered but no questions generated yet
+  /**
+   * Curriculum ladder: this topic stays locked until `unlockAfter` is PASSED
+   * officially. Topics without it are entry points and unlock themselves.
+   */
+  unlockAfter?: string
+  track?: string // groups topics into a section on the Academy screen
+  level?: number // position in the ladder, shown as "LEVEL n"
+  /** One-line promise of what you can do once this level is conquered. */
+  outcome?: string
 }
+
+/** Sections on the Academy screen, in display order. */
+export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
+  {
+    id: 'agent-path',
+    title: '🛠️ The Agent Engineer Path',
+    blurb: 'Six levels, vendor-neutral. Pass a level’s final test to unlock the next one.',
+  },
+  { id: 'tooling', title: '🧰 Tooling & day job', blurb: 'The specific tools you actually type into.' },
+]
 
 export const QUIZ_TOPICS: QuizTopic[] = [
   // --- Ben (grade 6, born Feb 2014) ---
@@ -48,13 +67,88 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     description: 'Riddles, patterns and puzzles. No math calculations, promise.',
     targetCount: 50,
   },
-  // --- Diogo (senior frontend dev going deep on AI-assisted development) ---
+  // --- Diogo: the Agent Engineer path (vendor-neutral, six levels) ---
+  // Deliberately free of provider names: model APIs churn every few months, the
+  // ideas underneath them don't. Every level assumes a frontend/React brain.
+  {
+    id: 'agents-1-foundations',
+    owner: 'diogo',
+    title: 'L1 · What a model actually is',
+    emoji: '🧱',
+    description: 'Next-token prediction, tokens, context windows, temperature, embeddings, statelessness.',
+    outcome: 'You can explain, precisely, why an LLM does the weird things it does.',
+    track: 'agent-path',
+    level: 1,
+    targetCount: 40,
+  },
+  {
+    id: 'agents-2-prompting',
+    owner: 'diogo',
+    title: 'L2 · Talking to models on purpose',
+    emoji: '🎯',
+    description: 'System vs user roles, few-shot, chain of thought, structured JSON output, schemas, first evals.',
+    outcome: 'You can get reliable, machine-parseable output instead of vibes.',
+    track: 'agent-path',
+    level: 2,
+    unlockAfter: 'agents-1-foundations',
+    targetCount: 40,
+  },
+  {
+    id: 'agents-3-tools',
+    owner: 'diogo',
+    title: 'L3 · Tools & the agent loop',
+    emoji: '🔧',
+    description: 'Function calling, the think→act→observe loop, tool schemas, errors, parallel calls, ReAct.',
+    outcome: 'You can build a real agent from scratch on any provider.',
+    track: 'agent-path',
+    level: 3,
+    unlockAfter: 'agents-2-prompting',
+    targetCount: 40,
+  },
+  {
+    id: 'agents-4-context',
+    owner: 'diogo',
+    title: 'L4 · Context engineering & memory',
+    emoji: '🧠',
+    description: 'RAG, chunking, vector vs keyword search, reranking, compaction, context rot, agent memory.',
+    outcome: 'You can feed an agent the right 5% of your data instead of all of it.',
+    track: 'agent-path',
+    level: 4,
+    unlockAfter: 'agents-3-tools',
+    targetCount: 40,
+  },
+  {
+    id: 'agents-5-architecture',
+    owner: 'diogo',
+    title: 'L5 · Agent architectures',
+    emoji: '🏗️',
+    description: 'Workflows vs agents, routing, chaining, orchestrator–worker, evaluator loops, human-in-the-loop.',
+    outcome: 'You can pick the simplest architecture that solves the problem — and defend it.',
+    track: 'agent-path',
+    level: 5,
+    unlockAfter: 'agents-4-context',
+    targetCount: 40,
+  },
+  {
+    id: 'agents-6-production',
+    owner: 'diogo',
+    title: 'L6 · Shipping agents for real',
+    emoji: '🚢',
+    description: 'Evals, tracing, cost & latency, caching, prompt injection, sandboxing, permissions, rollout.',
+    outcome: 'You can put an agent in front of real users without it becoming an incident.',
+    track: 'agent-path',
+    level: 6,
+    unlockAfter: 'agents-5-architecture',
+    targetCount: 40,
+  },
+  // --- Diogo: the specific tools (these DO churn — retrain as they change) ---
   {
     id: 'ai-software-dev',
     owner: 'diogo',
     title: 'AI in Software Dev',
     emoji: '🤖',
     description: 'Tokens, context, prompting, agents, orchestration, MCP — the practical craft.',
+    track: 'tooling',
     targetCount: 50,
   },
   {
@@ -63,6 +157,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     title: 'GitHub Copilot',
     emoji: '🧑‍✈️',
     description: 'Chat participants, slash commands, custom instructions, agent mode, Copilot at work.',
+    track: 'tooling',
     targetCount: 50,
   },
   {
@@ -71,6 +166,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     title: 'Claude Code',
     emoji: '🟠',
     description: 'CLAUDE.md, plan mode, subagents, hooks, MCP, headless -p, token-efficient workflows.',
+    track: 'tooling',
     targetCount: 50,
   },
 ]
@@ -81,6 +177,48 @@ export function topicById(id: string): QuizTopic | undefined {
 
 export function topicsFor(ownerId: string): QuizTopic[] {
   return QUIZ_TOPICS.filter((t) => t.owner === ownerId)
+}
+
+// --- curriculum ladder ------------------------------------------------------
+
+/**
+ * Auto-unlocking, done idempotently.
+ *
+ * A topic opens itself when it's an entry point (no `unlockAfter`) or when its
+ * prerequisite has been officially passed. We remember every id we've ever
+ * auto-opened in `quiz.autoUnlocked` so that (a) adding a new topic to the
+ * catalog opens it exactly once, and (b) a topic the admin deliberately
+ * re-locks stays locked instead of springing back open on the next login.
+ *
+ * Returns true if anything changed (callers only save when it did).
+ */
+export function syncTopicUnlocks(d: AppData, ownerId: string): boolean {
+  const q = d.quiz
+  let changed = false
+  if (!q.autoUnlocked) {
+    // Migration: everything already open counts as "we've offered this before".
+    q.autoUnlocked = [...q.unlockedTopics]
+    changed = true
+  }
+  for (const t of topicsFor(ownerId)) {
+    if (t.comingSoon || q.autoUnlocked.includes(t.id)) continue
+    const ready = !t.unlockAfter || q.passedTopics.includes(t.unlockAfter)
+    if (!ready) continue
+    q.autoUnlocked.push(t.id)
+    if (!q.unlockedTopics.includes(t.id)) q.unlockedTopics.push(t.id)
+    changed = true
+  }
+  return changed
+}
+
+/** The topic this one opens up, if any — used for the "next level unlocked!" celebration. */
+export function nextLevelAfter(topicId: string): QuizTopic | undefined {
+  return QUIZ_TOPICS.find((t) => t.unlockAfter === topicId)
+}
+
+/** The prerequisite topic, for the "🔒 pass L2 first" hint on a locked card. */
+export function prerequisiteOf(topic: QuizTopic): QuizTopic | undefined {
+  return topic.unlockAfter ? topicById(topic.unlockAfter) : undefined
 }
 
 // --- economy ---------------------------------------------------------------

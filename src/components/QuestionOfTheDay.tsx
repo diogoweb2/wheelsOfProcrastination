@@ -6,6 +6,8 @@ import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
 import { correctAnswerText, qotdPenalty, qotdReward, topicById } from '../logic/quiz'
 import { QuestionCard, type Given } from './QuizSession'
+import { lessonById } from '../quiz/lessons'
+import { LessonView } from './Lesson'
 import { sfx } from '../audio'
 
 export function QuestionOfTheDay() {
@@ -15,6 +17,7 @@ export function QuestionOfTheDay() {
   const topic = q ? topicById(q.topicId) : undefined
   const startRef = useRef(Date.now())
   const [result, setResult] = useState<{ correct: boolean; delta: number; given: Given } | null>(null)
+  const [reading, setReading] = useState(false) // the deep-dive lesson, opened after a miss
 
   // A fresh, unanswered question pops itself open the moment it appears.
   useEffect(() => {
@@ -45,6 +48,12 @@ export function QuestionOfTheDay() {
 
   const win = qotdReward(q)
   const loss = qotdPenalty(q)
+
+  // reading the lesson replaces the modal entirely — it needs the whole screen
+  const lesson = lessonById(q.lessonId)
+  if (reading && lesson) {
+    return <LessonView lesson={lesson} doneLabel="⚓ Set sail" onDone={() => { setReading(false); useStore.getState().closeQotd() }} />
+  }
 
   return (
     <div className="overlay overlay--center">
@@ -105,6 +114,11 @@ export function QuestionOfTheDay() {
             )}
             {q.funFact && (
               <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>💡 {q.funFact}</p>
+            )}
+            {!result.correct && lessonById(q.lessonId) && (
+              <button className="btn btn--blue" style={{ marginTop: 12 }} onClick={() => { sfx.click(); setReading(true) }}>
+                📖 Explain this properly · {lessonById(q.lessonId)!.minutes} min
+              </button>
             )}
             <button className="btn" style={{ marginTop: 14 }} onClick={() => useStore.getState().closeQotd()}>
               ⚓ Set sail

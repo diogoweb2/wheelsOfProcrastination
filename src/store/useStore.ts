@@ -70,7 +70,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { PASS_PCT, giftCardDaysLeft, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, topicsFor, trainingReward, updatedStat } from '../logic/quiz'
+import { PASS_PCT, giftCardDaysLeft, nextLevelAfter, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -337,12 +337,8 @@ export const useStore = create<StoreState>((set, get) => {
         // keep the wheel's quiz habits in step with the unlocked topics.
         // Only write if something actually changes (avoids a no-op save every login).
         const ensure = (d: AppData) => {
-          if (!d.quiz.selfInit) {
-            for (const t of topicsFor(id)) {
-              if (!t.comingSoon && !d.quiz.unlockedTopics.includes(t.id)) d.quiz.unlockedTopics.push(t.id)
-            }
-            d.quiz.selfInit = true
-          }
+          d.quiz.selfInit = true // legacy flag; the ladder below supersedes it
+          syncTopicUnlocks(d, id)
           syncQuizTasks(d, id)
         }
         const probe: AppData = JSON.parse(JSON.stringify(get().data))
@@ -890,6 +886,17 @@ export const useStore = create<StoreState>((set, get) => {
             title: 'Devil Fruit won!',
             description: `Final test conquered with ${scorePct}%! A Devil Fruit joins the treasure — spend them in the Store.`,
           })
+          // Curriculum ladder: passing a level opens the next one.
+          const next = nextLevelAfter(topicId)
+          if (next && syncTopicUnlocks(d, targetId)) {
+            syncQuizTasks(d, targetId)
+            events.push({
+              type: 'goal',
+              emoji: next.emoji,
+              title: `LEVEL ${next.level ?? ''} UNLOCKED`.trim(),
+              description: `${next.title} is open. ${next.outcome ?? ''}`.trim(),
+            })
+          }
         }
       })
       return record
