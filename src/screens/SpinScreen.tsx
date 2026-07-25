@@ -8,6 +8,7 @@ import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { eligibleTasks } from '../logic/wheel'
+import { dayKey } from '../logic/dates'
 import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
 
 const FILTERS: { id: Effort; label: string }[] = [
@@ -51,7 +52,7 @@ export function SpinScreen() {
     () => {
       const excluded = new Set([...doneIds, ...pendingIds])
       if (targetId) excluded.delete(targetId)
-      return eligibleTasks(data.tasks, filter, excluded)
+      return eligibleTasks(data.tasks, filter, excluded, dayKey(), data.completions)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data.tasks, filter, data.completions.length, data.daily.day, data.daily.pendingPicks, targetId],

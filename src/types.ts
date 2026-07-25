@@ -30,6 +30,18 @@ export interface Task {
    */
   requiredFrom?: string
   requiredUntil?: string
+  /**
+   * Chained quest: stays completely hidden (wheel AND must-do checklist) until
+   * the task with this id has been completed at least once. A dangling id (the
+   * prerequisite was deleted) unlocks it, so a chain can never get stuck.
+   */
+  afterTaskId?: string
+  /**
+   * Cooldown for a repeating task: once done, it disappears for this many days.
+   * "Cut the grass" with 15 comes back on the 15th day after the last time it
+   * was ticked off. Absent / 0 = available again the next day, as before.
+   */
+  cooldownDays?: number
 }
 
 export interface Completion {

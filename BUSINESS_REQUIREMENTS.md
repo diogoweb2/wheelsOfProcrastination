@@ -28,10 +28,12 @@ Fields when creating a task:
 | Due date | optional | As the date approaches, the task's effective urgency rises. Overdue or due ≤ 48h ⇒ treated as urgent. |
 | Start date | optional | Task stays **off the wheel** (and off manual/eligible pools) until this local day arrives. Blank ⇒ available immediately. |
 | Days | all / weekdays / weekends | Restricts which days the task can appear on the wheel. Weekdays = Mon–Fri, weekends = Sat/Sun (local). Default: **all**. |
+| Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
+| Rest days | optional, repeating tasks only | After a completion the task disappears for N days and only comes back on day N after the last time it was done (e.g. "cut the grass" with 15). Blank/0 ⇒ available again the next day. While resting it is off the wheel, off the checklist, and **not** penalised as a missed must-do. |
 
 ## 3. The Wheel
 
-- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), and matching today's day scope (all / weekdays / weekends).
+- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends), unlocked (their prerequisite task is done), and not resting out a cooldown.
 - Before spinning, user picks an effort filter: **Low / Medium / High / All** (you don't spin a High task when you have 10 minutes).
 - The wheel is **weighted but fair**:
   - Base weight: urgent = 3, not-urgent = 1.

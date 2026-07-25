@@ -1,6 +1,6 @@
 // Weighted-but-fair wheel selection. Rules in BUSINESS_REQUIREMENTS.md §3.
-import type { EffortFilter, Task } from '../types'
-import { dayKey, daysUntil, isWeekend } from './dates'
+import type { Completion, EffortFilter, Task } from '../types'
+import { addDays, dayKey, daysUntil, isWeekend } from './dates'
 import { isEffectivelyUrgent } from './economy'
 
 export interface WheelEntry {
@@ -8,11 +8,46 @@ export interface WheelEntry {
   weight: number
 }
 
-/** Is the task allowed on the wheel on `today` (start date reached + day-of-week scope)? */
-export function isAvailableOn(task: Task, today: string): boolean {
+/** Latest day (YYYY-MM-DD) this task was completed on or before `today`, if ever. */
+export function lastDoneDay(taskId: string, completions: Completion[], today: string): string | null {
+  let last: string | null = null
+  for (const c of completions) {
+    if (c.taskId !== taskId || c.day > today) continue
+    if (!last || c.day > last) last = c.day
+  }
+  return last
+}
+
+/**
+ * Chained quest gate: has the prerequisite been done (on or before `today`)?
+ * A prerequisite that no longer exists is treated as satisfied, so deleting a
+ * task can never strand the ones waiting behind it.
+ */
+export function isUnlockedOn(task: Task, today: string, completions: Completion[], tasks?: Task[]): boolean {
+  if (!task.afterTaskId) return true
+  if (tasks && !tasks.some((t) => t.id === task.afterTaskId)) return true
+  return lastDoneDay(task.afterTaskId, completions, today) !== null
+}
+
+/** First day a cooling-down task is allowed back, or null if it has no cooldown / was never done. */
+export function cooldownUntil(task: Task, completions: Completion[], today: string = dayKey()): string | null {
+  if (!task.cooldownDays || task.cooldownDays <= 0) return null
+  const last = lastDoneDay(task.id, completions, today)
+  return last ? addDays(last, task.cooldownDays) : null
+}
+
+/**
+ * Is the task allowed on `today`? Start date reached, day-of-week scope, its
+ * prerequisite quest done, and not still cooling down from its last completion.
+ * `completions` may be omitted only where the caller has already ruled those out.
+ */
+export function isAvailableOn(task: Task, today: string, completions: Completion[] = [], tasks?: Task[]): boolean {
   if (task.startDate && today < task.startDate) return false
   if (task.dayScope === 'weekdays' && isWeekend(today)) return false
   if (task.dayScope === 'weekends' && !isWeekend(today)) return false
+  if (!isUnlockedOn(task, today, completions, tasks)) return false
+  const back = cooldownUntil(task, completions, today)
+  if (back && today < back) return false
   return true
 }
 
@@ -21,17 +56,22 @@ export function isAvailableOn(task: Task, today: string): boolean {
  * carry a window (`requiredFrom`…`requiredUntil`); outside it the task is
  * dormant — off the checklist, and no penalty for not doing it.
  */
-export function isRequiredOn(task: Task, today: string = dayKey()): boolean {
+export function isRequiredOn(
+  task: Task,
+  today: string = dayKey(),
+  completions: Completion[] = [],
+  tasks?: Task[],
+): boolean {
   if (!task.required || task.archived) return false
   if (task.requiredFrom && today < task.requiredFrom) return false
   if (task.requiredUntil && today > task.requiredUntil) return false
-  return isAvailableOn(task, today)
+  return isAvailableOn(task, today, completions, tasks)
 }
 
 /** Today's checklist: every active requirement in its window, urgent ones first. */
-export function requiredToday(tasks: Task[], today: string = dayKey()): Task[] {
+export function requiredToday(tasks: Task[], today: string = dayKey(), completions: Completion[] = []): Task[] {
   return tasks
-    .filter((t) => isRequiredOn(t, today))
+    .filter((t) => isRequiredOn(t, today, completions, tasks))
     .sort((a, b) => {
       // the closest deadline leads; undated requirements sit at the bottom
       const da = a.requiredUntil ?? '9999-12-31'
@@ -45,6 +85,7 @@ export function eligibleTasks(
   filter: EffortFilter,
   completedTodayIds: Set<string>,
   today: string = dayKey(),
+  completions: Completion[] = [],
 ): Task[] {
   return tasks.filter(
     (t) =>
@@ -53,7 +94,7 @@ export function eligibleTasks(
       !t.required &&
       (filter.length === 0 || filter.includes(t.effort)) &&
       !completedTodayIds.has(t.id) &&
-      isAvailableOn(t, today),
+      isAvailableOn(t, today, completions, tasks),
   )
 }
 

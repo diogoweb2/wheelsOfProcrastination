@@ -14,7 +14,7 @@ export function RequiredList() {
   const { data, completeRequired, completedTodayIds } = useStore()
   const today = dayKey()
   const doneIds = completedTodayIds()
-  const items = useMemo(() => requiredToday(data.tasks, today), [data.tasks, today])
+  const items = useMemo(() => requiredToday(data.tasks, today, data.completions), [data.tasks, today, data.completions])
   // Done items leave the list, but only after a little exit ceremony: the row
   // flips green, shows its berries, then slides away. `leaving` keeps it
   // rendered for exactly that long.

@@ -198,6 +198,8 @@ interface StoreState {
     required?: boolean
     requiredFrom?: string
     requiredUntil?: string
+    afterTaskId?: string
+    cooldownDays?: number
   }) => void
   updateTask: (id: string, patch: Partial<Task>) => void
   deleteTask: (id: string) => void
@@ -574,7 +576,7 @@ export const useStore = create<StoreState>((set, get) => {
         while (cur < today) {
           // Every requirement that was live that day and never ticked off costs Berries.
           for (const t of d.tasks) {
-            if (!isRequiredOn(t, cur) || donePerDay.has(`${cur}|${t.id}`)) continue
+            if (!isRequiredOn(t, cur, d.completions, d.tasks) || donePerDay.has(`${cur}|${t.id}`)) continue
             missedRequired += requiredPenalty(t)
             if (!missedNames.includes(t.name)) missedNames.push(t.name)
           }
@@ -651,6 +653,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(t.required ? { required: true } : {}),
           ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
           ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
+          ...(t.afterTaskId ? { afterTaskId: t.afterTaskId } : {}),
+          ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
         })
       })
     },
@@ -686,7 +690,7 @@ export const useStore = create<StoreState>((set, get) => {
       let earned = 0
       commit((d, events) => {
         const task = d.tasks.find((t) => t.id === taskId)
-        if (!task || !isRequiredOn(task, today)) return
+        if (!task || !isRequiredOn(task, today, d.completions, d.tasks)) return
         if (d.completions.some((c) => c.day === today && c.taskId === taskId)) return // already ticked
         earned = requiredReward(task)
         d.completions.push({
@@ -740,7 +744,7 @@ export const useStore = create<StoreState>((set, get) => {
       const { data } = get()
       if (data.daily.pendingPicks.length >= MAX_PENDING) return 'full'
       const excluded = new Set([...get().completedTodayIds(), ...data.daily.pendingPicks.map((p) => p.taskId)])
-      const pool = eligibleTasks(data.tasks, filter, excluded)
+      const pool = eligibleTasks(data.tasks, filter, excluded, dayKey(), data.completions)
       if (pool.length === 0) return null
       const picked = pickWeighted(buildEntries(pool))
       if (TEST_DISABLE_SPIN_TRACKING) return picked
@@ -775,7 +779,7 @@ export const useStore = create<StoreState>((set, get) => {
       const { data } = get()
       if (data.daily.pendingPicks.length >= MAX_PENDING) return 'full'
       const task = data.tasks.find((t) => t.id === taskId)
-      if (!task || !isAvailableOn(task, dayKey())) return 'broke'
+      if (!task || !isAvailableOn(task, dayKey(), data.completions, data.tasks)) return 'broke'
       const cost = manualPickCost(task)
       if (data.economy.gems < cost) return 'broke'
       commit((d) => {
