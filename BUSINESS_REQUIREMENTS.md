@@ -28,10 +28,12 @@ Fields when creating a task:
 | Due date | optional | As the date approaches, the task's effective urgency rises. Overdue or due ≤ 48h ⇒ treated as urgent. |
 | Start date | optional | Task stays **off the wheel** (and off manual/eligible pools) until this local day arrives. Blank ⇒ available immediately. |
 | Days | all / weekdays / weekends | Restricts which days the task can appear on the wheel. Weekdays = Mon–Fri, weekends = Sat/Sun (local). Default: **all**. |
+| Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
+| Rest days | optional, repeating tasks only | After a completion the task disappears for N days and only comes back on day N after the last time it was done (e.g. "cut the grass" with 15). Blank/0 ⇒ available again the next day. While resting it is off the wheel, off the checklist, and **not** penalised as a missed must-do. |
 
 ## 3. The Wheel
 
-- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), and matching today's day scope (all / weekdays / weekends).
+- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends), unlocked (their prerequisite task is done), and not resting out a cooldown.
 - Before spinning, user picks an effort filter: **Low / Medium / High / All** (you don't spin a High task when you have 10 minutes).
 - The wheel is **weighted but fair**:
   - Base weight: urgent = 3, not-urgent = 1.
@@ -174,8 +176,11 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 - **Topics** (registry in `src/logic/quiz.ts`, each with an `owner`):
   - **Ben** (born Feb 2014 — Ontario grade-6 level): Canada Geography (live, 50 questions), Science, Critical Thinking (scams/fake news), Logic — coming later, plus ~5 more Ontario grade-6 topics eventually.
-  - **Diogo** (senior frontend dev; goal = practical AI-for-dev market edge, NO ML training theory): AI in Software Dev, GitHub Copilot, Claude Code (live, ~20 seed questions each, target 50 — `quiz:regen` tops them up).
-  - On a profile's first login its own non-comingSoon topics auto-unlock once (`quiz.selfInit`); after that locks are fully admin-managed.
+  - **Diogo** (senior frontend dev; goal = practical AI-for-dev market edge, NO ML training theory). Two tracks (`QUIZ_TRACKS`, shown as sections):
+    - **🛠️ The Agent Engineer Path** — six gated levels, deliberately **vendor-neutral** (no provider names: APIs churn, the ideas don't), each explained through his React/frontend background. L1 What a model actually is · L2 Talking to models on purpose · L3 Tools & the agent loop · L4 Context engineering & memory · L5 Agent architectures · L6 Shipping agents for real. 105 seed questions (`src/quiz/agentsSeed.ts`).
+    - **🧰 Tooling & day job** — the products that *do* churn: AI in Software Dev, GitHub Copilot, Claude Code (~20 seed questions each, target 50 — `quiz:regen` tops them up).
+- **Curriculum ladder** (`syncTopicUnlocks`): a topic with no `unlockAfter` is an entry point and opens itself; one with `unlockAfter` stays locked until that prerequisite is **officially passed** (passing L2 pops a "LEVEL 3 UNLOCKED" event). Every id the ladder has ever auto-opened is recorded in `quiz.autoUnlocked`, so a topic the admin deliberately re-locks stays locked and a newly added topic opens exactly once. Admin locks still win at any time.
+- **Lessons** (`src/quiz/lessons/`, rendered by `src/components/Lesson.tsx`): each question may carry a `lessonId` pointing at a 2–5 min illustrated deep-dive (37 lessons, ~150 min total). Offered as "📖 Explain this properly" on a **wrong** training answer, in the final-test mistakes review, and after a missed Question of the Day; also browsable per topic via "📖 Study the lessons". Built from typed blocks so they can *draw* — flow diagrams, side-by-side comparisons, layer stacks, proportional bars, tables, code — plus four callout flavours: 🌊 "Imagine that…", ⚛️ React bridge, ⚠️ gotcha, 🗝️ takeaway. They live in **code, not the Firestore bank** (long, shared by several questions, and the bank is one document with a 1MB ceiling).
 - **Question bank** lives in Firestore `app/quizBank` (seeded from `src/quiz/*Seed.ts` on first run; after that the cloud copy is the source of truth). Types: multiple choice, short write-in, tap-to-match pairs, put-in-order. `weight: 2` = core material, `weight: 1` = fun/nice-to-know.
 - **Training (own profile)**: correct answers never interrupt the flow — Berries fly to the topbar counter (which counts up) with a small "+N 🪙" flash, and the next question appears immediately; only WRONG answers pause on a correction card (right answer + fun fact). Berries: full `points` on the first-ever correct answer, **half** on later correct answers, **at most once per question per day** (anti-farming). Adaptive picker favours unseen/weak questions and ✨ fresh ones (see weekly review, §16).
 - **Final test**:

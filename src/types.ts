@@ -30,6 +30,18 @@ export interface Task {
    */
   requiredFrom?: string
   requiredUntil?: string
+  /**
+   * Chained quest: stays completely hidden (wheel AND must-do checklist) until
+   * the task with this id has been completed at least once. A dangling id (the
+   * prerequisite was deleted) unlocks it, so a chain can never get stuck.
+   */
+  afterTaskId?: string
+  /**
+   * Cooldown for a repeating task: once done, it disappears for this many days.
+   * "Cut the grass" with 15 comes back on the 15th day after the last time it
+   * was ticked off. Absent / 0 = available again the next day, as before.
+   */
+  cooldownDays?: number
 }
 
 export interface Completion {
@@ -147,6 +159,55 @@ export interface QuizQuestion {
   status: 'active' | 'removed' | 'pending' // pending = AI-regenerated, awaiting parent review
   createdAt: string
   freshAt?: string // set when the weekly AI review adds/updates a question → "NEW" badge + training priority until seen again
+  lessonId?: string // deep-dive explanation offered after a wrong answer (see src/quiz/lessons.ts)
+}
+
+// --- Lessons (the "I got it wrong, teach me properly" layer) -----------------
+// Lessons live in CODE, not in the Firestore bank: they're long, they're shared
+// by several questions, and the whole bank is one Firestore document with a 1MB
+// ceiling. Questions point at one with `lessonId`.
+
+/** A callout's flavour — drives the icon + colour of the block. */
+export type LessonNote = 'imagine' | 'react' | 'warn' | 'key'
+
+/** One box in a flow diagram. */
+export interface LessonFlowStep {
+  emoji?: string
+  label: string
+  sub?: string
+  tone?: 'accent' | 'muted' | 'danger'
+}
+
+/** One column of a side-by-side comparison. */
+export interface LessonPane {
+  title: string
+  emoji?: string
+  tone?: 'good' | 'bad' | 'neutral'
+  items: string[]
+}
+
+/**
+ * A block of lesson content. Text fields support a tiny inline syntax:
+ * `**bold**` and `` `code` ``.
+ */
+export type LessonBlock =
+  | { kind: 'p'; text: string }
+  | { kind: 'h'; text: string } // section heading
+  | { kind: 'note'; note: LessonNote; text: string } // "Imagine that…" / React bridge / gotcha / takeaway
+  | { kind: 'flow'; steps: LessonFlowStep[]; loop?: string; caption?: string } // boxes joined by arrows
+  | { kind: 'compare'; left: LessonPane; right: LessonPane; caption?: string }
+  | { kind: 'stack'; layers: { label: string; sub?: string }[]; caption?: string } // layered architecture
+  | { kind: 'bars'; items: { label: string; pct: number; note?: string }[]; caption?: string }
+  | { kind: 'code'; code: string; caption?: string }
+  | { kind: 'table'; head: string[]; rows: string[][]; caption?: string }
+  | { kind: 'list'; items: string[]; ordered?: boolean }
+
+export interface QuizLesson {
+  id: string
+  title: string
+  emoji: string
+  minutes: number // honest reading estimate, shown up front
+  blocks: LessonBlock[]
 }
 
 /** Per-question training history (lives in the kid's AppData). Drives rewards, adaptive picking and test-length estimates. */
@@ -192,7 +253,8 @@ export interface QuizState {
   passedTopics: string[] // official pass → big checkmark + one-time Devil Fruit
   unlockedTopics: string[] // admin-managed; locked topics are visible but not playable
   bonusFruits: Record<string, number> // admin-granted extra 🍇 per topic (a log, fruits go to economy)
-  selfInit?: boolean // one-time flag: this profile's own default topics were unlocked
+  selfInit?: boolean // legacy one-time flag: this profile's own default topics were unlocked
+  autoUnlocked?: string[] // every topic the ladder has ever auto-opened — so a re-locked topic stays locked
   daily?: DailyQuiz // the Question of the Day (absent until the profile has trained something)
 }
 

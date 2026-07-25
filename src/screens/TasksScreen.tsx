@@ -5,7 +5,7 @@ import { REQUIRED_REWARD, isEffectivelyUrgent, manualPickCost, rewardFor } from 
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { dayKey, daysUntil } from '../logic/dates'
-import { isAvailableOn } from '../logic/wheel'
+import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
 
 export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   const { data, addTask, updateTask, deleteTask, manualPick, completedTodayIds } = useStore()
@@ -65,7 +65,11 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
         const doneToday = doneIds.has(t.id)
         const due = t.dueDate ? daysUntil(t.dueDate) : null
         const notStarted = t.startDate ? daysUntil(t.startDate) > 0 : false
-        const available = isAvailableOn(t, today)
+        const available = isAvailableOn(t, today, data.completions, data.tasks)
+        const locked = !isUnlockedOn(t, today, data.completions, data.tasks)
+        const gate = locked ? data.tasks.find((x) => x.id === t.afterTaskId) : undefined
+        const backOn = cooldownUntil(t, data.completions, today)
+        const cooling = backOn && today < backOn ? backOn : null
         return (
           <div key={t.id} className={`task-row effort-${t.effort}`} style={urgent ? { borderColor: 'var(--orange)' } : undefined}>
             <div className="dot" />
@@ -80,6 +84,9 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
                 {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
                 {t.dayScope === 'weekends' && <span className="chip">🏖️ weekends</span>}
                 {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
+                {gate && <span className="chip">🔒 after "{gate.name}"</span>}
+                {t.cooldownDays ? <span className="chip">⏳ every {t.cooldownDays}d</span> : null}
+                {cooling && <span className="chip">😴 back {cooling}</span>}
                 {due !== null && (
                   <span className="chip" style={due <= 2 ? { color: 'var(--orange)' } : undefined}>
                     📅 {due < 0 ? `${-due}d overdue!` : due === 0 ? 'today!' : `${due}d left`}
@@ -136,6 +143,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
       {formOpen && (
         <TaskForm
           initial={editing}
+          allTasks={data.tasks}
           onClose={() => setFormOpen(false)}
           onSave={(v) => {
             if (editing) updateTask(editing.id, v)
@@ -176,11 +184,14 @@ function TaskForm(props: {
     required?: boolean
     requiredFrom?: string
     requiredUntil?: string
+    afterTaskId?: string
+    cooldownDays?: number
   }) => void
+  allTasks: Task[]
   onClose: () => void
   onDelete?: () => void
 }) {
-  const { initial, onSave, onClose, onDelete } = props
+  const { initial, allTasks, onSave, onClose, onDelete } = props
   const [name, setName] = useState(initial?.name ?? '')
   const [repeats, setRepeats] = useState(initial?.repeats ?? false)
   const [effort, setEffort] = useState<Effort>(initial?.effort ?? 'low')
@@ -191,7 +202,11 @@ function TaskForm(props: {
   const [required, setRequired] = useState(initial?.required ?? false)
   const [requiredFrom, setRequiredFrom] = useState(initial?.requiredFrom ?? '')
   const [requiredUntil, setRequiredUntil] = useState(initial?.requiredUntil ?? '')
+  const [afterTaskId, setAfterTaskId] = useState(initial?.afterTaskId ?? '')
+  const [cooldownDays, setCooldownDays] = useState(initial?.cooldownDays ? String(initial.cooldownDays) : '')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Everything except this quest itself can act as its unlock gate.
+  const gateOptions = allTasks.filter((t) => t.id !== initial?.id && !t.archived)
   // Dates are the advanced corner of this form — folded away by default so the
   // everyday "name + must-do + effort" path stays short enough for a kid.
   const [datesOpen, setDatesOpen] = useState(
@@ -254,6 +269,42 @@ function TaskForm(props: {
               Every day 🔁
             </button>
           </div>
+          {repeats && (
+            <>
+              <label style={{ marginTop: 10 }}>Rest days after doing it (0 = every day)</label>
+              <input
+                type="number"
+                min={0}
+                max={365}
+                inputMode="numeric"
+                placeholder="e.g. 15"
+                value={cooldownDays}
+                onChange={(e) => setCooldownDays(e.target.value)}
+              />
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                {Number(cooldownDays) > 0
+                  ? `Once you tick it off it takes a nap and comes back ${cooldownDays} days later. Perfect for "cut the grass".`
+                  : 'No rest — it can show up again tomorrow.'}
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className="field">
+          <label>Locked until another quest is done? (optional)</label>
+          <select value={afterTaskId} onChange={(e) => setAfterTaskId(e.target.value)}>
+            <option value="">🔓 No — available right away</option>
+            {gateOptions.map((t) => (
+              <option key={t.id} value={t.id}>
+                🔒 After "{t.name}"
+              </option>
+            ))}
+          </select>
+          {afterTaskId && (
+            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              Hidden from the wheel and the must-do list until that quest is completed once.
+            </p>
+          )}
         </div>
 
         <div className="field">
@@ -371,6 +422,8 @@ function TaskForm(props: {
               // the window only means anything for a requirement
               requiredFrom: required ? requiredFrom || undefined : undefined,
               requiredUntil: required ? requiredUntil || undefined : undefined,
+              afterTaskId: afterTaskId || undefined,
+              cooldownDays: repeats && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
             })
           }
         >

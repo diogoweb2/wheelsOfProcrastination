@@ -19,7 +19,7 @@ export function RequiredDeadline() {
 
   const today = dayKey()
   const doneIds = completedTodayIds()
-  const task = requiredToday(data.tasks, today).find(
+  const task = requiredToday(data.tasks, today, data.completions).find(
     (t) => t.requiredUntil !== undefined && daysUntil(t.requiredUntil, today) <= 0 && !doneIds.has(t.id),
   )
   if (!task) return null
