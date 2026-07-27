@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import type { FinalTestAuth } from '../types'
-import { topicById } from '../logic/quiz'
+import { reviewTopicIds, topicById } from '../logic/quiz'
 import { QuizSession } from './QuizSession'
 import { Luffy } from './Luffy'
 import { sfx } from '../audio'
@@ -107,6 +107,12 @@ function KidFinalTest() {
           {open.fromName} opened your official final test. Sit next to a grown-up — they’ll have the code. You get{' '}
           <b>one shot</b>, so start it when you’re ready.
         </p>
+        {reviewTopicIds(data, activeProfileId ?? '', open.topicId).length > 0 && (
+          <p className="muted" style={{ margin: '0 0 16px' }}>
+            🧠 It opens with a short <b>warm-up review</b> of the seas you already conquered — clear 70% of that and the
+            real test begins.
+          </p>
+        )}
         <button className="btn" onClick={() => begin(open)}>
           ⚔️ Do it now
         </button>
@@ -200,12 +206,18 @@ function AdminResultBanners() {
               <div style={{ fontWeight: 900, fontSize: 13 }}>
                 {t.status === 'abandoned'
                   ? `Ben walked out of the ${topic?.title} final test`
-                  : `Ben ${t.passed ? 'PASSED' : 'failed'} the ${topic?.title} final test — ${t.scorePct}%`}
+                  : t.reviewFailed
+                    ? `Ben missed the warm-up review — ${t.scorePct}% — no ${topic?.title} test`
+                    : `Ben ${t.passed ? 'PASSED' : 'failed'} the ${topic?.title} final test — ${t.scorePct}%`}
               </div>
               <div style={{ fontSize: 11, opacity: 0.9 }}>
                 {t.status === 'abandoned'
                   ? 'his attempt is spent — authorise a new one if it was an accident'
-                  : unlocked
+                  : t.reviewFailed
+                    ? (t.reviewBreakdown ?? [])
+                        .map((r) => `${topicById(r.topicId)?.title ?? r.topicId} ${Math.round((r.right / r.total) * 100)}%`)
+                        .join(' · ') || 'old topics need another pass'
+                    : unlocked
                     ? `${unlocked.emoji} ${unlocked.title} opened up for him`
                     : t.passed
                       ? 'Devil Fruit awarded 🍇'

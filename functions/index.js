@@ -205,12 +205,20 @@ export const onFinalTestWrite = onDocumentWritten('app/finalTests', async (event
     }
 
     if (t.status === 'done') {
-      await pushTo(PARENT_ID, {
-        title: t.passed ? `🏴‍☠️ Ben PASSED — ${t.scorePct}%` : `⛈️ Ben missed it — ${t.scorePct}%`,
-        body: t.passed
-          ? 'Devil Fruit awarded and his next topic just opened. Open the app for the details.'
-          : 'He can train and retry another day. Open the app to see where the points went.',
-      })
+      // a missed warm-up review means the new topic was never even sat
+      if (t.reviewFailed) {
+        await pushTo(PARENT_ID, {
+          title: `🌫️ Ben missed the warm-up — ${t.scorePct}%`,
+          body: 'His old topics went rusty, so the final test never started. Open the app to see which ones.',
+        })
+      } else {
+        await pushTo(PARENT_ID, {
+          title: t.passed ? `🏴‍☠️ Ben PASSED — ${t.scorePct}%` : `⛈️ Ben missed it — ${t.scorePct}%`,
+          body: t.passed
+            ? 'Devil Fruit awarded and his next topic just opened. Open the app for the details.'
+            : 'He can train and retry another day. Open the app to see where the points went.',
+        })
+      }
     }
 
     if (t.status === 'abandoned') {

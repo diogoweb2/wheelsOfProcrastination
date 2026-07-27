@@ -148,8 +148,10 @@ function TopicCard({
   onStart: (mode: QuizMode) => void
   onStudy: () => void
 }) {
-  const unlocked = data.quiz.unlockedTopics.includes(topic.id)
   const passed = data.quiz.passedTopics.includes(topic.id)
+  // A conquered topic drops off the wheel, but stays open in the Academy: every
+  // later official test opens with a warm-up round on this material.
+  const unlocked = data.quiz.unlockedTopics.includes(topic.id) || passed
   const pool = activeQuestions(bank, topic.id)
   const mastered = pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length
   const freshCount = pool.filter((q) => isFresh(q, data.quiz.stats[q.id])).length
@@ -188,6 +190,7 @@ function TopicCard({
           <div className="muted" style={{ fontSize: 11, marginTop: 3 }}>
             {mastered}/{pool.length} questions mastered
             {dueCount > 0 ? ` · ${dueCount} to practise today` : ' · all caught up today 😴'}
+            {passed && ' · keep it fresh — it comes back in every warm-up review'}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <button className="btn btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); onStart('training') }}>

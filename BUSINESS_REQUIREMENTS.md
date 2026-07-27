@@ -190,6 +190,12 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - Size auto-chosen from real per-question answer times (10–14 questions, ≤ ~13 min budget).
   - Selection targets ~80%: ~60% strong + 40% weak/unseen, interleaved; live mercy rule = after 2 wrong in a row the next question is the strongest remaining ("possible to fail, but don't fail too hard").
   - Score revealed **only at the end**, with a mistakes review. Pass = **80%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).
+- **Warm-up review round** (every OFFICIAL test, once at least one topic is conquered — mock tests skip it): old material must stay fresh, so a new topic is earned only by proving the old ones didn't fade.
+  - **Length** — 10 questions for the first conquered topic, then half again for each extra one (10 + 5 + 2.5 + …), rounded up: 1 topic → 10, 2 → 15, 3 → 18. Split as evenly as the banks allow and interleaved topic by topic.
+  - **Mix** — ~75% questions he's strong at + ~25% weak ones: some real bite, but the goal is that he passes. Last round's questions are excluded.
+  - **Pass = 70%.** Clear it and the real final test starts right after. **Miss it and the run ends there** — the new topic is never sat, and the single authorisation is spent.
+  - A miss shows **no answers** — only a per-topic tally, weakest first (`Canada Geography 4/8 · 50%`), i.e. what to go study. Dad gets the same tally in his banner + push.
+  - A **conquered topic stays trainable in the Academy** (it only leaves the wheel), so there's always a way to blow the fog off before the next test.
 - **Remote final test (a grown-up beside him, not Dad)** — shared `app/finalTests` doc, live-synced both ways:
   - Diogo authorises ONE run from the Admin desk: he picks a **4-digit code** and writes a **note for the grown-up** ("~15 min, no help, no phone"). Only one open authorisation per topic — a new one replaces it. He can withdraw it while it's unused.
   - Ben's device pops it up immediately: **do it now**, or **later** → a red top banner with **Start** nags until he does. Push notification reaches a closed app.

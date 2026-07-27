@@ -228,9 +228,11 @@ export interface QuizTestRecord {
   topicId: string
   day: string // YYYY-MM-DD
   official: boolean // true = parent-launched, counts for the Devil Fruit
+  /** The warm-up round on already-conquered topics that gates this test. Pass mark 70%; `topicId` is the test it guards. */
+  review?: boolean
   results: { qid: string; correct: boolean }[]
   scorePct: number
-  passed: boolean // scorePct >= 80
+  passed: boolean // scorePct >= 80 (>= 70 on a review round)
 }
 
 /**
@@ -468,6 +470,10 @@ export interface FinalTestAuth {
   finishedAt?: string
   scorePct?: number // on 'done'
   passed?: boolean // on 'done'
+  /** He fell under 70% on the warm-up review round, so the new topic was never opened. */
+  reviewFailed?: boolean
+  /** Per-topic tally of the failed warm-up (weakest first) — what he has to study again. */
+  reviewBreakdown?: { topicId: string; right: number; total: number }[]
   unlockedTopicId?: string // the topic his pass opened, if any
   ackAt?: string // Diogo dismissed the result banner
 }

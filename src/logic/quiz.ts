@@ -250,6 +250,8 @@ export const TEST_TIME_BUDGET_MS = 13 * 60_000 // keep the whole test under ~15 
 export const TEST_MIN_QUESTIONS = 10
 export const TEST_MAX_QUESTIONS = 14
 export const DEFAULT_ANSWER_TIME_MS = 45_000 // assumed pace for questions he's never trained on
+export const REVIEW_PASS_PCT = 70 // the warm-up round is meant to be passed
+export const REVIEW_BASE_QUESTIONS = 10 // one old topic to keep fresh = 10 questions; each extra topic adds half of the previous
 
 export interface Prize {
   id: string
@@ -560,6 +562,102 @@ export function buildFinalTest(
   return { questions: byPlan, estimatedMs: est }
 }
 
+// --- warm-up review round (before every official final test) ----------------
+
+/**
+ * The already-conquered topics an official test must warm up on: every topic
+ * this profile has officially passed (minus the one he's about to sit) that
+ * still has questions in the bank.
+ */
+export function reviewTopicIds(data: AppData, ownerId: string, aboutToSit: string): string[] {
+  const owned = new Set(topicsFor(ownerId).map((t) => t.id))
+  return data.quiz.passedTopics.filter((id) => id !== aboutToSit && owned.has(id))
+}
+
+/**
+ * How long the warm-up is: 10 questions for the first old topic, then half again
+ * for each extra one (10 + 5 + 2.5 + …), rounded up. It keeps growing far more
+ * slowly than the pile of conquered topics does.
+ */
+export function reviewSize(topicCount: number): number {
+  let total = 0
+  for (let i = 0; i < topicCount; i++) total += REVIEW_BASE_QUESTIONS / 2 ** i
+  return Math.ceil(total)
+}
+
+/** Per-topic tally of a review round, for the "what to study" report. */
+export interface ReviewTopicScore {
+  topicId: string
+  right: number
+  total: number
+}
+
+/**
+ * Build the warm-up round: `reviewSize(n)` questions split as evenly as the
+ * banks allow across the conquered topics, and interleaved so he hops between
+ * seas instead of grinding one.
+ *
+ * The pass mark is only 70% and the point is to keep old material fresh, so the
+ * mix leans on things he has answered right before (~75%) with a few of his
+ * weak ones mixed in to make it a real check.
+ */
+export function buildReviewTest(
+  bank: QuizQuestion[],
+  stats: Record<string, QuizStat>,
+  topicIds: string[],
+  excludeIds: string[] = [],
+): QuizQuestion[] {
+  if (topicIds.length === 0) return []
+  const target = reviewSize(topicIds.length)
+  const excluded = new Set(excludeIds)
+
+  // fair share each, remainder handed out from the front
+  const base = Math.floor(target / topicIds.length)
+  const extra = target % topicIds.length
+  const order = shuffle(topicIds)
+
+  const perTopic = order.map((topicId, i) => {
+    const want = base + (i < extra ? 1 : 0)
+    let pool = activeQuestions(bank, topicId).filter((q) => !excluded.has(q.id))
+    if (pool.length < want) pool = activeQuestions(bank, topicId) // small bank: allow last attempt's questions back
+    const strong = shuffle(pool.filter((q) => successRate(stats[q.id]) >= 0.6))
+    const weak = shuffle(pool.filter((q) => successRate(stats[q.id]) < 0.6))
+    const hard = Math.min(weak.length, Math.round(want * 0.25)) // "some hard questions, but he should pass"
+    const picked = [...weak.slice(0, hard), ...strong.slice(0, want - hard)]
+    // one side ran dry — top up from whatever is left
+    if (picked.length < want) {
+      const rest = [...strong.slice(want - hard), ...weak.slice(hard)]
+      picked.push(...rest.slice(0, want - picked.length))
+    }
+    return shuffle(picked)
+  })
+
+  // interleave: one from each topic, round after round
+  const out: QuizQuestion[] = []
+  for (let round = 0; out.length < target; round++) {
+    const before = out.length
+    for (const list of perTopic) if (list[round]) out.push(list[round])
+    if (out.length === before) break // every topic exhausted
+  }
+  return out.slice(0, target)
+}
+
+/** Tally a finished review round per topic — the only thing a failed round reveals. */
+export function reviewBreakdown(bank: QuizQuestion[], results: { qid: string; correct: boolean }[]): ReviewTopicScore[] {
+  const byId = new Map(bank.map((q) => [q.id, q]))
+  const acc = new Map<string, ReviewTopicScore>()
+  for (const r of results) {
+    const topicId = byId.get(r.qid)?.topicId
+    if (!topicId) continue
+    const row = acc.get(topicId) ?? { topicId, right: 0, total: 0 }
+    row.total += 1
+    if (r.correct) row.right += 1
+    acc.set(topicId, row)
+  }
+  // weakest first: that's the study order
+  return [...acc.values()].sort((a, b) => a.right / a.total - b.right / b.total)
+}
+
 /**
  * Live mercy rule: with 2+ wrong in a row, serve the remaining question he's
  * strongest at next; otherwise follow the plan. Never 3 misses in a row if we
@@ -643,7 +741,16 @@ export function syncQuizTasks(d: AppData, ownerId: string): void {
 export function lastOfficialAttempt(data: AppData, topicId: string) {
   for (let i = data.quiz.tests.length - 1; i >= 0; i--) {
     const t = data.quiz.tests[i]
-    if (t.official && t.topicId === topicId) return t
+    if (t.official && t.topicId === topicId && !t.review) return t
+  }
+  return null
+}
+
+/** The warm-up round of the previous attempt — its questions don't come back. */
+export function lastReviewAttempt(data: AppData, topicId: string) {
+  for (let i = data.quiz.tests.length - 1; i >= 0; i--) {
+    const t = data.quiz.tests[i]
+    if (t.review && t.topicId === topicId) return t
   }
   return null
 }

@@ -75,7 +75,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { PASS_PCT, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
+import { PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -236,6 +236,12 @@ interface StoreState {
    * authorisation (see finalTests), which is closed out with the result.
    */
   finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
+  /**
+   * Close the warm-up review round that gates an official test (70% to pass).
+   * A fail ends the whole attempt: the new topic is never sat, and Dad's banner
+   * carries the per-topic tally instead of a score.
+   */
+  finishReviewTest: (targetId: string, topicId: string, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
 
   // --- remote final tests: Dad authorises, another grown-up invigilates on Ben's device ---
   /** Admin: allow ONE official test on the target's device, guarded by a 4-digit code. */
@@ -1010,6 +1016,36 @@ export const useStore = create<StoreState>((set, get) => {
           scorePct,
           passed: record.passed,
           unlockedTopicId,
+        })
+      }
+      return record
+    },
+
+    finishReviewTest(targetId, topicId, results, authId) {
+      const scorePct = results.length === 0 ? 0 : Math.round((results.filter((r) => r.correct).length / results.length) * 100)
+      const record: QuizTestRecord = {
+        id: crypto.randomUUID(),
+        topicId,
+        day: dayKey(),
+        official: true,
+        review: true,
+        results,
+        scorePct,
+        passed: scorePct >= REVIEW_PASS_PCT,
+      }
+      commitFor(targetId, (d) => {
+        d.quiz.tests.push(record)
+        if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60)
+      })
+      // a failed warm-up ends the authorised run there and then — nothing was unlocked
+      if (authId && !record.passed) {
+        patchFinalTest(authId, {
+          status: 'done',
+          finishedAt: new Date().toISOString(),
+          scorePct,
+          passed: false,
+          reviewFailed: true,
+          reviewBreakdown: reviewBreakdown(get().quizBank, results),
         })
       }
       return record

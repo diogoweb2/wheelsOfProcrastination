@@ -2,6 +2,11 @@
 //  - training:    Ben practices; instant feedback, fun facts, Berries (once/question/day, half after first mastery)
 //  - simulation:  Ben rehearses a final test; result only at the end, no rewards
 //  - official:    parent-launched final test; counts for the topic checkmark + Devil Fruit
+//
+// An official test on someone who has already conquered topics opens with a
+// WARM-UP REVIEW ROUND on that old material (see buildReviewTest): shorter,
+// 70% to pass, and a miss ends the run before the new topic is ever sat — the
+// point is that conquered seas stay fresh instead of fading away.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
@@ -9,15 +14,20 @@ import { KID_ID } from '../store/storage'
 import type { QuizQuestion, QuizStat, QuizTestRecord } from '../types'
 import {
   PASS_PCT,
+  REVIEW_PASS_PCT,
   activeQuestions,
   buildFinalTest,
+  buildReviewTest,
   correctAnswerText,
   gradeWrite,
   isFresh,
   lastOfficialAttempt,
+  lastReviewAttempt,
   nextTestQuestion,
   pickChoiceOptions,
   pickTraining,
+  reviewBreakdown,
+  reviewTopicIds,
   shuffle,
   topicById,
 } from '../logic/quiz'
@@ -50,7 +60,7 @@ interface Props {
 }
 
 export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onClose }: Props) {
-  const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest } = useStore()
+  const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest } = useStore()
   const topic = topicById(topicId)
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
 
@@ -58,11 +68,25 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const target = activeProfileId === targetId ? data : targetId === KID_ID ? kidData : null
 
   // ---- test plan (fixed once per session) ----
-  const [plan] = useState<QuizQuestion[]>(() => {
+  const [testPlan] = useState<QuizQuestion[]>(() => {
     if (mode === 'training') return []
     const exclude = mode === 'official' && target ? (lastOfficialAttempt(target, topicId)?.results.map((r) => r.qid) ?? []) : []
     return buildFinalTest(pool, stats, exclude).questions
   })
+
+  // ---- warm-up review round on the topics he already conquered ----
+  const [reviewPlan] = useState<QuizQuestion[]>(() => {
+    if (mode !== 'official' || !target || preview) return []
+    const topics = reviewTopicIds(target, targetId, topicId)
+    const exclude = lastReviewAttempt(target, topicId)?.results.map((r) => r.qid) ?? []
+    return buildReviewTest(quizBank, stats, topics, exclude)
+  })
+  const [stage, setStage] = useState<'review' | 'review-passed' | 'review-failed' | 'test'>(
+    () => (reviewPlan.length > 0 ? 'review' : 'test'),
+  )
+  const [reviewRecord, setReviewRecord] = useState<QuizTestRecord | null>(null)
+  // the review results stay paired with the review plan until he moves on
+  const plan = stage === 'test' ? testPlan : reviewPlan
 
   const [results, setResults] = useState<{ qid: string; correct: boolean }[]>([])
   const [recent, setRecent] = useState<string[]>([]) // training: recently shown, to avoid instant repeats
@@ -100,7 +124,19 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
 
   // ---- test: finish when all answered ----
   useEffect(() => {
-    if (mode !== 'training' && !preview && plan.length > 0 && results.length === plan.length && !finished) {
+    if (mode === 'training' || preview || plan.length === 0 || results.length !== plan.length || finished) return
+
+    // the warm-up round grades itself first — a fail stops the run here
+    if (stage === 'review') {
+      const record = finishReviewTest(targetId, topicId, results, authId)
+      setReviewRecord(record)
+      setStage(record.passed ? 'review-passed' : 'review-failed')
+      if (record.passed) sfx.gem()
+      else sfx.sad()
+      return
+    }
+
+    {
       const record = finishQuizTest(targetId, topicId, mode === 'official', results, authId)
       setFinished(record)
       if (record.passed) {
@@ -201,6 +237,39 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     )
   }
 
+  // ---- warm-up review verdict ----
+  if (stage === 'review-passed' && reviewRecord) {
+    return (
+      <Full onClose={onClose} title="🧠 Warm-up review — cleared">
+        <div className="card" style={{ textAlign: 'center', borderColor: 'var(--green)' }}>
+          <div style={{ fontSize: 56 }}>🧠⚡</div>
+          <div style={{ fontSize: 44, fontWeight: 900, color: 'var(--green)' }}>{reviewRecord.scorePct}%</div>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            old seas still yours · pass mark {REVIEW_PASS_PCT}%
+          </div>
+          <p style={{ marginTop: 10, fontWeight: 800 }}>
+            Memory intact! Now the new sea — pass mark {PASS_PCT}%, {testPlan.length} questions.
+          </p>
+          <button
+            className="btn"
+            style={{ marginTop: 14 }}
+            onClick={() => {
+              sfx.click()
+              setResults([])
+              setStage('test')
+            }}
+          >
+            ⚔️ Start the {topic.title} final test
+          </button>
+        </div>
+      </Full>
+    )
+  }
+
+  if (stage === 'review-failed' && reviewRecord) {
+    return <ReviewFailed record={reviewRecord} bank={quizBank} topicTitle={topic.title} onClose={onClose} />
+  }
+
   // ---- results screen (tests) ----
   if (finished) {
     return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} onRead={(id) => setReading({ lessonId: id, then: 'back' })} />
@@ -243,7 +312,9 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       ? preview
         ? `${topic.emoji} Training (preview — nothing saved)`
         : `${topic.emoji} Training · +🪙${sessionEarned}`
-      : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
+      : stage === 'review'
+        ? `🧠 Warm-up review · ${results.length + 1}/${plan.length}`
+        : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
 
   return (
     <Full onClose={onClose} title={header} confirmClose={mode !== 'training' && results.length > 0}>
@@ -253,6 +324,11 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
             <div key={i} className={`quiz-progress-dot ${i < results.length ? 'done' : ''}`} />
           ))}
         </div>
+      )}
+      {stage === 'review' && (
+        <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
+          Seas you already conquered — clear {REVIEW_PASS_PCT}% of these and the {topic.title} final test opens.
+        </p>
       )}
       {mode === 'training' && (
         <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
@@ -313,6 +389,51 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       )}
 
       {/* neutral test acknowledgement is implicit: next question just appears */}
+    </Full>
+  )
+}
+
+// --- warm-up review: the failure report ------------------------------------
+
+/**
+ * A missed warm-up shows NO answers on purpose — the material has to be earned
+ * back from his own studying, not read off a review card. All he gets is which
+ * seas leaked, weakest first.
+ */
+function ReviewFailed({ record, bank, topicTitle, onClose }: { record: QuizTestRecord; bank: QuizQuestion[]; topicTitle: string; onClose: () => void }) {
+  const rows = reviewBreakdown(bank, record.results)
+  return (
+    <Full onClose={onClose} title="🧠 Warm-up review — result">
+      <div className="card" style={{ textAlign: 'center', marginBottom: 14, borderColor: 'var(--orange)' }}>
+        <div style={{ fontSize: 56 }}>🌫️</div>
+        <div style={{ fontSize: 44, fontWeight: 900, color: 'var(--orange)' }}>{record.scorePct}%</div>
+        <div className="muted" style={{ fontWeight: 800 }}>warm-up pass mark {REVIEW_PASS_PCT}%</div>
+        <p style={{ marginTop: 10, fontWeight: 800 }}>
+          Some old seas went foggy, so the {topicTitle} final test stays shut this time. Sail them again in Training and
+          come back — no answers here, that part is on you. 💪
+        </p>
+      </div>
+
+      <div className="h2">🗺️ Where the fog is</div>
+      {rows.map((r) => {
+        const t = topicById(r.topicId)
+        const pct = Math.round((r.right / r.total) * 100)
+        const ok = pct >= REVIEW_PASS_PCT
+        return (
+          <div key={r.topicId} className="card" style={{ marginBottom: 8, borderColor: ok ? 'var(--green)' : 'var(--red)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ fontSize: 22 }}>{t?.emoji ?? '📘'}</div>
+              <div style={{ flex: 1, fontWeight: 900, fontSize: 15 }}>{t?.title ?? r.topicId}</div>
+              <div style={{ fontWeight: 900, color: ok ? 'var(--green)' : 'var(--red)' }}>
+                {r.right}/{r.total} · {pct}%
+              </div>
+            </div>
+          </div>
+        )
+      })}
+      <button className="btn" style={{ marginTop: 10 }} onClick={onClose}>
+        Back to the Academy
+      </button>
     </Full>
   )
 }
