@@ -36,7 +36,9 @@ import {
   logAudit,
   pruneExpiredAudit,
   subscribeAudit,
+  fireAndForget,
   saveDataFields,
+  setWriteErrorHandler,
   saveIdeas,
   saveQuizBank,
   saveRoster,
@@ -163,7 +165,9 @@ interface StoreState {
   activeProfileId: string | null // who's logged in on this device
   ready: boolean // roster loaded from cloud
   dataLoaded: boolean // active profile's data has arrived at least once (guards writes)
-  cloudError: string | null // set if Firestore/auth can't be reached
+  cloudError: string | null // set if Firestore/auth can't be reached (blocks the whole app)
+  saveError: string | null // last failed background write — the change is in memory only and dies on refresh
+  dismissSaveError: () => void
   events: AppEvent[]
   quizBank: QuizQuestion[] // shared question bank (app/quizBank), live-synced
   quizBankLoaded: boolean
@@ -415,6 +419,15 @@ export const useStore = create<StoreState>((set, get) => {
     )
   }
 
+  // A failed background write means the change is only in memory and will be lost
+  // on refresh — never let that pass silently.
+  // Not `cloudError` — that blanks the whole app, which is wrong for a single
+  // failed write. A banner warns that the change is in memory only.
+  setWriteErrorHandler((e) => {
+    console.error('cloud write failed', e)
+    set({ saveError: (e as Error)?.message ?? String(e) })
+  })
+
   // Async bootstrap: sign in, load the roster, and (if someone's logged in here)
   // start syncing their data. Runs once at startup.
   void (async () => {
@@ -460,7 +473,7 @@ export const useStore = create<StoreState>((set, get) => {
     // Write ONLY the fields this mutation touched. A full-document write would carry
     // our whole local blob up and overwrite areas another device changed in the
     // meantime. onSnapshot echoes it back; the local set keeps the UI instant.
-    void saveDataFields(id, changedFields(prev, data))
+    fireAndForget(saveDataFields(id, changedFields(prev, data)))
     auditDiff(id, id, prev, data) // append audit rows for any audited change (actor == the active login)
     // ANY Berry gain, wherever it came from (tasks, streak goals, quiz…), gets the same fly-to-topbar animation
     if (data.economy.gems > before) flyBerries(null, data.economy.gems - before)
@@ -485,23 +498,23 @@ export const useStore = create<StoreState>((set, get) => {
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ kidData: data, events: [...s.events, ...events] }))
-    void saveDataFields(KID_ID, changedFields(kid, data))
+    fireAndForget(saveDataFields(KID_ID, changedFields(kid, data)))
     auditDiff(targetId, get().activeProfileId ?? 'unknown', kid, data) // actor = the admin acting on Ben's world
   }
 
   function saveTradeList(trades: StickerTrade[]) {
     set({ trades })
-    void saveStickerTrades(trades)
+    fireAndForget(saveStickerTrades(trades))
   }
 
   function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
     set({ freezeRequests: requests, freezeGifts: gifts })
-    void saveFreezeDesk(requests, gifts)
+    fireAndForget(saveFreezeDesk(requests, gifts))
   }
 
   function saveFinalTestList(tests: FinalTestAuth[]) {
     set({ finalTests: tests })
-    void saveFinalTests(tests)
+    fireAndForget(saveFinalTests(tests))
   }
 
   /** Patch one authorisation in the shared desk (local set + write-through). */
@@ -511,12 +524,12 @@ export const useStore = create<StoreState>((set, get) => {
 
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
-    void saveIdeas(ideas)
+    fireAndForget(saveIdeas(ideas))
   }
 
   function saveBank(questions: QuizQuestion[]) {
     set({ quizBank: questions })
-    void saveQuizBank(questions)
+    fireAndForget(saveQuizBank(questions))
   }
 
   return {
@@ -526,6 +539,8 @@ export const useStore = create<StoreState>((set, get) => {
     ready: false,
     dataLoaded: false,
     cloudError: null,
+    saveError: null,
+    dismissSaveError: () => set({ saveError: null }),
     events: [],
     quizBank: [],
     quizBankLoaded: false,
@@ -716,14 +731,14 @@ export const useStore = create<StoreState>((set, get) => {
           repeats: t.repeats,
           effort: t.effort,
           priority: t.priority,
-          dueDate: t.dueDate || undefined,
-          startDate: t.startDate || undefined,
           dayScope: t.dayScope,
           createdAt: new Date().toISOString(),
           archived: false,
           spinsSinceLastPicked: 0,
           timesPicked: 0,
           // omitted entirely when unset — Firestore rejects undefined values
+          ...(t.dueDate ? { dueDate: t.dueDate } : {}),
+          ...(t.startDate ? { startDate: t.startDate } : {}),
           ...(t.required ? { required: true } : {}),
           ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
           ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
@@ -1583,7 +1598,7 @@ export const useStore = create<StoreState>((set, get) => {
       for (const id of trade.give) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
       for (const id of trade.want) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
       set({ mateData: theirs, mateAlbum: theirs.album })
-      void saveDataFields(trade.fromId, { album: theirs.album }) // only their album moves in a swap
+      fireAndForget(saveDataFields(trade.fromId, { album: theirs.album })) // only their album moves in a swap
       auditDiff(trade.fromId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's album change
 
       saveTradeList(

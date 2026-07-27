@@ -106,6 +106,25 @@ export async function saveDataFields(id: string, fields: Partial<AppData>): Prom
   await setDoc(dataRef(id), fields, { merge: true })
 }
 
+/**
+ * Callback invoked when a background write fails. Writes are fire-and-forget so
+ * the UI stays instant, which means a rejected write is invisible: the change
+ * sits in memory looking saved until a refresh throws it away. (A single
+ * `undefined` field value — which Firestore rejects outright — silently ate
+ * newly-added tasks this way.) The store registers a reporter here so any
+ * failure surfaces instead of vanishing.
+ */
+let onWriteError: (e: unknown) => void = (e) => console.error('cloud write failed', e)
+
+export function setWriteErrorHandler(fn: (e: unknown) => void): void {
+  onWriteError = fn
+}
+
+/** Fire-and-forget wrapper: never blocks the UI, never swallows the failure. */
+export function fireAndForget(p: Promise<unknown>): void {
+  void p.catch((e) => onWriteError(e))
+}
+
 // --- quiz bank -------------------------------------------------------------
 
 /**

@@ -56,7 +56,7 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
   const unlocked = activeProfileId !== null
@@ -205,6 +205,21 @@ export default function App() {
           : undefined
       }
     >
+      {/* A background write was rejected: the change is only in memory and will be
+          lost on refresh. Silent failures here previously ate newly-added tasks. */}
+      {saveError && (
+        <div
+          role="alert"
+          onClick={dismissSaveError}
+          style={{
+            background: '#b3261e', color: '#fff', padding: '8px 12px', fontSize: 12,
+            cursor: 'pointer', textAlign: 'center', lineHeight: 1.35,
+          }}
+        >
+          <strong>Not saved to the cloud.</strong> Your last change is only on this device and will
+          be lost if you refresh. {saveError} <em>(tap to dismiss)</em>
+        </div>
+      )}
       <header className="topbar">
         <div className={`stat stat--flame ${streakAlive ? '' : 'dead'}`} title="streak">
           🔥 <span className="num">{data.streak.current}</span>

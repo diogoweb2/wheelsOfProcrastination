@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore } from 'firebase/firestore'
 
 // Web app config from the Firebase console (Project settings → Your apps → Web).
 // These values are NOT secret — like the Spmkt project, they ship in the client. The PIN never lives here.
@@ -18,7 +18,14 @@ export const app = initializeApp(firebaseConfig)
 // Always-online, no persisted IndexedDB cache: a stale local snapshot from a
 // previous day/device was overwriting fresh cross-device writes (rollover()
 // would act on it before the real server data arrived). No offline mode needed.
-export const firestore = getFirestore(app)
+//
+// ignoreUndefinedProperties: by default Firestore REJECTS a write containing any
+// `undefined` field value, failing the whole document. Since writes are
+// fire-and-forget, one stray optional field (`dueDate: x || undefined`) silently
+// discarded every newly-added task. Dropping undefined keys instead matches how
+// the data already round-trips (the store deep-clones via JSON, which strips
+// them), so this can only ever prevent a loss, never cause one.
+export const firestore = initializeFirestore(app, { ignoreUndefinedProperties: true })
 
 const auth = getAuth(app)
 
