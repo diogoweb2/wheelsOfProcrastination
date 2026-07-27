@@ -77,16 +77,33 @@ export function subscribeRoster(cb: (profiles: Profile[]) => void): () => void {
   })
 }
 
-/** Live-sync one profile's world. cb fires on load and whenever another device writes. Returns unsubscribe. */
-export function subscribeData(id: string, cb: (data: AppData) => void): () => void {
+/**
+ * Live-sync one profile's world. cb fires on load and whenever another device writes.
+ *
+ * `fromCache` matters: the web SDK serves the local IndexedDB copy first and only
+ * then round-trips to the server, so the FIRST snapshot after a cold load is very
+ * often stale (it can predate a write made on another device). Callers must not
+ * treat a cached snapshot as authoritative — writing back a blob built from one
+ * is how a task added on the phone gets silently deleted by the laptop.
+ * Returns unsubscribe.
+ */
+export function subscribeData(id: string, cb: (data: AppData, fromCache: boolean) => void): () => void {
   return onSnapshot(dataRef(id), (snap) => {
-    cb(mergeData(snap.exists() ? (snap.data() as Partial<AppData>) : undefined))
+    cb(mergeData(snap.exists() ? (snap.data() as Partial<AppData>) : undefined), snap.metadata.fromCache)
   })
 }
 
-export async function saveData(id: string, data: AppData): Promise<void> {
+/**
+ * Write only the named top-level fields, leaving every other field on the doc
+ * untouched. This is the normal write path: a full setDoc overwrites the whole
+ * document, so two devices editing different areas (phone adds a task, laptop
+ * rolls the day over) clobber each other. Merging by field means only a genuine
+ * same-field conflict is last-write-wins.
+ */
+export async function saveDataFields(id: string, fields: Partial<AppData>): Promise<void> {
+  if (Object.keys(fields).length === 0) return
   await ensureAuth()
-  await setDoc(dataRef(id), data)
+  await setDoc(dataRef(id), fields, { merge: true })
 }
 
 // --- quiz bank -------------------------------------------------------------

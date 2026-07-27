@@ -36,7 +36,7 @@ import {
   logAudit,
   pruneExpiredAudit,
   subscribeAudit,
-  saveData,
+  saveDataFields,
   saveIdeas,
   saveQuizBank,
   saveRoster,
@@ -168,6 +168,7 @@ interface StoreState {
   quizBank: QuizQuestion[] // shared question bank (app/quizBank), live-synced
   quizBankLoaded: boolean
   kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
+  kidDataFresh: boolean // kidData has arrived from the SERVER (not just the local cache) — guards writes into Ben's world
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
@@ -176,6 +177,7 @@ interface StoreState {
   finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
   mateAlbum: AlbumState | null // the OTHER crewmate's album, live-synced — powers "cards they can spare for you"
   mateData: AppData | null // their whole world; kept so accepting a swap can write their album back intact
+  mateDataFresh: boolean // mateData came from the SERVER — guards writing a swap into their doc
   audit: AuditEntry[] // recent audit-log rows (admin desk), live-synced; self-expiring after ~7d
   qotdOpen: boolean // is the Question-of-the-Day modal showing?
 
@@ -332,6 +334,22 @@ function checkBadges(data: AppData, events: AppEvent[]): void {
   }
 }
 
+/**
+ * The top-level fields of an AppData blob that changed between two versions.
+ * Compared by value (JSON), since every mutation path deep-clones the whole blob
+ * and so changes identity even where nothing actually moved.
+ */
+function changedFields(prev: AppData, next: AppData): Partial<AppData> {
+  const out: Partial<AppData> = {}
+  for (const key of Object.keys(next) as (keyof AppData)[]) {
+    if (JSON.stringify(prev[key]) !== JSON.stringify(next[key])) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (out as any)[key] = next[key]
+    }
+  }
+  return out
+}
+
 export const useStore = create<StoreState>((set, get) => {
   // Unsubscribe from the currently-watched profile doc (swapped on login/logout).
   let unsubData: (() => void) | null = null
@@ -344,17 +362,24 @@ export const useStore = create<StoreState>((set, get) => {
   let unsubMate: (() => void) | null = null
 
   /**
-   * Live-sync a profile's world from Firestore. First snapshot flips dataLoaded
-   * and triggers a rollover; later snapshots are cross-device updates.
+   * Live-sync a profile's world from Firestore. The first SERVER snapshot flips
+   * dataLoaded and triggers a rollover; later snapshots are cross-device updates.
    * The parent additionally watches the kid's world.
+   *
+   * Cached snapshots update the UI but never unlock writing. The SDK replays the
+   * local copy before reaching the network, and that copy can predate another
+   * device's write — acting on it (rollover, topic unlock) would push a stale
+   * blob back up and delete whatever the other device just added.
    */
   function watchProfile(id: string) {
     unsubData?.()
     let first = true
-    unsubData = subscribeData(id, (data) => {
+    unsubData = subscribeData(id, (data, fromCache) => {
       setMuted(!data.settings.soundOn)
-      set({ data, dataLoaded: true })
-      if (first) {
+      // Show cached data immediately, but hold `dataLoaded` (the write gate) until
+      // the server copy lands.
+      set(fromCache ? { data } : { data, dataLoaded: true })
+      if (first && !fromCache) {
         first = false
         get().rollover()
         // On login: one-time unlock of this profile's own default topics, and
@@ -375,7 +400,7 @@ export const useStore = create<StoreState>((set, get) => {
     unsubAudit?.()
     unsubAudit = null
     if (id === PARENT_ID) {
-      unsubKid = subscribeData(KID_ID, (data) => set({ kidData: data }))
+      unsubKid = subscribeData(KID_ID, (data, fromCache) => set(fromCache ? { kidData: data } : { kidData: data, kidDataFresh: true }))
       // Audit trail lives on the Captain's desk only — one subscription, parent-side.
       // Prune expired rows on load (no Firestore TTL on the free plan), then live-sync.
       void pruneExpiredAudit()
@@ -385,7 +410,9 @@ export const useStore = create<StoreState>((set, get) => {
     // show what they can spare, and so accepting a swap can write to their album.
     unsubMate?.()
     const mateId = id === PARENT_ID ? KID_ID : PARENT_ID
-    unsubMate = subscribeData(mateId, (data) => set({ mateAlbum: data.album, mateData: data }))
+    unsubMate = subscribeData(mateId, (data, fromCache) =>
+      set(fromCache ? { mateAlbum: data.album, mateData: data } : { mateAlbum: data.album, mateData: data, mateDataFresh: true }),
+    )
   }
 
   // Async bootstrap: sign in, load the roster, and (if someone's logged in here)
@@ -430,7 +457,10 @@ export const useStore = create<StoreState>((set, get) => {
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ data, events: [...s.events, ...events] }))
-    void saveData(id, data) // onSnapshot echoes it back; local set keeps the UI instant
+    // Write ONLY the fields this mutation touched. A full-document write would carry
+    // our whole local blob up and overwrite areas another device changed in the
+    // meantime. onSnapshot echoes it back; the local set keeps the UI instant.
+    void saveDataFields(id, changedFields(prev, data))
     auditDiff(id, id, prev, data) // append audit rows for any audited change (actor == the active login)
     // ANY Berry gain, wherever it came from (tasks, streak goals, quiz…), gets the same fly-to-topbar animation
     if (data.economy.gems > before) flyBerries(null, data.economy.gems - before)
@@ -448,12 +478,14 @@ export const useStore = create<StoreState>((set, get) => {
     }
     if (targetId !== KID_ID) return // only Ben's world can be edited from another session
     const kid = get().kidData
-    if (!kid) return // not loaded yet — admin UI disables these actions until it is
+    // Not loaded, or loaded only from the local cache — a cached copy can predate
+    // Ben's own device's writes, and writing back from it would undo them.
+    if (!kid || !get().kidDataFresh) return
     const data: AppData = JSON.parse(JSON.stringify(kid))
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ kidData: data, events: [...s.events, ...events] }))
-    void saveData(KID_ID, data)
+    void saveDataFields(KID_ID, changedFields(kid, data))
     auditDiff(targetId, get().activeProfileId ?? 'unknown', kid, data) // actor = the admin acting on Ben's world
   }
 
@@ -498,6 +530,7 @@ export const useStore = create<StoreState>((set, get) => {
     quizBank: [],
     quizBankLoaded: false,
     kidData: null,
+    kidDataFresh: false,
     market: null,
     ideas: [],
     trades: [],
@@ -506,6 +539,7 @@ export const useStore = create<StoreState>((set, get) => {
     freezeGifts: [],
     mateAlbum: null,
     mateData: null,
+    mateDataFresh: false,
     audit: [],
     qotdOpen: false,
 
@@ -557,7 +591,7 @@ export const useStore = create<StoreState>((set, get) => {
       const hash = await hashPin(pin, prof.pinSalt)
       if (hash !== prof.pinHash) return false
       setActiveProfileId(profileId)
-      set({ activeProfileId: profileId, dataLoaded: false, events: [] })
+      set({ activeProfileId: profileId, dataLoaded: false, kidDataFresh: false, mateDataFresh: false, events: [] })
       watchProfile(profileId)
       return true
     },
@@ -569,7 +603,7 @@ export const useStore = create<StoreState>((set, get) => {
       prof.pinHash = await hashPin(pin, prof.pinSalt)
       await saveRoster(profiles)
       setActiveProfileId(profileId)
-      set({ profiles, activeProfileId: profileId, dataLoaded: false, events: [] })
+      set({ profiles, activeProfileId: profileId, dataLoaded: false, kidDataFresh: false, mateDataFresh: false, events: [] })
       watchProfile(profileId)
     },
 
@@ -581,7 +615,12 @@ export const useStore = create<StoreState>((set, get) => {
       unsubAudit?.()
       unsubAudit = null
       setActiveProfileId(null)
-      set({ activeProfileId: null, dataLoaded: false, data: defaultData(), events: [], kidData: null, audit: [] })
+      unsubMate?.()
+      unsubMate = null
+      set({
+        activeProfileId: null, dataLoaded: false, data: defaultData(), events: [],
+        kidData: null, kidDataFresh: false, mateData: null, mateAlbum: null, mateDataFresh: false, audit: [],
+      })
     },
 
     popEvent: () => set((s) => ({ events: s.events.slice(1) })),
@@ -594,7 +633,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (!activeProfileId || !dataLoaded) return
       // The banker keeps Ben's bank ticking even when Ben hasn't opened the app:
       // deterministic day-based sim, so whichever device catches up writes the same numbers.
-      if (activeProfileId === PARENT_ID && get().kidData && get().kidData!.bank.lastDay < today) {
+      if (activeProfileId === PARENT_ID && get().kidDataFresh && get().kidData && get().kidData!.bank.lastDay < today) {
         commitFor(KID_ID, (d, events) => simulateBank(d.bank, today, (e: BankSimEvent) => events.push({ type: 'goal', ...e }), get().market))
       }
       const bankBehind = activeProfileId === KID_ID && data.bank.lastDay < today
@@ -1519,7 +1558,10 @@ export const useStore = create<StoreState>((set, get) => {
         )
         return
       }
-      if (!mateData) return // their world hasn't loaded; the UI keeps Accept disabled until it has
+      // Their world hasn't loaded, or only from cache — accepting writes into their
+      // doc, so a stale copy would roll back whatever they've done since.
+      // The UI keeps Accept disabled until it has.
+      if (!mateData || !get().mateDataFresh) return
 
       // Re-check both sides still hold the spares they promised — either album
       // may have changed since the offer was made (packs opened, other swaps).
@@ -1544,7 +1586,7 @@ export const useStore = create<StoreState>((set, get) => {
       for (const id of trade.give) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
       for (const id of trade.want) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
       set({ mateData: theirs, mateAlbum: theirs.album })
-      void saveData(trade.fromId, theirs)
+      void saveDataFields(trade.fromId, { album: theirs.album }) // only their album moves in a swap
       auditDiff(trade.fromId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's album change
 
       saveTradeList(
