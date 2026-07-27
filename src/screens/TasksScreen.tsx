@@ -6,7 +6,7 @@ import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { dayKey, daysUntil } from '../logic/dates'
 import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
-import { describeParsed, parseSpokenTask } from '../logic/voiceTask'
+import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '../logic/voiceTask'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 
 export function TasksScreen({ goSpin }: { goSpin: () => void }) {
@@ -218,6 +218,7 @@ function TaskForm(props: {
   // Dictation: speak the whole quest, the keyword parser fills the form, you review.
   const [heard, setHeard] = useState('')
   const [parsedSummary, setParsedSummary] = useState('')
+  const [voiceHelpOpen, setVoiceHelpOpen] = useState(false)
   const speech = useSpeechRecognition({
     onResult: (transcript, isFinal) => {
       setHeard(transcript)
@@ -284,6 +285,18 @@ function TaskForm(props: {
                 }}
               >
                 {speech.listening ? '🔴' : '🎤'}
+              </button>
+            )}
+            {speech.supported && (
+              <button
+                className="mic-btn mic-btn--help"
+                aria-label="What can I say?"
+                onClick={() => {
+                  sfx.click()
+                  setVoiceHelpOpen(true)
+                }}
+              >
+                ❓
               </button>
             )}
           </div>
@@ -499,6 +512,50 @@ function TaskForm(props: {
           ))}
         <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
           Cancel
+        </button>
+      </div>
+
+      {voiceHelpOpen && <VoiceHelp onClose={() => setVoiceHelpOpen(false)} />}
+    </div>
+  )
+}
+
+// Cheat sheet for dictation — everything parseSpokenTask() understands.
+function VoiceHelp({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="overlay overlay--center voice-help-overlay" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="h1" style={{ marginBottom: 4 }}>
+          🎤 What can I say?
+        </div>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 14 }}>
+          Say the whole quest in one go. I'll pull out the settings and whatever's left becomes the name.
+        </p>
+
+        <div className="voice-help-examples">
+          {VOICE_EXAMPLES.map((ex) => (
+            <div key={ex} className="voice-help-example">“{ex}”</div>
+          ))}
+        </div>
+
+        {VOICE_PHRASES.map((group) => (
+          <div key={group.title} className="voice-help-group">
+            <div className="voice-help-title">
+              {group.emoji} {group.title}
+            </div>
+            <ul>
+              {group.phrases.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
+        <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
+          Nothing saves until you tap the save button — check what I filled in first!
+        </p>
+        <button className="btn btn--blue" style={{ marginTop: 12 }} onClick={onClose}>
+          Got it!
         </button>
       </div>
     </div>

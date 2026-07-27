@@ -121,6 +121,71 @@ export function parseSpokenTask(text: string, today: string = dayKey()): ParsedT
   return out
 }
 
+// What the rules above understand, in plain English — powers the 🎤 help sheet.
+// Keep this in step with RULES when you add a phrasing.
+export const VOICE_PHRASES: { emoji: string; title: string; phrases: string[] }[] = [
+  {
+    emoji: '🔁',
+    title: 'Repeats & rest days',
+    phrases: [
+      '“every day” / “daily” — comes back tomorrow',
+      '“every other day” — 1 rest day',
+      '“every 3 days”, “every two weeks”, “every 6 months”',
+      '“once a week” / “weekly” — 7 rest days',
+      '“fortnightly” — 14 rest days',
+      '“once a month” / “monthly” — 30 rest days',
+      '“one-shot” / “just once” — no repeat',
+    ],
+  },
+  {
+    emoji: '💪',
+    title: 'Effort (sets the reward)',
+    phrases: [
+      '“high effort”, “hard”, “big one”, “tough”',
+      '“medium effort”, “normal one”',
+      '“low effort”, “easy”, “quick”, “small one”',
+    ],
+  },
+  {
+    emoji: '🔥',
+    title: 'Urgent & must-do',
+    phrases: [
+      '“urgent”, “asap”, “important” — marks it urgent',
+      '“must do”, “required”, “no excuses” — skips the wheel',
+    ],
+  },
+  {
+    emoji: '📅',
+    title: 'Deadlines',
+    phrases: [
+      '“today”, “tomorrow”',
+      '“in 3 days”, “in two weeks”',
+      '“by Friday”, “before Monday” — the next one coming up',
+    ],
+  },
+  {
+    emoji: '🗓️',
+    title: 'Which days',
+    phrases: ['“on weekends”', '“on weekdays” / “school days”'],
+  },
+  {
+    emoji: '✂️',
+    title: 'Words I throw away',
+    phrases: [
+      '“add a quest called…”, “new task…”, “remind me to…”',
+      'Everything left over becomes the quest name (max 60 letters).',
+    ],
+  },
+]
+
+export const VOICE_EXAMPLES: string[] = [
+  'cut the grass every two weeks, high effort',
+  'read for 10 minutes every day, must do',
+  'tidy room by Friday, urgent',
+  'take the bins out every week on weekends',
+  'water the plants once a month, easy',
+]
+
 // One-line "here's what I heard" for the form, so a mis-parse is obvious.
 export function describeParsed(p: ParsedTask): string {
   const bits: string[] = []
