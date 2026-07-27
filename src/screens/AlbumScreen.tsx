@@ -19,6 +19,7 @@ import { dayKey } from '../logic/dates'
 import { Sticker } from '../components/Sticker'
 import { StickerDetail } from '../components/StickerDetail'
 import { PackOpening } from '../components/PackOpening'
+import { VictoryParty } from '../components/VictoryParty'
 import { BerryCoin } from '../components/BerryCoin'
 import { sfx } from '../audio'
 import type { StickerTrade } from '../types'
@@ -114,15 +115,42 @@ function useRaceIntro() {
 /** Ease-out so the runners burst off the line and settle into their spot. */
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3)
 
+/**
+ * Per-device memory of which victory has already thrown its party. Keyed by
+ * album size too: growing the catalog starts a new edition, so completing that
+ * one is a fresh win and earns its own party.
+ */
+const partySeenKey = (viewerId: string, winnerId: string, total: number) =>
+  `wop-party-seen:${viewerId}:${winnerId}:${total}`
+
 function AlbumRace() {
   const { data, mateAlbum, profiles, activeProfileId } = useStore()
   const t = useRaceIntro()
   const racing = t < 1
+  const [party, setParty] = useState<{ name: string; emoji: string } | null>(null)
 
   const me = profiles.find((p) => p.id === activeProfileId)
   const mate = profiles.find((p) => p.id !== activeProfileId)
   const mine = albumProgress(data.album)
   const theirs = mateAlbum ? albumProgress(mateAlbum) : null
+
+  // Whoever glues in the last sticker wins the race — and the party.
+  const winner =
+    mine.pct === 100 && (!theirs || mine.owned >= theirs.owned)
+      ? { id: activeProfileId ?? 'me', name: me?.name ?? 'You', emoji: me?.emoji ?? '👒' }
+      : theirs?.pct === 100
+        ? { id: mate?.id ?? 'mate', name: mate?.name ?? 'Crewmate', emoji: mate?.emoji ?? '🏴‍☠️' }
+        : null
+
+  // The party fires itself once per device, after the runners have settled.
+  const viewer = activeProfileId ?? 'guest'
+  useEffect(() => {
+    if (!winner || racing) return
+    const key = partySeenKey(viewer, winner.id, mine.total)
+    if (localStorage.getItem(key)) return
+    localStorage.setItem(key, '1')
+    setParty({ name: winner.name, emoji: winner.emoji })
+  }, [winner?.id, racing, viewer, mine.total]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // the mate's world may not have landed yet — until it does, nobody leads
   const lead = theirs ? mine.owned - theirs.owned : null
@@ -143,6 +171,8 @@ function AlbumRace() {
 
   return (
     <div className="album-race">
+      {party && <VictoryParty name={party.name} emoji={party.emoji} onDone={() => setParty(null)} />}
+
       <div className="album-race-head">
         <span>🏁 Race to {mine.total}</span>
         <span className="album-race-caption">{caption}</span>
@@ -175,6 +205,15 @@ function AlbumRace() {
           </div>
         )
       })}
+
+      {winner && (
+        <button
+          className="party-replay"
+          onClick={() => { sfx.click(); setParty({ name: winner.name, emoji: winner.emoji }) }}
+        >
+          🎉 Replay victory party
+        </button>
+      )}
     </div>
   )
 }

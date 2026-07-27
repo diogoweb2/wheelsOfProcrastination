@@ -1,9 +1,30 @@
-// All sounds synthesized with WebAudio — zero audio assets.
+// Every sound effect is synthesized with WebAudio; the only audio file in the
+// build is the victory-party theme (see playLoop).
 let ctx: AudioContext | null = null
 let muted = false
 
 export function setMuted(m: boolean) {
   muted = m
+}
+
+/**
+ * Play an audio file once — used by the victory party, which runs for exactly
+ * as long as its theme. `onEnded` fires when the clip finishes; call the
+ * returned stop() to cut it short. Respects the mute toggle, and a browser that
+ * blocks autoplay stays quiet rather than throwing (onEnded never fires, so
+ * callers need their own fallback).
+ */
+export function playClip(src: string, volume = 0.7, onEnded?: () => void): () => void {
+  if (muted) return () => {}
+  const el = new Audio(src)
+  el.volume = volume
+  if (onEnded) el.addEventListener('ended', onEnded)
+  void el.play().catch(() => {})
+  return () => {
+    if (onEnded) el.removeEventListener('ended', onEnded)
+    el.pause()
+    el.currentTime = 0
+  }
 }
 
 function ac(): AudioContext {
