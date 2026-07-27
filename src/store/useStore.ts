@@ -919,6 +919,9 @@ export const useStore = create<StoreState>((set, get) => {
         if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60) // keep the blob small
         if (official && record.passed && !d.quiz.passedTopics.includes(topicId)) {
           d.quiz.passedTopics.push(topicId)
+          // Conquered → the topic locks itself and leaves the wheel. `autoUnlocked`
+          // already holds its id, so syncTopicUnlocks won't spring it back open.
+          d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((id) => id !== topicId)
           d.economy.devilFruits += 1
           events.push({
             type: 'goal',
@@ -933,7 +936,6 @@ export const useStore = create<StoreState>((set, get) => {
             syncTopicUnlocks(d, targetId) // ladder bookkeeping (autoUnlocked)
             if (!d.quiz.unlockedTopics.includes(next.id)) d.quiz.unlockedTopics.push(next.id)
             if (!d.quiz.autoUnlocked?.includes(next.id)) d.quiz.autoUnlocked = [...(d.quiz.autoUnlocked ?? []), next.id]
-            syncQuizTasks(d, targetId)
             unlockedTopicId = next.id
             events.push({
               type: 'goal',
@@ -942,6 +944,8 @@ export const useStore = create<StoreState>((set, get) => {
               description: `${next.title} is open. ${next.outcome ?? ''}`.trim(),
             })
           }
+          // conquered topic off the wheel + any newly opened one on it
+          syncQuizTasks(d, targetId)
         }
       })
       // a remotely-authorised test closes its row with the verdict → Dad's banner + push

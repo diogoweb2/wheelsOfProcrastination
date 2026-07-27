@@ -200,6 +200,14 @@ export function syncTopicUnlocks(d: AppData, ownerId: string): boolean {
     q.autoUnlocked = [...q.unlockedTopics]
     changed = true
   }
+  // A conquered topic locks itself and drops off the wheel — retroactively too,
+  // for profiles that passed before this rule existed.
+  for (const id of q.passedTopics) {
+    if (!q.unlockedTopics.includes(id)) continue
+    q.unlockedTopics = q.unlockedTopics.filter((x) => x !== id)
+    if (!q.autoUnlocked.includes(id)) q.autoUnlocked.push(id)
+    changed = true
+  }
   for (const t of topicsFor(ownerId)) {
     if (t.comingSoon || q.autoUnlocked.includes(t.id)) continue
     const ready = !t.unlockAfter || q.passedTopics.includes(t.unlockAfter)
