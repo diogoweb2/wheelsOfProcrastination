@@ -6,6 +6,8 @@ import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { dayKey, daysUntil } from '../logic/dates'
 import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
+import { describeParsed, parseSpokenTask } from '../logic/voiceTask'
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 
 export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   const { data, addTask, updateTask, deleteTask, manualPick, completedTodayIds } = useStore()
@@ -213,6 +215,31 @@ function TaskForm(props: {
     Boolean(initial?.dueDate || initial?.startDate || initial?.requiredFrom || initial?.requiredUntil),
   )
 
+  // Dictation: speak the whole quest, the keyword parser fills the form, you review.
+  const [heard, setHeard] = useState('')
+  const [parsedSummary, setParsedSummary] = useState('')
+  const speech = useSpeechRecognition({
+    onResult: (transcript, isFinal) => {
+      setHeard(transcript)
+      if (!isFinal) return
+      const p = parseSpokenTask(transcript)
+      if (p.name) setName(p.name)
+      if (p.repeats !== undefined) setRepeats(p.repeats)
+      if (p.cooldownDays !== undefined) setCooldownDays(p.cooldownDays ? String(p.cooldownDays) : '')
+      if (p.effort) setEffort(p.effort)
+      if (p.priority) setPriority(p.priority)
+      if (p.required !== undefined) setRequired(p.required)
+      if (p.dayScope) setDayScope(p.dayScope)
+      if (p.dueDate) {
+        // Must-dos use the requiredUntil window instead of a due date.
+        if (p.required) setRequiredUntil(p.dueDate)
+        else setDueDate(p.dueDate)
+        setDatesOpen(true)
+      }
+      setParsedSummary(describeParsed(p))
+    },
+  })
+
   const preview = rewardFor(
     {
       id: '',
@@ -239,7 +266,38 @@ function TaskForm(props: {
 
         <div className="field">
           <label>What must be done?</label>
-          <input type="text" value={name} maxLength={60} placeholder='e.g. "Read for 10 min"' onChange={(e) => setName(e.target.value)} />
+          <div className="mic-row">
+            <input type="text" value={name} maxLength={60} placeholder='e.g. "Read for 10 min"' onChange={(e) => setName(e.target.value)} />
+            {speech.supported && (
+              <button
+                className={`mic-btn${speech.listening ? ' listening' : ''}`}
+                aria-label={speech.listening ? 'Stop listening' : 'Say the quest out loud'}
+                onClick={() => {
+                  sfx.click()
+                  if (speech.listening) {
+                    speech.stop()
+                  } else {
+                    setHeard('')
+                    setParsedSummary('')
+                    speech.start()
+                  }
+                }}
+              >
+                {speech.listening ? '🔴' : '🎤'}
+              </button>
+            )}
+          </div>
+          {speech.supported && (
+            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              {speech.error
+                ? speech.error
+                : speech.listening
+                  ? heard || 'Listening… try "cut the grass every two weeks, high effort"'
+                  : parsedSummary
+                    ? `Heard: ${parsedSummary}`
+                    : 'Tap 🎤 and say the whole quest — I\'ll fill the rest in.'}
+            </p>
+          )}
         </div>
 
         <div className="field">
