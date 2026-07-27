@@ -1037,6 +1037,26 @@ input, select { font-family: inherit; }
   border-color: var(--yellow); box-shadow: 0 0 8px rgb(255 206 0 / 55%);
 }
 
+/* the launch: rAF drives the positions, so CSS must not smear them */
+.race-lane.is-racing .race-fill,
+.race-lane.is-racing .race-runner { transition: none; }
+.race-lane.is-racing .race-runner { animation: race-bob 320ms ease-in-out infinite; }
+.album-race-caption { animation: race-flash 700ms ease-out 2; }
+.race-crown { animation: race-crown-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+
+@keyframes race-bob {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-7deg); }
+  50%      { transform: translate(-50%, -62%) rotate(7deg); }
+}
+@keyframes race-flash { 0% { opacity: 0.35; } 50% { opacity: 1; } 100% { opacity: 0.35; } }
+@keyframes race-crown-pop { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1) rotate(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .race-lane.is-racing .race-runner,
+  .album-race-caption,
+  .race-crown { animation: none; }
+}
+
 .album-crew { margin-bottom: 18px; }
 .album-crew-head {
   display: flex; align-items: center; justify-content: space-between;

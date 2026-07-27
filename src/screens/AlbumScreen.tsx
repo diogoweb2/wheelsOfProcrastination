@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import {
   ALL_STICKER_IDS,
@@ -85,8 +85,39 @@ export function AlbumScreen() {
  * Head-to-head album race: both crewmates run the same track, each riding their
  * own profile icon. Whoever is nearer the finish flag wears the crown.
  */
+const RACE_MS = 1500
+
+/**
+ * Drives the start-of-race animation: 0 → 1 over RACE_MS on mount, so both
+ * runners leave the starting line together every time the page opens.
+ */
+function useRaceIntro() {
+  const [t, setT] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setT(1)
+      return
+    }
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / RACE_MS)
+      setT(p)
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  return t
+}
+
+/** Ease-out so the runners burst off the line and settle into their spot. */
+const easeOut = (x: number) => 1 - Math.pow(1 - x, 3)
+
 function AlbumRace() {
   const { data, mateAlbum, profiles, activeProfileId } = useStore()
+  const t = useRaceIntro()
+  const racing = t < 1
 
   const me = profiles.find((p) => p.id === activeProfileId)
   const mate = profiles.find((p) => p.id !== activeProfileId)
@@ -96,12 +127,13 @@ function AlbumRace() {
   // the mate's world may not have landed yet — until it does, nobody leads
   const lead = theirs ? mine.owned - theirs.owned : null
   const runners = [
-    { key: 'me', name: me?.name ?? 'You', emoji: me?.emoji ?? '👒', p: mine, crown: lead !== null && lead > 0 },
-    { key: 'mate', name: mate?.name ?? 'Crewmate', emoji: mate?.emoji ?? '🏴‍☠️', p: theirs, crown: lead !== null && lead < 0 },
+    { key: 'me', name: me?.name ?? 'You', emoji: me?.emoji ?? '👒', p: mine, lag: 0, crown: lead !== null && lead > 0 },
+    { key: 'mate', name: mate?.name ?? 'Crewmate', emoji: mate?.emoji ?? '🏴‍☠️', p: theirs, lag: 0.12, crown: lead !== null && lead < 0 },
   ]
 
   let caption: string
-  if (lead === null) caption = `Waiting for ${mate?.name ?? 'your crewmate'}’s log book…`
+  if (racing) caption = 'Ready… set… GO!'
+  else if (lead === null) caption = `Waiting for ${mate?.name ?? 'your crewmate'}’s log book…`
   else if (lead === 0) caption = `Neck and neck — ${mine.owned} stickers each!`
   else {
     const ahead = lead > 0 ? me?.name ?? 'You' : mate?.name ?? 'Crewmate'
@@ -116,25 +148,33 @@ function AlbumRace() {
         <span className="album-race-caption">{caption}</span>
       </div>
 
-      {runners.map((r) => (
-        <div key={r.key} className={`race-lane ${r.crown ? 'is-leading' : ''}`}>
-          <div className="race-lane-top">
-            <span className="race-name">
-              {r.crown && <span className="race-crown">👑</span>}
-              {r.name}
-            </span>
-            <span className="race-count">
-              {r.p ? `${r.p.owned} / ${r.p.total} · ${r.p.pct}%` : '— / —'}
-            </span>
-          </div>
-          <div className="race-track">
-            <div className="race-fill" style={{ width: `${r.p?.pct ?? 0}%` }} />
-            <div className="race-runner" style={{ left: `${r.p?.pct ?? 0}%` }}>
-              {r.emoji}
+      {runners.map((r) => {
+        // each lane runs its own clock so the two icons don't move in lockstep
+        const laneT = easeOut(Math.max(0, Math.min(1, (t - r.lag) / (1 - r.lag))))
+        const at = (r.p?.pct ?? 0) * laneT
+        return (
+          <div
+            key={r.key}
+            className={`race-lane ${!racing && r.crown ? 'is-leading' : ''} ${racing ? 'is-racing' : ''}`}
+          >
+            <div className="race-lane-top">
+              <span className="race-name">
+                {!racing && r.crown && <span className="race-crown">👑</span>}
+                {r.name}
+              </span>
+              <span className="race-count">
+                {r.p ? `${Math.round(r.p.owned * laneT)} / ${r.p.total} · ${Math.round(r.p.pct * laneT)}%` : '— / —'}
+              </span>
+            </div>
+            <div className="race-track">
+              <div className="race-fill" style={{ width: `${at}%` }} />
+              <div className="race-runner" style={{ left: `${at}%` }}>
+                {r.emoji}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
