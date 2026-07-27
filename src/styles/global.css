@@ -986,17 +986,56 @@ input, select { font-family: inherit; }
 
 /* ---- Sticker album (Grand Line Log Book) --------------------------------- */
 
-.album-progress { display: flex; align-items: center; gap: 10px; }
-.album-progress-bar {
-  flex: 1; height: 12px; border-radius: 999px; overflow: hidden;
+/* head-to-head album race: two lanes, two profile icons, one finish flag */
+.album-race {
+  background: var(--card); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 10px 12px 12px; box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+}
+.album-race-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  font-size: 12px; font-weight: 900; margin-bottom: 10px;
+}
+.album-race-caption { color: var(--yellow); text-align: right; }
+
+.race-lane + .race-lane { margin-top: 12px; }
+.race-lane-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12px; font-weight: 900; margin-bottom: 5px;
+}
+.race-name { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); }
+.race-crown { font-size: 13px; }
+.race-count { color: var(--muted); white-space: nowrap; }
+.race-lane.is-leading .race-name,
+.race-lane.is-leading .race-count { color: var(--text); }
+
+.race-track {
+  position: relative; height: 12px; margin: 0 16px; border-radius: 999px;
   background: var(--bg2); box-shadow: inset 0 2px 4px rgb(0 0 0 / 40%);
 }
-.album-progress-fill {
+/* the finish line sits flush with the end of the track */
+.race-track::after {
+  content: '🏁'; position: absolute; right: -18px; top: 50%;
+  transform: translateY(-50%); font-size: 13px; line-height: 1;
+}
+.race-fill {
   height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  background: linear-gradient(90deg, var(--blue-dark), var(--blue));
   transition: width 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
-.album-progress-label { font-size: 12px; font-weight: 900; color: var(--muted); white-space: nowrap; }
+.race-lane.is-leading .race-fill { background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+
+.race-runner {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; line-height: 1;
+  background: var(--card2); border: 2px solid var(--line);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 40%);
+  transition: left 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.race-lane.is-leading .race-runner {
+  border-color: var(--yellow); box-shadow: 0 0 8px rgb(255 206 0 / 55%);
+}
 
 .album-crew { margin-bottom: 18px; }
 .album-crew-head {

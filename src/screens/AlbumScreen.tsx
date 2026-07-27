@@ -44,8 +44,7 @@ function useStickerZoom() {
 
 export function AlbumScreen() {
   const [tab, setTab] = useState<'album' | 'packs' | 'trade'>('album')
-  const { data, trades, activeProfileId } = useStore()
-  const progress = albumProgress(data.album)
+  const { trades, activeProfileId } = useStore()
 
   // a swap waiting on MY answer deserves a dot on the tab
   const incoming = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId).length
@@ -59,14 +58,7 @@ export function AlbumScreen() {
         Every pirate on the seas — collect them all, trade the spares.
       </p>
 
-      <div className="album-progress">
-        <div className="album-progress-bar">
-          <div className="album-progress-fill" style={{ width: `${progress.pct}%` }} />
-        </div>
-        <div className="album-progress-label">
-          {progress.owned} / {progress.total} stickers · {progress.pct}%
-        </div>
-      </div>
+      <AlbumRace />
 
       <div className="seg" style={{ margin: '14px 0' }}>
         <button className={tab === 'album' ? 'on' : ''} onClick={() => { sfx.click(); setTab('album') }}>
@@ -83,6 +75,66 @@ export function AlbumScreen() {
       {tab === 'album' && <AlbumTab />}
       {tab === 'packs' && <PacksTab />}
       {tab === 'trade' && <TradeTab />}
+    </div>
+  )
+}
+
+// --- race ------------------------------------------------------------------
+
+/**
+ * Head-to-head album race: both crewmates run the same track, each riding their
+ * own profile icon. Whoever is nearer the finish flag wears the crown.
+ */
+function AlbumRace() {
+  const { data, mateAlbum, profiles, activeProfileId } = useStore()
+
+  const me = profiles.find((p) => p.id === activeProfileId)
+  const mate = profiles.find((p) => p.id !== activeProfileId)
+  const mine = albumProgress(data.album)
+  const theirs = mateAlbum ? albumProgress(mateAlbum) : null
+
+  // the mate's world may not have landed yet — until it does, nobody leads
+  const lead = theirs ? mine.owned - theirs.owned : null
+  const runners = [
+    { key: 'me', name: me?.name ?? 'You', emoji: me?.emoji ?? '👒', p: mine, crown: lead !== null && lead > 0 },
+    { key: 'mate', name: mate?.name ?? 'Crewmate', emoji: mate?.emoji ?? '🏴‍☠️', p: theirs, crown: lead !== null && lead < 0 },
+  ]
+
+  let caption: string
+  if (lead === null) caption = `Waiting for ${mate?.name ?? 'your crewmate'}’s log book…`
+  else if (lead === 0) caption = `Neck and neck — ${mine.owned} stickers each!`
+  else {
+    const ahead = lead > 0 ? me?.name ?? 'You' : mate?.name ?? 'Crewmate'
+    const gap = Math.abs(lead)
+    caption = `${ahead} leads by ${gap} sticker${gap === 1 ? '' : 's'}`
+  }
+
+  return (
+    <div className="album-race">
+      <div className="album-race-head">
+        <span>🏁 Race to {mine.total}</span>
+        <span className="album-race-caption">{caption}</span>
+      </div>
+
+      {runners.map((r) => (
+        <div key={r.key} className={`race-lane ${r.crown ? 'is-leading' : ''}`}>
+          <div className="race-lane-top">
+            <span className="race-name">
+              {r.crown && <span className="race-crown">👑</span>}
+              {r.name}
+            </span>
+            <span className="race-count">
+              {r.p ? `${r.p.owned} / ${r.p.total} · ${r.p.pct}%` : '— / —'}
+            </span>
+          </div>
+          <div className="race-track">
+            <div className="race-fill" style={{ width: `${r.p?.pct ?? 0}%` }} />
+            <div className="race-runner" style={{ left: `${r.p?.pct ?? 0}%` }}>
+              {r.emoji}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
