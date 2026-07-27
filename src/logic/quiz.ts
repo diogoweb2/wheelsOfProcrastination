@@ -229,11 +229,20 @@ export function nextLevelAfter(topicId: string): QuizTopic | undefined {
  * academy. The ladder wins when there is one (Diogo's levels); otherwise — Ben's
  * topics have no prerequisites, Dad just opens them one at a time — it's the
  * first topic of his still sitting locked, in catalog order.
+ *
+ * The fallback must never jump the ladder: passing an off-ladder topic (say
+ * Claude Code) can't hand out L2 while L1 is still unconquered.
  */
 export function nextTopicToUnlock(d: AppData, ownerId: string, passedTopicId: string): QuizTopic | undefined {
   const ladder = nextLevelAfter(passedTopicId)
   if (ladder) return ladder
-  return topicsFor(ownerId).find((t) => !t.comingSoon && t.id !== passedTopicId && !d.quiz.unlockedTopics.includes(t.id))
+  return topicsFor(ownerId).find(
+    (t) =>
+      !t.comingSoon &&
+      t.id !== passedTopicId &&
+      !d.quiz.unlockedTopics.includes(t.id) &&
+      (!t.unlockAfter || d.quiz.passedTopics.includes(t.unlockAfter)),
+  )
 }
 
 /** The prerequisite topic, for the "🔒 pass L2 first" hint on a locked card. */
