@@ -24,8 +24,6 @@ const MAX_TXNS = 250
 // The Shock Test: a scripted QQQ market correction.
 export const CRASH_PCT = 20 // −20% overnight
 export const BOUNCE_MULT = 1.325 // undoes the −20% and lands ~6% higher — holding must WIN
-const CRASH_MIN_DAYS = 21 // first auto-crash arms 3–5 weeks after the first QQQ deposit
-const CRASH_SPREAD_DAYS = 14
 const RECOVER_MIN_DAYS = 14 // held positions finish bouncing back 2–3 weeks after the decision
 const RECOVER_SPREAD_DAYS = 8
 const CRASH_MIN_BALANCE = 0.5 // don't waste the lesson on pennies
@@ -174,13 +172,6 @@ export function pushTxn(bank: BankState, txn: Omit<BankTxn, 'id' | 'at'> & { at?
   if (bank.txns.length > MAX_TXNS) bank.txns = bank.txns.slice(-MAX_TXNS)
 }
 
-/** Arm the one-and-only automatic Shock Test crash, ~1 month out. No-op after crash #1. */
-export function armFirstShock(bank: BankState, fromDay: string, rand01: number): void {
-  const s = bank.shock
-  if (s.crashCount > 0 || s.scheduledDay || s.crashedDay) return
-  s.scheduledDay = addDays(fromDay, CRASH_MIN_DAYS + Math.floor(rand01 * CRASH_SPREAD_DAYS))
-}
-
 /** The overnight −20% hit on the Rocket Ship. Returns the dollars wiped (0 = nothing to crash). */
 export function applyCrash(bank: BankState, day: string): number {
   const a = bank.accounts.qqq
@@ -258,15 +249,6 @@ export function simulateBank(
       a.growth += delta
     }
 
-    // 1b) Shock Test — the scheduled first crash fires on the first day with real money aboard
-    if (shock.scheduledDay && !shock.crashedDay && day >= shock.scheduledDay && bank.accounts.qqq.balance >= CRASH_MIN_BALANCE) {
-      applyCrash(bank, day)
-      onEvent?.({
-        emoji: '📉🚨',
-        title: 'MARKET CRASH!',
-        description: 'Tech stocks just took a dive! Open the Bank — the Rocket Ship needs a decision.',
-      })
-    }
     // 1c) a held position finishes bouncing back HIGHER — the whole point of the lesson
     if (shock.decision === 'hold' && shock.recoverDay && day >= shock.recoverDay) {
       const a = bank.accounts.qqq

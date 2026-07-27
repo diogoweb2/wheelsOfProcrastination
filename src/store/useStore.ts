@@ -75,7 +75,7 @@ import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted 
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
-import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, armFirstShock, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
+import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 import { enablePush } from '../push'
 
@@ -1201,7 +1201,6 @@ export const useStore = create<StoreState>((set, get) => {
         dst.balance += amt
         dst.deposited += amt
         pushTxn(d.bank, { day, type: 'transfer', from, to, amount: amt })
-        if (to === 'qqq') armFirstShock(d.bank, day, Math.random()) // first QQQ money quietly starts the crash countdown
         if (to === 'college') {
           dst.balance += amt // Dad matches it 1:1
           dst.matched = round2(dst.matched + amt)
@@ -1227,7 +1226,6 @@ export const useStore = create<StoreState>((set, get) => {
           dst.balance += v
           dst.deposited += v
           pushTxn(d.bank, { day, type: 'allowance', from: 'allowance', to: id, amount: v })
-          if (id === 'qqq') armFirstShock(d.bank, day, Math.random())
           if (id === 'college') {
             dst.balance += v
             dst.matched = round2(dst.matched + v)
@@ -1290,7 +1288,6 @@ export const useStore = create<StoreState>((set, get) => {
         if (amt > 0) a.deposited += amt
         else a.deposited = Math.max(0, a.deposited + amt)
         pushTxn(d.bank, { day: dayKey(), type: 'adjust', to: acct, amount: amt, note: note.trim() || 'Banker adjustment' })
-        if (acct === 'qqq' && amt > 0) armFirstShock(d.bank, dayKey(), Math.random())
       })
     },
 

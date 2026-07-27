@@ -1087,7 +1087,7 @@ function AdminShock({ kidData }: { kidData: AppData }) {
   const pending = !!s.crashedDay && s.decision === null
   const holding = s.decision === 'hold' && !!s.recoverDay
   const recoverIn = holding ? daysToRecover(kidData.bank) : null
-  const canTrigger = s.crashCount >= 1 && !pending && !holding && crashWorthwhile(kidData.bank)
+  const canTrigger = !pending && !holding && crashWorthwhile(kidData.bank)
 
   return (
     <div className="card" style={{ marginBottom: 10, borderColor: pending ? 'var(--red)' : 'var(--line)' }}>
@@ -1097,9 +1097,8 @@ function AdminShock({ kidData }: { kidData: AppData }) {
           <div className="muted" style={{ fontSize: 11 }}>
             {pending && `Crashed ${s.crashedDay} (−${fmt$(s.crashAmount)}) — waiting for Ben’s call`}
             {holding && `Ben is HOLDING — recovers in ~${recoverIn} day${recoverIn === 1 ? '' : 's'} (${s.recoverDay})`}
-            {!pending && !holding && s.scheduledDay && `First auto-crash armed for ${s.scheduledDay} (needs QQQ money aboard)`}
-            {!pending && !holding && !s.scheduledDay && s.crashCount === 0 && 'Arms itself ~1 month after his first QQQ deposit'}
-            {!pending && !holding && !s.scheduledDay && s.crashCount > 0 && `${s.crashCount} crash${s.crashCount > 1 ? 'es' : ''} so far · sea is calm`}
+            {!pending && !holding && s.crashCount === 0 && 'No crashes yet — trigger one manually whenever you’re ready'}
+            {!pending && !holding && s.crashCount > 0 && `${s.crashCount} crash${s.crashCount > 1 ? 'es' : ''} so far · sea is calm`}
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -1107,33 +1106,31 @@ function AdminShock({ kidData }: { kidData: AppData }) {
           <div className="muted" style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase' }}>days without<br />a crash</div>
         </div>
       </div>
-      {s.crashCount >= 1 && (
-        <button
-          className={`btn btn--small ${armed ? 'btn--red' : 'btn--ghost'}`}
-          style={{ marginTop: 10, width: '100%' }}
-          disabled={!canTrigger}
-          onClick={() => {
-            if (!armed) {
-              sfx.click()
-              setArmed(true)
-              return
-            }
-            setArmed(false)
-            if (triggerBankCrash()) {
-              sfx.error()
-              pushEvent({
-                type: 'penalty',
-                emoji: '📉',
-                title: 'Market correction unleashed',
-                description: `Ben’s Rocket Ship just dropped ${CRASH_PCT}%. He’ll face the panic-or-hold choice on his next visit.`,
-              })
-            }
-          }}
-        >
-          {armed ? '⚠️ Sure? Tap again to crash the market' : `📉 Trigger a −${CRASH_PCT}% Market Correction`}
-        </button>
-      )}
-      {s.crashCount >= 1 && !canTrigger && !pending && !holding && (
+      <button
+        className={`btn btn--small ${armed ? 'btn--red' : 'btn--ghost'}`}
+        style={{ marginTop: 10, width: '100%' }}
+        disabled={!canTrigger}
+        onClick={() => {
+          if (!armed) {
+            sfx.click()
+            setArmed(true)
+            return
+          }
+          setArmed(false)
+          if (triggerBankCrash()) {
+            sfx.error()
+            pushEvent({
+              type: 'penalty',
+              emoji: '📉',
+              title: 'Market correction unleashed',
+              description: `Ben’s Rocket Ship just dropped ${CRASH_PCT}%. He’ll face the panic-or-hold choice on his next visit.`,
+            })
+          }
+        }}
+      >
+        {armed ? '⚠️ Sure? Tap again to crash the market' : `📉 Trigger a −${CRASH_PCT}% Market Correction`}
+      </button>
+      {!canTrigger && !pending && !holding && (
         <p className="muted" style={{ fontSize: 10, marginTop: 6 }}>Needs real money on the Rocket Ship to matter.</p>
       )}
     </div>
