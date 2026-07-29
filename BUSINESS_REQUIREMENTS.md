@@ -41,6 +41,7 @@ Fields when creating a task:
   - Fairness (anti-starvation): weight × (1 + 0.5 × spinsSinceLastPicked), capped at ×4. A task that keeps losing gets progressively luckier; repeats are still possible so it feels random.
 - The spin has sound (ticks + fanfare), easing animation, and confetti on landing.
 - **The plate (pending picks)**: a spun or hand-picked task lands on "today's plate". Choosing "Later" keeps it there until end of day. The plate holds at most **3** tasks (shown as a swipeable card stack); tasks on the plate leave the wheel pool until dealt with.
+- **Quiz quests link to the Academy**: a quiz training card (on the plate or in the post-spin sheet) shows a **🏫 Start training →** button that switches to the Quiz tab and opens that topic's training round directly.
 - **One study topic at a time**: quiz training quests (the auto-synced "<emoji> <topic> quiz training" habits) are limited to **one on the plate at a time** — while one is pending, every other topic leaves the wheel. Finishing it (or re-spinning it away) lifts the lock, so landing on a second topic later the same day is fine.
 - **Abandoned-pick penalty**: each task still on the plate at end of day costs gems at rollover — **low −5, medium −10, high −18** (≈ half its base reward, each pick penalized separately). Gems floor at 0. This is separate from streak rules.
 - **Re-spin ("the sloth shrugs")**: if you don't like the result you can pay gems to spin again.

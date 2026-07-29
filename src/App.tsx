@@ -59,6 +59,8 @@ export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [tab, setTab] = useState<Tab>('spin')
   const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
+  // topic a quiz quest card asked to jump into; consumed by QuizScreen on arrival
+  const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
@@ -331,10 +333,17 @@ export default function App() {
         </div>
       ))}
 
-      {tab === 'spin' && <SpinScreen />}
+      {tab === 'spin' && (
+        <SpinScreen
+          goTrain={(topicId) => {
+            setTrainTopic(topicId)
+            setTab('quiz')
+          }}
+        />
+      )}
       {tab === 'store' && <StoreScreen />}
       {tab === 'album' && <AlbumScreen />}
-      {tab === 'quiz' && <QuizScreen />}
+      {tab === 'quiz' && <QuizScreen trainTopicId={trainTopic} onTrainOpened={() => setTrainTopic(null)} />}
       {tab === 'bank' && <BankScreen />}
       {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}
 

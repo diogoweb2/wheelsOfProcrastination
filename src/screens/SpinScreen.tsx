@@ -7,7 +7,8 @@ import { RequiredList } from '../components/RequiredList'
 import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { eligibleTasks, studyLockedIds } from '../logic/wheel'
+import { eligibleTasks, isStudyTask, studyLockedIds } from '../logic/wheel'
+import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { dayKey } from '../logic/dates'
 import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
 
@@ -17,7 +18,7 @@ const FILTERS: { id: Effort; label: string }[] = [
   { id: 'high', label: 'High' },
 ]
 
-export function SpinScreen() {
+export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } = {}) {
   const { data, spin, respin, completeTask, completedTodayIds, pushEvent, openQotd } = useStore()
   const [filter, setFilter] = useState<EffortFilter>([])
 
@@ -167,6 +168,7 @@ export function SpinScreen() {
           gems={data.economy.gems}
           onComplete={onComplete}
           onRespin={onRespin}
+          onTrain={goTrain && ((t) => goTrain(t.id.slice(QUIZ_TASK_PREFIX.length)))}
         />
       )}
 
@@ -262,6 +264,7 @@ export function SpinScreen() {
               gems={data.economy.gems}
               onComplete={() => onComplete(resultTask)}
               onRespin={() => onRespin(resultTask)}
+              onTrain={goTrain && (() => goTrain(resultTask.id.slice(QUIZ_TASK_PREFIX.length)))}
               laterLabel="Later 👒"
               onLater={() => {
                 setShowResult(false)
@@ -288,8 +291,9 @@ function PendingStack(props: {
   gems: number
   onComplete: (t: Task) => void
   onRespin: (t: Task) => void
+  onTrain?: (t: Task) => void
 }) {
-  const { items, isFirst, respinPrice, gems, onComplete, onRespin } = props
+  const { items, isFirst, respinPrice, gems, onComplete, onRespin, onTrain } = props
   const [top, setTop] = useState(0)
   const [dx, setDx] = useState(0)
   const [flying, setFlying] = useState<1 | -1 | null>(null)
@@ -391,6 +395,7 @@ function PendingStack(props: {
                 gems={gems}
                 onComplete={() => onComplete(task)}
                 onRespin={() => onRespin(task)}
+                onTrain={onTrain && (() => onTrain(task))}
                 showRespin={via === 'wheel'}
                 laterLabel={n > 1 ? 'Next ▸' : undefined}
                 onLater={n > 1 ? () => fling(1) : undefined}
@@ -431,8 +436,9 @@ function TaskCard(props: {
   showRespin: boolean
   laterLabel?: string
   onLater?: () => void
+  onTrain?: () => void
 }) {
-  const { task, isFirst, banner, respinPrice, gems, onComplete, onRespin, showRespin, laterLabel, onLater } = props
+  const { task, isFirst, banner, respinPrice, gems, onComplete, onRespin, showRespin, laterLabel, onLater, onTrain } = props
   const urgent = isEffectivelyUrgent(task)
   const reward = rewardFor(task, isFirst)
   return (
@@ -462,6 +468,12 @@ function TaskCard(props: {
       <button className="btn" onClick={onComplete}>
         ✓ Quest complete (+{reward} 🪙)
       </button>
+      {/* a quiz quest can't be done anywhere but the Academy — jump straight into its training round */}
+      {onTrain && isStudyTask(task) && (
+        <button className="btn btn--blue" style={{ marginTop: 8 }} onClick={() => { sfx.click(); onTrain() }}>
+          🏫 Start training →
+        </button>
+      )}
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
         {showRespin && (
           <button className="btn btn--blue btn--small" style={{ flex: 1 }} onClick={onRespin} disabled={gems < respinPrice}>

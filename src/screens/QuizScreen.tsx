@@ -3,7 +3,7 @@
 // test practice for everyone; Diogo, being admin, can also launch his own
 // OFFICIAL final test here. Ben's official tests are launched from Diogo's
 // profile → Admin.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import type { AppData, QuizLesson, QuizQuestion } from '../types'
@@ -24,10 +24,23 @@ import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
 
-export function QuizScreen() {
+/**
+ * `trainTopicId` is a deep link from elsewhere in the app (the "Start training"
+ * button on a quiz quest card): it drops straight into that topic's training
+ * round. `onTrainOpened` clears it so closing the session lands on the topic
+ * list instead of bouncing back in.
+ */
+export function QuizScreen({ trainTopicId, onTrainOpened }: { trainTopicId?: string | null; onTrainOpened?: () => void } = {}) {
   const { data, activeProfileId, quizBank, quizBankLoaded } = useStore()
   const [session, setSession] = useState<{ mode: QuizMode; topicId: string } | null>(null)
   const [study, setStudy] = useState<string | null>(null) // topicId whose reading list is open
+
+  useEffect(() => {
+    if (!trainTopicId) return
+    setSession({ mode: 'training', topicId: trainTopicId })
+    setStudy(null)
+    onTrainOpened?.()
+  }, [trainTopicId, onTrainOpened])
 
   if (!activeProfileId) return null
   const topics = topicsFor(activeProfileId)
