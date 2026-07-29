@@ -73,7 +73,7 @@ import {
   streakGoalBonus,
   streakRepairCost,
 } from '../logic/economy'
-import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted } from '../logic/wheel'
+import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted, studyLockedIds } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
@@ -838,7 +838,13 @@ export const useStore = create<StoreState>((set, get) => {
     spin(filter) {
       const { data } = get()
       if (data.daily.pendingPicks.length >= MAX_PENDING) return 'full'
-      const excluded = new Set([...get().completedTodayIds(), ...data.daily.pendingPicks.map((p) => p.taskId)])
+      const pendingIds = data.daily.pendingPicks.map((p) => p.taskId)
+      const excluded = new Set([
+        ...get().completedTodayIds(),
+        ...pendingIds,
+        // one study topic on the plate at a time
+        ...studyLockedIds(data.tasks, pendingIds),
+      ])
       const pool = eligibleTasks(data.tasks, filter, excluded, dayKey(), data.completions)
       if (pool.length === 0) return null
       const picked = pickWeighted(buildEntries(pool))

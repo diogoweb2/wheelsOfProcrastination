@@ -7,7 +7,7 @@ import { RequiredList } from '../components/RequiredList'
 import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { eligibleTasks } from '../logic/wheel'
+import { eligibleTasks, studyLockedIds } from '../logic/wheel'
 import { dayKey } from '../logic/dates'
 import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
 
@@ -50,7 +50,7 @@ export function SpinScreen() {
   // and removing its segment mid-animation would break the spin).
   const pool = useMemo(
     () => {
-      const excluded = new Set([...doneIds, ...pendingIds])
+      const excluded = new Set([...doneIds, ...pendingIds, ...studyLockedIds(data.tasks, pendingIds)])
       if (targetId) excluded.delete(targetId)
       return eligibleTasks(data.tasks, filter, excluded, dayKey(), data.completions)
     },

@@ -2,6 +2,7 @@
 import type { Completion, EffortFilter, Task } from '../types'
 import { addDays, dayKey, daysUntil, isWeekend } from './dates'
 import { isEffectivelyUrgent } from './economy'
+import { QUIZ_TASK_PREFIX } from './quiz'
 
 export interface WheelEntry {
   task: Task
@@ -78,6 +79,26 @@ export function requiredToday(tasks: Task[], today: string = dayKey(), completio
       const db = b.requiredUntil ?? '9999-12-31'
       return da.localeCompare(db) || a.name.localeCompare(b.name)
     })
+}
+
+/** A quiz training quest — one auto-synced habit per unlocked topic. */
+export function isStudyTask(task: Task): boolean {
+  return task.id.startsWith(QUIZ_TASK_PREFIX)
+}
+
+/**
+ * Study comes one topic at a time. While a quiz training quest sits on today's
+ * plate, every OTHER topic leaves the wheel — so a single spin session can't
+ * bury you under three subjects. Finishing (or re-spinning) it lifts the lock,
+ * so a second topic later the same day is fair game.
+ */
+export function studyLockedIds(tasks: Task[], pendingIds: Iterable<string>): Set<string> {
+  const pending = new Set(pendingIds)
+  const locked = new Set<string>()
+  const studyPending = tasks.some((t) => pending.has(t.id) && isStudyTask(t))
+  if (!studyPending) return locked
+  for (const t of tasks) if (isStudyTask(t) && !pending.has(t.id)) locked.add(t.id)
+  return locked
 }
 
 export function eligibleTasks(
