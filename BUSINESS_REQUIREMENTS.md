@@ -1,7 +1,7 @@
 # Wheels of Procrastination — Business Requirements
 
 > Living document. Update this file whenever a rule changes. The code should always match this doc.
-> Last updated: 2026-07-15
+> Last updated: 2026-07-29
 
 ## 1. Concept
 
@@ -27,13 +27,16 @@ Fields when creating a task:
 | Priority | urgent+important / not-urgent+important | Nothing unimportant is tracked — if it's not important it doesn't get in. Default: **not-urgent**. |
 | Due date | optional | As the date approaches, the task's effective urgency rises. Overdue or due ≤ 48h ⇒ treated as urgent. |
 | Start date | optional | Task stays **off the wheel** (and off manual/eligible pools) until this local day arrives. Blank ⇒ available immediately. |
-| Days | all / weekdays / weekends | Restricts which days the task can appear on the wheel. Weekdays = Mon–Fri, weekends = Sat/Sun (local). Default: **all**. |
+| Days | all / weekdays / weekends / pick days | Restricts which days the task is live (wheel **and** must-do checklist). Weekdays = Mon–Fri, weekends = Sat/Sun (local). **Pick days** = hand-picked days of the week (e.g. Mon/Wed/Fri → `weekDays: [1,3,5]`, 0 = Sunday); an empty pick list means no restriction. Default: **all**. |
+| Must-do | yes / no | A non-negotiable: leaves the wheel and lives in the daily checklist beside the wheel. |
+| Also on the wheel | must-dos only | A must-do can opt back **onto** the wheel (`onWheel`): it stays on the checklist AND can be spun/hand-picked, paying the full wheel reward. Off by default. |
 | Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
 | Rest days | optional, repeating tasks only | After a completion the task disappears for N days and only comes back on day N after the last time it was done (e.g. "cut the grass" with 15). Blank/0 ⇒ available again the next day. While resting it is off the wheel, off the checklist, and **not** penalised as a missed must-do. |
 
 ## 3. The Wheel
 
-- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends), unlocked (their prerequisite task is done), and not resting out a cooldown.
+- Must-dos are off the wheel unless they set **also on the wheel** (`onWheel`), in which case they sit in both places.
+- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends / hand-picked days), unlocked (their prerequisite task is done), and not resting out a cooldown.
 - Before spinning, user picks an effort filter: **Low / Medium / High / All** (you don't spin a High task when you have 10 minutes).
 - The wheel is **weighted but fair**:
   - Base weight: urgent = 3, not-urgent = 1.

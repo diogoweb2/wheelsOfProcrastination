@@ -1,6 +1,6 @@
 // Weighted-but-fair wheel selection. Rules in BUSINESS_REQUIREMENTS.md §3.
 import type { Completion, EffortFilter, Task } from '../types'
-import { addDays, dayKey, daysUntil, isWeekend } from './dates'
+import { addDays, dayKey, dayOfWeek, daysUntil, isWeekend } from './dates'
 import { isEffectivelyUrgent } from './economy'
 import { QUIZ_TASK_PREFIX } from './quiz'
 
@@ -46,6 +46,8 @@ export function isAvailableOn(task: Task, today: string, completions: Completion
   if (task.startDate && today < task.startDate) return false
   if (task.dayScope === 'weekdays' && isWeekend(today)) return false
   if (task.dayScope === 'weekends' && !isWeekend(today)) return false
+  // Hand-picked days ("video games on Mon/Wed/Fri"). An empty list = no restriction.
+  if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeek(today))) return false
   if (!isUnlockedOn(task, today, completions, tasks)) return false
   const back = cooldownUntil(task, completions, today)
   if (back && today < back) return false
@@ -111,8 +113,8 @@ export function eligibleTasks(
   return tasks.filter(
     (t) =>
       !t.archived &&
-      // required items are checklist-only — they never take a wheel segment
-      !t.required &&
+      // required items are checklist-only — unless they opted back onto the wheel
+      (!t.required || t.onWheel) &&
       (filter.length === 0 || filter.includes(t.effort)) &&
       !completedTodayIds.has(t.id) &&
       isAvailableOn(t, today, completions, tasks),

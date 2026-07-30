@@ -4,7 +4,7 @@ import type { DayScope, Effort, Priority, Task } from '../types'
 import { REQUIRED_REWARD, isEffectivelyUrgent, manualPickCost, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { dayKey, daysUntil } from '../logic/dates'
+import { dayKey, daysUntil, weekDayLabel } from '../logic/dates'
 import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
 import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '../logic/voiceTask'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
@@ -85,6 +85,10 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
                 {t.repeats && <span className="chip">🔁</span>}
                 {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
                 {t.dayScope === 'weekends' && <span className="chip">🏖️ weekends</span>}
+                {t.dayScope === 'custom' && t.weekDays?.length ? (
+                  <span className="chip">🗓️ {t.weekDays.map(weekDayLabel).join('/')}</span>
+                ) : null}
+                {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
                 {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
                 {gate && <span className="chip">🔒 after "{gate.name}"</span>}
                 {t.cooldownDays ? <span className="chip">⏳ every {t.cooldownDays}d</span> : null}
@@ -104,7 +108,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               <span className="chip" style={{ background: 'var(--purple)', color: '#fff' }}>
                 🎯 on plate
               </span>
-            ) : t.required ? (
+            ) : t.required && !t.onWheel ? (
               // must-dos are ticked off in the checklist beside the wheel, never picked
               <span className="chip chip--required">✅ checklist</span>
             ) : !available ? (
@@ -183,7 +187,9 @@ function TaskForm(props: {
     dueDate?: string
     startDate?: string
     dayScope: DayScope
+    weekDays?: number[]
     required?: boolean
+    onWheel?: boolean
     requiredFrom?: string
     requiredUntil?: string
     afterTaskId?: string
@@ -201,7 +207,9 @@ function TaskForm(props: {
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? '')
   const [startDate, setStartDate] = useState(initial?.startDate ?? '')
   const [dayScope, setDayScope] = useState<DayScope>(initial?.dayScope ?? 'all')
+  const [weekDays, setWeekDays] = useState<number[]>(initial?.weekDays ?? [])
   const [required, setRequired] = useState(initial?.required ?? false)
+  const [onWheel, setOnWheel] = useState(initial?.onWheel ?? false)
   const [requiredFrom, setRequiredFrom] = useState(initial?.requiredFrom ?? '')
   const [requiredUntil, setRequiredUntil] = useState(initial?.requiredUntil ?? '')
   const [afterTaskId, setAfterTaskId] = useState(initial?.afterTaskId ?? '')
@@ -231,6 +239,7 @@ function TaskForm(props: {
       if (p.priority) setPriority(p.priority)
       if (p.required !== undefined) setRequired(p.required)
       if (p.dayScope) setDayScope(p.dayScope)
+      if (p.weekDays?.length) setWeekDays(p.weekDays)
       if (p.dueDate) {
         // Must-dos use the requiredUntil window instead of a due date.
         if (p.required) setRequiredUntil(p.dueDate)
@@ -314,7 +323,7 @@ function TaskForm(props: {
         </div>
 
         <div className="field">
-          <label>Required every day? (skips the wheel)</label>
+          <label>Must-do? (a non-negotiable, not a wheel pick)</label>
           <div className="seg">
             <button className={!required ? 'on' : ''} onClick={() => setRequired(false)}>
               🎡 On the wheel
@@ -328,6 +337,23 @@ function TaskForm(props: {
               ? `Lives in the must-do checklist beside the wheel. Pays 🪙${REQUIRED_REWARD[effort]} per tick — and costs 🪙${REQUIRED_REWARD[effort]} for every day you skip it.`
               : 'Normal quest — the wheel can land on it.'}
           </p>
+          {required && (
+            <>
+              <div className="seg" style={{ marginTop: 10 }}>
+                <button className={!onWheel ? 'on' : ''} onClick={() => setOnWheel(false)}>
+                  Checklist only
+                </button>
+                <button className={onWheel ? 'on' : ''} onClick={() => setOnWheel(true)}>
+                  ➕ Also on the wheel
+                </button>
+              </div>
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                {onWheel
+                  ? `Both: tick it in the checklist, or let the wheel land on it for the full 🪙${preview}.`
+                  : 'Only the checklist — the wheel never picks it.'}
+              </p>
+            </>
+          )}
         </div>
 
         <div className="field">
@@ -468,7 +494,31 @@ function TaskForm(props: {
             <button className={dayScope === 'weekends' ? 'on' : ''} onClick={() => setDayScope('weekends')}>
               🏖️ Weekends
             </button>
+            <button className={dayScope === 'custom' ? 'on' : ''} onClick={() => setDayScope('custom')}>
+              🗓️ Pick days
+            </button>
           </div>
+          {dayScope === 'custom' && (
+            <>
+              {/* Monday first — the week people actually plan in. */}
+              <div className="seg seg--days" style={{ marginTop: 10 }}>
+                {[1, 2, 3, 4, 5, 6, 0].map((d) => (
+                  <button
+                    key={d}
+                    className={weekDays.includes(d) ? 'on' : ''}
+                    onClick={() => setWeekDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort()))}
+                  >
+                    {weekDayLabel(d).slice(0, 2)}
+                  </button>
+                ))}
+              </div>
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                {weekDays.length === 0
+                  ? 'Pick at least one day, or it counts as every day.'
+                  : `${required ? 'Must-do on' : 'On the wheel on'} ${weekDays.map(weekDayLabel).join(', ')} only.`}
+              </p>
+            </>
+          )}
         </div>
 
         <p className="muted" style={{ marginBottom: 12 }}>
@@ -489,7 +539,9 @@ function TaskForm(props: {
               dueDate: dueDate || undefined,
               startDate: startDate || undefined,
               dayScope,
+              weekDays: dayScope === 'custom' && weekDays.length ? weekDays : undefined,
               required,
+              onWheel: required && onWheel ? true : undefined,
               // the window only means anything for a requirement
               requiredFrom: required ? requiredFrom || undefined : undefined,
               requiredUntil: required ? requiredUntil || undefined : undefined,

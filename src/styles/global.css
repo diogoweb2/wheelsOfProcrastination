@@ -311,6 +311,10 @@ input, select { font-family: inherit; }
   text-transform: uppercase;
 }
 .seg button.on { background: var(--card2); color: var(--text); box-shadow: 0 2px 0 rgb(0 0 0 / 30%); }
+/* Seven day toggles have to fit one phone row, so they shed the padding. */
+.seg--days { gap: 3px; }
+.seg--days button { padding: 9px 0; font-size: 12px; }
+.seg--days button.on { background: var(--gold); color: #2a1c00; }
 
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }

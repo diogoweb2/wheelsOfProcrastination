@@ -1,7 +1,7 @@
 export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
 export type EffortFilter = Effort[] // selected efforts; empty = all
-export type DayScope = 'all' | 'weekdays' | 'weekends' // which days a task is allowed on the wheel
+export type DayScope = 'all' | 'weekdays' | 'weekends' | 'custom' // which days a task is allowed on the wheel / checklist
 
 export interface Task {
   id: string
@@ -11,7 +11,13 @@ export interface Task {
   priority: Priority
   dueDate?: string // YYYY-MM-DD
   startDate?: string // YYYY-MM-DD; task stays off the wheel until this day arrives
-  dayScope: DayScope // restrict the task to weekdays / weekends / all days
+  dayScope: DayScope // restrict the task to weekdays / weekends / all days / hand-picked days
+  /**
+   * Hand-picked days of the week, only read when `dayScope === 'custom'`:
+   * 0 = Sunday … 6 = Saturday (e.g. [1,3,5] = Mon/Wed/Fri). An empty or missing
+   * list means the scope says nothing, so the task is allowed on any day.
+   */
+  weekDays?: number[]
   createdAt: string // ISO
   archived: boolean // non-repeating tasks get archived once done
   spinsSinceLastPicked: number // fairness counter
@@ -30,6 +36,12 @@ export interface Task {
    */
   requiredFrom?: string
   requiredUntil?: string
+  /**
+   * A must-do that ALSO wants a wheel segment. Normally `required` pulls a task
+   * off the wheel entirely (checklist only); with this on it lives in both, so
+   * the wheel can still land on it and pay the full reward.
+   */
+  onWheel?: boolean
   /**
    * Chained quest: stays completely hidden (wheel AND must-do checklist) until
    * the task with this id has been completed at least once. A dangling id (the

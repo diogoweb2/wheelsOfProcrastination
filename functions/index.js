@@ -95,9 +95,13 @@ function todayKey(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: HOME_TZ }).format(now)
 }
 
-function isWeekendKey(key) {
+function dayOfWeekKey(key) {
   const [y, m, d] = key.split('-').map(Number)
-  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay()
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay()
+}
+
+function isWeekendKey(key) {
+  const dow = dayOfWeekKey(key)
   return dow === 0 || dow === 6
 }
 
@@ -105,6 +109,8 @@ function isAvailableOn(task, today) {
   if (task.startDate && today < task.startDate) return false
   if (task.dayScope === 'weekdays' && isWeekendKey(today)) return false
   if (task.dayScope === 'weekends' && !isWeekendKey(today)) return false
+  // hand-picked days (weekDays: 0=Sun…6=Sat); an empty list means no restriction
+  if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeekKey(today))) return false
   return true
 }
 

@@ -18,6 +18,16 @@ export function addDays(key: string, n: number): string {
   return dayKey(d)
 }
 
+/** Day of week for a day key: 0 = Sunday … 6 = Saturday (local). */
+export function dayOfWeek(key: string): number {
+  return parseDay(key).getDay()
+}
+
+/** Short weekday label for a 0–6 index, e.g. 1 → "Mon". */
+export function weekDayLabel(dow: number): string {
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow] ?? ''
+}
+
 /** True if the given day (local) falls on Saturday or Sunday. */
 export function isWeekend(key: string): boolean {
   const dow = parseDay(key).getDay()

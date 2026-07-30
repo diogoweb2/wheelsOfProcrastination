@@ -205,7 +205,9 @@ interface StoreState {
     dueDate?: string
     startDate?: string
     dayScope: DayScope
+    weekDays?: number[]
     required?: boolean
+    onWheel?: boolean
     requiredFrom?: string
     requiredUntil?: string
     afterTaskId?: string
@@ -746,6 +748,8 @@ export const useStore = create<StoreState>((set, get) => {
           ...(t.dueDate ? { dueDate: t.dueDate } : {}),
           ...(t.startDate ? { startDate: t.startDate } : {}),
           ...(t.required ? { required: true } : {}),
+          ...(t.required && t.onWheel ? { onWheel: true } : {}),
+          ...(t.dayScope === 'custom' && t.weekDays?.length ? { weekDays: t.weekDays } : {}),
           ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
           ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
           ...(t.afterTaskId ? { afterTaskId: t.afterTaskId } : {}),
@@ -830,6 +834,7 @@ export const useStore = create<StoreState>((set, get) => {
         if (!t) return
         // It stops being a requirement but survives as a normal wheel quest.
         t.required = false
+        delete t.onWheel
         delete t.requiredFrom
         delete t.requiredUntil
       })

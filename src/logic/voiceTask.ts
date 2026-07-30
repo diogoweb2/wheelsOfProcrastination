@@ -13,6 +13,7 @@ export type ParsedTask = {
   required?: boolean
   dueDate?: string
   dayScope?: DayScope
+  weekDays?: number[] // 0=Sun…6=Sat, only meaningful with dayScope 'custom'
 }
 
 const WORD_NUMBERS: Record<string, number> = {
@@ -28,6 +29,20 @@ function toNumber(word: string): number {
 }
 
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+// "mondays", "mon", "tues", "weds"… whatever the dictation hands us.
+const DAY_WORD = '(?:sun|mon|tues?|wed(?:nes)?|thurs?|fri|sat(?:ur)?)(?:day)?s?'
+const DAY_LIST = `${DAY_WORD}(?:\\s*(?:,|and|&)?\\s*${DAY_WORD})*`
+
+/** Every weekday named in a phrase like "monday, wednesday and friday" → [1,3,5]. */
+function parseDayList(phrase: string): number[] {
+  const days = new Set<number>()
+  for (const m of phrase.matchAll(new RegExp(DAY_WORD, 'g'))) {
+    const w = m[0]
+    const i = WEEKDAYS.findIndex((d) => d.startsWith(w.slice(0, 3)))
+    if (i >= 0) days.add(i)
+  }
+  return [...days].sort()
+}
 
 // Next occurrence of a weekday, always in the future (a week out if it's today).
 function nextWeekday(name: string, today: string): string {
@@ -67,6 +82,18 @@ const RULES: Rule[] = [
   { re: /\bmust ?-? ?do\b|\brequired\b|\bno excuses\b|\bevery single day no matter what\b/, apply: (_m, o) => { o.required = true } },
 
   // --- day scope ---
+  // Hand-picked days, e.g. "every monday wednesday and friday", "on tuesdays".
+  // Ahead of the deadline rules so "on Friday" reads as a schedule, not a due date.
+  {
+    re: new RegExp(`\\b(?:every|each|on)\\s+(${DAY_LIST})\\b`),
+    apply: (m, o) => {
+      const days = parseDayList(m[1])
+      if (!days.length) return
+      o.dayScope = 'custom'
+      o.weekDays = days
+      if (o.repeats === undefined) o.repeats = true
+    },
+  },
   { re: /\b(?:on |at )?(?:the )?weekends?\b|\bsaturdays and sundays\b/, apply: (_m, o) => { o.dayScope = 'weekends' } },
   { re: /\b(?:on )?(?:week ?days|school days)\b/, apply: (_m, o) => { o.dayScope = 'weekdays' } },
 
@@ -166,7 +193,12 @@ export const VOICE_PHRASES: { emoji: string; title: string; phrases: string[] }[
   {
     emoji: '🗓️',
     title: 'Which days',
-    phrases: ['“on weekends”', '“on weekdays” / “school days”'],
+    phrases: [
+      '“on weekends”',
+      '“on weekdays” / “school days”',
+      '“every monday, wednesday and friday” — just those days',
+      '“on tuesdays” — one day a week',
+    ],
   },
   {
     emoji: '✂️',
@@ -184,6 +216,7 @@ export const VOICE_EXAMPLES: string[] = [
   'tidy room by Friday, urgent',
   'take the bins out every week on weekends',
   'water the plants once a month, easy',
+  'play video games every monday wednesday and friday, must do',
 ]
 
 // One-line "here's what I heard" for the form, so a mis-parse is obvious.
@@ -193,7 +226,8 @@ export function describeParsed(p: ParsedTask): string {
   if (p.repeats) bits.push(p.cooldownDays ? `repeats, ${p.cooldownDays}d rest` : 'repeats daily')
   if (p.effort) bits.push(`${p.effort} effort`)
   if (p.priority === 'urgent') bits.push('urgent')
-  if (p.dayScope && p.dayScope !== 'all') bits.push(p.dayScope)
+  if (p.weekDays?.length) bits.push(p.weekDays.map((d) => WEEKDAYS[d].slice(0, 3)).join('/'))
+  else if (p.dayScope && p.dayScope !== 'all') bits.push(p.dayScope)
   if (p.dueDate) bits.push(`due ${p.dueDate}`)
   return bits.join(' · ')
 }
