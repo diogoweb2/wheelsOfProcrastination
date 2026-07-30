@@ -9,7 +9,6 @@ export const FREEZE_COST = 150
 export const MAX_FREEZES = 2
 export const RESPIN_CHEAP = 15
 export const RESPIN_EXPENSIVE = 60
-export const MANUAL_PICK_MULTIPLIER = 1.5
 export const STREAK_GOAL_OPTIONS = [7, 14, 30, 50, 100]
 /** Mystery background from the Store. SPECIAL feature — priced like a luxury, not a habit. */
 export const BACKGROUND_COST = 20
@@ -50,12 +49,6 @@ export function rewardFor(task: Task, isFirstOfDay: boolean, today?: string): nu
   if (isEffectivelyUrgent(task, today)) gems = Math.round(gems * URGENT_MULTIPLIER)
   if (isFirstOfDay) gems += FIRST_OF_DAY_BONUS
   return gems
-}
-
-/** Cost to hand-pick a task. Urgent = free (encouraged). Non-urgent = pay more than you'd earn. */
-export function manualPickCost(task: Task, today?: string): number {
-  if (isEffectivelyUrgent(task, today)) return 0
-  return Math.ceil(BASE_REWARD[task.effort] * MANUAL_PICK_MULTIPLIER)
 }
 
 export function respinCost(respinsToday: number, completionsToday: number): number {

@@ -65,7 +65,6 @@ import {
   MAX_FREEZES,
   MAX_PENDING,
   isEffectivelyUrgent,
-  manualPickCost,
   respinCost,
   rewardFor,
   requiredPenalty,
@@ -886,10 +885,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (data.daily.pendingPicks.length >= MAX_PENDING) return 'full'
       const task = data.tasks.find((t) => t.id === taskId)
       if (!task || !isAvailableOn(task, dayKey(), data.completions, data.tasks)) return 'broke'
-      const cost = manualPickCost(task)
-      if (data.economy.gems < cost) return 'broke'
       commit((d) => {
-        d.economy.gems -= cost
         d.daily.pendingPicks.unshift({ taskId, via: 'manual' })
       })
       return 'ok'

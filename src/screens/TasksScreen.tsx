@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import type { DayScope, Effort, Priority, Task } from '../types'
-import { REQUIRED_REWARD, isEffectivelyUrgent, manualPickCost, rewardFor } from '../logic/economy'
+import { REQUIRED_REWARD, isEffectivelyUrgent, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
 import { dayKey, daysUntil, weekDayLabel } from '../logic/dates'
@@ -26,19 +26,18 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   })
 
   function pick(task: Task) {
-    const cost = manualPickCost(task)
     const result = manualPick(task.id)
     if (result !== 'ok') {
       sfx.error()
       setToast(
         result === 'full'
           ? 'Your plate already has 3 quests. Finish one before grabbing more, greedy-guts!'
-          : `You need 🪙${cost} to hand-pick that. Spinning the wheel is free, just saying!`,
+          : "That one isn't up for grabs today.",
       )
       window.setTimeout(() => setToast(null), 3000)
       return
     }
-    sfx[cost > 0 ? 'spend' : 'click']()
+    sfx.click()
     goSpin()
   }
 
@@ -63,7 +62,6 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
       <div className="h2">Active ({active.length})</div>
       {urgentFirst.map((t) => {
         const urgent = isEffectivelyUrgent(t)
-        const cost = manualPickCost(t)
         const doneToday = doneIds.has(t.id)
         const due = t.dueDate ? daysUntil(t.dueDate) : null
         const notStarted = t.startDate ? daysUntil(t.startDate) > 0 : false
@@ -117,7 +115,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               </span>
             ) : (
               <button className="btn btn--small" style={urgent ? undefined : { background: 'var(--blue)', boxShadow: '0 3px 0 var(--blue-dark)' }} onClick={() => pick(t)}>
-                {urgent ? 'Do it! FREE' : `Pick 🪙${cost}`}
+                {urgent ? 'Do it!' : 'Pick it'}
               </button>
             )}
             <button

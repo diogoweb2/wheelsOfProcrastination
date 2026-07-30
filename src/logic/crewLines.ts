@@ -58,12 +58,12 @@ const pools = {
     'New island! Toss some Berries to the sea and let\'s go!',
   ],
   manualUpsell: [
-    'You wanna pick yourself? Cool! But Nami\'s charging you for it.',
-    'Choosing your own quest costs Berries — captain\'s orders... well, Nami\'s.',
+    'You wanna pick yourself? Do it! Picking is always free.',
+    'Your quest, your call — no Berries needed. Just don\'t overload the plate!',
   ],
   urgentPick: [
-    'That one\'s an emergency — grab it, it\'s FREE! Charge in!',
-    'Danger?! I love danger! Do the scary one, no cost!',
+    'That one\'s an emergency — grab it! Charge in!',
+    'Danger?! I love danger! Do the scary one!',
   ],
   missedDay: [
     'You skipped yesterday! It\'s okay — real pirates get back up. Let\'s go!',

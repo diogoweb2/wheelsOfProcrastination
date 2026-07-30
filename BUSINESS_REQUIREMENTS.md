@@ -53,8 +53,8 @@ Fields when creating a task:
 
 ## 4. Manual pick ("I know what I want today")
 
-- Urgent+important tasks (including date-escalated ones): picking manually is **free** — the app actively encourages ("do the scary thing").
-- Not-urgent tasks: picking manually **costs 1.5× the task's reward** (rounded up), i.e. you always pay more than you earn. Freedom is a luxury; the sloth says so.
+- **Hand-picking any task is free**, urgent or not. Deciding to work is never taxed — the only limit is the plate cap of **3** pending tasks (§3), which is what keeps a day honest.
+- Urgent+important tasks (including date-escalated ones) are still surfaced first and nudged hardest ("do the scary thing").
 
 ## 5. Economy (gems — displayed in-app as "Berries" 🪙; internal data field stays `gems`) — Duolingo-calibrated
 
