@@ -187,7 +187,7 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
       {/* must-dos on top, then the wheel with its effort filter running down the side */}
       <div className="spin-split">
         <div className="spin-split-list">
-          <RequiredList />
+          <RequiredList onTrain={goTrain} />
         </div>
 
         <div className="wheel-row">

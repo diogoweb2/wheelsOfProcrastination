@@ -1,7 +1,7 @@
 # Wheels of Procrastination — Business Requirements
 
 > Living document. Update this file whenever a rule changes. The code should always match this doc.
-> Last updated: 2026-07-29
+> Last updated: 2026-07-31
 
 ## 1. Concept
 
@@ -31,7 +31,14 @@ Fields when creating a task:
 | Must-do | yes / no | A non-negotiable: leaves the wheel and lives in the daily checklist beside the wheel. |
 | Also on the wheel | must-dos only | A must-do can opt back **onto** the wheel (`onWheel`): it stays on the checklist AND can be spun/hand-picked, paying the full wheel reward. Off by default. |
 | Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
+| Split into parts | optional, new one-shot quests only | A big job broken into N sessions ("cut trees" → 6 parts). Creates N quests named `<name> (1/N)`…`(N/N)`, each **locked until the previous part is done** (`afterTaskId` chain), all sharing a `seriesId`. Max 20. |
 | Rest days | optional, repeating tasks only | After a completion the task disappears for N days and only comes back on day N after the last time it was done (e.g. "cut the grass" with 15). Blank/0 ⇒ available again the next day. While resting it is off the wheel, off the checklist, and **not** penalised as a missed must-do. |
+
+**Form layout**: the everyday path is short — name (with 🎤 dictation), must-do, repeats, effort, priority. Everything else (locked-until, split into parts, dates, which days) lives behind one **⚙️ Advanced** drawer, which opens itself when the quest being edited already uses any of those fields.
+
+**Finishing a split early**: once any part of a split quest is done, its next remaining part shows a **🏁** button in the quest log. Tapping it deletes every part that hasn't been completed yet (history of the finished parts stays) — "I only needed 4 of the 6 sessions".
+
+**Search**: the quest log shows a 🔍 search box once there are more than 4 active quests; it filters the list by name.
 
 ## 3. The Wheel
 
@@ -44,8 +51,7 @@ Fields when creating a task:
   - Fairness (anti-starvation): weight × (1 + 0.5 × spinsSinceLastPicked), capped at ×4. A task that keeps losing gets progressively luckier; repeats are still possible so it feels random.
 - The spin has sound (ticks + fanfare), easing animation, and confetti on landing.
 - **The plate (pending picks)**: a spun or hand-picked task lands on "today's plate". Choosing "Later" keeps it there until end of day. The plate holds at most **3** tasks (shown as a swipeable card stack); tasks on the plate leave the wheel pool until dealt with.
-- **Quiz quests link to the Academy**: a quiz training card (on the plate or in the post-spin sheet) shows a **🏫 Start training →** button that switches to the Quiz tab and opens that topic's training round directly.
-- **One study topic at a time**: quiz training quests (the auto-synced "<emoji> <topic> quiz training" habits) are limited to **one on the plate at a time** — while one is pending, every other topic leaves the wheel. Finishing it (or re-spinning it away) lifts the lock, so landing on a second topic later the same day is fine.
+- **Quiz quests are must-dos, not wheel picks** (see §14): studying isn't left to luck, so every unlocked topic lands on the daily must-do checklist. The checklist row carries a **🏫** shortcut that switches to the Quiz tab and opens that topic's training round directly; a quiz card still on the plate from before the change keeps its **🏫 Start training →** button.
 - **Abandoned-pick penalty**: each task still on the plate at end of day costs gems at rollover — **low −5, medium −10, high −18** (≈ half its base reward, each pick penalized separately). Gems floor at 0. This is separate from streak rules.
 - **Re-spin ("the sloth shrugs")**: if you don't like the result you can pay gems to spin again.
   - First re-spin of the day, before any task is completed that day: **15 gems** (viable ~once/day).
@@ -208,7 +214,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - Diogo is told the verdict (**push + a top banner with a dismiss button**) whether Ben passed, failed, or walked out.
   - **A pass automatically opens his next topic**: the ladder's successor where there is one, otherwise the first still-locked topic in his catalog. Plus the usual 🍇 and CONQUERED stamp.
 - **Devil Fruits 🍇** = the diamond currency, per profile. Sources: first official topic pass + admin bonus grants. Shown in the topbar next to Berries (the admin sees Ben's count on his own topbar too).
-- **Wheel integration**: every unlocked topic is auto-synced onto the owner's wheel as a daily habit ("<emoji> <topic> quiz training", medium effort, ⚡ high priority); locking archives the habit.
+- **Must-do integration**: every unlocked topic is auto-synced into the owner's **daily must-do checklist** ("<emoji> <topic> quiz training", medium effort, ⚡ high priority, `required: true`) — never a wheel segment, since study shouldn't depend on a spin. The checklist row gets a **🏫** button straight into that topic's training. Locking archives the habit. Quiz habits created before this rule are promoted to must-dos on the next sync.
 
 ## 15. Store tabs & Treasures (prizes)
 

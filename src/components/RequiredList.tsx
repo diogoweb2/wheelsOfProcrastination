@@ -3,14 +3,15 @@ import { useStore } from '../store/useStore'
 import type { Task } from '../types'
 import { sfx } from '../audio'
 import { dayKey, daysUntil } from '../logic/dates'
-import { requiredToday } from '../logic/wheel'
+import { isStudyTask, requiredToday } from '../logic/wheel'
+import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
 
 /**
  * Today's non-negotiables, sitting beside the wheel. One tap marks an item done —
  * no ceremony, no wheel. Dated requirements shout louder as their last day nears.
  */
-export function RequiredList() {
+export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void } = {}) {
   const { data, completeRequired, completedTodayIds } = useStore()
   const today = dayKey()
   const doneIds = completedTodayIds()
@@ -70,6 +71,14 @@ export function RequiredList() {
               if (doneIds.has(t.id)) return
               complete(t.id)
             }}
+            onTrain={
+              onTrain && isStudyTask(t)
+                ? () => {
+                    sfx.click()
+                    onTrain(t.id.slice(QUIZ_TASK_PREFIX.length))
+                  }
+                : undefined
+            }
           />
         ))}
       </div>
@@ -81,12 +90,21 @@ export function RequiredList() {
   )
 }
 
-function RequiredRow(props: { task: Task; done: boolean; leaving: boolean; today: string; onToggle: () => void }) {
-  const { task, done, leaving, today, onToggle } = props
+function RequiredRow(props: {
+  task: Task
+  done: boolean
+  leaving: boolean
+  today: string
+  onToggle: () => void
+  onTrain?: () => void
+}) {
+  const { task, done, leaving, today, onToggle, onTrain } = props
   const left = task.requiredUntil ? daysUntil(task.requiredUntil, today) : null
   const warning = left !== null && left <= REQUIRED_WARN_DAYS
 
-  return (
+  // Study must-dos get a shortcut straight into the topic's training round —
+  // the checkbox still belongs to the user, the button just saves two taps.
+  const row = (
     <button
       className={`required-row${done ? ' required-row--done' : ''}${leaving ? ' required-row--leaving' : ''}${warning && !done ? ' required-row--warn' : ''}`}
       onClick={onToggle}
@@ -110,5 +128,15 @@ function RequiredRow(props: { task: Task; done: boolean; leaving: boolean; today
         </span>
       </span>
     </button>
+  )
+
+  if (!onTrain || done) return row
+  return (
+    <div className="required-row-wrap">
+      {row}
+      <button className="required-train" onClick={onTrain} aria-label="Start training">
+        🏫
+      </button>
+    </div>
   )
 }

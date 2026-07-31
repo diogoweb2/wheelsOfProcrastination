@@ -211,9 +211,16 @@ interface StoreState {
     requiredUntil?: string
     afterTaskId?: string
     cooldownDays?: number
+    /** Auto-split: >1 creates that many chained parts instead of one quest. */
+    parts?: number
   }) => void
   updateTask: (id: string, patch: Partial<Task>) => void
   deleteTask: (id: string) => void
+  /**
+   * "I'm done earlier than planned": drops every part of an auto-split quest
+   * that hasn't been completed yet. Returns how many parts were removed.
+   */
+  finishSeriesEarly: (seriesId: string) => number
 
   completedTodayIds: () => Set<string>
   /** Tick a required checklist item off for today (pays the reduced flat reward). */
@@ -731,30 +738,62 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     addTask(t) {
+      const parts = t.parts && t.parts > 1 ? Math.min(20, Math.floor(t.parts)) : 1
       commit((d) => {
-        d.tasks.push({
-          id: crypto.randomUUID(),
-          name: t.name.trim(),
-          repeats: t.repeats,
-          effort: t.effort,
-          priority: t.priority,
-          dayScope: t.dayScope,
-          createdAt: new Date().toISOString(),
-          archived: false,
-          spinsSinceLastPicked: 0,
-          timesPicked: 0,
-          // omitted entirely when unset — Firestore rejects undefined values
-          ...(t.dueDate ? { dueDate: t.dueDate } : {}),
-          ...(t.startDate ? { startDate: t.startDate } : {}),
-          ...(t.required ? { required: true } : {}),
-          ...(t.required && t.onWheel ? { onWheel: true } : {}),
-          ...(t.dayScope === 'custom' && t.weekDays?.length ? { weekDays: t.weekDays } : {}),
-          ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
-          ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
-          ...(t.afterTaskId ? { afterTaskId: t.afterTaskId } : {}),
-          ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
+        // Auto-split: one quest per session, each locked behind the previous one,
+        // so only the next part is ever live on the wheel.
+        const seriesId = parts > 1 ? crypto.randomUUID() : undefined
+        let previousId: string | undefined
+        for (let i = 1; i <= parts; i++) {
+          const id = crypto.randomUUID()
+          // part 1 keeps whatever gate the user chose; every later part waits on its predecessor
+          const gate = previousId ?? t.afterTaskId
+          d.tasks.push({
+            id,
+            name: parts > 1 ? `${t.name.trim()} (${i}/${parts})` : t.name.trim(),
+            repeats: t.repeats,
+            effort: t.effort,
+            priority: t.priority,
+            dayScope: t.dayScope,
+            createdAt: new Date().toISOString(),
+            archived: false,
+            spinsSinceLastPicked: 0,
+            timesPicked: 0,
+            // omitted entirely when unset — Firestore rejects undefined values
+            ...(t.dueDate ? { dueDate: t.dueDate } : {}),
+            ...(t.startDate ? { startDate: t.startDate } : {}),
+            ...(t.required ? { required: true } : {}),
+            ...(t.required && t.onWheel ? { onWheel: true } : {}),
+            ...(t.dayScope === 'custom' && t.weekDays?.length ? { weekDays: t.weekDays } : {}),
+            ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
+            ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
+            ...(gate ? { afterTaskId: gate } : {}),
+            ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
+            ...(seriesId ? { seriesId, seriesPart: i, seriesTotal: parts } : {}),
+          })
+          previousId = id
+        }
+      })
+    },
+
+    finishSeriesEarly(seriesId) {
+      let removed = 0
+      commit((d, events) => {
+        const doneIds = new Set(d.completions.map((c) => c.taskId))
+        const dropping = d.tasks.filter((t) => t.seriesId === seriesId && !doneIds.has(t.id))
+        if (dropping.length === 0) return
+        removed = dropping.length
+        const ids = new Set(dropping.map((t) => t.id))
+        d.tasks = d.tasks.filter((t) => !ids.has(t.id))
+        d.daily.pendingPicks = d.daily.pendingPicks.filter((p) => !ids.has(p.taskId))
+        events.push({
+          type: 'goal',
+          emoji: '🏁',
+          title: 'Done ahead of schedule!',
+          description: `You called it early — ${removed} leftover part${removed > 1 ? 's' : ''} dropped. Shishishi, that's a captain's call!`,
         })
       })
+      return removed
     },
 
     updateTask(id, patch) {

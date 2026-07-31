@@ -319,6 +319,37 @@ input, select { font-family: inherit; }
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 /* Collapsible "Dates" drawer in the task form — keeps the page short by default. */
+/* Quest-log search: find a quest by name once the list gets long. */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--bg2);
+}
+.search-row input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--text);
+}
+.search-row input:focus { outline: none; }
+.search-clear {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 900;
+  padding: 4px 2px;
+}
+
 .dates-toggle {
   display: flex;
   align-items: center;
@@ -1618,6 +1649,19 @@ input, select { font-family: inherit; }
     margin-top: -6px; /* swallow the flex gap above */
   }
 }
+
+/* Study must-do: the row plus a shortcut into that topic's training round. */
+.required-row-wrap { display: flex; align-items: stretch; gap: 6px; }
+.required-row-wrap .required-row { flex: 1; min-width: 0; }
+.required-train {
+  flex: none;
+  width: 42px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  font-size: 18px;
+}
+.required-train:active { transform: scale(0.94); }
 
 .required-box {
   flex: none;

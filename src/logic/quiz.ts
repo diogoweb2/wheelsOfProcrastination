@@ -714,9 +714,11 @@ export function shuffle<T>(arr: T[]): T[] {
 export const QUIZ_TASK_PREFIX = 'quiz-'
 
 /**
- * Every unlocked topic is also a daily habit on the owner's wheel: medium
- * effort, high priority. Locking a topic archives its habit (history survives).
- * Runs against the owner's data on login and whenever a lock is toggled.
+ * Every unlocked topic is also a daily **must-do**: medium effort, high
+ * priority, ticked off in the checklist beside the wheel (never spun for —
+ * studying isn't left to luck). Locking a topic archives its habit (history
+ * survives). Runs against the owner's data on login and whenever a lock is
+ * toggled; older wheel-era quiz habits are promoted to must-dos on the way.
  */
 export function syncQuizTasks(d: AppData, ownerId: string): void {
   for (const t of topicsFor(ownerId)) {
@@ -732,13 +734,19 @@ export function syncQuizTasks(d: AppData, ownerId: string): void {
           effort: 'medium',
           priority: 'urgent',
           dayScope: 'all',
+          required: true,
           createdAt: new Date().toISOString(),
           archived: false,
           spinsSinceLastPicked: 0,
           timesPicked: 0,
         })
-      } else if (task.archived) {
-        task.archived = false
+      } else {
+        if (task.archived) task.archived = false
+        // migration: quiz training used to live on the wheel
+        if (!task.required) {
+          task.required = true
+          delete task.onWheel
+        }
       }
     } else if (task && !task.archived) {
       task.archived = true

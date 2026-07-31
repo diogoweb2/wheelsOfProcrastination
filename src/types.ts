@@ -54,6 +54,15 @@ export interface Task {
    * was ticked off. Absent / 0 = available again the next day, as before.
    */
   cooldownDays?: number
+  /**
+   * Auto-split quest ("cut the trees" → 6 sessions). Every part of one split
+   * shares a `seriesId` and knows its place (`seriesPart` of `seriesTotal`).
+   * Parts are chained through `afterTaskId`, so only the next one is ever live.
+   * Finishing early drops every part that hasn't been done yet.
+   */
+  seriesId?: string
+  seriesPart?: number
+  seriesTotal?: number
 }
 
 export interface Completion {

@@ -10,20 +10,33 @@ import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 
 export function TasksScreen({ goSpin }: { goSpin: () => void }) {
-  const { data, addTask, updateTask, deleteTask, manualPick, completedTodayIds } = useStore()
+  const { data, addTask, updateTask, deleteTask, manualPick, completedTodayIds, finishSeriesEarly } = useStore()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Task | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   const today = dayKey()
   const doneIds = completedTodayIds()
   const pendingIds = new Set(data.daily.pendingPicks.map((p) => p.taskId))
   const active = data.tasks.filter((t) => !t.archived)
-  const urgentFirst = [...active].sort((a, b) => {
-    const ua = isEffectivelyUrgent(a) ? 0 : 1
-    const ub = isEffectivelyUrgent(b) ? 0 : 1
-    return ua - ub || a.name.localeCompare(b.name)
-  })
+  const needle = query.trim().toLowerCase()
+  const urgentFirst = [...active]
+    .filter((t) => !needle || t.name.toLowerCase().includes(needle))
+    .sort((a, b) => {
+      const ua = isEffectivelyUrgent(a) ? 0 : 1
+      const ub = isEffectivelyUrgent(b) ? 0 : 1
+      return ua - ub || a.name.localeCompare(b.name)
+    })
+  // "Done early" is offered once a split quest is under way, on its next
+  // remaining part only — tapping it drops that part and everything after it.
+  const doneEver = new Set(data.completions.map((c) => c.taskId))
+  const earlyFinishIds = new Set<string>()
+  for (const [, parts] of groupBySeries(data.tasks)) {
+    if (!parts.some((p) => doneEver.has(p.id))) continue
+    const next = parts.filter((p) => !doneEver.has(p.id) && !p.archived).sort((a, b) => (a.seriesPart ?? 0) - (b.seriesPart ?? 0))[0]
+    if (next) earlyFinishIds.add(next.id)
+  }
 
   function pick(task: Task) {
     const result = manualPick(task.id)
@@ -59,7 +72,30 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
         + Add task
       </button>
 
-      <div className="h2">Active ({active.length})</div>
+      {active.length > 4 && (
+        <div className="search-row">
+          <span aria-hidden>🔍</span>
+          <input
+            type="search"
+            value={query}
+            placeholder="Search your quests…"
+            aria-label="Search quests"
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button className="search-clear" aria-label="Clear search" onClick={() => setQuery('')}>
+              ✕
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="h2">
+        {needle ? `Found ${urgentFirst.length} of ${active.length}` : `Active (${active.length})`}
+      </div>
+      {needle && urgentFirst.length === 0 && (
+        <p className="muted">No quest matches “{query.trim()}”. Even Zoro couldn't find it.</p>
+      )}
       {urgentFirst.map((t) => {
         const urgent = isEffectivelyUrgent(t)
         const doneToday = doneIds.has(t.id)
@@ -89,6 +125,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
                 {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
                 {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
                 {gate && <span className="chip">🔒 after "{gate.name}"</span>}
+                {t.seriesTotal ? <span className="chip">🧩 part {t.seriesPart}/{t.seriesTotal}</span> : null}
                 {t.cooldownDays ? <span className="chip">⏳ every {t.cooldownDays}d</span> : null}
                 {cooling && <span className="chip">😴 back {cooling}</span>}
                 {due !== null && (
@@ -116,6 +153,21 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
             ) : (
               <button className="btn btn--small" style={urgent ? undefined : { background: 'var(--blue)', boxShadow: '0 3px 0 var(--blue-dark)' }} onClick={() => pick(t)}>
                 {urgent ? 'Do it!' : 'Pick it'}
+              </button>
+            )}
+            {earlyFinishIds.has(t.id) && (
+              <button
+                className="btn--ghost btn btn--small"
+                style={{ padding: '8px 10px' }}
+                title="Finished early — drop the parts left"
+                onClick={() => {
+                  const dropped = finishSeriesEarly(t.seriesId!)
+                  sfx.gem()
+                  setToast(`🏁 Called it early — ${dropped} part${dropped > 1 ? 's' : ''} dropped.`)
+                  window.setTimeout(() => setToast(null), 3000)
+                }}
+              >
+                🏁
               </button>
             )}
             <button
@@ -169,6 +221,18 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   )
 }
 
+/** All parts of every auto-split quest, keyed by series id. */
+function groupBySeries(tasks: Task[]): Map<string, Task[]> {
+  const out = new Map<string, Task[]>()
+  for (const t of tasks) {
+    if (!t.seriesId) continue
+    const list = out.get(t.seriesId)
+    if (list) list.push(t)
+    else out.set(t.seriesId, [t])
+  }
+  return out
+}
+
 function crewToneForCount(n: number): string {
   if (n <= 3) return `${n} quest${n > 1 ? 's' : ''} ready. Small crew, big dreams!`
   if (n <= 8) return 'A solid lineup of adventures. Let\'s go!'
@@ -192,6 +256,7 @@ function TaskForm(props: {
     requiredUntil?: string
     afterTaskId?: string
     cooldownDays?: number
+    parts?: number
   }) => void
   allTasks: Task[]
   onClose: () => void
@@ -215,10 +280,20 @@ function TaskForm(props: {
   const [confirmDelete, setConfirmDelete] = useState(false)
   // Everything except this quest itself can act as its unlock gate.
   const gateOptions = allTasks.filter((t) => t.id !== initial?.id && !t.archived)
-  // Dates are the advanced corner of this form — folded away by default so the
-  // everyday "name + must-do + effort" path stays short enough for a kid.
-  const [datesOpen, setDatesOpen] = useState(
-    Boolean(initial?.dueDate || initial?.startDate || initial?.requiredFrom || initial?.requiredUntil),
+  // Chaining, splitting, dates and day scope are the advanced corner of this
+  // form — folded away by default so the everyday "name + must-do + effort"
+  // path stays short enough for a kid. Opens itself when a quest already uses it.
+  const [parts, setParts] = useState('')
+  const partCount = Math.min(20, Math.max(1, Math.floor(Number(parts) || 1)))
+  const [advancedOpen, setAdvancedOpen] = useState(
+    Boolean(
+      initial?.dueDate ||
+        initial?.startDate ||
+        initial?.requiredFrom ||
+        initial?.requiredUntil ||
+        initial?.afterTaskId ||
+        (initial?.dayScope && initial.dayScope !== 'all'),
+    ),
   )
 
   // Dictation: speak the whole quest, the keyword parser fills the form, you review.
@@ -242,7 +317,7 @@ function TaskForm(props: {
         // Must-dos use the requiredUntil window instead of a due date.
         if (p.required) setRequiredUntil(p.dueDate)
         else setDueDate(p.dueDate)
-        setDatesOpen(true)
+        setAdvancedOpen(true)
       }
       setParsedSummary(describeParsed(p))
     },
@@ -386,23 +461,6 @@ function TaskForm(props: {
         </div>
 
         <div className="field">
-          <label>Locked until another quest is done? (optional)</label>
-          <select value={afterTaskId} onChange={(e) => setAfterTaskId(e.target.value)}>
-            <option value="">🔓 No — available right away</option>
-            {gateOptions.map((t) => (
-              <option key={t.id} value={t.id}>
-                🔒 After "{t.name}"
-              </option>
-            ))}
-          </select>
-          {afterTaskId && (
-            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-              Hidden from the wheel and the must-do list until that quest is completed once.
-            </p>
-          )}
-        </div>
-
-        <div className="field">
           <label>Effort</label>
           <div className="seg">
             {(['low', 'medium', 'high'] as Effort[]).map((e) => (
@@ -425,16 +483,54 @@ function TaskForm(props: {
           </div>
         </div>
 
-        {/* One dates drawer. Only ever two dates: a start and an end — the pair
-            shown depends on whether this is a must-do or a wheel quest. */}
+        {/* Everything power-user lives behind one button: chaining, splitting,
+            dates and day scope. The everyday path stays name + must-do + effort. */}
         <div className="field">
-          <button className="dates-toggle" onClick={() => setDatesOpen((o) => !o)}>
-            <span>📅 Dates (optional)</span>
-            <span className="muted">{datesOpen ? '▲' : '▼'}</span>
+          <button className="dates-toggle" onClick={() => setAdvancedOpen((o) => !o)}>
+            <span>⚙️ Advanced</span>
+            <span className="muted">{advancedOpen ? '▲' : '▼'}</span>
           </button>
 
-          {datesOpen && (
+          {advancedOpen && (
             <div className="dates-body">
+              <label>Locked until another quest is done? (optional)</label>
+              <select value={afterTaskId} onChange={(e) => setAfterTaskId(e.target.value)}>
+                <option value="">🔓 No — available right away</option>
+                {gateOptions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    🔒 After "{t.name}"
+                  </option>
+                ))}
+              </select>
+              {afterTaskId && (
+                <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                  Hidden from the wheel and the must-do list until that quest is completed once.
+                </p>
+              )}
+
+              {/* Auto-split: one big job → N chained sessions. New quests only —
+                  re-splitting an existing one would orphan its history. */}
+              {!initial && !repeats && (
+                <>
+                  <label style={{ marginTop: 12 }}>Split into parts (a big job, one session at a time)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    inputMode="numeric"
+                    placeholder="e.g. 6"
+                    value={parts}
+                    onChange={(e) => setParts(e.target.value)}
+                  />
+                  <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                    {partCount > 1
+                      ? `Creates ${partCount} quests — "${(name.trim() || 'Your quest')} (1/${partCount})" … (${partCount}/${partCount}). Each one unlocks when the one before it is done, and you can call it early any time to drop the rest.`
+                      : 'One quest, as usual.'}
+                  </p>
+                </>
+              )}
+
+              <div style={{ height: 12 }} />
               {required ? (
                 <>
                   <label>Starts on — ignored until this day</label>
@@ -476,46 +572,44 @@ function TaskForm(props: {
                   )}
                 </>
               )}
-            </div>
-          )}
-        </div>
 
-        <div className="field">
-          <label>Which days? (the wheel obeys)</label>
-          <div className="seg">
-            <button className={dayScope === 'all' ? 'on' : ''} onClick={() => setDayScope('all')}>
-              All days
-            </button>
-            <button className={dayScope === 'weekdays' ? 'on' : ''} onClick={() => setDayScope('weekdays')}>
-              💼 Weekdays
-            </button>
-            <button className={dayScope === 'weekends' ? 'on' : ''} onClick={() => setDayScope('weekends')}>
-              🏖️ Weekends
-            </button>
-            <button className={dayScope === 'custom' ? 'on' : ''} onClick={() => setDayScope('custom')}>
-              🗓️ Pick days
-            </button>
-          </div>
-          {dayScope === 'custom' && (
-            <>
-              {/* Monday first — the week people actually plan in. */}
-              <div className="seg seg--days" style={{ marginTop: 10 }}>
-                {[1, 2, 3, 4, 5, 6, 0].map((d) => (
-                  <button
-                    key={d}
-                    className={weekDays.includes(d) ? 'on' : ''}
-                    onClick={() => setWeekDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort()))}
-                  >
-                    {weekDayLabel(d).slice(0, 2)}
-                  </button>
-                ))}
+              <label style={{ marginTop: 12 }}>Which days? (the wheel obeys)</label>
+              <div className="seg">
+                <button className={dayScope === 'all' ? 'on' : ''} onClick={() => setDayScope('all')}>
+                  All days
+                </button>
+                <button className={dayScope === 'weekdays' ? 'on' : ''} onClick={() => setDayScope('weekdays')}>
+                  💼 Weekdays
+                </button>
+                <button className={dayScope === 'weekends' ? 'on' : ''} onClick={() => setDayScope('weekends')}>
+                  🏖️ Weekends
+                </button>
+                <button className={dayScope === 'custom' ? 'on' : ''} onClick={() => setDayScope('custom')}>
+                  🗓️ Pick days
+                </button>
               </div>
-              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                {weekDays.length === 0
-                  ? 'Pick at least one day, or it counts as every day.'
-                  : `${required ? 'Must-do on' : 'On the wheel on'} ${weekDays.map(weekDayLabel).join(', ')} only.`}
-              </p>
-            </>
+              {dayScope === 'custom' && (
+                <>
+                  {/* Monday first — the week people actually plan in. */}
+                  <div className="seg seg--days" style={{ marginTop: 10 }}>
+                    {[1, 2, 3, 4, 5, 6, 0].map((d) => (
+                      <button
+                        key={d}
+                        className={weekDays.includes(d) ? 'on' : ''}
+                        onClick={() => setWeekDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort()))}
+                      >
+                        {weekDayLabel(d).slice(0, 2)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                    {weekDays.length === 0
+                      ? 'Pick at least one day, or it counts as every day.'
+                      : `${required ? 'Must-do on' : 'On the wheel on'} ${weekDays.map(weekDayLabel).join(', ')} only.`}
+                  </p>
+                </>
+              )}
+            </div>
           )}
         </div>
 
@@ -545,10 +639,18 @@ function TaskForm(props: {
               requiredUntil: required ? requiredUntil || undefined : undefined,
               afterTaskId: afterTaskId || undefined,
               cooldownDays: repeats && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
+              // splitting only ever happens on creation
+              parts: !initial && !repeats && partCount > 1 ? partCount : undefined,
             })
           }
         >
-          {initial ? 'Save' : required ? 'Add to must-dos' : 'Add to the wheel'}
+          {initial
+            ? 'Save'
+            : partCount > 1
+              ? `Add ${partCount} parts`
+              : required
+                ? 'Add to must-dos'
+                : 'Add to the wheel'}
         </button>
         {onDelete &&
           (confirmDelete ? (
