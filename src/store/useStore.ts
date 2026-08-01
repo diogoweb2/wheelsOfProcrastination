@@ -807,6 +807,12 @@ export const useStore = create<StoreState>((set, get) => {
           if (v === undefined) delete row[k]
           else row[k] = v
         }
+        // The edit can push the quest out of today (start date moved forward, day
+        // scope narrowed, archived…). If so it can't stay on the plate.
+        const today = dayKey()
+        if (t.archived || !isAvailableOn(t, today, d.completions, d.tasks)) {
+          d.daily.pendingPicks = d.daily.pendingPicks.filter((p) => p.taskId !== id)
+        }
       })
     },
 
