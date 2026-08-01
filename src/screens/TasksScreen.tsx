@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import type { DayScope, Effort, Priority, Task } from '../types'
 import { REQUIRED_REWARD, isEffectivelyUrgent, rewardFor } from '../logic/economy'
@@ -15,6 +15,18 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   const [editing, setEditing] = useState<Task | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  // "Organize" = group the log by category, so you can clear a whole batch of
+  // quests of the same kind in one sitting.
+  const [byCategory, setByCategory] = useState(false)
+  // Grouped is the default view as soon as anything carries a category — but only
+  // until the user says otherwise; after that their choice sticks for the session.
+  const chosenView = useRef(false)
+  const [category, setCategory] = useState('')
+  // Bulk tagging: tick a pile of quests, stamp one category on all of them.
+  const [tagMode, setTagMode] = useState(false)
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  // Quests whose categories the sheet is currently editing (one row, or the whole tick list).
+  const [placing, setCatIds] = useState<string[] | null>(null)
 
   const today = dayKey()
   const doneIds = completedTodayIds()
@@ -28,6 +40,17 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
       const ub = isEffectivelyUrgent(b) ? 0 : 1
       return ua - ub || a.name.localeCompare(b.name)
     })
+  // Every category any active quest names, for the group headers and the filter row.
+  const allCategories = [...new Set(active.flatMap((t) => t.categories ?? []))].sort((a, b) => a.localeCompare(b))
+  const shown = byCategory && category ? urgentFirst.filter((t) => t.categories?.includes(category)) : urgentFirst
+  const untagged = shown.filter((t) => !t.categories?.length)
+  const tagged = shown.filter((t) => t.categories?.length)
+
+  // Data arrives async, so this can't just be the useState seed.
+  useEffect(() => {
+    if (!chosenView.current && allCategories.length > 0) setByCategory(true)
+  }, [allCategories.length])
+
   // "Done early" is offered once a split quest is under way, on its next
   // remaining part only — tapping it drops that part and everything after it.
   const doneEver = new Set(data.completions.map((c) => c.taskId))
@@ -54,6 +77,142 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
     goSpin()
   }
 
+  function taskRow(t: Task) {
+    const urgent = isEffectivelyUrgent(t)
+    // Tag mode turns the whole log into a checklist: tick several quests, then
+    // stamp one category on all of them at once.
+    if (tagMode) {
+      const on = picked.has(t.id)
+      return (
+        <div
+          key={t.id}
+          className={`task-row effort-${t.effort}${on ? ' task-row--picked' : ''}`}
+          onClick={() => {
+            sfx.click()
+            setPicked((cur) => {
+              const next = new Set(cur)
+              if (next.has(t.id)) next.delete(t.id)
+              else next.add(t.id)
+              return next
+            })
+          }}
+        >
+          <div className="dot" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="name">{t.name}</div>
+            <div className="meta">
+              {t.categories?.length ? (
+                t.categories.map((loc) => (
+                  <span key={loc} className="chip chip--cat">🏷️ {loc}</span>
+                ))
+              ) : (
+                <span className="chip">🤷 no category</span>
+              )}
+            </div>
+          </div>
+          <span className="chip" style={on ? { background: 'var(--gold)', color: '#2a1c00' } : undefined}>
+            {on ? '✓' : '○'}
+          </span>
+        </div>
+      )
+    }
+    const doneToday = doneIds.has(t.id)
+    const due = t.dueDate ? daysUntil(t.dueDate) : null
+    const notStarted = t.startDate ? daysUntil(t.startDate) > 0 : false
+    const available = isAvailableOn(t, today, data.completions, data.tasks)
+    const locked = !isUnlockedOn(t, today, data.completions, data.tasks)
+    const gate = locked ? data.tasks.find((x) => x.id === t.afterTaskId) : undefined
+    const backOn = cooldownUntil(t, data.completions, today)
+    const cooling = backOn && today < backOn ? backOn : null
+    return (
+        <div key={t.id} className={`task-row effort-${t.effort}`} style={urgent ? { borderColor: 'var(--orange)' } : undefined}>
+          <div className="dot" />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="name">{t.name}</div>
+            <div className="meta">
+              <span className="chip chip--effort">{t.effort}</span>
+              {t.required && <span className="chip chip--required">✅ must-do</span>}
+              {t.required && t.requiredUntil && <span className="chip">🏁 until {t.requiredUntil}</span>}
+              {urgent && <span className="chip chip--urgent">⚡ urgent</span>}
+              {t.repeats && <span className="chip">🔁</span>}
+              {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
+              {t.dayScope === 'weekends' && <span className="chip">🏖️ weekends</span>}
+              {t.dayScope === 'custom' && t.weekDays?.length ? (
+                <span className="chip">🗓️ {t.weekDays.map(weekDayLabel).join('/')}</span>
+              ) : null}
+              {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
+              {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
+              {gate && <span className="chip">🔒 after "{gate.name}"</span>}
+              {t.seriesTotal ? <span className="chip">🧩 part {t.seriesPart}/{t.seriesTotal}</span> : null}
+              {t.cooldownDays ? <span className="chip">⏳ every {t.cooldownDays}d</span> : null}
+              {t.categories?.map((loc) => (
+                <span key={loc} className="chip chip--cat">🏷️ {loc}</span>
+              ))}
+              {cooling && <span className="chip">😴 back {cooling}</span>}
+              {due !== null && (
+                <span className="chip" style={due <= 2 ? { color: 'var(--orange)' } : undefined}>
+                  📅 {due < 0 ? `${-due}d overdue!` : due === 0 ? 'today!' : `${due}d left`}
+                </span>
+              )}
+            </div>
+          </div>
+          {doneToday ? (
+            <span className="chip" style={{ background: 'var(--green)', color: '#10230a' }}>
+              ✓ done
+            </span>
+          ) : pendingIds.has(t.id) ? (
+            <span className="chip" style={{ background: 'var(--purple)', color: '#fff' }}>
+              🎯 on plate
+            </span>
+          ) : t.required && !t.onWheel ? (
+            // must-dos are ticked off in the checklist beside the wheel, never picked
+            <span className="chip chip--required">✅ checklist</span>
+          ) : !available ? (
+            <span className="chip" title="Not on today's wheel">
+              💤 not today
+            </span>
+          ) : (
+            <button className="btn btn--small" style={urgent ? undefined : { background: 'var(--blue)', boxShadow: '0 3px 0 var(--blue-dark)' }} onClick={() => pick(t)}>
+              {urgent ? 'Do it!' : 'Pick it'}
+            </button>
+          )}
+          {earlyFinishIds.has(t.id) && (
+            <button
+              className="btn--ghost btn btn--small"
+              style={{ padding: '8px 10px' }}
+              title="Finished early — drop the parts left"
+              onClick={() => {
+                const dropped = finishSeriesEarly(t.seriesId!)
+                sfx.gem()
+                setToast(`🏁 Called it early — ${dropped} part${dropped > 1 ? 's' : ''} dropped.`)
+                window.setTimeout(() => setToast(null), 3000)
+              }}
+            >
+              🏁
+            </button>
+          )}
+          <button
+            className="btn--ghost btn btn--small"
+            style={{ padding: '8px 10px' }}
+            title="Category"
+            onClick={() => setCatIds([t.id])}
+          >
+            📍
+          </button>
+          <button
+            className="btn--ghost btn btn--small"
+            style={{ padding: '8px 10px' }}
+            onClick={() => {
+              setEditing(t)
+              setFormOpen(true)
+            }}
+          >
+            ✎
+          </button>
+        </div>
+      )
+  }
+
   return (
     <div className="screen">
       <div className="h1">Your quest log</div>
@@ -71,6 +230,61 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
       >
         + Add task
       </button>
+
+      {/* Organize = "what can I do right where I am?" — group the log by category,
+          or tag a whole pile of quests with a category in one go. */}
+      {active.length > 0 && (
+        <div className="cat-tools">
+          <button
+            className={`btn btn--small${byCategory ? '' : ' btn--ghost'}`}
+            style={byCategory ? { background: 'var(--purple)', boxShadow: '0 3px 0 #3d1f66' } : undefined}
+            onClick={() => {
+              sfx.click()
+              chosenView.current = true
+              setByCategory((o) => !o)
+              setCategory('')
+            }}
+          >
+            🏷️ {byCategory ? 'Organized by category' : 'Organize by category'}
+          </button>
+          <button
+            className={`btn btn--small${tagMode ? '' : ' btn--ghost'}`}
+            style={tagMode ? { background: 'var(--gold)', color: '#2a1c00', boxShadow: '0 3px 0 #8a6200' } : undefined}
+            onClick={() => {
+              sfx.click()
+              setTagMode((o) => !o)
+              setPicked(new Set())
+            }}
+          >
+            🏷️ {tagMode ? 'Done tagging' : 'Tag categories'}
+          </button>
+        </div>
+      )}
+
+      {tagMode && (
+        <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+          Tap every quest in the same category, then hit the button at the bottom.
+        </p>
+      )}
+
+      {byCategory && allCategories.length === 0 && (
+        <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+          No categories yet — tap 🏷️ Tag categories and stamp a bunch of quests at once.
+        </p>
+      )}
+
+      {byCategory && allCategories.length > 0 && (
+        <div className="seg seg--days" style={{ marginTop: 8, flexWrap: 'wrap' }}>
+          <button className={category === '' ? 'on' : ''} onClick={() => setCategory('')}>
+            All
+          </button>
+          {allCategories.map((p) => (
+            <button key={p} className={category === p ? 'on' : ''} onClick={() => setCategory(p)}>
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
 
       {active.length > 4 && (
         <div className="search-row">
@@ -91,103 +305,78 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
       )}
 
       <div className="h2">
-        {needle ? `Found ${urgentFirst.length} of ${active.length}` : `Active (${active.length})`}
+        {tagMode
+          ? `Still to tag (${untagged.length})`
+          : needle
+            ? `Found ${shown.length} of ${active.length}`
+            : `Active (${active.length})`}
       </div>
-      {needle && urgentFirst.length === 0 && (
+      {needle && shown.length === 0 && (
         <p className="muted">No quest matches “{query.trim()}”. Even Zoro couldn't find it.</p>
       )}
-      {urgentFirst.map((t) => {
-        const urgent = isEffectivelyUrgent(t)
-        const doneToday = doneIds.has(t.id)
-        const due = t.dueDate ? daysUntil(t.dueDate) : null
-        const notStarted = t.startDate ? daysUntil(t.startDate) > 0 : false
-        const available = isAvailableOn(t, today, data.completions, data.tasks)
-        const locked = !isUnlockedOn(t, today, data.completions, data.tasks)
-        const gate = locked ? data.tasks.find((x) => x.id === t.afterTaskId) : undefined
-        const backOn = cooldownUntil(t, data.completions, today)
-        const cooling = backOn && today < backOn ? backOn : null
-        return (
-          <div key={t.id} className={`task-row effort-${t.effort}`} style={urgent ? { borderColor: 'var(--orange)' } : undefined}>
-            <div className="dot" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="name">{t.name}</div>
-              <div className="meta">
-                <span className="chip chip--effort">{t.effort}</span>
-                {t.required && <span className="chip chip--required">✅ must-do</span>}
-                {t.required && t.requiredUntil && <span className="chip">🏁 until {t.requiredUntil}</span>}
-                {urgent && <span className="chip chip--urgent">⚡ urgent</span>}
-                {t.repeats && <span className="chip">🔁</span>}
-                {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
-                {t.dayScope === 'weekends' && <span className="chip">🏖️ weekends</span>}
-                {t.dayScope === 'custom' && t.weekDays?.length ? (
-                  <span className="chip">🗓️ {t.weekDays.map(weekDayLabel).join('/')}</span>
-                ) : null}
-                {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
-                {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
-                {gate && <span className="chip">🔒 after "{gate.name}"</span>}
-                {t.seriesTotal ? <span className="chip">🧩 part {t.seriesPart}/{t.seriesTotal}</span> : null}
-                {t.cooldownDays ? <span className="chip">⏳ every {t.cooldownDays}d</span> : null}
-                {cooling && <span className="chip">😴 back {cooling}</span>}
-                {due !== null && (
-                  <span className="chip" style={due <= 2 ? { color: 'var(--orange)' } : undefined}>
-                    📅 {due < 0 ? `${-due}d overdue!` : due === 0 ? 'today!' : `${due}d left`}
-                  </span>
-                )}
+      {/* Tagging is a "what's still missing?" sweep, so the untagged quests come
+          first and everything already sorted drops into a section below. */}
+      {tagMode ? (
+        <>
+          {untagged.map(taskRow)}
+          {untagged.length === 0 && <p className="muted">Everything's tagged. Nice sweep! 🏷️</p>}
+          {tagged.length > 0 && (
+            <div className="cat-group">
+              <div className="cat-head">
+                <span>✅ Already tagged</span>
+                <span className="muted">{tagged.length}</span>
               </div>
+              {tagged.map(taskRow)}
             </div>
-            {doneToday ? (
-              <span className="chip" style={{ background: 'var(--green)', color: '#10230a' }}>
-                ✓ done
-              </span>
-            ) : pendingIds.has(t.id) ? (
-              <span className="chip" style={{ background: 'var(--purple)', color: '#fff' }}>
-                🎯 on plate
-              </span>
-            ) : t.required && !t.onWheel ? (
-              // must-dos are ticked off in the checklist beside the wheel, never picked
-              <span className="chip chip--required">✅ checklist</span>
-            ) : !available ? (
-              <span className="chip" title="Not on today's wheel">
-                💤 not today
-              </span>
-            ) : (
-              <button className="btn btn--small" style={urgent ? undefined : { background: 'var(--blue)', boxShadow: '0 3px 0 var(--blue-dark)' }} onClick={() => pick(t)}>
-                {urgent ? 'Do it!' : 'Pick it'}
-              </button>
-            )}
-            {earlyFinishIds.has(t.id) && (
-              <button
-                className="btn--ghost btn btn--small"
-                style={{ padding: '8px 10px' }}
-                title="Finished early — drop the parts left"
-                onClick={() => {
-                  const dropped = finishSeriesEarly(t.seriesId!)
-                  sfx.gem()
-                  setToast(`🏁 Called it early — ${dropped} part${dropped > 1 ? 's' : ''} dropped.`)
-                  window.setTimeout(() => setToast(null), 3000)
-                }}
-              >
-                🏁
-              </button>
-            )}
-            <button
-              className="btn--ghost btn btn--small"
-              style={{ padding: '8px 10px' }}
-              onClick={() => {
-                setEditing(t)
-                setFormOpen(true)
-              }}
-            >
-              ✎
-            </button>
-          </div>
-        )
-      })}
+          )}
+        </>
+      ) : byCategory
+        ? groupByCategory(shown).map(([label, list]) => (
+            <div key={label} className="cat-group">
+              <div className="cat-head">
+                <span>{label === NO_CATEGORY ? '🤷 No category yet' : `🏷️ ${label}`}</span>
+                <span className="muted">{list.length}</span>
+              </div>
+              {list.map(taskRow)}
+            </div>
+          ))
+        : shown.map(taskRow)}
+
 
       {active.some((t) => isEffectivelyUrgent(t) && !doneIds.has(t.id)) && (
         <p className="muted" style={{ marginTop: 4 }}>
           ⚡ {crewSays('urgentPick')}
         </p>
+      )}
+
+      {tagMode && picked.size > 0 && (
+        <div className="tag-bar">
+          <button className="btn" onClick={() => setCatIds([...picked])}>
+            🏷️ Set category for {picked.size} quest{picked.size > 1 ? 's' : ''}
+          </button>
+        </div>
+      )}
+
+      {placing && (
+        <CategorySheet
+          tasks={data.tasks.filter((t) => placing.includes(t.id))}
+          knownCategories={allCategories}
+          onClose={() => setCatIds(null)}
+          onApply={(categories, mode) => {
+            for (const t of data.tasks.filter((x) => placing.includes(x.id))) {
+              const merged =
+                mode === 'replace'
+                  ? categories
+                  : [...(t.categories ?? []), ...categories.filter((l) => !t.categories?.some((x) => x.toLowerCase() === l.toLowerCase()))]
+              updateTask(t.id, { categories: merged.length ? merged : undefined })
+            }
+            sfx.gem()
+            setToast(`📍 ${placing.length} quest${placing.length > 1 ? 's' : ''} sorted.`)
+            window.setTimeout(() => setToast(null), 2500)
+            setCatIds(null)
+            setPicked(new Set())
+          }}
+        />
       )}
 
       {toast && (
@@ -200,6 +389,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
         <TaskForm
           initial={editing}
           allTasks={data.tasks}
+          knownCategories={allCategories}
           onClose={() => setFormOpen(false)}
           onSave={(v) => {
             if (editing) updateTask(editing.id, v)
@@ -221,6 +411,24 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
   )
 }
 
+const NO_CATEGORY = ' none'
+
+/**
+ * Quests bucketed by category, alphabetically, with the category-less ones last.
+ * A quest with two categories shows up under both — that's the point.
+ */
+function groupByCategory(tasks: Task[]): [string, Task[]][] {
+  const out = new Map<string, Task[]>()
+  for (const t of tasks) {
+    for (const loc of t.categories?.length ? t.categories : [NO_CATEGORY]) {
+      const list = out.get(loc)
+      if (list) list.push(t)
+      else out.set(loc, [t])
+    }
+  }
+  return [...out.entries()].sort(([a], [b]) => (a === NO_CATEGORY ? 1 : b === NO_CATEGORY ? -1 : a.localeCompare(b)))
+}
+
 /** All parts of every auto-split quest, keyed by series id. */
 function groupBySeries(tasks: Task[]): Map<string, Task[]> {
   const out = new Map<string, Task[]>()
@@ -237,6 +445,137 @@ function crewToneForCount(n: number): string {
   if (n <= 3) return `${n} quest${n > 1 ? 's' : ''} ready. Small crew, big dreams!`
   if (n <= 8) return 'A solid lineup of adventures. Let\'s go!'
   return 'Whoa, that\'s a LOT of quests. The wheel will pick — trust it!'
+}
+
+/**
+ * Type-a-category box with autocomplete: as you type it offers the categories
+ * already in use (substring match, ones you've picked filtered out), so
+ * "bas" → "Basement" in one tap and nobody ends up with three spellings of it.
+ * Enter or Add takes the first suggestion when there is one, else the raw text.
+ */
+function CategoryInput(props: {
+  known: string[]
+  chosen: string[]
+  value: string
+  onValue: (v: string) => void
+  onAdd: (v: string) => void
+}) {
+  const { known, chosen, value, onValue, onAdd } = props
+  const needle = value.trim().toLowerCase()
+  const suggestions = known
+    .filter((k) => !chosen.some((c) => c.toLowerCase() === k.toLowerCase()))
+    .filter((k) => needle && k.toLowerCase().includes(needle) && k.toLowerCase() !== needle)
+    .slice(0, 6)
+
+  function commit(v: string) {
+    if (!v.trim()) return
+    onAdd(v)
+    onValue('')
+  }
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div className="mic-row">
+        <input
+          type="text"
+          value={value}
+          maxLength={24}
+          autoComplete="off"
+          placeholder='e.g. "Basement", "Computer"'
+          onChange={(e) => onValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            e.preventDefault()
+            commit(suggestions[0] ?? value)
+          }}
+        />
+        <button className="btn btn--small" disabled={!value.trim()} onClick={() => commit(suggestions[0] ?? value)}>
+          Add
+        </button>
+      </div>
+      {suggestions.length > 0 && (
+        <div className="cat-picker" style={{ marginTop: 6 }}>
+          {suggestions.map((s) => (
+            <button key={s} className="chip chip--cat on" onClick={() => commit(s)}>
+              🏷️ {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Quick category editor, straight from the log — no full task form. One quest
+ * starts pre-filled with its own categories and saving replaces them; a bulk
+ * selection starts empty and adds on top of whatever each quest already has
+ * (with "Replace" there for a clean sweep).
+ */
+function CategorySheet(props: {
+  tasks: Task[]
+  knownCategories: string[]
+  onClose: () => void
+  onApply: (categories: string[], mode: 'add' | 'replace') => void
+}) {
+  const { tasks, knownCategories, onClose, onApply } = props
+  const single = tasks.length === 1 ? tasks[0] : null
+  const [sel, setSel] = useState<string[]>(single?.categories ?? [])
+  const [draft, setDraft] = useState('')
+
+  function toggle(raw: string) {
+    const loc = raw.trim().slice(0, 24)
+    if (!loc) return
+    setSel((cur) =>
+      cur.some((x) => x.toLowerCase() === loc.toLowerCase())
+        ? cur.filter((x) => x.toLowerCase() !== loc.toLowerCase())
+        : [...cur, loc],
+    )
+  }
+
+  return (
+    <div className="overlay overlay--center" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="h1" style={{ marginBottom: 4 }}>
+          🏷️ Pick a category
+        </div>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 14 }}>
+          {single ? single.name : `${tasks.length} quests selected`}
+        </p>
+
+        <div className="cat-picker">
+          {[...new Set([...knownCategories, ...sel])].map((p) => (
+            <button
+              key={p}
+              className={`chip chip--cat${sel.some((x) => x.toLowerCase() === p.toLowerCase()) ? ' on' : ''}`}
+              onClick={() => toggle(p)}
+            >
+              🏷️ {p}
+            </button>
+          ))}
+        </div>
+
+        <CategoryInput known={knownCategories} chosen={sel} value={draft} onValue={setDraft} onAdd={toggle} />
+
+        <button className="btn" style={{ marginTop: 14 }} disabled={sel.length === 0} onClick={() => onApply(sel, single ? 'replace' : 'add')}>
+          {single ? 'Save' : `Add to ${tasks.length} quests`}
+        </button>
+        {!single && (
+          <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={() => onApply(sel, 'replace')}>
+            Replace their categories {sel.length === 0 ? '(clears them)' : ''}
+          </button>
+        )}
+        {single && single.categories?.length ? (
+          <button className="btn btn--ghost" style={{ marginTop: 8, color: 'var(--red)' }} onClick={() => onApply([], 'replace')}>
+            Clear categories
+          </button>
+        ) : null}
+        <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
 }
 
 function TaskForm(props: {
@@ -257,12 +596,15 @@ function TaskForm(props: {
     afterTaskId?: string
     cooldownDays?: number
     parts?: number
+    categories?: string[]
   }) => void
   allTasks: Task[]
+  /** Categories already used elsewhere — offered as one-tap chips. */
+  knownCategories: string[]
   onClose: () => void
   onDelete?: () => void
 }) {
-  const { initial, allTasks, onSave, onClose, onDelete } = props
+  const { initial, allTasks, knownCategories, onSave, onClose, onDelete } = props
   const [name, setName] = useState(initial?.name ?? '')
   const [repeats, setRepeats] = useState(initial?.repeats ?? false)
   const [effort, setEffort] = useState<Effort>(initial?.effort ?? 'low')
@@ -277,7 +619,20 @@ function TaskForm(props: {
   const [requiredUntil, setRequiredUntil] = useState(initial?.requiredUntil ?? '')
   const [afterTaskId, setAfterTaskId] = useState(initial?.afterTaskId ?? '')
   const [cooldownDays, setCooldownDays] = useState(initial?.cooldownDays ? String(initial.cooldownDays) : '')
+  const [categories, setLocations] = useState<string[]>(initial?.categories ?? [])
+  const [draftCategory, setDraftCategory] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  function toggleCategory(raw: string) {
+    const loc = raw.trim().slice(0, 24)
+    if (!loc) return
+    setLocations((cur) =>
+      // case-insensitive so "Basement" and "basement" never both exist
+      cur.some((x) => x.toLowerCase() === loc.toLowerCase())
+        ? cur.filter((x) => x.toLowerCase() !== loc.toLowerCase())
+        : [...cur, loc],
+    )
+  }
   // Everything except this quest itself can act as its unlock gate.
   const gateOptions = allTasks.filter((t) => t.id !== initial?.id && !t.archived)
   // Chaining, splitting, dates and day scope are the advanced corner of this
@@ -292,6 +647,7 @@ function TaskForm(props: {
         initial?.requiredFrom ||
         initial?.requiredUntil ||
         initial?.afterTaskId ||
+        initial?.categories?.length ||
         (initial?.dayScope && initial.dayScope !== 'all'),
     ),
   )
@@ -493,6 +849,28 @@ function TaskForm(props: {
 
           {advancedOpen && (
             <div className="dates-body">
+              <label>Categories (as many as you like)</label>
+              {(knownCategories.length > 0 || categories.length > 0) && (
+                <div className="cat-picker">
+                  {[...new Set([...knownCategories, ...categories])].map((p) => (
+                    <button
+                      key={p}
+                      className={`chip chip--cat${categories.some((x) => x.toLowerCase() === p.toLowerCase()) ? ' on' : ''}`}
+                      onClick={() => toggleCategory(p)}
+                    >
+                      🏷️ {p}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <CategoryInput known={knownCategories} chosen={categories} value={draftCategory} onValue={setDraftCategory} onAdd={toggleCategory} />
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                {categories.length
+                  ? `Grouped under ${categories.join(' + ')} in the quest log.`
+                  : 'No category yet — tap 🏷️ Organize in the quest log to sort quests by category.'}
+              </p>
+
+              <div style={{ height: 12 }} />
               <label>Locked until another quest is done? (optional)</label>
               <select value={afterTaskId} onChange={(e) => setAfterTaskId(e.target.value)}>
                 <option value="">🔓 No — available right away</option>
@@ -639,6 +1017,8 @@ function TaskForm(props: {
               requiredUntil: required ? requiredUntil || undefined : undefined,
               afterTaskId: afterTaskId || undefined,
               cooldownDays: repeats && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
+              // undefined clears the field on edit, so dropping every category sticks
+              categories: categories.length ? categories : undefined,
               // splitting only ever happens on creation
               parts: !initial && !repeats && partCount > 1 ? partCount : undefined,
             })

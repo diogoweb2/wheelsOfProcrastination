@@ -211,6 +211,7 @@ interface StoreState {
     requiredUntil?: string
     afterTaskId?: string
     cooldownDays?: number
+    categories?: string[]
     /** Auto-split: >1 creates that many chained parts instead of one quest. */
     parts?: number
   }) => void
@@ -769,6 +770,7 @@ export const useStore = create<StoreState>((set, get) => {
             ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
             ...(gate ? { afterTaskId: gate } : {}),
             ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
+            ...(t.categories?.length ? { categories: t.categories } : {}),
             ...(seriesId ? { seriesId, seriesPart: i, seriesTotal: parts } : {}),
           })
           previousId = id

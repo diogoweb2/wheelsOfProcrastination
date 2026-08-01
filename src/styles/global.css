@@ -350,6 +350,32 @@ input, select { font-family: inherit; }
   padding: 4px 2px;
 }
 
+/* Quest categories — chips in the log, tappable chips in the form. */
+.chip--cat { background: var(--purple); color: #fff; }
+.cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat-picker .chip { opacity: 0.45; border: 2px solid transparent; }
+.cat-picker .chip.on { opacity: 1; border-color: var(--gold); }
+.cat-group { margin-top: 6px; }
+.cat-tools { display: flex; gap: 8px; margin-top: 8px; }
+.cat-tools .btn { flex: 1; }
+.task-row--picked { border-color: var(--gold); }
+/* Sticky "stamp this category on everything I ticked" bar, above the tab bar. */
+.tag-bar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 96px;
+  z-index: 60;
+}
+.cat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 2px 6px;
+  font-weight: 900;
+  font-size: 14px;
+}
+
 .dates-toggle {
   display: flex;
   align-items: center;

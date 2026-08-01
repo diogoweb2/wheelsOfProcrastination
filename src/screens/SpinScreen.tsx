@@ -7,7 +7,7 @@ import { RequiredList } from '../components/RequiredList'
 import { Luffy, type LuffyMood, type LuffyState } from '../components/Luffy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { eligibleTasks, isStudyTask, studyLockedIds } from '../logic/wheel'
+import { eligibleTasks, isAvailableOn, isStudyTask, studyLockedIds } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { dayKey } from '../logic/dates'
 import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
@@ -43,8 +43,12 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
     () =>
       data.daily.pendingPicks
         .map((p) => ({ task: data.tasks.find((t) => t.id === p.taskId), via: p.via }))
-        .filter((x): x is { task: Task; via: 'wheel' | 'manual' } => !!x.task),
-    [data.daily.pendingPicks, data.tasks],
+        .filter((x): x is { task: Task; via: 'wheel' | 'manual' } => !!x.task)
+        // An edit can push a plated quest out of today (start date moved forward,
+        // day scope narrowed, archived) — it drops off the plate right away.
+        .filter((x) => !x.task.archived && isAvailableOn(x.task, dayKey(), data.completions, data.tasks)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data.daily.pendingPicks, data.tasks, data.completions],
   )
   const pendingIds = new Set(pendingTasks.map((p) => p.task.id))
   // The task being spun stays visible on the wheel (it's pending the moment it's picked,

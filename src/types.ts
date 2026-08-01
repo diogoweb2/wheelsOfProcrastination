@@ -63,6 +63,12 @@ export interface Task {
   seriesId?: string
   seriesPart?: number
   seriesTotal?: number
+  /**
+   * Free-text categories for this quest ("Basement", "Computer"). Several per
+   * quest — the quest log can group by category so you can knock out a whole
+   * batch of the same kind at once. Absent / empty = uncategorized.
+   */
+  categories?: string[]
 }
 
 export interface Completion {
