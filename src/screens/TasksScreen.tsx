@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
+import { PARENT_ID } from '../store/storage'
 import type { DayScope, Effort, Priority, Task } from '../types'
 import { REQUIRED_REWARD, isEffectivelyUrgent, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
@@ -10,7 +11,7 @@ import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 
 export function TasksScreen({ goSpin }: { goSpin: () => void }) {
-  const { data, addTask, updateTask, deleteTask, manualPick, completedTodayIds, finishSeriesEarly } = useStore()
+  const { data, activeProfileId, addTask, updateTask, deleteTask, manualPick, completedTodayIds, finishSeriesEarly } = useStore()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Task | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -390,6 +391,8 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
           initial={editing}
           allTasks={data.tasks}
           knownCategories={allCategories}
+          // Diogo lives in the Advanced drawer (categories, dates, chaining) — open it for him.
+          advancedByDefault={activeProfileId === PARENT_ID}
           onClose={() => setFormOpen(false)}
           onSave={(v) => {
             if (editing) updateTask(editing.id, v)
@@ -601,10 +604,12 @@ function TaskForm(props: {
   allTasks: Task[]
   /** Categories already used elsewhere — offered as one-tap chips. */
   knownCategories: string[]
+  /** Start with the Advanced drawer open (the parent uses it on every quest). */
+  advancedByDefault?: boolean
   onClose: () => void
   onDelete?: () => void
 }) {
-  const { initial, allTasks, knownCategories, onSave, onClose, onDelete } = props
+  const { initial, allTasks, knownCategories, advancedByDefault, onSave, onClose, onDelete } = props
   const [name, setName] = useState(initial?.name ?? '')
   const [repeats, setRepeats] = useState(initial?.repeats ?? false)
   const [effort, setEffort] = useState<Effort>(initial?.effort ?? 'low')
@@ -641,6 +646,7 @@ function TaskForm(props: {
   const [parts, setParts] = useState('')
   const partCount = Math.min(20, Math.max(1, Math.floor(Number(parts) || 1)))
   const [advancedOpen, setAdvancedOpen] = useState(
+    advancedByDefault ||
     Boolean(
       initial?.dueDate ||
         initial?.startDate ||
