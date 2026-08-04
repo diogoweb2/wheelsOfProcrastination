@@ -1,7 +1,8 @@
 export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
 export type EffortFilter = Effort[] // selected efforts; empty = all
-export type DayScope = 'all' | 'weekdays' | 'weekends' | 'custom' // which days a task is allowed on the wheel / checklist
+export type Season = 'winter' | 'spring' | 'summer' | 'fall'
+export type DayScope ='all' | 'weekdays' | 'weekends' | 'custom' // which days a task is allowed on the wheel / checklist
 
 export interface Task {
   id: string
@@ -69,6 +70,12 @@ export interface Task {
    * batch of the same kind at once. Absent / empty = uncategorized.
    */
   categories?: string[]
+  /**
+   * Seasons this quest is allowed in ("mow the lawn" → spring/summer/fall).
+   * Multi-select and orthogonal to `dayScope`, so "every day, but only in
+   * summer" works. Absent / empty = all year round.
+   */
+  seasons?: Season[]
 }
 
 export interface Completion {

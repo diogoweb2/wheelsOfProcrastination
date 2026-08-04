@@ -29,6 +29,7 @@ Fields when creating a task:
 | Start date | optional | Task stays **off the wheel** (and off manual/eligible pools) until this local day arrives. Blank ⇒ available immediately. |
 | Days | all / weekdays / weekends / pick days | Restricts which days the task is live (wheel **and** must-do checklist). Weekdays = Mon–Fri, weekends = Sat/Sun (local). **Pick days** = hand-picked days of the week (e.g. Mon/Wed/Fri → `weekDays: [1,3,5]`, 0 = Sunday); an empty pick list means no restriction. Default: **all**. |
 | Must-do | yes / no | A non-negotiable: leaves the wheel and lives in the daily checklist beside the wheel. |
+| Seasons | winter / spring / summer / fall (multi-select) | Restricts the quest to the seasons you tick (`seasons`), on top of the day scope — so "every day, but only in summer" works. Northern hemisphere, by month: Dec–Feb winter, Mar–May spring, Jun–Aug summer, Sep–Nov fall. None ticked (or all four) = all year round. Default: **all year**. |
 | Also on the wheel | must-dos only | A must-do can opt back **onto** the wheel (`onWheel`): it stays on the checklist AND can be spun/hand-picked, paying the full wheel reward. Off by default. |
 | Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
 | Split into parts | optional, new one-shot quests only | A big job broken into N sessions ("cut trees" → 6 parts). Creates N quests named `<name> (1/N)`…`(N/N)`, each **locked until the previous part is done** (`afterTaskId` chain), all sharing a `seriesId`. Max 20. |
@@ -43,7 +44,7 @@ Fields when creating a task:
 ## 3. The Wheel
 
 - Must-dos are off the wheel unless they set **also on the wheel** (`onWheel`), in which case they sit in both places.
-- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends / hand-picked days), unlocked (their prerequisite task is done), and not resting out a cooldown.
+- Only **eligible** tasks are in the pool: not archived, not already completed/on the plate today, past their start date (if any), matching today's day scope (all / weekdays / weekends / hand-picked days) and season, unlocked (their prerequisite task is done), and not resting out a cooldown.
 - Before spinning, user picks an effort filter: **Low / Medium / High / All** (you don't spin a High task when you have 10 minutes).
 - The wheel is **weighted but fair**:
   - Base weight: urgent = 3, not-urgent = 1.

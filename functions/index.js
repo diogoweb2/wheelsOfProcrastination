@@ -105,12 +105,23 @@ function isWeekendKey(key) {
   return dow === 0 || dow === 6
 }
 
+/** Season for a day key (northern hemisphere, month-based). */
+function seasonOfKey(key) {
+  const m = Number(key.split('-')[1]) // 1 = Jan
+  if (m === 12 || m <= 2) return 'winter'
+  if (m <= 5) return 'spring'
+  if (m <= 8) return 'summer'
+  return 'fall'
+}
+
 function isAvailableOn(task, today) {
   if (task.startDate && today < task.startDate) return false
   if (task.dayScope === 'weekdays' && isWeekendKey(today)) return false
   if (task.dayScope === 'weekends' && !isWeekendKey(today)) return false
   // hand-picked days (weekDays: 0=Sun…6=Sat); an empty list means no restriction
   if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeekKey(today))) return false
+  // seasonal quests; an empty list means all year round
+  if (task.seasons?.length && !task.seasons.includes(seasonOfKey(today))) return false
   return true
 }
 

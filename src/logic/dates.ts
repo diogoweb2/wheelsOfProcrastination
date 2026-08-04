@@ -1,4 +1,5 @@
 // All streak logic runs on LOCAL calendar days, formatted YYYY-MM-DD.
+import type { Season } from '../types'
 
 export function dayKey(d: Date = new Date()): string {
   const y = d.getFullYear()
@@ -32,6 +33,23 @@ export function weekDayLabel(dow: number): string {
 export function isWeekend(key: string): boolean {
   const dow = parseDay(key).getDay()
   return dow === 0 || dow === 6
+}
+
+/**
+ * Which season a day key falls in (northern hemisphere, month-based so it never
+ * drifts): Mar–May spring, Jun–Aug summer, Sep–Nov fall, Dec–Feb winter.
+ */
+export function seasonOf(key: string): Season {
+  const m = parseDay(key).getMonth() // 0 = Jan
+  if (m <= 1 || m === 11) return 'winter'
+  if (m <= 4) return 'spring'
+  if (m <= 7) return 'summer'
+  return 'fall'
+}
+
+/** Label + emoji for a season chip, e.g. "☀️ Summer". */
+export function seasonLabel(s: Season): string {
+  return { winter: '❄️ Winter', spring: '🌱 Spring', summer: '☀️ Summer', fall: '🍂 Fall' }[s]
 }
 
 /** Days from today until `due` (negative = overdue). */

@@ -54,7 +54,7 @@ import {
   subscribeQuizBank,
   subscribeRoster,
 } from './cloud'
-import type { AuditCategory, AuditEntry } from '../types'
+import type { AuditCategory, AuditEntry, Season } from '../types'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
@@ -212,6 +212,7 @@ interface StoreState {
     afterTaskId?: string
     cooldownDays?: number
     categories?: string[]
+    seasons?: Season[]
     /** Auto-split: >1 creates that many chained parts instead of one quest. */
     parts?: number
   }) => void
@@ -771,6 +772,7 @@ export const useStore = create<StoreState>((set, get) => {
             ...(gate ? { afterTaskId: gate } : {}),
             ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
             ...(t.categories?.length ? { categories: t.categories } : {}),
+            ...(t.seasons?.length ? { seasons: t.seasons } : {}),
             ...(seriesId ? { seriesId, seriesPart: i, seriesTotal: parts } : {}),
           })
           previousId = id

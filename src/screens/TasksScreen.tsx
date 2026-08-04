@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import type { DayScope, Effort, Priority, Task } from '../types'
+import type { DayScope, Effort, Priority, Season, Task } from '../types'
 import { REQUIRED_REWARD, isEffectivelyUrgent, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { dayKey, daysUntil, weekDayLabel } from '../logic/dates'
+import { dayKey, daysUntil, seasonLabel, weekDayLabel } from '../logic/dates'
 import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
 import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '../logic/voiceTask'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
@@ -141,6 +141,7 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               {t.dayScope === 'custom' && t.weekDays?.length ? (
                 <span className="chip">🗓️ {t.weekDays.map(weekDayLabel).join('/')}</span>
               ) : null}
+              {t.seasons?.length ? <span className="chip">{t.seasons.map(seasonLabel).join(' ')}</span> : null}
               {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
               {notStarted && <span className="chip">🕒 starts {t.startDate}</span>}
               {gate && <span className="chip">🔒 after "{gate.name}"</span>}
@@ -600,6 +601,7 @@ function TaskForm(props: {
     cooldownDays?: number
     parts?: number
     categories?: string[]
+    seasons?: Season[]
   }) => void
   allTasks: Task[]
   /** Categories already used elsewhere — offered as one-tap chips. */
@@ -625,6 +627,7 @@ function TaskForm(props: {
   const [afterTaskId, setAfterTaskId] = useState(initial?.afterTaskId ?? '')
   const [cooldownDays, setCooldownDays] = useState(initial?.cooldownDays ? String(initial.cooldownDays) : '')
   const [categories, setLocations] = useState<string[]>(initial?.categories ?? [])
+  const [seasons, setSeasons] = useState<Season[]>(initial?.seasons ?? [])
   const [draftCategory, setDraftCategory] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -654,6 +657,7 @@ function TaskForm(props: {
         initial?.requiredUntil ||
         initial?.afterTaskId ||
         initial?.categories?.length ||
+        initial?.seasons?.length ||
         (initial?.dayScope && initial.dayScope !== 'all'),
     ),
   )
@@ -993,6 +997,25 @@ function TaskForm(props: {
                   </p>
                 </>
               )}
+
+              {/* Seasons stack on top of the day scope: "every day, but only in summer". */}
+              <label style={{ marginTop: 12 }}>Which seasons?</label>
+              <div className="seg seg--days">
+                {(['winter', 'spring', 'summer', 'fall'] as Season[]).map((s) => (
+                  <button
+                    key={s}
+                    className={seasons.includes(s) ? 'on' : ''}
+                    onClick={() => setSeasons((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : [...cur, s]))}
+                  >
+                    {seasonLabel(s)}
+                  </button>
+                ))}
+              </div>
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                {seasons.length === 0 || seasons.length === 4
+                  ? 'All year round.'
+                  : `Only shows up in ${seasons.map((s) => seasonLabel(s).split(' ')[1].toLowerCase()).join(', ')} — hidden the rest of the year.`}
+              </p>
             </div>
           )}
         </div>
@@ -1025,6 +1048,8 @@ function TaskForm(props: {
               cooldownDays: repeats && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
               // undefined clears the field on edit, so dropping every category sticks
               categories: categories.length ? categories : undefined,
+              // all four = no restriction, so store nothing
+              seasons: seasons.length && seasons.length < 4 ? seasons : undefined,
               // splitting only ever happens on creation
               parts: !initial && !repeats && partCount > 1 ? partCount : undefined,
             })

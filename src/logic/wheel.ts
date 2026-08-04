@@ -1,6 +1,6 @@
 // Weighted-but-fair wheel selection. Rules in BUSINESS_REQUIREMENTS.md §3.
 import type { Completion, EffortFilter, Task } from '../types'
-import { addDays, dayKey, dayOfWeek, daysUntil, isWeekend } from './dates'
+import { addDays, dayKey, dayOfWeek, daysUntil, isWeekend, seasonOf } from './dates'
 import { isEffectivelyUrgent } from './economy'
 import { QUIZ_TASK_PREFIX } from './quiz'
 
@@ -48,6 +48,8 @@ export function isAvailableOn(task: Task, today: string, completions: Completion
   if (task.dayScope === 'weekends' && !isWeekend(today)) return false
   // Hand-picked days ("video games on Mon/Wed/Fri"). An empty list = no restriction.
   if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeek(today))) return false
+  // Seasonal quests ("rake the leaves"). An empty list = all year round.
+  if (task.seasons?.length && !task.seasons.includes(seasonOf(today))) return false
   if (!isUnlockedOn(task, today, completions, tasks)) return false
   const back = cooldownUntil(task, completions, today)
   if (back && today < back) return false
