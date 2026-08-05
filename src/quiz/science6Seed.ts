@@ -84,11 +84,11 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '🪨',
     funFact: 'Movies show asteroid belts as crowded, but real asteroids are so spread out you could fly through and see nothing.',
   }),
-  choice('sc-14', 'What is an artificial satellite?', ['A human-made object orbiting Earth', 'A natural moon', 'A type of star', 'A space rock', 'A planet without a sun', 'A telescope on the ground', 'A cloud of space dust'], 'A human-made object orbiting Earth', {
+  choice('sc-14', 'What is an artificial satellite?', ['A human-made object orbiting Earth', 'A natural moon captured by a planet', 'A type of star that circles another', 'A space rock trapped by gravity', 'A small planet without any sun', 'A giant telescope on the ground', 'A slow-moving cloud of space dust'], 'A human-made object orbiting Earth', {
     emoji: '🛰️',
     funFact: 'There are thousands of satellites up there doing GPS, weather and TV. The Moon is a NATURAL satellite.',
   }),
-  choice('sc-15', 'Why do astronauts appear to float inside the space station?', ['They are in constant free fall around Earth', 'There is no gravity in space', 'They wear anti-gravity boots', 'The station has no air', 'They are too far from the Sun', 'Their suits are filled with helium', 'The station spins very fast'], 'They are in constant free fall around Earth', {
+  choice('sc-15', 'Why do astronauts appear to float inside the space station?', ['They are in constant free fall around Earth', 'There is no gravity at all up in space', 'Their boots push against Earth magnetism', 'The station has no air to hold them down', 'They are too far from the Sun to be pulled', 'Their suits are filled with helium to lift them', 'The station spins fast enough to lift them'], 'They are in constant free fall around Earth', {
     emoji: '👨‍🚀',
     weight: 1,
     points: 5,
@@ -108,7 +108,7 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '🧵',
     funFact: 'Insulators block the flow, so the electricity stays in the wire and out of your fingers.',
   }),
-  choice('sc-19', 'What does a switch do in a circuit?', ['Opens or closes the circuit', 'Stores energy', 'Makes light', 'Increases the voltage', 'Turns AC into DC', 'Measures the current', 'Cools down the wires'], 'Opens or closes the circuit', {
+  choice('sc-19', 'What does a switch do in a circuit?', ['Opens or closes the circuit', 'Stores energy for later', 'Makes the light brighter', 'Increases the voltage', 'Turns AC into DC', 'Measures the current', 'Cools down the wires'], 'Opens or closes the circuit', {
     emoji: '🎚️',
     funFact: 'A switch is just a controllable gap in the wire. Closed = flowing, open = stopped.',
   }),
@@ -116,11 +116,11 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '💡',
     funFact: 'Old Christmas lights were wired in series — one dead bulb killed the whole string. Very annoying.',
   }),
-  choice('sc-21', 'What does a battery provide to a circuit?', ['Stored chemical energy', 'Light energy', 'Sound energy', 'Extra wire', 'Magnetic rocks', 'Compressed air', 'Heat from the Sun'], 'Stored chemical energy', {
+  choice('sc-21', 'What does a battery provide to a circuit?', ['Stored chemical energy', 'Stored light energy', 'Stored sound energy', 'Extra copper wire', 'Tiny magnetic rocks', 'Compressed air', 'Heat from the Sun'], 'Stored chemical energy', {
     emoji: '🔋',
     funFact: 'Chemicals inside push electrons out one end and pull them in the other — a chemical reaction you can plug in.',
   }),
-  choice('sc-22', 'What is static electricity?', ['A build-up of electric charge on a surface', 'Electricity flowing through wires', 'Electricity made by magnets', 'Light produced by a bulb', 'Energy stored in a battery', 'Heat inside a toaster', 'Sound made by a speaker'], 'A build-up of electric charge on a surface', {
+  choice('sc-22', 'What is static electricity?', ['A build-up of electric charge on a surface', 'A steady flow of electricity through wires', 'Electricity made by spinning a magnet', 'Light produced by a bulb that never moves', 'Energy stored inside a battery on a shelf', 'Heat building up inside a toaster', 'Sound made by a speaker standing still'], 'A build-up of electric charge on a surface', {
     emoji: '⚡',
     funFact: 'Rub a balloon on your hair and it steals electrons — that’s why your hair stands up and follows it.',
   }),
@@ -128,7 +128,7 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '🌩️',
     funFact: 'A lightning bolt can be 5× hotter than the surface of the Sun. Thunder is the air exploding outward from it.',
   }),
-  choice('sc-24', 'What device turns electrical energy into motion?', ['An electric motor', 'A light bulb', 'A resistor', 'A speaker', 'A heater', 'A battery', 'A fuse'], 'An electric motor', {
+  choice('sc-24', 'What device turns electrical energy into motion?', ['An electric motor', 'An electric light bulb', 'An electric resistor', 'An electric heater', 'An electric buzzer', 'An electric battery', 'An electric fuse'], 'An electric motor', {
     emoji: '⚙️',
     funFact: 'Motors use electromagnets that push and pull to spin a shaft — fans, blenders and electric cars all use them.',
   }),
@@ -140,7 +140,7 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '💡',
     funFact: 'Old bulbs wasted 90% of their energy as heat. LEDs stay cool and use a fraction of the power.',
   }),
-  choice('sc-27', 'Why is a bird safe sitting on a single power line?', ['Its body is not part of a complete circuit', 'Birds cannot conduct electricity', 'Feathers are perfect insulators', 'The wire is turned off at night', 'Birds are too light to matter', 'The plastic coating protects them', 'Birds have no blood in their feet'], 'Its body is not part of a complete circuit', {
+  choice('sc-27', 'Why is a bird safe sitting on a single power line?', ['Its body is not part of a complete circuit', 'Bird bodies cannot conduct electricity at all', 'Feathers work as perfect electrical insulators', 'The power line is switched off during the day', 'Birds are far too light to draw any current', 'The plastic coating on the wire protects them', 'Birds have no blood in their feet to carry it'], 'Its body is not part of a complete circuit', {
     emoji: '🐦',
     weight: 1,
     points: 5,
@@ -180,7 +180,7 @@ export const SCIENCE_6_SEED: QuizQuestion[] = [
     emoji: '🕹️',
     funFact: 'The Wright brothers’ big breakthrough wasn’t the engine — it was figuring out how to STEER once you were up there.',
   }),
-  choice('sc-36', 'Why do rockets work in outer space where there is no air?', ['They push out their own exhaust gases', 'They push against the air', 'They use their wings', 'They fall toward the stars', 'Magnets pull them along', 'Sunlight blows them forward', 'Gravity pushes them outward'], 'They push out their own exhaust gases', {
+  choice('sc-36', 'Why do rockets work in outer space where there is no air?', ['They push out their own exhaust gases', 'They push against the thin air up there', 'They steer using their wings and fins', 'They keep falling toward the nearest star', 'Magnets in space pull them along', 'Sunlight blows them steadily forward', 'Gravity keeps pushing them outward'], 'They push out their own exhaust gases', {
     emoji: '🚀',
     weight: 1,
     points: 5,

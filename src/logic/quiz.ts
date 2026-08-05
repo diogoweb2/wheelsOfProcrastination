@@ -691,13 +691,35 @@ export const CHOICE_OPTIONS_SHOWN = 4
  * screen. We keep the correct answer, sample the rest at random and shuffle, so
  * both the position AND the set of distractors change every time. That's what
  * stops "the answer is the 3rd button" memorisation.
+ *
+ * We also kill the *length* tell: a wordy correct answer next to three short
+ * ones can be guessed without knowing anything. If the sample leaves the answer
+ * clearly the longest, we swap in a beefier distractor from the pool.
  */
 export function pickChoiceOptions(q: QuizQuestion, shown: number = CHOICE_OPTIONS_SHOWN): string[] {
   const pool = q.choices ?? []
   const answer = q.answer
   if (!answer) return shuffle(pool).slice(0, shown)
-  const distractors = shuffle(pool.filter((c) => c !== answer)).slice(0, Math.max(0, shown - 1))
-  return shuffle([answer, ...distractors])
+  const rest = shuffle(pool.filter((c) => c !== answer))
+  const picked = rest.slice(0, Math.max(0, shown - 1))
+  return shuffle([answer, ...deTell(answer, picked, rest.slice(picked.length))])
+}
+
+/** An answer this much longer than every distractor is a giveaway on its own. */
+const LENGTH_TELL_RATIO = 0.8
+
+/**
+ * Swap one sampled distractor for a longer spare when the answer towers over
+ * the whole sample. Only ever swaps one, so the sample stays varied.
+ */
+function deTell(answer: string, picked: string[], spares: string[]): string[] {
+  if (!picked.length) return picked
+  const floor = answer.length * LENGTH_TELL_RATIO
+  if (picked.some((c) => c.length >= floor)) return picked
+  const better = shuffle(spares.filter((c) => c.length >= floor))[0]
+  if (!better) return picked
+  const shortest = picked.reduce((a, b) => (b.length < a.length ? b : a))
+  return picked.map((c) => (c === shortest ? better : c))
 }
 
 export function shuffle<T>(arr: T[]): T[] {

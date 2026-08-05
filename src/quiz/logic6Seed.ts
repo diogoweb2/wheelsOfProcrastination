@@ -91,7 +91,7 @@ export const LOGIC_6_SEED: QuizQuestion[] = [
     emoji: '📮',
     funFact: 'A stamp sits in the corner of an envelope and rides along to anywhere on Earth.',
   }),
-  choice('lg-13', 'The more of them you take, the more you leave behind. What are they?', ['Footsteps', 'Coins', 'Photos', 'Breaths', 'Books', 'Seeds', 'Shadows'], 'Footsteps', {
+  choice('lg-13', 'The more of them you take, the more you leave behind. What are they?', ['Footsteps', 'Coins', 'Pictures', 'Breaths', 'Booklets', 'Seedlings', 'Shadows'], 'Footsteps', {
     emoji: '👣',
     funFact: 'Every step you take leaves one more footprint behind you. Riddles love a good double meaning.',
   }),
@@ -202,7 +202,7 @@ export const LOGIC_6_SEED: QuizQuestion[] = [
   }),
 
   // --- lateral thinking & traps --------------------------------------------
-  choice('lg-35', 'A rooster lays an egg on a pointed roof. Which side does the egg roll down?', ['Neither — roosters do not lay eggs', 'The left side', 'The right side', 'The steeper side', 'Straight down the middle', 'It stays put', 'The sunny side'], 'Neither — roosters do not lay eggs', {
+  choice('lg-35', 'A rooster lays an egg on a pointed roof. Which side does the egg roll down?', ['Neither — roosters do not lay eggs', 'The left side, because roofs lean left', 'The right side, because roofs lean right', 'The steeper side of the pointed roof', 'Straight down the middle of the roof', 'Neither — it stays put on the peak', 'The sunny side, because it is warmer'], 'Neither — roosters do not lay eggs', {
     emoji: '🐓',
     funFact: 'Roosters are male. The whole roof detail was bait to stop you checking the first fact.',
   }),
@@ -220,7 +220,7 @@ export const LOGIC_6_SEED: QuizQuestion[] = [
     points: 5,
     funFact: 'The car is a Monopoly token and the hotel is a plastic piece. Never assume the everyday meaning.',
   }),
-  choice('lg-39', 'How many times can you take 1 apple from a basket of 10 apples?', ['Once — after that it is not a basket of 10', '10 times', '9 times', '11 times', 'Forever', 'Twice', 'Zero times'], 'Once — after that it is not a basket of 10', {
+  choice('lg-39', 'How many times can you take 1 apple from a basket of 10 apples?', ['Once — after that it is not a basket of 10', '10 times, one for each apple in the basket', '9 times, because the last one has to stay', '11 times, if you count the empty basket', 'Forever, because apples keep growing back', 'Twice, once with each hand at the same time', 'Zero times, because the basket is not yours'], 'Once — after that it is not a basket of 10', {
     emoji: '🍎',
     weight: 1,
     points: 5,

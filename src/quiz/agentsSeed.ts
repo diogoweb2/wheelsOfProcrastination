@@ -93,8 +93,8 @@ const LEVEL_1: QuizQuestion[] = [
   }),
   choice('a1-02', L1, 'Roughly how much English text is one token?', [
     '~4 characters, about ¾ of a word',
-    'Exactly one word',
-    'Exactly one character',
+    'Exactly one word, always',
+    'Exactly one character of text',
     'One sentence',
     'One byte of UTF-8',
     'One line of text',
@@ -107,9 +107,9 @@ const LEVEL_1: QuizQuestion[] = [
     'It never sees letters — text is chopped into multi-character tokens',
     'It was never trained on spelling',
     'Counting requires a calculator tool',
-    'Its context window is too small for one word',
+    'Its context window is far too small to hold a whole word',
     'Tokenizers strip out rare letters',
-    'Because temperature adds randomness to counting',
+    'Because temperature adds randomness to every count it makes',
   ], 'It never sees letters — text is chopped into multi-character tokens', {
     emoji: '🔤',
     lessonId: 'l1-tokens',
@@ -125,8 +125,8 @@ const LEVEL_1: QuizQuestion[] = [
   }),
   choice('a1-05', L1, '"Context rot" describes…', [
     'Quality degrading as you stuff the window, well before you hit the hard limit',
-    'Old messages being deleted by the provider',
-    'Embeddings drifting as a model is updated',
+    'Old messages being quietly deleted by the provider partway through a chat',
+    'Embeddings drifting apart from each other as the underlying model is updated',
     'Tokens being corrupted in transit',
     'Cached prompts expiring after an hour',
     'The training data becoming outdated',
@@ -139,9 +139,9 @@ const LEVEL_1: QuizQuestion[] = [
     'False — it is stateless; your client re-sends the whole message array each turn',
     'True — that is what the session id is for',
     'True, but only for 24 hours',
-    'True for chat endpoints, false for completion endpoints',
+    'True for chat endpoints, but false for the older completion endpoints',
     'Only when streaming is enabled',
-    'Only if you enable memory in the dashboard',
+    'True — but only if you switch on memory in the provider dashboard',
   ], 'False — it is stateless; your client re-sends the whole message array each turn', {
     emoji: '🔁',
     lessonId: 'l1-stateless',
@@ -151,8 +151,8 @@ const LEVEL_1: QuizQuestion[] = [
     'So the stable prefix stays byte-identical and can be cached cheaply',
     'Because models only read the last 2,000 tokens',
     'Because the tokenizer processes text backwards',
-    'To keep the system message under the size limit',
-    'Because streaming starts from the end of the prompt',
+    'To keep the system message comfortably under the provider size limit',
+    'Because streaming starts from the very end of the prompt and works back',
     'It makes no difference — order is irrelevant',
   ], 'So the stable prefix stays byte-identical and can be cached cheaply', {
     emoji: '💾',
@@ -174,8 +174,8 @@ const LEVEL_1: QuizQuestion[] = [
   choice('a1-09', L1, 'Temperature 0 guarantees byte-identical output for identical input.', [
     'No — GPU non-determinism, batching and silent model updates can all change it',
     'Yes, always — that is the definition',
-    'Yes, as long as you also set top_p to 0',
-    'Yes, but only within the same calendar day',
+    'Yes, as long as you also set top_p to 0 on every one of the same requests',
+    'Yes, but only for calls that are made within the same calendar day',
     'Yes, for models under 100B parameters',
     'Only when streaming is disabled',
   ], 'No — GPU non-determinism, batching and silent model updates can all change it', {
@@ -188,8 +188,8 @@ const LEVEL_1: QuizQuestion[] = [
     'A shorter version of the text',
     'The next token in the sequence',
     'A relevance score between 0 and 1',
-    'A compressed copy of the input for storage',
-    'A list of keywords extracted from the input',
+    'A compressed copy of the input text, ready for cheap storage',
+    'A ranked list of the keywords extracted from the input text',
   ], 'A fixed-length vector representing the meaning of the text', {
     emoji: '📍',
     lessonId: 'l1-embeddings',
@@ -199,9 +199,9 @@ const LEVEL_1: QuizQuestion[] = [
     'Re-embed the entire corpus — vectors from different models are not comparable',
     'Nothing, vectors are a standard format',
     'Only re-embed documents added since the switch',
-    'Just normalise the old vectors to the new dimension count',
+    'Just normalise the old vectors to match the new dimension count',
     'Re-embed only the queries',
-    'Increase the number of results retrieved to compensate',
+    'Increase the number of results you retrieve each time to compensate',
   ], 'Re-embed the entire corpus — vectors from different models are not comparable', {
     emoji: '🔄',
     lessonId: 'l1-embeddings',
@@ -217,10 +217,10 @@ const LEVEL_1: QuizQuestion[] = [
   }),
   choice('a1-13', L1, 'The best framing of "hallucination" is…', [
     'The same plausibility machinery working where it has nothing solid to lean on',
-    'A bug that will be patched in the next model release',
+    'A straightforward bug that will be patched in the next model release',
     'The model deliberately lying',
     'A tokenizer error',
-    'What happens when temperature is above 1.0',
+    'What happens whenever the temperature is set above 1.0 on a call',
     'A sign the context window overflowed',
   ], 'The same plausibility machinery working where it has nothing solid to lean on', {
     emoji: '🌀',
@@ -281,9 +281,9 @@ const L2 = 'agents-2-prompting'
 const LEVEL_2: QuizQuestion[] = [
   choice('a2-01', L2, 'Which belongs in the SYSTEM message, not the user message?', [
     'The output format contract that applies to every request',
-    'The document being summarised today',
+    'The particular document being summarised in today’s request',
     'The user’s actual question',
-    'Per-request parameters like a date range',
+    'Per-request parameters, such as the date range being asked about',
     'The retrieved chunks for this query',
     'The customer id for this ticket',
   ], 'The output format contract that applies to every request', {
@@ -307,8 +307,8 @@ const LEVEL_2: QuizQuestion[] = [
     'Examples and an explicit output format',
     'A friendlier tone',
     'A higher temperature',
-    'A longer role description',
-    'More background context',
+    'A much longer role description',
+    'More background context up front',
     'A bigger model',
   ], 'Examples and an explicit output format', {
     emoji: '🧩',
@@ -317,11 +317,11 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-04', L2, 'Why does "reply in one paragraph of prose" beat "do not use bullet points"?', [
     'A positive instruction describes a target; a prohibition only describes a wall',
-    'Negations are stripped by the tokenizer',
+    'Negation words get stripped out by the tokenizer before the model sees them',
     'The model cannot process the word "not"',
     'Prohibitions cost more tokens',
     'It doesn’t — they perform identically',
-    'Because bullets are always cheaper to generate',
+    'Because bullet points are always much cheaper for a model to generate',
   ], 'A positive instruction describes a target; a prohibition only describes a wall', {
     emoji: '🎯',
     lessonId: 'l2-prompt-anatomy',
@@ -341,11 +341,11 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-06', L2, 'You have room for 4 few-shot examples. Which set is best?', [
     'The ambiguous cases, an empty input, and one where the answer is "unknown"',
-    'Four textbook-clear examples of the most common case',
+    'Four textbook-clear examples of the single most common case you see',
     'Four examples all with the same label',
     'The four longest examples you have',
     'Four randomly sampled from production',
-    'One example, repeated four times for emphasis',
+    'One very clear example, repeated four times over for extra emphasis',
   ], 'The ambiguous cases, an empty input, and one where the answer is "unknown"', {
     emoji: '🖼️',
     lessonId: 'l2-fewshot',
@@ -353,8 +353,8 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-07', L2, 'One of your few-shot examples contains a typo in the output. What happens?', [
     'The model reproduces it — examples are a specification, followed literally',
-    'The model corrects it automatically',
-    'It is ignored during tokenization',
+    'The model quietly corrects the typo for you and then moves on',
+    'It gets ignored during tokenization, so absolutely nothing happens',
     'It only matters at temperature 0',
     'Nothing — examples only affect tone',
     'It triggers a validation error',
@@ -377,8 +377,8 @@ const LEVEL_2: QuizQuestion[] = [
     'Always better, reasoning never hurts',
     'Required for any structured output',
     'The only way to get consistent labels',
-    'Cheaper, because it needs fewer examples',
-    'Necessary whenever there are more than two labels',
+    'Usually cheaper, because it needs far fewer examples to work',
+    'Necessary whenever the task has more than two possible labels',
   ], 'Usually a waste — it adds cost and latency for no accuracy gain', {
     emoji: '⚡',
     lessonId: 'l2-cot',
@@ -386,9 +386,9 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-10', L2, 'Can you treat a model’s written chain of thought as a faithful audit log?', [
     'No — models often reach an answer then produce a plausible justification',
-    'Yes, it is a literal trace of the computation',
+    'Yes, it is a literal trace of the computation that produced the answer',
     'Yes, as long as temperature is 0',
-    'Yes, for reasoning models specifically',
+    'Yes, at least for reasoning models that are trained to show their work',
     'Only if you ask it to be honest',
     'Yes, that is what it is designed for',
   ], 'No — models often reach an answer then produce a plausible justification', {
@@ -408,10 +408,10 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-12', L2, 'Strict schema mode guarantees…', [
     'The shape is valid — it says nothing about whether the values are correct',
-    'Both the shape and the factual accuracy',
+    'Both the shape of the output and the factual accuracy of its values',
     'That no hallucination can occur',
     'That required fields are never guessed',
-    'That the model read the source documents',
+    'That the model actually read the source documents you gave it',
     'Deterministic output across runs',
   ], 'The shape is valid — it says nothing about whether the values are correct', {
     emoji: '⚠️',
@@ -421,10 +421,10 @@ const LEVEL_2: QuizQuestion[] = [
   choice('a2-13', L2, 'Why should a schema always include an "unknown" or null option?', [
     'Without a legal way to abstain, the model will fabricate a value',
     'It makes the JSON smaller',
-    'Required by the JSON Schema spec',
+    'It is required by the JSON Schema spec for enum fields',
     'It reduces token cost',
     'It speeds up validation',
-    'It prevents the model from using enums',
+    'It stops the model from using enum fields anywhere else',
   ], 'Without a legal way to abstain, the model will fabricate a value', {
     emoji: '🕳️',
     lessonId: 'l2-structured-output',
@@ -432,8 +432,8 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-14', L2, 'Best way to know whether your prompt change was an improvement?', [
     'An eval set: fixed inputs, graded outputs, compared before and after',
-    'Try it three times and see if it feels better',
-    'Ask the model to rate its own answer',
+    'Try it three times in a row and see whether it feels any better',
+    'Ask the model to rate its own answer before and after the change',
     'Check that the output got longer',
     'Ship it and watch for complaints',
     'Compare token counts',
@@ -444,9 +444,9 @@ const LEVEL_2: QuizQuestion[] = [
   }),
   choice('a2-15', L2, 'Which grader should you prefer when the task allows it?', [
     'Code — exact match, schema validation, does the test pass',
-    'LLM-as-judge, it understands nuance',
+    'LLM-as-judge, because it understands nuance far better',
     'Human review, always',
-    'The model’s self-reported confidence',
+    'The model’s own self-reported confidence in its answer',
     'Whichever is fastest to write',
     'A second call to the same prompt',
   ], 'Code — exact match, schema validation, does the test pass', {
@@ -489,8 +489,8 @@ const LEVEL_3: QuizQuestion[] = [
     'Whether it uses tools at all',
     'Whether it streams its output',
     'How many models are involved',
-    'Whether it has a system prompt',
-    'Whether it runs in the background',
+    'Whether it has a system prompt guiding it or not',
+    'Whether the whole thing runs in the background or not',
   ], 'Who decides the control flow — your code, or the model', {
     emoji: '🧭',
     lessonId: 'l3-what-is-an-agent',
@@ -511,8 +511,8 @@ const LEVEL_3: QuizQuestion[] = [
   choice('a3-03', L3, 'When a model "calls a tool", what literally happens?', [
     'It emits a structured request; YOUR code executes it and returns the result',
     'It opens an HTTP connection to the tool',
-    'The provider runs the function on their servers',
-    'It executes sandboxed code inside the model',
+    'The provider runs your function on their own servers and returns it',
+    'It executes sandboxed code inside the model itself and keeps the result',
     'It queries the tool during training',
     'It writes to a shared function registry',
   ], 'It emits a structured request; YOUR code executes it and returns the result', {
@@ -525,8 +525,8 @@ const LEVEL_3: QuizQuestion[] = [
     'Documentation for your teammates',
     'Metadata for logging',
     'A fallback shown when the tool errors',
-    'Ignored by the model — only the name matters',
-    'Used to generate the JSON schema automatically',
+    'Ignored by the model entirely — only the tool name really matters',
+    'It is used to generate the tool’s JSON schema automatically',
   ], 'The prompt the model reads when deciding whether to use this tool', {
     emoji: '📝',
     lessonId: 'l3-tool-calling',
@@ -534,9 +534,9 @@ const LEVEL_3: QuizQuestion[] = [
   }),
   choice('a3-05', L3, 'Your agent has 30 tools with long descriptions. The hidden cost is…', [
     'They are re-sent on every single turn, consuming the window before the user speaks',
-    'The provider charges a per-tool registration fee',
+    'The provider charges you a per-tool registration fee for each one of them',
     'The model can only see the first 10',
-    'Latency increases only on the first call',
+    'Latency goes up on the first call of a session, but never after that',
     'Nothing — schemas are cached for free',
     'It halves the maximum output length',
   ], 'They are re-sent on every single turn, consuming the window before the user speaks', {
@@ -548,8 +548,8 @@ const LEVEL_3: QuizQuestion[] = [
     '"date_from must be YYYY-MM-DD; you sent \'last tuesday\'. Call get_current_date first."',
     '"Error: ValidationError"',
     '"null"',
-    'The full Python stack trace',
-    '"Something went wrong, please try again"',
+    'The full Python stack trace, exactly as your runtime printed it',
+    '"Something went wrong somewhere, please just try that again in a moment"',
     'Throw and let the loop crash',
   ], '"date_from must be YYYY-MM-DD; you sent \'last tuesday\'. Call get_current_date first."', {
     emoji: '🩹',
@@ -606,11 +606,11 @@ const LEVEL_3: QuizQuestion[] = [
   }),
   choice('a3-11', L3, 'An agent calls the same failing tool with identical arguments five times. Best fix?', [
     'Detect repeated identical calls and inject a message telling it to change approach',
-    'Increase the step limit so it can keep trying',
+    'Increase the agent’s step limit so that it can simply keep on trying',
     'Raise the temperature and hope',
     'Remove the tool from the agent',
     'Silently swallow the errors',
-    'Restart the run from the beginning',
+    'Restart the whole run from the beginning with a fresh context window',
   ], 'Detect repeated identical calls and inject a message telling it to change approach', {
     emoji: '🌀',
     lessonId: 'l3-loop-control',
@@ -640,8 +640,8 @@ const LEVEL_3: QuizQuestion[] = [
     'It cannot call more than one tool',
     'It only works with reasoning models',
     'It requires a vector database',
-    'It cannot recover from tool failures',
-    'It is slower than plan-then-execute in every case',
+    'It can never recover from a tool failure once one has happened',
+    'It is slower than plan-then-execute in every single case, without exception',
   ], 'Long horizons — early observations clog the context and drift compounds', {
     emoji: '📉',
     lessonId: 'l3-react',
@@ -651,8 +651,8 @@ const LEVEL_3: QuizQuestion[] = [
     'The N×M problem — every agent × every system needing a bespoke integration',
     'The context window limit',
     'Slow tool execution',
-    'Hallucinated tool arguments',
-    'Token pricing differences between providers',
+    'Hallucinated tool arguments that no schema can ever catch',
+    'The token pricing differences between all of the different providers',
     'The lack of streaming in tool calls',
   ], 'The N×M problem — every agent × every system needing a bespoke integration', {
     emoji: '🔗',
@@ -662,9 +662,9 @@ const LEVEL_3: QuizQuestion[] = [
   choice('a3-16', L3, 'Connecting an untrusted third-party tool server is risky because…', [
     'Its tool descriptions become instructions inside your agent’s context',
     'It slows down the loop',
-    'It uses a different JSON dialect',
+    'It uses a slightly different JSON dialect that your parser may reject',
     'It cannot be version-pinned',
-    'It requires opening an inbound port',
+    'It requires you to open an inbound port on your own network',
     'It doubles your token costs',
   ], 'Its tool descriptions become instructions inside your agent’s context', {
     emoji: '🐍',
@@ -674,9 +674,9 @@ const LEVEL_3: QuizQuestion[] = [
   choice('a3-17', L3, 'A model requests three independent tool calls in one turn. You should…', [
     'Run them concurrently — often the biggest latency win available',
     'Run them strictly in the order given',
-    'Reject all but the first, it is a protocol error',
+    'Reject all but the first of them, since that is a protocol error',
     'Ask the model to pick one',
-    'Run them in series to avoid rate limits, always',
+    'Always run them one after another in series, to avoid hitting rate limits',
     'Merge them into a single call',
   ], 'Run them concurrently — often the biggest latency win available', {
     emoji: '⚡',
@@ -693,8 +693,8 @@ const L4 = 'agents-4-context'
 const LEVEL_4: QuizQuestion[] = [
   choice('a4-01', L4, 'The best one-line description of context engineering is…', [
     'Deciding what information occupies the window at each step',
-    'Finding cleverer wording for prompts',
-    'Choosing the model with the biggest window',
+    'Finding cleverer wording for the prompts you already send',
+    'Choosing whichever model happens to have the biggest window',
     'Compressing prompts to save money',
     'Writing better system messages',
     'Tuning temperature and top-p',
@@ -716,8 +716,8 @@ const LEVEL_4: QuizQuestion[] = [
   choice('a4-03', L4, 'Why keep headroom in the window rather than filling it?', [
     'An agent that runs to the edge fails mid-task with no room to recover',
     'Providers charge extra above 90% utilisation',
-    'The tokenizer becomes inaccurate near the limit',
-    'Streaming stops working when the window is full',
+    'The tokenizer starts becoming inaccurate as you get near the limit',
+    'Streaming simply stops working once the context window is full',
     'It has no benefit — fill it',
     'Cached prefixes expire when the window is full',
   ], 'An agent that runs to the edge fails mid-task with no room to recover', {
@@ -735,8 +735,8 @@ const LEVEL_4: QuizQuestion[] = [
   }),
   choice('a4-05', L4, 'You need the model to know facts from your internal wiki. RAG or fine-tuning?', [
     'RAG — it teaches facts, updates in minutes, and gives you citations',
-    'Fine-tuning — facts belong in the weights',
-    'Fine-tuning, because RAG cannot handle private data',
+    'Fine-tuning — facts like these really belong inside the weights',
+    'Fine-tuning, because RAG cannot handle private company data at all',
     'Neither, just use a bigger model',
     'Both are equally suitable',
     'RAG only if the wiki is under 100 pages',
@@ -760,8 +760,8 @@ const LEVEL_4: QuizQuestion[] = [
   choice('a4-07', L4, 'Why add overlap between fixed-size chunks?', [
     'So an idea split across a boundary still appears whole in one chunk',
     'To make the vectors more distinct',
-    'To reduce the total number of chunks',
-    'It is required by vector databases',
+    'To reduce the total number of chunks you have to store',
+    'It is a hard requirement of every vector database out there',
     'To speed up embedding',
     'To improve keyword search only',
   ], 'So an idea split across a boundary still appears whole in one chunk', {
@@ -771,11 +771,11 @@ const LEVEL_4: QuizQuestion[] = [
   }),
   choice('a4-08', L4, 'The "small-to-big" (parent document) retrieval trick means…', [
     'Embed a small sharp chunk for matching, send the surrounding section to the model',
-    'Start with a small model and escalate to a bigger one',
+    'Start out with a small model and escalate to a much bigger one',
     'Retrieve 5 chunks, then expand to 50 if unsatisfied',
     'Chunk small documents first, then large ones',
     'Use small embeddings and large context windows',
-    'Summarise big chunks into small ones before storing',
+    'Summarise your big chunks down into small ones before storing them',
   ], 'Embed a small sharp chunk for matching, send the surrounding section to the model', {
     emoji: '🔎',
     lessonId: 'l4-chunking',
@@ -798,8 +798,8 @@ const LEVEL_4: QuizQuestion[] = [
     'Numbers cannot be embedded',
     'The code is too short to embed',
     'Vector databases do not index digits',
-    'It would work fine — this is not a real limitation',
-    'The tokenizer strips alphanumeric mixes',
+    'It would actually work fine — this is not a real limitation of embeddings',
+    'The tokenizer strips out mixes of letters and digits before embedding',
   ], 'Embeddings capture gist, so it returns similar-feeling codes rather than that exact one', {
     emoji: '🔤',
     lessonId: 'l4-retrieval-quality',
@@ -809,8 +809,8 @@ const LEVEL_4: QuizQuestion[] = [
     'Reads the query and the chunk together, so it judges relevance far better',
     'Searches more documents in less time',
     'Removes duplicate chunks',
-    'Translates the query into other languages',
-    'Compresses chunks to fit the window',
+    'Translates the user’s query into other languages before searching',
+    'Compresses the retrieved chunks so that they fit the window',
     'Re-embeds the corpus on the fly',
   ], 'Reads the query and the chunk together, so it judges relevance far better', {
     emoji: '⚖️',
@@ -832,8 +832,8 @@ const LEVEL_4: QuizQuestion[] = [
     'Latency and cost',
     'Chunk count and vector dimensions',
     'Temperature and top-p',
-    'Token count and context utilisation',
-    'Cosine similarity mean and variance',
+    'Token count per query (how big?) and context utilisation (how full?)',
+    'The mean of the cosine similarity scores and the variance across them',
   ], 'Recall (right chunk in the top 50?) and precision (right chunk in the top 5?)', {
     emoji: '📊',
     lessonId: 'l4-retrieval-quality',
@@ -854,8 +854,8 @@ const LEVEL_4: QuizQuestion[] = [
   choice('a4-15', L4, 'The most scalable way to handle huge tool outputs in a long run is…', [
     'Offload to files/DB and keep only paths plus one-line descriptions in context',
     'Increase the context window',
-    'Truncate to the first 500 characters and move on',
-    'Summarise everything after every single step',
+    'Truncate every output to the first 500 characters and simply move on',
+    'Summarise the whole conversation again after every single step',
     'Drop the oldest messages until it fits',
     'Split the output across multiple messages',
   ], 'Offload to files/DB and keep only paths plus one-line descriptions in context', {
@@ -875,9 +875,9 @@ const LEVEL_4: QuizQuestion[] = [
   }),
   choice('a4-17', L4, 'Good filter for deciding whether to write something to long-term memory?', [
     '"Would this change how I act in a future, different session?"',
-    '"Did the user say it more than once?"',
+    '"Did the user happen to say this more than once in the session?"',
     '"Is it longer than 20 words?"',
-    'Save everything — storage is cheap',
+    'Save absolutely everything, since storage is cheap these days',
     '"Was it in the last 5 messages?"',
     '"Did the model mark it as important?"',
   ], '"Would this change how I act in a future, different session?"', {
@@ -889,9 +889,9 @@ const LEVEL_4: QuizQuestion[] = [
     'It is a persistent injection surface — a poisoned memory reloads every session',
     'Memory files are always world-readable',
     'Vector databases cannot be encrypted',
-    'It doubles the attack surface of the API key',
+    'It roughly doubles the attack surface sitting around your API key',
     'It is not — memory is read-only',
-    'Because summaries can leak the system prompt',
+    'Because the stored summaries can leak your whole system prompt back out',
   ], 'It is a persistent injection surface — a poisoned memory reloads every session', {
     emoji: '☠️',
     lessonId: 'l4-memory',
@@ -917,10 +917,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-02', L5, 'Which pattern usually gives the biggest cost win?', [
     'Routing — send easy traffic to a small model, hard traffic to a big one',
-    'Voting — three cheap calls beat one expensive one',
+    'Voting — three cheap model calls will beat one expensive call',
     'Chaining — more steps means shorter prompts',
     'Sectioning — parallelism reduces tokens',
-    'Multi-agent — specialists are more efficient',
+    'Multi-agent — a team of specialists is simply more efficient',
     'Evaluator loops — fewer retries overall',
   ], 'Routing — send easy traffic to a small model, hard traffic to a big one', {
     emoji: '🚦',
@@ -929,10 +929,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-03', L5, 'What distinguishes orchestrator–worker from simple sectioning?', [
     'The subtasks are decided at runtime by the lead, not fixed in advance',
-    'It uses more than one model provider',
+    'It uses more than one model provider under the hood for the workers',
     'The workers can call each other',
     'It always requires a vector database',
-    'Workers share a single context window',
+    'All of the workers involved share one single context window',
     'It runs the subtasks sequentially',
   ], 'The subtasks are decided at runtime by the lead, not fixed in advance', {
     emoji: '🎼',
@@ -943,8 +943,8 @@ const LEVEL_5: QuizQuestion[] = [
     'Context isolation — each gets a clean window and returns a short summary',
     'They are cheaper than one agent',
     'They are easier to debug',
-    'They eliminate hallucination through cross-checking',
-    'They remove the need for tool schemas',
+    'They eliminate hallucination altogether by cross-checking each other',
+    'They remove the need to write tool schemas at all',
     'They give more deterministic output',
   ], 'Context isolation — each gets a clean window and returns a short summary', {
     emoji: '🧊',
@@ -966,8 +966,8 @@ const LEVEL_5: QuizQuestion[] = [
   choice('a5-06', L5, 'When should you NOT use subagents?', [
     'When subtasks depend on each other’s intermediate state',
     'When the task is read-heavy',
-    'When subtasks are independent',
-    'When results can be summarised',
+    'When the subtasks are all fully independent of one another',
+    'When the results can each be summarised down to a paragraph',
     'When the task is high-value',
     'When you need parallelism',
   ], 'When subtasks depend on each other’s intermediate state', {
@@ -977,10 +977,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-07', L5, 'An evaluator–optimizer loop works best when…', [
     'There is an objective external signal: tests, a compiler, schema validation',
-    'The criteria are deliberately open-ended',
+    'The criteria are deliberately open-ended and a matter of taste',
     'Latency is the top priority',
     'The task is simple and single-step',
-    'Only the model’s own opinion is available',
+    'Only the model’s own opinion of the output is available to you',
     'You want the cheapest possible run',
   ], 'There is an objective external signal: tests, a compiler, schema validation', {
     emoji: '♻️',
@@ -1012,9 +1012,9 @@ const LEVEL_5: QuizQuestion[] = [
   choice('a5-10', L5, 'Better than several agents passing prose to each other:', [
     'One agent with more tools, or shared state outside the conversation',
     'More agents, each with a narrower personality',
-    'A dedicated summariser agent between every pair',
+    'A dedicated summariser agent sitting between every pair of agents',
     'Longer handoff messages with more detail',
-    'Giving every agent the full conversation history',
+    'Giving every single agent the full conversation history each turn',
     'A round-robin discussion until they agree',
   ], 'One agent with more tools, or shared state outside the conversation', {
     emoji: '🗂️',
@@ -1035,10 +1035,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-12', L5, 'Why is gating EVERY action a bad idea?', [
     'Approval fatigue trains the human to click yes without reading',
-    'It slows the model’s token generation',
+    'It noticeably slows down the model’s token generation',
     'Providers charge per approval',
     'It breaks prompt caching',
-    'It is fine — more gates are always safer',
+    'It is not a bad idea at all — more gates are always safer',
     'It prevents parallel tool calls',
   ], 'Approval fatigue trains the human to click yes without reading', {
     emoji: '😵',
@@ -1047,10 +1047,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-13', L5, 'The most underrated option on an approval prompt is…', [
     'Reject WITH feedback, so the agent tries a different approach',
-    'A "remember this choice" checkbox',
+    'A "remember this choice for me next time" checkbox',
     'A countdown that auto-approves',
     'A link to the documentation',
-    'The token count of the pending call',
+    'The token count and cost of the pending tool call',
     'A confidence percentage',
   ], 'Reject WITH feedback, so the agent tries a different approach', {
     emoji: '💬',
@@ -1059,10 +1059,10 @@ const LEVEL_5: QuizQuestion[] = [
   }),
   choice('a5-14', L5, 'Approval gates require what architectural property?', [
     'Durable, resumable runs — a human may take days to respond',
-    'A websocket connection held open',
+    'A websocket connection held open the whole time',
     'A single-process deployment',
     'Streaming disabled',
-    'All tools to be idempotent',
+    'Every one of your tools to be idempotent',
     'A dedicated approval model',
   ], 'Durable, resumable runs — a human may take days to respond', {
     emoji: '💾',
@@ -1104,9 +1104,9 @@ const LEVEL_6: QuizQuestion[] = [
     'Whether it got there sensibly — tools used, steps taken, loops, recovery',
     'Whether the output was grammatical',
     'Whether the user was satisfied',
-    'Whether the model version changed',
+    'Whether the model version changed underneath you partway through the run',
     'Whether the JSON validated',
-    'Nothing — they measure the same thing',
+    'Nothing at all — the two of them end up measuring the same thing',
   ], 'Whether it got there sensibly — tools used, steps taken, loops, recovery', {
     emoji: '👣',
     lessonId: 'l6-agent-evals',
@@ -1116,8 +1116,8 @@ const LEVEL_6: QuizQuestion[] = [
     'Steps per task creeping upward',
     'Total monthly spend',
     'Number of users',
-    'Average response length',
-    'Model version count',
+    'Average response length per task',
+    'Number of model versions in use',
     'Cache hit rate',
   ], 'Steps per task creeping upward', {
     emoji: '📈',
@@ -1128,8 +1128,8 @@ const LEVEL_6: QuizQuestion[] = [
     'Non-determinism means "passes 7/10" and "passes 10/10" are different systems',
     'To warm the prompt cache',
     'To average out network latency',
-    'Providers require it for rate limit fairness',
-    'It is unnecessary at temperature 0',
+    'Providers require it for the sake of rate limit fairness across accounts',
+    'It is completely unnecessary once the temperature has been set to 0',
     'To generate more training data',
   ], 'Non-determinism means "passes 7/10" and "passes 10/10" are different systems', {
     emoji: '🎲',
@@ -1138,11 +1138,11 @@ const LEVEL_6: QuizQuestion[] = [
   }),
   choice('a6-04', L6, 'Most valuable single field to capture in an agent trace?', [
     'The fully rendered prompt actually sent, after templating and retrieval',
-    'The prompt template',
-    'The final answer only',
-    'The user id',
-    'The total token count',
-    'The wall-clock duration',
+    'The prompt template as written, before any values are filled in',
+    'The final answer only, exactly as it was returned to the user',
+    'The user id and the session id the run belongs to',
+    'The total token count for the whole run, input and output added up',
+    'The wall-clock duration of the entire run, measured end to end',
   ], 'The fully rendered prompt actually sent, after templating and retrieval', {
     emoji: '🔭',
     lessonId: 'l6-observability',
@@ -1153,8 +1153,8 @@ const LEVEL_6: QuizQuestion[] = [
     'Because exceptions are swallowed by the SDK',
     'To prove the user typed the wrong thing',
     'To measure token cost',
-    'Tracing is optional if you have good evals',
-    'Because the provider hides the response otherwise',
+    'Tracing is optional as long as you have a good eval suite',
+    'Because the provider hides the raw response from you otherwise',
   ], 'The code didn’t fail — the judgement did, so there is nothing else to inspect', {
     emoji: '🕵️',
     lessonId: 'l6-observability',
@@ -1163,10 +1163,10 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-06', L6, 'What silently destroys your prompt-cache hit rate?', [
     'A timestamp or session id near the top of the system prompt',
     'Streaming the response',
-    'Using more than three tools',
+    'Registering more than three tools on the request',
     'A long user message',
     'Setting temperature above 0',
-    'Calling from multiple regions',
+    'Calling the API from several regions at once',
   ], 'A timestamp or session id near the top of the system prompt', {
     emoji: '💾',
     lessonId: 'l6-cost-latency',
@@ -1208,9 +1208,9 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-10', L6, 'Why is prompt injection fundamentally hard to fix?', [
     'The model sees one flat text stream — there is no way to mark which text is trusted',
     'Providers refuse to add the necessary API field',
-    'Because tokenizers cannot handle special characters',
+    'Because tokenizers simply cannot handle the special characters used',
     'Because temperature cannot be set to 0',
-    'It is easy to fix with the right system prompt',
+    'It is actually easy to fix, with a carefully written system prompt',
     'Because tools run on the provider’s servers',
   ], 'The model sees one flat text stream — there is no way to mark which text is trusted', {
     emoji: '🌊',
@@ -1219,10 +1219,10 @@ const LEVEL_6: QuizQuestion[] = [
   }),
   choice('a6-11', L6, 'The "lethal trifecta" is…', [
     'Private data access + untrusted content + an exfiltration path',
-    'Hallucination + high temperature + no evals',
+    'Hallucination + a high temperature + no evals in place',
     'Big context + many tools + long runs',
     'Multi-agent + memory + autonomy',
-    'No caching + no tracing + no limits',
+    'No caching + no tracing + no spending limits at all',
     'Fine-tuning + RAG + tool calling',
   ], 'Private data access + untrusted content + an exfiltration path', {
     emoji: '☠️',
@@ -1256,9 +1256,9 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-14', L6, 'When is "skip all permission prompts" mode acceptable?', [
     'In a disposable sandbox with no credentials and restricted network',
     'Whenever the prompts get annoying',
-    'On your main machine, if you are the only developer',
+    'On your main machine, as long as you are the only developer there',
     'For any repo smaller than 10k lines',
-    'Whenever the agent is in read-only mode',
+    'Whenever the agent has been put into read-only mode for the run',
     'Never, under any circumstances',
   ], 'In a disposable sandbox with no credentials and restricted network', {
     emoji: '📦',
@@ -1267,11 +1267,11 @@ const LEVEL_6: QuizQuestion[] = [
   }),
   choice('a6-15', L6, 'Which sandboxing layer do engineers most under-use?', [
     'Reversibility — branches not force-pushes, soft deletes, dry runs, audit logs',
-    'Container isolation',
-    'Network egress allowlists',
-    'Scoped credentials',
-    'Human approval gates',
-    'Rate limiting',
+    'Container isolation — give each run its own throwaway machine',
+    'Network egress allowlists — pin exactly which hosts each tool may reach',
+    'Scoped credentials — hand out the narrowest token the task can work with',
+    'Human approval gates — a person signs off before anything is written',
+    'Rate limiting — cap how often the loop may call anything expensive',
   ], 'Reversibility — branches not force-pushes, soft deletes, dry runs, audit logs', {
     emoji: '↩️',
     lessonId: 'l6-sandboxing',
@@ -1280,9 +1280,9 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-16', L6, 'Why pin an explicit model version in production?', [
     'Floating aliases move under you and silently change behaviour',
     'Pinned versions are cheaper',
-    'It is required for prompt caching',
+    'It is a hard requirement for prompt caching to work',
     'It increases the context window',
-    'It guarantees deterministic output',
+    'It guarantees deterministic output across every run',
     'It avoids rate limits',
   ], 'Floating aliases move under you and silently change behaviour', {
     emoji: '📌',
@@ -1292,9 +1292,9 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-17', L6, 'What is "shadow mode"?', [
     'Run the new agent on real traffic, log what it would have done, show nothing',
     'Run with logging disabled for privacy',
-    'A cheaper model mirroring the expensive one',
+    'A cheaper model quietly mirroring the expensive one in production',
     'Running evals overnight',
-    'Hiding the agent behind a feature flag for staff',
+    'Hiding the new agent behind a feature flag that only staff can see',
     'Running two providers and comparing costs',
   ], 'Run the new agent on real traffic, log what it would have done, show nothing', {
     emoji: '👥',
@@ -1304,9 +1304,9 @@ const LEVEL_6: QuizQuestion[] = [
   choice('a6-18', L6, 'Output fails schema validation in production. The right sequence is…', [
     'Retry once with the validation error in context, then fall back to a deterministic path',
     'Retry indefinitely until it validates',
-    'Return the invalid output and let the client handle it',
+    'Return the invalid output as-is and let the calling client deal with it',
     'Raise the temperature and retry',
-    'Escalate to a human immediately, always',
+    'Escalate the whole thing to a human straight away, every single time',
     'Silently return an empty result',
   ], 'Retry once with the validation error in context, then fall back to a deterministic path', {
     emoji: '🪂',
@@ -1328,8 +1328,8 @@ const LEVEL_6: QuizQuestion[] = [
     'Presenting a probabilistic answer with the authority of a database read',
     'Being occasionally wrong',
     'Slow response times',
-    'Showing sources and citations',
-    'Making outputs editable',
+    'Showing your sources and citations to the user for every claim',
+    'Making every one of the generated outputs editable by the user',
     'Displaying a loading state',
   ], 'Presenting a probabilistic answer with the authority of a database read', {
     emoji: '🤝',

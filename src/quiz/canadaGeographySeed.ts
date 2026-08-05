@@ -113,7 +113,7 @@ export const CANADA_GEOGRAPHY_SEED: QuizQuestion[] = [
     emoji: '🧊',
     funFact: 'Canada touches three oceans — that’s why its motto is “From sea to sea”.',
   }),
-  choice('cg-20', 'Which country is Canada’s only land neighbour?', ['Russia', 'United States', 'Greenland', 'Mexico', 'Iceland', 'Denmark', 'France'], 'United States', {
+  choice('cg-20', 'Which country is Canada’s only land neighbour?', ['Russia', 'United States', 'Greenland', 'Mexico', 'Iceland', 'Denmark', 'United Kingdom'], 'United States', {
     emoji: '🛂',
     funFact: 'The Canada–US border is the longest land border in the world: almost 9,000 km!',
   }),

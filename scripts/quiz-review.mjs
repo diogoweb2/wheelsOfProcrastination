@@ -57,6 +57,8 @@ Do TWO things:
 1. UPDATES: find questions whose facts/commands/product names are outdated or wrong as of today, and rewrite them (keep the same "id", same "type"). Only include questions that genuinely need a change — an unchanged bank is a valid answer.
 2. ADDITIONS: write up to ${MAX_ADDITIONS_PER_TOPIC} NEW questions about recent, important developments in this area that the bank doesn't cover yet (new features, renamed products, new best practices). Use types "choice" (4 options), "write" (1-2 word answers, "accept" array), "match" (3-4 pairs) or "order" (3-4 items). weight 2 / points 8 (10 for match/order); weight 1 / points 5 for nice-to-know. Every question gets a one-sentence practical "funFact" and a fitting "emoji".
 
+LENGTH RULE (applies to updates AND additions): in a "choice" question every option must be about the same length, grammar and level of detail — never let the correct one be the longest or the most qualified, or it can be guessed without knowing the topic. If the answer carries a "— because…" clause, give the wrong ones one too.
+
 Reply with ONLY this JSON object, no markdown fences, no commentary:
 {"updates": [ {question objects incl. their original "id"} ], "additions": [ {new question objects, no "id"} ]}`
 
