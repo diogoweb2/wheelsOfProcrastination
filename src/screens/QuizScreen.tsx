@@ -1,8 +1,8 @@
-// Grand Line Academy — the quiz tab. Each profile sees ITS OWN academy
+// Grand Line Academy — the 🏫 Academy app. Each profile sees ITS OWN academy
 // (Ben: school topics · Diogo: the Agent Engineer path + tooling). Training and
 // test practice for everyone; Diogo, being admin, can also launch his own
 // OFFICIAL final test here. Ben's official tests are launched from Diogo's
-// profile → Admin.
+// Captain app → Academies.
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
@@ -30,7 +30,11 @@ import { sfx } from '../audio'
  * round. `onTrainOpened` clears it so closing the session lands on the topic
  * list instead of bouncing back in.
  */
-export function QuizScreen({ trainTopicId, onTrainOpened }: { trainTopicId?: string | null; onTrainOpened?: () => void } = {}) {
+export function QuizScreen({
+  tab = 'topics',
+  trainTopicId,
+  onTrainOpened,
+}: { tab?: string; trainTopicId?: string | null; onTrainOpened?: () => void } = {}) {
   const { data, activeProfileId, quizBank, quizBankLoaded } = useStore()
   const [session, setSession] = useState<{ mode: QuizMode; topicId: string } | null>(null)
   const [study, setStudy] = useState<string | null>(null) // topicId whose reading list is open
@@ -86,27 +90,156 @@ export function QuizScreen({ trainTopicId, onTrainOpened }: { trainTopicId?: str
 
       {!quizBankLoaded && <p className="muted">Loading the question chest…</p>}
 
-      {sections.map((s) => (
-        <div key={s.id || 'other'}>
-          {s.title && (
-            <>
-              <div className="h2" style={{ marginBottom: 2 }}>{s.title}</div>
-              <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>{s.blurb}</p>
-            </>
-          )}
-          {s.items.map((t) => (
-            <TopicCard
-              key={t.id}
-              topic={t}
-              data={data}
-              bank={quizBank}
-              selfOfficial={isAdmin}
-              onStart={(mode) => setSession({ mode, topicId: t.id })}
-              onStudy={() => setStudy(t.id)}
-            />
-          ))}
+      {tab === 'topics' &&
+        sections.map((s) => (
+          <div key={s.id || 'other'}>
+            {s.title && (
+              <>
+                <div className="h2" style={{ marginBottom: 2 }}>{s.title}</div>
+                <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>{s.blurb}</p>
+              </>
+            )}
+            {s.items.map((t) => (
+              <TopicCard
+                key={t.id}
+                topic={t}
+                data={data}
+                bank={quizBank}
+                selfOfficial={isAdmin}
+                onStart={(mode) => setSession({ mode, topicId: t.id })}
+                onStudy={() => setStudy(t.id)}
+              />
+            ))}
+          </div>
+        ))}
+
+      {tab === 'study' && <StudyShelf topics={topics} bank={quizBank} onOpen={setStudy} />}
+
+      {tab === 'progress' && <ProgressBoard topics={topics} data={data} bank={quizBank} />}
+    </div>
+  )
+}
+
+// --- Study tab: every topic that has written lessons -------------------------
+
+function StudyShelf({
+  topics,
+  bank,
+  onOpen,
+}: {
+  topics: QuizTopic[]
+  bank: QuizQuestion[]
+  onOpen: (topicId: string) => void
+}) {
+  const shelves = topics
+    .map((t) => ({ topic: t, count: lessonsForTopic(bank, t.id).length }))
+    .filter((s) => s.count > 0)
+
+  if (shelves.length === 0) {
+    return (
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 44 }}>📚</div>
+        <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+          No written lessons yet — the crew is still inking them.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="h2">📖 Reading room</div>
+      {shelves.map(({ topic, count }) => (
+        <button
+          key={topic.id}
+          className="quiz-opt"
+          style={{ marginBottom: 8 }}
+          onClick={() => { sfx.click(); onOpen(topic.id) }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 26 }}>{topic.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 900, fontSize: 14 }}>{topic.title}</div>
+              <div className="muted" style={{ fontSize: 11 }}>{count} lesson{count === 1 ? '' : 's'}</div>
+            </div>
+            <div style={{ color: 'var(--gold)' }}>➜</div>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// --- Progress tab: mastery per topic + the official test record --------------
+
+function ProgressBoard({ topics, data, bank }: { topics: QuizTopic[]; data: AppData; bank: QuizQuestion[] }) {
+  const rows = topics
+    .map((t) => {
+      const pool = activeQuestions(bank, t.id)
+      return {
+        topic: t,
+        total: pool.length,
+        mastered: pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length,
+        passed: data.quiz.passedTopics.includes(t.id),
+        last: lastOfficialAttempt(data, t.id),
+      }
+    })
+    .filter((r) => r.total > 0)
+
+  const answered = Object.keys(data.quiz.stats).length
+  const officials = data.quiz.tests.filter((t) => t.official && !t.review)
+  const totalMastered = rows.reduce((s, r) => s + r.mastered, 0)
+  const totalQuestions = rows.reduce((s, r) => s + r.total, 0)
+
+  return (
+    <div>
+      <div className="card" style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: 14 }}>
+        <div>
+          <div style={{ fontWeight: 900, fontSize: 22 }}>{totalMastered}<span className="muted" style={{ fontSize: 13 }}>/{totalQuestions}</span></div>
+          <div className="muted" style={{ fontSize: 11 }}>mastered</div>
+        </div>
+        <div>
+          <div style={{ fontWeight: 900, fontSize: 22, color: 'var(--blue)' }}>{answered}</div>
+          <div className="muted" style={{ fontSize: 11 }}>seen</div>
+        </div>
+        <div>
+          <div style={{ fontWeight: 900, fontSize: 22, color: 'var(--gold)' }}>{data.quiz.passedTopics.length}</div>
+          <div className="muted" style={{ fontSize: 11 }}>conquered</div>
+        </div>
+      </div>
+
+      <div className="h2">📊 Topic by topic</div>
+      {rows.map(({ topic, total, mastered, passed, last }) => (
+        <div key={topic.id} className="card" style={{ marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 22 }}>{topic.emoji}</span>
+            <div style={{ fontWeight: 900, flex: 1, minWidth: 0 }}>{topic.title}</div>
+            {passed && <span className="chip" style={{ background: 'var(--green)', color: '#06121f' }}>⚓ conquered</span>}
+          </div>
+          <div className="quiz-bar" title={`${mastered}/${total} mastered`}>
+            <div className="quiz-bar-fill" style={{ width: `${Math.round((mastered / total) * 100)}%` }} />
+          </div>
+          <div className="muted" style={{ fontSize: 11, marginTop: 3 }}>
+            {mastered}/{total} mastered
+            {last ? ` · last final test ${last.day}: ${last.scorePct}% ${last.passed ? '✅' : '❌'}` : ' · no final test yet'}
+          </div>
         </div>
       ))}
+
+      {officials.length > 0 && (
+        <>
+          <div className="h2">🎓 Final test record</div>
+          {[...officials].reverse().map((t) => (
+            <div key={t.id} className="card" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ flex: 1, fontWeight: 800, fontSize: 14 }}>{topics.find((x) => x.id === t.topicId)?.title ?? t.topicId}</div>
+              <div className="muted" style={{ fontSize: 12 }}>{t.day}</div>
+              <span className="chip" style={t.passed ? { background: 'var(--green)', color: '#10230a' } : { background: 'var(--red)', color: '#fff' }}>
+                {t.scorePct}%
+              </span>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   )
 }
@@ -239,7 +372,7 @@ function TopicCard({
         <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
           🔒 {prereq
             ? `Locked — pass the ${prereq.title} final test to open this level.`
-            : `Locked — ${selfOfficial ? 'open it from your Admin desk (Me tab).' : 'ask Dad to open this sea.'}`}
+            : `Locked — ${selfOfficial ? 'open it from the Captain app → Academies.' : 'ask Dad to open this sea.'}`}
         </div>
       )}
     </div>

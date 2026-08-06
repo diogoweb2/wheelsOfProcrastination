@@ -1,4 +1,4 @@
-// The Captain's desk — admin tools inside Diogo's profile (Me tab).
+// The Captain's desk — Diogo's admin app.
 // Manage BOTH academies (Ben's and his own): locks, bonus 🍇, question
 // curation, AI-question review, Ben's official final tests, and settling
 // prize purchases ("Paid").
@@ -11,7 +11,7 @@ import { QuizSession } from './QuizSession'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
 
-export function AdminSection() {
+export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
   const { data, kidData, quizBank } = useStore()
   const [session, setSession] = useState<{ kind: 'ben-official' | 'ben-preview'; topicId: string } | null>(null)
   const [managing, setManaging] = useState<string | null>(null)
@@ -36,48 +36,55 @@ export function AdminSection() {
 
   return (
     <>
-      <div className="h2">🛠️ Captain’s desk (admin)</div>
+      <div className="h2">🛠️ Captain’s desk</div>
 
-      <FreezeDesk />
+      {tab === 'freezes' && <FreezeDesk />}
 
-      <AuditLog />
+      {tab === 'audit' && <AuditLog />}
 
-      {pending.length > 0 && <PendingReview pending={pending} />}
+      {tab === 'prizes' && (
+        <>
+          <PendingPrizes />
+          {pending.length > 0 && <PendingReview pending={pending} />}
+        </>
+      )}
 
-      <PendingPrizes />
+      {tab === 'academies' && (
+        <>
+          <div className="muted" style={{ fontSize: 12, margin: '10px 0 6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+            ⚔️ Ben’s academy
+          </div>
+          {!kidData && <p className="muted">Loading Ben’s log from the cloud…</p>}
+          {topicsFor(KID_ID).map((t) => (
+            <AdminTopicCard
+              key={t.id}
+              topic={t}
+              targetId={KID_ID}
+              targetData={kidData}
+              onTest={() => setSession({ kind: 'ben-official', topicId: t.id })}
+              onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
+              onManage={() => setManaging(t.id)}
+            />
+          ))}
 
-      <div className="muted" style={{ fontSize: 12, margin: '10px 0 6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
-        ⚔️ Ben’s academy
-      </div>
-      {!kidData && <p className="muted">Loading Ben’s log from the cloud…</p>}
-      {topicsFor(KID_ID).map((t) => (
-        <AdminTopicCard
-          key={t.id}
-          topic={t}
-          targetId={KID_ID}
-          targetData={kidData}
-          onTest={() => setSession({ kind: 'ben-official', topicId: t.id })}
-          onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
-          onManage={() => setManaging(t.id)}
-        />
-      ))}
-
-      <div className="muted" style={{ fontSize: 12, margin: '14px 0 6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
-        🏴‍☠️ My academy
-      </div>
-      {topicsFor(PARENT_ID).map((t) => (
-        <AdminTopicCard
-          key={t.id}
-          topic={t}
-          targetId={PARENT_ID}
-          targetData={data}
-          onManage={() => setManaging(t.id)}
-        />
-      ))}
-      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-        Your own official final tests run from the Quiz tab. <b>npm run quiz:regen</b> refills removed questions;{' '}
-        <b>npm run quiz:review</b> (weekly, sonnet) refreshes your AI topics — updated questions show a ✨ NEW badge.
-      </p>
+          <div className="muted" style={{ fontSize: 12, margin: '14px 0 6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+            🏴‍☠️ My academy
+          </div>
+          {topicsFor(PARENT_ID).map((t) => (
+            <AdminTopicCard
+              key={t.id}
+              topic={t}
+              targetId={PARENT_ID}
+              targetData={data}
+              onManage={() => setManaging(t.id)}
+            />
+          ))}
+          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Your own official final tests run from the Academy app. <b>npm run quiz:regen</b> refills removed questions;{' '}
+            <b>npm run quiz:review</b> (weekly, sonnet) refreshes your AI topics — updated questions show a ✨ NEW badge.
+          </p>
+        </>
+      )}
     </>
   )
 }

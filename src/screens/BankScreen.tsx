@@ -133,9 +133,10 @@ function GrowthBar({ deposited, growth }: { deposited: number; growth: number })
   )
 }
 
-export function BankScreen() {
+/** `tab` comes from the Bank app's bottom menu (kid and admin have different menus). */
+export function BankScreen({ tab }: { tab: string }) {
   const { activeProfileId } = useStore()
-  return activeProfileId === PARENT_ID ? <BankAdmin /> : <BankKid />
+  return activeProfileId === PARENT_ID ? <BankAdmin tab={tab} /> : <BankKid tab={tab} />
 }
 
 // ============================================================================
@@ -149,11 +150,10 @@ type KidModal =
   | { kind: 'payDad' }
   | null
 
-function BankKid() {
+function BankKid({ tab }: { tab: string }) {
   const { data, celebrateBankBounce } = useStore()
   const [modal, setModal] = useState<KidModal>(null)
   const [crashDismissed, setCrashDismissed] = useState(false) // "let me think" hides the alert until the next visit
-  const [calcOpen, setCalcOpen] = useState(false) // standalone calculator modal, shown when trip mode is off
   const quote = useMemo(() => randomLuffyQuote(), [])
   const bank = data.bank
   const pendingPaybacks = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
@@ -201,26 +201,7 @@ function BankKid() {
       </div>
 
       {/* trip mode sits right under the treasure total — it's what he reaches for in a shop */}
-      {converterActive(bank) && <ConverterCard bank={bank} />}
-
-      {/* trip mode is off → the calculator lives behind a floating icon instead */}
-      {!converterActive(bank) && (
-        <button
-          className="fab fab--calc"
-          title="Calculator"
-          aria-label="Calculator"
-          onClick={() => { sfx.click(); setCalcOpen(true) }}
-        >
-          🧮
-        </button>
-      )}
-      {calcOpen && (
-        <div className="overlay overlay--center" onClick={() => setCalcOpen(false)}>
-          <div className="sheet" style={{ maxWidth: 340 }} onClick={(e) => e.stopPropagation()}>
-            <Calculator standalone />
-          </div>
-        </div>
-      )}
+      {converterActive(bank) && tab !== 'tools' && <ConverterCard bank={bank} />}
 
       {pendingPaybacks.length > 0 && (
         <div className="card" style={{ marginBottom: 12, borderColor: 'var(--blue)' }}>
@@ -233,19 +214,38 @@ function BankKid() {
       )}
 
       {/* the chests */}
-      {ACCOUNT_IDS.map((id) => (
-        <AccountCard
-          key={id}
-          id={id}
-          data={data}
-          onMove={() => setModal({ kind: 'move', from: id })}
-          onSell={() => setModal({ kind: 'sell', from: id })}
-          onCollege={() => setModal({ kind: 'college' })}
-          onPayDad={() => setModal({ kind: 'payDad' })}
-        />
-      ))}
+      {tab === 'chests' &&
+        ACCOUNT_IDS.map((id) => (
+          <AccountCard
+            key={id}
+            id={id}
+            data={data}
+            onMove={() => setModal({ kind: 'move', from: id })}
+            onSell={() => setModal({ kind: 'sell', from: id })}
+            onCollege={() => setModal({ kind: 'college' })}
+            onPayDad={() => setModal({ kind: 'payDad' })}
+          />
+        ))}
 
-      <ProjectionCard />
+      {tab === 'grow' && <ProjectionCard />}
+
+      {tab === 'tools' && (
+        <>
+          {converterActive(bank) ? (
+            <ConverterCard bank={bank} />
+          ) : (
+            <div className="card" style={{ marginBottom: 10 }}>
+              <div style={{ fontWeight: 900 }}>🌍 Trip mode is off</div>
+              <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                Ask Dad to switch it on before a trip and this page converts prices for you.
+              </div>
+            </div>
+          )}
+          <Calculator standalone />
+        </>
+      )}
+
+      {tab === 'log' && <TxnLog bank={bank} title="🧾 Your ledger — every move you made" />}
 
       {/* payday decision is mandatory: no dismiss, it just sits until allocated */}
       {needsAllocation && <PaydayModal />}
@@ -1001,7 +1001,7 @@ function CrashModal({ onThink }: { onThink: () => void }) {
 // Diogo's banker desk
 // ============================================================================
 
-function BankAdmin() {
+function BankAdmin({ tab }: { tab: string }) {
   const { kidData } = useStore()
   if (!kidData) {
     return (
@@ -1019,14 +1019,24 @@ function BankAdmin() {
       </div>
       <p className="muted" style={{ marginBottom: 14 }}>Ben’s real-money world — you set the rules, he makes every call.</p>
 
+      {/* market health and Ben's outstanding paybacks follow you across the desk */}
       <AdminMarket />
       <AdminPaybacks kidData={kidData} />
-      <AdminShock kidData={kidData} />
-      <AdminBalances kidData={kidData} />
-      <AdminConfig kidData={kidData} />
-      <AdminConverter kidData={kidData} />
-      <AdminAdjust />
-      <AdminLog kidData={kidData} />
+
+      {tab === 'vault' && (
+        <>
+          <AdminBalances kidData={kidData} />
+          <AdminAdjust />
+        </>
+      )}
+      {tab === 'shock' && <AdminShock kidData={kidData} />}
+      {tab === 'rules' && (
+        <>
+          <AdminConfig kidData={kidData} />
+          <AdminConverter kidData={kidData} />
+        </>
+      )}
+      {tab === 'ledger' && <TxnLog bank={kidData.bank} title="📜 Captain’s ledger — every move Ben made" />}
     </div>
   )
 }
@@ -1355,14 +1365,14 @@ const TXN_ICON: Record<BankTxn['type'], string> = {
   recover: '📈',
 }
 
-/** Every decision Ben makes, newest first — the coaching goldmine. */
-function AdminLog({ kidData }: { kidData: AppData }) {
+/** Every decision made on an account, newest first — the coaching goldmine. */
+function TxnLog({ bank, title }: { bank: BankState; title: string }) {
   const [showAll, setShowAll] = useState(false)
-  const txns = [...kidData.bank.txns].reverse()
+  const txns = [...bank.txns].reverse()
   const shown = showAll ? txns : txns.slice(0, 15)
   return (
     <div className="card" style={{ marginBottom: 10 }}>
-      <div style={{ fontWeight: 900, marginBottom: 6 }}>📜 Captain’s ledger — every move Ben made</div>
+      <div style={{ fontWeight: 900, marginBottom: 6 }}>{title}</div>
       {txns.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing yet — the ledger fills up as the bank comes alive.</p>}
       {shown.map((t) => (
         <div key={t.id} style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--line)', padding: '6px 0', fontSize: 12 }}>

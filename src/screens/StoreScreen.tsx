@@ -10,8 +10,8 @@ import { sfx } from '../audio'
 
 const FLASHES = 26 // how many backgrounds flash by before the reveal
 
-export function StoreScreen() {
-  const [tab, setTab] = useState<'backgrounds' | 'treasures'>('backgrounds')
+/** Nami's Black Market. `tab` comes from the app's bottom menu. */
+export function StoreScreen({ tab }: { tab: string }) {
   return (
     <div className="screen">
       <div className="h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -20,15 +20,9 @@ export function StoreScreen() {
       <p className="muted" style={{ marginBottom: 12 }}>
         Rare goods, non-negotiable prices. All sales final.
       </p>
-      <div className="seg" style={{ marginBottom: 14 }}>
-        <button className={tab === 'backgrounds' ? 'on' : ''} onClick={() => { sfx.click(); setTab('backgrounds') }}>
-          🖼️ Backgrounds
-        </button>
-        <button className={tab === 'treasures' ? 'on' : ''} onClick={() => { sfx.click(); setTab('treasures') }}>
-          🏴‍☠️ Treasures
-        </button>
-      </div>
-      {tab === 'backgrounds' ? <BackgroundsTab /> : <TreasuresTab />}
+      {tab === 'walls' && <BackgroundsTab />}
+      {tab === 'treasures' && <TreasuresTab />}
+      {tab === 'orders' && <OrdersTab />}
     </div>
   )
 }
@@ -214,7 +208,6 @@ function TreasuresTab() {
   const fruits = data.economy.devilFruits
   const unpaidCount = data.giftcards.filter((p) => !p.paidAt).length
   const daysLeft = giftCardDaysLeft(data)
-  const history = [...data.giftcards].reverse()
   const isAdmin = activeProfileId !== KID_ID
 
   function buy(itemId: string, cost: number) {
@@ -253,7 +246,7 @@ function TreasuresTab() {
         <div className="card" style={{ marginBottom: 14, borderColor: 'var(--yellow)' }}>
           <div style={{ fontWeight: 900 }}>⏳ {unpaidCount} treasure{unpaidCount > 1 ? 's' : ''} waiting to be handed over</div>
           <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            {isAdmin ? 'Settle them from your Captain’s desk (Me tab).' : 'Dad has a big warning on his profile — he’ll mark it “paid” when it’s in your hands.'}
+            {isAdmin ? 'Settle them from the Captain app → Prizes.' : 'Dad has a big warning on his profile — he’ll mark it “paid” when it’s in your hands.'}
             {' '}They stack up if more arrive — nothing is lost.
           </div>
         </div>
@@ -290,21 +283,39 @@ function TreasuresTab() {
           {msg}
         </p>
       )}
+    </div>
+  )
+}
 
-      {history.length > 0 && (
-        <>
-          <div className="h2">🧾 Past treasures</div>
-          {history.map((p) => (
-            <div key={p.id} className="card" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ flex: 1, fontWeight: 800, fontSize: 14 }}>{p.label}</div>
-              <div className="muted" style={{ fontSize: 12 }}>{p.day}</div>
-              <span className="chip" style={p.paidAt ? { background: 'var(--green)', color: '#10230a' } : { background: 'var(--orange)', color: '#3a2000' }}>
-                {p.paidAt ? '✓ paid' : '⏳ pending'}
-              </span>
-            </div>
-          ))}
-        </>
-      )}
+/** Every treasure ever ordered, newest first, with its handover status. */
+function OrdersTab() {
+  const { data } = useStore()
+  const history = [...data.giftcards].reverse()
+  const pending = history.filter((p) => !p.paidAt).length
+
+  if (history.length === 0) {
+    return (
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 44 }}>🧾</div>
+        <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+          No orders yet. Pass a final test, win a 🍇, come back rich.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="h2">🧾 Order log — {history.length} total{pending > 0 ? `, ${pending} waiting` : ''}</div>
+      {history.map((p) => (
+        <div key={p.id} className="card" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ flex: 1, fontWeight: 800, fontSize: 14 }}>{p.label}</div>
+          <div className="muted" style={{ fontSize: 12 }}>{p.day}</div>
+          <span className="chip" style={p.paidAt ? { background: 'var(--green)', color: '#10230a' } : { background: 'var(--orange)', color: '#3a2000' }}>
+            {p.paidAt ? '✓ paid' : '⏳ pending'}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }

@@ -43,13 +43,8 @@ function useStickerZoom() {
   }
 }
 
-export function AlbumScreen() {
-  const [tab, setTab] = useState<'album' | 'packs' | 'trade'>('album')
-  const { trades, activeProfileId } = useStore()
-
-  // a swap waiting on MY answer deserves a dot on the tab
-  const incoming = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId).length
-
+/** Grand Line Log Book. `tab` comes from the app's bottom menu. */
+export function AlbumScreen({ tab }: { tab: string }) {
   return (
     <div className="screen">
       <div className="h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -61,17 +56,7 @@ export function AlbumScreen() {
 
       <AlbumRace />
 
-      <div className="seg" style={{ margin: '14px 0' }}>
-        <button className={tab === 'album' ? 'on' : ''} onClick={() => { sfx.click(); setTab('album') }}>
-          📖 Album
-        </button>
-        <button className={tab === 'packs' ? 'on' : ''} onClick={() => { sfx.click(); setTab('packs') }}>
-          🎁 Packs
-        </button>
-        <button className={tab === 'trade' ? 'on' : ''} onClick={() => { sfx.click(); setTab('trade') }}>
-          🤝 Trade{incoming > 0 && <span className="tab-dot">{incoming}</span>}
-        </button>
-      </div>
+      <div style={{ height: 14 }} />
 
       {tab === 'album' && <AlbumTab />}
       {tab === 'packs' && <PacksTab />}

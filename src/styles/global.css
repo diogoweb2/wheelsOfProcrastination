@@ -70,18 +70,64 @@ input, select { font-family: inherit; }
   overflow-y: auto;
 }
 
+/* Home screen has no bottom menu, so it doesn't need to clear one. */
+.screen.home { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
 /* ---------- top bar ---------- */
-.topbar {
+/* Stat row + (inside an app) the back-to-main header travel together. */
+.chrome {
   position: sticky;
   top: 0;
   z-index: 20;
+  /* frosted, so an equipped wallpaper still reads through it */
+  background: linear-gradient(rgb(12 35 56 / 92%), rgb(12 35 56 / 80%));
+  backdrop-filter: blur(10px);
+}
+
+.topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
-  background: linear-gradient(rgb(12 35 56 / 85%) 70%, transparent);
 }
+
+/* ---------- app header (always offers the way back to the home screen) ---------- */
+.app-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 8px;
+}
+.app-head-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--card2);
+  box-shadow: inset 0 0 0 2px var(--line);
+  flex-shrink: 0;
+}
+.app-head-back span { font-size: 16px; line-height: 1; }
+.app-head-back:active { transform: scale(0.94); }
+.app-head-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 900;
+  font-size: 16px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.app-head-title img { object-fit: contain; flex-shrink: 0; }
 
 .stat {
   display: flex;
@@ -128,7 +174,7 @@ input, select { font-family: inherit; }
   transition: opacity 0.15s, transform 0.1s;
 }
 .tabbar button span { font-size: 10px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; }
-/* Luffy face on the Spin tab twirls forever (around the vertical axis, coin-style) */
+/* Spinning Luffy face / prize logos twirl forever (around the vertical axis, coin-style) */
 .spin-loop { animation: spin-loop 3.5s linear infinite; }
 @keyframes spin-loop { to { transform: perspective(120px) rotateY(360deg); } }
 
@@ -143,6 +189,161 @@ input, select { font-family: inherit; }
 }
 .tabbar button.active { opacity: 1; }
 .tabbar button:active { transform: scale(0.92); }
+.tabbar button .tab-icon { position: relative; }
+.tabbar button .tab-icon .tab-dot { position: absolute; top: -5px; left: 55%; margin-left: 0; }
+
+/* ---------- home screen (springboard) ---------- */
+.home-hello {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.home-hello-emoji { font-size: 34px; line-height: 1; }
+.home-hello-name { font-weight: 900; font-size: 20px; }
+
+.home-tip {
+  text-align: center;
+  font-size: 11px;
+  margin-top: 16px;
+  opacity: 0.7;
+}
+
+/* widgets — compact summaries that double as shortcuts into their app */
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (min-width: 700px) { .widget-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.widget {
+  text-align: left;
+  padding: 12px 13px 11px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 2px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 112px;
+  transition: transform 0.08s;
+}
+.widget:active { transform: scale(0.97); }
+.widget-head {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.widget-big { font-size: 32px; font-weight: 900; line-height: 1.1; margin-top: 2px; }
+.widget-of { font-size: 15px; color: var(--muted); font-weight: 800; }
+.widget-sub { font-size: 12px; color: var(--muted); line-height: 1.25; }
+.widget-foot { font-size: 11px; font-weight: 800; color: var(--muted); margin-top: auto; }
+.widget-dots { display: flex; gap: 4px; margin-top: auto; padding-top: 6px; }
+.widget-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--line); }
+.widget-dot.on { background: var(--orange); border-color: var(--orange); }
+.widget-dot.frozen { background: var(--ice); border-color: var(--ice); }
+.widget-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bg2);
+  overflow: hidden;
+  margin-top: auto;
+}
+.widget-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
+
+/* app icon grid */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 8px;
+}
+@media (min-width: 560px) { .icon-grid { grid-template-columns: repeat(6, 1fr); } }
+@media (min-width: 900px) { .icon-grid { grid-template-columns: repeat(8, 1fr); } }
+
+.app-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  touch-action: manipulation;
+}
+.app-icon-tile {
+  position: relative;
+  width: 100%;
+  max-width: 66px;
+  aspect-ratio: 1;
+  /* iOS-ish squircle */
+  border-radius: 24%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 38%), inset 0 1px 0 rgb(255 255 255 / 25%);
+  overflow: visible;
+}
+.app-icon-tile img {
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 45%));
+}
+.app-icon-emoji { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 45%)); }
+.app-icon-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+.app-icon-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 20px;
+  text-align: center;
+  border: 2px solid var(--bg);
+}
+.app-icon:active .app-icon-tile { transform: scale(0.92); }
+
+/* drag mode: everything jiggles, the held tile lifts out and rides the finger */
+.icon-grid.is-dragging .app-icon { animation: jiggle 0.32s ease-in-out infinite alternate; }
+.icon-grid.is-dragging .app-icon:nth-child(even) { animation-delay: -0.16s; }
+.icon-grid.is-dragging .app-icon .app-icon-tile { transition: none; }
+.app-icon.is-held { opacity: 0.25; animation: none !important; }
+.app-icon--ghost {
+  position: fixed;
+  width: 78px;
+  margin-left: -39px;
+  margin-top: -44px;
+  pointer-events: none;
+  z-index: 60;
+  transform: scale(1.14);
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 55%));
+}
+@keyframes jiggle {
+  from { transform: rotate(-1.6deg); }
+  to { transform: rotate(1.6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon-grid.is-dragging .app-icon { animation: none; }
+}
 
 /* ---------- duo-style buttons ---------- */
 .btn {
@@ -759,47 +960,6 @@ input, select { font-family: inherit; }
   animation: pulse-soft 2.2s infinite;
 }
 .banner .btn--small { width: auto; flex-shrink: 0; }
-
-/* Material-style floating action button — opens the quest log */
-.fab {
-  position: fixed;
-  right: 18px;
-  bottom: 92px; /* clears the tabbar */
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: none;
-  background: var(--yellow);
-  color: #3a2000;
-  font-size: 26px;
-  font-weight: 900;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* the icon is a round badge — a soft drop shadow, not the 3D ledge, or the
-     ledge reads as a stray border under the circle */
-  box-shadow: 0 6px 16px rgb(0 0 0 / 45%);
-  border: 3px solid var(--yellow-dark);
-  z-index: 40;
-}
-.fab:active { transform: scale(0.92); box-shadow: 0 3px 8px rgb(0 0 0 / 40%); }
-.fab img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-
-/* calculator FAB — sits to the left of the quest log FAB, only shown on the bank screen */
-.fab--calc { right: 86px; font-size: 24px; }
-
-/* full-screen overlay hosting the tasks screen */
-.tasks-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  animation: pop 0.2s ease-out;
-}
-.tasks-overlay-body { flex: 1; overflow-y: auto; }
 
 /* full-screen quiz session */
 .quiz-full {

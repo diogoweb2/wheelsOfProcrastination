@@ -7,31 +7,30 @@ import { StreakPrompts } from './components/StreakPrompts'
 import { RequiredDeadline } from './components/RequiredDeadline'
 import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { FinalTest } from './components/FinalTest'
+import { AppHeader, AppTabBar } from './components/AppShell'
+import { HabitsSection } from './components/HabitsSection'
+import { AdminSection } from './components/AdminSection'
+import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
-import { ProfileScreen } from './screens/ProfileScreen'
+import { VoyageScreen } from './screens/VoyageScreen'
+import { SettingsScreen } from './screens/SettingsScreen'
+import { IdeasScreen } from './screens/IdeasScreen'
+import { LogPoseScreen } from './screens/LogPoseScreen'
+import { appById, tabsFor } from './apps/registry'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
-import { BerryCoin } from './components/BerryCoin'
 import { DevilFruit } from './components/DevilFruit'
 import { Beli } from './components/Beli'
 import { fmt$, totalTreasure } from './logic/bank'
 import { sfx } from './audio'
 
-type Tab = 'spin' | 'store' | 'album' | 'quiz' | 'bank' | 'me'
-
-const TABS: { id: Tab; icon: string; label?: string }[] = [
-  { id: 'spin', icon: '', label: 'Spin' }, // icon is the spinning Luffy head img, special-cased in the tabbar
-  { id: 'store', icon: '', label: 'Store' }, // icon is the <BerryCoin /> svg, special-cased in the tabbar
-  { id: 'album', icon: '📖', label: 'Album' },
-  { id: 'quiz', icon: '🧭', label: 'Quiz' },
-  { id: 'bank', icon: '🏦', label: 'Bank' }, // real-dollar Grand Line Bank (badges moved to Me → Voyage)
-  { id: 'me', icon: '👒' },
-]
+/** Which app is open, and which of its bottom-menu tabs. `null` = home screen. */
+type OpenApp = { app: string; tab: string } | null
 
 /** Renders a number that visibly counts up/down to its new value (topbar currencies). */
 function AnimatedNum({ value }: { value: number }) {
@@ -56,12 +55,24 @@ function AnimatedNum({ value }: { value: number }) {
 }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, activeProfile, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
-  const [tab, setTab] = useState<Tab>('spin')
-  const [tasksOpen, setTasksOpen] = useState(false) // quest log lives behind the floating "+" now
-  // topic a quiz quest card asked to jump into; consumed by QuizScreen on arrival
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
+  const [open, setOpen] = useState<OpenApp>(null)
+  // topic a quiz quest card asked to jump into; consumed by the Academy on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
+
+  /** Open an app (optionally on a given tab), falling back to its first tab. */
+  function openApp(appId: string, tabId?: string) {
+    const app = appById(appId)
+    if (!app) return
+    const tabs = tabsFor(app, activeProfileId)
+    setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id })
+  }
+
+  // switching crewmate drops you back on the home screen — the roster differs
+  useEffect(() => {
+    setOpen(null)
+  }, [activeProfileId])
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
   useEffect(() => {
@@ -85,14 +96,14 @@ export default function App() {
   // Ask for push on open, once we're past the PIN. 'default' means we've never
   // asked, so this is the browser prompt; 'granted' just refreshes the device
   // token (FCM rotates them) — registerPushDevice ignores one it already has.
-  // 'denied' is left alone: the browser won't re-prompt, and the Profile screen
+  // 'denied' is left alone: the browser won't re-prompt, and Settings → Alerts
   // still has the manual button.
   const askedPush = useRef(false)
   useEffect(() => {
     if (!unlocked || askedPush.current) return
     if (!('Notification' in window) || Notification.permission === 'denied') return
     askedPush.current = true
-    void registerPushDevice() // errors surface on the Profile screen's button instead
+    void registerPushDevice() // errors surface on the Settings screen's button instead
   }, [unlocked, registerPushDevice])
 
   useEffect(() => {
@@ -109,7 +120,7 @@ export default function App() {
   useEffect(() => {
     if (paybackCount > prevPaybacks.current && 'Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification('📨 Ben paid you back!', { body: 'Open the Bank tab to see it and tap “Got it”.' })
+        new Notification('📨 Ben paid you back!', { body: 'Open the Bank app to see it and tap “Got it”.' })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
       }
@@ -123,7 +134,7 @@ export default function App() {
   useEffect(() => {
     if (openTrades.length > prevTrades.current && 'Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Album tab.' })
+        new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Log Book app.' })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
       }
@@ -139,7 +150,7 @@ export default function App() {
     if (freezeAsks.length > prevAsks.current && 'Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification('🆘 Ben needs a Streak Freeze!', {
-          body: 'His streak is on the line. Open the Me tab → Admin to send one.',
+          body: 'His streak is on the line. Open the Captain app to send one.',
         })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
@@ -178,7 +189,6 @@ export default function App() {
   if (!unlocked) return <PinLock />
 
   const streakAlive = data.streak.current > 0
-  const meIcon = activeProfile()?.emoji ?? '👒'
 
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
@@ -195,6 +205,16 @@ export default function App() {
           ...data.giftcards.filter((p) => !p.paidAt).map((p) => ({ who: 'You', targetId: PARENT_ID, p })),
         ]
       : []
+
+  // red dots on the home screen icons — the reason to open an app right now
+  const homeBadges: Record<string, number> = {
+    album: openTrades.length,
+    admin: freezeAsks.length + unpaidGifts.length,
+    bank: pendingPaybacks.length,
+  }
+
+  const openDef = open ? appById(open.app) : undefined
+  const openTabs = openDef ? tabsFor(openDef, activeProfileId) : []
 
   return (
     <div
@@ -222,33 +242,39 @@ export default function App() {
           be lost if you refresh. {saveError} <em>(tap to dismiss)</em>
         </div>
       )}
-      <header className="topbar">
-        <div className={`stat stat--flame ${streakAlive ? '' : 'dead'}`} title="streak">
-          🔥 <span className="num">{data.streak.current}</span>
-        </div>
-        <div className="stat stat--ice" title="streak freezes">
-          🧊 <span className="num">{data.economy.freezes}</span>
-        </div>
-        {/* Ben's own bank money — chests he can cash out, never Dad's RESP.
-            This is the ONE stat that stays Ben's on the parent's topbar, so the
-            parent view tags it with ⚔️ to make clear it isn't his own money. */}
-        {(activeProfileId === KID_ID || kidData) && (
-          <div className="stat stat--beli" title={activeProfileId === KID_ID ? 'Your money (your chests — not Dad’s RESP)' : "Ben's money (his chests — not Dad's RESP)"}>
-            {activeProfileId !== KID_ID && <span className="stat-owner" aria-hidden>⚔️</span>}
-            <Beli size={18} />{' '}
-            <span className="num">
-              {fmt$(totalTreasure(activeProfileId === KID_ID ? data.bank : kidData!.bank))}
-            </span>
+
+      {/* stats + (inside an app) the always-there way back to the home screen */}
+      <div className="chrome">
+        <header className="topbar">
+          <div className={`stat stat--flame ${streakAlive ? '' : 'dead'}`} title="streak">
+            🔥 <span className="num">{data.streak.current}</span>
           </div>
-        )}
-        {/* Devil Fruits: always the logged-in crewmate's OWN — everyone earns them from their own quizzes */}
-        <div className="stat stat--fruit" title="Your Devil Fruits (3 = gift card)">
-          <DevilFruit size={18} /> <span className="num"><AnimatedNum value={data.economy.devilFruits} /></span>
-        </div>
-        <div className="stat stat--gem" title="Berries">
-          🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
-        </div>
-      </header>
+          <div className="stat stat--ice" title="streak freezes">
+            🧊 <span className="num">{data.economy.freezes}</span>
+          </div>
+          {/* Ben's own bank money — chests he can cash out, never Dad's RESP.
+              This is the ONE stat that stays Ben's on the parent's topbar, so the
+              parent view tags it with ⚔️ to make clear it isn't his own money. */}
+          {(activeProfileId === KID_ID || kidData) && (
+            <div className="stat stat--beli" title={activeProfileId === KID_ID ? 'Your money (your chests — not Dad’s RESP)' : "Ben's money (his chests — not Dad's RESP)"}>
+              {activeProfileId !== KID_ID && <span className="stat-owner" aria-hidden>⚔️</span>}
+              <Beli size={18} />{' '}
+              <span className="num">
+                {fmt$(totalTreasure(activeProfileId === KID_ID ? data.bank : kidData!.bank))}
+              </span>
+            </div>
+          )}
+          {/* Devil Fruits: always the logged-in crewmate's OWN — everyone earns them from their own quizzes */}
+          <div className="stat stat--fruit" title="Your Devil Fruits (3 = gift card)">
+            <DevilFruit size={18} /> <span className="num"><AnimatedNum value={data.economy.devilFruits} /></span>
+          </div>
+          <div className="stat stat--gem" title="Berries">
+            🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
+          </div>
+        </header>
+
+        {openDef && <AppHeader app={openDef} onHome={() => setOpen(null)} />}
+      </div>
 
       {activeProfileId === PARENT_ID && market?.status === 'failed' && (
         <div className="banner" style={{ background: 'var(--red)' }}>
@@ -274,7 +300,7 @@ export default function App() {
               {r.reason ? `“${r.reason}”` : 'tap to send him one for free'}
             </div>
           </div>
-          <button className="btn btn--small" onClick={() => { sfx.click(); setTab('me') }}>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('admin', 'freezes') }}>
             Help him
           </button>
         </div>
@@ -289,7 +315,7 @@ export default function App() {
               {t.give.length} for {t.want.length} · tap to see the deal
             </div>
           </div>
-          <button className="btn btn--small" onClick={() => { sfx.click(); setTab('album') }}>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('album', 'trade') }}>
             See it
           </button>
         </div>
@@ -333,78 +359,30 @@ export default function App() {
         </div>
       ))}
 
-      {tab === 'spin' && (
-        <SpinScreen
+      {open === null ? (
+        <HomeScreen onOpen={openApp} badges={homeBadges} />
+      ) : (
+        <AppBodyRouter
+          open={open}
+          trainTopic={trainTopic}
+          onTrainOpened={() => setTrainTopic(null)}
           goTrain={(topicId) => {
             setTrainTopic(topicId)
-            setTab('quiz')
+            openApp('academy', 'topics')
           }}
+          goSpin={() => openApp('wheel', 'spin')}
+          setTab={(tab) => setOpen({ app: open.app, tab })}
         />
       )}
-      {tab === 'store' && <StoreScreen />}
-      {tab === 'album' && <AlbumScreen />}
-      {tab === 'quiz' && <QuizScreen trainTopicId={trainTopic} onTrainOpened={() => setTrainTopic(null)} />}
-      {tab === 'bank' && <BankScreen />}
-      {tab === 'me' && <ProfileScreen goSpin={() => setTab('spin')} />}
 
-      {/* the quest log moved behind a Material-style floating "+" */}
-      {!tasksOpen && (
-        <button
-          className="fab"
-          title="Quest log"
-          aria-label="Quest log"
-          onClick={() => {
-            sfx.click()
-            setTasksOpen(true)
-          }}
-        >
-          <img src="/quest-log.webp" alt="" draggable={false} />
-        </button>
+      {openDef && openTabs.length > 1 && (
+        <AppTabBar
+          tabs={openTabs}
+          tab={open!.tab}
+          onTab={(tab) => setOpen({ app: open!.app, tab })}
+          badges={openDef.id === 'album' ? { trade: openTrades.length } : undefined}
+        />
       )}
-      {tasksOpen && (
-        <div className="tasks-overlay">
-          <div className="quiz-full-head">
-            <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>📋 Quest log</div>
-            <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setTasksOpen(false) }}>
-              ✕
-            </button>
-          </div>
-          <div className="tasks-overlay-body">
-            <TasksScreen
-              goSpin={() => {
-                setTasksOpen(false)
-                setTab('spin')
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      <nav className="tabbar">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={tab === t.id ? 'active' : ''}
-            onClick={() => {
-              sfx.click()
-              setTab(t.id)
-            }}
-          >
-            <span className="tab-icon">
-              {t.id === 'me' ? (
-                meIcon
-              ) : t.id === 'store' ? (
-                <BerryCoin size={23} />
-              ) : t.id === 'spin' ? (
-                <img src="/luffy-spin-icon.png" className="spin-loop" width={26} alt="" draggable={false} style={{ display: 'block' }} />
-              ) : (
-                t.icon
-              )}
-            </span>
-            <span>{t.id === 'me' ? activeProfile()?.name : t.label}</span>
-          </button>
-        ))}
-      </nav>
 
       <QuestionOfTheDay />
       <EventModal />
@@ -413,4 +391,48 @@ export default function App() {
       <RequiredDeadline />
     </div>
   )
+}
+
+/** Maps the open app + tab onto the screen that renders it. */
+function AppBodyRouter({
+  open,
+  trainTopic,
+  onTrainOpened,
+  goTrain,
+  goSpin,
+  setTab,
+}: {
+  open: { app: string; tab: string }
+  trainTopic: string | null
+  onTrainOpened: () => void
+  goTrain: (topicId: string) => void
+  goSpin: () => void
+  setTab: (tab: string) => void
+}) {
+  switch (open.app) {
+    case 'wheel':
+      if (open.tab === 'quests') return <TasksScreen goSpin={goSpin} />
+      if (open.tab === 'habits') return <div className="screen"><HabitsSection /></div>
+      return <SpinScreen goTrain={goTrain} />
+    case 'academy':
+      return <QuizScreen tab={open.tab} trainTopicId={trainTopic} onTrainOpened={onTrainOpened} />
+    case 'bank':
+      return <BankScreen tab={open.tab} />
+    case 'store':
+      return <StoreScreen tab={open.tab} />
+    case 'album':
+      return <AlbumScreen tab={open.tab} />
+    case 'voyage':
+      return <VoyageScreen tab={open.tab} goSpin={goSpin} />
+    case 'ideas':
+      return <IdeasScreen tab={open.tab} onDone={() => setTab('open')} />
+    case 'logpose':
+      return <LogPoseScreen tab={open.tab} />
+    case 'settings':
+      return <SettingsScreen tab={open.tab} />
+    case 'admin':
+      return <div className="screen"><AdminSection tab={open.tab} /></div>
+    default:
+      return null
+  }
 }

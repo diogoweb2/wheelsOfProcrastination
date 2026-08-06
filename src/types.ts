@@ -108,6 +108,8 @@ export interface Settings {
   streakGoal: number
   goalsReached: number[] // list of streak goals already rewarded
   lastGoalPromptDay?: string // YYYY-MM-DD — the periodic "check your streak goal" nudge throttle
+  /** Home-screen icon order (app ids). Unknown/new apps append at the end. */
+  homeOrder?: string[]
 }
 
 /** One device registered for web push, so a closed app can still be reached. */

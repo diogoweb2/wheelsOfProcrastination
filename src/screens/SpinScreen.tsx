@@ -239,7 +239,7 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
           {nothingToSpin && (
             <p className="muted" style={{ textAlign: 'center', marginTop: 10 }}>
               {data.tasks.filter((t) => !t.archived).length === 0
-                ? 'Add quests in the Tasks tab. Adventure needs a destination!'
+                ? 'Add quests on the Quests page. Adventure needs a destination!'
                 : pendingTasks.length > 0
                   ? 'Everything left is already on your plate. Deal with the cards above.'
                   : 'Everything matching this filter is done today. SUGEEE!'}
