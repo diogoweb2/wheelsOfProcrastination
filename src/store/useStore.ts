@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type {
+  AiConfig,
   AlbumState,
   AppData,
   BankAccountId,
@@ -9,11 +10,14 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  ExerciseRating,
   FinalTestAuth,
   FreezeGift,
   FreezeRequest,
+  GymCatalog,
   Idea,
   MarketData,
+  Mood,
   Priority,
   Profile,
   QuizQuestion,
@@ -39,13 +43,17 @@ import {
   fireAndForget,
   saveDataFields,
   setWriteErrorHandler,
+  saveAiConfig,
+  saveGymCatalog,
   saveIdeas,
   saveQuizBank,
   saveRoster,
   saveStickerTrades,
   saveFreezeDesk,
   saveFinalTests,
+  subscribeAiConfig,
   subscribeData,
+  subscribeGymCatalog,
   subscribeIdeas,
   subscribeStickerTrades,
   subscribeFreezeDesk,
@@ -79,6 +87,19 @@ import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 import { enablePush } from '../push'
+import {
+  GYM_LOG_CAP,
+  bumpStreak,
+  coinsForExercise,
+  defaultLadder,
+  exerciseById,
+  isPersonalRecord,
+  learnFromExercise,
+  seedBrief,
+  sessionBonus,
+  advanceLadder,
+} from '../logic/gym'
+import { coachPlan, coachSwap } from '../logic/gymCoach'
 
 /** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
 function deviceLabel(): string {
@@ -183,6 +204,11 @@ interface StoreState {
   mateDataFresh: boolean // mateData came from the SERVER — guards writing a swap into their doc
   audit: AuditEntry[] // recent audit-log rows (admin desk), live-synced; self-expiring after ~7d
   qotdOpen: boolean // is the Question-of-the-Day modal showing?
+  gymCatalog: GymCatalog | null // the shared basement (app/gymCatalog), live-synced
+  aiConfig: AiConfig | null // OpenRouter key + model for the Gym coach (app/aiConfig), live-synced
+  gymPlanning: boolean // the coach is thinking about today's session
+  /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
+  gymFellBack: string | null
 
   activeProfile: () => Profile | null
   addIdea: (text: string) => void
@@ -345,6 +371,39 @@ interface StoreState {
   equipBackground: (id: string | null) => void
   setStreakGoal: (goal: number) => void
   setSettings: (patch: Partial<AppData['settings']>) => void
+
+  // --- gym (the 💪 Training Deck) ---
+  /** Build today's session (coach if it's on and reachable, offline planner otherwise) and park it on the preview. */
+  gymPlan: (minutes: number, mood: Mood) => Promise<void>
+  /** "Not that one today." Swaps one exercise on the preview for something else. */
+  gymSwap: (exId: string, reason?: string) => Promise<'ok' | 'none'>
+  /** Drop an exercise from the preview outright. */
+  gymDrop: (exId: string) => void
+  /** Throw away the previewed session. */
+  gymDiscard: () => void
+  /** GO — the preview becomes a live workout. */
+  gymStart: () => void
+  /** Log one set. `weight` is what you ACTUALLY loaded — corrections are the training signal. */
+  gymLogSet: (exId: string, reps: number, weight?: number) => void
+  gymUndoSet: (exId: string) => void
+  /** Record the rest you actually took after an exercise, in seconds. */
+  gymLogRest: (exId: string, seconds: number) => void
+  /** Rate an exercise from inside the runner (asked the first time you meet one). */
+  gymRateInSession: (exId: string, rating: ExerciseRating) => void
+  gymSkip: (exId: string) => void
+  /** Finish: pay the Berries, fold everything into the permanent memory, file the session. */
+  gymFinish: (rating?: number, feedback?: string) => number
+  /** Walk out. Anything logged is still kept and still pays; an untouched session is just thrown away. */
+  gymAbandon: () => void
+  gymSetBrief: (patch: Partial<AppData['gym']['brief']>) => void
+  /** Change your mind about an exercise later (Gear tab). */
+  gymRateExercise: (exId: string, rating: ExerciseRating | null) => void
+  gymSetExerciseNote: (exId: string, note: string) => void
+  gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'aiOn' | 'soundOn' | 'keepAwake'>>) => void
+  /** Add / edit / retire gear and exercises in the shared basement. */
+  gymSaveCatalog: (catalog: GymCatalog) => void
+  /** Admin: the OpenRouter key + model the coach uses. */
+  setAiConfig: (patch: Partial<AiConfig>) => void
 }
 
 function checkBadges(data: AppData, events: AppEvent[]): void {
@@ -409,6 +468,10 @@ export const useStore = create<StoreState>((set, get) => {
           d.quiz.selfInit = true // legacy flag; the ladder below supersedes it
           syncTopicUnlocks(d, id)
           syncQuizTasks(d, id)
+          // First login on this profile: drop in the trainer brief written for
+          // them (age, goals, injuries). It's a starting point — every word of
+          // it is editable in Gym → Coach, and we never overwrite an edit.
+          if (!d.gym.brief.text.trim() && !d.gym.brief.updatedAt) d.gym.brief = seedBrief(id)
         }
         const probe: AppData = JSON.parse(JSON.stringify(get().data))
         ensure(probe)
@@ -470,6 +533,9 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
       subscribeFinalTests((tests) => set({ finalTests: tests }))
+      // the shared basement (gear + exercises) and the coach's OpenRouter config
+      subscribeGymCatalog((c) => set({ gymCatalog: c }))
+      subscribeAiConfig((c) => set({ aiConfig: c }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
@@ -573,6 +639,10 @@ export const useStore = create<StoreState>((set, get) => {
     mateDataFresh: false,
     audit: [],
     qotdOpen: false,
+    gymCatalog: null,
+    aiConfig: null,
+    gymPlanning: false,
+    gymFellBack: null,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -1737,6 +1807,257 @@ export const useStore = create<StoreState>((set, get) => {
         Object.assign(d.settings, patch)
         setMuted(!d.settings.soundOn)
       })
+    },
+
+    // --- gym ----------------------------------------------------------------
+    // The store never talks to OpenRouter directly: it calls coachPlan/coachSwap,
+    // which ALWAYS return something (the offline planner is their failure path).
+    // `gymFellBack` carries the reason so the UI can say so out loud instead of
+    // pretending an offline plan came from the coach.
+
+    async gymPlan(minutes, mood) {
+      const { data, gymCatalog, aiConfig, activeProfile } = get()
+      set({ gymPlanning: true, gymFellBack: null })
+      try {
+        const { session, fellBackBecause } = await coachPlan({
+          catalog: gymCatalog,
+          gym: data.gym,
+          minutes,
+          mood,
+          ai: aiConfig,
+          name: activeProfile()?.name ?? 'the athlete',
+        })
+        set({ gymFellBack: fellBackBecause })
+        commit((d) => {
+          d.gym.active = session
+        })
+      } finally {
+        set({ gymPlanning: false })
+      }
+    },
+
+    async gymSwap(exId, reason) {
+      const { data, gymCatalog, aiConfig, activeProfile } = get()
+      const active = data.gym.active
+      const target = active?.exercises.find((e) => e.exId === exId)
+      if (!active || !target) return 'none'
+      const keep = active.exercises.filter((e) => e.exId !== exId)
+
+      set({ gymPlanning: true })
+      try {
+        const replacement = await coachSwap(
+          {
+            catalog: gymCatalog,
+            gym: data.gym,
+            minutes: active.minutes,
+            mood: active.mood,
+            ai: aiConfig,
+            name: activeProfile()?.name ?? 'the athlete',
+            day: active.day,
+          },
+          target,
+          keep,
+          reason ?? '',
+        )
+        if (!replacement) return 'none'
+        commit((d) => {
+          if (!d.gym.active) return
+          d.gym.active.exercises = d.gym.active.exercises.map((e) => (e.exId === exId ? replacement : e))
+        })
+        return 'ok'
+      } finally {
+        set({ gymPlanning: false })
+      }
+    },
+
+    gymDrop(exId) {
+      commit((d) => {
+        if (!d.gym.active) return
+        d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
+      })
+    },
+
+    gymDiscard() {
+      set({ gymFellBack: null })
+      commit((d) => {
+        d.gym.active = null
+      })
+    },
+
+    gymStart() {
+      commit((d) => {
+        if (!d.gym.active) return
+        d.gym.active.status = 'running'
+        d.gym.active.startedAt = new Date().toISOString()
+      })
+    },
+
+    gymLogSet(exId, reps, weight) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (!se || reps <= 0) return
+        se.sets.push(weight != null && weight > 0 ? { reps, weight } : { reps })
+        se.skipped = false
+      })
+    },
+
+    gymUndoSet(exId) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        se?.sets.pop()
+      })
+    },
+
+    gymLogRest(exId, seconds) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (!se) return
+        // several rests inside one exercise average out — what we want to learn
+        // is "how long does THIS move take him to recover from"
+        se.restSec = se.restSec ? Math.round((se.restSec + seconds) / 2) : Math.round(seconds)
+      })
+    },
+
+    gymRateInSession(exId, rating) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (se) se.rating = rating
+      })
+    },
+
+    gymSkip(exId) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (se) se.skipped = true
+      })
+    },
+
+    gymFinish(rating, feedback) {
+      const catalog = get().gymCatalog
+      const active = get().data.gym.active
+      if (!active) return 0
+      let paid = 0
+
+      commit((d, events) => {
+        const s = d.gym.active
+        if (!s) return
+        const day = s.day
+        s.status = 'done'
+        s.finishedAt = new Date().toISOString()
+        s.rating = rating
+        s.feedback = feedback
+        if (s.startedAt) s.activeSec = Math.round((Date.parse(s.finishedAt) - Date.parse(s.startedAt)) / 1000)
+
+        let coins = 0
+        let done = 0
+        let prs = 0
+
+        for (const se of s.exercises) {
+          const mem = d.gym.ex[se.exId]
+          const pr = isPersonalRecord(mem, se)
+          se.coins = coinsForExercise(se, pr)
+          coins += se.coins
+          if (!se.skipped && se.sets.length > 0) {
+            done += 1
+            if (pr) prs += 1
+          }
+          // the permanent memory — this is what makes unplugging the coach possible
+          d.gym.ex[se.exId] = learnFromExercise(mem, se, day)
+
+          // rep ladders: seeded from your first honest set, then climbed; a max
+          // test reseeds the whole thing from the new number
+          const def = exerciseById(catalog, se.exId)
+          if (def?.ladder && !se.skipped && se.sets.length > 0) {
+            const best = Math.max(...se.sets.map((x) => x.reps))
+            const cur = d.gym.ladders[se.exId]
+            d.gym.ladders[se.exId] = cur ? advanceLadder(cur, se.ladderTest ? best : null, day) : defaultLadder(best)
+          }
+        }
+
+        coins += sessionBonus(s, done)
+        s.coins = coins
+        paid = coins
+
+        if (done > 0) {
+          d.gym.streak = bumpStreak(d.gym.streak, day)
+          d.gym.totals.sessions += 1
+          d.gym.totals.minutes += Math.round((s.activeSec ?? s.minutes * 60) / 60)
+          d.gym.totals.reps += s.exercises.reduce((n, e) => n + e.sets.reduce((m, x) => m + x.reps, 0), 0)
+          d.gym.totals.coins += coins
+          d.economy.gems += coins
+          d.economy.totalGemsEarned += coins
+          d.gym.sessions = [...d.gym.sessions, s].slice(-GYM_LOG_CAP)
+          events.push({
+            type: 'badge',
+            title: prs > 0 ? `${prs} new record${prs > 1 ? 's' : ''}!` : 'Session logged',
+            emoji: prs > 0 ? '🏆' : '💪',
+            description: `${done} exercise${done === 1 ? '' : 's'} · +${coins} 🪙${prs > 0 ? ' · you beat your own best' : ''}`,
+          })
+        }
+        d.gym.active = null
+      })
+
+      set({ gymFellBack: null })
+      return paid
+    },
+
+    gymAbandon() {
+      const active = get().data.gym.active
+      const anyWork = !!active?.exercises.some((e) => !e.skipped && e.sets.length > 0)
+      // walked out having actually lifted something: keep it, pay it, learn from
+      // it. Nothing logged at all: throw it away rather than pollute the history.
+      if (anyWork) get().gymFinish(undefined, 'Left early')
+      else {
+        set({ gymFellBack: null })
+        commit((d) => {
+          d.gym.active = null
+        })
+      }
+    },
+
+    gymSetBrief(patch) {
+      commit((d) => {
+        Object.assign(d.gym.brief, patch, { updatedAt: new Date().toISOString() })
+      })
+    },
+
+    gymRateExercise(exId, rating) {
+      commit((d) => {
+        const mem = d.gym.ex[exId] ?? { timesDone: 0, totalReps: 0 }
+        if (rating) {
+          mem.rating = rating
+          mem.ratedAt = new Date().toISOString()
+        } else {
+          delete mem.rating
+          delete mem.ratedAt
+        }
+        d.gym.ex[exId] = mem
+      })
+    },
+
+    gymSetExerciseNote(exId, note) {
+      commit((d) => {
+        const mem = d.gym.ex[exId] ?? { timesDone: 0, totalReps: 0 }
+        mem.notes = note.trim() || undefined
+        d.gym.ex[exId] = mem
+      })
+    },
+
+    gymSetOptions(patch) {
+      commit((d) => {
+        Object.assign(d.gym, patch)
+      })
+    },
+
+    gymSaveCatalog(catalog) {
+      set({ gymCatalog: catalog })
+      fireAndForget(saveGymCatalog(catalog))
+    },
+
+    setAiConfig(patch) {
+      const next = { ...(get().aiConfig ?? {}), ...patch }
+      set({ aiConfig: next })
+      fireAndForget(saveAiConfig(next))
     },
   }
 })

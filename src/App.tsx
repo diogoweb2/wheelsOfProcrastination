@@ -19,6 +19,7 @@ import { BankScreen } from './screens/BankScreen'
 import { VoyageScreen } from './screens/VoyageScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { IdeasScreen } from './screens/IdeasScreen'
+import { GymScreen } from './screens/GymScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { scheduleDailyReminder } from './notifications'
@@ -373,6 +374,8 @@ function AppBodyRouter({
       return <StoreScreen tab={open.tab} />
     case 'album':
       return <AlbumScreen tab={open.tab} />
+    case 'gym':
+      return <GymScreen tab={open.tab} />
     case 'ideas':
       return <IdeasScreen tab={open.tab} onDone={() => setTab('open')} />
     case 'logpose':

@@ -7,6 +7,7 @@ import type { AppData, Profile } from '../types'
 import { addDays, dayKey, parseDay } from '../logic/dates'
 import { defaultBankState } from '../logic/bank'
 import { defaultAlbumState } from '../logic/album'
+import { GYM_LOG_CAP, defaultGymState } from '../logic/gym'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -47,6 +48,7 @@ export function defaultData(): AppData {
     giftcards: [],
     bank: defaultBankState(),
     album: defaultAlbumState(),
+    gym: defaultGymState(),
     pushTokens: [],
   }
 }
@@ -67,6 +69,19 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     giftcards: parsed.giftcards ?? base.giftcards,
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
+    gym: {
+      ...base.gym,
+      ...parsed.gym,
+      brief: { ...base.gym.brief, ...parsed.gym?.brief },
+      ex: { ...parsed.gym?.ex },
+      ladders: { ...parsed.gym?.ladders },
+      // the log is capped here rather than at write time, so an old oversized
+      // save trims itself the first time it loads
+      sessions: (parsed.gym?.sessions ?? []).slice(-GYM_LOG_CAP),
+      active: parsed.gym?.active ?? null,
+      streak: { ...base.gym.streak, ...parsed.gym?.streak },
+      totals: { ...base.gym.totals, ...parsed.gym?.totals },
+    },
     bank: parsed.bank
       ? {
           ...base.bank,

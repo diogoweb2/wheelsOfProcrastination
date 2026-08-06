@@ -514,6 +514,208 @@ export interface FinalTestAuth {
   ackAt?: string // Diogo dismissed the result banner
 }
 
+// --- Gym ("Training Deck", the 💪 Gym app) ---------------------------------
+// Two halves. The CATALOG (what exists in the basement: gear + the exercises it
+// makes possible) is SHARED — one basement, one doc: `app/gymCatalog`. The
+// MEMORY (what you like, what you lift, how long you actually rest) is personal
+// and lives in each profile's AppData under `gym`.
+//
+// The memory is deliberately small and permanent; the raw session log is capped.
+// That split is the point: once `gym.ex` is full enough, the local planner in
+// src/logic/gym.ts builds good sessions with no AI call at all.
+
+export type BodyPart = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'glutes' | 'core' | 'fullBody' | 'cardio'
+
+/** How a set is measured — decides what the runner asks you to type. */
+export type ExerciseKind = 'weight' | 'bodyweight' | 'timed' | 'cardio'
+
+/** One machine / bar / band in the basement. Written by `npm run gym:equipment`, editable by hand. */
+export interface Equipment {
+  id: string
+  name: string
+  emoji: string
+  img?: string // thumbnail in public/gym/, written by the photo script
+  notes?: string // "adjustable 5–25 lb", "resistance bands: light/medium/heavy" — the coach reads this
+  addedBy: 'ai' | 'manual'
+  createdAt: string
+  retired?: boolean // kept for history, never planned again
+}
+
+/**
+ * The "what does this actually look like" media for one exercise, fetched by
+ * `npm run gym:demos` from ExerciseDB (https://oss.exercisedb.dev) and re-hosted
+ * on our own Firebase Storage — only the handful we actually use, never their
+ * whole library.
+ *
+ * Two files per exercise on purpose: the poster (~2 KB) is what a list of ten
+ * exercises loads, and the animation (~21 KB) is only fetched when you are
+ * looking at that one move. Both are cached by the service worker forever, so
+ * the second view of an exercise costs nothing.
+ */
+export interface ExerciseDemo {
+  anim: string // animated webp — the movement
+  poster: string // single still frame, for lists and as the animation's placeholder
+  source: string // attribution, e.g. "ExerciseDB"
+  sourceId: string // their exerciseId, so a bad match can be re-pinned by hand
+  sourceName: string // their name for it — this is what you check when a match looks wrong
+  /**
+   * How this demo was chosen. `close` matters to the UI: the free library is
+   * missing plenty of basics, so rather than show nothing we allow an
+   * approximate demonstration — but it is always LABELLED as approximate, and
+   * the written instructions stay the authority on form.
+   */
+  match: 'exact' | 'ai' | 'close' | 'manual'
+}
+
+/** One exercise the crew can be asked to do. `equipmentIds: []` = needs nothing but you. */
+export interface ExerciseDef {
+  id: string
+  name: string
+  emoji: string
+  equipmentIds: string[]
+  kind: ExerciseKind
+  parts: BodyPart[] // primary muscle first — drives recovery spacing and the stats filter
+  intensity: 1 | 2 | 3 // 1 = light (good as a ramp-in), 3 = heavy
+  how: string // one or two sentences, shown in the runner
+  restSec: number // starting point; personal history overrides it once there is any
+  defaultReps: number // reps, or seconds for 'timed', minutes for 'cardio'
+  defaultSets: number
+  kidSafe: boolean // safe for a 12-year-old (no heavy spinal loading, simple form)
+  backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
+  ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
+  demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
+  addedBy: 'ai' | 'manual'
+  createdAt: string
+  retired?: boolean
+}
+
+/** The shared basement (Firestore `app/gymCatalog`). */
+export interface GymCatalog {
+  equipment: Equipment[]
+  exercises: ExerciseDef[]
+  /**
+   * Free text about the ROOM rather than any one item — "ceiling is low, no
+   * standing overhead work with a bar", "floor is concrete, nothing to drop".
+   * Written from `gym-photos/notes.txt` or edited in Gear, and read by the AI
+   * trainer before every session.
+   */
+  notes?: string
+  updatedAt?: string
+}
+
+/** OpenRouter credentials for the AI coach (Firestore `app/aiConfig`, admin-only). */
+export interface AiConfig {
+  openrouterKey?: string
+  model?: string
+  updatedAt?: string
+}
+
+export type ExerciseRating = 'hate' | 'dislike' | 'ok' | 'like' | 'love'
+export type Mood = 'lazy' | 'normal' | 'motivated'
+
+/**
+ * Everything the app has learned about ONE exercise for ONE person. This is the
+ * file that replaces the AI: it is what a good trainer would remember about you.
+ */
+export interface ExerciseMemory {
+  rating?: ExerciseRating
+  ratedAt?: string
+  timesDone: number
+  totalReps: number
+  lastDay?: string // YYYY-MM-DD
+  lastWeight?: number // what you actually loaded last time
+  suggestedWeight?: number // what to put in front of you next time
+  lastAdjust?: 'up' | 'down' | 'same' // how the last suggestion landed — too light, too heavy, right
+  restLearned?: number // rolling average of the rest you ACTUALLY took, seconds
+  bestReps?: number // best single set ever (seconds for 'timed')
+  bestWeight?: number
+  notes?: string // your own note; the coach reads it
+}
+
+/**
+ * The rep-ladder game for a bodyweight staple: 2 2 2 2 2 → 2 3 2 3 2 → 3 4 2 4 2.
+ * Every few cycles the app asks for a max-rep test and reseeds the whole ladder
+ * from the new number, so it never stops climbing.
+ */
+export interface LadderState {
+  max: number // last tested max reps — the ladder is built from this
+  level: number // step within the cycle
+  cyclesSinceTest: number
+  lastTestDay?: string
+}
+
+/** One set you actually did. `reps` = seconds for 'timed', minutes for 'cardio'. */
+export interface LoggedSet {
+  reps: number
+  weight?: number
+}
+
+/** One exercise inside a session: what was asked for (`plan`) and what happened (`sets`). */
+export interface SessionExercise {
+  exId: string
+  name: string // denormalised so old sessions survive a catalog edit
+  emoji: string
+  kind: ExerciseKind
+  parts: BodyPart[]
+  how?: string
+  /** The ask. `reps` is per-set, so a ladder is literally [2,3,2,3,2]. */
+  plan: { reps: number[]; weight?: number; restSec: number }
+  sets: LoggedSet[]
+  restSec?: number // rest you actually took after it, seconds
+  rating?: ExerciseRating // asked the first time you meet an exercise; editable later
+  skipped?: boolean
+  ladder?: boolean
+  ladderTest?: boolean // this one is a max-rep test — do as many as you can
+  why?: string // the coach's reason, shown on the preview card
+  coins: number
+}
+
+/** One workout, from "GO" to the closing star rating. */
+export interface GymSession {
+  id: string
+  day: string // YYYY-MM-DD
+  status: 'preview' | 'running' | 'done'
+  startedAt?: string // ISO, set on GO
+  finishedAt?: string
+  minutes: number // the budget you asked for
+  mood: Mood
+  source: 'ai' | 'local' // who built it — the coach or the offline planner
+  model?: string
+  note?: string // the coach's one-liner
+  exercises: SessionExercise[]
+  rating?: number // 1–5 stars, asked at the end
+  feedback?: string
+  coins: number
+  activeSec?: number // wall-clock length
+}
+
+/**
+ * The free-text brief the coach reads before every session, plus the few hard
+ * rules the OFFLINE planner also enforces (it can't read prose).
+ */
+export interface GymBrief {
+  text: string
+  age?: number
+  avoidBackLoad?: boolean // lower-back history — heavy spinal loading is filtered out
+  noWarmup?: boolean // no warmup block; ramp in with light sets of the real work instead
+  kidMode?: boolean // bodyweight-first, nothing heavy, short and fun
+  weightUnit?: 'lb' | 'kg'
+  updatedAt?: string
+}
+
+export interface GymState {
+  brief: GymBrief
+  ex: Record<string, ExerciseMemory> // by exercise id — the permanent memory
+  ladders: Record<string, LadderState>
+  sessions: GymSession[] // finished workouts, newest LAST, capped (see GYM_LOG_CAP)
+  active: GymSession | null // the plan on the preview screen, or the workout in progress
+  streak: { current: number; best: number; lastDay: string | null }
+  totals: { sessions: number; minutes: number; reps: number; coins: number }
+  aiOn: boolean // use the coach, or plan entirely offline
+  soundOn: boolean // rest-timer beeps
+  keepAwake: boolean // hold a screen Wake Lock during a session
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]
@@ -528,6 +730,7 @@ export interface AppData {
   giftcards: GiftCardPurchase[]
   bank: BankState
   album: AlbumState
+  gym: GymState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
 

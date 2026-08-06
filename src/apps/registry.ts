@@ -105,6 +105,18 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    id: 'gym',
+    name: 'Gym',
+    icon: '💪',
+    tint: ['#ff9600', '#8c3d00'],
+    tabs: [
+      { id: 'train', label: 'Train', icon: '💪' },
+      { id: 'stats', label: 'Stats', icon: '📊' },
+      { id: 'gear', label: 'Gear', icon: '🏋️' },
+      { id: 'coach', label: 'Coach', icon: '🧠' },
+    ],
+  },
+  {
     id: 'ideas',
     name: 'Ideas',
     icon: '💡',

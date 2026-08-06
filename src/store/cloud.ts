@@ -19,7 +19,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { ensureAuth, firestore } from '../lib/firebase'
-import type { AppData, AuditEntry, FinalTestAuth, FreezeGift, FreezeRequest, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -238,6 +238,42 @@ export function subscribeMarketData(cb: (m: MarketData | null) => void): () => v
   return onSnapshot(marketRef(), (snap) => {
     cb(snap.exists() ? (snap.data() as MarketData) : null)
   })
+}
+
+// --- gym catalog (the shared basement: gear + the exercises it makes possible) ---
+// One basement, one doc. Written by `npm run gym:equipment` and by the Gym app's
+// Gear tab; both crewmates read the same list. Personal history stays in each
+// profile's own AppData.
+
+const gymCatalogRef = () => doc(firestore, 'app', 'gymCatalog')
+
+/** Live-sync the shared equipment + exercise catalog. Fires when the photo script or the Gear tab writes. */
+export function subscribeGymCatalog(cb: (c: GymCatalog | null) => void): () => void {
+  return onSnapshot(gymCatalogRef(), (snap) => {
+    const data = snap.data() as GymCatalog | undefined
+    cb(data ? { equipment: data.equipment ?? [], exercises: data.exercises ?? [], updatedAt: data.updatedAt } : null)
+  })
+}
+
+export async function saveGymCatalog(catalog: GymCatalog): Promise<void> {
+  await ensureAuth()
+  await setDoc(gymCatalogRef(), { ...catalog, updatedAt: new Date().toISOString() })
+}
+
+// --- AI config (OpenRouter key for the Gym coach) --------------------------
+// Kept in the family db rather than the bundle so the key never ships in the
+// deployed JS and can be rotated without a build. Same arrangement as the Smart
+// Price project. Set a spend cap on the OpenRouter dashboard.
+
+const aiConfigRef = () => doc(firestore, 'app', 'aiConfig')
+
+export function subscribeAiConfig(cb: (c: AiConfig | null) => void): () => void {
+  return onSnapshot(aiConfigRef(), (snap) => cb(snap.exists() ? (snap.data() as AiConfig) : null))
+}
+
+export async function saveAiConfig(cfg: AiConfig): Promise<void> {
+  await ensureAuth()
+  await setDoc(aiConfigRef(), { ...cfg, updatedAt: new Date().toISOString() })
 }
 
 // --- audit log (append-only trail of album/money/fruit/task changes) --------

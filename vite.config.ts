@@ -8,9 +8,31 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
-      // the FCM worker registers itself on its own scope (see src/push.ts) —
-      // Workbox must not precache or serve it
-      workbox: { globIgnores: ['**/firebase-messaging-sw.js'] },
+      workbox: {
+        // the FCM worker registers itself on its own scope (see src/push.ts) —
+        // Workbox must not precache or serve it
+        globIgnores: ['**/firebase-messaging-sw.js'],
+        runtimeCaching: [
+          {
+            // Gym exercise demos (BUSINESS_REQUIREMENTS §18l). They are content-
+            // addressed by exercise id and only ever replaced by re-running the
+            // script, so CacheFirst is exactly right: the FIRST time you see an
+            // exercise costs ~21 KB, and every time after that costs nothing —
+            // including with no signal at all. Covers both places the script can
+            // put them: Firebase Storage, or /gym/ in the app's own bundle.
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/gym/') || /(^|\.)firebasestorage\.(googleapis\.com|app)$/.test(url.hostname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gym-demos',
+              expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              // Storage download URLs are cross-origin; an opaque (status 0)
+              // response still caches and still renders in an <img>.
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'Wheels of Procrastination',
         short_name: 'WheelsOP',

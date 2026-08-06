@@ -27,3 +27,15 @@ scripts/.bank-market.log
 # local env (holds VITE_FCM_VAPID_KEY — see .env.example)
 .env
 functions/node_modules
+
+# Gym: raw equipment photos in, shrunk copies for the model out. Only the 128px
+# thumbnails the script writes to public/gym/ are ever committed.
+gym-photos/
+.gym-work/
+
+# Gym: cached ExerciseDB lookups, so a re-run costs no requests against their
+# rate-limited free endpoint. Safe to delete; it just rebuilds.
+scripts/.exercisedb-cache.json
+
+# Gym: downloaded ExerciseDB library index (free tier and full tier)
+scripts/.exercisedb-index*.json

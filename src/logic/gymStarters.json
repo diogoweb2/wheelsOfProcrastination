@@ -1,0 +1,380 @@
+[
+  {
+    "id": "bw-pushup",
+    "name": "Push-ups",
+    "emoji": "🫸",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "chest",
+      "arms",
+      "core"
+    ],
+    "intensity": 2,
+    "how": "Hands under the shoulders, body in one straight line, chest to just above the floor.",
+    "restSec": 60,
+    "defaultReps": 10,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z",
+    "ladder": true
+  },
+  {
+    "id": "bw-incline-pushup",
+    "name": "Incline push-ups",
+    "emoji": "📐",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "chest",
+      "arms"
+    ],
+    "intensity": 1,
+    "how": "Hands on a bench or step. Easier than the floor — perfect as a ramp-in set.",
+    "restSec": 45,
+    "defaultReps": 15,
+    "defaultSets": 2,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-pullup",
+    "name": "Pull-ups",
+    "emoji": "🧗",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "back",
+      "arms"
+    ],
+    "intensity": 3,
+    "how": "Hang, pull until your chin clears the bar, lower all the way down under control.",
+    "restSec": 90,
+    "defaultReps": 5,
+    "defaultSets": 4,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z",
+    "ladder": true
+  },
+  {
+    "id": "bw-squat",
+    "name": "Bodyweight squats",
+    "emoji": "🦵",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "legs",
+      "glutes"
+    ],
+    "intensity": 1,
+    "how": "Feet shoulder width, sit back and down, knees tracking over the toes, stand tall.",
+    "restSec": 45,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z",
+    "ladder": true
+  },
+  {
+    "id": "bw-lunge",
+    "name": "Alternating lunges",
+    "emoji": "🚶",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "legs",
+      "glutes"
+    ],
+    "intensity": 2,
+    "how": "Step forward, back knee towards the floor, push back to the start. Alternate legs.",
+    "restSec": 50,
+    "defaultReps": 16,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-glute-bridge",
+    "name": "Glute bridge",
+    "emoji": "🌉",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "glutes",
+      "core"
+    ],
+    "intensity": 1,
+    "how": "On your back, heels close to the hips, drive through the heels and squeeze at the top.",
+    "restSec": 40,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-plank",
+    "name": "Plank",
+    "emoji": "🧱",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "core"
+    ],
+    "intensity": 2,
+    "how": "Forearms down, body in one line, ribs pulled down, squeeze everything. Hold.",
+    "restSec": 45,
+    "defaultReps": 40,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-side-plank",
+    "name": "Side plank",
+    "emoji": "📏",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "core"
+    ],
+    "intensity": 2,
+    "how": "On one forearm, hips stacked and lifted, body in a straight line. Both sides.",
+    "restSec": 40,
+    "defaultReps": 30,
+    "defaultSets": 2,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-dead-bug",
+    "name": "Dead bug",
+    "emoji": "🐞",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core"
+    ],
+    "intensity": 1,
+    "how": "On your back, lower back glued to the floor. Extend opposite arm and leg slowly, then swap.",
+    "restSec": 40,
+    "defaultReps": 16,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-bird-dog",
+    "name": "Bird dog",
+    "emoji": "🐦",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core",
+      "back"
+    ],
+    "intensity": 1,
+    "how": "On all fours, extend opposite arm and leg, hold a beat, keep the hips level. Gold for the lower back.",
+    "restSec": 40,
+    "defaultReps": 16,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-superman",
+    "name": "Superman hold",
+    "emoji": "🦸",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "back",
+      "core"
+    ],
+    "intensity": 1,
+    "how": "Face down, lift chest, arms and legs, look at the floor. Hold and breathe.",
+    "restSec": 40,
+    "defaultReps": 25,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-hollow",
+    "name": "Hollow hold",
+    "emoji": "🌙",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "core"
+    ],
+    "intensity": 3,
+    "how": "On your back, lower back pressed down, arms and legs off the floor in a shallow banana shape.",
+    "restSec": 50,
+    "defaultReps": 25,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-mountain-climber",
+    "name": "Mountain climbers",
+    "emoji": "⛰️",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core",
+      "cardio"
+    ],
+    "intensity": 2,
+    "how": "Push-up position, drive the knees to the chest fast without the hips bouncing.",
+    "restSec": 45,
+    "defaultReps": 30,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-calf-raise",
+    "name": "Calf raises",
+    "emoji": "🦶",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "legs"
+    ],
+    "intensity": 1,
+    "how": "Up on the toes as high as you can, slow all the way back down.",
+    "restSec": 35,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-wall-sit",
+    "name": "Wall sit",
+    "emoji": "🧊",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "legs"
+    ],
+    "intensity": 2,
+    "how": "Back flat on the wall, thighs parallel to the floor. Sit there and suffer politely.",
+    "restSec": 50,
+    "defaultReps": 45,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-dip-chair",
+    "name": "Chair dips",
+    "emoji": "🪑",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "arms",
+      "chest"
+    ],
+    "intensity": 2,
+    "how": "Hands on a chair edge behind you, elbows straight back, lower until the elbows hit 90°.",
+    "restSec": 55,
+    "defaultReps": 12,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-pike-pushup",
+    "name": "Pike push-ups",
+    "emoji": "🔺",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "shoulders",
+      "arms"
+    ],
+    "intensity": 3,
+    "how": "Hips high in an upside-down V, lower the crown of the head towards the floor.",
+    "restSec": 60,
+    "defaultReps": 8,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z",
+    "backRisk": false
+  },
+  {
+    "id": "bw-arm-circles",
+    "name": "Arm circles",
+    "emoji": "🌀",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "shoulders"
+    ],
+    "intensity": 1,
+    "how": "Arms out, small fast circles forward then backward. Great as a first move.",
+    "restSec": 30,
+    "defaultReps": 20,
+    "defaultSets": 2,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-jumping-jack",
+    "name": "Jumping jacks",
+    "emoji": "⭐",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "cardio",
+      "fullBody"
+    ],
+    "intensity": 1,
+    "how": "Classic. Feet out, arms up, keep the rhythm.",
+    "restSec": 30,
+    "defaultReps": 30,
+    "defaultSets": 2,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-bear-crawl",
+    "name": "Bear crawl",
+    "emoji": "🐻",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "fullBody",
+      "core"
+    ],
+    "intensity": 2,
+    "how": "On hands and toes, knees an inch off the floor, crawl forward and back staying low.",
+    "restSec": 50,
+    "defaultReps": 30,
+    "defaultSets": 3,
+    "kidSafe": true,
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  }
+]

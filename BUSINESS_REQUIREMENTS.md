@@ -36,6 +36,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🪙 **Store** | Wallpapers · Treasures · Orders |
 | 📖 **Log Book** | Album · Packs · Trade |
+| 💪 **Gym** | Train · Stats · Gear · Coach |
 | 💡 **Ideas** | Open · Done · New |
 | 🧭 **Log Pose** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
@@ -284,6 +285,8 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
 - Prize settlement: "Prizes to settle" list + topbar banners (see §15).
 - **Scripts** (both talk to Firestore via the public web config + anonymous auth):
   - `npm run quiz:regen` (claude CLI, opus) — refills every live topic to its target after removals; new questions land `pending`.
+  - `npm run gym:equipment` (claude CLI, **opus**, vision) — turns basement photos into gear + exercises; deletes the photos afterwards (§18k).
+  - `npm run gym:demos` (ExerciseDB + claude CLI for ambiguous matches) — animation + still for each exercise (§18l).
   - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
 
 ## 17. Question of the Day
@@ -299,5 +302,147 @@ One review question, per profile, resurfaced when the app opens — a light dail
 - **Ignored all day**: a question still `unseen`/`later` at midnight costs `qotdPenalty` 🪙 at the next rollover/open, shown as a 🕰️ penalty event, then a fresh question is picked.
 - Answering also updates the training stat (it's a real review) but pays **no** training Berries — the win/lose Berries are the only economy effect. No Devil Fruits involved.
 - Only exists once the profile has answered at least one question correctly; until then there's no Question of the Day.
+
+## 18. Gym — "Training Deck" (the 💪 Gym app)
+
+An AI personal trainer **designed to make itself redundant**. Everything it decides is written down in a form the app can reproduce on its own, so the AI can be switched off later without losing the training.
+
+Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI layer), `src/logic/gymStats.ts` (aggregations), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, script `scripts/gym-equipment.mjs`.
+
+### 18a. The two-layer rule (the whole design)
+
+- **Layer 1 — the offline planner** (`planSession`) always works: no network, no key, no credits. It reads the catalog, the profile brief and the per-exercise memory and produces a complete, ordered, time-budgeted session.
+- **Layer 2 — the AI coach** (`coachPlan`) is optional. It gets the same inputs, answers in the **same shape**, and is validated against the same catalog. **Every** failure path — AI switched off, no key, no network, timeout, malformed JSON, invented exercise ids, too few usable exercises — falls through to layer 1, and the preview screen says so out loud (`gymFellBack`).
+- The model is **never trusted** with an id, a rep count, a rest time or a rep-ladder rung. Unknown ids are dropped; out-of-range numbers are replaced with what layer 1 would have used; ladders own their own progression regardless of what the coach says.
+- Coach → "Independence from the AI" shows a readiness % (sessions logged + share of exercises tried). Past ~70% the offline planner is genuinely good, and the AI toggle can go off for good.
+
+### 18b. Data
+
+| Where | What |
+|---|---|
+| `app/gymCatalog` (shared) | `equipment[]` + `exercises[]` — one basement, both crewmates. Written by the photo script and by the Gear tab. |
+| `app/aiConfig` (shared, admin-writes) | OpenRouter `openrouterKey` + `model`. **Never in the repo or the bundle** so it rotates without a rebuild — same arrangement as the Smart Price project. Anyone who can sign into the Firebase project can read it, so it needs a spend cap on the OpenRouter dashboard. |
+| `profiles/{id}.gym` (personal) | `brief`, `ex` (per-exercise memory), `ladders`, `sessions` (capped at 220), `active`, `streak`, `totals`, and the `aiOn` / `soundOn` / `keepAwake` switches. |
+
+**`gym.ex[exerciseId]` is the memory that replaces the AI** — small, permanent, and exactly what a good trainer would remember: your rating, times done, last/suggested weight, whether you corrected the last suggestion up or down, the rest you *actually* take, best reps, best weight, your own note. The raw session log is capped; this is not.
+
+**Built-in exercises.** ~20 gear-free moves ship in code (`STARTER_EXERCISES`), so the app is usable before a single photo is processed. A stored catalog entry with the same id overrides the built-in one — that is how editing or retiring a built-in move sticks.
+
+### 18c. The session loop
+
+1. **Set up** — how many minutes (5/10/15/20/25/30/45/60) and how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal). Mood changes set counts, rep targets and how hard the planner leans.
+2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks for a replacement in the same body area) or **✕** to drop it. Also **🎲 Plan a different one** and **🗑 Cancel**.
+3. **GO** — one exercise at a time: how to do it, the planned sets as pills, and steppers for reps (or seconds / minutes) and weight, **pre-filled with what was prescribed**. You only touch them when reality differs — and that difference is the signal.
+4. **Rest** — a wall-clock countdown with **+30s more rest** and **Skip rest**. What you *actually* took is what gets learned (§18d).
+5. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
+6. **Finish** — 1–5 stars plus optional free text for the trainer, then Berries are paid and everything is folded into memory. Leaving early keeps whatever you logged (and pays for it); a session with nothing logged is thrown away rather than polluting the history.
+
+The session in progress lives in `gym.active` and is synced, so a refresh — or a different device — picks the workout back up mid-set.
+
+### 18d. What it learns, and how
+
+- **Rest** — `restLearned` is a rolling average (60/40) of the rest you actually took, not what was offered; the next offer is that blended 75/25 with the exercise's own default, clamped to 15–240 s. Take longer and the sessions get shorter and more honest; skip rest and it packs more work into the same minutes.
+- **Weight** — you loaded **more** than asked → too light → next suggestion goes up a step (5%, min 2.5); **less** → too heavy → down a step; the same → hold. First time on a loaded exercise there is no suggestion; whatever you type becomes the baseline.
+- **Preference** — ratings score into the picker (`love` +45, `like` +25, `ok` 0, `dislike` −40, `hate` = excluded).
+- **Recovery** — the planner reads the real timestamps of past sessions: chest/back/legs/glutes want ~48 h, shoulders/arms ~40 h, core ~24 h, cardio ~12 h. A part trained recently is heavily penalised, so the app spaces the body out on its own.
+- **Variety** — days since last done adds up to +63; every repeat of a body part already in today's session costs −45; a small random jitter means no two sessions are identical.
+
+### 18e. The natural warm-up
+
+Diogo doesn't warm up, so there is **no warm-up block**. Instead the planner forces the first two moves to be light (intensity 1) and scales their prescribed weight to **50% then 75%** of the working suggestion. Order after that: hardest compound work while fresh, core and holds last. Toggle: Coach → "No warm-up block".
+
+### 18f. Rep ladders
+
+The motivating pattern from Diogo's old push-up app, for bodyweight staples (`ladder: true` — push-ups, pull-ups, dips, squats): five sets that creep up a rep at a time — `4 4 4 4 4` → `4 5 4 5 4` → `5 5 4 5 4` → … built from `round(max × 0.4)`. Every **6 cycles** the session prescribes a **🏁 max test** — one all-out set — and the whole ladder is rebuilt from that number. A ladder is seeded automatically from your first honest set of that exercise. The coach gets no vote on ladder reps.
+
+### 18g. Body briefs
+
+Free text the coach reads **verbatim** before every session, plus three hard rules the offline planner enforces too (it can't read prose):
+
+- **Protect my lower back** — `backRisk` exercises are filtered out entirely.
+- **No warm-up block** — see §18e.
+- **Kid mode** — bodyweight first, nothing heavy; non-`kidSafe` exercises are filtered out.
+
+Seeded per profile on first login (`seedBrief`) and then fully editable — **Diogo**: 43, pickleball is his cardio, core + lower back are the priority, wants a good chest, likes high-rep dynamic sets and rep ladders. **Ben**: 12, kid mode, the goal is enjoying it and building the habit.
+
+### 18h. Berries
+
+Per exercise: `3 + intensity×2 + sets` (nothing logged pays nothing), **+15** for a personal record, **+20** for completing a max test. Closing bonus: `(minutes/5)×2`, **+6** for finishing everything, **+2 per star**. Calibrated against §5 — one exercise is worth about half a low-effort quest, a full 30-minute session lands north of a high-effort one, and a workout can never out-earn a whole day of quests.
+
+### 18i. Sound with the screen off
+
+The rest timer is driven by **wall-clock time**, never a tick counter, so a throttled background tab can't make it drift. The alerts (10 s warning, rest-over tone) do **not** use the app's WebAudio `sfx` — the browser suspends WebAudio the moment the page is hidden, which is exactly when the beep matters. Instead `gymSfx` renders short WAVs to data URIs at runtime and plays them through an `<audio>` element, and `holdAudioSession` keeps a near-silent loop running for the length of the rest so a hidden page is still allowed to make noise. **Still no audio files in the build.** On top of that a **Screen Wake Lock** (`src/logic/wakeLock.ts`, re-acquired on every `visibilitychange`) keeps the screen on for the whole session. Honest limits: screen on → alerts are exact; screen off → they still fire, but a heavily throttled browser may run them a few seconds late.
+
+### 18j. Stats
+
+Tiles (streak · sessions · minutes · Berries), a 28-day activity strip, weekly volume bars, where the work went by body part, a per-exercise progression line, and personal records. A **body-part filter** drives the whole page.
+
+Every chart is deliberately **single-series**: running the dataviz validator over the app's palette, gold↔orange separate by only ΔE 13.4 (below the 15 floor for normal vision) and bronze misses 3:1 contrast on the card surface — it is a brand palette, not a categorical one. So colour never carries identity here; the filter and direct labels do, and every value is also readable as text.
+
+### 18k. Cataloguing the basement — `npm run gym:equipment`
+
+Photograph everything, drop the photos in `gym-photos/` (gitignored), run the script. It shrinks each photo to 1024px webp in `.gym-work/`, asks the **claude CLI (`--model opus --effort medium`)** to identify every distinct piece of equipment and write every exercise it enables, writes a **96px webp thumbnail** per item into `public/gym/`, and merges into `app/gymCatalog`.
+
+**Your comments on the photos.** A photo can't tell you a dumbbell adjusts from 5 to 52 lb, so three ways to say so are read, and all of them are merged into what the model sees for that photo:
+
+1. **The photo's own caption** — type it in the Photos app when you take the shot. Read straight from EXIF `ImageDescription`; nothing else to manage.
+2. **`gym-photos/notes.txt`** — `dumbbells.jpg: adjustable, 5 to 52 lb in 2.5 lb steps`. The script writes a commented template here on the first run so the option is discoverable. Any line **without** a filename describes the **room** instead.
+3. **A sidecar file** next to the photo (`dumbbells.jpg.txt`).
+
+The model is told to trust your comment over what it thinks it sees, fold it into that item's `notes`, and let it constrain the exercise list. Room-level notes are stored on the catalog as `GymCatalog.notes` and read by the **AI trainer before every session** — "ceiling is low, no standing overhead work with a bar" should change what gets prescribed — and are editable any time in **Gear → About the room** without re-running the script. `notes.txt` and sidecars are never deleted.
+
+**Nothing large survives the run.** A photo's whole job is to become a row in the database, so once the catalog is saved the script **deletes the originals in `gym-photos/` and the shrunk working copies**, reporting the space freed. The only image left anywhere — and the only one that ever reaches the host — is the 96px webp thumbnail (~4 KB), which is exactly 2× the 48px the Gear tab draws it at, per CLAUDE.md's image rule. `--keep-photos` opts out of the deletion; `--dry-run` writes nothing and deletes nothing.
+
+Ids are slugs of the name, so **re-running is idempotent** — existing items are updated, never duplicated, and edits made in the Gear tab survive. No catalog entry is ever deleted by the script. Exercises referencing equipment that isn't in the catalog are skipped and reported. `--photos=` / `--model=` / `--effort=` override the defaults. Everything it produces is editable by hand in Gear, which also supports adding gear and exercises from scratch.
+
+### 18l. Exercise demos — `npm run gym:demos`
+
+Every exercise can carry a **still image and a looping animation of the movement**, sourced from [ExerciseDB's free open endpoint](https://oss.exercisedb.dev/api/v1) — 1,500 exercises, **no API key and no account required**. We take only the handful that match exercises we actually own and re-host those ourselves, so the app never depends on their CDN and we never mirror a library we don't use.
+
+**Two files per exercise, and the split is the data budget.** Their GIFs are 180×180 / ~67 KB; we store a **~21 KB animated WebP** (the movement) plus a **~2 KB still** (one frame). A list of ten exercises renders only stills (~20 KB); the animation is fetched when you are actually looking at that one movement. The service worker then caches both **CacheFirst for a year** (`gym-demos` cache, see `vite.config.ts`), so a second view transfers nothing and works with no signal at all. ~120 exercises ≈ 2.7 MB total.
+
+Media lands in **Firebase Storage** under `gym/moves/` (`storage.rules`: signed-in read/write on that path, everything else denied) so new demos appear without redeploying the app. `--to=public` writes to `public/gym/moves/` instead, for when Storage isn't provisioned.
+
+**Matching is the hard part, not the download.** The whole library index is pulled **once** and cached on disk (`scripts/.exercisedb-index.json`, gitignored); every match after that is offline, instant and reproducible.
+
+- **Pagination is `after=<meta.nextCursor>`.** `offset`, `page` and `cursor` are all silently ignored and return page 1 forever — misreading that is what made an earlier version fire ~10 narrowing queries per exercise instead of one crawl.
+- **Their own ranking is not usable** (asking for `push-up` returns *"push-up inside leg kick"* first), so every row is scored locally: folded plurals and hyphens, token overlap, body-part and equipment agreement, minus a penalty for every word they add that we didn't ask for.
+- **The free tier throttles** (Cloudflare 1015 after ~150 requests, clearing in ~30 s). Requests are spaced, a 429 is waited out rather than swallowed, and the crawl saves as it goes.
+
+**A wrong animation is worse than none** — it teaches bad form. So scoring only *ranks*; it never accepts. Three outcomes:
+
+| Outcome | Meaning |
+|---|---|
+| **exact** | Same name after folding plurals/hyphens/filler **and** the same equipment. Auto-accepted. |
+| **ai** / **close** | Everything else goes to the claude CLI with the top candidates. It answers `same`, `close`, or **null**. A `close` demo gets an **≈ badge** and a caption naming what it actually is — the written instructions stay the authority on form. |
+| *(nothing)* | No honest match — the exercise keeps its emoji. A normal state, see the coverage note below. |
+
+Two bugs this design exists to prevent, both of which shipped in earlier drafts and were caught by running it:
+
+- A numeric accept-threshold matched **"Wall sit" → *"march sit (wall)"*** and **"Pike push-ups" → *"side push-up"***. The scored auto-accept is gone.
+- Treating `weighted` as a filler word matched **"Pull-ups" → *"weighted pull-up"*** and **"Bodyweight squats" → *"weighted squat"*** — loaded movements prescribed as bodyweight ones. `weighted` is now significant, and the exact-name shortcut also requires equipment agreement.
+
+**Coverage is partial, and that is a data limit rather than a matching bug.** Verified against the downloaded index: the free 1,500-row tier contains **no** plain `plank`, `squat`, `glute bridge`, `wall sit`, `bird dog`, `jumping jack`, `arm circle` or `hollow hold`. On the 20 built-in bodyweight moves it matches **12** (4 of them flagged approximate). Gear exercises do much better — standard names like "dumbbell bench press" and "dumbbell lateral raise" hit exactly.
+
+#### If coverage isn't good enough — the options, and what they actually buy
+
+Not decided; recorded so the research isn't repeated. **Do nothing until the real basement catalog exists** — gear exercises match well already, so the gap may not be worth acting on.
+
+| Option | Exercises | Media | Cost / friction |
+|---|---|---|---|
+| **Free tier** (current) | 1,500 | 180p GIF | none — no key, no account |
+| **ExerciseDB v1 paid** | ~2,000 | GIF to 1080p, extra metadata | RapidAPI subscription |
+| **ExerciseDB v2 paid** | 11,000+ | images + **MP4, no GIFs** | separate subscription; free tier is watermarked |
+| **free-exercise-db** | 873 | 2 static JPGs (start/end) | none — public domain, no key, no rate limit |
+
+- **The v1 key is already supported in code**: set `EXERCISEDB_KEY` (or `--key=`) and the script switches host, adds the `X-RapidAPI-Key`/`X-RapidAPI-Host` headers, drops the request spacing and caches to a separate index file — same pagination, same response shape, nothing else to change. **But it is only ~500 more exercises**, so it is unlikely to contain the missing basics. (An earlier draft of this document claimed that key was the 11,000-exercise tier. It is not — that is v2, a different subscription.)
+- **v2 is the only tier with the full library**, but it serves MP4 rather than GIF, so adopting it means changing the media pipeline (§18l's animated-WebP conversion assumes a GIF input) and its free tier watermarks the assets.
+- **[yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db) is the cheapest way to close the specific gaps.** Public domain, one static JSON file, no key and no rate limit. Checked against our actual misses: it **has** `plank`, `arm circles`, `superman` and `glute bridge` — four of the eight — and still lacks `wall sit`, `bird dog`, `jumping jack` and `hollow hold`. It ships two photos per exercise (start and end position) instead of an animation; alternating those two frames reads as a movement demo. It would slot in as a **secondary source consulted only for exercises the primary can't cover**, reusing the same scoring, the same `ExerciseDemo` record and the same `close`/null honesty rules.
+
+The floor under all of this: an exercise with no honest demo keeps its emoji, which is a supported state, not a defect.
+
+The 20 built-in bodyweight moves are covered too: they live in **`src/logic/gymStarters.json`**, imported by both `src/logic/gym.ts` and the script, so there is one list and no drift. A built-in that finds a demo is written back to the catalog as an override row — the same mechanism the Gear tab uses to edit one.
+
+Re-runnable and idempotent: exercises that already have a demo are skipped unless `--refresh`. Flags: `--dry-run`, `--refresh`, `--reindex`, `--only=<id>`, `--pin=<ourId>:<theirId>` (force a specific ExerciseDB id), `--to=storage|public`, `--no-ai`, `--key=`. In the app, **Gear → an exercise** plays its demo, names the ExerciseDB entry it came from, and offers a one-tap **"Wrong movement — remove it"**. Attribution is shown wherever demos appear.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.
