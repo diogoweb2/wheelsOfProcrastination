@@ -2,7 +2,23 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Stamped into the bundle at build time and shown next to the app name, so a
+// glance at the header answers "is this actually the build I just pushed?".
+// Pinned to America/New_York on purpose: the CI runner builds in UTC, and a
+// version that disagreed with the wall clock would be worse than none.
+const BUILD_ID = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+  .format(new Date())
+  .replace(/\D/g, '')
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
     react(),
     VitePWA({

@@ -22,6 +22,12 @@ export function AppHeader({ app, onHome }: { app: AppDef; onHome: () => void }) 
       <div className="app-head-title">
         {app.img ? <img src={app.img} alt="" width={22} height={22} draggable={false} /> : <span>{app.icon}</span>}
         {app.name}
+        {/* MMDDHHmm of the build. Only the Gym carries it: it is the app being
+            shipped several times a day, and it answers "did my push land?"
+            without opening devtools. */}
+        {app.id === 'gym' && (
+          <span className="muted" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.2 }}>V: {__BUILD_ID__}</span>
+        )}
       </div>
       {/* Berries ride along in the header rather than in a row of their own —
           it's where earned coins fly to (logic/fx.ts targets .stat--gem). */}
