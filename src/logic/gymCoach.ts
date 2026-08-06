@@ -165,7 +165,7 @@ async function ask(key: string, model: string, prompt: string): Promise<string> 
       headers: {
         Authorization: `Bearer ${key}`,
         'HTTP-Referer': location.origin,
-        'X-Title': 'Wheels of Procrastination — Gym',
+        'X-Title': 'Wheels of Procrastination Gym',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

@@ -4,7 +4,7 @@
 // The catalog is shared (one basement, one Firestore doc) but the ratings, the
 // weights and the rest times are personal, so this screen edits two different
 // things at once and says which is which.
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { BodyPart, Equipment, ExerciseDef, ExerciseRating, GymCatalog } from '../../types'
 import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince } from '../../logic/gym'
@@ -61,8 +61,6 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
   return (
     <>
       <div className="h2" style={{ marginTop: 0 }}>🏋️ In the basement — {live.length}</div>
-
-      <RoomNote save={save} />
 
       {live.length === 0 && !adding && (
         <div className="card" style={{ textAlign: 'center' }}>
@@ -132,54 +130,6 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
         </>
       )}
     </>
-  )
-}
-
-/**
- * What the owner said about the ROOM, not about any one item — "ceiling is low",
- * "concrete floor, nothing to drop". The AI trainer reads this before every
- * session, so it's editable here rather than only via gym-photos/notes.txt.
- */
-function RoomNote({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => void }) {
-  const { gymCatalog } = useStore()
-  const stored = gymCatalog?.notes ?? ''
-  const [text, setText] = useState(stored)
-  const [dirty, setDirty] = useState(false)
-
-  useEffect(() => {
-    if (!dirty) setText(stored)
-  }, [stored, dirty])
-
-  return (
-    <div className="card">
-      <div className="field" style={{ marginBottom: dirty ? 10 : 0 }}>
-        <label>📝 About the room</label>
-        <textarea
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value)
-            setDirty(true)
-          }}
-          placeholder="Ceiling is low — no standing overhead work with a bar. Concrete floor, nothing heavy to drop."
-          style={{ minHeight: 60 }}
-        />
-        <span className="muted" style={{ fontSize: 11 }}>
-          Anything about the space itself. Your trainer reads this before building every session.
-        </span>
-      </div>
-      {dirty && (
-        <button
-          className="btn btn--small"
-          onClick={() => {
-            sfx.gem()
-            save((c) => ({ ...c, notes: text.trim() || undefined }))
-            setDirty(false)
-          }}
-        >
-          💾 Save
-        </button>
-      )}
-    </div>
   )
 }
 
@@ -314,11 +264,24 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises:
 
       <div className="field">
         <label>What is it?</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Adjustable dumbbells" />
-      </div>
-      <div className="field">
-        <label>Icon</label>
-        <input type="text" value={emoji} onChange={(e) => setEmoji(e.target.value.slice(0, 2))} />
+        {/* the icon lives beside the name, not on its own row: the model picks it
+            from the photo, so it is a thing you correct, not a thing you fill in */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={emoji}
+            onChange={(e) => setEmoji(e.target.value.slice(0, 2))}
+            aria-label="Icon"
+            style={{ width: 58, textAlign: 'center', flex: '0 0 auto' }}
+          />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Adjustable dumbbells"
+            style={{ flex: 1, minWidth: 0 }}
+          />
+        </div>
       </div>
       <div className="field">
         <label>Notes for your trainer (optional)</label>
@@ -567,11 +530,16 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
     <div className="card" style={{ marginTop: 10 }}>
       <div className="field">
         <label>Name</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Cable face pull" />
-      </div>
-      <div className="field">
-        <label>Icon</label>
-        <input type="text" value={emoji} onChange={(e) => setEmoji(e.target.value.slice(0, 2))} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={emoji}
+            onChange={(e) => setEmoji(e.target.value.slice(0, 2))}
+            aria-label="Icon"
+            style={{ width: 58, textAlign: 'center', flex: '0 0 auto' }}
+          />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Cable face pull" style={{ flex: 1, minWidth: 0 }} />
+        </div>
       </div>
       <div className="field">
         <label>How to do it</label>
