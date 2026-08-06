@@ -593,13 +593,6 @@ export interface ExerciseDef {
 export interface GymCatalog {
   equipment: Equipment[]
   exercises: ExerciseDef[]
-  /**
-   * Free text about the ROOM rather than any one item — "ceiling is low, no
-   * standing overhead work with a bar", "floor is concrete, nothing to drop".
-   * Written from `gym-photos/notes.txt` or edited in Gear, and read by the AI
-   * trainer before every session.
-   */
-  notes?: string
   updatedAt?: string
 }
 

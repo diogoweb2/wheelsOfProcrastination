@@ -66,7 +66,7 @@ const slug = (s) =>
 
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 
-function prompt(equipment, roomNotes, athletes, taken) {
+function prompt(equipment, athletes, taken) {
   const gear = equipment.length
     ? equipment.map((e) => `- ${e.name}${e.notes ? ` — ${e.notes}` : ''}`).join('\n')
     : '(nothing yet — bodyweight only)'
@@ -79,7 +79,6 @@ function prompt(equipment, roomNotes, athletes, taken) {
 
 ## The equipment they actually own
 ${gear}
-${roomNotes ? `\n## The room itself\n${roomNotes}\n` : ''}
 ## Who trains here
 ${people}
 
@@ -136,7 +135,6 @@ async function main() {
 
   const equipment = (snap.data().equipment ?? []).filter((e) => !e.retired)
   const exercises = snap.data().exercises ?? []
-  const roomNotes = snap.data().notes ?? ''
 
   if (equipment.length === 0) {
     console.log('ℹ️  No equipment registered — this will only add bodyweight work.')
@@ -166,7 +164,7 @@ async function main() {
   console.log(`👥 Briefs: ${athletes.map((a) => `${a.name} (${a.text ? `${a.text.length} chars` : 'empty'})`).join(', ')}`)
   console.log(`\n🧠 Asking claude (${MODEL}, effort ${EFFORT}) for the full library — this takes a minute…\n`)
 
-  const out = execFileSync('claude', ['--model', MODEL, '--effort', EFFORT, '-p', prompt(equipment, roomNotes, athletes, taken)], {
+  const out = execFileSync('claude', ['--model', MODEL, '--effort', EFFORT, '-p', prompt(equipment, athletes, taken)], {
     encoding: 'utf8',
     maxBuffer: 20 * 1024 * 1024,
     stdio: ['ignore', 'pipe', 'inherit'],

@@ -133,7 +133,6 @@ export async function coachSwap(
   try {
     const model = input.ai?.model?.trim() || DEFAULT_MODEL
     const prompt = `${briefBlock(input)}
-${roomBlock(input.catalog)}
 Today's session, already agreed:
 ${keep.map((k, i) => `${i + 1}. ${k.name} (${k.parts.join('/')})`).join('\n') || '(nothing else yet)'}
 
@@ -208,12 +207,6 @@ ${b.text.trim() || '(nothing written yet)'}
 ${rules.join('\n')}`
 }
 
-/** What the owner said about the room itself — constraints no exercise record carries. */
-function roomBlock(catalog: GymCatalog | null): string {
-  const notes = catalog?.notes?.trim()
-  return notes ? `\nAbout the gym itself: ${notes}\nRespect this — it describes the actual room.\n` : ''
-}
-
 function catalogBlock(pool: ExerciseDef[], gym: GymState): string {
   const rows = pool.map((e) => {
     const m = gym.ex[e.id]
@@ -263,7 +256,6 @@ function buildPrompt(input: CoachInput, pool: ExerciseDef[], day: string): strin
   }[input.mood]
 
   return `${briefBlock(input)}
-${roomBlock(input.catalog)}
 ${historyBlock(input.gym)}
 
 Today is ${day}. They have ${input.minutes} minutes, INCLUDING rest between sets. ${moodLine}
