@@ -379,9 +379,29 @@ Tiles (streak · sessions · minutes · Berries), a 28-day activity strip, weekl
 
 Every chart is deliberately **single-series**: running the dataviz validator over the app's palette, gold↔orange separate by only ΔE 13.4 (below the 15 floor for normal vision) and bronze misses 3:1 contrast on the card surface — it is a brand palette, not a categorical one. So colour never carries identity here; the filter and direct labels do, and every value is also readable as text.
 
-### 18k. Cataloguing the basement — `npm run gym:equipment`
+### 18k. Filling the catalog — the three steps
 
-Photograph everything, drop the photos in `gym-photos/` (gitignored), run the script. It shrinks each photo to 1024px webp in `.gym-work/`, asks the **claude CLI (`--model opus --effort medium`)** to identify every distinct piece of equipment and write every exercise it enables, writes a **96px webp thumbnail** per item into `public/gym/`, and merges into `app/gymCatalog`.
+| Step | What | Where |
+|---|---|---|
+| **1. Equipment** | what you own, described well | app camera **or** `npm run gym:equipment` |
+| **2. Exercises** | the library, from the whole inventory | `npm run gym:exercises` |
+| **3. Demos** | animation + still per exercise | run automatically at the end of step 2 (`npm run gym:demos` on its own) |
+
+**Why exercises are their own pass.** They depend on the WHOLE inventory at once. A bench alone is worth almost nothing; a bench *plus* dumbbells is incline press, chest-supported row and step-ups. A per-item or per-photo pass structurally cannot see those combinations, so step 1 only ever describes gear — it is explicitly told not to list exercises — and step 2 is given the full list, the room notes (§18k below) and **both athletes' briefs**.
+
+That last input is what makes the no-equipment half of the library personal: step 2 adds bodyweight exercises only where it can say *why they belong to Diogo or to Ben*, reading their actual briefs (core/lower-back priority, kid mode) rather than emitting a generic list. It is also told to prefer standard exercise names, because step 3 has to find each one in a demo library and an invented name never matches.
+
+`npm run gym:exercises` is idempotent — existing exercises are never duplicated or overwritten, so re-run it after adding gear and you get only what's new. It reports what it added grouped by single-item / combination / bodyweight, and skips anything referencing gear you don't own. Flags: `--dry-run`, `--no-demos`, `--model=`, `--effort=`.
+
+#### Cataloguing the basement — `npm run gym:equipment`
+
+There are two ways to get gear into the catalog, and they produce the same thing:
+
+**In the app (phone, one item at a time).** Gear → **➕ Add equipment** → **📷 Take a photo**. The shot is shrunk *in the browser* first (canvas, `src/logic/photo.ts`) so the full-size original never leaves the phone — a 1024px copy goes to the vision model and is thrown away, and only a **96px square thumbnail** is stored (Firebase Storage, `gym/equipment/`). With an OpenRouter key set (the same one the coach uses) the model names the item, writes its notes and proposes the exercises it unlocks, each with a tick box; without a key the camera still works and you just get the picture plus fields you fill in yourself. **Nothing is written until you press Save** and every field stays editable — a vision model reading a dim basement will sometimes be wrong, and being wrong has to cost a tap, not a bad catalog entry. Anything already typed is never overwritten by the model, and the **notes field is sent as a hint** the model is told to trust over the picture. Code: `src/logic/gymVision.ts`.
+
+**From the terminal (whole basement at once).** Photograph everything, drop the photos in `gym-photos/` (gitignored), run the script. It shrinks each photo to 1024px webp in `.gym-work/`, asks the **claude CLI (`--model opus --effort medium`)** to identify every distinct piece of equipment and **describe it thoroughly** — that description is all step 2 ever sees, so it carries the weight ranges, increments and adjustment limits — writes a **96px webp thumbnail** per item into `public/gym/`, and merges into `app/gymCatalog`. It writes no exercises.
+
+The app's camera does still propose exercises for the item in front of it, as a fast path; step 2 dedups by name, so using both is safe.
 
 **Your comments on the photos.** A photo can't tell you a dumbbell adjusts from 5 to 52 lb, so three ways to say so are read, and all of them are merged into what the model sees for that photo:
 

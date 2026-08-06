@@ -2438,3 +2438,26 @@ input, select { font-family: inherit; }
   background: rgb(255 150 0 / 92%); color: #3a2000;
   font-size: 9px; font-weight: 900; line-height: 15px; text-align: center;
 }
+
+/* --- add-equipment camera (Gear tab) --- */
+.gym-shoot { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.gym-shoot-img { border-radius: 12px; object-fit: cover; border: 2px solid var(--blue); flex: none; }
+.gym-shoot-empty {
+  width: 72px; height: 72px; flex: none; border-radius: 12px;
+  border: 2px dashed var(--line); background: var(--bg2);
+  display: flex; align-items: center; justify-content: center; font-size: 28px; opacity: 0.6;
+}
+.gym-shoot-error {
+  margin-bottom: 12px; padding: 9px 11px; border-radius: 12px; font-size: 12px; line-height: 1.4;
+  background: rgb(215 0 0 / 16%); border: 2px solid var(--red);
+}
+/* proposed exercises: tick the ones you actually want */
+.gym-suggest { display: flex; flex-direction: column; gap: 6px; }
+.gym-suggest-row {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border-radius: 12px; cursor: pointer;
+  border: 2px solid var(--line); background: var(--bg2); color: var(--text);
+  font-family: inherit; opacity: 0.55;
+}
+.gym-suggest-row.on { opacity: 1; border-color: var(--blue); }
+.gym-suggest-row:active { transform: scale(0.98); }

@@ -18,7 +18,8 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore'
-import { ensureAuth, firestore } from '../lib/firebase'
+import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
+import { app, ensureAuth, firestore } from '../lib/firebase'
 import type { AiConfig, AppData, AuditEntry, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
@@ -258,6 +259,21 @@ export function subscribeGymCatalog(cb: (c: GymCatalog | null) => void): () => v
 export async function saveGymCatalog(catalog: GymCatalog): Promise<void> {
   await ensureAuth()
   await setDoc(gymCatalogRef(), { ...catalog, updatedAt: new Date().toISOString() })
+}
+
+/**
+ * Store one already-shrunk Gym image and hand back its URL.
+ *
+ * Only ever called with a 96px thumbnail from `shrinkPhoto` — the raw camera
+ * file is never uploaded. `immutable` caching plus the service worker's
+ * `gym-demos` CacheFirst rule (vite.config.ts) means a given image is fetched
+ * once per device, ever.
+ */
+export async function uploadGymImage(path: string, blob: Blob): Promise<string> {
+  await ensureAuth()
+  const ref = storageRef(getStorage(app), `gym/${path}`)
+  await uploadBytes(ref, blob, { contentType: blob.type || 'image/webp', cacheControl: 'public, max-age=31536000, immutable' })
+  return await getDownloadURL(ref)
 }
 
 // --- AI config (OpenRouter key for the Gym coach) --------------------------

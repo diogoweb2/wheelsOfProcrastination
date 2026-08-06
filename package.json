@@ -10,6 +10,7 @@
     "quiz:review": "node scripts/quiz-review.mjs",
     "bank:market": "node scripts/bank-market.mjs",
     "gym:equipment": "node scripts/gym-equipment.mjs",
+    "gym:exercises": "node scripts/gym-exercises.mjs",
     "gym:demos": "node scripts/gym-demos.mjs",
     "assets": "claude --model opus --allowedTools \"Bash,Read,Write,Edit,Glob,Grep\" -p \"$(cat scripts/optimize-assets.md)\"",
     "predev": "npm run backgrounds && npm run stickers",

@@ -1,16 +1,18 @@
 rules_version = '2';
 
-// The only thing this project stores as files is Gym demo media (see
-// BUSINESS_REQUIREMENTS.md §18l): a still and a looping animation per exercise,
-// fetched from ExerciseDB by `npm run gym:demos` and re-hosted here so the app
-// never depends on someone else's CDN.
+// The only thing this project stores as files is Gym imagery (see
+// BUSINESS_REQUIREMENTS.md §18k/§18l): exercise demos fetched from ExerciseDB by
+// `npm run gym:demos` and re-hosted here so the app never depends on someone
+// else's CDN, plus 96px equipment thumbnails photographed in the app itself.
 //
 // Same trust model as firestore.rules: the whole app is behind anonymous auth,
 // so "signed in" is the bar. Everything outside gym/moves is denied outright —
 // no other path should ever be writable.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /gym/moves/{file} {
+    // moves/ = exercise demos from the gym:demos script
+    // equipment/ = photos taken in the app when adding gear by hand
+    match /gym/{folder}/{file} {
       allow read, write: if request.auth != null;
     }
     match /{everythingElse=**} {

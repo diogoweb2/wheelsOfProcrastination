@@ -6,7 +6,9 @@
 //   1. shrinks each photo to a 1024px webp in `.gym-work/` — the model reads
 //      those, not the 4 MB originals;
 //   2. asks Claude (Opus, medium effort) to identify every distinct piece of
-//      equipment AND write every exercise that equipment makes possible;
+//      equipment and describe it thoroughly (the exercise library is built from
+//      those descriptions later, by `npm run gym:exercises`, which needs to see
+//      the WHOLE inventory at once to find combinations);
 //   3. writes a 96px webp thumbnail per item into `public/gym/` (see CLAUDE.md —
 //      no un-resized image ever lands in public/);
 //   4. merges the result into Firestore `app/gymCatalog`.
@@ -59,8 +61,6 @@ const EFFORT = flag('effort', 'medium')
 const THUMB_PX = 96
 
 const PHOTO_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'])
-const PARTS = ['chest', 'back', 'shoulders', 'arms', 'legs', 'glutes', 'core', 'fullBody', 'cardio']
-const KINDS = ['weight', 'bodyweight', 'timed', 'cardio']
 
 /** Stable id from a name, so a second run updates instead of duplicating. */
 const slug = (s) =>
@@ -178,9 +178,9 @@ ${images.map((i) => `- ${i.workPath}   (original: ${i.name})${i.note ? `\n    �
 ${generalNotes ? `\nAbout the room itself, from the owner: ${generalNotes}\n` : ''}
 Identify EVERY distinct piece of equipment across all of them. The same item may appear in several photos — that is ONE piece of equipment, not several. Ignore furniture, walls, boxes and anything that is not usable for training.
 
-Then write every exercise that this equipment makes possible. Be generous but honest: 3–8 exercises per piece of equipment, covering different body parts. Only exercises that can genuinely be done with the gear in these photos.
+Do NOT list exercises. A separate pass does that, and it needs to see the whole inventory at once so it can find the combinations (a bench plus dumbbells is worth far more than either alone).
 
-${existing.equipment.length > 0 ? `Equipment already in the catalog (reuse the EXACT name if you see the same item again, so it updates instead of duplicating):\n${existing.equipment.map((e) => `- ${e.name}`).join('\n')}\n` : ''}${existing.exercises.length > 0 ? `Exercises already in the catalog — do NOT repeat these:\n${existing.exercises.map((e) => `- ${e.name}`).join('\n')}\n` : ''}
+${existing.equipment.length > 0 ? `Equipment already in the catalog (reuse the EXACT name if you see the same item again, so it updates instead of duplicating):\n${existing.equipment.map((e) => `- ${e.name}`).join('\n')}\n` : ''}
 Answer with ONLY this JSON object. No prose, no markdown fence.
 
 {
@@ -189,34 +189,14 @@ Answer with ONLY this JSON object. No prose, no markdown fence.
       "name": "short specific name, e.g. \\"Adjustable dumbbells\\"",
       "emoji": "one fitting emoji",
       "photo": "the ORIGINAL filename this item is best shown in",
-      "notes": "anything a trainer needs: weight range, attachments, adjustability, condition. Empty string if nothing useful."
-    }
-  ],
-  "exercises": [
-    {
-      "name": "standard exercise name",
-      "emoji": "one fitting emoji",
-      "equipment": ["exact equipment name(s) from above — [] if it needs none"],
-      "kind": one of ${JSON.stringify(KINDS)},
-      "parts": ["primary body part FIRST", "then secondary"],   // from ${JSON.stringify(PARTS)}
-      "intensity": 1 | 2 | 3,        // 1 = light enough to open a session with, 3 = heavy
-      "how": "one or two plain sentences on how to perform it, including the form cue that keeps it safe",
-      "restSec": 30-180,             // sensible rest between sets for this exercise
-      "defaultReps": number,         // reps; SECONDS for kind "timed"; MINUTES for kind "cardio"
-      "defaultSets": 2-5,
-      "kidSafe": true | false,       // safe for a 12-year-old beginner: no heavy spinal loading, simple form, low injury risk
-      "backRisk": true | false,      // true if it meaningfully loads the lower back / spine (heavy hinges, loaded twisting, standing overhead presses)
-      "ladder": true | false         // true ONLY for bodyweight staples worth a rep-ladder game (push-ups, pull-ups, dips, squats)
+      "notes": "everything a trainer needs to know that the picture alone can't settle: weight range, increments, attachments, what it adjusts to and what it doesn't, condition. This is the field that decides which exercises are possible later, so be thorough and concrete. Empty string only if there is genuinely nothing to say."
     }
   ]
 }
 
 Rules that matter:
-- "kind": "weight" means the app will ask him to type the load. Use "bodyweight" for rep-counted moves with no load, "timed" for holds (seconds), "cardio" for continuous work (minutes).
-- Be accurate about backRisk. It is a hard filter — anything marked true is never prescribed to him.
-- "how" is read mid-set on a phone. Short, concrete, no theory.
-- Where the owner has commented on a photo, TRUST IT over what you think you see, and fold the useful part into that item's "notes" (weight ranges, attachments, quirks). A photo can't show you that a dumbbell adjusts from 5 to 52 lb.
-- Let their comments shape the exercise list too: don't prescribe something the room or the gear can't actually support.`
+- Where the owner has commented on a photo, TRUST IT over what you think you see, and fold it into that item's "notes". A photo can't show you that a dumbbell adjusts from 5 to 52 lb.
+- Be specific in "notes". The next pass writes the entire exercise library from these descriptions alone — it never sees the photos.`
 }
 
 async function main() {
@@ -320,54 +300,13 @@ async function main() {
     idByName.set(key, id)
   }
 
-  // 5. validate + merge exercises
-  const exercises = [...existing.exercises]
-  const exByName = new Map(exercises.map((e) => [e.name.toLowerCase(), e]))
-  let newMoves = 0
-  const skipped = []
-
-  for (const raw of parsed.exercises ?? []) {
-    if (!raw?.name || !Array.isArray(raw.parts)) continue
-    const parts = raw.parts.filter((p) => PARTS.includes(p))
-    if (parts.length === 0) {
-      skipped.push(`${raw.name} (no valid body part)`)
-      continue
-    }
-    const needs = (raw.equipment ?? []).map((n) => idByName.get(String(n).toLowerCase())).filter(Boolean)
-    if ((raw.equipment ?? []).length !== needs.length) {
-      skipped.push(`${raw.name} (mentions equipment we don't have)`)
-      continue
-    }
-    const key = raw.name.toLowerCase()
-    if (exByName.has(key)) continue // already catalogued; the app's edits win
-    exercises.push({
-      id: `mv-${slug(raw.name)}`,
-      name: raw.name,
-      emoji: raw.emoji || '🤸',
-      equipmentIds: needs,
-      kind: KINDS.includes(raw.kind) ? raw.kind : 'bodyweight',
-      parts,
-      intensity: [1, 2, 3].includes(raw.intensity) ? raw.intensity : 2,
-      how: String(raw.how ?? '').trim() || 'No description yet.',
-      restSec: Math.min(240, Math.max(15, Number(raw.restSec) || 60)),
-      defaultReps: Math.max(1, Number(raw.defaultReps) || 10),
-      defaultSets: Math.min(5, Math.max(1, Number(raw.defaultSets) || 3)),
-      kidSafe: raw.kidSafe !== false,
-      backRisk: raw.backRisk === true,
-      ladder: raw.ladder === true,
-      addedBy: 'ai',
-      createdAt: now,
-    })
-    newMoves += 1
-  }
+  // Exercises are NOT written here — `npm run gym:exercises` builds them from the
+  // whole inventory at once. Existing ones are carried through untouched.
+  const exercises = existing.exercises
 
   console.log(`\n🏋️  Equipment: ${newGear} new, ${equipment.length} total`)
   for (const e of equipment) console.log(`   ${e.emoji} ${e.name}${e.notes ? ` — ${e.notes}` : ''}`)
-  console.log(`🤸 Exercises: ${newMoves} new, ${exercises.length} total`)
-  for (const e of exercises.slice(exercises.length - newMoves)) {
-    console.log(`   ${e.emoji} ${e.name} (${e.parts.join('/')}${e.backRisk ? ', BACK RISK' : ''})`)
-  }
-  if (skipped.length > 0) console.log(`⚠️  Skipped ${skipped.length}: ${skipped.join(', ')}`)
+  console.log(`🤸 Exercises: ${exercises.length} already in the catalog (this step doesn't touch them)`)
 
   if (DRY) {
     rmSync(WORK_DIR, { recursive: true, force: true })
@@ -403,6 +342,7 @@ async function main() {
 
   console.log(`\n✅ Saved to Firestore. Open the Gym app → Gear to review, rename or retire anything.`)
   console.log(`   All that is left on disk: ${kb(thumbBytes)} of ${THUMB_PX}px thumbnails in public/gym/.`)
+  console.log(`\n➡️  Next: npm run gym:exercises — turns this gear into the exercise library, then fetches the animations.`)
   process.exit(0)
 }
 
