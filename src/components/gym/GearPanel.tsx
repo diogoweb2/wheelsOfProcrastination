@@ -22,7 +22,10 @@ export function GearPanel() {
 
   /** Write-through helper: the catalog doc may not exist yet on a fresh install. */
   function save(patch: (c: GymCatalog) => GymCatalog) {
-    gymSaveCatalog(patch(gymCatalog ?? { equipment: [], exercises: [] }))
+    const next = patch(gymCatalog ?? { equipment: [], exercises: [] })
+    // gear no longer retires, so anything left flagged from before is swept out
+    // on the next write rather than lingering invisibly in the document
+    gymSaveCatalog({ ...next, equipment: next.equipment.filter((e) => !e.retired) })
   }
 
   return (
@@ -54,9 +57,10 @@ export function GearPanel() {
 function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => void }) {
   const { gymCatalog } = useStore()
   const [adding, setAdding] = useState(false)
-  const list = gymCatalog?.equipment ?? []
-  const live = list.filter((e) => !e.retired)
-  const retired = list.filter((e) => e.retired)
+  // Equipment is deleted outright, never retired: gear that left the basement
+  // is not history worth keeping, and anything already flagged retired is
+  // treated as gone. (Exercises still retire — those ARE worth keeping.)
+  const live = (gymCatalog?.equipment ?? []).filter((e) => !e.retired)
 
   return (
     <>
@@ -86,11 +90,20 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
           <button
             className="btn btn--ghost btn--small"
             onClick={() => {
+              // exercises that needed this piece go with it — they can't be done
+              // any more, and `npm run gym:exercises` rebuilds them if it returns
+              const orphans = (gymCatalog?.exercises ?? []).filter((x) => x.equipmentIds.includes(eq.id))
+              const tail = orphans.length ? ` and ${orphans.length} exercise${orphans.length > 1 ? 's' : ''} that need it` : ''
+              if (!confirm(`Delete ${eq.name}${tail}?`)) return
               sfx.click()
-              save((c) => ({ ...c, equipment: c.equipment.map((x) => (x.id === eq.id ? { ...x, retired: true } : x)) }))
+              save((c) => ({
+                ...c,
+                equipment: c.equipment.filter((x) => x.id !== eq.id),
+                exercises: c.exercises.filter((x) => !x.equipmentIds.includes(eq.id)),
+              }))
             }}
           >
-            Retire
+            Delete
           </button>
         </div>
       ))}
@@ -109,26 +122,6 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
         </button>
       )}
 
-      {retired.length > 0 && (
-        <>
-          <div className="h2">🧊 Retired — {retired.length}</div>
-          {retired.map((eq) => (
-            <div className="card gym-gear-row" key={eq.id} style={{ opacity: 0.6 }}>
-              <span style={{ fontSize: 24 }}>{eq.emoji}</span>
-              <div style={{ flex: 1, fontWeight: 800 }}>{eq.name}</div>
-              <button
-                className="btn btn--ghost btn--small"
-                onClick={() => {
-                  sfx.click()
-                  save((c) => ({ ...c, equipment: c.equipment.map((x) => (x.id === eq.id ? { ...x, retired: false } : x)) }))
-                }}
-              >
-                Restore
-              </button>
-            </div>
-          ))}
-        </>
-      )}
     </>
   )
 }
