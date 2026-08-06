@@ -22,6 +22,14 @@ export interface AppDef {
   /** Parent-only bottom menu; the same app looks different from the captain's chair. */
   adminTabs?: AppTabDef[]
   adminOnly?: boolean
+  /** Only on the home screen while this gate is open (see `Gates`). */
+  gate?: keyof Gates
+}
+
+/** Conditions that make a situational app appear. */
+export interface Gates {
+  /** Trip mode / the Brazil money converter is switched on. */
+  converter: boolean
 }
 
 export const APPS: AppDef[] = [
@@ -31,10 +39,14 @@ export const APPS: AppDef[] = [
     icon: '🎡',
     img: '/app-wheel.webp',
     tint: ['#d70000', '#8c0000'],
+    // the voyage pages (streak, map, record) live here: they're all about the
+    // wheel's daily loop, so they belong in the same app
     tabs: [
       { id: 'spin', label: 'Spin', icon: '🎡' },
       { id: 'quests', label: 'Quests', icon: '📋' },
-      { id: 'habits', label: 'Habits', icon: '🔁' },
+      { id: 'streak', label: 'Streak', icon: '🔥' },
+      { id: 'map', label: 'Map', icon: '🗺️' },
+      { id: 'record', label: 'Record', icon: '🏅' },
     ],
   },
   {
@@ -93,19 +105,6 @@ export const APPS: AppDef[] = [
     ],
   },
   {
-    id: 'voyage',
-    name: 'Voyage',
-    icon: '🗺️',
-    img: '/app-voyage.webp',
-    tint: ['#ff9600', '#a85c00'],
-    tabs: [
-      { id: 'streak', label: 'Streak', icon: '🔥' },
-      { id: 'map', label: 'Map', icon: '🗺️' },
-      { id: 'trophies', label: 'Trophies', icon: '🏅' },
-      { id: 'stats', label: 'Stats', icon: '📈' },
-    ],
-  },
-  {
     id: 'ideas',
     name: 'Ideas',
     icon: '💡',
@@ -117,14 +116,13 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // travel-only: it appears while trip mode (the Brazil money converter) is on
     id: 'logpose',
     name: 'Log Pose',
     icon: '🧭',
     tint: ['#60bff5', '#2e63a4'],
-    tabs: [
-      { id: 'clocks', label: 'Clocks', icon: '🕐' },
-      { id: 'crew', label: 'Crew', icon: '🏴‍☠️' },
-    ],
+    gate: 'converter',
+    tabs: [{ id: 'clocks', label: 'Clocks', icon: '🕐' }],
   },
   {
     id: 'settings',
@@ -163,9 +161,11 @@ export function tabsFor(app: AppDef, profileId: string | null): AppTabDef[] {
   return profileId === PARENT_ID && app.adminTabs ? app.adminTabs : app.tabs
 }
 
-/** Apps this profile may open, in the user's saved home-screen order. */
-export function appsFor(profileId: string | null, order: string[] | undefined): AppDef[] {
-  const allowed = APPS.filter((a) => !a.adminOnly || profileId === PARENT_ID)
+/** Apps this profile may open right now, in the user's saved home-screen order. */
+export function appsFor(profileId: string | null, order: string[] | undefined, gates: Gates): AppDef[] {
+  const allowed = APPS.filter(
+    (a) => (!a.adminOnly || profileId === PARENT_ID) && (!a.gate || gates[a.gate]),
+  )
   if (!order?.length) return allowed
   const rank = new Map(order.map((id, i) => [id, i]))
   // apps the saved order never heard of (newly shipped) land at the end, in registry order

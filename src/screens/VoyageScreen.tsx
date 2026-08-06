@@ -1,11 +1,12 @@
-// 🗺️ Voyage — the "how am I doing" app: streak, the island map, the trophy
-// shelf and lifetime numbers. Used to be crammed into the old Me tab.
+// The voyage pages of the 🎡 Wheel app — "how is the daily loop going": streak,
+// the island map, and the record (trophies, training log, lifetime numbers).
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS, streakGoalBonus } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
 import { MapSection } from '../components/MapSection'
+import { HabitsSection } from '../components/HabitsSection'
 import { sfx } from '../audio'
 
 export function VoyageScreen({ tab, goSpin }: { tab: string; goSpin: () => void }) {
@@ -13,8 +14,13 @@ export function VoyageScreen({ tab, goSpin }: { tab: string; goSpin: () => void 
     <div className="screen">
       {tab === 'streak' && <StreakTab />}
       {tab === 'map' && <MapSection goSpin={goSpin} />}
-      {tab === 'trophies' && <TrophiesTab />}
-      {tab === 'stats' && <StatsTab />}
+      {tab === 'record' && (
+        <>
+          <TrophiesTab />
+          <HabitsSection />
+          <StatsTab />
+        </>
+      )}
     </div>
   )
 }

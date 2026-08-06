@@ -17,27 +17,32 @@ Sound, animation and personality are a feature, not a nice-to-have ("grand prize
 
 ## 1b. Navigation — home screen + apps
 
-The app is organised like a phone, not like a tab bar. There is no global tab bar any more.
+The app is organised like a phone, not like a tab bar. There is **no global tab bar and no always-on stat bar** — the numbers that used to sit at the top of every screen are widgets on the Dashboard, which buys back the vertical space.
 
-- **Dashboard (home screen)** — the landing screen after the PIN. It shows a greeting, a row of **widgets**, and a grid of **app icons**.
-  - **Widgets** (2-up on phones, 4-up on wide screens): **📋 Today** (quests on the plate + done today) · **🔥 Streak** (current, best, last 7 days) · **🏦 Treasure** (bank total + Berries; the parent's widget watches Ben's chests) · **📖 Log Book** (stickers owned / total). Each widget is a shortcut into its app.
-  - **App icons** are **drag-and-drop reorderable**: press and hold an icon until the grid jiggles, then drag it to a new slot; the order is saved to `settings.homeOrder` (per profile, synced). Newly shipped apps append at the end. "Reset icon layout" lives in Settings → About.
+- **Dashboard (home screen)** — the landing screen after the PIN: a greeting, six **widgets**, then the app icons.
+  - **Widgets** (2-up on phones, 3-up on wide screens), each a shortcut into its app:
+    **📋 Today** (quests on the plate · done today) · **🔥 Streak** (current, best, freezes, last 7 days) ·
+    **🪙 Berries** (Berries + Devil Fruits) · **🏦 Treasure** (bank total; the parent's watches Ben's chests) ·
+    **📖 Log Book** (stickers owned / total) · **🏫 Academy** (questions due today · topics conquered).
+  - **Reordering icons**: tap **✥ Arrange** (or press and hold any icon for ~0.3s) to enter edit mode — the grid jiggles and a plain drag moves an icon into a new slot; tap **✓ Done** to leave. The order is saved to `settings.homeOrder` (per profile, synced). Newly shipped apps append at the end; "Reset icon layout" lives in Settings → About.
   - Icons carry an iOS-style **red badge** when something needs attention (incoming sticker trades, freeze asks + unpaid prizes on the Captain app, unacknowledged paybacks on the Bank).
-- **Inside an app**: the sticky chrome at the top always shows the currency stats **and a `⌂ Main` button back to the home screen**. Each app has **its own bottom menu** of 2–4 pages. An app with a single page shows no menu.
-- **The roster** ([src/apps/registry.ts](src/apps/registry.ts)) is the single source of truth — one entry per app (name, artwork, tile colours, bottom-menu tabs, `adminOnly`), plus one branch in `AppBodyRouter` ([src/App.tsx](src/App.tsx)). Adding an app touches nothing else.
+- **Inside an app**: one sticky header row holds the **`⌂ Main` button**, the app name, and the **🪙 Berry counter** (it lives here because earned coins fly to it — `logic/fx.ts` targets `.stat--gem`). Below that, each app has **its own bottom menu**. An app with a single page shows no menu.
+- **The roster** ([src/apps/registry.ts](src/apps/registry.ts)) is the single source of truth — one entry per app (name, artwork, tile colours, bottom-menu tabs, `adminOnly`, `gate`), plus one branch in `AppBodyRouter` ([src/App.tsx](src/App.tsx)). Adding an app touches nothing else.
 
 | App | Bottom menu |
 |---|---|
-| 🎡 **Wheel** | Spin · Quests (the quest log) · Habits |
+| 🎡 **Wheel** | Spin · Quests · Streak · Map · Record |
 | 🏫 **Academy** | Topics · Study · Progress |
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🪙 **Store** | Wallpapers · Treasures · Orders |
 | 📖 **Log Book** | Album · Packs · Trade |
-| 🗺️ **Voyage** | Streak · Map · Trophies · Stats |
 | 💡 **Ideas** | Open · Done · New |
-| 🧭 **Log Pose** | Clocks · Crew |
+| 🧭 **Log Pose** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
 | 🛠️ **Captain** (Diogo only) | Freezes · Academies · Prizes · Audit |
+
+- **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
+- **Situational apps.** An app may declare a `gate` and then only appears on the home screen while that gate is open. **Log Pose** (crew time-zone clocks) is gated on `converter` — it shows up only while **trip mode / the Brazil money converter** is switched on for Ben's bank (§8b), and disappears again when the trip is over.
 
 App tile artwork is generated from art already in `public/` (see CLAUDE.md's image rules) into 128px webp files named `public/app-*.webp`. Apps without artwork fall back to their emoji on a coloured squircle.
 
@@ -122,7 +127,7 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 - **Streak goal**: user picks a goal (7 / 14 / 30 / 50 / 100). Reaching it pays **goal × 10 🪙** and a celebration. A **goal check-in modal** resurfaces the goal (with the bonus per option) every ~7 days, so it's no longer buried in the profile.
 - **Streak repair**: if days were skipped and the streak died (no freezes left), the next app open shows a standing **repair offer**: revive the dead streak for **15 🪙 per lost day** (min 30, max 450). Repairing freezes the missed days; declining ("let it sink") clears the offer and the streak restarts from 0.
 - **Free freeze from Dad**: real life (trips, illness) shouldn't cost a streak, so Ben can ask Diogo to cover a day instead of paying the repair cost.
-  - Ben taps **🆘 Ask Dad for a free freeze** — on the streak-death modal, and on the freeze card in Voyage → Streak (available any time, not just after a death) — with an optional one-line reason. One open ask at a time; he can cancel it.
+  - Ben taps **🆘 Ask Dad for a free freeze** — on the streak-death modal, and on the freeze card in Wheel → Streak (available any time, not just after a death) — with an optional one-line reason. One open ask at a time; he can cancel it.
   - Diogo gets a **topbar banner + phone notification** ("Ben needs a Streak Freeze!", showing the reason) and answers from the **Admin desk** (`FreezeDesk` in `src/components/AdminSection.tsx`): pick how many freezes (1–9) and write a **custom message**. He can also gift unprompted, with no ask pending.
   - Granting adds the freezes to Ben's stock — **deliberately bypassing the `MAX_FREEZES` shop cap**, since Dad is overriding it — and, if his streak is currently dead, **revives it and freezes the missed days for free** (same effect as `repairStreak`, no Berries charged).
   - Ben's next app open shows a Chopper celebration: *"Dad sent you a free Streak Freeze!"* + Dad's message verbatim + the revived streak value. Shown once (`seenAt`), and it takes priority over the repair offer.
@@ -131,7 +136,7 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 
 ## 7. Map ("path of shame and glory")
 
-- Lives in the **Voyage** app, on its **🗺️ Map** page.
+- Lives in the **Wheel** app, on its **🗺️ Map** page.
 - Duolingo-style vertical snaking path of **completed tasks**, newest at the top, grouped by day.
 - Each node: circle with a checkmark, colored by effort (low = blue, medium = yellow, high = red), task name next to it.
 - Urgent tasks get a special indicator (⚡ + glowing ring).
@@ -143,7 +148,7 @@ Calibration intent: a freeze ≈ 8–12 typical completions. Not too easy, not t
 - Per-habit milestones (repeating tasks only): 10, 30, 50, 100 completions (e.g. "10 reading days").
 - Total completions: 10, 50, 100, 250.
 - Badges are surfaced with a celebration modal + kept in a trophy shelf.
-- The trophy shelf lives in **Voyage → 🏅 Trophies**.
+- The trophy shelf lives in **Wheel → 🏅 Record**, above the training log and the lifetime stats.
 
 ## 8b. Grand Line Bank (the 🏦 Bank app) — real CAD dollars
 

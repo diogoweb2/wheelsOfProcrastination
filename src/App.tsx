@@ -8,7 +8,6 @@ import { RequiredDeadline } from './components/RequiredDeadline'
 import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { FinalTest } from './components/FinalTest'
 import { AppHeader, AppTabBar } from './components/AppShell'
-import { HabitsSection } from './components/HabitsSection'
 import { AdminSection } from './components/AdminSection'
 import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
@@ -24,35 +23,10 @@ import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
-import { DevilFruit } from './components/DevilFruit'
-import { Beli } from './components/Beli'
-import { fmt$, totalTreasure } from './logic/bank'
 import { sfx } from './audio'
 
 /** Which app is open, and which of its bottom-menu tabs. `null` = home screen. */
 type OpenApp = { app: string; tab: string } | null
-
-/** Renders a number that visibly counts up/down to its new value (topbar currencies). */
-function AnimatedNum({ value }: { value: number }) {
-  const [shown, setShown] = useState(value)
-  const prev = useRef(value)
-  useEffect(() => {
-    const from = prev.current
-    prev.current = value
-    if (from === value) return
-    const start = performance.now()
-    const dur = 700
-    let raf = 0
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / dur)
-      setShown(Math.round(from + (value - from) * p))
-      if (p < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [value])
-  return <>{shown}</>
-}
 
 export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
@@ -188,8 +162,6 @@ export default function App() {
 
   if (!unlocked) return <PinLock />
 
-  const streakAlive = data.streak.current > 0
-
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
 
@@ -243,38 +215,14 @@ export default function App() {
         </div>
       )}
 
-      {/* stats + (inside an app) the always-there way back to the home screen */}
-      <div className="chrome">
-        <header className="topbar">
-          <div className={`stat stat--flame ${streakAlive ? '' : 'dead'}`} title="streak">
-            🔥 <span className="num">{data.streak.current}</span>
-          </div>
-          <div className="stat stat--ice" title="streak freezes">
-            🧊 <span className="num">{data.economy.freezes}</span>
-          </div>
-          {/* Ben's own bank money — chests he can cash out, never Dad's RESP.
-              This is the ONE stat that stays Ben's on the parent's topbar, so the
-              parent view tags it with ⚔️ to make clear it isn't his own money. */}
-          {(activeProfileId === KID_ID || kidData) && (
-            <div className="stat stat--beli" title={activeProfileId === KID_ID ? 'Your money (your chests — not Dad’s RESP)' : "Ben's money (his chests — not Dad's RESP)"}>
-              {activeProfileId !== KID_ID && <span className="stat-owner" aria-hidden>⚔️</span>}
-              <Beli size={18} />{' '}
-              <span className="num">
-                {fmt$(totalTreasure(activeProfileId === KID_ID ? data.bank : kidData!.bank))}
-              </span>
-            </div>
-          )}
-          {/* Devil Fruits: always the logged-in crewmate's OWN — everyone earns them from their own quizzes */}
-          <div className="stat stat--fruit" title="Your Devil Fruits (3 = gift card)">
-            <DevilFruit size={18} /> <span className="num"><AnimatedNum value={data.economy.devilFruits} /></span>
-          </div>
-          <div className="stat stat--gem" title="Berries">
-            🪙 <span className="num"><AnimatedNum value={data.economy.gems} /></span>
-          </div>
-        </header>
-
-        {openDef && <AppHeader app={openDef} onHome={() => setOpen(null)} />}
-      </div>
+      {/* Inside an app: the always-there way back to the home screen. The currency
+          stats used to live up here on every screen; they're widgets on the
+          Dashboard now, which buys back the vertical space. */}
+      {openDef && (
+        <div className="chrome">
+          <AppHeader app={openDef} onHome={() => setOpen(null)} />
+        </div>
+      )}
 
       {activeProfileId === PARENT_ID && market?.status === 'failed' && (
         <div className="banner" style={{ background: 'var(--red)' }}>
@@ -412,7 +360,10 @@ function AppBodyRouter({
   switch (open.app) {
     case 'wheel':
       if (open.tab === 'quests') return <TasksScreen goSpin={goSpin} />
-      if (open.tab === 'habits') return <div className="screen"><HabitsSection /></div>
+      // streak/map/record are the voyage pages — same daily loop, same app
+      if (open.tab === 'streak' || open.tab === 'map' || open.tab === 'record') {
+        return <VoyageScreen tab={open.tab} goSpin={goSpin} />
+      }
       return <SpinScreen goTrain={goTrain} />
     case 'academy':
       return <QuizScreen tab={open.tab} trainTopicId={trainTopic} onTrainOpened={onTrainOpened} />
@@ -422,12 +373,10 @@ function AppBodyRouter({
       return <StoreScreen tab={open.tab} />
     case 'album':
       return <AlbumScreen tab={open.tab} />
-    case 'voyage':
-      return <VoyageScreen tab={open.tab} goSpin={goSpin} />
     case 'ideas':
       return <IdeasScreen tab={open.tab} onDone={() => setTab('open')} />
     case 'logpose':
-      return <LogPoseScreen tab={open.tab} />
+      return <LogPoseScreen />
     case 'settings':
       return <SettingsScreen tab={open.tab} />
     case 'admin':
