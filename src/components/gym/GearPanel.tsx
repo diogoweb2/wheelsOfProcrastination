@@ -11,7 +11,7 @@ import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince } from '..
 import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { shrinkPhoto, type ShrunkPhoto } from '../../logic/photo'
-import { identifyEquipment, visionReady, type SuggestedExercise } from '../../logic/gymVision'
+import { identifyEquipment, visionReady } from '../../logic/gymVision'
 import { uploadGymImage } from '../../store/cloud'
 
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
@@ -98,8 +98,8 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
       {adding ? (
         <EquipmentForm
           onCancel={() => setAdding(false)}
-          onSave={(eq, exercises) => {
-            save((c) => ({ ...c, equipment: [...c.equipment, eq], exercises: [...c.exercises, ...exercises] }))
+          onSave={(eq) => {
+            save((c) => ({ ...c, equipment: [...c.equipment, eq] }))
             setAdding(false)
           }}
         />
@@ -137,23 +137,25 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
  * Add one piece of gear — by photographing it, or by typing it in.
  *
  * The camera is the fast path and it is the in-app twin of
- * `npm run gym:equipment`: shoot it, the model names it, describes it and
- * proposes the exercises it enables, and you tick the ones you want. Nothing is
- * written until Save, and every field stays editable, because a vision model
- * looking at a dim basement will sometimes be wrong.
+ * `npm run gym:equipment`: shoot it and the model names and describes it.
+ * Equipment only — no exercises. What one machine makes possible depends on
+ * everything else in the room (a bench with plates is not the same bench), so
+ * that job belongs to `npm run gym:exercises`, which sees the whole catalog.
+ * Nothing is written until Save, and every field stays editable, because a
+ * vision model looking at a dim basement will sometimes be wrong.
  *
  * Without an OpenRouter key the camera still works — you just get the photo as
  * the item's thumbnail and fill the fields in yourself.
  */
-function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises: ExerciseDef[]) => void; onCancel: () => void }) {
-  const { aiConfig, data } = useStore()
+function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment) => void; onCancel: () => void }) {
+  const { aiConfig } = useStore()
   const [name, setName] = useState('')
   const [emoji, setEmoji] = useState('🏋️')
   const [notes, setNotes] = useState('')
   const [photo, setPhoto] = useState<ShrunkPhoto | null>(null)
+  const [identified, setIdentified] = useState(false)
   const [busy, setBusy] = useState<'shrinking' | 'looking' | 'saving' | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [suggested, setSuggested] = useState<SuggestedExercise[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
   // the id is minted up front so the photo can be stored under it before saving
   const idRef = useRef(`eq-${crypto.randomUUID().slice(0, 8)}`)
@@ -169,15 +171,12 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises:
       setPhoto(shrunk)
       if (!canIdentify) return
       setBusy('looking')
-      const found = await identifyEquipment(aiConfig, shrunk.visionDataUrl, notes, {
-        kidMode: !!data.gym.brief.kidMode,
-        avoidBackLoad: !!data.gym.brief.avoidBackLoad,
-      })
+      const found = await identifyEquipment(aiConfig, shrunk.visionDataUrl, notes)
+      setIdentified(true)
       // never clobber something you already typed
       setName((n) => n.trim() || found.name)
       setEmoji(found.emoji)
       setNotes((n) => n.trim() || found.notes)
-      setSuggested(found.exercises)
       sfx.gem()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -200,20 +199,11 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises:
         emoji: emoji || '🏋️',
         notes: notes.trim() || undefined,
         img,
-        addedBy: suggested.length > 0 ? 'ai' : 'manual',
+        addedBy: identified ? 'ai' : 'manual',
         createdAt: now,
       }
-      const exercises: ExerciseDef[] = suggested
-        .filter((s) => s.keep)
-        .map(({ keep: _keep, ...def }) => ({
-          ...def,
-          id: `mv-${crypto.randomUUID().slice(0, 8)}`,
-          equipmentIds: [id],
-          addedBy: 'ai' as const,
-          createdAt: now,
-        }))
       sfx.gem()
-      onSave(equipment, exercises)
+      onSave(equipment)
     } catch (e) {
       // an upload failure must not lose what you typed
       setError(e instanceof Error ? e.message : String(e))
@@ -250,7 +240,7 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises:
           </button>
           <span className="muted" style={{ display: 'block', fontSize: 11, marginTop: 5, lineHeight: 1.35 }}>
             {canIdentify
-              ? 'It gets named, described and turned into exercises — you approve everything below.'
+              ? 'It gets named and described. Exercises come later, from the whole room at once.'
               : 'Saved as this item’s picture. Add an OpenRouter key in Coach to have it identified too.'}
           </span>
         </div>
@@ -295,34 +285,6 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment, exercises:
           What the photo can’t show. Write it before shooting and the model is told to trust it over the picture.
         </span>
       </div>
-
-      {suggested.length > 0 && (
-        <div className="field">
-          <label>Exercises this unlocks — {suggested.filter((s) => s.keep).length} of {suggested.length}</label>
-          <div className="gym-suggest">
-            {suggested.map((s, i) => (
-              <button
-                key={s.name + i}
-                className={`gym-suggest-row ${s.keep ? 'on' : ''}`}
-                onClick={() => {
-                  sfx.click()
-                  setSuggested((list) => list.map((x, j) => (j === i ? { ...x, keep: !x.keep } : x)))
-                }}
-              >
-                <span className={`gym-toggle-box ${s.keep ? 'on' : ''}`}>{s.keep ? '✓' : ''}</span>
-                <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                  <span style={{ display: 'block', fontWeight: 800, fontSize: 13 }}>{s.emoji} {s.name}</span>
-                  <span className="muted" style={{ display: 'block', fontSize: 10 }}>
-                    {s.parts.map((p) => PART_LABEL[p]).join(' · ')} · {s.defaultSets}×{s.defaultReps}
-                    {s.backRisk ? ' · ⚠️ loads the back' : ''}
-                    {!s.kidSafe ? ' · not for Ben' : ''}
-                  </span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button className="btn btn--ghost btn--small" style={{ flex: 1 }} disabled={working} onClick={onCancel}>
