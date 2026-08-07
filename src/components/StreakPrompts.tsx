@@ -24,6 +24,7 @@ export function StreakPrompts() {
     askForFreeze,
     freezeGifts,
     markFreezeGiftSeen,
+    markFreezeRequestSeen,
   } = useStore()
   const [askOpen, setAskOpen] = useState(false)
   const [reason, setReason] = useState('')
@@ -38,9 +39,15 @@ export function StreakPrompts() {
   // a gift Dad sent that this session hasn't celebrated yet — takes priority
   // over the repair offer, since the gift is what resolves the dead streak
   const gift = freezeGifts.find((g) => g.toId === activeProfileId && !g.seenAt)
+  // Dad turned the ask down — the streak is really gone now; tell him once.
+  const declined = freezeRequests.find(
+    (r) => r.status === 'declined' && r.fromId === activeProfileId && !r.seenAt,
+  )
   const showGift = dataLoaded && !!activeProfileId && !!gift
-  const showRepair = dataLoaded && !!activeProfileId && !!dead && !showGift
-  const showGoal = dataLoaded && !!activeProfileId && !dead && events.length === 0 && goalDue
+  const showDeclined = dataLoaded && !!activeProfileId && !!declined && !showGift
+  // while the ask is pending the streak is on hold: no modal, he keeps playing
+  const showRepair = dataLoaded && !!activeProfileId && !!dead && !showGift && !showDeclined && !asked
+  const showGoal = dataLoaded && !!activeProfileId && !dead && !showDeclined && events.length === 0 && goalDue
 
   useEffect(() => {
     if (showRepair) sfx.sad()
@@ -49,6 +56,34 @@ export function StreakPrompts() {
   useEffect(() => {
     if (showGift) sfx.fanfare()
   }, [showGift])
+
+  useEffect(() => {
+    if (showDeclined) sfx.sad()
+  }, [showDeclined])
+
+  if (showDeclined && declined) {
+    return (
+      <div className="overlay overlay--center">
+        <div className="sheet" style={{ textAlign: 'center' }}>
+          <Luffy mood="shocked" size={120} />
+          <div style={{ fontSize: 44, margin: '6px 0' }}>🪦</div>
+          <div className="h1">Dad said no this time</div>
+          <p className="muted" style={{ margin: '8px 0 14px' }}>
+            Your streak is back to <b>0</b>. New voyage starts today — do one quest and it’s 1 again. 🌅
+          </p>
+          <button
+            className="btn"
+            onClick={() => {
+              sfx.click()
+              markFreezeRequestSeen(declined.id)
+            }}
+          >
+            Alright — new voyage 👒
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (showGift && gift) {
     return (
@@ -116,11 +151,7 @@ export function StreakPrompts() {
               You have 🪙{data.economy.gems} — not enough this time.
             </p>
           )}
-          {canAsk && (asked ? (
-            <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
-              📨 Dad got your message — hang tight, he might send Chopper over!
-            </p>
-          ) : askOpen ? (
+          {canAsk && (askOpen ? (
             <div className="field" style={{ marginTop: 10, textAlign: 'left' }}>
               <label>Tell Dad what happened (optional)</label>
               <input
@@ -143,6 +174,9 @@ export function StreakPrompts() {
               >
                 📨 Send it to Dad
               </button>
+              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                Your 🔥{dead.value}-day streak stays put while Dad thinks about it — keep sailing meanwhile!
+              </p>
             </div>
           ) : (
             <button

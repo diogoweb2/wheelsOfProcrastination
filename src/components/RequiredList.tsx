@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore'
 import type { Task } from '../types'
 import { sfx } from '../audio'
 import { dayKey, daysUntil } from '../logic/dates'
-import { isStudyTask, requiredToday } from '../logic/wheel'
+import { dormantReason, dormantRequired, isStudyTask, requiredToday } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
 
@@ -12,10 +12,12 @@ import { REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
  * no ceremony, no wheel. Dated requirements shout louder as their last day nears.
  */
 export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void } = {}) {
-  const { data, completeRequired, completedTodayIds } = useStore()
+  const { data, completeRequired, completedTodayIds, setDoToday } = useStore()
   const today = dayKey()
   const doneIds = completedTodayIds()
   const items = useMemo(() => requiredToday(data.tasks, today, data.completions), [data.tasks, today, data.completions])
+  const dormant = useMemo(() => dormantRequired(data.tasks, today, data.completions), [data.tasks, today, data.completions])
+  const [picking, setPicking] = useState(false)
   // Done items leave the list, but only after a little exit ceremony: the row
   // flips green, shows its berries, then slides away. `leaving` keeps it
   // rendered for exactly that long.
@@ -37,6 +39,32 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
     }, 1300)
   }
 
+  function pullIn(id: string) {
+    sfx.click()
+    setDoToday(id, true)
+    setPicking(false)
+  }
+
+  // "Do it today anyway" — pulls a resting/out-of-window must-do onto the list.
+  const extras =
+    dormant.length === 0 ? null : (
+      <div className="required-extra">
+        <button className="required-extra-open" onClick={() => { sfx.click(); setPicking((p) => !p) }}>
+          {picking ? '✕ Never mind' : `＋ Do one of the other ${dormant.length} today`}
+        </button>
+        {picking && (
+          <div className="required-extra-list">
+            {dormant.map((t) => (
+              <button key={t.id} className="required-extra-row" onClick={() => pullIn(t.id)}>
+                <span className="required-name">{t.name}</span>
+                <span className="muted">{dormantReason(t, today, data.completions)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+
   if (items.length === 0) {
     return (
       <div className="required-panel">
@@ -46,6 +74,7 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
         <p className="muted" style={{ fontSize: 12, padding: '10px 2px' }}>
           Nothing required today. Mark a task “required” in the quest log to pin it here.
         </p>
+        {extras}
       </div>
     )
   }
@@ -79,6 +108,14 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
                   }
                 : undefined
             }
+            onRemove={
+              t.doTodayDay === today
+                ? () => {
+                    sfx.click()
+                    setDoToday(t.id, false)
+                  }
+                : undefined
+            }
           />
         ))}
       </div>
@@ -86,6 +123,7 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
       {remaining === 0 && (
         <div className="required-clear">🎉 All must-dos cleared!</div>
       )}
+      {extras}
     </div>
   )
 }
@@ -97,8 +135,9 @@ function RequiredRow(props: {
   today: string
   onToggle: () => void
   onTrain?: () => void
+  onRemove?: () => void
 }) {
-  const { task, done, leaving, today, onToggle, onTrain } = props
+  const { task, done, leaving, today, onToggle, onTrain, onRemove } = props
   const left = task.requiredUntil ? daysUntil(task.requiredUntil, today) : null
   const warning = left !== null && left <= REQUIRED_WARN_DAYS
 
@@ -130,13 +169,20 @@ function RequiredRow(props: {
     </button>
   )
 
-  if (!onTrain || done) return row
+  if (done || (!onTrain && !onRemove)) return row
   return (
     <div className="required-row-wrap">
       {row}
-      <button className="required-train" onClick={onTrain} aria-label="Start training">
-        🏫
-      </button>
+      {onTrain && (
+        <button className="required-train" onClick={onTrain} aria-label="Start training">
+          🏫
+        </button>
+      )}
+      {onRemove && (
+        <button className="required-train" onClick={onRemove} aria-label="Take back off today's list">
+          ↩
+        </button>
+      )}
     </div>
   )
 }

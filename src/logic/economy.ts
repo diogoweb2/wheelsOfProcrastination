@@ -65,5 +65,20 @@ export function streakRepairCost(deadDays: number): number {
   return Math.min(Math.max(deadDays * 15, 30), 450)
 }
 
+/**
+ * A dead streak that is *on hold*: the kid asked Dad for a free freeze and Dad
+ * hasn't answered yet. The app keeps showing the old number (and lets him carry
+ * on playing) until the answer lands — granted revives it, declined zeroes it.
+ */
+export function heldStreak(
+  deadStreak: { value: number; day: string } | null | undefined,
+  freezeRequests: { status: string; fromId: string }[],
+  profileId: string | null,
+): number | null {
+  if (!deadStreak || !profileId) return null
+  const pending = freezeRequests.some((r) => r.status === 'pending' && r.fromId === profileId)
+  return pending ? deadStreak.value : null
+}
+
 /** Days between goal-nudge prompts ("check your streak goal" modal). */
 export const GOAL_PROMPT_EVERY_DAYS = 7

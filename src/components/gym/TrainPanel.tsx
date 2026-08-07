@@ -128,7 +128,7 @@ function Setup() {
 // --- preview ----------------------------------------------------------------
 
 function Preview({ session }: { session: GymSession }) {
-  const { gymStart, gymSwap, gymDrop, gymDiscard, gymPlan, gymPlanning, gymFellBack, data } = useStore()
+  const { gymStart, gymSwap, gymDrop, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, gymFellBack, data } = useStore()
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -206,6 +206,20 @@ function Preview({ session }: { session: GymSession }) {
               ✕
             </button>
           </div>
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ marginTop: 8, width: '100%' }}
+            onClick={() => {
+              // "✕" only drops it from today. This removes it from the shared
+              // catalog, so no planner — AI or offline — can ever offer it again.
+              if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
+                return
+              sfx.click()
+              gymDeleteExercise(e.exId)
+            }}
+          >
+            🗑 Never show this exercise again
+          </button>
         </div>
       ))}
 

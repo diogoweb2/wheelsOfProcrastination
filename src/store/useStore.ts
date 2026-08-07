@@ -10,6 +10,7 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  ExerciseDef,
   ExerciseRating,
   FinalTestAuth,
   FreezeGift,
@@ -89,6 +90,7 @@ import { setMuted } from '../audio'
 import { enablePush } from '../push'
 import {
   GYM_LOG_CAP,
+  STARTER_EXERCISES,
   bumpStreak,
   coinsForExercise,
   defaultLadder,
@@ -253,6 +255,8 @@ interface StoreState {
   completedTodayIds: () => Set<string>
   /** Tick a required checklist item off for today (pays the reduced flat reward). */
   completeRequired: (taskId: string) => number
+  /** Pull a dormant must-do onto today's checklist (or take it back off again). */
+  setDoToday: (taskId: string, on: boolean) => void
   /** Last-day escape hatch: push a requirement's deadline out by `days`. */
   postponeRequired: (taskId: string, days: number) => void
   /** Last-day escape hatch: stop requiring this task forever (it stays as a normal quest). */
@@ -352,6 +356,8 @@ interface StoreState {
   declineFreezeRequest: (requestId: string) => void
   /** Kid: mark a gift's celebration as shown so it only fires once. */
   markFreezeGiftSeen: (giftId: string) => void
+  /** Kid: mark a declined ask as read so the "Dad said no" modal only fires once. */
+  markFreezeRequestSeen: (requestId: string) => void
 
   /** Register this device for web push so a CLOSED app still gets pinged. Returns an error message, or null on success. */
   registerPushDevice: () => Promise<string | null>
@@ -379,6 +385,8 @@ interface StoreState {
   gymSwap: (exId: string, reason?: string) => Promise<'ok' | 'none'>
   /** Drop an exercise from the preview outright. */
   gymDrop: (exId: string) => void
+  /** Kill an exercise for good: out of the shared catalog and never planned again. */
+  gymDeleteExercise: (exId: string) => void
   /** Throw away the previewed session. */
   gymDiscard: () => void
   /** GO — the preview becomes a live workout. */
@@ -751,6 +759,8 @@ export const useStore = create<StoreState>((set, get) => {
         while (cur < today) {
           // Every requirement that was live that day and never ticked off costs Berries.
           for (const t of d.tasks) {
+            // a day the user volunteered for is never a miss — it was a bonus, not a duty
+            if (t.doTodayDay === cur) continue
             if (!isRequiredOn(t, cur, d.completions, d.tasks) || donePerDay.has(`${cur}|${t.id}`)) continue
             missedRequired += requiredPenalty(t)
             if (!missedNames.includes(t.name)) missedNames.push(t.name)
@@ -935,6 +945,16 @@ export const useStore = create<StoreState>((set, get) => {
         checkBadges(d, events)
       })
       return earned
+    },
+
+    setDoToday(taskId, on) {
+      commit((d) => {
+        const t = d.tasks.find((x) => x.id === taskId)
+        if (!t) return
+        // Firestore rejects undefined, so clearing means deleting the key.
+        if (on) t.doTodayDay = dayKey()
+        else delete (t as unknown as Record<string, unknown>).doTodayDay
+      })
     },
 
     postponeRequired(taskId, days) {
@@ -1645,10 +1665,26 @@ export const useStore = create<StoreState>((set, get) => {
 
     declineFreezeRequest(requestId) {
       const { freezeRequests, freezeGifts } = get()
+      const req = freezeRequests.find((r) => r.id === requestId)
+      // the ask was holding the streak alive — saying no is what finally zeroes it
+      if (req?.fromId === KID_ID) {
+        commitFor(KID_ID, (d) => {
+          d.streak.deadStreak = null
+          d.streak.current = 0
+        })
+      }
       saveFreezeDeskList(
         freezeRequests.map((r) =>
           r.id === requestId ? { ...r, status: 'declined' as const, resolvedAt: new Date().toISOString() } : r,
         ),
+        freezeGifts,
+      )
+    },
+
+    markFreezeRequestSeen(requestId) {
+      const { freezeRequests, freezeGifts } = get()
+      saveFreezeDeskList(
+        freezeRequests.map((r) => (r.id === requestId ? { ...r, seenAt: new Date().toISOString() } : r)),
         freezeGifts,
       )
     },
@@ -1874,6 +1910,25 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         if (!d.gym.active) return
         d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
+      })
+    },
+
+    gymDeleteExercise(exId) {
+      // Gone for good, for the whole crew. A starter exercise lives in the code
+      // and can't be filtered out of the catalog, so it is stored back as a
+      // retired override — same effect everywhere: the planner never offers it.
+      const c: GymCatalog = get().gymCatalog ?? { equipment: [], exercises: [] }
+      const isStarter = STARTER_EXERCISES.some((s) => s.id === exId)
+      const def = exerciseById(c, exId)
+      let exercises: ExerciseDef[]
+      if (!isStarter) exercises = c.exercises.filter((x) => x.id !== exId)
+      else if (c.exercises.some((x) => x.id === exId))
+        exercises = c.exercises.map((x) => (x.id === exId ? { ...x, retired: true } : x))
+      else if (def) exercises = [...c.exercises, { ...def, retired: true }]
+      else exercises = c.exercises
+      get().gymSaveCatalog({ ...c, exercises })
+      commit((d) => {
+        if (d.gym.active) d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
       })
     },
 

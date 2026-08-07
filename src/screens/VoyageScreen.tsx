@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS, streakGoalBonus } from '../logic/economy'
+import { FREEZE_COST, MAX_FREEZES, STREAK_GOAL_OPTIONS, heldStreak, streakGoalBonus } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
 import { MapSection } from '../components/MapSection'
 import { HabitsSection } from '../components/HabitsSection'
@@ -33,7 +33,10 @@ function StreakTab() {
   const [freezeReason, setFreezeReason] = useState('')
   const askedFreeze = freezeRequests.some((r) => r.status === 'pending' && r.fromId === activeProfileId)
   const me = activeProfile()
-  const streakAlive = data.streak.current > 0
+  // a dead streak waiting on Dad's answer still reads as alive
+  const held = heldStreak(data.streak.deadStreak, freezeRequests, activeProfileId)
+  const streakShown = held ?? data.streak.current
+  const streakAlive = streakShown > 0
 
   const today = dayKey()
   const week = Array.from({ length: 7 }, (_, i) => {
@@ -63,13 +66,18 @@ function StreakTab() {
   return (
     <>
       <div className="card" style={{ textAlign: 'center', marginBottom: 14 }}>
-        <div style={{ fontSize: 56, lineHeight: 1 }}>{streakAlive ? '🔥' : '🪦'}</div>
+        <div style={{ fontSize: 56, lineHeight: 1 }}>{held !== null ? '🔥⏳' : streakAlive ? '🔥' : '🪦'}</div>
         <div style={{ fontSize: 44, fontWeight: 900, color: streakAlive ? 'var(--orange)' : 'var(--muted)' }}>
-          {data.streak.current}
+          {streakShown}
         </div>
         <div className="muted" style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
           day streak · best {data.streak.best}
         </div>
+        {held !== null && (
+          <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+            On hold until Dad answers your ask 📨
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 14 }}>
           {week.map((d) => (

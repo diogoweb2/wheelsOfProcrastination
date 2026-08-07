@@ -12,6 +12,7 @@ import { albumProgress } from '../logic/album'
 import { converterActive, fmt$, totalTreasure } from '../logic/bank'
 import { activeQuestions, duePool, topicsFor } from '../logic/quiz'
 import { isAvailableOn } from '../logic/wheel'
+import { heldStreak } from '../logic/economy'
 import { addDays, dayKey } from '../logic/dates'
 import { Beli } from '../components/Beli'
 import { DevilFruit } from '../components/DevilFruit'
@@ -96,7 +97,10 @@ function AnimatedNum({ value }: { value: number }) {
 // --- widgets ---------------------------------------------------------------
 
 function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }) {
-  const { data, activeProfileId, kidData, quizBank, completedTodayIds } = useStore()
+  const { data, activeProfileId, kidData, quizBank, completedTodayIds, freezeRequests } = useStore()
+  // a dead streak waiting on Dad's answer still reads as alive
+  const held = heldStreak(data.streak.deadStreak, freezeRequests, activeProfileId)
+  const streakShown = held ?? data.streak.current
   const today = dayKey()
 
   const plate = data.daily.pendingPicks
@@ -136,11 +140,15 @@ function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }
       </button>
 
       <button className="widget" onClick={() => { sfx.click(); onOpen('wheel', 'streak') }}>
-        <div className="widget-head">🔥 Streak</div>
-        <div className="widget-big" style={{ color: data.streak.current > 0 ? 'var(--orange)' : 'var(--muted)' }}>
-          {data.streak.current}
+        <div className="widget-head">🔥 Streak{held !== null ? ' ⏳' : ''}</div>
+        <div className="widget-big" style={{ color: streakShown > 0 ? 'var(--orange)' : 'var(--muted)' }}>
+          {streakShown}
         </div>
-        <div className="widget-sub">best {data.streak.best} · 🧊 {data.economy.freezes} freeze{data.economy.freezes === 1 ? '' : 's'}</div>
+        <div className="widget-sub">
+          {held !== null
+            ? 'on hold — waiting for Dad'
+            : `best ${data.streak.best} · 🧊 ${data.economy.freezes} freeze${data.economy.freezes === 1 ? '' : 's'}`}
+        </div>
         <div className="widget-dots">
           {week.map((d) => (
             <span key={d.day} className={`widget-dot${d.done ? ' on' : d.frozen ? ' frozen' : ''}`} />

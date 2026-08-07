@@ -68,6 +68,8 @@ export function isRequiredOn(
   tasks?: Task[],
 ): boolean {
   if (!task.required || task.archived) return false
+  // Volunteered for today by hand: skip the window, the day scope and the cooldown.
+  if (task.doTodayDay === today) return true
   if (task.requiredFrom && today < task.requiredFrom) return false
   if (task.requiredUntil && today > task.requiredUntil) return false
   return isAvailableOn(task, today, completions, tasks)
@@ -83,6 +85,37 @@ export function requiredToday(tasks: Task[], today: string = dayKey(), completio
       const db = b.requiredUntil ?? '9999-12-31'
       return da.localeCompare(db) || a.name.localeCompare(b.name)
     })
+}
+
+/**
+ * Must-dos that exist but aren't being asked for today — resting out a cooldown,
+ * waiting for their window to open, or scoped to other days of the week. These
+ * are the candidates for "do it today anyway". Chained quests whose prerequisite
+ * is still unmet stay hidden: they aren't dormant, they don't exist yet.
+ */
+export function dormantRequired(tasks: Task[], today: string = dayKey(), completions: Completion[] = []): Task[] {
+  return tasks
+    .filter(
+      (t) =>
+        t.required &&
+        !t.archived &&
+        !isRequiredOn(t, today, completions, tasks) &&
+        isUnlockedOn(t, today, completions, tasks) &&
+        !(t.requiredUntil && today > t.requiredUntil), // its deadline has passed — it's over, not dormant
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/** Why a dormant must-do isn't on today's list, in a few words for the picker. */
+export function dormantReason(task: Task, today: string = dayKey(), completions: Completion[] = []): string {
+  const back = cooldownUntil(task, completions, today)
+  if (back && today < back) {
+    const d = daysUntil(back, today)
+    return d === 1 ? 'back tomorrow' : `back in ${d}d`
+  }
+  if (task.requiredFrom && today < task.requiredFrom) return `starts ${task.requiredFrom}`
+  if (task.startDate && today < task.startDate) return `starts ${task.startDate}`
+  return 'not scheduled today'
 }
 
 /** A quiz training quest — one auto-synced habit per unlocked topic. */

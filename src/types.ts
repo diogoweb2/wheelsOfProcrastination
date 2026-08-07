@@ -56,6 +56,15 @@ export interface Task {
    */
   cooldownDays?: number
   /**
+   * "Do it today anyway" (YYYY-MM-DD). A must-do that is dormant today — still
+   * resting out its cooldown, outside its required window, or on the wrong day
+   * of the week — can be pulled onto today's checklist by hand. It only counts
+   * for that one day, and skipping it costs nothing (it was volunteered, not
+   * demanded). Ticking it off restarts the cooldown from today, so a 7-day
+   * chore done 3 days early is next due 7 days from now, not 4.
+   */
+  doTodayDay?: string
+  /**
    * Auto-split quest ("cut the trees" → 6 sessions). Every part of one split
    * shares a `seriesId` and knows its place (`seriesPart` of `seriesTotal`).
    * Parts are chained through `afterTaskId`, so only the next one is ever live.
@@ -460,6 +469,7 @@ export interface FreezeRequest {
   createdAt: string
   resolvedAt?: string
   granted?: number // how many freezes Dad gave (only on 'granted')
+  seenAt?: string // set once the kid's app has shown the answer (only needed for 'declined')
 }
 
 /**

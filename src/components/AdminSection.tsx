@@ -128,14 +128,16 @@ function FreezeDesk() {
             asked {new Date(r.createdAt).toLocaleString()}
           </div>
           <button className="btn btn--ghost btn--small" style={{ marginTop: 6 }} onClick={() => { sfx.click(); declineFreezeRequest(r.id) }}>
-            ✕ Not this time
+            ✕ Not this time {dead ? '(resets his streak to 0)' : ''}
           </button>
         </div>
       ))}
 
       <div className="muted" style={{ fontSize: 12, borderTop: '1px solid var(--line)', paddingTop: 8, marginTop: 4 }}>
         Ben has 🧊{stock} stocked
-        {dead ? ` · his ${dead.value}-day streak is DEAD — granting revives it free` : ' · streak is alive'}
+        {dead
+          ? ` · his ${dead.value}-day streak is ON HOLD while he waits — granting revives it free, declining zeroes it`
+          : ' · streak is alive'}
       </div>
 
       {!showForm ? (

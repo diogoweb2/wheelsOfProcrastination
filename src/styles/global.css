@@ -1914,6 +1914,41 @@ input, select { font-family: inherit; }
   color: var(--green);
 }
 
+/* "Do it today anyway": pull a resting / out-of-window must-do onto the list. */
+.required-extra { margin-top: 8px; }
+.required-extra-open {
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: 10px;
+  border: 2px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 11px;
+}
+.required-extra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  max-height: 30dvh;
+  overflow-y: auto;
+}
+.required-extra-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  font-size: 12px;
+}
+.required-extra-row .muted { font-size: 11px; white-space: nowrap; }
+
 .chip--required { background: var(--green); color: #10230a; }
 
 /* ---------- trip mode: converter | calculator ---------- */
