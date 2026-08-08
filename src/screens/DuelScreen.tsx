@@ -33,6 +33,8 @@ import { duelSfx, sfx } from '../audio'
 
 /** How long the AI "thinks" before playing — long enough to read what it did. */
 const AI_DELAY = 950
+/** Longer, after it revealed a treasure card or a dice roll: that has text to read. */
+const AI_REVEAL_DELAY = 2500
 
 // Which finished boards this device has already shown, and which chests it has
 // already opened. Per-device on purpose: it's about what the person looking at
@@ -119,17 +121,28 @@ function FightTab() {
     }
   }, [incoming?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // --- solo: the AI answers on a timer once it's its turn
+  // --- solo: the AI answers on a timer once it's its turn.
+  //
+  // Keyed on `seq`, NOT on the turn counter: a treasure or a dice roll is a free
+  // move that changes neither whose turn it is nor the turn number, so watching
+  // those left the opponent frozen mid-turn the moment it played one.
   const banked = useRef(false)
   useEffect(() => {
     if (!solo || solo.state.over || solo.state.turn !== 1) return
+    // hold longer after a reveal, so there's time to read the card it played
+    const lastEntry = solo.state.log[solo.state.log.length - 1]
+    const revealed = Boolean(lastEntry?.treasureId) || lastEntry?.diceFace !== undefined
     const t = window.setTimeout(() => {
-      setSolo((cur) => (cur && !cur.state.over && cur.state.turn === 1
-        ? { ...cur, state: applyMove(cur.state, aiMove(cur.state)) }
-        : cur))
-    }, AI_DELAY)
+      setSolo((cur) => {
+        if (!cur || cur.state.over || cur.state.turn !== 1) return cur
+        const next = applyMove(cur.state, aiMove(cur.state))
+        // A move the engine refuses would leave `seq` untouched and strand the
+        // turn here for good; focus is always legal, so it can always continue.
+        return { ...cur, state: next === cur.state ? applyMove(cur.state, { kind: 'focus' }) : next }
+      })
+    }, revealed ? AI_REVEAL_DELAY : AI_DELAY)
     return () => window.clearTimeout(t)
-  }, [solo?.state.turnNo, solo?.state.turn, solo?.state.over]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [solo?.state.seq, solo?.state.over]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!solo?.state.over || banked.current) return
@@ -199,6 +212,7 @@ function FightTab() {
                       ...cur.state,
                       over: true,
                       winnerId: cur.state.sides[1].profileId,
+                      seq: cur.state.seq + 1,
                       log: [...cur.state.log, { by: '', text: `🏳️ You backed out. ${cur.foe.name} takes it.`, final: true }],
                     },
                   }

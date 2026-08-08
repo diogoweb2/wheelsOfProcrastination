@@ -139,7 +139,15 @@ export interface DuelLogEntry {
 export interface DuelState {
   sides: DuelSide[] // exactly 2
   turn: number // index into sides — whose move it is
-  turnNo: number // turns played so far, for the storm and the TURN_LIMIT backstop
+  turnNo: number // ACTIONS played so far, for the storm and the TURN_LIMIT backstop
+  /**
+   * Every move ever played, free ones included. `turnNo` deliberately does not
+   * count treasures and dice rolls, so it is useless as a "did anything happen?"
+   * signal — and anything watching for a change (the arena's animations, the
+   * solo opponent's timer) will sit there forever on a free move. This is that
+   * signal, and it only ever goes up.
+   */
+  seq: number
   log: DuelLogEntry[]
   winnerId: string | null
   over: boolean
@@ -214,6 +222,7 @@ export function startDuel(a: DuelSeed, b: DuelSeed, first = 0): DuelState {
     sides: [freshSide(a), freshSide(b)],
     turn: first,
     turnNo: 0,
+    seq: 0,
     log: [],
     winnerId: null,
     over: false,
@@ -341,7 +350,9 @@ function dealDamage(target: DuelSide, attacker: DuelSide, raw: number): DuelCard
   if (card.hp > 0) return null
   target.cards.shift()
   target.fallen.push(card)
-  attacker.kos += 1
+  // Clamped: a sweep card can down three cards in one go, and the knockout
+  // count is a scoreboard the UI draws KOS_TO_WIN pips for — not a tally.
+  attacker.kos = Math.min(KOS_TO_WIN, attacker.kos + 1)
   return card
 }
 
@@ -372,7 +383,7 @@ export function applyMove(prev: DuelState, move: DuelMove): DuelState {
     resolveFx(state, i, card.fx, entry)
     state.log.push(entry)
     finish(state)
-    return trimLog(state)
+    return commit(state)
   }
 
   if (move.kind === 'dice') {
@@ -388,7 +399,7 @@ export function applyMove(prev: DuelState, move: DuelMove): DuelState {
     resolveFx(state, i, rolled.fx, entry)
     state.log.push(entry)
     finish(state)
-    return trimLog(state)
+    return commit(state)
   }
 
   // --- the turn's one action ------------------------------------------------
@@ -472,11 +483,16 @@ export function applyMove(prev: DuelState, move: DuelMove): DuelState {
       beginTurn(state)
     }
   }
-  return trimLog(state)
+  return commit(state)
 }
 
-/** Only keep what the log panel can show — a full match is otherwise ~60 lines. */
-function trimLog(state: DuelState): DuelState {
+/**
+ * Close out a move: stamp it so watchers can tell something happened, and keep
+ * the log to what the panel can show (a full match is otherwise ~60 lines).
+ * Every path that returns a NEW position goes through here.
+ */
+function commit(state: DuelState): DuelState {
+  state.seq = (state.seq ?? 0) + 1
   if (state.log.length > 12) state.log = state.log.slice(-12)
   return state
 }
@@ -580,7 +596,7 @@ function resolveFx(state: DuelState, sideIndex: number, fx: TreasureFx, entry: D
       if (them.cards[n].hp > 0) continue
       const [gone] = them.cards.splice(n, 1)
       them.fallen.push(gone)
-      me.kos += 1
+      me.kos = Math.min(KOS_TO_WIN, me.kos + 1)
       downed++
       entry.koId = gone.id
     }

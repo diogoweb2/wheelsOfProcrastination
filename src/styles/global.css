@@ -3027,3 +3027,16 @@ input, select { font-family: inherit; }
     animation: none !important;
   }
 }
+
+/* An opponent's reveal is the only chance to see what was just done to you, so
+   it holds the screen harder than your own: darker backdrop, and it enters from
+   their side of the board. */
+.tpop { animation-duration: 2.4s; }
+.tpop.is-theirs { background: rgb(6 18 30 / 78%); }
+.tpop.is-theirs .tpop-card { animation-name: tpop-pounce-down; }
+@keyframes tpop-pounce-down {
+  0% { transform: translateY(-60px) scale(0.4) rotate(8deg); }
+  60% { transform: scale(1.08) rotate(-2deg); }
+  100% { transform: none; }
+}
+.tpop-who { color: var(--rr); }

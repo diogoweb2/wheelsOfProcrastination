@@ -24,8 +24,8 @@ import { duelSfx, sfx } from '../audio'
 
 /** How long a blow is animated for. The action bar is locked for exactly this long. */
 const FX_MS = 1100
-/** A treasure reveal holds longer — there's text to read on it. */
-const TREASURE_FX_MS = 1700
+/** A treasure reveal holds much longer — there's a name and a rules line to read. */
+const TREASURE_FX_MS = 2400
 
 interface Fx extends DuelLogEntry {
   /** Which side (index) threw it — drives which card lunges and which one flinches. */
@@ -42,18 +42,18 @@ interface Fx extends DuelLogEntry {
  */
 function useDuelFx(state: DuelState): Fx | null {
   const [fx, setFx] = useState<Fx | null>(null)
-  const seen = useRef<string>('')
+  // Seeded with the position we mounted at, so the very first move of a match
+  // still animates while opening a match already in progress doesn't replay the
+  // last blow that happened without us.
+  const seen = useRef(state.seq ?? 0)
 
+  const seq = state.seq ?? 0
   const log = state.log.filter((e) => !e.final)
   const last = log[log.length - 1]
-  // the log is trimmed, so pair it with the turn count to get a stable identity
-  const stamp = last ? `${state.turnNo}:${state.log.length}:${last.text}` : ''
 
   useEffect(() => {
-    if (!last || stamp === seen.current) return
-    const first = seen.current === ''
-    seen.current = stamp
-    if (first) return // arriving mid-match shouldn't replay the last blow
+    if (!last || seq === seen.current) return
+    seen.current = seq
 
     const side = state.sides.findIndex((s) => s.profileId === last.by)
     setFx({ ...last, side })
@@ -80,7 +80,7 @@ function useDuelFx(state: DuelState): Fx | null {
       last.treasureId || last.diceFace !== undefined ? TREASURE_FX_MS : FX_MS,
     )
     return () => window.clearTimeout(t)
-  }, [stamp]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [seq]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return fx
 }
@@ -194,8 +194,12 @@ export function DuelArena({
         </div>
       )}
 
-      {fx?.treasureId && <TreasurePop id={fx.treasureId} mine={fx.side === myIndex} />}
-      {fx?.diceFace !== undefined && fx?.diceFace !== null && <DicePop face={fx.diceFace} />}
+      {fx?.treasureId && (
+        <TreasurePop id={fx.treasureId} who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')} mine={fx.side === myIndex} />
+      )}
+      {fx?.diceFace !== undefined && fx?.diceFace !== null && (
+        <DicePop face={fx.diceFace} who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')} />
+      )}
 
       <SideBar side={them} flip hideHand />
 
@@ -438,33 +442,35 @@ function Hand({
   )
 }
 
-/** Full-screen flash when a treasure resolves — the payoff for the rarity. */
-function TreasurePop({ id, mine }: { id: string; mine: boolean }) {
+/**
+ * Full-screen flash when a treasure resolves — the payoff for the rarity, and
+ * the only chance you get to see what the other captain just did to you. Names
+ * whoever played it, because "they played something" is not information.
+ */
+function TreasurePop({ id, who, mine }: { id: string; who: string; mine: boolean }) {
   const t = treasureById(id)
   if (!t) return null
   return (
-    <div className={`tpop rarity-${t.rarity}`}>
+    <div className={`tpop rarity-${t.rarity} ${mine ? 'is-mine' : 'is-theirs'}`}>
       <div className="tpop-card">
-        <span className="tpop-who">{mine ? 'YOU PLAYED' : 'THEY PLAYED'}</span>
+        <span className="tpop-who">{mine ? 'YOU PLAYED' : `${who.toUpperCase()} PLAYED`}</span>
         <span className="tpop-icon">{t.icon}</span>
         <span className="tpop-name">{t.name}</span>
         <span className="tpop-text">{t.text}</span>
-        {t.rarity !== 'common' && (
-          <span className="tpop-rarity">{t.rarity === 'legendary' ? '★ LEGENDARY ★' : t.rarity}</span>
-        )}
+        <span className="tpop-rarity">{t.rarity === 'legendary' ? '★ LEGENDARY ★' : t.rarity}</span>
       </div>
     </div>
   )
 }
 
 /** The dice tumbling to its face. */
-function DicePop({ face }: { face: number }) {
+function DicePop({ face, who }: { face: number; who: string }) {
   const f = DICE_FACES[face]
   if (!f) return null
   return (
     <div className="tpop rarity-epic">
       <div className="tpop-card">
-        <span className="tpop-who">DAVY BACK DICE</span>
+        <span className="tpop-who">{who.toUpperCase()} ROLLED THE DICE</span>
         <span className="tpop-icon dice-tumble">{f.pip}</span>
         <span className="tpop-name">{f.name}</span>
         <span className="tpop-text">{f.text}</span>

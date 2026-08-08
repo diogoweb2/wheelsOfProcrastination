@@ -1947,6 +1947,8 @@ export const useStore = create<StoreState>((set, get) => {
         ...duel.state,
         over: true,
         winnerId: winner.profileId,
+        // seq is what the other phone's arena watches for "something happened"
+        seq: (duel.state.seq ?? 0) + 1,
         log: [...duel.state.log, { by: activeProfileId, text: `🏳️ ${winner.name} wins — the other captain sailed off.` }],
       }
       saveDuelList(duels.map((d) => (d.id === duelId ? { ...d, ...settledFields(state) } : d)))
