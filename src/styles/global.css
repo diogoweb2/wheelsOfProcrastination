@@ -3143,3 +3143,21 @@ input, select { font-family: inherit; }
 .crew-dmg.is-them.is-weak { color: var(--red); }
 /* a swap costs energy but never a mis-tap: the strip reports, it doesn't act */
 .arena-swap.is-ready { background: rgb(255 206 0 / 95%); color: #2a1400; }
+
+/* The receipt: what a treasure or dice roll actually did. A greyed chip means
+   the effect landed on a board that had no room for it ("already at full HP"),
+   which is information — not the same thing as nothing happening. */
+.tpop-gains { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 6px; }
+.tpop-gains b {
+  font-size: 12px; font-weight: 900; padding: 3px 9px; border-radius: 999px;
+  background: var(--rr); color: var(--rr-ink);
+}
+.tpop-gains b.is-nil { background: rgb(12 35 56 / 80%); color: var(--muted); }
+/* the die spins before it lands, so the result reads as a result */
+.tpop-icon.is-rolling { animation: die-spin 240ms linear infinite; }
+@keyframes die-spin {
+  0% { transform: rotate(0) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .tpop-icon.is-rolling { animation: none; } }

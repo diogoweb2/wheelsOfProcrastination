@@ -162,13 +162,52 @@ export interface DiceFace {
   fx: TreasureFx
 }
 
+/**
+ * Every face carries at least one effect that CANNOT be a no-op.
+ *
+ * Heals, energy and draws all quietly do nothing on the wrong board — full HP,
+ * energy at the cap, a full hand — and a once-per-match comeback roll that
+ * visibly does nothing is worse than having no comeback roll at all. So each
+ * face is paired with a flag that always lands: a boost, a free swap, a shield,
+ * a stun, Iron Body, a damage multiplier.
+ */
 export const DICE_FACES: DiceFace[] = [
-  { pip: '⚀', name: 'Salty Wind', text: 'The sea gives little — gain ⚡.', fx: { energy: 1 } },
-  { pip: '⚁', name: 'Second Wind', text: 'Gain ⚡⚡⚡!', fx: { energy: 3 } },
-  { pip: '⚂', name: 'Buried Loot', text: 'Draw 2 treasure cards!', fx: { draw: 2 } },
-  { pip: '⚃', name: 'Frozen Sea', text: 'They lose their next turn!', fx: { stun: true } },
-  { pip: '⚄', name: 'Healing Tide', text: 'Heal to FULL!', fx: { heal: Infinity } },
-  { pip: '⚅', name: 'Phoenix Rising', text: 'A fallen crewmate returns!', fx: { revive: true } },
+  {
+    pip: '⚀',
+    name: 'Salty Wind',
+    text: 'The sea gives a little — ⚡⚡, heal 25, next attack +20.',
+    fx: { energy: 2, heal: 25, boost: 20 },
+  },
+  {
+    pip: '⚁',
+    name: 'Second Wind',
+    text: 'Gain ⚡⚡⚡, a treasure card, and a free swap!',
+    fx: { energy: 3, draw: 1, freeSwap: true },
+  },
+  {
+    pip: '⚂',
+    name: 'Buried Loot',
+    text: 'Draw 2 treasures, heal 30, and shrug off the next hit!',
+    fx: { draw: 2, heal: 30, shield: 30 },
+  },
+  {
+    pip: '⚃',
+    name: 'Frozen Sea',
+    text: 'They lose their next turn AND all their energy!',
+    fx: { stun: true, theirEnergy: -99 },
+  },
+  {
+    pip: '⚄',
+    name: 'Healing Tide',
+    text: 'Whole crew to FULL — and you can’t be knocked out!',
+    fx: { healAll: Infinity, energy: 1, survive: true },
+  },
+  {
+    pip: '⚅',
+    name: 'Phoenix Rising',
+    text: 'A fallen crewmate returns, and you hit DOUBLE!',
+    fx: { revive: true, double: 2 },
+  },
 ]
 
 export const rollDice = (rand: () => number = Math.random) => Math.floor(rand() * DICE_FACES.length)

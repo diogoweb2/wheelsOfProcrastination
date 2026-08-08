@@ -132,6 +132,13 @@ export interface DuelLogEntry {
   treasureId?: string
   /** The dice was rolled: index into DICE_FACES. */
   diceFace?: number
+  /**
+   * What a treasure or dice roll ACTUALLY did, in plain words ("+40 HP",
+   * "already at full HP"). The card's own rules text says what it is supposed
+   * to do; this says what happened, which is the only thing worth showing after
+   * spending it.
+   */
+  gains?: string[]
   /** The closing line. The arena reads the entry BEFORE this one to animate the last blow. */
   final?: boolean
 }
@@ -519,14 +526,18 @@ function resolveFx(state: DuelState, sideIndex: number, fx: TreasureFx, entry: D
   const me = state.sides[sideIndex]
   const them = state.sides[1 - sideIndex]
   const mine = activeCard(me)
-  const say = (s: string) => {
-    entry.text += ` ${s}`
-  }
+
+  // Report what ACTUALLY happened, not what the card claims it does. A heal at
+  // full HP, energy at the cap or a draw into a full hand all change nothing,
+  // and silently doing nothing is indistinguishable from a bug to whoever just
+  // spent a card on it. Anything that ends up empty says so out loud.
+  const gains: string[] = []
+  const gain = (s: string) => gains.push(s)
 
   if (fx.heal && mine) {
     const healed = Math.min(mine.max - mine.hp, fx.heal)
     mine.hp += healed
-    if (healed) say(`+${healed} HP.`)
+    gain(healed ? `+${healed} HP` : 'already at full HP')
   }
   if (fx.healAll) {
     let total = 0
@@ -535,37 +546,66 @@ function resolveFx(state: DuelState, sideIndex: number, fx: TreasureFx, entry: D
       c.hp += healed
       total += healed
     }
-    if (total) say(`+${total} HP across the crew.`)
+    gain(total ? `+${total} HP across the crew` : 'crew already at full HP')
   }
   if (fx.maxHp && mine) {
     mine.max += fx.maxHp
     mine.hp += fx.maxHp
-    say(`+${fx.maxHp} max HP.`)
+    gain(`+${fx.maxHp} max HP`)
   }
   if (fx.energy) {
+    const before = me.energy
     me.energy = Math.min(MAX_ENERGY, me.energy + fx.energy)
+    gain(me.energy > before ? `+${me.energy - before} ⚡` : 'energy already full')
   }
   if (fx.theirEnergy) {
+    const before = them.energy
     them.energy = fx.theirEnergy <= -99 ? 0 : Math.max(0, Math.min(MAX_ENERGY, them.energy + fx.theirEnergy))
-    if (fx.theirEnergy <= -99) say('Their energy is gone!')
+    if (them.energy !== before) {
+      gain(them.energy < before ? `${them.name} lost ${before - them.energy} ⚡` : `${them.name} gained ${them.energy - before} ⚡`)
+    }
   }
-  if (fx.boost) me.boost += fx.boost
-  if (fx.double) me.multiplier = Math.max(me.multiplier, fx.double)
+  if (fx.boost) {
+    me.boost += fx.boost
+    gain(`next attack +${fx.boost}`)
+  }
+  if (fx.double) {
+    me.multiplier = Math.max(me.multiplier, fx.double)
+    gain(`×${fx.double} damage this turn`)
+  }
   if (fx.stun) {
     them.stunned = true
-    say(`${them.name} is stunned!`)
+    gain(`${them.name} is stunned 💫`)
   }
-  if (fx.clearStun) me.stunned = false
-  if (fx.shield) me.shield += fx.shield
-  if (fx.survive) me.survive = true
-  if (fx.reflect) me.reflect = true
-  if (fx.freeSwap) me.freeSwap = true
-  if (fx.extraTurn) me.extraTurn = true
+  if (fx.clearStun) {
+    gain(me.stunned ? 'stun shaken off' : 'no stun to shake off') // read it before clearing it
+    me.stunned = false
+  }
+  if (fx.shield) {
+    me.shield += fx.shield
+    gain(`next hit −${fx.shield}`)
+  }
+  if (fx.survive) {
+    me.survive = true
+    gain('can’t be knocked out')
+  }
+  if (fx.reflect) {
+    me.reflect = true
+    gain('their next attack rebounds')
+  }
+  if (fx.freeSwap) {
+    me.freeSwap = true
+    gain('free swap this turn')
+  }
+  if (fx.extraTurn) {
+    me.extraTurn = true
+    gain('another turn after this one')
+  }
   if (fx.draw) {
     const room = Math.max(0, HAND_CAP - me.hand.length)
     const drawn = drawTreasures(Math.min(fx.draw, room))
     me.hand.push(...drawn)
-    say(drawn.length ? `Drew ${drawn.length}.` : 'Hand is full!')
+    gain(drawn.length ? `drew ${drawn.length} treasure` : 'hand already full')
   }
   if (fx.revive) {
     const back = me.fallen.pop()
@@ -575,25 +615,30 @@ function resolveFx(state: DuelState, sideIndex: number, fx: TreasureFx, entry: D
       back.hp = Math.max(1, Math.floor(back.max / 2))
       me.cards.push(back)
       them.kos = Math.max(0, them.kos - 1)
-      say(`🕊️ ${cardName(back.id)} rises again!`)
+      gain(`🕊️ ${cardName(back.id)} rises again`)
     } else {
-      say('Nobody to bring back.')
+      gain('nobody to bring back')
     }
   }
-  if (fx.scatter && them.cards.length > 1) {
-    const pick = 1 + Math.floor(Math.random() * (them.cards.length - 1))
-    const incoming = them.cards[pick]
-    them.cards[pick] = them.cards[0]
-    them.cards[0] = incoming
-    say(`${cardName(incoming.id)} is dragged to the front!`)
+  if (fx.scatter) {
+    if (them.cards.length > 1) {
+      const pick = 1 + Math.floor(Math.random() * (them.cards.length - 1))
+      const incoming = them.cards[pick]
+      them.cards[pick] = them.cards[0]
+      them.cards[0] = incoming
+      gain(`${cardName(incoming.id)} dragged to the front`)
+    } else {
+      gain('nothing left on their bench')
+    }
   }
   if (fx.damage) {
     const fell = dealDamage(them, me, fx.damage)
     entry.damage = (entry.damage ?? 0) + fx.damage
+    gain(`${fx.damage} damage`)
     if (fell) {
       entry.ko = true
       entry.koId = fell.id
-      say(`${cardName(fell.id)} is down!`)
+      gain(`${cardName(fell.id)} is down!`)
     }
   }
   if (fx.damageAll) {
@@ -615,11 +660,16 @@ function resolveFx(state: DuelState, sideIndex: number, fx: TreasureFx, entry: D
       entry.koId = gone.id
     }
     entry.damage = (entry.damage ?? 0) + fx.damageAll
+    gain(`${fx.damageAll} to their whole crew`)
     if (downed) {
       entry.ko = true
-      say(`${downed} card${downed === 1 ? '' : 's'} went down!`)
+      gain(`${downed} card${downed === 1 ? '' : 's'} went down!`)
     }
   }
+
+  if (gains.length === 0) gains.push('no effect')
+  entry.gains = gains
+  entry.text += ` ${gains.join(' · ')}.`
 }
 
 /** Finisher riders: heal, power-up, stun, drain. Mutates the two sides. */

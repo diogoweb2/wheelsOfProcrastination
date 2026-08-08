@@ -30,7 +30,11 @@ import { duelSfx, sfx } from '../audio'
 /** How long a blow is animated for. The action bar is locked for exactly this long. */
 const FX_MS = 1100
 /** A treasure reveal holds much longer — there's a name and a rules line to read. */
-const TREASURE_FX_MS = 2400
+const TREASURE_FX_MS = 2600
+/** A dice roll holds longer still: it tumbles before it lands, then reports. */
+const DICE_FX_MS = 3600
+/** How long the die tumbles through faces before settling on the real one. */
+const DICE_TUMBLE_MS = 950
 
 interface Fx extends DuelLogEntry {
   /** Which side (index) threw it — drives which card lunges and which one flinches. */
@@ -82,7 +86,7 @@ function useDuelFx(state: DuelState): Fx | null {
 
     const t = window.setTimeout(
       () => setFx(null),
-      last.treasureId || last.diceFace !== undefined ? TREASURE_FX_MS : FX_MS,
+      last.diceFace !== undefined ? DICE_FX_MS : last.treasureId ? TREASURE_FX_MS : FX_MS,
     )
     return () => window.clearTimeout(t)
   }, [seq]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -217,10 +221,19 @@ export function DuelArena({
       )}
 
       {fx?.treasureId && (
-        <TreasurePop id={fx.treasureId} who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')} mine={fx.side === myIndex} />
+        <TreasurePop
+          id={fx.treasureId}
+          who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')}
+          mine={fx.side === myIndex}
+          gains={fx.gains}
+        />
       )}
       {fx?.diceFace !== undefined && fx?.diceFace !== null && (
-        <DicePop face={fx.diceFace} who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')} />
+        <DicePop
+          face={fx.diceFace}
+          who={fx.side === myIndex ? 'You' : (state.sides[fx.side]?.name ?? 'They')}
+          gains={fx.gains}
+        />
       )}
 
       <SideBar side={them} flip hideHand />
@@ -656,7 +669,7 @@ function Hand({
  * the only chance you get to see what the other captain just did to you. Names
  * whoever played it, because "they played something" is not information.
  */
-function TreasurePop({ id, who, mine }: { id: string; who: string; mine: boolean }) {
+function TreasurePop({ id, who, mine, gains }: { id: string; who: string; mine: boolean; gains?: string[] }) {
   const t = treasureById(id)
   if (!t) return null
   return (
@@ -666,23 +679,72 @@ function TreasurePop({ id, who, mine }: { id: string; who: string; mine: boolean
         <span className="tpop-icon">{t.icon}</span>
         <span className="tpop-name">{t.name}</span>
         <span className="tpop-text">{t.text}</span>
+        <Gains gains={gains} />
         <span className="tpop-rarity">{t.rarity === 'legendary' ? '★ LEGENDARY ★' : t.rarity}</span>
       </div>
     </div>
   )
 }
 
-/** The dice tumbling to its face. */
-function DicePop({ face, who }: { face: number; who: string }) {
+/**
+ * What the play actually did. The card's rules text is a promise; this is the
+ * receipt — and it's the difference between "I rolled and nothing happened" and
+ * "I rolled, I was already at full HP, and I got the energy instead".
+ */
+function Gains({ gains }: { gains?: string[] }) {
+  if (!gains?.length) return null
+  return (
+    <span className="tpop-gains">
+      {gains.map((g, i) => (
+        <b key={i} className={/already|nobody|no effect|nothing left/i.test(g) ? 'is-nil' : ''}>
+          {g}
+        </b>
+      ))}
+    </span>
+  )
+}
+
+/**
+ * The dice: tumbles through faces, lands, then says what it gave you.
+ *
+ * The tumble isn't decoration — a result that simply appears reads as "nothing
+ * happened", which is exactly how the first version of this felt.
+ */
+function DicePop({ face, who, gains }: { face: number; who: string; gains?: string[] }) {
+  const [rolling, setRolling] = useState(true)
+  const [shown, setShown] = useState(0)
+
+  useEffect(() => {
+    const spin = window.setInterval(() => setShown((n) => (n + 1) % DICE_FACES.length), 85)
+    const land = window.setTimeout(() => {
+      window.clearInterval(spin)
+      setRolling(false)
+      duelSfx.treasure('epic')
+    }, DICE_TUMBLE_MS)
+    return () => {
+      window.clearInterval(spin)
+      window.clearTimeout(land)
+    }
+  }, [])
+
   const f = DICE_FACES[face]
   if (!f) return null
   return (
     <div className="tpop rarity-epic">
       <div className="tpop-card">
         <span className="tpop-who">{who.toUpperCase()} ROLLED THE DICE</span>
-        <span className="tpop-icon dice-tumble">{f.pip}</span>
-        <span className="tpop-name">{f.name}</span>
-        <span className="tpop-text">{f.text}</span>
+        <span className={`tpop-icon ${rolling ? 'is-rolling' : 'dice-tumble'}`}>
+          {rolling ? DICE_FACES[shown].pip : f.pip}
+        </span>
+        {rolling ? (
+          <span className="tpop-name">rolling…</span>
+        ) : (
+          <>
+            <span className="tpop-name">{f.name}</span>
+            <span className="tpop-text">{f.text}</span>
+            <Gains gains={gains} />
+          </>
+        )}
       </div>
     </div>
   )
