@@ -61,6 +61,11 @@ export const STICKER_CREWS: CrewDef[] = [
     "id": "belgium",
     "name": "Belgium",
     "flag": "/flags/be.webp"
+  },
+  {
+    "id": "germany",
+    "name": "Germany",
+    "flag": "/flags/de.webp"
   }
 ]
 
@@ -69,43 +74,49 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "6c224f4a20a4462309f75700c378650e0cf3d7ca7904-3-4",
     "name": "Smoker",
     "rarity": "common",
-    "crew": "spain"
+    "crew": "portugal"
   },
   {
     "id": "7a094561ead54385afc5120f89988e5d",
     "name": "Trafalgar D. Water Law",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "england"
   },
   {
     "id": "9c04c508408a164911c0a0c44bf17851",
     "name": "Dracule Mihawk",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "france"
+  },
+  {
+    "id": "0045-2d-png",
+    "name": "Mystery Pirate",
+    "rarity": "special",
+    "crew": "portugal"
   },
   {
     "id": "196-1967259-zoro-and-nami-chopper-transparent-on",
     "name": "Zoro, Nami & Chopper",
     "rarity": "special",
-    "crew": "argentina"
+    "crew": "brazil"
   },
   {
     "id": "502-5029965-dead-bones-brook-sabo-one-piece-png",
     "name": "Brook & Sabo",
     "rarity": "common",
-    "crew": "spain"
+    "crew": "france"
   },
   {
     "id": "853b05215a6172af49ec86605791bb08",
     "name": "Sanji · Raid Suit",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "spain"
   },
   {
     "id": "8523302-eb2874b406880a99ca39ec0cc06b4dc4",
     "name": "Kozuki Oden",
     "rarity": "common",
-    "crew": "france"
+    "crew": "portugal"
   },
   {
     "id": "ace-and-luffy-png-clipart",
@@ -117,7 +128,7 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "akainu-borsalino-one-piece-admiral-character-png",
     "name": "Akainu & Borsalino",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "argentina"
   },
   {
     "id": "bartholomew-kuma-render",
@@ -129,31 +140,37 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "blackbeard-posttimeskip-original-fix",
     "name": "Marshall D. Teach",
     "rarity": "common",
-    "crew": "england"
+    "crew": "brazil"
   },
   {
     "id": "brook",
     "name": "Brook",
     "rarity": "common",
-    "crew": "spain"
+    "crew": "brazil"
+  },
+  {
+    "id": "cavendish-one-piece",
+    "name": "Cavendish",
+    "rarity": "common",
+    "crew": "england"
   },
   {
     "id": "charlotte-katakuri-2",
     "name": "Charlotte Katakuri",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "england"
   },
   {
     "id": "cmelxgmy7wi4gxlhg9nswkxiwzi71nxwgm57a1x2n1whxuhz",
     "name": "Jinbe · Warlord",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "portugal"
   },
   {
     "id": "d4fty22-efc79fb4-86ee-4950-81f8-da8e362ba5ee",
     "name": "Tony Tony Chopper",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "spain"
   },
   {
     "id": "dellinger-dorsal-fin",
@@ -165,73 +182,127 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "denjiro-one-piece",
     "name": "Denjiro",
     "rarity": "common",
-    "crew": "england"
+    "crew": "belgium"
+  },
+  {
+    "id": "donquixote-rosinante",
+    "name": "Donquixote Rosinante",
+    "rarity": "common",
+    "crew": "netherlands"
   },
   {
     "id": "edwardnew",
     "name": "Edward Newgate",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "germany"
+  },
+  {
+    "id": "enelrender",
+    "name": "Enelrender",
+    "rarity": "common",
+    "crew": "france"
   },
   {
     "id": "eustass-kid",
     "name": "Eustass Kid",
     "rarity": "common",
-    "crew": "england"
+    "crew": "belgium"
   },
   {
     "id": "franky-2-years-later",
     "name": "Franky",
     "rarity": "common",
-    "crew": "england"
+    "crew": "brazil"
+  },
+  {
+    "id": "g37ajdyxoaa6llq",
+    "name": "Mystery Pirate",
+    "rarity": "special",
+    "crew": "france"
+  },
+  {
+    "id": "god-usopp-one-piece-elbaf-by-caiquenadal-df1j9ci",
+    "name": "God Usopp Elbaf Caiquenadal ",
+    "rarity": "common",
+    "crew": "argentina"
   },
   {
     "id": "gomu-gomu-no-mi",
     "name": "Gomu Gomu no Mi",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "france"
+  },
+  {
+    "id": "hajrudin-render",
+    "name": "Hajrudin",
+    "rarity": "common",
+    "crew": "germany"
   },
   {
     "id": "hybrid-queen",
     "name": "Queen · Hybrid",
     "rarity": "common",
+    "crew": "germany"
+  },
+  {
+    "id": "image-1",
+    "name": "Mystery Pirate",
+    "rarity": "special",
+    "crew": "england"
+  },
+  {
+    "id": "image-2",
+    "name": "Mystery Pirate",
+    "rarity": "special",
     "crew": "brazil"
+  },
+  {
+    "id": "image",
+    "name": "Mystery Pirate",
+    "rarity": "special",
+    "crew": "netherlands"
   },
   {
     "id": "images-1",
     "name": "Usopp",
     "rarity": "common",
+    "crew": "argentina"
+  },
+  {
+    "id": "images-1-xzc2",
+    "name": "Mystery Pirate",
+    "rarity": "special",
     "crew": "england"
   },
   {
     "id": "images",
     "name": "Portgas D. Ace",
     "rarity": "common",
-    "crew": "england"
+    "crew": "germany"
   },
   {
     "id": "images-ir3h",
     "name": "Luffy · World Cup",
     "rarity": "special",
-    "crew": "portugal"
+    "crew": "belgium"
   },
   {
     "id": "imgbin-donquixote-doflamingo-one-piece-unlimited",
     "name": "Donquixote Doflamingo",
     "rarity": "common",
-    "crew": "brazil"
+    "crew": "spain"
   },
   {
     "id": "jinbe",
     "name": "Jinbe",
     "rarity": "common",
-    "crew": "argentina"
+    "crew": "portugal"
   },
   {
     "id": "kaidoh",
     "name": "Kaido",
     "rarity": "common",
-    "crew": "brazil"
+    "crew": "argentina"
   },
   {
     "id": "kaidou-dragonform-original-enhanced",
@@ -249,19 +320,19 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "kawamatsu",
     "name": "Kawamatsu",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "netherlands"
   },
   {
     "id": "killer-post-timeskip-render",
     "name": "Killer",
     "rarity": "common",
-    "crew": "brazil"
+    "crew": "portugal"
   },
   {
     "id": "king-original",
     "name": "King",
     "rarity": "common",
-    "crew": "brazil"
+    "crew": "argentina"
   },
   {
     "id": "kody29-onepiece",
@@ -273,25 +344,31 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "kyoshiro-one-piece",
     "name": "Kyoshiro",
     "rarity": "common",
+    "crew": "spain"
+  },
+  {
+    "id": "lkpxy7a4g69ycyntpghhqitipgjf8n76czjuvmnbcpvsqpoy",
+    "name": "Xuqphecel Lqg",
+    "rarity": "special",
     "crew": "belgium"
   },
   {
     "id": "loki-anime-concept-art-copy",
     "name": "Loki",
     "rarity": "common",
-    "crew": "france"
+    "crew": "netherlands"
   },
   {
     "id": "lucci-cp0-1",
     "name": "Rob Lucci",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "spain"
   },
   {
     "id": "lucci-cp0",
     "name": "Rob Lucci · CP0",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "argentina"
   },
   {
     "id": "luffygear5",
@@ -303,7 +380,7 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "marco-the-phoenix",
     "name": "Marco the Phoenix",
     "rarity": "common",
-    "crew": "brazil"
+    "crew": "argentina"
   },
   {
     "id": "mihawk-render",
@@ -321,13 +398,19 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "monkey-d-luffy-gear-4-render-11563147961xnnsgtzk",
     "name": "Luffy · Gear 4",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "spain"
   },
   {
     "id": "monkey-d-luffy-one-piece-monkey-d-luffy-wallpape",
     "name": "Monkey D. Luffy",
     "rarity": "special",
-    "crew": "england"
+    "crew": "brazil"
+  },
+  {
+    "id": "nami-elbaph-official-by-monkeyoflife-dktbt1e-ful",
+    "name": "Nami Elbaph Official Monkeyo",
+    "rarity": "common",
+    "crew": "germany"
   },
   {
     "id": "nami-onigashima-official-by-monkeyoflife-dje6rrx",
@@ -339,13 +422,13 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "new-shogun-kozuki-momonosuke-by-robirh-df6kq3l-f",
     "name": "Shogun Momonosuke",
     "rarity": "common",
-    "crew": "argentina"
+    "crew": "netherlands"
   },
   {
     "id": "o-lin-jumputi",
     "name": "Charlotte Linlin",
     "rarity": "common",
-    "crew": "france"
+    "crew": "netherlands"
   },
   {
     "id": "one-piece-monkey-d-luffy-512x512",
@@ -357,35 +440,53 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "perona-render-01",
     "name": "Perona",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "england"
   },
   {
     "id": "pica-render",
     "name": "Pica",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "brazil"
   },
   {
     "id": "png-clipart-boa-hancock-nico-robin-one-piece-mon",
     "name": "Boa Hancock & Nico Robin",
     "rarity": "common",
-    "crew": "spain"
+    "crew": "netherlands"
   },
   {
     "id": "png-clipart-monkey-d-luffy-monkey-d-garp-gol-d-r",
     "name": "Luffy, Garp & Roger",
     "rarity": "common",
-    "crew": "spain"
+    "crew": "argentina"
+  },
+  {
+    "id": "poll-bartolomeo-or-cavendish-who-do-you-prefer-i",
+    "name": "Poll Bartolomeo Or Cavendish",
+    "rarity": "special",
+    "crew": "portugal"
   },
   {
     "id": "queen-original",
     "name": "Queen",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "england"
+  },
+  {
+    "id": "raizo-anime",
+    "name": "Raizo",
+    "rarity": "common",
+    "crew": "england"
   },
   {
     "id": "rob-lucci-by-orochimarusama1-by-staxkiller-d8rj4",
     "name": "Rob Lucci · Leopard",
+    "rarity": "common",
+    "crew": "portugal"
+  },
+  {
+    "id": "robin-elbaph-official-by-monkeyoflife-dktc8i6-fu",
+    "name": "Robin Elbaph Official Monkey",
     "rarity": "common",
     "crew": "spain"
   },
@@ -393,37 +494,61 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "robin-render",
     "name": "Nico Robin",
     "rarity": "common",
-    "crew": "portugal"
+    "crew": "netherlands"
   },
   {
     "id": "roronoa-zoro",
     "name": "Roronoa Zoro",
     "rarity": "common",
-    "crew": "argentina"
+    "crew": "brazil"
   },
   {
     "id": "roronoa-zoro-png-clipart",
     "name": "Zoro · Three Swords",
     "rarity": "special",
-    "crew": "brazil"
+    "crew": "portugal"
+  },
+  {
+    "id": "ryokugyu-vs-luffy",
+    "name": "Ryokugyu Vs Luffy",
+    "rarity": "common",
+    "crew": "germany"
+  },
+  {
+    "id": "sabo-s-devil-fruit",
+    "name": "Sabo Devil Fruit",
+    "rarity": "common",
+    "crew": "netherlands"
   },
   {
     "id": "sanji-sanji-new-world-full-body-115633029592ajtk",
     "name": "Vinsmoke Sanji",
     "rarity": "common",
-    "crew": "argentina"
+    "crew": "germany"
   },
   {
     "id": "shanks",
     "name": "Red-Haired Shanks",
     "rarity": "common",
-    "crew": "netherlands"
+    "crew": "belgium"
+  },
+  {
+    "id": "shimotsuki-ryumamonsters-103-mercies-dragon-damn",
+    "name": "Shimotsuki Ryumamonsters Mer",
+    "rarity": "common",
+    "crew": "germany"
+  },
+  {
+    "id": "tony-tony-chopper-brown-animal-character-wallpap",
+    "name": "Tony Tony Chopper Brown Anim",
+    "rarity": "special",
+    "crew": "spain"
   },
   {
     "id": "top-20-strongest-one-piece-characters-powerscali",
     "name": "Legends of the Sea",
     "rarity": "common",
-    "crew": "belgium"
+    "crew": "brazil"
   },
   {
     "id": "urouge",
@@ -435,23 +560,41 @@ export const STICKER_CATALOG: StickerDef[] = [
     "id": "usopp-one-piece-usopp-wallpaper-png-clipart",
     "name": "Sogeking",
     "rarity": "special",
-    "crew": "argentina"
+    "crew": "france"
   },
   {
     "id": "uta-one-piece",
     "name": "Uta",
     "rarity": "common",
-    "crew": "france"
+    "crew": "england"
+  },
+  {
+    "id": "vegapunkrender",
+    "name": "Vegapunkrender",
+    "rarity": "common",
+    "crew": "belgium"
   },
   {
     "id": "vinsmoke-sanji-one-piece-treasure-cruise-monkey-",
     "name": "Sanji · Black Leg",
     "rarity": "special",
-    "crew": "argentina"
+    "crew": "belgium"
+  },
+  {
+    "id": "what-do-you-think-made-rocks-d-xebec-so-strong-v",
+    "name": "What Do You Think Made Rocks",
+    "rarity": "common",
+    "crew": "germany"
   },
   {
     "id": "yasopp-render",
     "name": "Yasopp",
+    "rarity": "common",
+    "crew": "belgium"
+  },
+  {
+    "id": "zombieryuma-original",
+    "name": "Zombieryuma",
     "rarity": "common",
     "crew": "france"
   }

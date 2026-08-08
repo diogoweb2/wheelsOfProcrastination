@@ -32,11 +32,14 @@ function BackgroundsTab() {
   const [rolling, setRolling] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const [justWon, setJustWon] = useState<string | null>(null)
+  // the prize is already in `owned` the moment we pay, so the collection would
+  // spoil it mid-animation — keep it hidden there until the reveal lands
+  const [secret, setSecret] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
-  const owned = data.backgrounds.owned
-  const allOwned = owned.length >= BACKGROUND_CATALOG.length
+  const allOwned = data.backgrounds.owned.length >= BACKGROUND_CATALOG.length
+  const owned = secret ? data.backgrounds.owned.filter((id) => id !== secret) : data.backgrounds.owned
 
   // preload the whole catalog so the flash animation doesn't stutter
   useEffect(() => {
@@ -52,6 +55,7 @@ function BackgroundsTab() {
   function roll(won: string) {
     setRolling(true)
     setJustWon(null)
+    setSecret(won)
     setMsg(null)
     const start = BACKGROUND_CATALOG.indexOf(won) + 1 // so the sequence lands on the prize
     let step = 0
@@ -67,6 +71,7 @@ function BackgroundsTab() {
         setPreview(won)
         setRolling(false)
         setJustWon(won)
+        setSecret(null) // now the collection may show it
         sfx.fanfare()
       }
     }
