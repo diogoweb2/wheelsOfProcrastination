@@ -251,25 +251,39 @@ export const stormActive = (state: DuelState) => state.turnNo >= STORM_TURN
 /** Turns until the storm — the arena counts it down so it never arrives as a surprise. */
 export const turnsToStorm = (state: DuelState) => Math.max(0, STORM_TURN - state.turnNo)
 
-/** Damage this attack would do right now, and whether the weakness ring doubled it. */
-export function previewDamage(
+/**
+ * What `cardId` would hit their CURRENT front-liner for, if it were the one
+ * attacking. Works for a benched card too, which is the whole point: "would
+ * Marco do more here than Katakuri?" is the question a swap is answering, and
+ * you cannot answer it without seeing both numbers.
+ */
+export function damageFrom(
   state: DuelState,
   sideIndex: number,
+  cardId: string,
   attackIndex: number,
 ): { damage: number; weak: boolean } {
   const me = state.sides[sideIndex]
-  const them = state.sides[1 - sideIndex]
-  const mine = activeCard(me)
-  const theirs = activeCard(them)
-  const attack = mine ? statsFor(mine.id).attacks[attackIndex] : undefined
-  if (!mine || !theirs || !attack) return { damage: 0, weak: false }
-  const weak = isWeakTo(statsFor(mine.id).element, statsFor(theirs.id).element)
+  const theirs = activeCard(state.sides[1 - sideIndex])
+  const attack = statsFor(cardId).attacks[attackIndex]
+  if (!theirs || !attack) return { damage: 0, weak: false }
+  const weak = isWeakTo(statsFor(cardId).element, statsFor(theirs.id).element)
   // Order matters and is deliberate: flat bonuses first, then the weakness ring,
   // then treasure multipliers, then the storm. A boosted Haki hit into a
   // weakness during the storm is the biggest number in the game — as it should be.
   let damage = (attack.damage + me.boost) * (weak ? 2 : 1) * me.multiplier
   if (stormActive(state)) damage *= 2
   return { damage: Math.round(damage), weak }
+}
+
+/** Damage the front-liner's attack would do right now. */
+export function previewDamage(
+  state: DuelState,
+  sideIndex: number,
+  attackIndex: number,
+): { damage: number; weak: boolean } {
+  const mine = activeCard(state.sides[sideIndex])
+  return mine ? damageFrom(state, sideIndex, mine.id, attackIndex) : { damage: 0, weak: false }
 }
 
 /** Can this side use that attack right now? */

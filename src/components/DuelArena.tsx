@@ -9,7 +9,11 @@ import {
   canPlayTreasure,
   canRollDice,
   canSwap,
+  cardName,
+  damageFrom,
+  elementInfo,
   previewDamage,
+  weaknessOf,
   retreatCost,
   statsFor,
   stormActive,
@@ -19,6 +23,7 @@ import {
   type DuelState,
 } from '../logic/cardGame'
 import { DICE_FACES, treasureById } from '../logic/treasures'
+import { stickerUrl } from '../logic/album'
 import { BattleCard, BoardCard } from './BattleCard'
 import { duelSfx, sfx } from '../audio'
 
@@ -126,6 +131,7 @@ export function DuelArena({
   const fx = useDuelFx(state)
   const [peek, setPeek] = useState<string | null>(null)
   const [picked, setPicked] = useState<number | null>(null) // treasure being considered
+  const [crewOpen, setCrewOpen] = useState(false)
   const me = state.sides[myIndex]
   const them = state.sides[1 - myIndex]
   const myTurn = state.turn === myIndex && !state.over
@@ -192,6 +198,15 @@ export function DuelArena({
           <BattleCard id={peek} size="full" />
           <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>tap anywhere to close</p>
         </div>
+      )}
+
+      {crewOpen && (
+        <CrewSheet
+          state={state}
+          myIndex={myIndex}
+          onSwap={myTurn && !locked ? (to) => { setCrewOpen(false); play({ kind: 'swap', to }) } : null}
+          onClose={() => setCrewOpen(false)}
+        />
       )}
 
       {fx?.treasureId && (
@@ -322,11 +337,11 @@ export function DuelArena({
           {me.stunned && (
             <p className="arena-warn">💫 Stunned — no attacking this turn. Send out a bench card, or focus.</p>
           )}
-          {myTurn && benchCards(me).length > 0 && (
-            <p className="arena-hint">
-              🔄 Tap a bench card to send it to the front
-              {me.energy < retreatCost(me) ? ` — needs ${'⚡'.repeat(retreatCost(me))}` : ''}
-            </p>
+          {benchCards(me).length > 0 && (
+            <button className="crew-open" onClick={() => { sfx.click(); setCrewOpen(true) }}>
+              🧭 <b>See my crew</b>
+              <em>HP, attacks and what each would hit for — then swap</em>
+            </button>
           )}
 
           {/* The last stand. Free, once a match, and no face on the dice is bad. */}
@@ -359,6 +374,150 @@ export function DuelArena({
             {e.text}
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The whole crew, laid out to answer one question: should I swap?
+ *
+ * A bench card on the board is 60px of thumbnail — you cannot read its HP, its
+ * attacks, or whether its element beats what's in front of you off that. This
+ * sheet shows every card's real numbers side by side, and crucially prints what
+ * each attack would do **against the defender currently facing you**, so the
+ * comparison is the one that actually matters rather than raw card stats.
+ */
+function CrewSheet({
+  state,
+  myIndex,
+  onSwap,
+  onClose,
+}: {
+  state: DuelState
+  myIndex: number
+  /** null when swapping isn't possible right now — the row says why instead. */
+  onSwap: ((to: number) => void) | null
+  onClose: () => void
+}) {
+  const me = state.sides[myIndex]
+  const them = state.sides[1 - myIndex]
+  const facing = activeCard(them)
+  const facingEl = facing ? elementInfo(statsFor(facing.id).element) : null
+  const cost = retreatCost(me)
+  const myTurn = state.turn === myIndex && !state.over
+
+  return (
+    <div className="crew-sheet" onClick={onClose}>
+      <div className="crew-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="crew-sheet-head">
+          <span>🧭 Your crew</span>
+          <button className="crew-close" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+
+        {facing && facingEl && (
+          <div className="crew-facing">
+            Facing <b>{cardName(facing.id)}</b> · {facing.hp}/{facing.max} HP · {facingEl.icon} {facingEl.name}
+            <em>
+              Weak to {elementInfo(weaknessOf(statsFor(facing.id).element)).icon}{' '}
+              {elementInfo(weaknessOf(statsFor(facing.id).element)).name}
+            </em>
+          </div>
+        )}
+
+        {me.cards.map((c, i) => {
+          const stats = statsFor(c.id)
+          const el = elementInfo(stats.element)
+          const weak = elementInfo(weaknessOf(stats.element))
+          const pct = Math.max(0, Math.min(100, (c.hp / c.max) * 100))
+          const health = pct > 55 ? 'is-good' : pct > 25 ? 'is-warn' : 'is-low'
+          const able = i > 0 && myTurn && canSwap(state, myIndex, i)
+          return (
+            <div key={c.id} className={`crew-card ${i === 0 ? 'is-front' : ''}`}>
+              <img className="crew-art" src={stickerUrl(c.id)} alt="" loading="lazy" />
+              <div className="crew-body">
+                <div className="crew-name">
+                  {cardName(c.id)}
+                  <span className="crew-slot">{i === 0 ? 'FRONT LINE' : 'BENCH'}</span>
+                </div>
+                <div className="crew-hp">
+                  <div className={`crew-hp-fill ${health}`} style={{ width: `${pct}%` }} />
+                  <span>
+                    {c.hp} / {c.max} HP
+                  </span>
+                </div>
+                <div className="crew-tags">
+                  <span>
+                    {el.icon} {el.name}
+                  </span>
+                  <span>{stats.archetype}</span>
+                  <span className="is-weak">weak {weak.icon}</span>
+                </div>
+                {stats.attacks.map((a, ai) => {
+                  const hit = damageFrom(state, myIndex, c.id, ai)
+                  return (
+                    <div className="crew-move" key={ai}>
+                      <span className="crew-cost">{'⚡'.repeat(a.cost)}</span>
+                      <span className="crew-move-name">
+                        {a.name}
+                        {a.text && <em>{a.text}</em>}
+                      </span>
+                      <span className={`crew-dmg ${hit.weak ? 'is-weak' : ''}`}>
+                        {hit.damage}
+                        {hit.weak && <b>×2</b>}
+                      </span>
+                    </div>
+                  )
+                })}
+                {i === 0 ? (
+                  <div className="crew-action is-note">Out front · costs {'⚡'.repeat(cost) || 'nothing'} to pull back</div>
+                ) : able && onSwap ? (
+                  <button className="btn btn--small crew-action" onClick={() => onSwap(i)}>
+                    🔄 Send {cardName(c.id).split(/[·,]/)[0].trim()} out {cost > 0 ? '⚡'.repeat(cost) : '(free)'}
+                  </button>
+                ) : (
+                  <div className="crew-action is-note">
+                    {!myTurn ? 'Wait for your move' : `Needs ${'⚡'.repeat(cost)} to swap in`}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+
+        <div className="crew-sheet-head" style={{ marginTop: 6 }}>
+          <span>⚔️ {them.name}’s crew</span>
+        </div>
+        {them.cards.map((c, i) => {
+          const stats = statsFor(c.id)
+          const el = elementInfo(stats.element)
+          const pct = Math.max(0, Math.min(100, (c.hp / c.max) * 100))
+          return (
+            <div key={c.id} className="crew-card is-them">
+              <img className="crew-art" src={stickerUrl(c.id)} alt="" loading="lazy" />
+              <div className="crew-body">
+                <div className="crew-name">
+                  {cardName(c.id)}
+                  <span className="crew-slot">{i === 0 ? 'FRONT LINE' : 'BENCH'}</span>
+                </div>
+                <div className="crew-hp">
+                  <div className="crew-hp-fill is-them" style={{ width: `${pct}%` }} />
+                  <span>
+                    {c.hp} / {c.max} HP
+                  </span>
+                </div>
+                <div className="crew-tags">
+                  <span>
+                    {el.icon} {el.name}
+                  </span>
+                  <span className="is-weak">weak {elementInfo(weaknessOf(stats.element)).icon}</span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
