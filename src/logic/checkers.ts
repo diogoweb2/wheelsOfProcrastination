@@ -1,17 +1,22 @@
-// Checkers — the official 8×8 English draughts rules (the game Checkers Canada
-// plays, and the board everyone actually owns), as pure JSON-only functions.
+// Checkers — Brazilian Draughts (Jogo de Damas Brasileiro), the FMJD-recognised
+// ruleset: International Draughts scaled down to an 8×8 board with 12 pieces
+// per side, as pure JSON-only functions.
 //
 // Same contract as logic/chess.ts: flat 64-entry board (Firestore rejects
 // nested arrays), no React, no Firestore, `null` never `undefined`.
 //
-// The four rules that make this the official game rather than a toy:
-//   1. **Capturing is compulsory.** If a jump exists anywhere, only jumps are
-//      legal. Which jump you take is your choice (English rules do not force
-//      the longest one).
-//   2. **A jump chains.** After landing, if the same piece can jump again it
-//      must, and the turn does not pass — `chain` holds that piece.
-//   3. **Men move and jump forward only.** Only a King goes backwards.
-//   4. **Crowning ends the turn**, even if more jumps were available.
+// The rules that make this the official game rather than a toy:
+//   1. **Capturing is compulsory, and the biggest capture wins.** If any
+//      capture exists, only captures are legal — and only the sequence(s)
+//      taking the MOST pieces are legal. A shorter capture is not a choice.
+//   2. **A jump chains.** After landing, if the same piece can keep capturing
+//      it must, and the turn does not pass — `chain` holds that piece.
+//   3. **Men move forward only, but capture in any of the four diagonal
+//      directions** — including backwards.
+//   4. **Kings fly.** A King moves or captures any distance along an empty
+//      diagonal, and after capturing may land on any empty square beyond the
+//      captured piece.
+//   5. **Crowning ends the turn**, even if more jumps were available.
 // A player with no legal move loses — being blocked is a real way to lose.
 
 import type { Color } from './chess'
@@ -111,20 +116,42 @@ export function newCheckers(): CheckersState {
   }
 }
 
-/** Which diagonals this piece may travel: men forward only, kings both ways. */
+/** A man's quiet moves are forward only — the four capture directions are handled separately. */
 function dirsFor(piece: string): [number, number][] {
   const forward = colorOf(piece) === 'w' ? -1 : 1
-  if (isKing(piece)) return [[-1, -1], [-1, 1], [1, -1], [1, 1]]
   return [[forward, -1], [forward, 1]]
 }
 
-/** Jumps available to the piece on `from`, with the square it hops over. */
+const DIAGONALS: [number, number][] = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+
+/** Jumps available to the piece on `from`, with the square it hops over. Kings fly. */
 function jumpsFrom(squares: string[], from: number): { to: number; over: number }[] {
   const piece = squares[from]
   if (!piece) return []
   const me = colorOf(piece)!
   const out: { to: number; over: number }[] = []
-  for (const [dr, dc] of dirsFor(piece)) {
+  if (isKing(piece)) {
+    for (const [dr, dc] of DIAGONALS) {
+      let r = row(from) + dr
+      let c = col(from) + dc
+      while (on(r, c) && squares[idx(r, c)] === '') {
+        r += dr
+        c += dc
+      }
+      if (!on(r, c)) continue
+      const mid = squares[idx(r, c)]
+      if (!mid || colorOf(mid) === me) continue
+      let lr = r + dr
+      let lc = c + dc
+      while (on(lr, lc) && squares[idx(lr, lc)] === '') {
+        out.push({ to: idx(lr, lc), over: idx(r, c) })
+        lr += dr
+        lc += dc
+      }
+    }
+    return out
+  }
+  for (const [dr, dc] of DIAGONALS) {
     const mr = row(from) + dr
     const mc = col(from) + dc
     const lr = row(from) + 2 * dr
@@ -140,6 +167,18 @@ function stepsFrom(squares: string[], from: number): number[] {
   const piece = squares[from]
   if (!piece) return []
   const out: number[] = []
+  if (isKing(piece)) {
+    for (const [dr, dc] of DIAGONALS) {
+      let r = row(from) + dr
+      let c = col(from) + dc
+      while (on(r, c) && squares[idx(r, c)] === '') {
+        out.push(idx(r, c))
+        r += dr
+        c += dc
+      }
+    }
+    return out
+  }
   for (const [dr, dc] of dirsFor(piece)) {
     const r = row(from) + dr
     const c = col(from) + dc
@@ -157,16 +196,59 @@ function anyJump(state: CheckersState): boolean {
   return false
 }
 
-/** Every legal destination for the piece on `from`, for the side to move. */
+/** Board (and crowned-or-not) after one jump — used to look ahead for the biggest capture. */
+function jumpOutcome(squares: string[], from: number, j: { to: number; over: number }): { squares: string[]; crowned: boolean } {
+  const piece = squares[from]
+  const ns = [...squares]
+  ns[from] = ''
+  ns[j.over] = ''
+  const crownRow = colorOf(piece) === 'w' ? 0 : 7
+  const crowned = !isKing(piece) && row(j.to) === crownRow
+  ns[j.to] = crowned ? `${colorOf(piece)}k` : piece
+  return { squares: ns, crowned }
+}
+
+/** Most pieces this piece can capture in one turn, following every possible chain to its end. */
+function maxCaptureFrom(squares: string[], from: number): number {
+  const jumps = jumpsFrom(squares, from)
+  if (jumps.length === 0) return 0
+  let best = 0
+  for (const j of jumps) {
+    const { squares: ns, crowned } = jumpOutcome(squares, from, j)
+    const cont = crowned ? 0 : maxCaptureFrom(ns, j.to)
+    best = Math.max(best, 1 + cont)
+  }
+  return best
+}
+
+/** Of the jumps available from `from`, only the ones that reach the required total. */
+function maximalJumps(squares: string[], from: number, target: number): { to: number; over: number }[] {
+  return jumpsFrom(squares, from).filter((j) => {
+    const { squares: ns, crowned } = jumpOutcome(squares, from, j)
+    const cont = crowned ? 0 : maxCaptureFrom(ns, j.to)
+    return 1 + cont === target
+  })
+}
+
+/** Every legal destination for the piece on `from`, for the side to move. Majority-capture rule: only the biggest capture(s) on the board are legal. */
 export function legalMoves(state: CheckersState, from: number): CheckersMove[] {
   if (state.over) return []
   const piece = state.squares[from]
   if (!piece || colorOf(piece) !== state.turn) return []
   // mid-chain, only the jumping piece may move — and only by jumping
   if (state.chain !== null && state.chain !== from) return []
-  const jumps = jumpsFrom(state.squares, from)
-  if (state.chain !== null) return jumps.map((j) => ({ from, to: j.to }))
-  if (anyJump(state)) return jumps.map((j) => ({ from, to: j.to }))
+  if (state.chain !== null) {
+    const target = maxCaptureFrom(state.squares, from)
+    return maximalJumps(state.squares, from, target).map((j) => ({ from, to: j.to }))
+  }
+  let globalMax = 0
+  for (let i = 0; i < 64; i++) {
+    if (colorOf(state.squares[i]) === state.turn) globalMax = Math.max(globalMax, maxCaptureFrom(state.squares, i))
+  }
+  if (globalMax > 0) {
+    if (maxCaptureFrom(state.squares, from) !== globalMax) return []
+    return maximalJumps(state.squares, from, globalMax).map((j) => ({ from, to: j.to }))
+  }
   return stepsFrom(state.squares, from).map((to) => ({ from, to }))
 }
 

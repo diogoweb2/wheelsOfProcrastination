@@ -520,13 +520,13 @@ function CheckersRules() {
       <h3>Moving</h3>
       <ul>
         <li>Only the <strong>dark squares</strong> are ever used.</li>
-        <li>A <strong>Man</strong> moves one square diagonally <em>forward</em>.</li>
-        <li>Jump an enemy piece by hopping over it to the empty square straight behind. The jumped piece is captured.</li>
+        <li>A <strong>Man</strong> moves one square diagonally <em>forward</em> — but can <strong>capture in any of the four diagonal directions</strong>, backwards included.</li>
+        <li>Jump an enemy piece by hopping over it to the empty square straight behind it. The jumped piece is captured.</li>
       </ul>
-      <h3>Jumping is compulsory</h3>
-      <p>If a jump exists anywhere on the board, you <strong>must</strong> jump — a quiet move isn’t legal. If several jumps are on offer, you pick which one. And if the piece you just landed with can jump again, it <strong>must keep going</strong>: one turn, many captures.</p>
+      <h3>Jumping is compulsory — and the biggest jump wins</h3>
+      <p>If a jump exists anywhere on the board, you <strong>must</strong> jump — a quiet move isn’t legal. This is Brazilian Draughts, so it's not just any jump: only the sequence that captures the <strong>most pieces</strong> is legal. If one piece can take 3 and another can only take 1, you must play the 3. And if the piece you just landed with can jump again, it <strong>must keep going</strong>: one turn, many captures.</p>
       <h3>Getting crowned</h3>
-      <p>A Man reaching the far row is <strong>crowned a King</strong> 👑 — it moves and jumps diagonally in <em>any</em> direction, backwards included. Crowning <strong>ends your turn</strong> right there, even if more jumps were available.</p>
+      <p>A Man reaching the far row is <strong>crowned a King</strong> 👑 — it <strong>flies</strong>: any distance along an empty diagonal, in any direction, and after capturing it can land on any empty square past the piece it took. Crowning <strong>ends your turn</strong> right there, even if more jumps were available.</p>
       <h3>Draws</h3>
       <p>Forty moves each with nothing captured is a draw.</p>
       <h3>The helper</h3>
