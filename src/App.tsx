@@ -34,7 +34,7 @@ type OpenApp = { app: string; tab: string } | null
 export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [open, setOpen] = useState<OpenApp>(null)
-  // topic a quiz quest card asked to jump into; consumed by the Academy on arrival
+  // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
 
@@ -149,8 +149,8 @@ export default function App() {
       Notification.permission === 'granted'
     ) {
       try {
-        new Notification(duelCall ? '⚔️ A duel challenge!' : '⚔️ Your move!', {
-          body: duelCall ? `${duelCall.fromName} is calling you out.` : 'The Davy Back Fight is waiting on you.',
+        new Notification(duelCall ? '🃏 A card-game challenge!' : '🃏 Your move!', {
+          body: duelCall ? `${duelCall.fromName} is calling you out.` : 'The card game is waiting on you.',
         })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
@@ -194,7 +194,7 @@ export default function App() {
   useEffect(() => {
     if (openTrades.length > prevTrades.current && 'Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Log Book app.' })
+        new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Stickers app.' })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
       }
@@ -210,7 +210,7 @@ export default function App() {
     if (freezeAsks.length > prevAsks.current && 'Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification('🆘 Ben needs a Streak Freeze!', {
-          body: 'His streak is on the line. Open the Captain app to send one.',
+          body: 'His streak is on the line. Open the Parent app to send one.',
         })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
@@ -354,7 +354,7 @@ export default function App() {
               {duelCall ? `${duelCall.fromName} calls you out!` : 'Your move in the duel!'}
             </div>
             <div style={{ fontSize: 11, opacity: 0.9 }}>
-              {duelCall ? 'Davy Back Fight — winner takes the Berries' : 'The other captain is waiting on you'}
+              {duelCall ? 'Card game — winner takes the Berries' : 'The other captain is waiting on you'}
             </div>
           </div>
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('duel', 'fight') }}>

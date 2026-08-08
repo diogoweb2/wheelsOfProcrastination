@@ -80,7 +80,7 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
             />
           ))}
           <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            Your own official final tests run from the Academy app. <b>npm run quiz:regen</b> refills removed questions;{' '}
+            Your own official final tests run from the Quiz app. <b>npm run quiz:regen</b> refills removed questions;{' '}
             <b>npm run quiz:review</b> (weekly, sonnet) refreshes your AI topics — updated questions show a ✨ NEW badge.
           </p>
         </>

@@ -43,12 +43,12 @@ function useStickerZoom() {
   }
 }
 
-/** Grand Line Log Book. `tab` comes from the app's bottom menu. */
+/** The Sticker Album. `tab` comes from the app's bottom menu. */
 export function AlbumScreen({ tab }: { tab: string }) {
   return (
     <div className="screen">
       <div className="h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        📖 Grand Line Log Book
+        🖼️ Sticker Album
       </div>
       <p className="muted" style={{ marginBottom: 10 }}>
         Every pirate on the seas — collect them all, trade the spares.

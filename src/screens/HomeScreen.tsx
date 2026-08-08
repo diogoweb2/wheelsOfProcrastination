@@ -227,7 +227,7 @@ function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }
         <div className="widget-head">🪙 Berries</div>
         {/* stat--gem: where earned coins fly to on this screen (logic/fx.ts) */}
         <div className="widget-big stat--gem" style={{ color: 'var(--gold)' }}><AnimatedNum value={data.economy.gems} /></div>
-        <div className="widget-sub">to spend at Nami’s</div>
+        <div className="widget-sub">to spend in the Shop</div>
         <div className="widget-foot widget-inline">
           <DevilFruit size={14} /> <AnimatedNum value={data.economy.devilFruits} /> Devil Fruit{data.economy.devilFruits === 1 ? '' : 's'}
         </div>
@@ -244,14 +244,14 @@ function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }
       </button>
 
       <button className="widget" onClick={() => { sfx.click(); onOpen('album', 'album') }}>
-        <div className="widget-head">📖 Log Book</div>
+        <div className="widget-head">🖼️ Stickers</div>
         <div className="widget-big">{album.owned}<span className="widget-of">/{album.total}</span></div>
         <div className="widget-sub">pirates collected</div>
         <div className="widget-bar"><span style={{ width: `${album.pct}%` }} /></div>
       </button>
 
       <button className="widget" onClick={() => { sfx.click(); onOpen('academy', 'topics') }}>
-        <div className="widget-head">🏫 Academy</div>
+        <div className="widget-head">🎓 Quiz</div>
         <div className="widget-big" style={{ color: due > 0 ? 'var(--blue)' : 'var(--muted)' }}>{due}</div>
         <div className="widget-sub">{due === 0 ? 'all caught up today 😴' : 'questions to practise'}</div>
         <div className="widget-foot">{data.quiz.passedTopics.length} topics conquered</div>

@@ -15,10 +15,10 @@ export function StoreScreen({ tab }: { tab: string }) {
   return (
     <div className="screen">
       <div className="h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <BerryCoin size={26} /> Nami’s Black Market
+        <BerryCoin size={26} /> Shop
       </div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        Rare goods, non-negotiable prices. All sales final.
+        Nami’s black market. Rare goods, non-negotiable prices. All sales final.
       </p>
       {tab === 'walls' && <BackgroundsTab />}
       {tab === 'treasures' && <TreasuresTab />}
@@ -225,7 +225,7 @@ function TreasuresTab() {
       sfx.error()
       setMsg(
         result === 'broke'
-          ? `You need ${cost} 🍇 for that — pass official final tests at the Academy!`
+          ? `You need ${cost} 🍇 for that — pass official final tests in the Quiz app!`
           : `The merchant ship returns in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. One treasure per month!`,
       )
     }
@@ -237,7 +237,7 @@ function TreasuresTab() {
         <DevilFruit size={34} />
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 900 }}>{fruits} Devil Fruit{fruits === 1 ? '' : 's'}</div>
-          <div className="muted" style={{ fontSize: 12 }}>Win them by passing official final tests at the Academy.</div>
+          <div className="muted" style={{ fontSize: 12 }}>Win them by passing official final tests in the Quiz app.</div>
         </div>
         {daysLeft > 0 && (
           <div style={{ textAlign: 'center' }}>
@@ -251,7 +251,7 @@ function TreasuresTab() {
         <div className="card" style={{ marginBottom: 14, borderColor: 'var(--yellow)' }}>
           <div style={{ fontWeight: 900 }}>⏳ {unpaidCount} treasure{unpaidCount > 1 ? 's' : ''} waiting to be handed over</div>
           <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            {isAdmin ? 'Settle them from the Captain app → Prizes.' : 'Dad has a big warning on his profile — he’ll mark it “paid” when it’s in your hands.'}
+            {isAdmin ? 'Settle them from the Parent app → Prizes.' : 'Dad has a big warning on his profile — he’ll mark it “paid” when it’s in your hands.'}
             {' '}They stack up if more arrive — nothing is lost.
           </div>
         </div>

@@ -19,7 +19,7 @@ export interface AppDef {
   /** Two CSS colors — the icon tile's gradient. */
   tint: [string, string]
   tabs: AppTabDef[]
-  /** Parent-only bottom menu; the same app looks different from the captain's chair. */
+  /** Parent-only bottom menu; the same app looks different from the parent's side. */
   adminTabs?: AppTabDef[]
   adminOnly?: boolean
   /** Only on the home screen while this gate is open (see `Gates`). */
@@ -53,8 +53,8 @@ export interface Gates {
 export const APPS: AppDef[] = [
   {
     id: 'wheel',
-    name: 'Wheel',
-    icon: '🎡',
+    name: 'Tasks',
+    icon: '📋',
     img: '/app-wheel.webp',
     tint: ['#d70000', '#8c0000'],
     // the voyage pages (streak, map, record) live here: they're all about the
@@ -69,8 +69,8 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'academy',
-    name: 'Academy',
-    icon: '🏫',
+    name: 'Quiz',
+    icon: '🎓',
     img: '/app-academy.webp',
     tint: ['#2e63a4', '#12315a'],
     tabs: [
@@ -100,8 +100,8 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'store',
-    name: 'Store',
-    icon: '🪙',
+    name: 'Shop',
+    icon: '🛒',
     img: '/app-store.webp',
     tint: ['#af6528', '#6b3a12'],
     tabs: [
@@ -112,27 +112,27 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'album',
-    name: 'Log Book',
-    icon: '📖',
+    name: 'Stickers',
+    icon: '🖼️',
     img: '/app-album.webp',
     tint: ['#60bff5', '#1d4f80'],
     tabs: [
-      { id: 'album', label: 'Album', icon: '📖' },
+      { id: 'album', label: 'Album', icon: '🖼️' },
       { id: 'packs', label: 'Packs', icon: '🎁' },
       { id: 'trade', label: 'Trade', icon: '🤝' },
     ],
   },
   {
-    // the album's cards, played as a TCG — lives next to the Log Book on purpose
+    // the sticker album's cards, played as a TCG
     id: 'duel',
-    name: 'Davy Back',
-    icon: '⚔️',
+    name: 'Card Game',
+    icon: '🃏',
     img: '/app-duel.webp',
     tint: ['#d70000', '#3a0000'],
     folder: 'games',
     tabs: [
-      { id: 'fight', label: 'Fight', icon: '⚔️' },
-      { id: 'deck', label: 'Crew', icon: '🃏' },
+      { id: 'fight', label: 'Play', icon: '⚔️' },
+      { id: 'deck', label: 'Deck', icon: '🃏' },
       { id: 'rules', label: 'How to', icon: '📜' },
     ],
   },
@@ -188,8 +188,8 @@ export const APPS: AppDef[] = [
   {
     // travel-only: it appears while trip mode (the Brazil money converter) is on
     id: 'logpose',
-    name: 'Log Pose',
-    icon: '🧭',
+    name: 'Clocks',
+    icon: '🕐',
     tint: ['#60bff5', '#2e63a4'],
     gate: 'converter',
     tabs: [{ id: 'clocks', label: 'Clocks', icon: '🕐' }],
@@ -208,14 +208,14 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'admin',
-    name: 'Captain',
-    icon: '🛠️',
+    name: 'Parent',
+    icon: '👨‍👦',
     img: '/app-admin.webp',
     tint: ['#d70000', '#5c0000'],
     adminOnly: true,
     tabs: [
       { id: 'freezes', label: 'Freezes', icon: '🧊' },
-      { id: 'academies', label: 'Academies', icon: '🏫' },
+      { id: 'academies', label: 'Quizzes', icon: '🎓' },
       { id: 'prizes', label: 'Prizes', icon: '🎁' },
       { id: 'audit', label: 'Audit', icon: '📜' },
     ],
@@ -226,7 +226,7 @@ export function appById(id: string): AppDef | undefined {
   return APPS.find((a) => a.id === id)
 }
 
-/** The bottom menu this profile sees for an app (admins get the captain's version). */
+/** The bottom menu this profile sees for an app (the parent gets their own version). */
 export function tabsFor(app: AppDef, profileId: string | null): AppTabDef[] {
   return profileId === PARENT_ID && app.adminTabs ? app.adminTabs : app.tabs
 }

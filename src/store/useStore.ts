@@ -2047,7 +2047,7 @@ export const useStore = create<StoreState>((set, get) => {
             d.economy.totalGemsEarned += DUEL_REWARD
             events.push({
               type: 'goal',
-              title: 'Davy Back Fight won!',
+              title: 'Card game won!',
               emoji: '🏴‍☠️',
               description: `You beat ${duel.fromId === activeProfileId ? duel.toName : duel.fromName} — +${DUEL_REWARD} Berries.`,
             })

@@ -1,8 +1,8 @@
-// Grand Line Academy — the 🏫 Academy app. Each profile sees ITS OWN academy
+// Quiz ("Grand Line Academy") — the 🎓 Quiz app. Each profile sees ITS OWN set of topics
 // (Ben: school topics · Diogo: the Agent Engineer path + tooling). Training and
 // test practice for everyone; Diogo, being admin, can also launch his own
 // OFFICIAL final test here. Ben's official tests are launched from Diogo's
-// Captain app → Academies.
+// Parent app → Quizzes.
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
@@ -74,7 +74,7 @@ export function QuizScreen({
 
   return (
     <div className="screen">
-      <div className="h1">🏫 Grand Line Academy</div>
+      <div className="h1">🎓 Quiz</div>
       <p className="muted" style={{ marginBottom: 6 }}>
         {isAdmin
           ? 'Train your AI-dev skills, earn Berries, pass your own final tests for Devil Fruits.'
@@ -295,7 +295,7 @@ function TopicCard({
   onStudy: () => void
 }) {
   const passed = data.quiz.passedTopics.includes(topic.id)
-  // A conquered topic drops off the wheel, but stays open in the Academy: every
+  // A conquered topic drops off the wheel, but stays open in the Quiz app: every
   // later official test opens with a warm-up round on this material.
   const unlocked = data.quiz.unlockedTopics.includes(topic.id) || passed
   const pool = activeQuestions(bank, topic.id)
@@ -372,7 +372,7 @@ function TopicCard({
         <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
           🔒 {prereq
             ? `Locked — pass the ${prereq.title} final test to open this level.`
-            : `Locked — ${selfOfficial ? 'open it from the Captain app → Academies.' : 'ask Dad to open this sea.'}`}
+            : `Locked — ${selfOfficial ? 'open it from the Parent app → Quizzes.' : 'ask Dad to open this topic.'}`}
         </div>
       )}
     </div>

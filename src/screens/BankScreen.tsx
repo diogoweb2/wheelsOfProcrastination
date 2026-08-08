@@ -170,7 +170,7 @@ function BankKid({ tab }: { tab: string }) {
   return (
     <div className="screen">
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div className="h1" style={{ flex: 1 }}>Grand Line Bank</div>
+        <div className="h1" style={{ flex: 1 }}>Bank</div>
         <div style={{ fontSize: 40 }}>🏦</div>
       </div>
 

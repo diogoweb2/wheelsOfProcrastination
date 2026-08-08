@@ -107,7 +107,7 @@ const asCheckers = (s: BoardState) => s as CheckersState
 
 export const CHESS_KIT: GameKit = {
   kind: 'chess',
-  title: 'Grand Line Chess',
+  title: 'Chess',
   icon: '♟️',
   blurb: 'Official chess rules, crewed by the Straw Hats. Trap the enemy King and the sea is yours.',
   create: () => newChess(),
@@ -152,7 +152,7 @@ export const CHESS_KIT: GameKit = {
 
 export const CHECKERS_KIT: GameKit = {
   kind: 'checkers',
-  title: 'Davy Back Checkers',
+  title: 'Checkers',
   icon: '🔴',
   blurb: 'Official 8×8 checkers. Jumping is compulsory — reach the far side and you’re crowned.',
   create: () => newCheckers(),

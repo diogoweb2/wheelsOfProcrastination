@@ -29,25 +29,27 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 - **Inside an app**: one sticky header row holds the **`⌂ Main` button**, the app name, and the **🪙 Berry counter** (it lives here because earned coins fly to it — `logic/fx.ts` targets `.stat--gem`). Below that, each app has **its own bottom menu**. An app with a single page shows no menu.
 - **The roster** ([src/apps/registry.ts](src/apps/registry.ts)) is the single source of truth — one entry per app (name, artwork, tile colours, bottom-menu tabs, `adminOnly`, `gate`), plus one branch in `AppBodyRouter` ([src/App.tsx](src/App.tsx)). Adding an app touches nothing else.
 
+**App names are deliberately plain.** The One Piece flavour lives in the artwork, the copy and the game content — never in the icon label. "Log Book", "Davy Back", "Captain" and "Log Pose" were unreadable as navigation: you cannot find the sticker album from a tile called Log Book. Each tile now says what the app *is*; the flavour name (Grand Line Academy, Nami's Black Market, Davy Back Fight) survives as a subtitle inside.
+
 | App | Bottom menu |
 |---|---|
-| 🎡 **Wheel** | Spin · Quests · Streak · Map · Record |
-| 🏫 **Academy** | Topics · Study · Progress |
+| 📋 **Tasks** *(the wheel + the daily loop)* | Spin · Quests · Streak · Map · Record |
+| 🎓 **Quiz** | Topics · Study · Progress |
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
-| 🪙 **Store** | Wallpapers · Treasures · Orders |
-| 📖 **Log Book** | Album · Packs · Trade |
-| ⚔️ **Davy Back** *(in 🎮 Games)* | Fight · Crew · How to |
+| 🛒 **Shop** | Wallpapers · Treasures · Orders |
+| 🖼️ **Stickers** | Album · Packs · Trade |
+| 🃏 **Card Game** *(in 🎮 Games)* | Play · Deck · How to |
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
 | 💡 **Ideas** | Open · Done · New |
-| 🧭 **Log Pose** | Clocks *(single page)* |
+| 🕐 **Clocks** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
-| 🛠️ **Captain** (Diogo only) | Freezes · Academies · Prizes · Audit |
+| 👨‍👦 **Parent** (Diogo only) | Freezes · Quizzes · Prizes · Audit |
 
 - **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
 - **Folders.** An app may declare a `folder`, and every app naming the same one collapses into a single Dashboard tile that opens onto them — exactly what a phone does. **🎮 Games** holds ⚔️ Davy Back, ♟️ Chess and 🔴 Checkers; three games in a row of icons is three games' worth of noise. The folder tile carries a strip of the icons inside it and **one red badge summing everything waiting in there**, so nothing gets buried by being grouped. Dragging still works: the saved order (`settings.homeOrder`) holds tile ids, and a folder that has never been dragged inherits the earliest slot any app inside it held — which is why the Games folder appears where the Davy Back icon used to be rather than at the end.
-- **Situational apps.** An app may declare a `gate` and then only appears on the home screen while that gate is open. **Log Pose** (crew time-zone clocks) is gated on `converter` — it shows up only while **trip mode / the Brazil money converter** is switched on for Ben's bank (§8b), and disappears again when the trip is over.
+- **Situational apps.** An app may declare a `gate` and then only appears on the home screen while that gate is open. **Clocks** (crew time zones) is gated on `converter` — it shows up only while **trip mode / the Brazil money converter** is switched on for Ben's bank (§8b), and disappears again when the trip is over.
 
 App tile artwork is generated from art already in `public/` (see CLAUDE.md's image rules) into 128px webp files named `public/app-*.webp`. Apps without artwork fall back to their emoji on a coloured squircle.
 

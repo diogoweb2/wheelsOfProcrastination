@@ -65,7 +65,7 @@ function useDeck() {
 export function DuelScreen({ tab }: { tab: string }) {
   return (
     <div className="screen">
-      <div className="h1">⚔️ Davy Back Fight</div>
+      <div className="h1">🃏 Card Game</div>
       <p className="muted" style={{ marginBottom: 12 }}>
         Your album cards, in a real fight. Knock out {KOS_TO_WIN} of theirs and the Berries are yours.
       </p>
@@ -185,7 +185,7 @@ function FightTab() {
       <p className="muted" style={{ textAlign: 'center', marginTop: 24, lineHeight: 1.5 }}>
         🃏 You need {DECK_SIZE} cards to field a crew — you have {battleReady(data.album.counts).length}.
         <br />
-        Open a pack in the Log Book and come back!
+        Open a pack in the Stickers app and come back!
       </p>
     )
   }
@@ -378,7 +378,7 @@ function DeckTab() {
   if (!enough) {
     return (
       <p className="muted" style={{ textAlign: 'center', marginTop: 24 }}>
-        Collect {DECK_SIZE} cards in the Log Book and your crew can set sail.
+        Collect {DECK_SIZE} cards in the Stickers app and your deck can set sail.
       </p>
     )
   }

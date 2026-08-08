@@ -432,7 +432,7 @@ function ReviewFailed({ record, bank, topicTitle, onClose }: { record: QuizTestR
         )
       })}
       <button className="btn" style={{ marginTop: 10 }} onClick={onClose}>
-        Back to the Academy
+        Back to the Quiz
       </button>
     </Full>
   )
@@ -495,7 +495,7 @@ function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTest
         )
       })}
       <button className="btn" style={{ marginTop: 10 }} onClick={onClose}>
-        Back to the Academy
+        Back to the Quiz
       </button>
     </Full>
   )

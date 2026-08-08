@@ -79,7 +79,7 @@ export function TimeZoneSection() {
 
   return (
     <>
-      <div className="h2">🧭 Log Pose — crew time zones</div>
+      <div className="h2">🕐 Clocks — crew time zones</div>
 
       <div style={{ textAlign: 'center', marginBottom: 10 }}>
         <Luffy state="default" size={90} />
