@@ -1,13 +1,19 @@
-// Keeps public/Album/ in shape for the Grand Line Sticker Album:
+// Turns the source art in assets/Album/ into the Grand Line Sticker Album:
 //  1. normalizes every image to one portrait card ratio (Panini-style), on a
 //     transparent canvas, and compresses it — output always lands in
 //     public/stickers/<slug>.webp so the originals stay untouched
 //  2. regenerates src/logic/stickerCatalog.generated.ts: every sticker with a
-//     stable id, display name, rarity, and its crew
+//     stable id, display name, rarity, its crew — and its Davy Back Duel battle
+//     card (element, archetype, HP, two attacks). New art is playable the moment
+//     it lands; see the "battle stats" section below.
+//
+// The originals live OUTSIDE public/ on purpose: they are ~15 MB of full-size
+// art, and anything under public/ is copied verbatim into the build and
+// downloaded by every user. Only the compressed cards in public/stickers/ ship.
 //
 // Rarity comes from the folder:
-//   public/Album/                    → common  (white border)
-//   public/Album/special stickers/   → special (red border)
+//   assets/Album/                    → common  (white border)
+//   assets/Album/special stickers/   → special (red border)
 //
 // Crews are assigned by a STABLE hash of the sticker id, so dropping new images
 // in never reshuffles the cards anyone already owns. Ids are derived from the
@@ -18,7 +24,7 @@ import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
-const SRC = new URL('../public/Album/', import.meta.url).pathname
+const SRC = new URL('../assets/Album/', import.meta.url).pathname
 const SPECIAL_DIR = 'special stickers'
 const OUT_DIR = new URL('../public/stickers/', import.meta.url).pathname
 const CATALOG = new URL('../src/logic/stickerCatalog.generated.ts', import.meta.url).pathname
@@ -36,6 +42,9 @@ const EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp'])
 // filenames are noisy enough that most cards need one; ids without an entry fall
 // back to the guesser, and the run prints them so they're easy to fix up.
 const NAMES = JSON.parse(await readFile(new URL('./sticker-names.json', import.meta.url), 'utf8'))
+
+// Battle identities for characters we recognise by name (see card-powers.json).
+const POWERS = JSON.parse(await readFile(new URL('./card-powers.json', import.meta.url), 'utf8'))
 
 // Album sections are World Cup 2026 teams, best-ranked first. Only as many
 // teams as the catalog needs are active (~CARDS_PER_TEAM cards each), so
@@ -138,6 +147,137 @@ function displayName(file) {
     .slice(0, 28)
 }
 
+// --- battle stats (the Davy Back Duel card game) ----------------------------
+//
+// Every album card doubles as a playable TCG card, so the stats have to be
+// DERIVED, not written by hand: new art dropped into assets/Album/ has to arrive
+// battle-ready. Everything below hangs off the same stable id hash the crews use
+// — a card's element, archetype, HP and damage never change once it exists, and
+// two machines running the script produce identical numbers.
+//
+// Balance is archetype-driven rather than random: a card is a Guardian (tanky,
+// heals), Bruiser (solid, powers up), Striker (glass cannon) or Trickster
+// (fragile, stuns). Within an archetype the hash only picks WHERE in a narrow
+// band the card lands, so nothing can roll broken. Red rares get +HP, +damage
+// and pay for it with a 3-energy finisher instead of 2.
+
+/** The weakness ring: each element beats the NEXT one, and is weak to the one before it. */
+const ELEMENTS = [
+  { id: 'flame', name: 'Flame', icon: '🔥' },
+  { id: 'beast', name: 'Beast', icon: '🐗' },
+  { id: 'blade', name: 'Blade', icon: '⚔️' },
+  { id: 'spirit', name: 'Spirit', icon: '👻' },
+  { id: 'storm', name: 'Storm', icon: '⚡' },
+  { id: 'tide', name: 'Tide', icon: '🌊' },
+]
+
+/**
+ * hp: [floor, steps] → floor + 10·(hash % steps). Same shape for damage with a
+ * step of 5. `effect` rides on the finisher; Strikers trade it for raw damage.
+ */
+// A finisher is worth ~2.6 quick attacks for twice the energy, so hoarding a
+// turn to land one genuinely beats swinging every turn. That gap is the whole
+// decision the game asks a player to make, and it's why matches don't drag.
+const ARCHETYPES = {
+  guardian: { label: 'Guardian', hp: [120, 4], quick: [15, 3], big: [50, 3], effect: 'heal', amount: 20, retreat: 2 },
+  bruiser: { label: 'Bruiser', hp: [105, 4], quick: [20, 3], big: [62, 3], effect: 'boost', amount: 20, retreat: 2 },
+  striker: { label: 'Striker', hp: [80, 4], quick: [25, 3], big: [80, 3], effect: null, amount: 0, retreat: 1 },
+  trickster: { label: 'Trickster', hp: [90, 4], quick: [20, 3], big: [56, 3], effect: 'stun', amount: 0, retreat: 1 },
+}
+const ARCH_IDS = Object.keys(ARCHETYPES)
+
+/** Move names for cards we can't recognise — flavoured by element so they still read right. */
+const MOVES = {
+  flame: {
+    quick: ['Ember Jab', 'Cinder Kick', 'Heat Haze', 'Spark Fist'],
+    big: ['Blazing Cross', 'Inferno Rush', 'Volcano Break', 'Firestorm'],
+  },
+  beast: {
+    quick: ['Wild Swipe', 'Horn Jab', 'Fang Bite', 'Heavy Paw'],
+    big: ['Beast Rampage', 'Roar of the Wild', 'Savage Charge', 'Titan Slam'],
+  },
+  blade: {
+    quick: ['Quick Draw', 'Crescent Cut', 'Iron Slash', 'Blade Dance'],
+    big: ['Flying Slash', 'Thousand Cuts', 'Storm of Steel', 'Executioner'],
+  },
+  spirit: {
+    quick: ['Phantom Grip', 'Soul Touch', 'Hollow Chill', 'Shadow Jab'],
+    big: ['Spirit Requiem', 'Nightmare Wail', 'Soul Parade', 'Curse Bloom'],
+  },
+  storm: {
+    quick: ['Static Snap', 'Wind Slap', 'Bolt Jab', 'Gale Kick'],
+    big: ['Sky Judgment', 'Thunder Lance', 'Tempest Cannon', 'Cloudbreaker'],
+  },
+  tide: {
+    quick: ['Water Shot', 'Ripple Palm', 'Undertow', 'Salt Spray'],
+    big: ['Whirlpool Spear', 'Deep Sea Crush', 'Tidal Wall', 'Abyss Current'],
+  },
+}
+
+/** Longest-matching key from card-powers.json, so "Luffy · Gear 5" beats plain "luffy". */
+function curatedPower(name) {
+  const lower = name.toLowerCase()
+  let best = null
+  for (const key of Object.keys(POWERS)) {
+    if (key.startsWith('_') || !lower.includes(key)) continue
+    if (!best || key.length > best.length) best = key
+  }
+  return best ? POWERS[best] : null
+}
+
+/** Human-readable effect line — the card front prints this under the finisher. */
+function effectText(effect, amount) {
+  if (effect === 'heal') return `Heal ${amount} HP`
+  if (effect === 'boost') return `Next attack +${amount}`
+  if (effect === 'stun') return 'They can’t attack next turn'
+  if (effect === 'drain') return 'Heal half the damage dealt'
+  return null
+}
+
+/**
+ * The full battle card for one sticker. `id` drives every roll (stable forever);
+ * `name` only chooses the curated identity, so renaming a card can change its
+ * flavour but never destabilises the rest of the album.
+ */
+function cardStats(id, name, rarity) {
+  const h = hash(id)
+  const curated = curatedPower(name)
+  const special = rarity === 'special'
+
+  const element = curated?.element ?? ELEMENTS[h % ELEMENTS.length].id
+  const archId = curated?.archetype ?? ARCH_IDS[(h >>> 3) % ARCH_IDS.length]
+  const arch = ARCHETYPES[archId]
+
+  const hp = arch.hp[0] + 10 * ((h >>> 6) % arch.hp[1]) + (special ? 20 : 0)
+  const quickDmg = arch.quick[0] + 5 * ((h >>> 10) % arch.quick[1]) + (special ? 5 : 0)
+  const bigDmg = arch.big[0] + 5 * ((h >>> 14) % arch.big[1]) + (special ? 10 : 0)
+
+  const pool = MOVES[element]
+  const names = curated?.attacks ?? [
+    pool.quick[(h >>> 18) % pool.quick.length],
+    pool.big[(h >>> 22) % pool.big.length],
+  ]
+
+  const finisher = { name: names[1], cost: special ? 3 : 2, damage: bigDmg }
+  if (arch.effect) {
+    finisher.effect = arch.effect
+    if (arch.amount) finisher.amount = arch.amount
+    finisher.text = effectText(arch.effect, arch.amount)
+  }
+
+  const stats = {
+    element,
+    archetype: archId,
+    hp,
+    retreat: arch.retreat,
+    attacks: [{ name: names[0], cost: 1, damage: quickDmg }, finisher],
+  }
+  // Only recognised characters carry a voice; everyone else is played with their
+  // element's sound, so a swordsman never shouts Gum-Gum.
+  if (curated?.voice) stats.voice = curated.voice
+  return stats
+}
+
 /**
  * Many clipart downloads have the transparency checkerboard baked into the
  * pixels instead of a real alpha channel. Detect that (opaque, light-gray
@@ -236,11 +376,13 @@ for (const { file, full, rarity } of sources) {
   await writeFile(outPath, out)
 
   const curated = NAMES[id]
+  const name = curated ?? displayName(file)
   catalog.push({
     id,
-    name: curated ?? displayName(file),
+    name,
     named: Boolean(curated),
     rarity,
+    card: cardStats(id, name, rarity),
     kb: Math.round(out.length / 1024),
   })
 }
@@ -284,13 +426,46 @@ const commons = catalog.filter((c) => c.rarity === 'common').length
 const specials = catalog.length - commons
 
 const ts = `// AUTO-GENERATED by scripts/stickers.mjs — do not edit.
-// Drop images into public/Album/ (or public/Album/${SPECIAL_DIR}/ for red rares)
+// Drop images into assets/Album/ (or assets/Album/${SPECIAL_DIR}/ for red rares)
 // and run \`npm run stickers\` (also runs before dev/build).
+/** The six battle elements, in ring order: each one beats the NEXT in this list. */
+export type CardElement = ${ELEMENTS.map((e) => `'${e.id}'`).join(' | ')}
+
+export type CardArchetype = ${ARCH_IDS.map((a) => `'${a}'`).join(' | ')}
+
+/** What a finisher does on top of its damage. Strikers trade this for raw power. */
+export type CardEffect = 'heal' | 'boost' | 'stun' | 'drain'
+
+export interface CardAttack {
+  name: string
+  cost: number // energy spent to use it
+  damage: number
+  effect?: CardEffect
+  amount?: number // heal/boost magnitude
+  text?: string // the effect line printed on the card
+}
+
+/** A sticker's Davy Back Duel identity — derived from its id, so it never drifts. */
+export interface CardStats {
+  element: CardElement
+  archetype: CardArchetype
+  hp: number
+  retreat: number // energy to swap this card off the front line
+  /** [quick move, finisher] */
+  attacks: CardAttack[]
+  /**
+   * Clip in public/duel/voices/ this character shouts on a finisher. Only set for
+   * characters we recognise by name; everyone else uses their element's sound.
+   */
+  voice?: string
+}
+
 export interface StickerDef {
   id: string
   name: string
   rarity: 'common' | 'special'
   crew: string
+  card: CardStats
 }
 
 export interface CrewDef {
@@ -312,8 +487,30 @@ export const STICKER_CREWS: CrewDef[] = ${JSON.stringify(
   2,
 )}
 
+/**
+ * The weakness ring — \`beats\` takes DOUBLE damage from this element. Rendered
+ * as-is on the duel's How to Play page, so the rules can never fall out of sync
+ * with the maths.
+ */
+export const CARD_ELEMENTS: { id: CardElement; name: string; icon: string; beats: CardElement }[] = ${JSON.stringify(
+  ELEMENTS.map((e, i) => ({ ...e, beats: ELEMENTS[(i + 1) % ELEMENTS.length].id })),
+  null,
+  2,
+)}
+
+export const CARD_ARCHETYPES: { id: CardArchetype; label: string; blurb: string }[] = ${JSON.stringify(
+  [
+    { id: 'guardian', label: 'Guardian', blurb: 'Huge HP, small hits — its finisher heals.' },
+    { id: 'bruiser', label: 'Bruiser', blurb: 'Tough and steady — its finisher powers up the next hit.' },
+    { id: 'striker', label: 'Striker', blurb: 'Glass cannon: hits hardest, folds fastest.' },
+    { id: 'trickster', label: 'Trickster', blurb: 'Fragile, but its finisher stuns for a turn.' },
+  ],
+  null,
+  2,
+)}
+
 export const STICKER_CATALOG: StickerDef[] = ${JSON.stringify(
-  catalog.map(({ id, name, rarity, crew }) => ({ id, name, rarity, crew })),
+  catalog.map(({ id, name, rarity, crew, card }) => ({ id, name, rarity, crew, card })),
   null,
   2,
 )}

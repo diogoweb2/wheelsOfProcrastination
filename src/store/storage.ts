@@ -48,6 +48,7 @@ export function defaultData(): AppData {
     giftcards: [],
     bank: defaultBankState(),
     album: defaultAlbumState(),
+    duel: { wins: 0, losses: 0, deck: [], soloDay: null, soloWins: 0, settled: [] },
     gym: defaultGymState(),
     pushTokens: [],
   }
@@ -69,6 +70,12 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     giftcards: parsed.giftcards ?? base.giftcards,
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
+    duel: {
+      ...base.duel,
+      ...parsed.duel,
+      deck: parsed.duel?.deck ?? [],
+      settled: parsed.duel?.settled ?? [],
+    },
     gym: {
       ...base.gym,
       ...parsed.gym,

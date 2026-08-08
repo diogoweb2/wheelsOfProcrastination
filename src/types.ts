@@ -1,3 +1,8 @@
+// Type-only, so it is erased at build time and no import cycle survives into the
+// bundle (cardGame → album → types). The duel RULES live in logic/cardGame.ts;
+// only the stored shapes belong here.
+import type { DuelState } from './logic/cardGame'
+
 export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
 export type EffortFilter = Effort[] // selected efforts; empty = all
@@ -452,6 +457,46 @@ export interface StickerTrade {
   note?: string // optional one-liner from the sender
 }
 
+// --- Davy Back Duel (the card game played with album cards) -----------------
+
+/** One crewmate's duel record and the team they take into battle. */
+export interface DuelStats {
+  wins: number
+  losses: number
+  /** Their saved line-up (sticker ids, front line first); empty until they build one. */
+  deck: string[]
+  /** Solo wins are only paid for the first few each day — this is the day they count for. */
+  soloDay: string | null // YYYY-MM-DD
+  soloWins: number
+  /** Duel ids already counted into wins/losses, so a re-sync can't double-count them. */
+  settled: string[]
+}
+
+/**
+ * A head-to-head match, in the SHARED app/cardDuels doc so both phones watch the
+ * same board. `state` is the whole position: whoever's turn it is writes the
+ * next one back, which is safe precisely because only one side may move at a
+ * time. Solo matches never touch this — they live in React state.
+ */
+export interface CardDuel {
+  id: string
+  fromId: string // who challenged
+  fromName: string
+  fromEmoji: string
+  fromDeck: string[]
+  toId: string // who must answer
+  toName: string
+  toEmoji: string
+  toDeck: string[] // empty until they accept with their own line-up
+  status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled'
+  state: DuelState | null // null while the challenge is still pending
+  createdAt: string
+  resolvedAt?: string
+  winnerId?: string
+  /** Set once the winner's Berries have been paid, so a re-render can't pay twice. */
+  paidAt?: string
+}
+
 // --- Free freezes from Dad (shared app/freezeRequests doc) ------------------
 
 /**
@@ -733,6 +778,7 @@ export interface AppData {
   giftcards: GiftCardPurchase[]
   bank: BankState
   album: AlbumState
+  duel: DuelStats
   gym: GymState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }

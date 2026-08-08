@@ -13,6 +13,7 @@ import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
+import { DuelScreen } from './screens/DuelScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
@@ -30,7 +31,7 @@ import { sfx } from './audio'
 type OpenApp = { app: string; tab: string } | null
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [open, setOpen] = useState<OpenApp>(null)
   // topic a quiz quest card asked to jump into; consumed by the Academy on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
@@ -102,6 +103,43 @@ export default function App() {
     }
     prevPaybacks.current = paybackCount
   }, [paybackCount])
+
+  // Duels: a finished board pays out and goes into the W/L record. Both phones
+  // run this off the same shared doc and each one only banks its own side, so it
+  // lands even if the loser never reopened the arena.
+  useEffect(() => {
+    settleDuels()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duels, dataLoaded])
+
+  const duelCall = duels.find((d) => d.status === 'pending' && d.toId === activeProfileId)
+  const myDuel = duels.find(
+    (d) => d.status === 'active' && d.state && !d.state.over && d.state.sides[d.state.turn]?.profileId === activeProfileId,
+  )
+
+  // Ping when the snail rings: a challenge, or the other captain handing the turn
+  // back. Keyed on the turn number so every move gets its own ping — but only
+  // while the app is in the background, since an open arena already shows it.
+  const prevCall = useRef<string | null>(null)
+  const duelPing = duelCall ? `call:${duelCall.id}` : myDuel ? `turn:${myDuel.id}:${myDuel.state?.turnNo}` : null
+  useEffect(() => {
+    if (
+      duelPing &&
+      duelPing !== prevCall.current &&
+      document.visibilityState === 'hidden' &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
+      try {
+        new Notification(duelCall ? '⚔️ A duel challenge!' : '⚔️ Your move!', {
+          body: duelCall ? `${duelCall.fromName} is calling you out.` : 'The Davy Back Fight is waiting on you.',
+        })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevCall.current = duelPing
+  }, [duelPing]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ping when a sticker swap offer lands while the app is open
   const openTrades = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId)
@@ -182,6 +220,7 @@ export default function App() {
   // red dots on the home screen icons — the reason to open an app right now
   const homeBadges: Record<string, number> = {
     album: openTrades.length,
+    duel: (duelCall ? 1 : 0) + (myDuel ? 1 : 0),
     admin: freezeAsks.length + unpaidGifts.length,
     bank: pendingPaybacks.length,
   }
@@ -254,6 +293,23 @@ export default function App() {
           </button>
         </div>
       ))}
+
+      {(duelCall || myDuel) && (
+        <div className="banner" style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>⚔️</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              {duelCall ? `${duelCall.fromName} calls you out!` : 'Your move in the duel!'}
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              {duelCall ? 'Davy Back Fight — winner takes the Berries' : 'The other captain is waiting on you'}
+            </div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('duel', 'fight') }}>
+            {duelCall ? 'Answer' : 'Play'}
+          </button>
+        </div>
+      )}
 
       {openTrades.map((t) => (
         <div className="banner" key={t.id} style={{ background: 'var(--red)' }}>
@@ -374,6 +430,8 @@ function AppBodyRouter({
       return <StoreScreen tab={open.tab} />
     case 'album':
       return <AlbumScreen tab={open.tab} />
+    case 'duel':
+      return <DuelScreen tab={open.tab} />
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'ideas':

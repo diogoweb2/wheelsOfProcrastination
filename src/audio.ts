@@ -90,6 +90,85 @@ export const sfx = {
   },
 }
 
+// --- Davy Back Duel voices --------------------------------------------------
+//
+// The only sampled audio in the app besides the victory theme: real One Piece
+// shouts make a card game land in a way synthesized blips never will. Every clip
+// is a trimmed mono 22 kHz AAC in public/duel/ (~450 KB for the whole pack).
+//
+// Cards are voiced in two layers, so nothing ever sounds like the wrong pirate:
+//   · the QUICK attack plays the card's ELEMENT — a slash, a fire whoosh, a
+//     thunderclap. Never a voice, so it can't be attributed to anyone.
+//   · the FINISHER plays that CHARACTER's own clip when we have one
+//     (`card.voice`, curated in scripts/card-powers.json), and falls back to the
+//     element otherwise. Zoro draws steel; Nami calls thunder; Luffy is the only
+//     one who ever shouts Gum-Gum.
+// `maxMs` cuts playback to the length of the animation it scores.
+
+function sample(src: string, volume: number, maxMs: number) {
+  const stop = playClip(src, volume)
+  window.setTimeout(stop, maxMs)
+}
+
+const elementClip = (element: string) => `/duel/voices/el-${element}.m4a`
+
+export const duelSfx = {
+  /** A quick attack: the element's own sound. */
+  attack(element: string) {
+    sample(elementClip(element), 0.55, 1700)
+    tone(320, 0.08, 'square', 0.05, 0, 180)
+  },
+  /** A finisher: this character's voice if they have one, else their element. */
+  special(element: string, voice?: string) {
+    sample(voice ? `/duel/voices/${voice}.m4a` : elementClip(element), 0.65, 2600)
+    tone(180, 0.14, 'sawtooth', 0.07, 0, 70)
+  },
+  /** A card is knocked out. */
+  ko() {
+    sample('/duel/ko.m4a', 0.6, 1500)
+  },
+  /** A stun / effect rider fires. */
+  haki() {
+    sample('/duel/haki.m4a', 0.5, 2000)
+  },
+  /** The chest cracks open at the start of a duel. */
+  chest() {
+    sample('/duel/chest.m4a', 0.6, 1900)
+  },
+  /** The Davy Back Dice tumbles. */
+  dice() {
+    sample('/duel/dice.m4a', 0.6, 1500)
+  },
+  /**
+   * A treasure card resolves. The noise scales with the rarity, which is the
+   * whole point of rarities: a Legendary has to SOUND like one before anyone
+   * reads what it does.
+   */
+  treasure(rarity: 'common' | 'rare' | 'epic' | 'legendary') {
+    if (rarity === 'legendary') {
+      sample('/duel/legendary.m4a', 0.75, 2600)
+    } else if (rarity === 'epic') {
+      sample('/duel/haki.m4a', 0.65, 2000)
+    } else if (rarity === 'rare') {
+      tone(880, 0.1, 'triangle', 0.16)
+      tone(1320, 0.16, 'triangle', 0.14, 0.08)
+    } else {
+      tone(660, 0.08, 'sine', 0.13)
+      tone(990, 0.1, 'sine', 0.1, 0.06)
+    }
+  },
+  /** The transponder snail: a challenge just landed. */
+  challenge() {
+    sample('/duel/challenge.m4a', 0.55, 2600)
+  },
+  win() {
+    sample('/duel/win.m4a', 0.7, 2400)
+  },
+  lose() {
+    sample('/duel/lose.m4a', 0.5, 2600)
+  },
+}
+
 // --- background-safe alerts (the Gym's rest timer) --------------------------
 //
 // Everything above runs through WebAudio, which the browser SUSPENDS the moment

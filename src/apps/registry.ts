@@ -105,6 +105,19 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // the album's cards, played as a TCG — lives next to the Log Book on purpose
+    id: 'duel',
+    name: 'Davy Back',
+    icon: '⚔️',
+    img: '/app-duel.webp',
+    tint: ['#d70000', '#3a0000'],
+    tabs: [
+      { id: 'fight', label: 'Fight', icon: '⚔️' },
+      { id: 'deck', label: 'Crew', icon: '🃏' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
     id: 'gym',
     name: 'Gym',
     icon: '💪',

@@ -23,6 +23,7 @@ import type {
   Profile,
   QuizQuestion,
   QuizTestRecord,
+  CardDuel,
   StickerTrade,
   Task,
 } from '../types'
@@ -50,6 +51,7 @@ import {
   saveQuizBank,
   saveRoster,
   saveStickerTrades,
+  saveCardDuels,
   saveFreezeDesk,
   saveFinalTests,
   subscribeAiConfig,
@@ -57,6 +59,7 @@ import {
   subscribeGymCatalog,
   subscribeIdeas,
   subscribeStickerTrades,
+  subscribeCardDuels,
   subscribeFreezeDesk,
   subscribeFinalTests,
   subscribeMarketData,
@@ -67,6 +70,16 @@ import type { AuditCategory, AuditEntry, Season } from '../types'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
+import {
+  DECK_SIZE,
+  DUEL_REWARD,
+  SOLO_REWARD,
+  SOLO_REWARD_LIMIT,
+  applyMove,
+  startDuel,
+  type DuelMove,
+  type DuelState,
+} from '../logic/cardGame'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -198,6 +211,7 @@ interface StoreState {
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
+  duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
   freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
@@ -372,6 +386,24 @@ interface StoreState {
   /** Withdraw a swap I proposed and that hasn't been answered yet. */
   cancelTrade: (tradeId: string) => void
 
+  // --- Davy Back Duel (the card game) ---
+  /** Throw down the gauntlet with this line-up. One live duel between the crewmates at a time. */
+  challengeDuel: (deck: string[]) => 'ok' | 'busy' | 'deck'
+  /** Answer a challenge aimed at me — accepting needs my own line-up and starts the match. */
+  answerChallenge: (duelId: string, accept: boolean, deck?: string[]) => void
+  /** Play one move in an online duel. Ignored unless the board says it's my move. */
+  playDuelMove: (duelId: string, move: DuelMove) => void
+  /** Give up: the other side takes the win (and the Berries). */
+  resignDuel: (duelId: string) => void
+  /** Withdraw a challenge I sent that hasn't been answered yet. */
+  cancelDuel: (duelId: string) => void
+  /** Remember a line-up as my default team. */
+  saveDuelDeck: (deck: string[]) => void
+  /** Bank the record + Berries for any finished duel of mine not yet counted. Safe to call repeatedly. */
+  settleDuels: () => void
+  /** Log a solo match against the training dummy. Returns the Berries it paid. */
+  recordSoloResult: (won: boolean) => number
+
   buyBackground: () => string | 'broke' | 'complete'
   /** Equip an owned background as the app background; null = default solid color. */
   equipBackground: (id: string | null) => void
@@ -537,6 +569,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeIdeas((ideas) => set({ ideas }))
       // shared sticker swap table (same deal — empty doc is a valid empty list)
       subscribeStickerTrades((trades) => set({ trades }))
+      // shared duel board: challenges, and every move the other phone plays
+      subscribeCardDuels((duels) => set({ duels }))
       // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
@@ -597,6 +631,26 @@ export const useStore = create<StoreState>((set, get) => {
     fireAndForget(saveStickerTrades(trades))
   }
 
+  /**
+   * The duel fields that follow from a new position: the board itself, plus the
+   * closing paperwork once it's over. Firestore rejects `undefined`, so the
+   * winner/resolution keys are only added when they actually exist (a draw
+   * finishes with no winner at all).
+   */
+  function settledFields(state: DuelState): Partial<CardDuel> {
+    if (!state.over) return { state }
+    const done: Partial<CardDuel> = { state, status: 'finished', resolvedAt: new Date().toISOString() }
+    if (state.winnerId) done.winnerId = state.winnerId
+    return done
+  }
+
+  /** Write-through for the duel board, trimmed to what the app ever shows. */
+  function saveDuelList(duels: CardDuel[]) {
+    const kept = duels.slice(-8)
+    set({ duels: kept })
+    fireAndForget(saveCardDuels(kept))
+  }
+
   function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
     set({ freezeRequests: requests, freezeGifts: gifts })
     fireAndForget(saveFreezeDesk(requests, gifts))
@@ -639,6 +693,7 @@ export const useStore = create<StoreState>((set, get) => {
     market: null,
     ideas: [],
     trades: [],
+    duels: [],
     freezeRequests: [],
     finalTests: [],
     freezeGifts: [],
@@ -1811,6 +1866,170 @@ export const useStore = create<StoreState>((set, get) => {
       saveTradeList(
         trades.map((t) => (t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t)),
       )
+    },
+
+    // --- Davy Back Duel -----------------------------------------------------
+    //
+    // The whole match lives in the shared board doc. Each device only ever
+    // writes a position it is legally allowed to reach (its own move), so the
+    // last write always wins on purpose rather than by luck.
+
+    challengeDuel(deck) {
+      const me = get().activeProfile()
+      const mateId = get().activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
+      const mate = get().profiles.find((p) => p.id === mateId)
+      if (!me || !mate) return 'busy'
+      if (deck.length !== DECK_SIZE) return 'deck'
+      // one duel at a time between the two of them — two live boards would be chaos
+      if (get().duels.some((d) => d.status === 'pending' || d.status === 'active')) return 'busy'
+
+      saveDuelList([
+        ...get().duels,
+        {
+          id: `duel-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          fromId: me.id,
+          fromName: me.name,
+          fromEmoji: me.emoji,
+          fromDeck: deck,
+          toId: mate.id,
+          toName: mate.name,
+          toEmoji: mate.emoji,
+          toDeck: [],
+          status: 'pending',
+          state: null,
+          createdAt: new Date().toISOString(),
+        },
+      ])
+      return 'ok'
+    },
+
+    answerChallenge(duelId, accept, deck) {
+      const { duels, activeProfileId } = get()
+      const duel = duels.find((d) => d.id === duelId)
+      if (!duel || duel.status !== 'pending' || duel.toId !== activeProfileId) return
+      if (!accept) {
+        saveDuelList(
+          duels.map((d) =>
+            d.id === duelId ? { ...d, status: 'declined' as const, resolvedAt: new Date().toISOString() } : d,
+          ),
+        )
+        return
+      }
+      if (!deck || deck.length !== DECK_SIZE) return
+      // The side that accepted moves first — it's the small edge for answering the call.
+      const state = startDuel(
+        { profileId: duel.fromId, name: duel.fromName, emoji: duel.fromEmoji, deck: duel.fromDeck },
+        { profileId: duel.toId, name: duel.toName, emoji: duel.toEmoji, deck },
+        1,
+      )
+      saveDuelList(duels.map((d) => (d.id === duelId ? { ...d, toDeck: deck, status: 'active' as const, state } : d)))
+    },
+
+    playDuelMove(duelId, move) {
+      const { duels, activeProfileId } = get()
+      const duel = duels.find((d) => d.id === duelId)
+      if (!duel || duel.status !== 'active' || !duel.state || duel.state.over) return
+      // the board itself is the referee: only the side it says is to move may write
+      if (duel.state.sides[duel.state.turn]?.profileId !== activeProfileId) return
+
+      const state = applyMove(duel.state, move)
+      if (state === duel.state) return // move wasn't legal; leave the board alone
+      saveDuelList(duels.map((d) => (d.id === duelId ? { ...d, ...settledFields(state) } : d)))
+    },
+
+    resignDuel(duelId) {
+      const { duels, activeProfileId } = get()
+      const duel = duels.find((d) => d.id === duelId)
+      if (!duel || duel.status !== 'active' || !duel.state || !activeProfileId) return
+      const winner = duel.state.sides.find((s) => s.profileId !== activeProfileId)
+      if (!winner) return
+      const state = {
+        ...duel.state,
+        over: true,
+        winnerId: winner.profileId,
+        log: [...duel.state.log, { by: activeProfileId, text: `🏳️ ${winner.name} wins — the other captain sailed off.` }],
+      }
+      saveDuelList(duels.map((d) => (d.id === duelId ? { ...d, ...settledFields(state) } : d)))
+    },
+
+    cancelDuel(duelId) {
+      const { duels, activeProfileId } = get()
+      const duel = duels.find((d) => d.id === duelId)
+      if (!duel || duel.status !== 'pending' || duel.fromId !== activeProfileId) return
+      saveDuelList(
+        duels.map((d) =>
+          d.id === duelId ? { ...d, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : d,
+        ),
+      )
+    },
+
+    saveDuelDeck(deck) {
+      commit((d) => {
+        d.duel.deck = deck
+      })
+    },
+
+    /**
+     * Both phones run this off the live board, and each one only ever banks its
+     * OWN record — so a win is counted once by the winner and once as a loss by
+     * the loser, no matter which device was looking when the match ended.
+     * `paidAt` on the shared doc stops the Berries being paid twice.
+     */
+    settleDuels() {
+      const { duels, activeProfileId, data, dataLoaded } = get()
+      if (!activeProfileId || !dataLoaded) return
+      const counted = new Set(data.duel.settled)
+      const mine = duels.filter(
+        (d) =>
+          d.status === 'finished' &&
+          (d.fromId === activeProfileId || d.toId === activeProfileId) &&
+          !counted.has(d.id),
+      )
+      if (mine.length === 0) return
+
+      commit((d, events) => {
+        for (const duel of mine) {
+          d.duel.settled = [...d.duel.settled, duel.id].slice(-20)
+          if (duel.winnerId === activeProfileId) {
+            d.duel.wins += 1
+            d.economy.gems += DUEL_REWARD
+            d.economy.totalGemsEarned += DUEL_REWARD
+            events.push({
+              type: 'goal',
+              title: 'Davy Back Fight won!',
+              emoji: '🏴‍☠️',
+              description: `You beat ${duel.fromId === activeProfileId ? duel.toName : duel.fromName} — +${DUEL_REWARD} Berries.`,
+            })
+          } else if (duel.winnerId) {
+            d.duel.losses += 1
+          }
+        }
+      })
+      // `paidAt` is the shared marker of who has already counted a match; each
+      // side appends its own id, so a finished board ends up naming both.
+      const ids = new Set(mine.map((d) => d.id))
+      saveDuelList(
+        get().duels.map((d) => (ids.has(d.id) ? { ...d, paidAt: `${d.paidAt ?? ''}|${activeProfileId}` } : d)),
+      )
+    },
+
+    recordSoloResult(won) {
+      const today = dayKey()
+      const { data } = get()
+      const freshDay = data.duel.soloDay !== today
+      const soloWins = freshDay ? 0 : data.duel.soloWins
+      // Solo pays, but only for the first few wins a day — the dummy is practice,
+      // not a Berry printer.
+      const pay = won && soloWins < SOLO_REWARD_LIMIT ? SOLO_REWARD : 0
+      commit((d) => {
+        d.duel.soloDay = today
+        d.duel.soloWins = soloWins + (won ? 1 : 0)
+        if (pay > 0) {
+          d.economy.gems += pay
+          d.economy.totalGemsEarned += pay
+        }
+      })
+      return pay
     },
 
     buyBackground() {

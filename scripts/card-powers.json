@@ -1,0 +1,524 @@
+{
+  "_comment": "Hand-written battle identities for characters we can recognise by name. Keys are matched (lowercased) as SUBSTRINGS of the card's display name, longest key first — so 'luffy · gear 5' picks 'gear 5' over 'luffy'. Anything not listed gets a stable hash-derived element/archetype/moves and its element's sound. Fields are all optional: 'element', 'archetype' (guardian|bruiser|striker|trickster), 'attacks' ([quick move, finisher]) and 'voice' (a clip in public/duel/voices/ — several keys may share one, e.g. every Luffy form).",
+  "gear 5": {
+    "element": "beast",
+    "archetype": "striker",
+    "attacks": [
+      "Rubber Balloon",
+      "Bajrang Gun"
+    ],
+    "voice": "luffy"
+  },
+  "gear 4": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "Kong Gun",
+      "Leo Bazooka"
+    ],
+    "voice": "luffy"
+  },
+  "luffy": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "Gum-Gum Pistol",
+      "Gum-Gum Red Roc"
+    ],
+    "voice": "luffy"
+  },
+  "zoro": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Oni Giri",
+      "Three Sword Style: Purgatory"
+    ],
+    "voice": "zoro"
+  },
+  "sanji": {
+    "element": "flame",
+    "archetype": "striker",
+    "attacks": [
+      "Diable Jambe",
+      "Hell Memories"
+    ],
+    "voice": "sanji"
+  },
+  "nami": {
+    "element": "storm",
+    "archetype": "trickster",
+    "attacks": [
+      "Thunderbolt Tempo",
+      "Zeus Breeze Tempo"
+    ],
+    "voice": "nami"
+  },
+  "usopp": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Impact Wolf",
+      "Kabuto Firebird Star"
+    ],
+    "voice": "usopp"
+  },
+  "sogeking": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Sniper Shot",
+      "Firebird Star"
+    ],
+    "voice": "usopp"
+  },
+  "chopper": {
+    "element": "beast",
+    "archetype": "guardian",
+    "attacks": [
+      "Kung Fu Point",
+      "Monster Point"
+    ],
+    "voice": "chopper"
+  },
+  "robin": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Mil Fleurs",
+      "Gigante Fleur"
+    ],
+    "voice": "robin"
+  },
+  "franky": {
+    "element": "storm",
+    "archetype": "guardian",
+    "attacks": [
+      "Strong Right",
+      "Coup de Vent"
+    ],
+    "voice": "franky"
+  },
+  "brook": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Hanauta Sancho",
+      "Soul Solid"
+    ],
+    "voice": "brook"
+  },
+  "jinbe": {
+    "element": "tide",
+    "archetype": "guardian",
+    "attacks": [
+      "Fish-Man Karate",
+      "Vagabond Drill"
+    ],
+    "voice": "jinbe"
+  },
+  "ace": {
+    "element": "flame",
+    "archetype": "striker",
+    "attacks": [
+      "Fire Fist",
+      "Great Flame Commandment"
+    ],
+    "voice": "ace"
+  },
+  "sabo": {
+    "element": "flame",
+    "archetype": "bruiser",
+    "attacks": [
+      "Dragon Claw",
+      "Dragon's Breath"
+    ]
+  },
+  "law": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Room: Shambles",
+      "Gamma Knife"
+    ],
+    "voice": "law"
+  },
+  "eustass kid": {
+    "element": "storm",
+    "archetype": "bruiser",
+    "attacks": [
+      "Repel",
+      "Punk Gibson"
+    ]
+  },
+  "killer": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Rotating Blade",
+      "Scratch Wave"
+    ]
+  },
+  "mihawk": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Hawk Slash",
+      "Black Blade"
+    ]
+  },
+  "shanks": {
+    "element": "blade",
+    "archetype": "bruiser",
+    "attacks": [
+      "Conqueror's Glare",
+      "Divine Departure"
+    ],
+    "voice": "shanks"
+  },
+  "kaido": {
+    "element": "beast",
+    "archetype": "guardian",
+    "attacks": [
+      "Thunder Bagua",
+      "Boro Breath"
+    ],
+    "voice": "kaido"
+  },
+  "linlin": {
+    "element": "spirit",
+    "archetype": "guardian",
+    "attacks": [
+      "Prometheus Blaze",
+      "Ikoku Sovereignty"
+    ],
+    "voice": "bigmom"
+  },
+  "katakuri": {
+    "element": "tide",
+    "archetype": "bruiser",
+    "attacks": [
+      "Mochi Spear",
+      "Buzz Cut Mochi"
+    ],
+    "voice": "katakuri"
+  },
+  "doflamingo": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Parasite",
+      "Overheat"
+    ],
+    "voice": "doflamingo"
+  },
+  "rosinante": {
+    "element": "spirit",
+    "archetype": "guardian",
+    "attacks": [
+      "Silent Room",
+      "Calm Field"
+    ]
+  },
+  "teach": {
+    "element": "spirit",
+    "archetype": "bruiser",
+    "attacks": [
+      "Black Hole",
+      "Liberation"
+    ],
+    "voice": "teach"
+  },
+  "akainu": {
+    "element": "flame",
+    "archetype": "striker",
+    "attacks": [
+      "Magma Fist",
+      "Meteor Volcano"
+    ]
+  },
+  "borsalino": {
+    "element": "storm",
+    "archetype": "striker",
+    "attacks": [
+      "Yasakani no Magatama",
+      "Amaterasu"
+    ]
+  },
+  "smoker": {
+    "element": "spirit",
+    "archetype": "guardian",
+    "attacks": [
+      "White Blow",
+      "White Out"
+    ]
+  },
+  "marco": {
+    "element": "flame",
+    "archetype": "guardian",
+    "attacks": [
+      "Phoenix Brand",
+      "Blue Flame Rebirth"
+    ]
+  },
+  "newgate": {
+    "element": "storm",
+    "archetype": "bruiser",
+    "attacks": [
+      "Quake Punch",
+      "Sea Splitter"
+    ],
+    "voice": "whitebeard"
+  },
+  "oden": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Togen Totsuka",
+      "Paradise Totsuka"
+    ]
+  },
+  "momonosuke": {
+    "element": "beast",
+    "archetype": "guardian",
+    "attacks": [
+      "Dragon Twister",
+      "Flame Cloud"
+    ]
+  },
+  "kuma": {
+    "element": "spirit",
+    "archetype": "bruiser",
+    "attacks": [
+      "Pad Cannon",
+      "Ursus Shock"
+    ]
+  },
+  "hancock": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Slave Arrow",
+      "Perfume Femur"
+    ]
+  },
+  "perona": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Ghost Rap",
+      "Negative Hollow"
+    ]
+  },
+  "enel": {
+    "element": "storm",
+    "archetype": "striker",
+    "attacks": [
+      "El Thor",
+      "Deathpiea"
+    ],
+    "voice": "enel"
+  },
+  "king": {
+    "element": "flame",
+    "archetype": "bruiser",
+    "attacks": [
+      "Wildfire Wing",
+      "Flame Lance"
+    ]
+  },
+  "queen": {
+    "element": "beast",
+    "archetype": "trickster",
+    "attacks": [
+      "Brachio Bomber",
+      "Plague Rounds"
+    ]
+  },
+  "lucci": {
+    "element": "beast",
+    "archetype": "striker",
+    "attacks": [
+      "Shigan",
+      "Rokuogan"
+    ]
+  },
+  "vegapunk": {
+    "element": "storm",
+    "archetype": "guardian",
+    "attacks": [
+      "Punk Ray",
+      "Satellite Barrage"
+    ]
+  },
+  "urouge": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "Sky Grudge",
+      "Damage Return"
+    ]
+  },
+  "cavendish": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Swan Lake",
+      "Bloody Mary"
+    ]
+  },
+  "bartolomeo": {
+    "element": "spirit",
+    "archetype": "guardian",
+    "attacks": [
+      "Barrier",
+      "Barrier Bulls"
+    ]
+  },
+  "pica": {
+    "element": "beast",
+    "archetype": "guardian",
+    "attacks": [
+      "Stone Fist",
+      "Colossus Crush"
+    ]
+  },
+  "dellinger": {
+    "element": "beast",
+    "archetype": "striker",
+    "attacks": [
+      "Fighting Fish Kick",
+      "Blood Frenzy"
+    ]
+  },
+  "garp": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "Fist of Love",
+      "Galaxy Impact"
+    ]
+  },
+  "roger": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Divine Slash",
+      "King's Wave"
+    ]
+  },
+  "uta": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Sing for Me",
+      "Tot Musica"
+    ]
+  },
+  "yasopp": {
+    "element": "storm",
+    "archetype": "striker",
+    "attacks": [
+      "Long Shot",
+      "Thousand Shots"
+    ]
+  },
+  "ryuma": {
+    "element": "blade",
+    "archetype": "striker",
+    "attacks": [
+      "Gavotte Bond en Avant",
+      "Dragon Slayer"
+    ]
+  },
+  "hajrudin": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "Giant Stomp",
+      "Bone Breaker"
+    ]
+  },
+  "loki": {
+    "element": "storm",
+    "archetype": "bruiser",
+    "attacks": [
+      "Chain Swing",
+      "Sky Breaker"
+    ]
+  },
+  "denjiro": {
+    "element": "blade",
+    "archetype": "guardian",
+    "attacks": [
+      "Iai Draw",
+      "Boss Slash"
+    ]
+  },
+  "kyoshiro": {
+    "element": "blade",
+    "archetype": "bruiser",
+    "attacks": [
+      "Wave Cut",
+      "Winter Moon"
+    ]
+  },
+  "raizo": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Scroll Trap",
+      "Ninja Art: Flame"
+    ]
+  },
+  "kawamatsu": {
+    "element": "tide",
+    "archetype": "guardian",
+    "attacks": [
+      "Kappa Guard",
+      "Sake Slash"
+    ]
+  },
+  "ryokugyu": {
+    "element": "beast",
+    "archetype": "guardian",
+    "attacks": [
+      "Forest Bind",
+      "Drain Forest"
+    ]
+  },
+  "vinsmoke": {
+    "element": "flame",
+    "archetype": "striker",
+    "attacks": [
+      "Sky Walk Kick",
+      "Diable Jambe"
+    ],
+    "voice": "sanji"
+  },
+  "straw hat crew": {
+    "element": "beast",
+    "archetype": "bruiser",
+    "attacks": [
+      "All Hands Rush",
+      "Crew Combo"
+    ],
+    "voice": "luffy"
+  },
+  "legends of the sea": {
+    "element": "tide",
+    "archetype": "guardian",
+    "attacks": [
+      "Old Tide",
+      "Legend's Wave"
+    ]
+  },
+  "mystery pirate": {
+    "element": "spirit",
+    "archetype": "trickster",
+    "attacks": [
+      "Unknown Strike",
+      "Hidden Power"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 // The Grand Line Sticker Album — pack odds, trade values and album math.
-// Catalog + crews are generated from public/Album/ by `npm run stickers`.
+// Catalog + crews are generated from assets/Album/ by `npm run stickers`.
 import { STICKER_CATALOG, STICKER_CREWS, type StickerDef } from './stickerCatalog.generated'
 import type { AlbumState, StickerTrade } from '../types'
 

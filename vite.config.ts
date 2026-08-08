@@ -28,6 +28,9 @@ export default defineConfig({
         // the FCM worker registers itself on its own scope (see src/push.ts) —
         // Workbox must not precache or serve it
         globIgnores: ['**/firebase-messaging-sw.js'],
+        // the plugin default, plus m4a: the duel's One Piece shouts (~110 KB for
+        // the set) are part of the game feeling like a game, so they ship offline
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,m4a}'],
         runtimeCaching: [
           {
             // Gym exercise demos (BUSINESS_REQUIREMENTS §18l). They are content-

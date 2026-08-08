@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, CardDuel, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -192,6 +192,28 @@ export function subscribeStickerTrades(cb: (trades: StickerTrade[]) => void): ()
 export async function saveStickerTrades(trades: StickerTrade[]): Promise<void> {
   await ensureAuth()
   await setDoc(tradesRef(), { trades })
+}
+
+// --- card duels (shared board: challenges + the live match state) -----------
+//
+// One doc holding a short history of matches. Both phones subscribe; whoever's
+// turn it is writes the whole list back with the new position. Only one side can
+// legally move at a time, so a last-write-wins doc is enough — there is no
+// window where both devices hold the move.
+
+const duelsRef = () => doc(firestore, 'app', 'cardDuels')
+
+/** Live-sync the duel board. Fires on a challenge, an accept, and every move the other side plays. */
+export function subscribeCardDuels(cb: (duels: CardDuel[]) => void): () => void {
+  return onSnapshot(duelsRef(), (snap) => {
+    const data = snap.data() as { duels?: CardDuel[] } | undefined
+    cb(data?.duels ?? [])
+  })
+}
+
+export async function saveCardDuels(duels: CardDuel[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(duelsRef(), { duels })
 }
 
 // --- free freezes (shared: the kid's asks + Dad's gifts) -------------------
