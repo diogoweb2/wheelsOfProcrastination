@@ -3356,15 +3356,4 @@ input, select { font-family: inherit; }
 }
 .app-icon--folder .app-icon-emoji { transform: translateY(-6px); }
 
-.folder-overlay { z-index: 55; }
-.folder-sheet {
-  width: 100%;
-  max-width: 380px;
-  background: rgb(18 50 82 / 96%);
-  border: 2px solid var(--line);
-  border-radius: 24px;
-  padding: 16px 12px 10px;
-  animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.4);
-}
-.folder-title { text-align: center; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
-.folder-sheet .icon-grid { margin-bottom: 8px; }
+.folder-page .icon-grid { margin-top: 16px; }

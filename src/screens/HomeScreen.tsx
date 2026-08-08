@@ -42,8 +42,23 @@ export function HomeScreen({
     [activeProfileId, data.settings.homeOrder, gates.converter],
   )
 
-  // which folder is open, if any — a folder tile shows its apps rather than opening one
+  // which folder is open, if any — a folder tile shows its apps on their own
+  // full page rather than opening one directly
   const [folder, setFolder] = useState<HomeTile | null>(null)
+
+  if (folder) {
+    return (
+      <FolderPage
+        folder={folder}
+        badges={badges}
+        onClose={() => setFolder(null)}
+        onOpen={(id) => {
+          setFolder(null)
+          onOpen(id)
+        }}
+      />
+    )
+  }
 
   return (
     <div className="screen home">
@@ -67,24 +82,12 @@ export function HomeScreen({
         }}
         onReorder={(order) => setSettings({ homeOrder: order })}
       />
-
-      {folder && (
-        <FolderSheet
-          folder={folder}
-          badges={badges}
-          onClose={() => setFolder(null)}
-          onOpen={(id) => {
-            setFolder(null)
-            onOpen(id)
-          }}
-        />
-      )}
     </div>
   )
 }
 
-/** A folder tapped open: the apps inside it, on a dimmed Dashboard. */
-function FolderSheet({
+/** A folder tapped open: a full page of the apps inside it, with its own way back. */
+function FolderPage({
   folder,
   badges,
   onOpen,
@@ -96,36 +99,39 @@ function FolderSheet({
   onClose: () => void
 }) {
   return (
-    <div
-      className="overlay overlay--center folder-overlay"
-      onClick={() => {
-        sfx.click()
-        onClose()
-      }}
-    >
-      <div className="folder-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="folder-title">
+    <div className="screen folder-page">
+      <div className="app-head">
+        <button
+          className="app-head-back"
+          aria-label="Back to main"
+          onClick={() => {
+            sfx.click()
+            onClose()
+          }}
+        >
+          <span aria-hidden>⌂</span> Main
+        </button>
+        <div className="app-head-title">
           {folder.icon} {folder.name}
         </div>
-        <div className="icon-grid">
-          {(folder.apps ?? []).map((app) => (
-            <button
-              key={app.id}
-              className="app-icon"
-              onClick={() => {
-                sfx.click()
-                onOpen(app.id)
-              }}
-            >
-              <span className="app-icon-tile" style={{ background: `linear-gradient(150deg, ${app.tint[0]}, ${app.tint[1]})` }}>
-                {app.img ? <img src={app.img} alt="" draggable={false} /> : <span className="app-icon-emoji">{app.icon}</span>}
-                {!!badges?.[app.id] && <span className="app-icon-badge">{badges[app.id]}</span>}
-              </span>
-              <span className="app-icon-label">{app.name}</span>
-            </button>
-          ))}
-        </div>
-        <p className="muted" style={{ fontSize: 11, textAlign: 'center' }}>Tap anywhere outside to go back.</p>
+      </div>
+      <div className="icon-grid">
+        {(folder.apps ?? []).map((app) => (
+          <button
+            key={app.id}
+            className="app-icon"
+            onClick={() => {
+              sfx.click()
+              onOpen(app.id)
+            }}
+          >
+            <span className="app-icon-tile" style={{ background: `linear-gradient(150deg, ${app.tint[0]}, ${app.tint[1]})` }}>
+              {app.img ? <img src={app.img} alt="" draggable={false} /> : <span className="app-icon-emoji">{app.icon}</span>}
+              {!!badges?.[app.id] && <span className="app-icon-badge">{badges[app.id]}</span>}
+            </span>
+            <span className="app-icon-label">{app.name}</span>
+          </button>
+        ))}
       </div>
     </div>
   )
