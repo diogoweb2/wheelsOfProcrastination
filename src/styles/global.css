@@ -3130,3 +3130,16 @@ input, select { font-family: inherit; }
 .crew-action.is-note { font-size: 10px; color: var(--muted); text-align: center; padding: 3px 0; }
 
 @media (prefers-reduced-motion: reduce) { .crew-panel { animation: none; } }
+
+/* The tapped card is highlighted and scrolled to — the sheet lists eight cards
+   and the one you asked about is usually below the fold. */
+.crew-card.is-focus { border-color: var(--yellow); box-shadow: 0 0 0 2px rgb(255 206 0 / 35%); }
+.crew-card.is-them.is-focus { border-color: var(--orange); box-shadow: 0 0 0 2px rgb(255 150 0 / 30%); }
+/* the thumbnail is a button: it opens the full card face */
+.crew-art { padding: 0; border: none; display: block; overflow: hidden; cursor: pointer; }
+.crew-art img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.crew-art:active { transform: scale(0.94); }
+.crew-dmg.is-them { color: var(--orange); }
+.crew-dmg.is-them.is-weak { color: var(--red); }
+/* a swap costs energy but never a mis-tap: the strip reports, it doesn't act */
+.arena-swap.is-ready { background: rgb(255 206 0 / 95%); color: #2a1400; }

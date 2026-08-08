@@ -131,7 +131,12 @@ export function DuelArena({
   const fx = useDuelFx(state)
   const [peek, setPeek] = useState<string | null>(null)
   const [picked, setPicked] = useState<number | null>(null) // treasure being considered
-  const [crewOpen, setCrewOpen] = useState(false)
+  /** Card id the crew sheet is open on, or '' for "open, no particular card". */
+  const [crewOn, setCrewOn] = useState<string | null>(null)
+  const openCrew = (id = '') => {
+    sfx.click()
+    setCrewOn(id)
+  }
   const me = state.sides[myIndex]
   const them = state.sides[1 - myIndex]
   const myTurn = state.turn === myIndex && !state.over
@@ -200,12 +205,14 @@ export function DuelArena({
         </div>
       )}
 
-      {crewOpen && (
+      {crewOn !== null && (
         <CrewSheet
           state={state}
           myIndex={myIndex}
-          onSwap={myTurn && !locked ? (to) => { setCrewOpen(false); play({ kind: 'swap', to }) } : null}
-          onClose={() => setCrewOpen(false)}
+          focusId={crewOn}
+          onSwap={myTurn && !locked ? (to) => { setCrewOn(null); play({ kind: 'swap', to }) } : null}
+          onPeek={(id) => setPeek(id)}
+          onClose={() => setCrewOn(null)}
         />
       )}
 
@@ -221,13 +228,13 @@ export function DuelArena({
       <div className={`arena-row is-them ${fx?.side === 1 - myIndex ? 'is-acting' : ''}`}>
         <div className="arena-bench">
           {benchCards(them).map((c) => (
-            <BoardCard key={c.id} card={c} size="bench" onClick={() => setPeek(c.id)} />
+            <BoardCard key={c.id} card={c} size="bench" onClick={() => openCrew(c.id)} />
           ))}
         </div>
         {theirActive ? (
           <div className="arena-active">
             {/* keyed by card id so a knockout always remounts and replays its fall */}
-            <BoardCard key={theirActive.id} card={theirActive} state={cardState(1 - myIndex)} onClick={() => setPeek(theirActive.id)} />
+            <BoardCard key={theirActive.id} card={theirActive} state={cardState(1 - myIndex)} onClick={() => openCrew(theirActive.id)} />
             {fx && fx.side === myIndex && fx.damage ? <DamagePop fx={fx} /> : null}
           </div>
         ) : (
@@ -258,15 +265,16 @@ export function DuelArena({
       <div className={`arena-row is-me ${fx?.side === myIndex ? 'is-acting' : ''}`}>
         {myActive ? (
           <div className="arena-active">
-            <BoardCard key={myActive.id} card={myActive} state={cardState(myIndex)} onClick={() => setPeek(myActive.id)} />
+            <BoardCard key={myActive.id} card={myActive} state={cardState(myIndex)} onClick={() => openCrew(myActive.id)} />
             {fx && fx.side === 1 - myIndex && fx.damage ? <DamagePop fx={fx} /> : null}
           </div>
         ) : (
           <div className="arena-empty">no cards left</div>
         )}
-        {/* The bench IS the swap control — tapping a card sends it to the front.
-            The chip stays a thin strip along the bottom edge so the art it's
-            advertising is still visible underneath it. */}
+        {/* Tapping a card NEVER commits a move — it opens that card's details.
+            Swapping is an explicit button inside the sheet, so a tap meant as
+            "what does this one do?" can't cost you your turn. The strip just
+            reports what a swap would cost. */}
         <div className="arena-bench">
           {benchCards(me).map((c, i) => {
             const slot = i + 1
@@ -277,11 +285,11 @@ export function DuelArena({
                 key={c.id}
                 card={c}
                 size="bench"
-                onClick={() => (able ? play({ kind: 'swap', to: slot }) : setPeek(c.id))}
+                onClick={() => openCrew(c.id)}
                 footer={
                   myTurn ? (
                     <span className={`arena-swap ${able ? 'is-ready' : 'is-off'}`}>
-                      {able ? (cost === 0 ? 'SEND FREE' : `SEND ${'⚡'.repeat(cost)}`) : `${'⚡'.repeat(cost)}`}
+                      {cost === 0 ? 'SWAP FREE' : `SWAP ${'⚡'.repeat(cost)}`}
                     </span>
                   ) : undefined
                 }
@@ -337,12 +345,10 @@ export function DuelArena({
           {me.stunned && (
             <p className="arena-warn">💫 Stunned — no attacking this turn. Send out a bench card, or focus.</p>
           )}
-          {benchCards(me).length > 0 && (
-            <button className="crew-open" onClick={() => { sfx.click(); setCrewOpen(true) }}>
-              🧭 <b>See my crew</b>
-              <em>HP, attacks and what each would hit for — then swap</em>
-            </button>
-          )}
+          <button className="crew-open" onClick={() => openCrew()}>
+            🧭 <b>See every card</b>
+            <em>Tap any card on the board too</em>
+          </button>
 
           {/* The last stand. Free, once a match, and no face on the dice is bad. */}
           {diceReady && (
@@ -391,13 +397,19 @@ export function DuelArena({
 function CrewSheet({
   state,
   myIndex,
+  focusId,
   onSwap,
+  onPeek,
   onClose,
 }: {
   state: DuelState
   myIndex: number
+  /** The card that was tapped to get here — highlighted and scrolled to. '' = none. */
+  focusId: string
   /** null when swapping isn't possible right now — the row says why instead. */
   onSwap: ((to: number) => void) | null
+  /** Show the full card face (the art) for one card. */
+  onPeek: (id: string) => void
   onClose: () => void
 }) {
   const me = state.sides[myIndex]
@@ -406,6 +418,13 @@ function CrewSheet({
   const facingEl = facing ? elementInfo(statsFor(facing.id).element) : null
   const cost = retreatCost(me)
   const myTurn = state.turn === myIndex && !state.over
+
+  // scroll the tapped card into view — the sheet lists eight cards and the one
+  // you asked about is often below the fold
+  const focusRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    focusRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, [focusId])
 
   return (
     <div className="crew-sheet" onClick={onClose}>
@@ -435,8 +454,14 @@ function CrewSheet({
           const health = pct > 55 ? 'is-good' : pct > 25 ? 'is-warn' : 'is-low'
           const able = i > 0 && myTurn && canSwap(state, myIndex, i)
           return (
-            <div key={c.id} className={`crew-card ${i === 0 ? 'is-front' : ''}`}>
-              <img className="crew-art" src={stickerUrl(c.id)} alt="" loading="lazy" />
+            <div
+              key={c.id}
+              ref={c.id === focusId ? focusRef : undefined}
+              className={`crew-card ${i === 0 ? 'is-front' : ''} ${c.id === focusId ? 'is-focus' : ''}`}
+            >
+              <button className="crew-art" onClick={() => onPeek(c.id)} title="See the full card">
+                <img src={stickerUrl(c.id)} alt="" loading="lazy" />
+              </button>
               <div className="crew-body">
                 <div className="crew-name">
                   {cardName(c.id)}
@@ -495,8 +520,14 @@ function CrewSheet({
           const el = elementInfo(stats.element)
           const pct = Math.max(0, Math.min(100, (c.hp / c.max) * 100))
           return (
-            <div key={c.id} className="crew-card is-them">
-              <img className="crew-art" src={stickerUrl(c.id)} alt="" loading="lazy" />
+            <div
+              key={c.id}
+              ref={c.id === focusId ? focusRef : undefined}
+              className={`crew-card is-them ${c.id === focusId ? 'is-focus' : ''}`}
+            >
+              <button className="crew-art" onClick={() => onPeek(c.id)} title="See the full card">
+                <img src={stickerUrl(c.id)} alt="" loading="lazy" />
+              </button>
               <div className="crew-body">
                 <div className="crew-name">
                   {cardName(c.id)}
@@ -512,8 +543,27 @@ function CrewSheet({
                   <span>
                     {el.icon} {el.name}
                   </span>
+                  <span>{stats.archetype}</span>
                   <span className="is-weak">weak {elementInfo(weaknessOf(stats.element)).icon}</span>
                 </div>
+                {/* Their attacks are public in a card game — and the number that
+                    matters is what it would hit YOUR front-liner for. */}
+                {stats.attacks.map((a, ai) => {
+                  const hit = damageFrom(state, 1 - myIndex, c.id, ai)
+                  return (
+                    <div className="crew-move" key={ai}>
+                      <span className="crew-cost">{'⚡'.repeat(a.cost)}</span>
+                      <span className="crew-move-name">
+                        {a.name}
+                        {a.text && <em>{a.text}</em>}
+                      </span>
+                      <span className={`crew-dmg is-them ${hit.weak ? 'is-weak' : ''}`}>
+                        {hit.damage}
+                        {hit.weak && <b>×2</b>}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )

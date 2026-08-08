@@ -541,14 +541,18 @@ function RulesTab() {
       <div className="duel-head">👆 On the board</div>
       <ul className="rules-list">
         <li>
-          Your <b>bench</b> is the row of small cards under your fighter. On your turn the ones you can afford wear a
-          gold <b>SEND OUT</b> chip — tap to swap them in.
+          <b>Tapping a card never costs you a move</b> — it opens that card’s details: HP, both attacks, and what each
+          one would hit for <b>right now</b>, against whoever is in front of you.
         </li>
-        <li>Tap any other card to read its attacks and weakness mid-fight.</li>
+        <li>
+          <b>Swapping is a button</b> inside that sheet (🔄 Send … out). Your <b>bench</b> is the row of small cards
+          under your fighter; the gold <b>SWAP ⚡</b> strip tells you what bringing one in would cost.
+        </li>
         <li>
           A <b>Guardian</b> costs ⚡⚡ to pull back, a <b>Striker</b> only ⚡ — so heavy cards are harder to retreat once
           they’re out front.
         </li>
+        <li>Their cards are open too: the sheet shows what their crew would hit you for.</li>
       </ul>
     </div>
   )
