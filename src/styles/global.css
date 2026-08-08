@@ -1546,6 +1546,26 @@ input, select { font-family: inherit; }
 @keyframes legendary-throb { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
 @keyframes verdict-pop { from { transform: scale(0.5); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* the new cards, shown big, once every card in the pack has been flipped */
+.pack-stage--newbies { max-width: 400px; gap: 10px; }
+.pack-newbies-title {
+  font-weight: 900; font-size: 22px; color: var(--yellow); text-align: center;
+  text-shadow: 0 0 14px rgb(255 206 0 / 70%), 0 2px 4px rgb(0 0 0 / 60%);
+  animation: verdict-pop 380ms cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.pack-newbies-title.is-rare { animation: verdict-pop 380ms cubic-bezier(0.2, 1.5, 0.4, 1), legendary-throb 900ms ease-in-out 380ms infinite; }
+.pack-newbies { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+.pack-newbie { animation: newbie-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.pack-newbies.is-one .sticker--lg { width: min(230px, 68vw); }
+.pack-newbies.is-two .sticker--lg { width: min(160px, 42vw); }
+.pack-newbies.is-few .sticker--lg { width: min(148px, 40vw); }
+.pack-newbies.is-lots .sticker--lg { width: min(112px, 27vw); }
+.pack-newbies-sub { font-size: 13px; font-weight: 900; color: var(--yellow); text-align: center; }
+@keyframes newbie-in {
+  from { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 .pack-summary-title { font-weight: 900; font-size: 20px; color: var(--yellow); }
 .pack-summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; }
 .pack-summary-stats { display: flex; gap: 12px; font-size: 13px; font-weight: 900; }
@@ -1557,7 +1577,8 @@ input, select { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .pack-wrap, .pack-shine, .pack-aura, .pack-rays,
   .pack-flip.is-charging, .pack-flip.is-charging-rare, .pack-tease,
-  .pack-verdict.is-legendary, .pack-hint { animation: none; }
+  .pack-verdict.is-legendary, .pack-hint,
+  .pack-newbies-title, .pack-newbies-title.is-rare, .pack-newbie { animation: none; }
 }
 
 /* ---- trading ------------------------------------------------------------- */

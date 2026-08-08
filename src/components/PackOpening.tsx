@@ -54,6 +54,7 @@ function newCardPop() {
  *   cards   — each card rises face-down, wobbles with suspense (longer + brighter
  *             the rarer it is), then flips. Rares get a gold aura, a rising
  *             "something big is coming" glow, and a full confetti blast.
+ *   newbies — everything brand new, shown big, all together (skipped if nothing new).
  *   summary — the whole haul with a new/spare tally.
  * Tapping anywhere advances; tapping during suspense skips straight to the flip.
  */
@@ -66,7 +67,7 @@ export function PackOpening({
   ownedBefore: Set<string> // album contents BEFORE the pack — decides new vs. repeat
   onDone: () => void
 }) {
-  const [phase, setPhase] = useState<'sealed' | 'tearing' | 'cards' | 'summary'>('sealed')
+  const [phase, setPhase] = useState<'sealed' | 'tearing' | 'cards' | 'newbies' | 'summary'>('sealed')
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [charging, setCharging] = useState(false) // suspense wobble before a flip
@@ -84,6 +85,12 @@ export function PackOpening({
   const isNew = marks[index]
   const isRare = current?.rarity === 'special'
   const isBig = Boolean(isRare && isNew) // the moment worth a party
+
+  // the haul that actually changes the album — the reason to keep buying packs
+  const newIds = drawn.filter((_, i) => marks[i])
+  const newHasRare = newIds.some((id) => stickerById(id)?.rarity === 'special')
+  const newSpread =
+    newIds.length === 1 ? 'is-one' : newIds.length === 2 ? 'is-two' : newIds.length <= 4 ? 'is-few' : 'is-lots'
 
   const clearTimers = () => {
     for (const t of timers.current) window.clearTimeout(t)
@@ -125,7 +132,21 @@ export function PackOpening({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, index])
 
+  // the "look what you got" moment: one more round of noise for the new cards
+  useEffect(() => {
+    if (phase !== 'newbies') return
+    sfx.fanfare()
+    if (newHasRare) legendaryBlast()
+    else newCardPop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
   function advance() {
+    if (phase === 'newbies') {
+      sfx.click()
+      setPhase('summary')
+      return
+    }
     if (phase === 'sealed') {
       sfx.click()
       setPhase('tearing')
@@ -152,7 +173,7 @@ export function PackOpening({
     if (index + 1 < drawn.length) setIndex(index + 1)
     else {
       sfx.gem()
-      setPhase('summary')
+      setPhase(newIds.length > 0 ? 'newbies' : 'summary')
     }
   }
 
@@ -222,6 +243,29 @@ export function PackOpening({
           <div className="pack-hint">
             {flipped ? (index + 1 < drawn.length ? 'Tap for the next card' : 'Tap to finish') : 'Tap to reveal'}
           </div>
+        </div>
+      )}
+
+      {phase === 'newbies' && (
+        <div className="pack-stage pack-stage--newbies">
+          <div className={`pack-newbies-title ${newHasRare ? 'is-rare' : ''}`}>
+            {newIds.length === 1 ? '★ NEW CARD! ★' : `★ ${newIds.length} NEW CARDS! ★`}
+          </div>
+          {/* fewer cards → bigger cards; a full new pack still fits without scrolling */}
+          <div className={`pack-newbies ${newSpread}`}>
+            {newIds.map((id, i) => {
+              const s = stickerById(id)
+              return s ? (
+                <div className="pack-newbie" key={id} style={{ animationDelay: `${i * 140}ms` }}>
+                  <Sticker sticker={s} state="reveal" size="lg" badge="NEW!" />
+                </div>
+              ) : null
+            })}
+          </div>
+          <div className="pack-newbies-sub">
+            {newIds.length === 1 ? 'Straight into your album!' : 'All of them straight into your album!'}
+          </div>
+          <div className="pack-hint">Tap to continue</div>
         </div>
       )}
 
