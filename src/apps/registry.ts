@@ -24,7 +24,25 @@ export interface AppDef {
   adminOnly?: boolean
   /** Only on the home screen while this gate is open (see `Gates`). */
   gate?: keyof Gates
+  /**
+   * Home-screen folder this app lives in (see `FOLDERS`). The app still opens
+   * and behaves exactly as it would on the top level — the folder is purely how
+   * the Dashboard groups the icons, the way a phone does.
+   */
+  folder?: string
 }
+
+/** A home-screen folder: one tile that opens onto the apps inside it. */
+export interface FolderDef {
+  id: string
+  name: string
+  icon: string
+  tint: [string, string]
+}
+
+export const FOLDERS: FolderDef[] = [
+  { id: 'games', name: 'Games', icon: '🎮', tint: ['#af6528', '#3a0000'] },
+]
 
 /** Conditions that make a situational app appear. */
 export interface Gates {
@@ -111,9 +129,36 @@ export const APPS: AppDef[] = [
     icon: '⚔️',
     img: '/app-duel.webp',
     tint: ['#d70000', '#3a0000'],
+    folder: 'games',
     tabs: [
       { id: 'fight', label: 'Fight', icon: '⚔️' },
       { id: 'deck', label: 'Crew', icon: '🃏' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
+    // official chess, One Piece paint. Straw Hats vs Marines, head-to-head only.
+    id: 'chess',
+    name: 'Chess',
+    icon: '♟️',
+    tint: ['#8fb4dc', '#123252'],
+    folder: 'games',
+    tabs: [
+      { id: 'play', label: 'Play', icon: '♟️' },
+      { id: 'pieces', label: 'Pieces', icon: '👑' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
+    // official 8×8 English draughts — the checkers board everyone in Canada owns
+    id: 'checkers',
+    name: 'Checkers',
+    icon: '🔴',
+    tint: ['#ff9600', '#8c3d00'],
+    folder: 'games',
+    tabs: [
+      { id: 'play', label: 'Play', icon: '🔴' },
+      { id: 'pieces', label: 'Pieces', icon: '👑' },
       { id: 'rules', label: 'How to', icon: '📜' },
     ],
   },
@@ -197,4 +242,64 @@ export function appsFor(profileId: string | null, order: string[] | undefined, g
   return [...allowed].sort(
     (a, b) => (rank.get(a.id) ?? 1000 + APPS.indexOf(a)) - (rank.get(b.id) ?? 1000 + APPS.indexOf(b)),
   )
+}
+
+/**
+ * One icon on the Dashboard: either an app, or a folder standing in for the
+ * apps inside it. Folders exist because three games in a row of nine icons is
+ * three games' worth of noise; grouping them is what a phone would do.
+ */
+export interface HomeTile {
+  /** App id, or `folder:<id>` — this is what the saved home order stores. */
+  id: string
+  name: string
+  icon: string
+  img?: string
+  tint: [string, string]
+  /** Present only on a folder tile: the apps it opens onto, in registry order. */
+  apps?: AppDef[]
+}
+
+/**
+ * The Dashboard's icons for this profile, in their saved order.
+ *
+ * The saved order ([settings.homeOrder]) holds tile ids, which may be app ids
+ * OR `folder:<id>`. A folder that has never been dragged has no entry of its
+ * own, so it inherits the best slot any of its members had — which is what
+ * keeps the Games folder sitting where the Davy Back icon used to sit for
+ * everyone who already had a layout.
+ */
+export function homeTiles(profileId: string | null, order: string[] | undefined, gates: Gates): HomeTile[] {
+  const apps = appsFor(profileId, order, gates)
+  const rank = new Map((order ?? []).map((id, i) => [id, i]))
+  const tiles: HomeTile[] = []
+  const placed = new Set<string>()
+
+  for (const app of apps) {
+    const folder = app.folder ? FOLDERS.find((f) => f.id === app.folder) : undefined
+    if (!folder) {
+      tiles.push({ id: app.id, name: app.name, icon: app.icon, img: app.img, tint: app.tint })
+      continue
+    }
+    if (placed.has(folder.id)) continue
+    placed.add(folder.id)
+    tiles.push({
+      id: `folder:${folder.id}`,
+      name: folder.name,
+      icon: folder.icon,
+      tint: folder.tint,
+      apps: apps.filter((a) => a.folder === folder.id),
+    })
+  }
+
+  if (!order?.length) return tiles
+  // one rank scale for everything: a tile's own saved slot, else the earliest
+  // slot any app inside it holds, else the end (a newly shipped tile)
+  const rankOf = (t: HomeTile, i: number) => {
+    const own = rank.get(t.id)
+    if (own !== undefined) return own
+    const inner = (t.apps ?? []).map((a) => rank.get(a.id)).filter((n): n is number => n !== undefined)
+    return inner.length ? Math.min(...inner) : 1000 + i
+  }
+  return tiles.map((t, i) => ({ t, r: rankOf(t, i), i })).sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.t)
 }

@@ -169,6 +169,73 @@ export const duelSfx = {
   },
 }
 
+// --- Chess & Checkers ------------------------------------------------------
+//
+// All synthesized, no files: a board game needs its sounds to be SHORT and
+// instant (you hear four of them a minute), and a sampled clip that arrives
+// 80ms late reads as lag. Each one is shaped so you can tell what happened
+// without looking: a plain move is a dry wooden click, a capture cracks, check
+// is an alarm you can't mistake for either.
+
+export const boardSfx = {
+  /** A piece is picked up — the quietest sound in the set, it fires constantly. */
+  pick() {
+    tone(900, 0.035, 'sine', 0.09)
+  },
+  /** Put back down with nothing played. */
+  drop() {
+    tone(420, 0.04, 'sine', 0.07)
+  },
+  /** A plain move: one dry knock on wood. */
+  move() {
+    tone(260, 0.05, 'square', 0.09, 0, 170)
+    tone(140, 0.07, 'sine', 0.07)
+  },
+  /** A capture: the knock, plus the crack of the piece leaving the board. */
+  capture() {
+    tone(200, 0.06, 'sawtooth', 0.11, 0, 110)
+    tone(700, 0.09, 'square', 0.07, 0.03, 260)
+  },
+  /** Castling: two knocks, because two pieces moved. */
+  castle() {
+    tone(300, 0.05, 'square', 0.08, 0, 190)
+    tone(300, 0.05, 'square', 0.08, 0.11, 190)
+  },
+  /** Check — deliberately alarming, and unlike every other sound here. */
+  check() {
+    tone(1180, 0.12, 'triangle', 0.16)
+    tone(880, 0.16, 'triangle', 0.14, 0.13)
+  },
+  /** A pawn becomes a Queen. */
+  promote() {
+    const notes = [523, 659, 784, 1047]
+    notes.forEach((f, i) => tone(f, 0.14, 'triangle', 0.17, i * 0.07))
+  },
+  /** A checker reaches the far row and is crowned. */
+  crown() {
+    tone(784, 0.1, 'triangle', 0.16)
+    tone(1047, 0.12, 'triangle', 0.15, 0.08)
+    tone(1568, 0.18, 'sine', 0.12, 0.16)
+  },
+  /** Tapped a square that can't be played. */
+  nope() {
+    tone(180, 0.12, 'square', 0.08)
+  },
+  win() {
+    const notes = [523, 659, 784, 1047, 1319]
+    notes.forEach((f, i) => tone(f, 0.16, 'triangle', 0.19, i * 0.1))
+  },
+  lose() {
+    tone(392, 0.3, 'sawtooth', 0.11, 0, 196)
+    tone(196, 0.45, 'sawtooth', 0.09, 0.26, 98)
+  },
+  /** A draw is neither — two flat notes that resolve nowhere. */
+  draw() {
+    tone(523, 0.22, 'sine', 0.12)
+    tone(523, 0.3, 'sine', 0.1, 0.24)
+  },
+}
+
 // --- background-safe alerts (the Gym's rest timer) --------------------------
 //
 // Everything above runs through WebAudio, which the browser SUSPENDS the moment

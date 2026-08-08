@@ -14,6 +14,7 @@ import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
 import { DuelScreen } from './screens/DuelScreen'
+import { BoardGameScreen } from './screens/BoardGameScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
@@ -31,7 +32,7 @@ import { sfx } from './audio'
 type OpenApp = { app: string; tab: string } | null
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
   const [open, setOpen] = useState<OpenApp>(null)
   // topic a quiz quest card asked to jump into; consumed by the Academy on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
@@ -112,6 +113,23 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duels, dataLoaded])
 
+  // Chess/Checkers settle exactly like duels: both phones bank their own side
+  // off the same finished board, so a result lands even if the loser never
+  // reopened the game.
+  useEffect(() => {
+    settleBoardGames()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardGames, dataLoaded])
+
+  const boardCall = boardGames.find((m) => m.status === 'pending' && m.toId === activeProfileId)
+  const myBoard = boardGames.find(
+    (m) =>
+      m.status === 'active' &&
+      m.state &&
+      !m.state.over &&
+      (m.state.turn === 'w' ? m.fromId : m.toId) === activeProfileId,
+  )
+
   const duelCall = duels.find((d) => d.status === 'pending' && d.toId === activeProfileId)
   const myDuel = duels.find(
     (d) => d.status === 'active' && d.state && !d.state.over && d.state.sides[d.state.turn]?.profileId === activeProfileId,
@@ -140,6 +158,35 @@ export default function App() {
     }
     prevCall.current = duelPing
   }, [duelPing]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The same snail for the board games: a challenge, or the other captain
+  // handing the turn back. Keyed on the position number so every move pings —
+  // and only while the app is in the background, since an open board shows it.
+  const prevBoard = useRef<string | null>(null)
+  const boardPing = boardCall
+    ? `call:${boardCall.id}`
+    : myBoard
+      ? `turn:${myBoard.id}:${myBoard.state?.seq}`
+      : null
+  useEffect(() => {
+    if (
+      boardPing &&
+      boardPing !== prevBoard.current &&
+      document.visibilityState === 'hidden' &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
+      const game = (boardCall ?? myBoard)!.kind === 'chess' ? 'Chess' : 'Checkers'
+      try {
+        new Notification(boardCall ? `♟️ A ${game} challenge!` : `♟️ Your move in ${game}!`, {
+          body: boardCall ? `${boardCall.fromName} wants a game.` : 'The other captain is waiting on you.',
+        })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevBoard.current = boardPing
+  }, [boardPing]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ping when a sticker swap offer lands while the app is open
   const openTrades = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId)
@@ -218,9 +265,14 @@ export default function App() {
       : []
 
   // red dots on the home screen icons — the reason to open an app right now
+  const boardWaiting = (kind: 'chess' | 'checkers') =>
+    (boardCall?.kind === kind ? 1 : 0) + (myBoard?.kind === kind ? 1 : 0)
+
   const homeBadges: Record<string, number> = {
     album: openTrades.length,
     duel: (duelCall ? 1 : 0) + (myDuel ? 1 : 0),
+    chess: boardWaiting('chess'),
+    checkers: boardWaiting('checkers'),
     admin: freezeAsks.length + unpaidGifts.length,
     bank: pendingPaybacks.length,
   }
@@ -307,6 +359,31 @@ export default function App() {
           </div>
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('duel', 'fight') }}>
             {duelCall ? 'Answer' : 'Play'}
+          </button>
+        </div>
+      )}
+
+      {(boardCall || myBoard) && (
+        <div className="banner" style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>{(boardCall ?? myBoard)!.kind === 'chess' ? '♟️' : '🔴'}</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              {boardCall
+                ? `${boardCall.fromName} wants a game of ${boardCall.kind === 'chess' ? 'Chess' : 'Checkers'}!`
+                : `Your move in ${myBoard!.kind === 'chess' ? 'Chess' : 'Checkers'}!`}
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              {boardCall ? 'Winner takes the Berries' : 'The other captain is waiting on you'}
+            </div>
+          </div>
+          <button
+            className="btn btn--small"
+            onClick={() => {
+              sfx.click()
+              openApp((boardCall ?? myBoard)!.kind, 'play')
+            }}
+          >
+            {boardCall ? 'Answer' : 'Play'}
           </button>
         </div>
       )}
@@ -432,6 +509,10 @@ function AppBodyRouter({
       return <AlbumScreen tab={open.tab} />
     case 'duel':
       return <DuelScreen tab={open.tab} />
+    case 'chess':
+      return <BoardGameScreen kind="chess" tab={open.tab} />
+    case 'checkers':
+      return <BoardGameScreen kind="checkers" tab={open.tab} />
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'ideas':

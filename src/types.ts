@@ -2,6 +2,9 @@
 // bundle (cardGame → album → types). The duel RULES live in logic/cardGame.ts;
 // only the stored shapes belong here.
 import type { DuelState } from './logic/cardGame'
+import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
+
+export type { BoardGameKind }
 
 export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
@@ -497,6 +500,51 @@ export interface CardDuel {
   paidAt?: string
 }
 
+// --- Board games (Chess & Checkers, the 🎮 Games folder) --------------------
+
+/**
+ * One head-to-head board game, in the SHARED app/boardGames doc so both phones
+ * watch the same position. Exactly the arrangement the card duel uses, and safe
+ * for the same reason: only one side may legally move at a time, so whoever's
+ * turn it is writes the next position back and last-write-wins can never lose a
+ * move. The challenger always plays the light pieces (`'w'`), which in chess is
+ * also who moves first.
+ */
+export interface BoardMatch {
+  id: string
+  kind: BoardGameKind
+  fromId: string // who challenged — plays 'w'
+  fromName: string
+  fromEmoji: string
+  toId: string // who must answer — plays 'b'
+  toName: string
+  toEmoji: string
+  status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled'
+  state: BoardState | null // null while the challenge is still pending
+  createdAt: string
+  resolvedAt?: string
+  winnerId?: string // absent on a draw — see `draw`
+  draw?: boolean
+  /** Set once each side has banked its own result, so a re-sync can't pay twice. */
+  paidAt?: string
+}
+
+/** One crewmate's record in one board game. */
+export interface BoardGameStats {
+  wins: number
+  losses: number
+  draws: number
+}
+
+export interface BoardGamesState {
+  chess: BoardGameStats
+  checkers: BoardGameStats
+  /** Match ids already counted into the record, so a re-sync can't double-count. */
+  settled: string[]
+  /** Coaching highlights (legal moves, danger rings, piece labels). On by default. */
+  hints: boolean
+}
+
 // --- Free freezes from Dad (shared app/freezeRequests doc) ------------------
 
 /**
@@ -779,6 +827,7 @@ export interface AppData {
   bank: BankState
   album: AlbumState
   duel: DuelStats
+  games: BoardGamesState
   gym: GymState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }

@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
-import { appsFor, type AppDef, type Gates } from '../apps/registry'
+import { homeTiles, type AppDef, type Gates, type HomeTile } from '../apps/registry'
 import { albumProgress } from '../logic/album'
 import { converterActive, fmt$, totalTreasure } from '../logic/bank'
 import { activeQuestions, duePool, topicsFor } from '../logic/quiz'
@@ -36,11 +36,14 @@ export function HomeScreen({
   const watchedBank = activeProfileId === KID_ID ? data.bank : kidData?.bank
   const gates: Gates = { converter: !!watchedBank && converterActive(watchedBank) }
 
-  const apps = useMemo(
-    () => appsFor(activeProfileId, data.settings.homeOrder, gates),
+  const tiles = useMemo(
+    () => homeTiles(activeProfileId, data.settings.homeOrder, gates),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeProfileId, data.settings.homeOrder, gates.converter],
   )
+
+  // which folder is open, if any — a folder tile shows its apps rather than opening one
+  const [folder, setFolder] = useState<HomeTile | null>(null)
 
   return (
     <div className="screen home">
@@ -55,11 +58,75 @@ export function HomeScreen({
       <Widgets onOpen={onOpen} />
 
       <IconGrid
-        apps={apps}
+        tiles={tiles}
         badges={badges}
-        onOpen={onOpen}
+        onOpen={(id) => {
+          const tile = tiles.find((t) => t.id === id)
+          if (tile?.apps) setFolder(tile)
+          else onOpen(id)
+        }}
         onReorder={(order) => setSettings({ homeOrder: order })}
       />
+
+      {folder && (
+        <FolderSheet
+          folder={folder}
+          badges={badges}
+          onClose={() => setFolder(null)}
+          onOpen={(id) => {
+            setFolder(null)
+            onOpen(id)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+/** A folder tapped open: the apps inside it, on a dimmed Dashboard. */
+function FolderSheet({
+  folder,
+  badges,
+  onOpen,
+  onClose,
+}: {
+  folder: HomeTile
+  badges?: Record<string, number>
+  onOpen: (appId: string) => void
+  onClose: () => void
+}) {
+  return (
+    <div
+      className="overlay overlay--center folder-overlay"
+      onClick={() => {
+        sfx.click()
+        onClose()
+      }}
+    >
+      <div className="folder-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="folder-title">
+          {folder.icon} {folder.name}
+        </div>
+        <div className="icon-grid">
+          {(folder.apps ?? []).map((app) => (
+            <button
+              key={app.id}
+              className="app-icon"
+              onClick={() => {
+                sfx.click()
+                onOpen(app.id)
+              }}
+            >
+              <span className="app-icon-tile" style={{ background: `linear-gradient(150deg, ${app.tint[0]}, ${app.tint[1]})` }}>
+                {app.img ? <img src={app.img} alt="" draggable={false} /> : <span className="app-icon-emoji">{app.icon}</span>}
+                {!!badges?.[app.id] && <span className="app-icon-badge">{badges[app.id]}</span>}
+              </span>
+              <span className="app-icon-label">{app.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="muted" style={{ fontSize: 11, textAlign: 'center' }}>Tap anywhere outside to go back.</p>
+      </div>
     </div>
   )
 }
@@ -196,18 +263,22 @@ function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }
 // --- draggable icon grid ---------------------------------------------------
 
 function IconGrid({
-  apps,
+  tiles,
   badges,
   onOpen,
   onReorder,
 }: {
-  apps: AppDef[]
+  tiles: HomeTile[]
+  /** app id → count. A folder tile shows the sum of the apps inside it. */
   badges?: Record<string, number>
-  onOpen: (appId: string) => void
+  onOpen: (tileId: string) => void
   onReorder: (order: string[]) => void
 }) {
-  const ids = apps.map((a) => a.id)
-  const byId = new Map(apps.map((a) => [a.id, a]))
+  const ids = tiles.map((a) => a.id)
+  const byId = new Map(tiles.map((a) => [a.id, a]))
+  /** A folder wears one badge for everything waiting inside it. */
+  const badgeFor = (tile: HomeTile) =>
+    tile.apps ? tile.apps.reduce((n, a) => n + (badges?.[a.id] ?? 0), 0) : (badges?.[tile.id] ?? 0)
   const [order, setOrder] = useState<string[]>(ids)
   const [arrange, setArrange] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
@@ -353,11 +424,12 @@ function IconGrid({
         {order.map((id) => {
           const app = byId.get(id)
           if (!app) return null
+          const badge = badgeFor(app)
           return (
             <button
               key={id}
               data-app={id}
-              className={`app-icon${dragId === id ? ' is-held' : ''}`}
+              className={`app-icon${dragId === id ? ' is-held' : ''}${app.apps ? ' app-icon--folder' : ''}`}
               onPointerDown={(e) => onDown(e, id)}
               onPointerMove={onMove}
               onPointerUp={() => onUp(id)}
@@ -369,7 +441,15 @@ function IconGrid({
             >
               <span className="app-icon-tile" style={tileStyle(app)}>
                 {app.img ? <img src={app.img} alt="" draggable={false} /> : <span className="app-icon-emoji">{app.icon}</span>}
-                {!arrange && !!badges?.[id] && <span className="app-icon-badge">{badges[id]}</span>}
+                {/* a folder shows a strip of what's inside, the way a phone does */}
+                {app.apps && (
+                  <span className="app-icon-mini">
+                    {app.apps.slice(0, 4).map((a) => (
+                      <span key={a.id}>{a.icon}</span>
+                    ))}
+                  </span>
+                )}
+                {!arrange && !!badge && <span className="app-icon-badge">{badge}</span>}
               </span>
               <span className="app-icon-label">{app.name}</span>
             </button>
@@ -394,6 +474,6 @@ function IconGrid({
   )
 }
 
-function tileStyle(app: AppDef) {
+function tileStyle(app: HomeTile | AppDef) {
   return { background: `linear-gradient(150deg, ${app.tint[0]}, ${app.tint[1]})` }
 }

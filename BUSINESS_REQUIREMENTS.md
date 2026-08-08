@@ -36,7 +36,9 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🪙 **Store** | Wallpapers · Treasures · Orders |
 | 📖 **Log Book** | Album · Packs · Trade |
-| ⚔️ **Davy Back** | Fight · Crew · How to |
+| ⚔️ **Davy Back** *(in 🎮 Games)* | Fight · Crew · How to |
+| ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
+| 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
 | 💡 **Ideas** | Open · Done · New |
 | 🧭 **Log Pose** | Clocks *(single page)* |
@@ -44,6 +46,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 🛠️ **Captain** (Diogo only) | Freezes · Academies · Prizes · Audit |
 
 - **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
+- **Folders.** An app may declare a `folder`, and every app naming the same one collapses into a single Dashboard tile that opens onto them — exactly what a phone does. **🎮 Games** holds ⚔️ Davy Back, ♟️ Chess and 🔴 Checkers; three games in a row of icons is three games' worth of noise. The folder tile carries a strip of the icons inside it and **one red badge summing everything waiting in there**, so nothing gets buried by being grouped. Dragging still works: the saved order (`settings.homeOrder`) holds tile ids, and a folder that has never been dragged inherits the earliest slot any app inside it held — which is why the Games folder appears where the Davy Back icon used to be rather than at the end.
 - **Situational apps.** An app may declare a `gate` and then only appears on the home screen while that gate is open. **Log Pose** (crew time-zone clocks) is gated on `converter` — it shows up only while **trip mode / the Brazil money converter** is switched on for Ben's bank (§8b), and disappears again when the trip is over.
 
 App tile artwork is generated from art already in `public/` (see CLAUDE.md's image rules) into 128px webp files named `public/app-*.webp`. Apps without artwork fall back to their emoji on a coloured squircle.
@@ -311,6 +314,34 @@ A Pokémon-TCG-style duel played with the cards from the Log Book. **You can onl
 - **The arena** animates off the board's own log, so a blow looks the same whether it was played here or arrived from the other phone: the attacker lunges, the defender flashes and shakes, the damage number leaps off the card (bigger and gold on a **WEAKNESS ×2**), and a knocked-out card spins away — the engine records `koId` precisely so the card that *fell* animates rather than the one that replaced it. - **Sound follows the card, never the app.** Two layers, so no pirate is ever heard shouting someone else's move: the **quick attack plays the card's element** (steel for ⚔️ Blade, a whoosh for 🔥 Flame, a thunderclap for ⚡ Storm, a splash for 🌊 Tide, a roar for 🐗 Beast, a wail for 👻 Spirit) — never a voice, so it can't be misattributed; the **finisher plays that character's own clip** when the card has one (`card.voice`), falling back to its element otherwise. **40 of the 87 cards are voiced by name** across 20 characters (all Luffy forms share Luffy's, Sogeking shares Usopp's, the Raid Suit shares Sanji's); the other 47 speak in their element. Clips are real One Piece audio in `public/duel/voices/`, trimmed to ≤2.4s and encoded to mono 22 kHz AAC (~450 KB for the whole pack, precached for offline).
 - **Crew tab**: pick and order your 4, **Auto-pick** builds the strongest legal team, and holding any card reads its full face. A deck that references a card traded away since is repaired automatically, so there is always a legal team.
 - **Tapping a card never costs you a move.** One rule, everywhere: a tap on any card — yours, theirs, front line or bench — opens the **crew sheet** focused on that card. Swapping is an explicit *🔄 Send … out* button inside it, so a tap meant as "what does this one do?" can never spend your turn. A 60px thumbnail cannot answer "should I switch?", so the sheet lays out both crews with HP, element, weakness, archetype and both attacks — and prints what each attack would do **against the defender currently facing you** rather than its raw stat, because that is the comparison the decision actually turns on. Their attacks are shown too (card faces are public in a TCG), scored against *your* front-liner. Tapping the artwork opens the full card face. The bench's gold `SWAP ⚡⚡` strip reports the cost; it isn't a button.
+
+## 15d. Chess & Checkers (the ♟️ and 🔴 apps, inside the 🎮 Games folder)
+
+Two **real** board games, played **head-to-head only** — there is no AI opponent and there is not meant to be one. The point is Diogo and Ben playing each other.
+
+**The rules are the official ones, no house edits.** They live in [src/logic/chess.ts](src/logic/chess.ts) and [src/logic/checkers.ts](src/logic/checkers.ts) as pure JSON-only functions with no React and no Firestore — the same contract `cardGame.ts` follows, and the reason one engine can drive both a pass-and-play match in React state and a live one through a shared document.
+
+- **Chess** — full FIDE: castling (including "not out of, through, or into check"), en passant, under-promotion, and every draw the rules name — stalemate, the fifty-move rule, threefold repetition and insufficient material. Moves are recorded in real **SAN** (`Qxf7#`, `O-O`, `exd5`) with disambiguation, *alongside* a plain-English line a nine-year-old can read.
+- **Checkers** — official **8×8 English draughts**, the game Checkers Canada plays. **Capturing is compulsory** (you choose which jump, not the longest), **jumps chain** and the turn doesn't pass until the chain is out, Men move and jump forward only, and **crowning ends the turn** even if more jumps were on offer. A player with no legal move **loses** — being blocked is a real way to lose. Forty moves each with no capture is a draw.
+- Both engines are covered by a self-play harness: 300 random games each, asserting every generated move is legal, no King ever vanishes, no side is ever left in check, and no non-finished position is ever moveless.
+
+**One Piece paint, never in place of the game.** The glyph is always the real chess glyph and the name is always the real name — **King, Queen, Rook, Bishop, Knight, Pawn** — because a kid learning this has to be learning *the* game. The character rides alongside as flavour: 👒 Luffy is the King, ⚔️ Zoro the Queen, 🚢 the Thousand Sunny is the Rook, 🧭 Nami the Bishop, 🦌 Chopper the Knight (the piece that jumps), against the **Marines** — 🌋 Akainu, ⭐ Kizaru, ⛴️ a warship, 🕊️ Tsuru, 💨 Smoker. The **Pieces tab** is a straight lesson: each piece's real name, what it's worth, how it moves, and who it is.
+
+**🧑‍🏫 The Helper — the whole reason a kid can play this unaided.** On by default; one chip turns it off.
+
+- **Every square the tapped piece may legally go to is marked** — a dot for a quiet move, a ring for a capture. This part is always on, helper or not: it *is* the interaction.
+- **⚠️ on a landing square the other side attacks**, so "if I go there it gets taken" is visible before the move, not after it.
+- **A dashed red ring on every one of your pieces currently under attack**, and a **flashing red square on a King in check**.
+- **Each piece's letter (K/Q/R/B/N/P) printed on it**, which is the answer to "which one is the Queen again?".
+- With nothing selected, **every piece that has somewhere to go glows** — so a kid staring at a board never has "I don't know where to start".
+- **Tapping any piece — yours or theirs — says what it is and how it moves, and never costs a turn.** The same rule the card duel follows, for the same reason.
+
+**Sound is synthesized, not sampled** ([src/audio.ts](src/audio.ts) `boardSfx`): you hear four of these a minute, and a clip arriving 80ms late reads as lag. Each is shaped so you can tell what happened without looking — a plain move is a dry wooden knock, a capture cracks, castling knocks twice because two pieces moved, **check is an alarm unlike anything else in the set**, promotion and crowning are rising fanfares. Sounds fire off the **move's own log line**, which is what makes them work for a move that arrived from the other phone: the receiving device never sees the move, only the position that followed it.
+
+**Two ways to play:**
+
+- **Live vs the other crewmate** (shared `app/boardGames` doc, live-synced) — challenge → the other phone gets a topbar banner, a home-screen badge and a notification → they accept and the board is dealt. The **challenger plays the light pieces**, which in chess is also who moves first. One live match **per game** (a chess and a checkers board can both be running). Each device writes only the position it is legally allowed to reach, so last-write-wins is safe by construction. **Winner takes 25 🪙**; both devices bank their own W/L off the same board, guarded by `games.settled` locally and `paidAt` on the shared doc. Unlike the card duel these games can **draw**, so the record has a third column and `winnerId` is genuinely absent rather than always set.
+- **Pass & play on one phone** — the board flips to whoever is about to move so nobody plays upside down, with a manual 🔄 Flip. Pays nothing and records nothing; it's for sitting on the couch together.
 
 ## 16. Admin (Diogo) — the "Captain's desk" (🛠️ Captain app, Diogo only)
 

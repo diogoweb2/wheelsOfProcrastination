@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, CardDuel, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -214,6 +214,27 @@ export function subscribeCardDuels(cb: (duels: CardDuel[]) => void): () => void 
 export async function saveCardDuels(duels: CardDuel[]): Promise<void> {
   await ensureAuth()
   await setDoc(duelsRef(), { duels })
+}
+
+// --- board games (shared board for Chess and Checkers) ---------------------
+//
+// Same arrangement as the card duels, and safe for the same reason: only one
+// side may legally move at a time, so the device holding the move is the only
+// one writing. Chess and Checkers share the doc — a match names its own `kind`.
+
+const boardGamesRef = () => doc(firestore, 'app', 'boardGames')
+
+/** Live-sync the board-game table. Fires on a challenge, an accept, and every move the other side plays. */
+export function subscribeBoardGames(cb: (matches: BoardMatch[]) => void): () => void {
+  return onSnapshot(boardGamesRef(), (snap) => {
+    const data = snap.data() as { matches?: BoardMatch[] } | undefined
+    cb(data?.matches ?? [])
+  })
+}
+
+export async function saveBoardGames(matches: BoardMatch[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(boardGamesRef(), { matches })
 }
 
 // --- free freezes (shared: the kid's asks + Dad's gifts) -------------------

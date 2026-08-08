@@ -24,6 +24,7 @@ import type {
   QuizQuestion,
   QuizTestRecord,
   CardDuel,
+  BoardMatch,
   StickerTrade,
   Task,
 } from '../types'
@@ -52,6 +53,7 @@ import {
   saveRoster,
   saveStickerTrades,
   saveCardDuels,
+  saveBoardGames,
   saveFreezeDesk,
   saveFinalTests,
   subscribeAiConfig,
@@ -60,6 +62,7 @@ import {
   subscribeIdeas,
   subscribeStickerTrades,
   subscribeCardDuels,
+  subscribeBoardGames,
   subscribeFreezeDesk,
   subscribeFinalTests,
   subscribeMarketData,
@@ -80,6 +83,7 @@ import {
   type DuelMove,
   type DuelState,
 } from '../logic/cardGame'
+import { BOARD_REWARD, kitFor, type BoardKind, type BoardMove, type BoardState } from '../logic/boardGames'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -212,6 +216,7 @@ interface StoreState {
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
+  boardGames: BoardMatch[] // shared Chess/Checkers board (app/boardGames), live-synced
   freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
@@ -404,6 +409,22 @@ interface StoreState {
   /** Log a solo match against the training dummy. Returns the Berries it paid. */
   recordSoloResult: (won: boolean) => number
 
+  // --- Chess & Checkers (the 🎮 Games folder) ---
+  /** Challenge the other crewmate to a board game. One live match per game at a time. */
+  challengeBoardGame: (kind: BoardKind) => 'ok' | 'busy'
+  /** Answer a board-game challenge aimed at me. Accepting deals the opening position. */
+  answerBoardChallenge: (matchId: string, accept: boolean) => void
+  /** Play one move. Ignored unless the shared board says it's my move and the move is legal. */
+  playBoardMove: (matchId: string, move: BoardMove) => void
+  /** Give up: the other side takes the win (and the Berries). */
+  resignBoardGame: (matchId: string) => void
+  /** Withdraw a challenge I sent that hasn't been answered yet. */
+  cancelBoardGame: (matchId: string) => void
+  /** Bank the record + Berries for any finished match of mine not yet counted. Safe to call repeatedly. */
+  settleBoardGames: () => void
+  /** Turn the coaching highlights (legal-move dots, danger rings, labels) on or off. */
+  setBoardHints: (on: boolean) => void
+
   buyBackground: () => string | 'broke' | 'complete'
   /** Equip an owned background as the app background; null = default solid color. */
   equipBackground: (id: string | null) => void
@@ -571,6 +592,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeStickerTrades((trades) => set({ trades }))
       // shared duel board: challenges, and every move the other phone plays
       subscribeCardDuels((duels) => set({ duels }))
+      // shared Chess/Checkers board — same deal, one doc for both games
+      subscribeBoardGames((boardGames) => set({ boardGames }))
       // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
@@ -651,6 +674,31 @@ export const useStore = create<StoreState>((set, get) => {
     fireAndForget(saveCardDuels(kept))
   }
 
+  /**
+   * Write-through for the Chess/Checkers board. Trimmed harder than the duels:
+   * a chess position carries a 64-square array plus a move log, and the doc
+   * holds both games at once.
+   */
+  function saveBoardList(matches: BoardMatch[]) {
+    const kept = matches.slice(-6)
+    set({ boardGames: kept })
+    fireAndForget(saveBoardGames(kept))
+  }
+
+  /**
+   * The match fields that follow from a new position: the board itself, plus the
+   * closing paperwork once it's over. Firestore rejects `undefined`, so the
+   * winner key is only added when someone actually won — a draw finishes with
+   * `draw: true` and no winner at all.
+   */
+  function boardSettledFields(match: BoardMatch, state: BoardState): Partial<BoardMatch> {
+    if (!state.over) return { state }
+    const done: Partial<BoardMatch> = { state, status: 'finished', resolvedAt: new Date().toISOString() }
+    if (state.winner) done.winnerId = state.winner === 'w' ? match.fromId : match.toId
+    else done.draw = true
+    return done
+  }
+
   function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
     set({ freezeRequests: requests, freezeGifts: gifts })
     fireAndForget(saveFreezeDesk(requests, gifts))
@@ -694,6 +742,7 @@ export const useStore = create<StoreState>((set, get) => {
     ideas: [],
     trades: [],
     duels: [],
+    boardGames: [],
     freezeRequests: [],
     finalTests: [],
     freezeGifts: [],
@@ -2032,6 +2081,144 @@ export const useStore = create<StoreState>((set, get) => {
         }
       })
       return pay
+    },
+
+    // --- Chess & Checkers ---------------------------------------------------
+    //
+    // Deliberately the same shape as the duel above: one shared doc, the device
+    // holding the move is the only one that writes, and each side banks its own
+    // W/L off the finished board. The only real difference is that these games
+    // can end in a DRAW, which the duel can't — so the record has a third column
+    // and `winnerId` is genuinely absent rather than always set.
+
+    challengeBoardGame(kind) {
+      const { activeProfileId, profiles } = get()
+      if (!activeProfileId) return 'busy'
+      const me = profiles.find((p) => p.id === activeProfileId)
+      const mate = profiles.find((p) => p.id !== activeProfileId)
+      if (!me || !mate) return 'busy'
+      // one live match PER GAME — you can have chess and checkers going at once,
+      // but two chess boards between the same two people is just confusing
+      if (get().boardGames.some((m) => m.kind === kind && (m.status === 'pending' || m.status === 'active'))) {
+        return 'busy'
+      }
+      saveBoardList([
+        ...get().boardGames,
+        {
+          id: `bg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          kind,
+          fromId: me.id,
+          fromName: me.name,
+          fromEmoji: me.emoji,
+          toId: mate.id,
+          toName: mate.name,
+          toEmoji: mate.emoji,
+          status: 'pending',
+          state: null,
+          createdAt: new Date().toISOString(),
+        },
+      ])
+      return 'ok'
+    },
+
+    answerBoardChallenge(matchId, accept) {
+      const { boardGames, activeProfileId } = get()
+      const match = boardGames.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.toId !== activeProfileId) return
+      if (!accept) {
+        saveBoardList(
+          boardGames.map((m) =>
+            m.id === matchId ? { ...m, status: 'declined' as const, resolvedAt: new Date().toISOString() } : m,
+          ),
+        )
+        return
+      }
+      // the challenger plays the light pieces, which in chess is also who moves first
+      saveBoardList(
+        boardGames.map((m) => (m.id === matchId ? { ...m, status: 'active' as const, state: kitFor(m.kind).create() } : m)),
+      )
+    },
+
+    playBoardMove(matchId, move) {
+      const { boardGames, activeProfileId } = get()
+      const match = boardGames.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active' || !match.state || match.state.over) return
+      // only the side whose turn it is may write — the guarantee that makes
+      // last-write-wins safe on a shared doc
+      const mySide = match.fromId === activeProfileId ? 'w' : match.toId === activeProfileId ? 'b' : null
+      if (mySide !== match.state.turn) return
+      const state = kitFor(match.kind).apply(match.state, move)
+      if (!state) return // illegal (or a stale tap from the other phone) — leave the board alone
+      saveBoardList(boardGames.map((m) => (m.id === matchId ? { ...m, ...boardSettledFields(m, state) } : m)))
+    },
+
+    resignBoardGame(matchId) {
+      const { boardGames, activeProfileId } = get()
+      const match = boardGames.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active' || !match.state || !activeProfileId) return
+      const mySide = match.fromId === activeProfileId ? 'w' : match.toId === activeProfileId ? 'b' : null
+      if (!mySide) return
+      const state = kitFor(match.kind).resign(match.state, mySide)
+      saveBoardList(boardGames.map((m) => (m.id === matchId ? { ...m, ...boardSettledFields(m, state) } : m)))
+    },
+
+    cancelBoardGame(matchId) {
+      const { boardGames, activeProfileId } = get()
+      const match = boardGames.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.fromId !== activeProfileId) return
+      saveBoardList(
+        boardGames.map((m) =>
+          m.id === matchId ? { ...m, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : m,
+        ),
+      )
+    },
+
+    settleBoardGames() {
+      const { boardGames, activeProfileId, data, dataLoaded } = get()
+      if (!activeProfileId || !dataLoaded) return
+      const counted = new Set(data.games.settled)
+      const mine = boardGames.filter(
+        (m) =>
+          m.status === 'finished' &&
+          (m.fromId === activeProfileId || m.toId === activeProfileId) &&
+          !counted.has(m.id),
+      )
+      if (mine.length === 0) return
+
+      commit((d, events) => {
+        for (const match of mine) {
+          d.games.settled = [...d.games.settled, match.id].slice(-20)
+          const record = d.games[match.kind]
+          const kit = kitFor(match.kind)
+          if (match.draw) {
+            record.draws += 1
+          } else if (match.winnerId === activeProfileId) {
+            record.wins += 1
+            d.economy.gems += BOARD_REWARD
+            d.economy.totalGemsEarned += BOARD_REWARD
+            events.push({
+              type: 'goal',
+              title: `${kit.title} won!`,
+              emoji: kit.icon,
+              description: `You beat ${match.fromId === activeProfileId ? match.toName : match.fromName} — +${BOARD_REWARD} Berries.`,
+            })
+          } else if (match.winnerId) {
+            record.losses += 1
+          }
+        }
+      })
+      // `paidAt` is the shared marker of who has already counted a match; each
+      // side appends its own id, so a finished board ends up naming both.
+      const ids = new Set(mine.map((m) => m.id))
+      saveBoardList(
+        get().boardGames.map((m) => (ids.has(m.id) ? { ...m, paidAt: `${m.paidAt ?? ''}|${activeProfileId}` } : m)),
+      )
+    },
+
+    setBoardHints(on) {
+      commit((d) => {
+        d.games.hints = on
+      })
     },
 
     buyBackground() {

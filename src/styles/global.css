@@ -3161,3 +3161,210 @@ input, select { font-family: inherit; }
   100% { transform: rotate(360deg) scale(1); }
 }
 @media (prefers-reduced-motion: reduce) { .tpop-icon.is-rolling { animation: none; } }
+
+/* ---------- Chess & Checkers (the 🎮 Games folder) ---------- */
+
+/* The board is the screen's whole job, so it takes the full width and stays
+   square at any phone size. `aspect-ratio` plus a plain 8-column grid keeps the
+   squares square without a single measured pixel. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid var(--bronze);
+  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+  touch-action: manipulation;
+}
+/* not your turn: still readable, still tappable (tapping a piece explains it) */
+.board.is-waiting { filter: saturate(0.75) brightness(0.92); }
+
+.sq {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font-size: 0;
+}
+.sq--light { background: #e8d7b4; }
+.sq--dark { background: #9c6b3f; }
+/* checkers never uses the light squares — dim them so the playing area is obvious */
+.sq--dead { background: #d9c9a9; opacity: 0.55; }
+
+.sq-coord {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 900;
+  color: rgb(12 35 56 / 55%);
+  pointer-events: none;
+}
+.sq--dark .sq-coord { color: rgb(255 255 255 / 60%); }
+.sq-coord--rank { top: 2px; left: 3px; }
+.sq-coord--file { bottom: 1px; right: 3px; }
+
+/* the square a piece just came from / landed on */
+.sq.is-last { box-shadow: inset 0 0 0 3px rgb(255 206 0 / 70%); }
+/* the piece you picked up */
+.sq.is-selected { box-shadow: inset 0 0 0 4px var(--yellow); }
+/* a King in check — the one thing on the board that must never be missed */
+.sq.is-check { background: var(--red); animation: pulse-soft 1s infinite; }
+/* your piece is under attack right now */
+.sq.is-danger::after {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  border: 3px dashed rgb(215 0 0 / 85%);
+  pointer-events: none;
+}
+/* nothing selected: a gentle nudge on every piece that has somewhere to go */
+.sq.is-ready .pc-glyph { filter: drop-shadow(0 0 5px rgb(96 191 245 / 90%)); }
+
+.pc {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+}
+.pc-glyph {
+  font-size: clamp(20px, 7.4vw, 40px);
+  line-height: 1;
+}
+/* Real chess glyphs, high contrast both ways — the shape is what's being learnt,
+   so it is never replaced by a character portrait. */
+.pc--chess.pc--w .pc-glyph { color: #fffdf6; text-shadow: 0 0 2px #000, 0 1px 2px rgb(0 0 0 / 70%); }
+.pc--chess.pc--b .pc-glyph { color: #1a1208; text-shadow: 0 0 2px rgb(255 255 255 / 55%); }
+/* Checkers discs: the Straw Hats' straw-gold against the Marines' red. */
+.pc--checkers .pc-glyph { font-size: clamp(18px, 6.6vw, 36px); }
+.pc--checkers.pc--w .pc-glyph { color: var(--yellow); text-shadow: 0 2px 0 #8a6b00, 0 0 3px rgb(0 0 0 / 60%); }
+.pc--checkers.pc--b .pc-glyph { color: var(--red); text-shadow: 0 2px 0 #6d0000, 0 0 3px rgb(0 0 0 / 60%); }
+/* A crowned checker keeps its crew colour and wears the crown on top — a bare
+   👑 for both sides would be unreadable at a glance. */
+.pc--checkers.pc--king::after {
+  content: '👑';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -46%);
+  font-size: clamp(9px, 3.2vw, 17px);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* The name tag: K/Q/R/B/N/P under the piece. This is the whole "recognise the
+   King from the Queen" feature — it's on whenever the helper is on. */
+.pc-letter {
+  position: absolute;
+  bottom: -1px;
+  right: 1px;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgb(12 35 56 / 85%);
+  color: var(--text);
+  pointer-events: none;
+}
+
+/* Where this piece may go: a dot for a quiet move, a ring for a capture. */
+.sq-target {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgb(96 191 245 / 85%);
+  box-shadow: 0 0 0 2px rgb(12 35 56 / 45%);
+  pointer-events: none;
+}
+.sq-target--take {
+  width: 88%;
+  height: 88%;
+  background: none;
+  border: 5px solid rgb(96 191 245 / 90%);
+  box-shadow: none;
+}
+/* the other side attacks this square — go there and the piece can be taken */
+.sq-target--risky { background: rgb(255 150 0 / 85%); border-color: rgb(255 150 0 / 95%); }
+.sq-warn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 11px;
+}
+
+.board-status { margin-bottom: 8px; }
+.board-status-line { font-weight: 900; font-size: 15px; }
+.board-status-line.is-check { color: var(--red); }
+.board-status-line.is-over { color: var(--gold); }
+
+.board-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.board-tools .chip { cursor: pointer; }
+.chip--on { background: var(--green); color: #0c2338; }
+
+/* Tapping any piece says what it is. It never costs a turn — the same rule the
+   card duel follows, for the same reason. */
+.piece-sheet { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; }
+.piece-sheet .pc { width: 42px; height: 42px; flex: none; }
+.piece-sheet .pc-glyph { font-size: 34px; }
+
+.board-log { margin-top: 10px; display: flex; flex-direction: column; gap: 3px; }
+.board-log-line { font-size: 12px; color: var(--muted); padding-left: 8px; border-left: 3px solid var(--line); }
+.board-log-line--w { border-left-color: var(--yellow); }
+.board-log-line--b { border-left-color: var(--red); }
+.board-log-line:last-child { color: var(--text); font-weight: 700; }
+
+.board-record { display: flex; gap: 18px; }
+.board-record > div { display: flex; flex-direction: column; align-items: center; }
+.board-record-num { font-size: 26px; font-weight: 900; line-height: 1; }
+.board-record .muted { font-size: 11px; }
+
+.promo-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.promo-pick {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 4px; border-radius: 12px; background: var(--card2);
+  font-size: 11px; font-weight: 800;
+}
+.promo-pick .pc { width: 34px; height: 34px; }
+.promo-pick .pc-glyph { font-size: 30px; }
+.promo-pick:active { transform: translateY(2px); }
+
+.rules h3 { font-size: 14px; font-weight: 900; margin: 14px 0 4px; }
+.rules p, .rules li { font-size: 13px; line-height: 1.45; color: var(--muted); }
+.rules ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.rules strong { color: var(--text); }
+
+/* ---------- home-screen folders ---------- */
+
+/* A folder tile shows a strip of what's inside, so "Games" isn't a mystery box. */
+.app-icon-mini {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10px;
+  line-height: 1;
+  pointer-events: none;
+}
+.app-icon--folder .app-icon-emoji { transform: translateY(-6px); }
+
+.folder-overlay { z-index: 55; }
+.folder-sheet {
+  width: 100%;
+  max-width: 380px;
+  background: rgb(18 50 82 / 96%);
+  border: 2px solid var(--line);
+  border-radius: 24px;
+  padding: 16px 12px 10px;
+  animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.folder-title { text-align: center; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
+.folder-sheet .icon-grid { margin-bottom: 8px; }
