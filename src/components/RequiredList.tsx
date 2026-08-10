@@ -18,20 +18,20 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
   const items = useMemo(() => requiredToday(data.tasks, today, data.completions), [data.tasks, today, data.completions])
   const dormant = useMemo(() => dormantRequired(data.tasks, today, data.completions), [data.tasks, today, data.completions])
   const [picking, setPicking] = useState(false)
-  // Done items leave the list, but only after a little exit ceremony: the row
-  // flips green, shows its berries, then slides away. `leaving` keeps it
-  // rendered for exactly that long.
-  const [leaving, setLeaving] = useState<Set<string>>(new Set())
+  // A done item STAYS on the list all day, ticked and struck through — the whole
+  // point of a checklist is seeing what you already cleared, and a vanishing row
+  // makes the "3/5" count disagree with what's on screen. `justDone` only holds
+  // the little green celebration for a beat before the row settles.
+  const [justDone, setJustDone] = useState<Set<string>>(new Set())
 
   const remaining = items.filter((t) => !doneIds.has(t.id)).length
-  const visible = items.filter((t) => !doneIds.has(t.id) || leaving.has(t.id))
 
   function complete(id: string) {
     sfx.gem()
     completeRequired(id)
-    setLeaving((s) => new Set(s).add(id))
+    setJustDone((s) => new Set(s).add(id))
     window.setTimeout(() => {
-      setLeaving((s) => {
+      setJustDone((s) => {
         const next = new Set(s)
         next.delete(id)
         return next
@@ -89,12 +89,12 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
       </div>
 
       <div className="required-scroll">
-        {visible.map((t) => (
+        {items.map((t) => (
           <RequiredRow
             key={t.id}
             task={t}
             done={doneIds.has(t.id)}
-            leaving={leaving.has(t.id)}
+            celebrating={justDone.has(t.id)}
             today={today}
             onToggle={() => {
               if (doneIds.has(t.id)) return
@@ -131,13 +131,13 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
 function RequiredRow(props: {
   task: Task
   done: boolean
-  leaving: boolean
+  celebrating: boolean
   today: string
   onToggle: () => void
   onTrain?: () => void
   onRemove?: () => void
 }) {
-  const { task, done, leaving, today, onToggle, onTrain, onRemove } = props
+  const { task, done, celebrating, today, onToggle, onTrain, onRemove } = props
   const left = task.requiredUntil ? daysUntil(task.requiredUntil, today) : null
   const warning = left !== null && left <= REQUIRED_WARN_DAYS
 
@@ -145,7 +145,7 @@ function RequiredRow(props: {
   // the checkbox still belongs to the user, the button just saves two taps.
   const row = (
     <button
-      className={`required-row${done ? ' required-row--done' : ''}${leaving ? ' required-row--leaving' : ''}${warning && !done ? ' required-row--warn' : ''}`}
+      className={`required-row${done ? ' required-row--done' : ''}${celebrating ? ' required-row--celebrate' : ''}${warning && !done ? ' required-row--warn' : ''}`}
       onClick={onToggle}
       disabled={done}
     >
@@ -169,7 +169,10 @@ function RequiredRow(props: {
     </button>
   )
 
-  if (done || (!onTrain && !onRemove)) return row
+  // A done study row keeps its 🏫 shortcut (more training is always allowed) so
+  // it doesn't change width the moment it's ticked. ↩ goes: you can't un-do it.
+  const showRemove = onRemove && !done
+  if (!onTrain && !showRemove) return row
   return (
     <div className="required-row-wrap">
       {row}
@@ -178,7 +181,7 @@ function RequiredRow(props: {
           🏫
         </button>
       )}
-      {onRemove && (
+      {showRemove && (
         <button className="required-train" onClick={onRemove} aria-label="Take back off today's list">
           ↩
         </button>
