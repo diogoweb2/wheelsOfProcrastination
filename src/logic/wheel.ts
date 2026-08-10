@@ -42,7 +42,13 @@ export function cooldownUntil(task: Task, completions: Completion[], today: stri
  * prerequisite quest done, and not still cooling down from its last completion.
  * `completions` may be omitted only where the caller has already ruled those out.
  */
-export function isAvailableOn(task: Task, today: string, completions: Completion[] = [], tasks?: Task[]): boolean {
+export function isAvailableOn(
+  task: Task,
+  today: string,
+  completions: Completion[] = [],
+  tasks?: Task[],
+  opts: { ignoreCooldown?: boolean } = {},
+): boolean {
   if (task.startDate && today < task.startDate) return false
   if (task.dayScope === 'weekdays' && isWeekend(today)) return false
   if (task.dayScope === 'weekends' && !isWeekend(today)) return false
@@ -51,6 +57,7 @@ export function isAvailableOn(task: Task, today: string, completions: Completion
   // Seasonal quests ("rake the leaves"). An empty list = all year round.
   if (task.seasons?.length && !task.seasons.includes(seasonOf(today))) return false
   if (!isUnlockedOn(task, today, completions, tasks)) return false
+  if (opts.ignoreCooldown) return true
   const back = cooldownUntil(task, completions, today)
   if (back && today < back) return false
   return true
@@ -66,19 +73,35 @@ export function isRequiredOn(
   today: string = dayKey(),
   completions: Completion[] = [],
   tasks?: Task[],
+  opts: { ignoreJustDone?: boolean } = {},
 ): boolean {
-  if (!task.required || task.archived) return false
+  if (!task.required) return false
+  // Ticking a must-do can archive it (one-shots) or start its rest days ticking.
+  // `ignoreJustDone` looks past both, so a task that was on the list this morning
+  // is still recognised as belonging to it this evening.
+  if (task.archived && !opts.ignoreJustDone) return false
   // Volunteered for today by hand: skip the window, the day scope and the cooldown.
   if (task.doTodayDay === today) return true
   if (task.requiredFrom && today < task.requiredFrom) return false
   if (task.requiredUntil && today > task.requiredUntil) return false
-  return isAvailableOn(task, today, completions, tasks)
+  return isAvailableOn(task, today, completions, tasks, { ignoreCooldown: opts.ignoreJustDone })
 }
 
-/** Today's checklist: every active requirement in its window, urgent ones first. */
+/** Every task ticked off on `day`. */
+function doneOn(completions: Completion[], day: string): Set<string> {
+  return new Set(completions.filter((c) => c.day === day).map((c) => c.taskId))
+}
+
+/**
+ * Today's checklist: every active requirement in its window, urgent ones first.
+ * Must-dos already ticked off today stay on the list until midnight — completing
+ * a one-shot archives it and completing a rest-days quest sends it to sleep, and
+ * neither should make the row (or its slot in the "2/3" count) vanish mid-tick.
+ */
 export function requiredToday(tasks: Task[], today: string = dayKey(), completions: Completion[] = []): Task[] {
+  const done = doneOn(completions, today)
   return tasks
-    .filter((t) => isRequiredOn(t, today, completions, tasks))
+    .filter((t) => isRequiredOn(t, today, completions, tasks, { ignoreJustDone: done.has(t.id) }))
     .sort((a, b) => {
       // the closest deadline leads; undated requirements sit at the bottom
       const da = a.requiredUntil ?? '9999-12-31'
@@ -94,11 +117,13 @@ export function requiredToday(tasks: Task[], today: string = dayKey(), completio
  * is still unmet stay hidden: they aren't dormant, they don't exist yet.
  */
 export function dormantRequired(tasks: Task[], today: string = dayKey(), completions: Completion[] = []): Task[] {
+  const done = doneOn(completions, today)
   return tasks
     .filter(
       (t) =>
         t.required &&
         !t.archived &&
+        !done.has(t.id) && // done today: it's on the checklist wearing a ✓, not dormant
         !isRequiredOn(t, today, completions, tasks) &&
         isUnlockedOn(t, today, completions, tasks) &&
         !(t.requiredUntil && today > t.requiredUntil), // its deadline has passed — it's over, not dormant
