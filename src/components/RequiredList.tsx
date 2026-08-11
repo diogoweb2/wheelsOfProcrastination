@@ -103,7 +103,10 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
             onTrain={
               onTrain && isStudyTask(t)
                 ? () => {
-                    sfx.click()
+                    // Tapping 🏫 IS doing the study must-do: tick it on the way
+                    // into the training round, so the row isn't left unchecked.
+                    if (doneIds.has(t.id)) sfx.click()
+                    else complete(t.id)
                     onTrain(t.id.slice(QUIZ_TASK_PREFIX.length))
                   }
                 : undefined
