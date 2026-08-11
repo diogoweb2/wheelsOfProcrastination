@@ -2,11 +2,12 @@
 // fields TaskForm needs. Deliberately dumb keyword matching — no network, no key.
 // Anything we don't recognise stays undefined so the form keeps its defaults.
 import type { DayScope, Effort, Priority } from '../types'
-import { addDays, dayKey, parseDay } from './dates'
+import { addDays, dayKey, monthDayLabel, parseDay } from './dates'
 
 export type ParsedTask = {
   name: string
   repeats?: boolean
+  untilDone?: boolean
   cooldownDays?: number
   effort?: Effort
   priority?: Priority
@@ -14,6 +15,7 @@ export type ParsedTask = {
   dueDate?: string
   dayScope?: DayScope
   weekDays?: number[] // 0=Sun…6=Sat, only meaningful with dayScope 'custom'
+  monthDays?: number[] // 1–31, only meaningful with dayScope 'monthdays'
 }
 
 const WORD_NUMBERS: Record<string, number> = {
@@ -52,12 +54,43 @@ function nextWeekday(name: string, today: string): string {
   return addDays(today, delta === 0 ? 7 : delta)
 }
 
+// "11th", "1st and 15th", "3, 20" — days of the month, spoken however.
+const MONTH_DAY = '\\d{1,2}(?:st|nd|rd|th)?'
+const MONTH_DAY_LIST = `${MONTH_DAY}(?:\\s*(?:,|and|&)\\s*${MONTH_DAY})*`
+
+/** "the 1st and 15th" → dayScope monthdays, monthDays [1,15], repeating. */
+function applyMonthDays(phrase: string, out: ParsedTask): void {
+  const days = [...new Set([...phrase.matchAll(/\d{1,2}/g)].map((m) => Number(m[0])).filter((n) => n >= 1 && n <= 31))].sort(
+    (a, b) => a - b,
+  )
+  if (!days.length) return
+  out.dayScope = 'monthdays'
+  out.monthDays = days
+  out.repeats = true
+  out.cooldownDays = 0 // the calendar day does the spacing, not a rest period
+}
+
 type Rule = { re: RegExp; apply: (m: RegExpMatchArray, out: ParsedTask, today: string) => void }
 
 // Order matters: the more specific phrasing has to win before the loose one
 // ("every other day" before "every day", "weekends" before "weekend").
 const RULES: Rule[] = [
+  // --- day of the month ("on the 11th of every month") ---
+  // Ahead of the cooldown rules, so "of every month" can't be read as "monthly,
+  // 30 rest days" — a fixed calendar day is a scope, not a rest period.
+  {
+    re: new RegExp(`\\b(?:(?:on|at)\\s+)?(?:the\\s+)?(?:day\\s+)?(${MONTH_DAY_LIST})\\s+of\\s+(?:every|each)\\s+month\\b`),
+    apply: (m, o) => applyMonthDays(m[1], o),
+  },
+  {
+    re: new RegExp(`\\b(?:every|each)\\s+month\\s+on\\s+(?:the\\s+)?(${MONTH_DAY_LIST})\\b`),
+    apply: (m, o) => applyMonthDays(m[1], o),
+  },
+
   // --- repeats / cooldown ---
+  // Ahead of the rest: "until it's done" is a repeat mode of its own, and it
+  // must not be swallowed by the loose "repeats" rule below.
+  { re: /\buntil (?:it'?s |they'?re )?done\b|\buntil finished\b/, apply: (_m, o) => { o.repeats = true; o.untilDone = true } },
   { re: /\bevery other day\b/, apply: (_m, o) => { o.repeats = true; o.cooldownDays = 1 } },
   { re: /\bevery ?day\b|\bdaily\b|\beach day\b/, apply: (_m, o) => { o.repeats = true; o.cooldownDays = 0 } },
   { re: new RegExp(`\\bevery ${NUM} days?\\b`), apply: (m, o) => { o.repeats = true; o.cooldownDays = toNumber(m[1]) } },
@@ -162,6 +195,7 @@ export const VOICE_PHRASES: { emoji: string; title: string; phrases: string[] }[
       '“fortnightly” — 14 rest days',
       '“once a month” / “monthly” — 30 rest days',
       '“one-shot” / “just once” — no repeat',
+      '“until it\'s done” — keeps coming back, one tick ends it, no fines',
     ],
   },
   {
@@ -198,6 +232,8 @@ export const VOICE_PHRASES: { emoji: string; title: string; phrases: string[] }[
       '“on weekdays” / “school days”',
       '“every monday, wednesday and friday” — just those days',
       '“on tuesdays” — one day a week',
+      '“on the 11th of every month” — a fixed calendar day',
+      '“every month on the 1st and 15th” — twice a month',
     ],
   },
   {
@@ -223,11 +259,13 @@ export const VOICE_EXAMPLES: string[] = [
 export function describeParsed(p: ParsedTask): string {
   const bits: string[] = []
   if (p.required) bits.push('must-do')
-  if (p.repeats) bits.push(p.cooldownDays ? `repeats, ${p.cooldownDays}d rest` : 'repeats daily')
+  if (p.monthDays?.length) bits.push(`monthly on the ${p.monthDays.map(monthDayLabel).join(', ')}`)
+  else if (p.repeats && p.untilDone) bits.push('repeats until done')
+  else if (p.repeats) bits.push(p.cooldownDays ? `repeats, ${p.cooldownDays}d rest` : 'repeats daily')
   if (p.effort) bits.push(`${p.effort} effort`)
   if (p.priority === 'urgent') bits.push('urgent')
   if (p.weekDays?.length) bits.push(p.weekDays.map((d) => WEEKDAYS[d].slice(0, 3)).join('/'))
-  else if (p.dayScope && p.dayScope !== 'all') bits.push(p.dayScope)
+  else if (p.dayScope && p.dayScope !== 'all' && p.dayScope !== 'monthdays') bits.push(p.dayScope)
   if (p.dueDate) bits.push(`due ${p.dueDate}`)
   return bits.join(' · ')
 }

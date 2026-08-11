@@ -98,7 +98,7 @@ import {
   streakGoalBonus,
   streakRepairCost,
 } from '../logic/economy'
-import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, pickWeighted, studyLockedIds } from '../logic/wheel'
+import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, missedSince, pickWeighted, studyLockedIds } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
 import { PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
@@ -246,12 +246,14 @@ interface StoreState {
   addTask: (t: {
     name: string
     repeats: boolean
+    untilDone?: boolean
     effort: Effort
     priority: Priority
     dueDate?: string
     startDate?: string
     dayScope: DayScope
     weekDays?: number[]
+    monthDays?: number[]
     required?: boolean
     onWheel?: boolean
     requiredFrom?: string
@@ -866,7 +868,9 @@ export const useStore = create<StoreState>((set, get) => {
             // a day the user volunteered for is never a miss — it was a bonus, not a duty
             if (t.doTodayDay === cur) continue
             if (!isRequiredOn(t, cur, d.completions, d.tasks) || donePerDay.has(`${cur}|${t.id}`)) continue
-            missedRequired += requiredPenalty(t)
+            const fine = requiredPenalty(t)
+            if (fine === 0) continue // "until done" quests cost nothing to miss
+            missedRequired += fine
             if (!missedNames.includes(t.name)) missedNames.push(t.name)
           }
           const dayDone = completedDays.has(cur) || frozen.has(cur)
@@ -951,10 +955,12 @@ export const useStore = create<StoreState>((set, get) => {
             ...(t.required ? { required: true } : {}),
             ...(t.required && t.onWheel ? { onWheel: true } : {}),
             ...(t.dayScope === 'custom' && t.weekDays?.length ? { weekDays: t.weekDays } : {}),
+            ...(t.dayScope === 'monthdays' && t.monthDays?.length ? { monthDays: t.monthDays } : {}),
             ...(t.required && t.requiredFrom ? { requiredFrom: t.requiredFrom } : {}),
             ...(t.required && t.requiredUntil ? { requiredUntil: t.requiredUntil } : {}),
             ...(gate ? { afterTaskId: gate } : {}),
             ...(t.cooldownDays ? { cooldownDays: t.cooldownDays } : {}),
+            ...(t.repeats && t.untilDone ? { untilDone: true } : {}),
             ...(t.categories?.length ? { categories: t.categories } : {}),
             ...(t.seasons?.length ? { seasons: t.seasons } : {}),
             ...(seriesId ? { seriesId, seriesPart: i, seriesTotal: parts } : {}),
@@ -1021,7 +1027,10 @@ export const useStore = create<StoreState>((set, get) => {
       let earned = 0
       commit((d, events) => {
         const task = d.tasks.find((t) => t.id === taskId)
-        if (!task || !isRequiredOn(task, today, d.completions, d.tasks)) return
+        // Asked for today, or a scheduled must-do whose day passed unticked and
+        // is still being carried in red — both can be ticked off right here.
+        if (!task) return
+        if (!isRequiredOn(task, today, d.completions, d.tasks) && missedSince(task, today, d.completions, d.tasks) === null) return
         if (d.completions.some((c) => c.day === today && c.taskId === taskId)) return // already ticked
         earned = requiredReward(task)
         d.completions.push({
@@ -1038,8 +1047,9 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.gems += earned
         d.economy.totalGemsEarned += earned
         d.daily.completionsToday += 1
-        // A one-shot requirement with a deadline is finished for good once it's done.
-        if (!task.repeats) task.archived = true
+        // A one-shot requirement with a deadline is finished for good once it's
+        // done — and so is a "repeat until done" one, the moment it's ticked.
+        if (!task.repeats || task.untilDone) task.archived = true
 
         if (d.streak.lastCompletionDay !== today) {
           d.streak.current += 1
@@ -1164,7 +1174,8 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.totalGemsEarned += earned
         d.daily.completionsToday += 1
         d.daily.pendingPicks = d.daily.pendingPicks.filter((p) => p.taskId !== taskId)
-        if (!task.repeats) task.archived = true
+        // one-shots retire on completion, and so do "repeat until done" quests
+        if (!task.repeats || task.untilDone) task.archived = true
 
         if (d.streak.lastCompletionDay !== today) {
           d.streak.current += 1

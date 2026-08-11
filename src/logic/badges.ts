@@ -39,7 +39,7 @@ export function newBadges(data: AppData): BadgeAward[] {
 
   const habitCounts = new Map<string, number>()
   for (const c of data.completions) habitCounts.set(c.taskId, (habitCounts.get(c.taskId) ?? 0) + 1)
-  const habits = new Map<string, Task>(data.tasks.filter((t) => t.repeats).map((t) => [t.id, t]))
+  const habits = new Map<string, Task>(data.tasks.filter((t) => t.repeats && !t.untilDone).map((t) => [t.id, t]))
   for (const [taskId, count] of habitCounts) {
     const task = habits.get(taskId)
     if (!task) continue

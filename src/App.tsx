@@ -31,9 +31,13 @@ import { sfx } from './audio'
 /** Which app is open, and which of its bottom-menu tabs. `null` = home screen. */
 type OpenApp = { app: string; tab: string } | null
 
+/** Where the app lands on open: the wheel, not the dashboard. The dashboard is
+    one tap away behind the header's "Apps" button. */
+const LANDING: OpenApp = { app: 'wheel', tab: 'spin' }
+
 export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
-  const [open, setOpen] = useState<OpenApp>(null)
+  const [open, setOpen] = useState<OpenApp>(LANDING)
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
@@ -46,9 +50,9 @@ export default function App() {
     setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id })
   }
 
-  // switching crewmate drops you back on the home screen — the roster differs
+  // switching crewmate drops you back on the landing page — the roster differs
   useEffect(() => {
-    setOpen(null)
+    setOpen(LANDING)
   }, [activeProfileId])
 
   // process missed days on open and whenever the app regains focus (day may have flipped)

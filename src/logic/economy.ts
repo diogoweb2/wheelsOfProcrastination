@@ -32,8 +32,13 @@ export function requiredReward(task: Task): number {
   return REQUIRED_REWARD[task.effort]
 }
 
-/** Berries docked at rollover for a required item left undone that day. */
+/**
+ * Berries docked at rollover for a required item left undone that day.
+ * "Repeat until done" quests are free to miss — they're usually waiting on
+ * someone else, so a day without an answer isn't a skipped duty.
+ */
 export function requiredPenalty(task: Task): number {
+  if (task.untilDone) return 0
   return REQUIRED_REWARD[task.effort]
 }
 

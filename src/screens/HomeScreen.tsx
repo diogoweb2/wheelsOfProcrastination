@@ -1,5 +1,6 @@
-// The Dashboard — a home screen of app icons plus widgets that carry every
-// number the old always-on top bar used to show.
+// The Dashboard — a home screen of app icons, nothing else. It is not where the
+// app opens any more: the quest list is, and the header's "Apps" button comes
+// back here.
 //
 // Reordering icons: tap "Arrange" (or press and hold any icon) to enter edit
 // mode, where the grid jiggles and a plain drag moves an icon. The order is
@@ -8,14 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import { homeTiles, type AppDef, type Gates, type HomeTile } from '../apps/registry'
-import { albumProgress } from '../logic/album'
-import { converterActive, fmt$, totalTreasure } from '../logic/bank'
-import { activeQuestions, duePool, topicsFor } from '../logic/quiz'
-import { isAvailableOn } from '../logic/wheel'
-import { heldStreak } from '../logic/economy'
-import { addDays, dayKey } from '../logic/dates'
-import { Beli } from '../components/Beli'
-import { DevilFruit } from '../components/DevilFruit'
+import { converterActive } from '../logic/bank'
 import { sfx } from '../audio'
 
 const HOLD_MS = 320 // press-and-hold before the grid enters arrange mode
@@ -70,8 +64,6 @@ export function HomeScreen({
         </div>
       </div>
 
-      <Widgets onOpen={onOpen} />
-
       <IconGrid
         tiles={tiles}
         badges={badges}
@@ -103,13 +95,13 @@ function FolderPage({
       <div className="app-head">
         <button
           className="app-head-back"
-          aria-label="Back to main"
+          aria-label="Back to the apps"
           onClick={() => {
             sfx.click()
             onClose()
           }}
         >
-          <span aria-hidden>⌂</span> Main
+          <span aria-hidden>⌂</span> Apps
         </button>
         <div className="app-head-title">
           {folder.icon} {folder.name}
@@ -143,127 +135,6 @@ function greeting(): string {
   if (h < 12) return 'Morning, captain'
   if (h < 18) return 'Good afternoon'
   return 'Good evening'
-}
-
-/** Counts up/down to its new value, so an earned reward is visible. */
-function AnimatedNum({ value }: { value: number }) {
-  const [shown, setShown] = useState(value)
-  const prev = useRef(value)
-  useEffect(() => {
-    const from = prev.current
-    prev.current = value
-    if (from === value) return
-    const start = performance.now()
-    const dur = 700
-    let raf = 0
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / dur)
-      setShown(Math.round(from + (value - from) * p))
-      if (p < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [value])
-  return <>{shown}</>
-}
-
-// --- widgets ---------------------------------------------------------------
-
-function Widgets({ onOpen }: { onOpen: (appId: string, tabId?: string) => void }) {
-  const { data, activeProfileId, kidData, quizBank, completedTodayIds, freezeRequests } = useStore()
-  // a dead streak waiting on Dad's answer still reads as alive
-  const held = heldStreak(data.streak.deadStreak, freezeRequests, activeProfileId)
-  const streakShown = held ?? data.streak.current
-  const today = dayKey()
-
-  const plate = data.daily.pendingPicks
-    .map((p) => data.tasks.find((t) => t.id === p.taskId))
-    .filter((t): t is NonNullable<typeof t> => !!t && !t.archived && isAvailableOn(t, today, data.completions, data.tasks))
-  const doneToday = completedTodayIds().size
-
-  // Parent has no bank of his own — his widget watches Ben's chests.
-  const watchedBank = activeProfileId === KID_ID ? data.bank : kidData?.bank
-  const album = albumProgress(data.album)
-
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const day = addDays(today, i - 6)
-    return {
-      day,
-      done: data.completions.some((c) => c.day === day),
-      frozen: data.frozenDays.some((f) => f.day === day),
-    }
-  })
-
-  // questions waiting to be practised today, across every unlocked topic
-  const due = activeProfileId
-    ? topicsFor(activeProfileId)
-        .filter((t) => data.quiz.unlockedTopics.includes(t.id) || data.quiz.passedTopics.includes(t.id))
-        .reduce((n, t) => n + duePool(activeQuestions(quizBank, t.id), data.quiz.stats).length, 0)
-    : 0
-
-  return (
-    <div className="widget-grid">
-      <button className="widget" onClick={() => { sfx.click(); onOpen('wheel', plate.length ? 'spin' : 'quests') }}>
-        <div className="widget-head">📋 Today</div>
-        <div className="widget-big">{plate.length}</div>
-        <div className="widget-sub">
-          {plate.length === 0 ? 'nothing picked — spin!' : plate.length === 1 ? 'quest on your plate' : 'quests on your plate'}
-        </div>
-        <div className="widget-foot">{doneToday} done today</div>
-      </button>
-
-      <button className="widget" onClick={() => { sfx.click(); onOpen('wheel', 'streak') }}>
-        <div className="widget-head">🔥 Streak{held !== null ? ' ⏳' : ''}</div>
-        <div className="widget-big" style={{ color: streakShown > 0 ? 'var(--orange)' : 'var(--muted)' }}>
-          {streakShown}
-        </div>
-        <div className="widget-sub">
-          {held !== null
-            ? 'on hold — waiting for Dad'
-            : `best ${data.streak.best} · 🧊 ${data.economy.freezes} freeze${data.economy.freezes === 1 ? '' : 's'}`}
-        </div>
-        <div className="widget-dots">
-          {week.map((d) => (
-            <span key={d.day} className={`widget-dot${d.done ? ' on' : d.frozen ? ' frozen' : ''}`} />
-          ))}
-        </div>
-      </button>
-
-      <button className="widget" onClick={() => { sfx.click(); onOpen('store', 'walls') }}>
-        <div className="widget-head">🪙 Berries</div>
-        {/* stat--gem: where earned coins fly to on this screen (logic/fx.ts) */}
-        <div className="widget-big stat--gem" style={{ color: 'var(--gold)' }}><AnimatedNum value={data.economy.gems} /></div>
-        <div className="widget-sub">to spend in the Shop</div>
-        <div className="widget-foot widget-inline">
-          <DevilFruit size={14} /> <AnimatedNum value={data.economy.devilFruits} /> Devil Fruit{data.economy.devilFruits === 1 ? '' : 's'}
-        </div>
-      </button>
-
-      <button className="widget" onClick={() => { sfx.click(); onOpen('bank') }}>
-        <div className="widget-head widget-inline">
-          <Beli size={13} /> Treasure
-        </div>
-        <div className="widget-big" style={{ color: 'var(--gold)', fontSize: 26 }}>
-          {watchedBank ? fmt$(totalTreasure(watchedBank)) : '—'}
-        </div>
-        <div className="widget-sub">{activeProfileId === KID_ID ? 'yours to cash out' : '⚔️ Ben’s chests'}</div>
-      </button>
-
-      <button className="widget" onClick={() => { sfx.click(); onOpen('album', 'album') }}>
-        <div className="widget-head">🖼️ Stickers</div>
-        <div className="widget-big">{album.owned}<span className="widget-of">/{album.total}</span></div>
-        <div className="widget-sub">pirates collected</div>
-        <div className="widget-bar"><span style={{ width: `${album.pct}%` }} /></div>
-      </button>
-
-      <button className="widget" onClick={() => { sfx.click(); onOpen('academy', 'topics') }}>
-        <div className="widget-head">🎓 Quiz</div>
-        <div className="widget-big" style={{ color: due > 0 ? 'var(--blue)' : 'var(--muted)' }}>{due}</div>
-        <div className="widget-sub">{due === 0 ? 'all caught up today 😴' : 'questions to practise'}</div>
-        <div className="widget-foot">{data.quiz.passedTopics.length} topics conquered</div>
-      </button>
-    </div>
-  )
 }
 
 // --- draggable icon grid ---------------------------------------------------

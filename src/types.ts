@@ -10,12 +10,19 @@ export type Effort = 'low' | 'medium' | 'high'
 export type Priority = 'urgent' | 'normal' // both are "important"; unimportant tasks don't exist here
 export type EffortFilter = Effort[] // selected efforts; empty = all
 export type Season = 'winter' | 'spring' | 'summer' | 'fall'
-export type DayScope ='all' | 'weekdays' | 'weekends' | 'custom' // which days a task is allowed on the wheel / checklist
+export type DayScope ='all' | 'weekdays' | 'weekends' | 'custom' | 'monthdays' // which days a task is allowed on the wheel / checklist
 
 export interface Task {
   id: string
   name: string
   repeats: boolean
+  /**
+   * "Repeat until done" — only read when `repeats` is true. The quest keeps
+   * coming back every day like a habit, but the FIRST tick retires it for good,
+   * and a day without it costs nothing. For jobs that wait on somebody else
+   * ("ask Dad if the form went in"): you can't fail them, you just aren't done yet.
+   */
+  untilDone?: boolean
   effort: Effort
   priority: Priority
   dueDate?: string // YYYY-MM-DD
@@ -27,6 +34,13 @@ export interface Task {
    * list means the scope says nothing, so the task is allowed on any day.
    */
   weekDays?: number[]
+  /**
+   * Hand-picked days of the MONTH, only read when `dayScope === 'monthdays'`:
+   * 1–31 (e.g. [11] = the 11th of every month, [1,15] = twice a month). A day
+   * past the end of a short month lands on that month's last day, so 31 still
+   * fires in February. Empty / missing = the scope says nothing, any day goes.
+   */
+  monthDays?: number[]
   createdAt: string // ISO
   archived: boolean // non-repeating tasks get archived once done
   spinsSinceLastPicked: number // fairness counter
@@ -334,6 +348,10 @@ export interface BankAccountState {
   balance: number // stored unrounded so tiny daily interest still compounds; round on display
   deposited: number // lifetime net "new money" HE put in (drives the new-money-vs-growth split)
   growth: number // lifetime market growth earned
+  // lifetime compounded return of the chest itself (1 = flat, 1.1 = +10%). Cash
+  // moving in or out never touches it, so "this pocket paid you 10%" stays true
+  // even after he empties it.
+  returnFactor: number
   matched: number // college only: Dad's matched dollars currently in the chest (burned if he withdraws)
   history: { day: string; balance: number }[] // last ~30 daily snapshots for the sparkline
 }

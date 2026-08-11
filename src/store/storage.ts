@@ -5,7 +5,7 @@
 //  - readers for the previous localStorage data, used once to migrate up into Firestore
 import type { AppData, Profile } from '../types'
 import { addDays, dayKey, parseDay } from '../logic/dates'
-import { defaultBankState } from '../logic/bank'
+import { ACCOUNT_IDS, defaultBankState } from '../logic/bank'
 import { defaultAlbumState } from '../logic/album'
 import { GYM_LOG_CAP, defaultGymState } from '../logic/gym'
 
@@ -124,6 +124,15 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
   if (legacySavings?.balance) {
     merged.bank.accounts.chequing.balance += legacySavings.balance
     merged.bank.accounts.chequing.deposited += legacySavings.deposited ?? legacySavings.balance
+  }
+  // bank v2 → v3: chests now carry a lifetime return factor. Saves from before it
+  // get it back-estimated from the growth they already earned vs the money put in.
+  const savedAccts = (parsed.bank as { accounts?: Record<string, { returnFactor?: number }> } | undefined)?.accounts
+  for (const id of ACCOUNT_IDS) {
+    if (savedAccts?.[id]?.returnFactor !== undefined) continue
+    const a = merged.bank.accounts[id]
+    const basis = a.deposited + a.matched
+    a.returnFactor = basis > 0 ? Math.max(0, 1 + a.growth / basis) : 1
   }
   // one-time fix: a bank seeded ON its own payday used to skip that day's allowance,
   // because the sim only pays days *after* lastDay. If it never ran (no history, no

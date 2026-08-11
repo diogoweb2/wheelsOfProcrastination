@@ -29,6 +29,34 @@ export function weekDayLabel(dow: number): string {
   return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow] ?? ''
 }
 
+/** Day of the month for a day key: 1–31 (local). */
+export function dayOfMonth(key: string): number {
+  return parseDay(key).getDate()
+}
+
+/** How many days the month of `key` has (28–31). */
+export function daysInMonth(key: string): number {
+  const d = parseDay(key)
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+}
+
+/**
+ * Does `key` fall on one of these days of the month? A picked day that doesn't
+ * exist this month (the 31st in February) fires on the last day instead, so a
+ * monthly chore never silently skips a month.
+ */
+export function isMonthDay(key: string, days: number[]): boolean {
+  const dom = dayOfMonth(key)
+  const last = daysInMonth(key)
+  return days.some((d) => d === dom || (d > last && dom === last))
+}
+
+/** Ordinal label for a day of the month, e.g. 11 → "11th". */
+export function monthDayLabel(d: number): string {
+  const suffix = d % 100 >= 11 && d % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][d % 10] ?? 'th'
+  return `${d}${suffix}`
+}
+
 /** True if the given day (local) falls on Saturday or Sunday. */
 export function isWeekend(key: string): boolean {
   const dow = parseDay(key).getDay()

@@ -21,6 +21,8 @@
   --yellow: #ffce00;    /* Dark Yellow (straw gold) */
   --yellow-dark: #c9a200;
   --gold: #ffce00;
+  /* the one real green: profit vs loss on the bank chests must read at a glance */
+  --profit: #2ecc71;
   --bronze: #af6528;    /* Dark Bronze */
   --purple: #af6528;    /* "on plate" accent → bronze */
   --ice: #9adcff;
@@ -538,6 +540,9 @@ input, select { font-family: inherit; }
 .seg--days { gap: 3px; }
 .seg--days button { padding: 9px 0; font-size: 12px; }
 .seg--days button.on { background: var(--gold); color: #2a1c00; }
+/* 31 day-of-month toggles: a grid that wraps instead of one squeezed row. */
+.seg--month { display: grid; grid-template-columns: repeat(7, 1fr); }
+.seg--month button { flex: none; }
 
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
@@ -1154,6 +1159,31 @@ input, select { font-family: inherit; }
   background: var(--bg2);
 }
 .bank-growbar-shine { animation: pulse-soft 2.4s infinite; }
+
+/* Lifetime interest badge — the headline "this chest paid you X%" number.
+   The one place the palette gets a real green: profit/loss must read instantly. */
+.bank-return {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid transparent;
+}
+.bank-return-pct { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -0.5px; }
+.bank-return-label { font-size: 11px; font-weight: 800; opacity: 0.85; }
+.bank-return--up {
+  color: var(--profit);
+  border-color: rgb(46 204 113 / 45%);
+  background: rgb(46 204 113 / 12%);
+}
+.bank-return--down {
+  color: var(--red);
+  border-color: rgb(215 0 0 / 45%);
+  background: rgb(215 0 0 / 12%);
+}
+.bank-return--flat { color: var(--muted); border-color: var(--line); background: var(--bg2); }
 
 .bank-resp {
   margin-top: 8px;
@@ -1799,6 +1829,34 @@ input, select { font-family: inherit; }
 .effort-pip--high.on { background: var(--red); border-color: var(--red); color: #fff; }
 
 /* ---------- required (must-do) checklist ---------- */
+/* The checklist is two panels: what's scheduled, then the daily habits. */
+.required-stack { display: flex; flex-direction: column; gap: 8px; }
+
+/* A late scheduled must-do turns its whole panel red — impossible to scroll past. */
+.required-panel--late {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 35%, transparent);
+}
+.required-alarm {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--red) 25%, transparent);
+  border: 2px solid var(--red);
+  color: #fff;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.3;
+  animation: req-alarm 1.6s ease-in-out infinite;
+}
+@keyframes req-alarm {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 55%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--red) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .required-alarm { animation: none; }
+}
+
 .required-panel {
   background: var(--bg2);
   border: 2px solid var(--line);
@@ -1834,8 +1892,8 @@ input, select { font-family: inherit; }
   flex-direction: column;
   gap: 6px;
   overflow-y: auto;
-  /* Never eats more than half the screen — the wheel keeps the other half. */
-  max-height: 50dvh;
+  /* Two panels now share the space above the wheel, so each keeps a third. */
+  max-height: 33dvh;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1853,6 +1911,20 @@ input, select { font-family: inherit; }
 }
 .required-row:active:not(:disabled) { transform: scale(0.97); }
 .required-row--warn { border-color: var(--orange); }
+/* Missed its scheduled day: loud on purpose — this one is easy to keep ignoring. */
+.required-row--late {
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 18%, var(--card));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 45%, transparent);
+}
+.required-box--late { border-color: var(--red); background: color-mix(in srgb, var(--red) 35%, transparent); color: #fff; }
+.required-late {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #ff9b9d;
+  text-transform: uppercase;
+}
 .required-row--done { opacity: 0.55; border-color: var(--green); }
 .required-row--done .required-name { text-decoration: line-through; }
 

@@ -63,7 +63,8 @@ function computeStats(task: Task, completions: Completion[]): HabitStats {
 export function HabitsSection() {
   const { data } = useStore()
   const habits = useMemo(
-    () => data.tasks.filter((t) => t.repeats).map((t) => computeStats(t, data.completions)),
+    // "until done" quests repeat, but they're a one-tap errand, not a habit to track
+    () => data.tasks.filter((t) => t.repeats && !t.untilDone).map((t) => computeStats(t, data.completions)),
     [data.tasks, data.completions],
   )
 

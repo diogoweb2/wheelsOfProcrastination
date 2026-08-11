@@ -11,13 +11,13 @@ export function AppHeader({ app, onHome }: { app: AppDef; onHome: () => void }) 
     <div className="app-head">
       <button
         className="app-head-back"
-        aria-label="Back to main"
+        aria-label="Back to the apps"
         onClick={() => {
           sfx.click()
           onHome()
         }}
       >
-        <span aria-hidden>⌂</span> Main
+        <span aria-hidden>⌂</span> Apps
       </button>
       <div className="app-head-title">
         {app.img ? <img src={app.img} alt="" width={22} height={22} draggable={false} /> : <span>{app.icon}</span>}

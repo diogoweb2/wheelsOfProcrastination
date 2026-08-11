@@ -1,6 +1,6 @@
 // Weighted-but-fair wheel selection. Rules in BUSINESS_REQUIREMENTS.md §3.
 import type { Completion, EffortFilter, Task } from '../types'
-import { addDays, dayKey, dayOfWeek, daysUntil, isWeekend, seasonOf } from './dates'
+import { addDays, dayKey, dayOfWeek, daysUntil, isMonthDay, isWeekend, seasonOf } from './dates'
 import { isEffectivelyUrgent } from './economy'
 import { QUIZ_TASK_PREFIX } from './quiz'
 
@@ -54,6 +54,8 @@ export function isAvailableOn(
   if (task.dayScope === 'weekends' && !isWeekend(today)) return false
   // Hand-picked days ("video games on Mon/Wed/Fri"). An empty list = no restriction.
   if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeek(today))) return false
+  // Hand-picked days of the month ("pay the rent on the 1st"). An empty list = no restriction.
+  if (task.dayScope === 'monthdays' && task.monthDays?.length && !isMonthDay(today, task.monthDays)) return false
   // Seasonal quests ("rake the leaves"). An empty list = all year round.
   if (task.seasons?.length && !task.seasons.includes(seasonOf(today))) return false
   if (!isUnlockedOn(task, today, completions, tasks)) return false
@@ -111,6 +113,77 @@ export function requiredToday(tasks: Task[], today: string = dayKey(), completio
 }
 
 /**
+ * Is this must-do simply asked for EVERY day, or does it keep a schedule of its
+ * own (certain weekdays, a day of the month, rest days, a season, a window)?
+ * The checklist splits on this: a scheduled must-do is easy to miss, so it gets
+ * its own section above the daily habits.
+ */
+export function isEveryDayRequired(task: Task): boolean {
+  if (task.dayScope && task.dayScope !== 'all') return false
+  if (task.cooldownDays && task.cooldownDays > 0) return false
+  if (task.seasons?.length && task.seasons.length < 4) return false
+  if (task.requiredFrom || task.requiredUntil || task.startDate) return false
+  return true
+}
+
+/** How far back the checklist looks for a scheduled must-do that was never ticked. */
+const MISSED_LOOKBACK_DAYS = 90
+
+/**
+ * The earliest day in the recent past this scheduled must-do was asked for and
+ * never ticked off — or null if it's up to date, or simply due today. Walks back
+ * day by day over its own schedule, no further than the day the quest was
+ * created, and stops at the first occurrence that WAS done, so only the current
+ * run of misses counts. Daily habits are exempt: yesterday's floss is gone, but
+ * "pay the rent on the 1st" has to keep nagging until it's paid.
+ */
+export function missedSince(
+  task: Task,
+  today: string = dayKey(),
+  completions: Completion[] = [],
+  tasks?: Task[],
+): string | null {
+  if (!task.required || isEveryDayRequired(task)) return null
+  // Its day is TODAY — it's due, not late. Whatever it did or didn't do on
+  // earlier occurrences, the live one is the one on the checklist.
+  if (isRequiredOn(task, today, completions, tasks)) return null
+  const doneDays = new Set(completions.filter((c) => c.taskId === task.id).map((c) => c.day))
+  const born = task.createdAt.slice(0, 10) // YYYY-MM-DD
+  let earliest: string | null = null
+  let day = addDays(today, -1)
+  for (let i = 0; i < MISSED_LOOKBACK_DAYS; i++, day = addDays(day, -1)) {
+    // Before it ever started being asked for — nothing older can be a miss.
+    if (born && day < born) break
+    if (task.requiredFrom && day < task.requiredFrom) break
+    if (task.startDate && day < task.startDate) break
+    if (!isRequiredOn(task, day, completions, tasks)) continue
+    if (doneDays.has(day)) break // caught up as of this occurrence
+    earliest = day
+  }
+  return earliest
+}
+
+/**
+ * Scheduled must-dos whose day came and went unticked. They are NOT on today's
+ * list by their own schedule, but they stay on the checklist (in red) until
+ * they're done — that's the whole point of scheduling them.
+ */
+export function carriedRequired(tasks: Task[], today: string = dayKey(), completions: Completion[] = []): Task[] {
+  const done = doneOn(completions, today)
+  return tasks
+    .filter(
+      (t) =>
+        t.required &&
+        !t.archived &&
+        !done.has(t.id) &&
+        !isRequiredOn(t, today, completions, tasks) &&
+        isUnlockedOn(t, today, completions, tasks) &&
+        missedSince(t, today, completions, tasks) !== null,
+    )
+    .sort((a, b) => (missedSince(a, today, completions) ?? '').localeCompare(missedSince(b, today, completions) ?? ''))
+}
+
+/**
  * Must-dos that exist but aren't being asked for today — resting out a cooldown,
  * waiting for their window to open, or scoped to other days of the week. These
  * are the candidates for "do it today anyway". Chained quests whose prerequisite
@@ -126,6 +199,8 @@ export function dormantRequired(tasks: Task[], today: string = dayKey(), complet
         !done.has(t.id) && // done today: it's on the checklist wearing a ✓, not dormant
         !isRequiredOn(t, today, completions, tasks) &&
         isUnlockedOn(t, today, completions, tasks) &&
+        // already carried onto the checklist in red — offering it again would double it up
+        missedSince(t, today, completions, tasks) === null &&
         !(t.requiredUntil && today > t.requiredUntil), // its deadline has passed — it's over, not dormant
     )
     .sort((a, b) => a.name.localeCompare(b.name))

@@ -5,7 +5,7 @@ import type { DayScope, Effort, Priority, Season, Task } from '../types'
 import { REQUIRED_REWARD, isEffectivelyUrgent, rewardFor } from '../logic/economy'
 import { sfx } from '../audio'
 import { crewSays } from '../logic/crewLines'
-import { dayKey, daysUntil, seasonLabel, weekDayLabel } from '../logic/dates'
+import { dayKey, daysUntil, monthDayLabel, seasonLabel, weekDayLabel } from '../logic/dates'
 import { cooldownUntil, isAvailableOn, isUnlockedOn } from '../logic/wheel'
 import { VOICE_EXAMPLES, VOICE_PHRASES, describeParsed, parseSpokenTask } from '../logic/voiceTask'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
@@ -135,11 +135,14 @@ export function TasksScreen({ goSpin }: { goSpin: () => void }) {
               {t.required && <span className="chip chip--required">✅ must-do</span>}
               {t.required && t.requiredUntil && <span className="chip">🏁 until {t.requiredUntil}</span>}
               {urgent && <span className="chip chip--urgent">⚡ urgent</span>}
-              {t.repeats && <span className="chip">🔁</span>}
+              {t.repeats && <span className="chip">{t.untilDone ? '🔁 until done' : '🔁'}</span>}
               {t.dayScope === 'weekdays' && <span className="chip">💼 weekdays</span>}
               {t.dayScope === 'weekends' && <span className="chip">🏖️ weekends</span>}
               {t.dayScope === 'custom' && t.weekDays?.length ? (
                 <span className="chip">🗓️ {t.weekDays.map(weekDayLabel).join('/')}</span>
+              ) : null}
+              {t.dayScope === 'monthdays' && t.monthDays?.length ? (
+                <span className="chip">📆 {t.monthDays.map(monthDayLabel).join('/')} monthly</span>
               ) : null}
               {t.seasons?.length ? <span className="chip">{t.seasons.map(seasonLabel).join(' ')}</span> : null}
               {t.required && t.onWheel && <span className="chip">🎡 + wheel</span>}
@@ -587,12 +590,14 @@ function TaskForm(props: {
   onSave: (v: {
     name: string
     repeats: boolean
+    untilDone?: boolean
     effort: Effort
     priority: Priority
     dueDate?: string
     startDate?: string
     dayScope: DayScope
     weekDays?: number[]
+    monthDays?: number[]
     required?: boolean
     onWheel?: boolean
     requiredFrom?: string
@@ -614,12 +619,15 @@ function TaskForm(props: {
   const { initial, allTasks, knownCategories, advancedByDefault, onSave, onClose, onDelete } = props
   const [name, setName] = useState(initial?.name ?? '')
   const [repeats, setRepeats] = useState(initial?.repeats ?? false)
+  // Third repeat mode: repeats, but the first tick retires it (and misses are free).
+  const [untilDone, setUntilDone] = useState(initial?.untilDone ?? false)
   const [effort, setEffort] = useState<Effort>(initial?.effort ?? 'low')
   const [priority, setPriority] = useState<Priority>(initial?.priority ?? 'normal')
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? '')
   const [startDate, setStartDate] = useState(initial?.startDate ?? '')
   const [dayScope, setDayScope] = useState<DayScope>(initial?.dayScope ?? 'all')
   const [weekDays, setWeekDays] = useState<number[]>(initial?.weekDays ?? [])
+  const [monthDays, setMonthDays] = useState<number[]>(initial?.monthDays ?? [])
   const [required, setRequired] = useState(initial?.required ?? false)
   const [onWheel, setOnWheel] = useState(initial?.onWheel ?? false)
   const [requiredFrom, setRequiredFrom] = useState(initial?.requiredFrom ?? '')
@@ -672,13 +680,20 @@ function TaskForm(props: {
       if (!isFinal) return
       const p = parseSpokenTask(transcript)
       if (p.name) setName(p.name)
-      if (p.repeats !== undefined) setRepeats(p.repeats)
+      if (p.repeats !== undefined) {
+        setRepeats(p.repeats)
+        setUntilDone(p.repeats ? (p.untilDone ?? false) : false)
+      }
       if (p.cooldownDays !== undefined) setCooldownDays(p.cooldownDays ? String(p.cooldownDays) : '')
       if (p.effort) setEffort(p.effort)
       if (p.priority) setPriority(p.priority)
       if (p.required !== undefined) setRequired(p.required)
       if (p.dayScope) setDayScope(p.dayScope)
       if (p.weekDays?.length) setWeekDays(p.weekDays)
+      if (p.monthDays?.length) {
+        setMonthDays(p.monthDays)
+        setAdvancedOpen(true)
+      }
       if (p.dueDate) {
         // Must-dos use the requiredUntil window instead of a due date.
         if (p.required) setRequiredUntil(p.dueDate)
@@ -798,14 +813,43 @@ function TaskForm(props: {
         <div className="field">
           <label>Repeats? (habit)</label>
           <div className="seg">
-            <button className={!repeats ? 'on' : ''} onClick={() => setRepeats(false)}>
+            <button
+              className={!repeats ? 'on' : ''}
+              onClick={() => {
+                setRepeats(false)
+                setUntilDone(false)
+              }}
+            >
               One-shot 💨
             </button>
-            <button className={repeats ? 'on' : ''} onClick={() => setRepeats(true)}>
-              Every day 🔁
+            <button
+              className={repeats && !untilDone ? 'on' : ''}
+              onClick={() => {
+                setRepeats(true)
+                setUntilDone(false)
+              }}
+            >
+              Repeat 🔁
+            </button>
+            <button
+              className={repeats && untilDone ? 'on' : ''}
+              onClick={() => {
+                setRepeats(true)
+                setUntilDone(true)
+              }}
+            >
+              Until done ✅
             </button>
           </div>
-          {repeats && (
+          {untilDone && (
+            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              Keeps coming back every day until you tick it — then it's gone for good. Missing a day costs nothing (perfect for “ask Dad
+              if the form went in”).
+            </p>
+          )}
+          {/* Rest days measure the gap AFTER a completion — an "until done" quest
+              only ever gets one, so the field would never do anything. */}
+          {repeats && !untilDone && (
             <>
               <label style={{ marginTop: 10 }}>Rest days after doing it (0 = every day)</label>
               <input
@@ -975,6 +1019,9 @@ function TaskForm(props: {
                 <button className={dayScope === 'custom' ? 'on' : ''} onClick={() => setDayScope('custom')}>
                   🗓️ Pick days
                 </button>
+                <button className={dayScope === 'monthdays' ? 'on' : ''} onClick={() => setDayScope('monthdays')}>
+                  📆 Day of month
+                </button>
               </div>
               {dayScope === 'custom' && (
                 <>
@@ -994,6 +1041,29 @@ function TaskForm(props: {
                     {weekDays.length === 0
                       ? 'Pick at least one day, or it counts as every day.'
                       : `${required ? 'Must-do on' : 'On the wheel on'} ${weekDays.map(weekDayLabel).join(', ')} only.`}
+                  </p>
+                </>
+              )}
+              {dayScope === 'monthdays' && (
+                <>
+                  {/* "Day 11 of every month" — pick one number, or several. */}
+                  <div className="seg seg--days seg--month" style={{ marginTop: 10 }}>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                      <button
+                        key={d}
+                        className={monthDays.includes(d) ? 'on' : ''}
+                        onClick={() => setMonthDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort((a, b) => a - b)))}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+                    {monthDays.length === 0
+                      ? 'Pick at least one day of the month, or it counts as every day.'
+                      : `${required ? 'Must-do on' : 'On the wheel on'} the ${monthDays.map(monthDayLabel).join(', ')} of every month.${
+                          monthDays.some((d) => d > 28) ? ' Short months use their last day.' : ''
+                        }`}
                   </p>
                 </>
               )}
@@ -1022,7 +1092,9 @@ function TaskForm(props: {
 
         <p className="muted" style={{ marginBottom: 12 }}>
           {required
-            ? `Pays 🪙${REQUIRED_REWARD[effort]} per tick, −🪙${REQUIRED_REWARD[effort]} per skipped day.`
+            ? untilDone
+              ? `Pays 🪙${REQUIRED_REWARD[effort]} when you tick it. No fine for the days it isn't done.`
+              : `Pays 🪙${REQUIRED_REWARD[effort]} per tick, −🪙${REQUIRED_REWARD[effort]} per skipped day.`
             : `Pays 🪙${preview} per completion${priority === 'urgent' ? ' (urgency bonus included)' : ''}.`}
         </p>
 
@@ -1033,19 +1105,22 @@ function TaskForm(props: {
             onSave({
               name,
               repeats,
+              // undefined clears it on edit, so switching back to a plain repeat sticks
+              untilDone: repeats && untilDone ? true : undefined,
               effort,
               priority,
               dueDate: dueDate || undefined,
               startDate: startDate || undefined,
               dayScope,
               weekDays: dayScope === 'custom' && weekDays.length ? weekDays : undefined,
+              monthDays: dayScope === 'monthdays' && monthDays.length ? monthDays : undefined,
               required,
               onWheel: required && onWheel ? true : undefined,
               // the window only means anything for a requirement
               requiredFrom: required ? requiredFrom || undefined : undefined,
               requiredUntil: required ? requiredUntil || undefined : undefined,
               afterTaskId: afterTaskId || undefined,
-              cooldownDays: repeats && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
+              cooldownDays: repeats && !untilDone && Number(cooldownDays) > 0 ? Number(cooldownDays) : undefined,
               // undefined clears the field on edit, so dropping every category sticks
               categories: categories.length ? categories : undefined,
               // all four = no restriction, so store nothing

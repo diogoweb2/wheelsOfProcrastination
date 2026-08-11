@@ -7,7 +7,7 @@
 // the habit forms. Three chests + the College/RESP one. Market moves come from a
 // monthly-fetched real series (see scripts/bank-market.mjs); we fall back to the
 // admin's monthly-rate estimate when the series is missing.
-import type { BankAccountId, BankConfig, BankConverterState, BankState, BankTxn, MarketData } from '../types'
+import type { BankAccountId, BankAccountState, BankConfig, BankConverterState, BankState, BankTxn, MarketData } from '../types'
 import { addDays, dayKey, daysUntil, parseDay } from './dates'
 
 // Real admin fees (MER, %/year) — buying/selling itself is free, like we promised.
@@ -59,7 +59,7 @@ export const ACCOUNT_META: Record<
 }
 
 export function defaultBankState(): BankState {
-  const emptyAcct = () => ({ balance: 0, deposited: 0, growth: 0, matched: 0, history: [] })
+  const emptyAcct = () => ({ balance: 0, deposited: 0, growth: 0, returnFactor: 1, matched: 0, history: [] })
   return {
     config: {
       weeklyAmount: 7,
@@ -105,6 +105,20 @@ export function fmt$(n: number): string {
   const v = round2(n)
   const sign = v < 0 ? '-' : ''
   return `${sign}$${Math.abs(v).toFixed(2)}`
+}
+
+/**
+ * Lifetime interest this chest has paid, in %. Independent of how much money is
+ * in it right now — the point is "this pocket already paid you X%", so emptying
+ * it doesn't erase the score.
+ */
+export function lifetimeReturnPct(a: BankAccountState): number {
+  return (a.returnFactor - 1) * 100
+}
+
+export function fmtPct(n: number): string {
+  const v = Math.abs(n) < 0.005 ? 0 : n
+  return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1)}%`
 }
 
 // --- deterministic daily market moves --------------------------------------
@@ -179,6 +193,7 @@ export function applyCrash(bank: BankState, day: string): number {
   if (loss <= 0) return 0
   a.balance -= loss
   a.growth -= loss
+  a.returnFactor *= 1 - CRASH_PCT / 100
   const s = bank.shock
   s.scheduledDay = null
   s.crashedDay = day
@@ -247,12 +262,14 @@ export function simulateBank(
       const delta = a.balance * rate
       a.balance += delta
       a.growth += delta
+      a.returnFactor *= 1 + rate
     }
 
     // 1c) a held position finishes bouncing back HIGHER — the whole point of the lesson
     if (shock.decision === 'hold' && shock.recoverDay && day >= shock.recoverDay) {
       const a = bank.accounts.qqq
       const gain = round2(Math.max(0, shock.recoverTo - a.balance))
+      if (gain > 0 && a.balance > 0) a.returnFactor *= (a.balance + gain) / a.balance
       a.balance = Math.max(a.balance, shock.recoverTo)
       a.growth += gain
       pushTxn(bank, { day, type: 'recover', to: 'qqq', amount: gain, note: 'HOLD THE LINE paid off — the market bounced back higher!' })

@@ -105,6 +105,13 @@ function isWeekendKey(key) {
   return dow === 0 || dow === 6
 }
 
+/** Does a day key fall on one of these days of the month (1–31)? */
+function isMonthDayKey(key, days) {
+  const [y, m, d] = key.split('-').map(Number)
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  return days.some((x) => x === d || (x > last && d === last))
+}
+
 /** Season for a day key (northern hemisphere, month-based). */
 function seasonOfKey(key) {
   const m = Number(key.split('-')[1]) // 1 = Jan
@@ -120,6 +127,9 @@ function isAvailableOn(task, today) {
   if (task.dayScope === 'weekends' && !isWeekendKey(today)) return false
   // hand-picked days (weekDays: 0=Sun…6=Sat); an empty list means no restriction
   if (task.dayScope === 'custom' && task.weekDays?.length && !task.weekDays.includes(dayOfWeekKey(today))) return false
+  // hand-picked days of the month (monthDays: 1–31); a day past the end of a
+  // short month fires on that month's last day, and an empty list = no restriction
+  if (task.dayScope === 'monthdays' && task.monthDays?.length && !isMonthDayKey(today, task.monthDays)) return false
   // seasonal quests; an empty list means all year round
   if (task.seasons?.length && !task.seasons.includes(seasonOfKey(today))) return false
   return true

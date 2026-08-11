@@ -26,7 +26,9 @@ import {
   daysToRecover,
   daysWithoutCrash,
   fmt$,
+  fmtPct,
   getConverter,
+  lifetimeReturnPct,
   partyName,
   projectAccount,
   randomLuffyQuote,
@@ -112,23 +114,43 @@ function RiskMeter({ level }: { level: 0 | 1 | 2 | 3 }) {
   )
 }
 
+/**
+ * Lifetime interest badge — the headline number. It's the chest's own return, so
+ * it survives him moving every dollar somewhere else.
+ */
+function ReturnBadge({ pct }: { pct: number }) {
+  const up = pct > 0
+  const flat = Math.abs(pct) < 0.005
+  return (
+    <div className={`bank-return ${up ? 'bank-return--up' : flat ? 'bank-return--flat' : 'bank-return--down'}`}>
+      <span className="bank-return-pct">{fmtPct(pct)}</span>
+      <span className="bank-return-label">{flat ? 'nothing earned yet' : up ? 'this chest has paid you' : 'this chest is down'}</span>
+    </div>
+  )
+}
+
 /** New-money vs growth split bar: blue = you saved it, gold = the money worked. */
-function GrowthBar({ deposited, growth }: { deposited: number; growth: number }) {
+function GrowthBar({ deposited, growth, returnPct }: { deposited: number; growth: number; returnPct: number }) {
   const total = deposited + Math.max(0, growth)
-  if (total <= 0) return null
-  const gPct = Math.max(0, growth) / total
+  if (total <= 0 && Math.abs(returnPct) < 0.005) return null
+  const gPct = total > 0 ? Math.max(0, growth) / total : 0
   return (
     <div style={{ marginTop: 8 }}>
-      <div className="bank-growbar">
-        <div style={{ flex: Math.max(0.02, 1 - gPct), background: 'var(--blue)' }} />
-        <div style={{ flex: Math.max(0.02, gPct), background: 'var(--gold)' }} className={growth > 0 ? 'bank-growbar-shine' : ''} />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, marginTop: 3 }}>
-        <span style={{ color: 'var(--blue)' }}>you put in {fmt$(deposited)}</span>
-        <span style={{ color: growth < 0 ? 'var(--red)' : 'var(--gold)' }}>
-          {growth < 0 ? `storm losses ${fmt$(growth)}` : `money made ${fmt$(growth)} ✨`}
-        </span>
-      </div>
+      <ReturnBadge pct={returnPct} />
+      {total > 0 && (
+        <>
+          <div className="bank-growbar">
+            <div style={{ flex: Math.max(0.02, 1 - gPct), background: 'var(--blue)' }} />
+            <div style={{ flex: Math.max(0.02, gPct), background: 'var(--gold)' }} className={growth > 0 ? 'bank-growbar-shine' : ''} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 800, marginTop: 3 }}>
+            <span style={{ color: 'var(--blue)' }}>you put in {fmt$(deposited)}</span>
+            <span style={{ color: growth < 0 ? 'var(--red)' : 'var(--gold)' }}>
+              {growth < 0 ? `storm losses ${fmt$(growth)}` : `money made ${fmt$(growth)} ✨`}
+            </span>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -320,7 +342,7 @@ function AccountCard({
         </div>
       )}
 
-      <GrowthBar deposited={a.deposited + (id === 'college' ? a.matched : 0)} growth={a.growth} />
+      <GrowthBar deposited={a.deposited + (id === 'college' ? a.matched : 0)} growth={a.growth} returnPct={lifetimeReturnPct(a)} />
 
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
         {id === 'chequing' && (
@@ -1161,7 +1183,18 @@ function AdminBalances({ kidData }: { kidData: AppData }) {
             <span>{ACCOUNT_META[id].emoji}</span>
             <span style={{ flex: 1, fontWeight: 800 }}>{ACCOUNT_META[id].name}</span>
             <span className="muted" style={{ fontSize: 11 }}>
-              in {fmt$(a.deposited)}{id === 'college' ? ` +${fmt$(a.matched)} match` : ''} · grew {fmt$(a.growth)}
+              in {fmt$(a.deposited)}{id === 'college' ? ` +${fmt$(a.matched)} match` : ''} · {fmt$(a.growth)}
+            </span>
+            <span
+              style={{
+                fontWeight: 900,
+                fontSize: 12,
+                width: 52,
+                textAlign: 'right',
+                color: lifetimeReturnPct(a) > 0 ? 'var(--profit)' : lifetimeReturnPct(a) < 0 ? 'var(--red)' : 'var(--muted)',
+              }}
+            >
+              {fmtPct(lifetimeReturnPct(a))}
             </span>
             <span style={{ fontWeight: 900, width: 76, textAlign: 'right' }}>{fmt$(a.balance)}</span>
           </div>

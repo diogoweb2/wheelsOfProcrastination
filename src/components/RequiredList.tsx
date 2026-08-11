@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import type { Task } from '../types'
 import { sfx } from '../audio'
-import { dayKey, daysUntil } from '../logic/dates'
-import { dormantReason, dormantRequired, isStudyTask, requiredToday } from '../logic/wheel'
+import { dayKey, daysUntil, prettyDay } from '../logic/dates'
+import { carriedRequired, dormantReason, dormantRequired, isEveryDayRequired, isStudyTask, missedSince, requiredToday } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
 
@@ -16,15 +16,40 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
   const today = dayKey()
   const doneIds = completedTodayIds()
   const items = useMemo(() => requiredToday(data.tasks, today, data.completions), [data.tasks, today, data.completions])
+  // Scheduled must-dos whose day slipped by unticked: they keep their place on
+  // the checklist, in red, until they're actually done.
+  const carried = useMemo(
+    () => carriedRequired(data.tasks, today, data.completions),
+    [data.tasks, today, data.completions],
+  )
   const dormant = useMemo(() => dormantRequired(data.tasks, today, data.completions), [data.tasks, today, data.completions])
   const [picking, setPicking] = useState(false)
-  // A done item STAYS on the list all day, ticked and struck through — the whole
-  // point of a checklist is seeing what you already cleared, and a vanishing row
-  // makes the "3/5" count disagree with what's on screen. `justDone` only holds
-  // the little green celebration for a beat before the row settles.
+  // A ticked item leaves the list — what's left on screen is what's left to do.
+  // `justDone` keeps the row up for the green celebration beat before it goes,
+  // and the "3/5" header still counts today's done items, so nothing is lost.
   const [justDone, setJustDone] = useState<Set<string>>(new Set())
 
-  const remaining = items.filter((t) => !doneIds.has(t.id)).length
+  // Everything the checklist is responsible for today: what's due, plus what was
+  // due earlier and never got ticked.
+  const all = useMemo(() => [...items, ...carried], [items, carried])
+  // How late each scheduled must-do is, if at all (null = up to date).
+  const missed = useMemo(
+    () => new Map(all.map((t) => [t.id, missedSince(t, today, data.completions, data.tasks)])),
+    [all, today, data.completions, data.tasks],
+  )
+  const remaining = all.filter((t) => !doneIds.has(t.id)).length
+  const shown = all.filter((t) => !doneIds.has(t.id) || justDone.has(t.id))
+  // Two lists, because a daily habit and a "the 11th of every month" chore need
+  // different attention: the scheduled one is the one you can actually miss.
+  const scheduled = shown
+    .filter((t) => !isEveryDayRequired(t))
+    .sort((a, b) => (missed.get(a.id) ?? '9999').localeCompare(missed.get(b.id) ?? '9999')) // most overdue first
+  const daily = shown.filter(isEveryDayRequired)
+  const scheduledTotal = all.filter((t) => !isEveryDayRequired(t)).length
+  const dailyTotal = all.length - scheduledTotal
+  const scheduledDone = scheduledTotal - scheduled.filter((t) => !doneIds.has(t.id)).length
+  const dailyDone = dailyTotal - daily.filter((t) => !doneIds.has(t.id)).length
+  const lateCount = all.filter((t) => !doneIds.has(t.id) && missed.get(t.id)).length
 
   function complete(id: string) {
     sfx.gem()
@@ -65,7 +90,7 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
       </div>
     )
 
-  if (items.length === 0) {
+  if (all.length === 0) {
     return (
       <div className="required-panel">
         <div className="required-head">
@@ -79,52 +104,80 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
     )
   }
 
-  return (
-    <div className="required-panel">
-      <div className="required-head">
-        <span>✅ Must-dos</span>
-        <span className={`required-count${remaining === 0 ? ' required-count--done' : ''}`}>
-          {items.length - remaining}/{items.length}
-        </span>
-      </div>
+  function renderRow(t: Task) {
+    return (
+      <RequiredRow
+        key={t.id}
+        task={t}
+        done={doneIds.has(t.id)}
+        celebrating={justDone.has(t.id)}
+        lateSince={doneIds.has(t.id) ? null : (missed.get(t.id) ?? null)}
+        today={today}
+        onToggle={() => {
+          if (doneIds.has(t.id)) return
+          complete(t.id)
+        }}
+        onTrain={
+          onTrain && isStudyTask(t)
+            ? () => {
+                // Tapping 🏫 IS doing the study must-do: tick it on the way
+                // into the training round, so the row isn't left unchecked.
+                if (doneIds.has(t.id)) sfx.click()
+                else complete(t.id)
+                onTrain(t.id.slice(QUIZ_TASK_PREFIX.length))
+              }
+            : undefined
+        }
+        onRemove={
+          t.doTodayDay === today
+            ? () => {
+                sfx.click()
+                setDoToday(t.id, false)
+              }
+            : undefined
+        }
+      />
+    )
+  }
 
-      <div className="required-scroll">
-        {items.map((t) => (
-          <RequiredRow
-            key={t.id}
-            task={t}
-            done={doneIds.has(t.id)}
-            celebrating={justDone.has(t.id)}
-            today={today}
-            onToggle={() => {
-              if (doneIds.has(t.id)) return
-              complete(t.id)
-            }}
-            onTrain={
-              onTrain && isStudyTask(t)
-                ? () => {
-                    // Tapping 🏫 IS doing the study must-do: tick it on the way
-                    // into the training round, so the row isn't left unchecked.
-                    if (doneIds.has(t.id)) sfx.click()
-                    else complete(t.id)
-                    onTrain(t.id.slice(QUIZ_TASK_PREFIX.length))
-                  }
-                : undefined
-            }
-            onRemove={
-              t.doTodayDay === today
-                ? () => {
-                    sfx.click()
-                    setDoToday(t.id, false)
-                  }
-                : undefined
-            }
-          />
-        ))}
-      </div>
+  return (
+    <div className="required-stack">
+      {/* Scheduled first: these are the ones a day can swallow whole. An emptied
+          panel disappears completely — only what's left to do stays on screen. */}
+      {scheduled.length > 0 && (
+        <div className={`required-panel${lateCount > 0 ? ' required-panel--late' : ''}`}>
+          <div className="required-head">
+            <span>🗓️ Scheduled must-dos</span>
+            <span className={`required-count${scheduledDone === scheduledTotal ? ' required-count--done' : ''}`}>
+              {scheduledDone}/{scheduledTotal}
+            </span>
+          </div>
+          {lateCount > 0 && (
+            <div className="required-alarm">
+              ⚠️ {lateCount === 1 ? '1 scheduled must-do is LATE' : `${lateCount} scheduled must-dos are LATE`} — they stay
+              here until they're done.
+            </div>
+          )}
+          <div className="required-scroll">{scheduled.map(renderRow)}</div>
+        </div>
+      )}
+
+      {daily.length > 0 && (
+        <div className="required-panel">
+          <div className="required-head">
+            <span>🔁 Every day</span>
+            <span className={`required-count${dailyDone === dailyTotal ? ' required-count--done' : ''}`}>
+              {dailyDone}/{dailyTotal}
+            </span>
+          </div>
+          <div className="required-scroll">{daily.map(renderRow)}</div>
+        </div>
+      )}
 
       {remaining === 0 && (
-        <div className="required-clear">🎉 All must-dos cleared!</div>
+        <div className="required-panel">
+          <div className="required-clear">🎉 All must-dos cleared!</div>
+        </div>
       )}
       {extras}
     </div>
@@ -135,30 +188,43 @@ function RequiredRow(props: {
   task: Task
   done: boolean
   celebrating: boolean
+  /** Day it was first missed (YYYY-MM-DD), or null if it isn't running late. */
+  lateSince: string | null
   today: string
   onToggle: () => void
   onTrain?: () => void
   onRemove?: () => void
 }) {
-  const { task, done, celebrating, today, onToggle, onTrain, onRemove } = props
+  const { task, done, celebrating, lateSince, today, onToggle, onTrain, onRemove } = props
   const left = task.requiredUntil ? daysUntil(task.requiredUntil, today) : null
   const warning = left !== null && left <= REQUIRED_WARN_DAYS
+  const lateBy = lateSince ? -daysUntil(lateSince, today) : 0
 
   // Study must-dos get a shortcut straight into the topic's training round —
   // the checkbox still belongs to the user, the button just saves two taps.
   const row = (
     <button
-      className={`required-row${done ? ' required-row--done' : ''}${celebrating ? ' required-row--celebrate' : ''}${warning && !done ? ' required-row--warn' : ''}`}
+      className={`required-row${done ? ' required-row--done' : ''}${celebrating ? ' required-row--celebrate' : ''}${warning && !done ? ' required-row--warn' : ''}${lateSince && !done ? ' required-row--late' : ''}`}
       onClick={onToggle}
       disabled={done}
     >
-      <span className={`required-box${done ? ' required-box--on' : ''}`}>{done ? '✓' : ''}</span>
+      <span className={`required-box${done ? ' required-box--on' : ''}${lateSince && !done ? ' required-box--late' : ''}`}>
+        {done ? '✓' : lateSince ? '!' : ''}
+      </span>
       <span className="required-body">
         {/* wraps to as many lines as it needs — the title must always be readable */}
         <span className="required-name">{task.name}</span>
+        {lateSince && !done && (
+          <span className="required-late">
+            ⚠️ MISSED — due {prettyDay(lateSince)}, {lateBy === 1 ? '1 day late' : `${lateBy} days late`}
+          </span>
+        )}
         <span className="required-meta">
           {done ? (
             <span className="required-earned">+{requiredReward(task)} 🪙</span>
+          ) : task.untilDone ? (
+            // no fine for these — they stay until they're ticked, that's the whole deal
+            <span className="muted">+{requiredReward(task)} 🪙 · stays until done</span>
           ) : (
             <span className="muted">+{requiredReward(task)} 🪙 · miss = −{requiredReward(task)}</span>
           )}

@@ -134,12 +134,12 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
       type: 'goal',
       emoji: '🪙',
       title: `+${earned} Berries!`,
-      description: task.repeats ? 'Habit leveled up — you\'re getting stronger!' : 'Quest cleared! On to the next island.',
+      description:
+        task.repeats && !task.untilDone ? 'Habit leveled up — you\'re getting stronger!' : 'Quest cleared! On to the next island.',
     })
   }
 
   const respinPrice = respinCost(data.daily.respinsToday, data.daily.completionsToday)
-  const doneToday = data.daily.completionsToday > 0
   // which Luffy shows: nervous gif mid-spin, effort-based reaction once the wheel lands
   const luffyState: LuffyState = spinning
     ? 'spinning'
@@ -155,13 +155,15 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
 
   return (
     <div className="screen">
-      {/* Luffy + bubble */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 8 }}>
-        <Luffy state={luffyState} mood={doneToday && !spinning ? 'happy' : mood} size={104} />
-        <div className="bubble" style={{ flex: 1, marginBottom: 26 }}>
-          {line}
+      {/* Luffy + bubble — only while the wheel is turning, to save vertical space */}
+      {spinning && (
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginBottom: 8 }}>
+          <Luffy state={luffyState} mood={mood} size={104} />
+          <div className="bubble" style={{ flex: 1, marginBottom: 26 }}>
+            {line}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* pending pick stack */}
       {pendingTasks.length > 0 && !spinning && (
@@ -463,7 +465,7 @@ function TaskCard(props: {
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
         <span className="chip chip--effort">{task.effort}</span>
         {urgent && <span className="chip chip--urgent">⚡ urgent</span>}
-        {task.repeats && <span className="chip">🔁 habit</span>}
+        {task.repeats && <span className="chip">{task.untilDone ? '🔁 until done' : '🔁 habit'}</span>}
         {task.dueDate && <span className="chip">📅 {task.dueDate}</span>}
         <span className="chip" style={{ background: 'var(--blue)', color: '#06222e' }}>
           🪙 +{reward}
