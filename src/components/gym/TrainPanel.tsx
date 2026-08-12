@@ -1,14 +1,30 @@
 // 💪 Train — the whole workout loop: set it up, look at it before you commit,
-// do it one exercise at a time, rate it on the way out.
+// do it, get graded on the way out.
 //
-// The one rule that shapes this screen: nothing is ever guessed silently. The
-// preview says who built the session (coach or offline planner) and why, the
-// runner shows the weight it is suggesting AND lets you correct it, and every
-// correction is what the app learns from.
-import { useEffect, useMemo, useState } from 'react'
+// Two rules shape this screen.
+//
+// 1. NOTHING IS EVER GUESSED SILENTLY. The preview says who built the session
+//    (coach or offline planner) and why, the runner shows the weight it is
+//    suggesting AND lets you correct it, and every correction is what the app
+//    learns from.
+// 2. THREE BUTTONS, NEVER MORE. Once you are training the whole session is
+//    GO → DONE → (rest) → NEXT → DONE → … A set is never logged by hand: the
+//    app times it from the moment you started to the moment you said you were
+//    done, and that measured time is what the end-of-session grade is built on.
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
-import type { ExerciseRating, GymSession, Mood, SessionExercise } from '../../types'
-import { PART_LABEL, RATING_LABEL, SESSION_MINUTES, allExercises, sessionSeconds } from '../../logic/gym'
+import type { ExerciseRating, GearMode, GymSession, Mood, SessionExercise } from '../../types'
+import {
+  GEAR_MODES,
+  GEAR_MODE_LABEL,
+  PART_LABEL,
+  RATING_LABEL,
+  SESSION_MINUTES,
+  allExercises,
+  mmss,
+  sessionReport,
+  sessionSeconds,
+} from '../../logic/gym'
 import { coachReady } from '../../logic/gymCoach'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
@@ -23,6 +39,15 @@ const MOODS: { id: Mood; label: string; emoji: string }[] = [
 
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 
+/** Minute buttons offered by the "do more" card — a bonus block is a short one. */
+const MORE_MINUTES = [5, 10, 15, 20] as const
+
+/** What the finished session left on screen: the grade, the Berries, and the offer of more. */
+interface Banked {
+  session: GymSession
+  coins: number
+}
+
 /**
  * Demos by exercise id. A session stores a SNAPSHOT of each exercise (so old
  * logs survive a catalog edit), which means the media has to be looked up live
@@ -35,9 +60,18 @@ function useDemos() {
 
 export function TrainPanel() {
   const active = useStore((s) => s.data.gym.active)
-  if (!active) return <Setup />
-  if (active.status === 'preview') return <Preview session={active} />
-  return <Runner session={active} />
+  const [banked, setBanked] = useState<Banked | null>(null)
+  const hasActive = !!active
+
+  // ordering a "do more" block from the report retires the report
+  useEffect(() => {
+    if (hasActive) setBanked(null)
+  }, [hasActive])
+
+  if (active?.status === 'preview') return <Preview session={active} />
+  if (active) return <Runner session={active} onBanked={setBanked} />
+  if (banked) return <ReportCard banked={banked} onClose={() => setBanked(null)} />
+  return <Setup />
 }
 
 // --- setup ------------------------------------------------------------------
@@ -46,6 +80,7 @@ function Setup() {
   const { data, gymPlan, gymPlanning, aiConfig } = useStore()
   const [minutes, setMinutes] = useState(20)
   const [mood, setMood] = useState<Mood>('normal')
+  const [gearMode, setGearMode] = useState<GearMode>('mixed')
   const gym = data.gym
   const coachOn = gym.aiOn && coachReady(aiConfig)
 
@@ -101,13 +136,15 @@ function Setup() {
           </div>
         </div>
 
+        <GearModePicker value={gearMode} onChange={setGearMode} />
+
         <button
           className="btn"
           disabled={gymPlanning}
           onClick={() => {
             sfx.click()
             primeGymAudio() // first gesture of the session: unlock the alert clips
-            void gymPlan(minutes, mood)
+            void gymPlan(minutes, mood, { gearMode })
           }}
         >
           {gymPlanning ? '🧠 Building your session…' : '📋 Build my session'}
@@ -122,6 +159,29 @@ function Setup() {
         </p>
       </div>
     </>
+  )
+}
+
+/** Weights only · bodyweight only · both. Offered before the first session and again after it. */
+function GearModePicker({ value, onChange }: { value: GearMode; onChange: (m: GearMode) => void }) {
+  return (
+    <div className="field" style={{ marginBottom: 14 }}>
+      <label>What do you want to use?</label>
+      <div className="seg">
+        {GEAR_MODES.map((g) => (
+          <button
+            key={g.id}
+            className={value === g.id ? 'on' : ''}
+            onClick={() => {
+              sfx.click()
+              onChange(g.id)
+            }}
+          >
+            {g.emoji} {g.label}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -143,6 +203,8 @@ function Preview({ session }: { session: GymSession }) {
           <span className="chip">{session.source === 'ai' ? '🧠 AI trainer' : '⚙️ Offline plan'}</span>
           <span className="chip">⏱ ~{estimate} min of {session.minutes}</span>
           <span className="chip">{MOODS.find((m) => m.id === session.mood)?.emoji} {MOODS.find((m) => m.id === session.mood)?.label}</span>
+          {session.gearMode && session.gearMode !== 'mixed' && <span className="chip">{GEAR_MODE_LABEL[session.gearMode]}</span>}
+          {session.followUp && <span className="chip chip--test">➕ Bonus block</span>}
         </div>
         {session.note && <p style={{ fontSize: 14, fontWeight: 700, marginTop: 8 }}>“{session.note}”</p>}
         {gymFellBack && (
@@ -241,7 +303,7 @@ function Preview({ session }: { session: GymSession }) {
           disabled={gymPlanning}
           onClick={() => {
             sfx.click()
-            void gymPlan(session.minutes, session.mood)
+            void gymPlan(session.minutes, session.mood, { gearMode: session.gearMode })
           }}
         >
           🎲 Plan a different one
@@ -263,11 +325,22 @@ function Preview({ session }: { session: GymSession }) {
 }
 
 // --- runner -----------------------------------------------------------------
+// GO → DONE → rest → NEXT → DONE → … Three buttons and no bookkeeping: the app
+// times every set itself, so "how long did that actually take" is a measurement
+// rather than something you have to remember at the end.
 
-function Runner({ session }: { session: GymSession }) {
+type Phase = 'ready' | 'working' | 'resting'
+
+function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Banked) => void }) {
   const { data, gymLogSet, gymUndoSet, gymLogRest, gymRateInSession, gymSkip, gymAbandon } = useStore()
-  const [idx, setIdx] = useState(0)
-  const [resting, setResting] = useState(false)
+  // a refresh mid-session lands on the first exercise that still has sets owed,
+  // not back at the top — `gym.active` is synced, so this is a real recovery
+  const [idx, setIdx] = useState(() => {
+    const i = session.exercises.findIndex((e) => !e.skipped && e.sets.length < e.plan.reps.length)
+    return i === -1 ? Math.max(0, session.exercises.length - 1) : i
+  })
+  const [phase, setPhase] = useState<Phase>('ready')
+  const [startedAt, setStartedAt] = useState(0)
   const [finishing, setFinishing] = useState(false)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -288,7 +361,6 @@ function Runner({ session }: { session: GymSession }) {
   useEffect(() => {
     setReps(plannedReps)
     setWeight(current?.plan.weight)
-    setResting(false)
   }, [idx, nextSetNo, plannedReps, current?.plan.weight])
 
   // hold the screen on for the whole workout, so a phone on the bench doesn't
@@ -302,9 +374,57 @@ function Runner({ session }: { session: GymSession }) {
   const doneCount = list.filter((e) => e.sets.length > 0 || e.skipped).length
   const setsLeft = current ? Math.max(0, current.plan.reps.length - current.sets.length) : 0
   const isLast = idx >= list.length - 1
+  const upNext = list[idx + 1]
 
-  if (finishing) return <FinishCard session={session} onDone={() => setFinishing(false)} />
+  if (finishing) return <FinishCard session={session} onBanked={onBanked} onBack={() => setFinishing(false)} />
   if (!current) return null
+
+  /** Start (or restart) the clock on the set in front of you. */
+  const begin = () => {
+    setStartedAt(Date.now())
+    setPhase('working')
+  }
+
+  /** Move on without logging anything more for this exercise. */
+  const moveOn = (skip: boolean) => {
+    if (skip) gymSkip(current.exId)
+    if (isLast) {
+      setFinishing(true)
+      return
+    }
+    setIdx(idx + 1)
+    setPhase('ready')
+  }
+
+  /** DONE — measure the set, log it, and drop straight into rest. */
+  const done = () => {
+    const sec = Math.max(1, (Date.now() - startedAt) / 1000)
+    // a timed hold or a run is measured, never typed: hold a 30s plank for a
+    // minute and the minute is what gets logged
+    const logged =
+      current.kind === 'timed' ? Math.round(sec) : current.kind === 'cardio' ? Math.max(1, Math.round(sec / 60)) : reps
+    gymSfx.logged()
+    gymLogSet(current.exId, logged, weight, sec)
+    const moreHere = current.sets.length + 1 < current.plan.reps.length
+    if (moreHere || !isLast) setPhase('resting')
+    else setFinishing(true)
+  }
+
+  /** NEXT — rest is over (however long it really took); start the next set or exercise. */
+  const next = (restedSec: number) => {
+    gymLogRest(current.exId, restedSec, current.plan.restSec)
+    if (setsLeft > 0) {
+      begin()
+      return
+    }
+    if (isLast) {
+      setFinishing(true)
+      return
+    }
+    setIdx(idx + 1)
+    setStartedAt(Date.now())
+    setPhase('working')
+  }
 
   return (
     <>
@@ -314,7 +434,7 @@ function Runner({ session }: { session: GymSession }) {
         </div>
         <div className="gym-progress-text">
           <span>
-            Exercise {idx + 1} / {list.length}
+            Exercise {idx + 1} / {list.length} · set {Math.min(nextSetNo + 1, current.plan.reps.length)} / {current.plan.reps.length}
           </span>
           <button
             className="gym-quit"
@@ -328,17 +448,23 @@ function Runner({ session }: { session: GymSession }) {
         </div>
       </div>
 
-      {resting ? (
+      {phase === 'resting' ? (
         <RestTimer
           seconds={current.plan.restSec}
-          onDone={(actual) => {
-            gymLogRest(current.exId, actual)
-            setResting(false)
-          }}
-          onSkip={(actual) => {
-            gymLogRest(current.exId, actual)
-            setResting(false)
-          }}
+          upNext={
+            setsLeft > 0 ? (
+              <>
+                Up next: <strong>set {current.sets.length + 1}</strong> of {current.name}
+              </>
+            ) : upNext ? (
+              <>
+                Up next: <strong>{upNext.name}</strong> · {planLine(upNext, unit)}
+              </>
+            ) : (
+              <>Up next: <strong>the finish line</strong></>
+            )
+          }
+          onNext={next}
         />
       ) : (
         <div className="card gym-ex-card">
@@ -378,61 +504,54 @@ function Runner({ session }: { session: GymSession }) {
               ))}
           </div>
 
-          <div className="gym-inputs">
-            <Stepper
-              label={repLabel(current)}
-              value={reps}
-              step={current.kind === 'timed' ? 5 : 1}
-              min={1}
-              onChange={setReps}
-            />
-            {current.kind === 'weight' && (
-              <Stepper
-                label={`weight (${unit})`}
-                value={weight ?? 0}
-                step={2.5}
-                min={0}
-                onChange={setWeight}
-                hint={current.plan.weight != null ? `asked for ${current.plan.weight}` : 'first time — set it'}
-              />
-            )}
-          </div>
+          {phase === 'working' && isClocked(current) ? (
+            // a plank or a run: no numbers to type, just a clock that keeps going
+            <WorkClock startedAt={startedAt} target={plannedReps} kind={current.kind} />
+          ) : phase === 'working' ? (
+            <div className="gym-inputs">
+              <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
+              {current.kind === 'weight' && (
+                <Stepper
+                  label={`weight (${unit})`}
+                  value={weight ?? 0}
+                  step={2.5}
+                  min={0}
+                  onChange={setWeight}
+                  hint={current.plan.weight != null ? `asked for ${current.plan.weight}` : 'first time — set it'}
+                />
+              )}
+            </div>
+          ) : null}
 
-          <button
-            className="btn"
-            onClick={() => {
-              gymSfx.logged()
-              gymLogSet(current.exId, reps, weight)
-              if (setsLeft > 1) setResting(true)
-            }}
-          >
-            ✓ Log set {nextSetNo + 1}
-          </button>
-
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            {current.sets.length > 0 && (
-              <button
-                className="btn btn--ghost btn--small"
-                style={{ flex: 1 }}
-                onClick={() => {
-                  sfx.click()
-                  gymUndoSet(current.exId)
-                }}
-              >
-                ↩︎ Undo set
-              </button>
-            )}
+          {phase === 'working' ? (
+            <button className="btn" style={{ marginTop: 14 }} onClick={done}>
+              ✓ DONE
+            </button>
+          ) : (
             <button
-              className="btn btn--ghost btn--small"
-              style={{ flex: 1 }}
+              className="btn"
+              style={{ marginTop: 14 }}
               onClick={() => {
-                sfx.click()
-                setResting(true)
+                sfx.fanfare()
+                begin()
               }}
             >
-              😮‍💨 Rest
+              ▶️ GO
             </button>
-          </div>
+          )}
+
+          {current.sets.length > 0 && phase === 'ready' && (
+            <button
+              className="btn btn--ghost btn--small"
+              style={{ marginTop: 8, width: '100%' }}
+              onClick={() => {
+                sfx.click()
+                gymUndoSet(current.exId)
+              }}
+            >
+              ↩︎ Undo last set
+            </button>
+          )}
         </div>
       )}
 
@@ -459,38 +578,38 @@ function Runner({ session }: { session: GymSession }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-        <button
-          className="btn btn--ghost btn--small"
-          style={{ flex: 1 }}
-          onClick={() => {
-            sfx.click()
-            gymSkip(current.exId)
-            if (isLast) setFinishing(true)
-            else setIdx(idx + 1)
-          }}
-        >
-          ⏭ Skip this one
-        </button>
-        <button
-          className="btn btn--blue btn--small"
-          style={{ flex: 1 }}
-          onClick={() => {
-            sfx.click()
-            if (isLast) setFinishing(true)
-            else setIdx(idx + 1)
-          }}
-        >
-          {isLast ? '🏁 Finish session' : 'Next exercise →'}
-        </button>
-      </div>
+      {phase !== 'resting' && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ flex: 1 }}
+            onClick={() => {
+              sfx.click()
+              moveOn(true)
+            }}
+          >
+            ⏭ Skip this one
+          </button>
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ flex: 1 }}
+            onClick={() => {
+              sfx.click()
+              moveOn(false)
+            }}
+          >
+            {isLast ? '🏁 Finish session' : 'Next exercise →'}
+          </button>
+        </div>
+      )}
 
       <button
         className="btn btn--ghost btn--small"
         style={{ marginTop: 16, width: '100%' }}
         onClick={() => {
           sfx.click()
-          gymAbandon()
+          const res = gymAbandon()
+          if (res.session) onBanked({ session: res.session, coins: res.coins })
         }}
       >
         Leave (keeps whatever you logged)
@@ -499,9 +618,53 @@ function Runner({ session }: { session: GymSession }) {
   )
 }
 
+/** Reps you count vs. time the app counts. Planks and runs are clocked. */
+function isClocked(e: SessionExercise): boolean {
+  return e.kind === 'timed' || e.kind === 'cardio'
+}
+
+/**
+ * The clock for a hold or a run. It counts UP and never stops at the target:
+ * asked for 30 seconds of plank and held it for a minute? The minute is what
+ * gets logged, and what the next session is planned from.
+ */
+function WorkClock({ startedAt, target, kind }: { startedAt: number; target: number; kind: SessionExercise['kind'] }) {
+  const targetSec = kind === 'cardio' ? target * 60 : target
+  const [now, setNow] = useState(Date.now())
+  const rang = useRef(false)
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 200)
+    return () => window.clearInterval(id)
+  }, [])
+
+  const elapsed = Math.max(0, Math.floor((now - startedAt) / 1000))
+  useEffect(() => {
+    if (elapsed >= targetSec && !rang.current) {
+      rang.current = true
+      gymSfx.go()
+    }
+  }, [elapsed, targetSec])
+
+  const hit = elapsed >= targetSec
+  const pct = Math.min(1, targetSec > 0 ? elapsed / targetSec : 1)
+
+  return (
+    <div className="gym-clock">
+      <div className={`gym-clock-time ${hit ? 'over' : ''}`}>{mmss(elapsed)}</div>
+      <div className="gym-clock-bar">
+        <span style={{ width: `${pct * 100}%` }} />
+      </div>
+      <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
+        {hit ? `past the ${mmss(targetSec)} asked for — every extra second counts` : `target ${mmss(targetSec)}`}
+      </div>
+    </div>
+  )
+}
+
 // --- finish -----------------------------------------------------------------
 
-function FinishCard({ session, onDone }: { session: GymSession; onDone: () => void }) {
+function FinishCard({ session, onBanked, onBack }: { session: GymSession; onBanked: (b: Banked) => void; onBack: () => void }) {
   const { gymFinish } = useStore()
   const [stars, setStars] = useState(4)
   const [feedback, setFeedback] = useState('')
@@ -556,16 +719,149 @@ function FinishCard({ session, onDone }: { session: GymSession; onDone: () => vo
         <button
           className="btn"
           onClick={() => {
-            const coins = gymFinish(stars, feedback.trim() || undefined)
+            const { coins, session: filed } = gymFinish(stars, feedback.trim() || undefined)
             if (coins > 0) gymSfx.win()
             else sfx.click()
-            onDone()
+            onBanked({ session: filed ?? session, coins })
           }}
         >
           🪙 Bank it
         </button>
+        <button className="btn btn--ghost btn--small" style={{ marginTop: 8, width: '100%' }} onClick={onBack}>
+          ← Not yet, back to the workout
+        </button>
       </div>
     </>
+  )
+}
+
+// --- the report -------------------------------------------------------------
+
+function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }) {
+  const { gymPlan, gymPlanning } = useStore()
+  const { session, coins } = banked
+  const report = sessionReport(session)
+  const [more, setMore] = useState(false)
+  const [gearMode, setGearMode] = useState<GearMode>(session.gearMode ?? 'mixed')
+
+  return (
+    <>
+      <div className="h2">📊 How that went</div>
+
+      {report && (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div className={`gym-grade grade-${report.grade[0].toLowerCase()}`}>{report.grade}</div>
+          <p style={{ fontWeight: 800, fontSize: 14, margin: '4px 0 0' }}>{report.blurb}</p>
+          <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+            {mmss(report.totalSec)} against a {mmss(report.totalTargetSec)} target — {Math.round(report.ratio * 100)}% of the time it
+            was meant to take.
+          </p>
+
+          <div className="gym-report">
+            <ReportRow emoji="🏋️" label="Working" actual={report.workSec} target={report.workTargetSec} lowerIsBetter />
+            <ReportRow emoji="😮‍💨" label="Resting" actual={report.restSec} target={report.restTargetSec} lowerIsBetter />
+          </div>
+
+          <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>
+            Targets only count the sets you actually did, so skipping never buys a better grade.
+          </p>
+        </div>
+      )}
+
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 34 }}>🪙</div>
+        <div style={{ fontWeight: 900, fontSize: 20 }}>+{coins} Berries banked</div>
+        {!report && (
+          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Nothing timed this session — the pace grade needs at least one set done with GO and DONE.
+          </p>
+        )}
+      </div>
+
+      {!more ? (
+        <>
+          <button
+            className="btn btn--blue"
+            onClick={() => {
+              sfx.click()
+              setMore(true)
+            }}
+          >
+            ➕ Do more exercises
+          </button>
+          <button className="btn btn--ghost btn--small" style={{ marginTop: 8, width: '100%' }} onClick={onClose}>
+            ✓ Done for today
+          </button>
+        </>
+      ) : (
+        <div className="card">
+          <div className="h2" style={{ marginTop: 0 }}>➕ How much longer?</div>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+            A bonus block built around what you just did — none of those exercises come back, and the muscles they hit get left
+            alone.
+          </p>
+          <div className="gym-min-grid" style={{ marginBottom: 14 }}>
+            {MORE_MINUTES.map((m) => (
+              <button
+                key={m}
+                className="gym-min"
+                disabled={gymPlanning}
+                onClick={() => {
+                  sfx.click()
+                  primeGymAudio()
+                  void gymPlan(m, session.mood, { gearMode, followUp: session })
+                }}
+              >
+                {m}
+                <span>min</span>
+              </button>
+            ))}
+          </div>
+          <GearModePicker value={gearMode} onChange={setGearMode} />
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ width: '100%' }}
+            onClick={() => {
+              sfx.click()
+              setMore(false)
+            }}
+          >
+            {gymPlanning ? '🧠 Building it…' : '← Actually, I’m done'}
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+function ReportRow({
+  emoji,
+  label,
+  actual,
+  target,
+  lowerIsBetter,
+}: {
+  emoji: string
+  label: string
+  actual: number
+  target: number
+  lowerIsBetter?: boolean
+}) {
+  const diff = actual - target
+  const good = lowerIsBetter ? diff <= 0 : diff >= 0
+  return (
+    <div className="gym-report-row">
+      <span className="gym-report-label">
+        {emoji} {label}
+      </span>
+      <span className="gym-report-nums">
+        <strong>{mmss(actual)}</strong>
+        <em>target {mmss(target)}</em>
+      </span>
+      <span className={`gym-report-diff ${good ? 'good' : 'bad'}`}>
+        {diff === 0 ? 'spot on' : `${diff > 0 ? '+' : '−'}${mmss(Math.abs(diff))}`}
+      </span>
+    </div>
   )
 }
 

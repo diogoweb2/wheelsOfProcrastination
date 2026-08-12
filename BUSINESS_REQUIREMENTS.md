@@ -412,14 +412,64 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI la
 
 ### 18c. The session loop
 
-1. **Set up** — how many minutes (5/10/15/20/25/30/45/60) and how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal). Mood changes set counts, rep targets and how hard the planner leans.
+1. **Set up** — how many minutes (5/10/15/20/25/30/45/60), how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal) and **what you want to use** (§18c-2). Mood changes set counts, rep targets and how hard the planner leans.
 2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks for a replacement in the same body area) or **✕** to drop it. Also **🎲 Plan a different one** and **🗑 Cancel**.
-3. **GO** — one exercise at a time: how to do it, the planned sets as pills, and steppers for reps (or seconds / minutes) and weight, **pre-filled with what was prescribed**. You only touch them when reality differs — and that difference is the signal.
-4. **Rest** — a wall-clock countdown with **+30s more rest** and **Skip rest**. What you *actually* took is what gets learned (§18d).
-5. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
-6. **Finish** — 1–5 stars plus optional free text for the trainer, then Berries are paid and everything is folded into memory. Leaving early keeps whatever you logged (and pays for it); a session with nothing logged is thrown away rather than polluting the history.
+3. **Train — three buttons, never more** (§18c-1).
+4. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
+5. **Finish** — 1–5 stars plus optional free text for the trainer, then Berries are paid and everything is folded into memory. Leaving early keeps whatever you logged (and pays for it); a session with nothing logged is thrown away rather than polluting the history.
+6. **The report** (§18c-3) — what the session actually cost you against what it was supposed to, one letter grade, and the offer of **➕ more**.
 
 The session in progress lives in `gym.active` and is synced, so a refresh — or a different device — picks the workout back up mid-set.
+
+#### 18c-1. GO → DONE → NEXT
+
+Once you are training there is exactly one button on screen at a time, and the loop never changes:
+
+| Button | What it does |
+|---|---|
+| **▶️ GO** | Starts the set in front of you and starts the clock. Shown on the first set of an exercise you arrived at by hand (start of session, after a skip, after "Next exercise"). |
+| **✓ DONE** | "I've finished this set." Logs it with the **measured** time, and the app drops straight into rest on its own. |
+| **▶️ NEXT** | Ends the rest and starts the next set — or the next exercise — immediately. No second GO. |
+
+**A set is timed, not typed.** The wall clock runs from GO/NEXT to DONE and that measurement is the only source for the pace grade. What you type is only ever the *result*:
+
+- **Reps** — a stepper pre-filled with what was prescribed, exactly as before. You touch it only when reality differs, and that difference is the signal.
+- **Weight** — the same, for `weight` exercises.
+- **Holds and runs** (`timed` / `cardio`) — **nothing to type**. A big count-up clock replaces the stepper, beeps when it passes the target, and **keeps counting**. Asked for a 30 s plank and held it for a minute? DONE at 1:00 logs 60 seconds, and the next session is planned from that.
+
+**Not tapping NEXT is how you ask for more rest.** There is no "+30 s" button any more: the rest timer counts past zero and what gets learned (§18d) is the moment you actually tapped NEXT. Rest longer, and the app plans longer rests; get back to work early, and it packs more in.
+
+While you rest, the card says what NEXT will start — the next set, or the next exercise with its full prescription — so it is never a blind tap. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
+
+#### 18c-2. Weights, bodyweight, or both
+
+Asked on the setup screen and again on the report's "do more" card: **🔀 Mixed** (the default), **🏋️ Weights** or **🤸 Body only**. It filters the pool *before* the planner or the coach ever sees it, so it constrains both layers identically.
+
+The split is by **load, not by gear** — `kind === 'weight'` is the weights half, everything else is bodyweight. A pull-up on a bar is bodyweight; it is equipment you hang from, not weight you add. If the filter leaves fewer than three usable exercises — asking for weights-only before a single item of gear has been catalogued — it **falls back to the full pool**, because a real session beats an empty one. The chosen mode is stored on the session and shown on the preview.
+
+#### 18c-3. The report and the grade
+
+Every finished session ends on a scorecard with two honest comparisons and one letter:
+
+| | Measured | Target |
+|---|---|---|
+| 🏋️ **Working** | wall clock, GO/NEXT → DONE, summed | what the plan asked those sets to take |
+| 😮‍💨 **Resting** | wall clock, DONE → NEXT, summed | the rest that was offered |
+
+**Grade** = total time taken ÷ total time asked for. Under 1 means you were quicker than the plan:
+
+| Ratio | Grade |
+|---|---|
+| < 0.80 | **A+** — way quicker than the plan |
+| < 0.95 | **A** — ahead of it |
+| ≤ 1.10 | **B** — right around target |
+| ≤ 1.30 | **C** — a bit slower |
+| ≤ 1.60 | **D** — a lot of it wasn't training |
+| above | **F** — more time resting than working |
+
+**The targets are accumulated per set, as you do it** — never from the whole plan. Skip half the session and only the half you did is graded, so a good letter cannot be bought by walking out early. A session with nothing timed gets no grade rather than a fake one.
+
+Then: **➕ Do more exercises** for 5 / 10 / 15 / 20 more minutes, with the gear question asked again. The bonus block is **planned around the session that just ended** — its exercises are excluded outright, the muscles it hit are minutes old so recovery scoring buries them, and the coach is told in as many words that this is an extension of a workout already done, not a fresh one. It carries a **➕ Bonus block** chip on the preview.
 
 ### 18d. What it learns, and how
 

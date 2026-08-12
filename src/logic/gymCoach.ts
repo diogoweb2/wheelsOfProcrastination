@@ -10,7 +10,7 @@
 // The key lives in Firestore (`app/aiConfig`), never in the repo or the bundle —
 // same arrangement as the Smart Price project. Put a spend cap on the
 // OpenRouter dashboard; one session plan costs a fraction of a cent.
-import type { AiConfig, ExerciseDef, GymCatalog, GymSession, GymState, Mood, SessionExercise } from '../types'
+import type { AiConfig, ExerciseDef, GearMode, GymCatalog, GymSession, GymState, Mood, SessionExercise } from '../types'
 import { dayKey } from './dates'
 import {
   REST_MAX,
@@ -30,12 +30,13 @@ import {
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 
 /** Cheap, fast and reliably good at small structured JSON — the right default for one call a day. */
-export const DEFAULT_MODEL = 'google/gemini-2.5-flash'
+export const DEFAULT_MODEL = 'deepseek/deepseek-v4-flash'
 
 /** Offered in Coach → Settings. Any OpenRouter model id can be typed in instead. */
 export const MODEL_PRESETS: { id: string; label: string; note: string }[] = [
   { id: 'google/gemini-2.5-flash-lite', label: 'Gemini Flash Lite', note: 'cheapest — fine once your history is rich' },
-  { id: 'google/gemini-2.5-flash', label: 'Gemini Flash', note: 'the default: cheap, fast, good judgement' },
+  { id: 'google/gemini-2.5-flash', label: 'Gemini Flash', note: 'cheap, fast, good judgement' },
+  { id: 'deepseek/deepseek-v4-flash', label: 'DeepSeek V4 Flash', note: 'the default: cheapest of the capable ones' },
   { id: 'anthropic/claude-haiku-4.5', label: 'Claude Haiku 4.5', note: 'sharper on your written brief' },
   { id: 'anthropic/claude-sonnet-5', label: 'Claude Sonnet 5', note: 'the best trainer, ~20× the cost' },
 ]
@@ -56,6 +57,10 @@ export interface CoachInput {
   gym: GymState
   minutes: number
   mood: Mood
+  /** Weights only / bodyweight only / both. Filters the pool before the coach ever sees it. */
+  gearMode?: GearMode
+  /** The session this is a "do more" continuation of — the coach must not repeat it. */
+  followUp?: GymSession | null
   ai: AiConfig | null
   name: string
   day?: string
@@ -67,12 +72,22 @@ export interface CoachInput {
  */
 export async function coachPlan(input: CoachInput): Promise<CoachOutcome> {
   const day = input.day ?? dayKey()
-  const local = () => planSession({ catalog: input.catalog, gym: input.gym, minutes: input.minutes, mood: input.mood, day })
+  const local = () =>
+    planSession({
+      catalog: input.catalog,
+      gym: input.gym,
+      minutes: input.minutes,
+      mood: input.mood,
+      gearMode: input.gearMode,
+      followUp: input.followUp,
+      day,
+    })
 
   if (!input.gym.aiOn) return { session: local(), fellBackBecause: null }
   if (!coachReady(input.ai)) return { session: local(), fellBackBecause: 'no OpenRouter key set (Coach → Settings)' }
 
-  const pool = usableExercises(input.catalog, input.gym.brief, input.gym.ex)
+  const justDid = new Set((input.followUp?.exercises ?? []).map((e) => e.exId))
+  const pool = usableExercises(input.catalog, input.gym.brief, input.gym.ex, input.gearMode).filter((e) => !justDid.has(e.id))
   if (pool.length < 3) return { session: local(), fellBackBecause: 'not enough exercises to choose from' }
 
   try {
@@ -92,11 +107,13 @@ export async function coachPlan(input: CoachInput): Promise<CoachOutcome> {
         status: 'preview',
         minutes: input.minutes,
         mood: input.mood,
+        gearMode: input.gearMode ?? 'mixed',
         source: 'ai',
         model,
         note: parsed.note?.slice(0, 300),
         exercises: trimToBudget(exercises, input.minutes),
         coins: 0,
+        followUp: input.followUp ? true : undefined,
       },
       fellBackBecause: null,
     }
@@ -118,14 +135,22 @@ export async function coachSwap(
   const day = input.day ?? dayKey()
   const offline = () =>
     pickReplacement(
-      { catalog: input.catalog, gym: input.gym, minutes: input.minutes, mood: input.mood, day, exclude: keep.map((k) => k.exId) },
+      {
+        catalog: input.catalog,
+        gym: input.gym,
+        minutes: input.minutes,
+        mood: input.mood,
+        gearMode: input.gearMode,
+        day,
+        exclude: keep.map((k) => k.exId),
+      },
       replacing,
       keep,
     )
 
   if (!input.gym.aiOn || !coachReady(input.ai)) return offline()
 
-  const pool = usableExercises(input.catalog, input.gym.brief, input.gym.ex).filter(
+  const pool = usableExercises(input.catalog, input.gym.brief, input.gym.ex, input.gearMode).filter(
     (e) => e.id !== replacing.exId && !keep.some((k) => k.exId === e.id),
   )
   if (pool.length === 0) return null
@@ -255,10 +280,30 @@ function buildPrompt(input: CoachInput, pool: ExerciseDef[], day: string): strin
     motivated: 'They feel MOTIVATED today. Push harder than usual, but stay inside the hard rules.',
   }[input.mood]
 
+  const gearLine =
+    input.gearMode === 'weights'
+      ? 'They asked for LOADED work only today — every exercise in the list below is one you can put weight on.'
+      : input.gearMode === 'bodyweight'
+        ? 'They asked for BODYWEIGHT only today — no external load at all.'
+        : ''
+
+  // "Do more" — a bonus block bolted onto a session that just ended. The muscles
+  // it hit are minutes old, so this one has to complement it, not repeat it.
+  const followUpBlock = input.followUp
+    ? `\nThey JUST finished a ${input.followUp.minutes}-minute session, minutes ago, and asked for MORE. It contained: ${
+        input.followUp.exercises
+          .filter((e) => !e.skipped && e.sets.length > 0)
+          .map((e) => `${e.name} (${e.parts.join('/')})`)
+          .join(', ') || 'nothing logged'
+      }.
+This block is an EXTENSION of that session, not a fresh one: none of those exercises may come back, and the muscles they hit are already fatigued. Complement the work they just did — different body parts, or lighter finishing work on the same ones — and keep it realistic for someone who has already been training.\n`
+    : ''
+
   return `${briefBlock(input)}
 ${historyBlock(input.gym)}
-
+${followUpBlock}
 Today is ${day}. They have ${input.minutes} minutes, INCLUDING rest between sets. ${moodLine}
+${gearLine}
 
 ${catalogBlock(pool, input.gym)}
 

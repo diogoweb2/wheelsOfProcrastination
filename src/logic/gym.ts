@@ -12,6 +12,7 @@ import type {
   ExerciseKind,
   ExerciseMemory,
   ExerciseRating,
+  GearMode,
   GymBrief,
   GymCatalog,
   GymSession,
@@ -34,9 +35,6 @@ export const GYM_LOG_CAP = 220
 /** Rest is clamped to this band no matter what the coach or the history says. */
 export const REST_MIN = 15
 export const REST_MAX = 240
-
-/** "More rest" adds this many seconds per tap. */
-export const REST_BUMP = 30
 
 /** Max exercises in a session, by minute budget. */
 const MAX_MOVES: Record<number, number> = { 5: 3, 10: 4, 15: 5, 20: 6, 25: 7, 30: 8, 45: 10, 60: 12 }
@@ -90,6 +88,18 @@ export const PART_EMOJI: Record<BodyPart, string> = {
 }
 
 export const ALL_PARTS: BodyPart[] = ['chest', 'back', 'shoulders', 'arms', 'legs', 'glutes', 'core', 'fullBody', 'cardio']
+
+export const GEAR_MODES: { id: GearMode; label: string; emoji: string }[] = [
+  { id: 'mixed', label: 'Mixed', emoji: '🔀' },
+  { id: 'weights', label: 'Weights', emoji: '🏋️' },
+  { id: 'bodyweight', label: 'Body only', emoji: '🤸' },
+]
+
+export const GEAR_MODE_LABEL: Record<GearMode, string> = {
+  mixed: '🔀 Weights + bodyweight',
+  weights: '🏋️ Weights only',
+  bodyweight: '🤸 Bodyweight only',
+}
 
 // --- the crew's starting briefs ---------------------------------------------
 // Seeded the first time a profile opens the Gym; fully editable afterwards in
@@ -188,9 +198,14 @@ export function exerciseById(catalog: GymCatalog | null, id: string): ExerciseDe
 }
 
 /** Exercises this person could actually be given today: gear present, body safe, not hated. */
-export function usableExercises(catalog: GymCatalog | null, brief: GymBrief, memory: Record<string, ExerciseMemory>): ExerciseDef[] {
+export function usableExercises(
+  catalog: GymCatalog | null,
+  brief: GymBrief,
+  memory: Record<string, ExerciseMemory>,
+  gearMode: GearMode = 'mixed',
+): ExerciseDef[] {
   const gear = new Set((catalog?.equipment ?? []).filter((e) => !e.retired).map((e) => e.id))
-  return allExercises(catalog).filter((e) => {
+  const pool = allExercises(catalog).filter((e) => {
     if (e.retired) return false
     if (!e.equipmentIds.every((id) => gear.has(id))) return false
     if (brief.kidMode && !e.kidSafe) return false
@@ -198,6 +213,12 @@ export function usableExercises(catalog: GymCatalog | null, brief: GymBrief, mem
     if (memory[e.id]?.rating === 'hate') return false
     return true
   })
+  if (gearMode === 'mixed') return pool
+  // `weight` is the only kind you load — a pull-up on a bar is still bodyweight.
+  const wanted = pool.filter((e) => (gearMode === 'weights' ? e.kind === 'weight' : e.kind !== 'weight'))
+  // Asking for weights-only in a basement with no gear catalogued yet would
+  // leave nothing to prescribe. A real session beats an empty one, so fall back.
+  return wanted.length >= 3 ? wanted : pool
 }
 
 /** Seconds of rest to offer: what you actually take, blended with the exercise's own default. */
@@ -280,7 +301,7 @@ export function advanceLadder(l: LadderState, testedMax: number | null, today: s
 // --- time budgeting ---------------------------------------------------------
 
 /** Seconds one set of this exercise takes to perform (rest excluded). */
-function setSeconds(kind: ExerciseKind, reps: number): number {
+export function setSeconds(kind: ExerciseKind, reps: number): number {
   if (kind === 'timed') return reps
   if (kind === 'cardio') return reps * 60
   return Math.round(reps * 3.5)
@@ -333,9 +354,13 @@ export interface PlanInput {
   gym: GymState
   minutes: number
   mood: Mood
+  /** Weights only / bodyweight only / both. Defaults to 'mixed'. */
+  gearMode?: GearMode
   day?: string
   /** Exercise ids to keep out — a "give me another one" swap passes what it just rejected. */
   exclude?: string[]
+  /** The session this one is a "do more" continuation of, if any. */
+  followUp?: GymSession | null
   /** Deterministic ordering for tests; leave undefined in the app. */
   seed?: number
 }
@@ -354,10 +379,12 @@ export function planSession(input: PlanInput): GymSession {
     status: 'preview',
     minutes: input.minutes,
     mood: input.mood,
+    gearMode: input.gearMode ?? 'mixed',
     source: 'local',
     note: localNote(input.mood, exercises),
     exercises,
     coins: 0,
+    followUp: input.followUp ? true : undefined,
   }
 }
 
@@ -380,9 +407,11 @@ interface Scored {
 
 function scoreCandidates(input: PlanInput, day: string, partsUsed: BodyPart[]): Scored[] {
   const { gym, mood } = input
-  const pool = usableExercises(input.catalog, gym.brief, gym.ex)
+  const pool = usableExercises(input.catalog, gym.brief, gym.ex, input.gearMode)
   const fatigue = partFatigue(gym.sessions)
-  const excluded = new Set(input.exclude ?? [])
+  // a "do more" block never repeats what you just did — the memory's lastDay
+  // covers it once the session is filed, this covers it even if it isn't
+  const excluded = new Set([...(input.exclude ?? []), ...(input.followUp?.exercises ?? []).map((e) => e.exId)])
   const rnd = mulberry(input.seed ?? Date.now())
 
   const scored = pool
@@ -542,6 +571,61 @@ export function sessionBonus(s: GymSession, doneCount: number): number {
   const complete = doneCount >= s.exercises.length ? 6 : 0
   const stars = s.rating ? s.rating * 2 : 0
   return base + complete + stars
+}
+
+// --- the end-of-session report ----------------------------------------------
+// Two honest comparisons — how long the work took vs how long it was supposed
+// to take, and how long you rested vs what was offered — plus one letter.
+//
+// The targets are accumulated PER SET as you do it (see the store), never from
+// the whole plan, so walking out after two exercises grades those two exercises
+// and nothing else. You can't buy an A+ by skipping.
+
+export type SessionGrade = 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
+
+export interface SessionReport {
+  grade: SessionGrade
+  /** Total time taken ÷ total time asked for. Under 1 = quicker than target. */
+  ratio: number
+  workSec: number
+  workTargetSec: number
+  restSec: number
+  restTargetSec: number
+  totalSec: number
+  totalTargetSec: number
+  /** One line explaining the letter. */
+  blurb: string
+}
+
+const GRADE_BANDS: { max: number; grade: SessionGrade; blurb: string }[] = [
+  { max: 0.8, grade: 'A+', blurb: 'Way quicker than the plan. Relentless.' },
+  { max: 0.95, grade: 'A', blurb: 'Ahead of the plan — exactly the pace it was built for.' },
+  { max: 1.1, grade: 'B', blurb: 'Right around target. Solid, honest session.' },
+  { max: 1.3, grade: 'C', blurb: 'A bit slower than planned. Cut the standing around.' },
+  { max: 1.6, grade: 'D', blurb: 'A lot of the session was spent not training.' },
+  { max: Infinity, grade: 'F', blurb: 'More time resting than working. Shorter rests next time.' },
+]
+
+/** The report for a finished session, or null when nothing was logged to grade. */
+export function sessionReport(s: GymSession): SessionReport | null {
+  const workTargetSec = Math.round(s.workTargetSec ?? 0)
+  const restTargetSec = Math.round(s.restTargetSec ?? 0)
+  const totalTargetSec = workTargetSec + restTargetSec
+  if (totalTargetSec <= 0) return null
+
+  const workSec = Math.round(s.workSec ?? 0)
+  const restSec = Math.round(s.restTotalSec ?? 0)
+  const totalSec = workSec + restSec
+  const ratio = totalSec / totalTargetSec
+  const band = GRADE_BANDS.find((b) => ratio < b.max) ?? GRADE_BANDS[GRADE_BANDS.length - 1]
+
+  return { grade: band.grade, ratio, workSec, workTargetSec, restSec, restTargetSec, totalSec, totalTargetSec, blurb: band.blurb }
+}
+
+/** `m:ss`, for the report and the live timers. */
+export function mmss(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
 // --- learning ---------------------------------------------------------------

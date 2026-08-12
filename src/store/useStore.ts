@@ -15,8 +15,11 @@ import type {
   FinalTestAuth,
   FreezeGift,
   FreezeRequest,
+  GearMode,
   GymCatalog,
+  GymSession,
   Idea,
+  LoggedSet,
   MarketData,
   Mood,
   Priority,
@@ -116,6 +119,7 @@ import {
   learnFromExercise,
   seedBrief,
   sessionBonus,
+  setSeconds,
   advanceLadder,
 } from '../logic/gym'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
@@ -434,8 +438,12 @@ interface StoreState {
   setSettings: (patch: Partial<AppData['settings']>) => void
 
   // --- gym (the 💪 Training Deck) ---
-  /** Build today's session (coach if it's on and reachable, offline planner otherwise) and park it on the preview. */
-  gymPlan: (minutes: number, mood: Mood) => Promise<void>
+  /**
+   * Build today's session (coach if it's on and reachable, offline planner
+   * otherwise) and park it on the preview. `followUp` is the session that just
+   * ended when this is a "do more" block — it is never repeated.
+   */
+  gymPlan: (minutes: number, mood: Mood, opts?: { gearMode?: GearMode; followUp?: GymSession | null }) => Promise<void>
   /** "Not that one today." Swaps one exercise on the preview for something else. */
   gymSwap: (exId: string, reason?: string) => Promise<'ok' | 'none'>
   /** Drop an exercise from the preview outright. */
@@ -446,18 +454,25 @@ interface StoreState {
   gymDiscard: () => void
   /** GO — the preview becomes a live workout. */
   gymStart: () => void
-  /** Log one set. `weight` is what you ACTUALLY loaded — corrections are the training signal. */
-  gymLogSet: (exId: string, reps: number, weight?: number) => void
+  /**
+   * Log one set. `weight` is what you ACTUALLY loaded — corrections are the
+   * training signal. `sec` is how long the set really took (GO/NEXT → DONE) and
+   * feeds the end-of-session pace grade.
+   */
+  gymLogSet: (exId: string, reps: number, weight?: number, sec?: number) => void
   gymUndoSet: (exId: string) => void
-  /** Record the rest you actually took after an exercise, in seconds. */
-  gymLogRest: (exId: string, seconds: number) => void
+  /** Record the rest you actually took after a set, and what was offered, in seconds. */
+  gymLogRest: (exId: string, seconds: number, targetSec?: number) => void
   /** Rate an exercise from inside the runner (asked the first time you meet one). */
   gymRateInSession: (exId: string, rating: ExerciseRating) => void
   gymSkip: (exId: string) => void
-  /** Finish: pay the Berries, fold everything into the permanent memory, file the session. */
-  gymFinish: (rating?: number, feedback?: string) => number
+  /**
+   * Finish: pay the Berries, fold everything into the permanent memory, file the
+   * session. Hands the filed session back so the report screen can grade it.
+   */
+  gymFinish: (rating?: number, feedback?: string) => { coins: number; session: GymSession | null }
   /** Walk out. Anything logged is still kept and still pays; an untouched session is just thrown away. */
-  gymAbandon: () => void
+  gymAbandon: () => { coins: number; session: GymSession | null }
   gymSetBrief: (patch: Partial<AppData['gym']['brief']>) => void
   /** Change your mind about an exercise later (Gear tab). */
   gymRateExercise: (exId: string, rating: ExerciseRating | null) => void
@@ -2270,7 +2285,7 @@ export const useStore = create<StoreState>((set, get) => {
     // `gymFellBack` carries the reason so the UI can say so out loud instead of
     // pretending an offline plan came from the coach.
 
-    async gymPlan(minutes, mood) {
+    async gymPlan(minutes, mood, opts) {
       const { data, gymCatalog, aiConfig, activeProfile } = get()
       set({ gymPlanning: true, gymFellBack: null })
       try {
@@ -2279,6 +2294,8 @@ export const useStore = create<StoreState>((set, get) => {
           gym: data.gym,
           minutes,
           mood,
+          gearMode: opts?.gearMode,
+          followUp: opts?.followUp ?? null,
           ai: aiConfig,
           name: activeProfile()?.name ?? 'the athlete',
         })
@@ -2306,6 +2323,7 @@ export const useStore = create<StoreState>((set, get) => {
             gym: data.gym,
             minutes: active.minutes,
             mood: active.mood,
+            gearMode: active.gearMode,
             ai: aiConfig,
             name: activeProfile()?.name ?? 'the athlete',
             day: active.day,
@@ -2366,29 +2384,50 @@ export const useStore = create<StoreState>((set, get) => {
       })
     },
 
-    gymLogSet(exId, reps, weight) {
+    gymLogSet(exId, reps, weight, sec) {
       commit((d) => {
-        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
-        if (!se || reps <= 0) return
-        se.sets.push(weight != null && weight > 0 ? { reps, weight } : { reps })
+        const s = d.gym.active
+        const se = s?.exercises.find((e) => e.exId === exId)
+        if (!s || !se || reps <= 0) return
+        // the plan for THIS set — the target the report grades this set against.
+        // Extra sets beyond the plan reuse the last prescribed one.
+        const planned = se.plan.reps[Math.min(se.sets.length, se.plan.reps.length - 1)] ?? reps
+        const base: LoggedSet = { reps }
+        if (weight != null && weight > 0) base.weight = weight
+        if (sec != null && sec > 0) base.sec = Math.round(sec)
+        se.sets.push(base)
         se.skipped = false
+        if (base.sec != null) {
+          s.workSec = (s.workSec ?? 0) + base.sec
+          s.workTargetSec = (s.workTargetSec ?? 0) + setSeconds(se.kind, planned)
+        }
       })
     },
 
     gymUndoSet(exId) {
       commit((d) => {
-        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
-        se?.sets.pop()
+        const s = d.gym.active
+        const se = s?.exercises.find((e) => e.exId === exId)
+        if (!s || !se) return
+        const planned = se.plan.reps[Math.min(se.sets.length - 1, se.plan.reps.length - 1)]
+        const gone = se.sets.pop()
+        if (gone?.sec != null) {
+          s.workSec = Math.max(0, (s.workSec ?? 0) - gone.sec)
+          s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - setSeconds(se.kind, planned ?? gone.reps))
+        }
       })
     },
 
-    gymLogRest(exId, seconds) {
+    gymLogRest(exId, seconds, targetSec) {
       commit((d) => {
-        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
-        if (!se) return
+        const s = d.gym.active
+        const se = s?.exercises.find((e) => e.exId === exId)
+        if (!s || !se) return
         // several rests inside one exercise average out — what we want to learn
         // is "how long does THIS move take him to recover from"
         se.restSec = se.restSec ? Math.round((se.restSec + seconds) / 2) : Math.round(seconds)
+        s.restTotalSec = (s.restTotalSec ?? 0) + Math.round(seconds)
+        s.restTargetSec = (s.restTargetSec ?? 0) + Math.round(targetSec ?? se.plan.restSec)
       })
     },
 
@@ -2409,8 +2448,9 @@ export const useStore = create<StoreState>((set, get) => {
     gymFinish(rating, feedback) {
       const catalog = get().gymCatalog
       const active = get().data.gym.active
-      if (!active) return 0
+      if (!active) return { coins: 0, session: null }
       let paid = 0
+      let filed: GymSession | null = null
 
       commit((d, events) => {
         const s = d.gym.active
@@ -2468,11 +2508,13 @@ export const useStore = create<StoreState>((set, get) => {
             description: `${done} exercise${done === 1 ? '' : 's'} · +${coins} 🪙${prs > 0 ? ' · you beat your own best' : ''}`,
           })
         }
+        // a plain snapshot: the report screen outlives `gym.active`
+        filed = JSON.parse(JSON.stringify(s)) as GymSession
         d.gym.active = null
       })
 
       set({ gymFellBack: null })
-      return paid
+      return { coins: paid, session: filed }
     },
 
     gymAbandon() {
@@ -2480,13 +2522,12 @@ export const useStore = create<StoreState>((set, get) => {
       const anyWork = !!active?.exercises.some((e) => !e.skipped && e.sets.length > 0)
       // walked out having actually lifted something: keep it, pay it, learn from
       // it. Nothing logged at all: throw it away rather than pollute the history.
-      if (anyWork) get().gymFinish(undefined, 'Left early')
-      else {
-        set({ gymFellBack: null })
-        commit((d) => {
-          d.gym.active = null
-        })
-      }
+      if (anyWork) return get().gymFinish(undefined, 'Left early')
+      set({ gymFellBack: null })
+      commit((d) => {
+        d.gym.active = null
+      })
+      return { coins: 0, session: null }
     },
 
     gymSetBrief(patch) {

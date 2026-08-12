@@ -1,4 +1,9 @@
-// The rest countdown between sets.
+// The rest countdown between sets. One button: NEXT.
+//
+// There is no "+30s more" any more, because there doesn't need to be — the timer
+// keeps counting past zero and what the app learns is the moment you actually
+// tapped NEXT. Sitting there longer IS asking for more rest, and the next
+// session is planned from it.
 //
 // Two things make this more than a `setInterval`:
 //
@@ -15,8 +20,8 @@
 // src/logic/wakeLock.ts keeps it on during a session) the alerts are exact. With
 // the screen OFF, the beeps still fire, but a heavily throttled browser may run
 // them a few seconds late.
-import { useEffect, useRef, useState } from 'react'
-import { REST_BUMP, REST_MIN } from '../../logic/gym'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { REST_MIN } from '../../logic/gym'
 import { gymSfx, holdAudioSession } from '../../audio'
 
 /** Seconds left when the "get ready" double blip fires. */
@@ -24,16 +29,17 @@ const WARN_AT = 10
 
 export function RestTimer({
   seconds,
-  onDone,
-  onSkip,
+  upNext,
+  onNext,
 }: {
   seconds: number
-  /** How long you ACTUALLY rested — the number the app learns from. */
-  onDone: (actualSeconds: number) => void
-  onSkip: (actualSeconds: number) => void
+  /** What NEXT will start — shown so you never tap it blind. */
+  upNext?: ReactNode
+  /** Tapped NEXT. The argument is how long you ACTUALLY rested — the number the app learns from. */
+  onNext: (actualSeconds: number) => void
 }) {
   const startedAt = useRef(Date.now())
-  const [target, setTarget] = useState(Math.max(REST_MIN, seconds))
+  const target = Math.max(REST_MIN, seconds)
   const [now, setNow] = useState(Date.now())
   const warned = useRef(false)
   const rang = useRef(false)
@@ -67,7 +73,7 @@ export function RestTimer({
   const circumference = 2 * Math.PI * r
 
   return (
-    <div className="card gym-rest" style={{ textAlign: 'center' }}>
+    <div className="card gym-rest">
       <div className="h2" style={{ margin: '0 0 6px' }}>{over ? '⏱️ Rest is over' : '⏱️ Resting'}</div>
 
       <svg viewBox="0 0 130 130" width="150" height="150" style={{ margin: '0 auto', display: 'block' }} role="img" aria-label={`${Math.abs(left)} seconds ${over ? 'over' : 'left'}`}>
@@ -94,25 +100,14 @@ export function RestTimer({
       </svg>
 
       <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-        {over ? 'Go when you’re ready — every extra second is being learned.' : `Asked for ${target}s, based on your own history.`}
+        {over ? 'Take longer if you need it — every extra second is being learned.' : `Asked for ${target}s, based on your own history.`}
       </p>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-        <button
-          className="btn btn--ghost btn--small"
-          style={{ flex: 1 }}
-          onClick={() => {
-            warned.current = false
-            rang.current = false
-            setTarget((t) => t + REST_BUMP)
-          }}
-        >
-          + {REST_BUMP}s more
-        </button>
-        <button className="btn btn--blue btn--small" style={{ flex: 1 }} onClick={() => (over ? onDone(elapsed) : onSkip(elapsed))}>
-          {over ? '✓ Back to work' : 'Skip rest'}
-        </button>
-      </div>
+      {upNext && <div className="gym-upnext">{upNext}</div>}
+
+      <button className="btn btn--blue" style={{ marginTop: 12 }} onClick={() => onNext(elapsed)}>
+        ▶️ NEXT
+      </button>
     </div>
   )
 }

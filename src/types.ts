@@ -728,6 +728,13 @@ export type ExerciseRating = 'hate' | 'dislike' | 'ok' | 'like' | 'love'
 export type Mood = 'lazy' | 'normal' | 'motivated'
 
 /**
+ * What a session is allowed to draw on. `weights` = loaded work only, `bodyweight`
+ * = nothing but you (a pull-up bar still counts as bodyweight — what matters is
+ * whether you load it), `mixed` = both, and the default.
+ */
+export type GearMode = 'mixed' | 'weights' | 'bodyweight'
+
+/**
  * Everything the app has learned about ONE exercise for ONE person. This is the
  * file that replaces the AI: it is what a good trainer would remember about you.
  */
@@ -762,6 +769,8 @@ export interface LadderState {
 export interface LoggedSet {
   reps: number
   weight?: number
+  /** Wall-clock seconds between GO/NEXT and DONE — what the end-of-session pace is graded on. */
+  sec?: number
 }
 
 /** One exercise inside a session: what was asked for (`plan`) and what happened (`sets`). */
@@ -793,6 +802,7 @@ export interface GymSession {
   finishedAt?: string
   minutes: number // the budget you asked for
   mood: Mood
+  gearMode?: GearMode // weights / bodyweight / both (default 'mixed')
   source: 'ai' | 'local' // who built it — the coach or the offline planner
   model?: string
   note?: string // the coach's one-liner
@@ -801,6 +811,18 @@ export interface GymSession {
   feedback?: string
   coins: number
   activeSec?: number // wall-clock length
+  /**
+   * The end-of-session report. Every number is accumulated live by the runner:
+   * `*Sec` is wall-clock reality, `*TargetSec` is what the plan asked for, and
+   * the targets only count the sets you ACTUALLY did — so skipping half the
+   * session can never buy you a better grade.
+   */
+  workSec?: number
+  workTargetSec?: number
+  restTotalSec?: number
+  restTargetSec?: number
+  /** True when this one was planned as "do more" right after another session. */
+  followUp?: boolean
 }
 
 /**
