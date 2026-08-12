@@ -2418,6 +2418,13 @@ input, select { font-family: inherit; }
 /* --- preview + runner cards --- */
 .gym-note-head { display: flex; flex-wrap: wrap; gap: 6px; }
 .gym-ex-card { margin-bottom: 10px; }
+/* Preview cards: the movement on the left at a size you can actually read,
+   everything else — name, plan, chips, reason, buttons — stacked on the right. */
+.gym-ex-split { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: start; }
+.gym-ex-body { min-width: 0; }
+/* The size is set inline by ExerciseDemo (DEMO_SIZE) so the <img> carries real
+   intrinsic dimensions; this only has to centre the emoji fallback in it. */
+.gym-ex-demo--big { flex: none; display: flex; align-items: center; justify-content: center; }
 .gym-ex-head { display: flex; align-items: center; gap: 10px; }
 .gym-ex-emoji { font-size: 28px; line-height: 1; flex: none; }
 .gym-ex-emoji--big { font-size: 40px; }

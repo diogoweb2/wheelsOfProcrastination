@@ -42,6 +42,14 @@ const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 /** Minute buttons offered by the "do more" card — a bonus block is a short one. */
 const MORE_MINUTES = [5, 10, 15, 20] as const
 
+/**
+ * The demo on a preview card, in CSS pixels. The source animations are 180px
+ * (§18l), so this is the biggest it can go without upscaling — and on the
+ * preview it is the point of the card: you are deciding whether you want to do
+ * that movement, and a 56px thumbnail can't tell you.
+ */
+const DEMO_SIZE = 120
+
 /** What the finished session left on screen: the grade, the Berries, and the offer of more. */
 interface Banked {
   session: GymSession
@@ -225,63 +233,63 @@ function Preview({ session }: { session: GymSession }) {
       )}
 
       {session.exercises.map((e, i) => (
-        <div className="card gym-ex-card" key={e.exId}>
-          <div className="gym-ex-head">
-            <ExerciseDemo demo={demos.get(e.exId)} emoji={e.emoji} size={56} className="gym-ex-emoji" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 900, fontSize: 15 }}>
-                {i + 1}. {e.name}
-              </div>
-              <div className="muted" style={{ fontSize: 12 }}>{planLine(e, unit)}</div>
+        // Two columns: the movement on the left, big enough to actually read,
+        // and everything you can say about it on the right.
+        <div className="card gym-ex-card gym-ex-split" key={e.exId}>
+          <ExerciseDemo demo={demos.get(e.exId)} emoji={e.emoji} size={DEMO_SIZE} className="gym-ex-demo--big" />
+          <div className="gym-ex-body">
+            <div style={{ fontWeight: 900, fontSize: 15 }}>
+              {i + 1}. {e.name}
             </div>
-          </div>
-          <div className="gym-chip-row">
-            {e.parts.slice(0, 3).map((p) => (
-              <span className="chip" key={p}>{PART_LABEL[p]}</span>
-            ))}
-            {e.ladderTest && <span className="chip chip--test">🏁 Max test</span>}
-            {e.ladder && !e.ladderTest && <span className="chip">🪜 Ladder</span>}
-          </div>
-          {e.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {e.why}</p>}
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <div className="muted" style={{ fontSize: 12 }}>{planLine(e, unit)}</div>
+            <div className="gym-chip-row gym-chip-row--wrap">
+              {e.parts.slice(0, 3).map((p) => (
+                <span className="chip" key={p}>{PART_LABEL[p]}</span>
+              ))}
+              {e.ladderTest && <span className="chip chip--test">🏁 Max test</span>}
+              {e.ladder && !e.ladderTest && <span className="chip">🪜 Ladder</span>}
+            </div>
+            {e.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {e.why}</p>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <button
+                className="btn btn--ghost btn--small"
+                style={{ flex: 1 }}
+                disabled={gymPlanning}
+                onClick={async () => {
+                  sfx.click()
+                  setSwapping(e.exId)
+                  const res = await gymSwap(e.exId, 'not feeling like this one today')
+                  setSwapping(null)
+                  if (res === 'none') sfx.error()
+                }}
+              >
+                {swapping === e.exId ? '…' : '🔄 Not this one'}
+              </button>
+              <button
+                className="btn btn--ghost btn--small"
+                onClick={() => {
+                  sfx.click()
+                  gymDrop(e.exId)
+                }}
+              >
+                ✕
+              </button>
+            </div>
             <button
               className="btn btn--ghost btn--small"
-              style={{ flex: 1 }}
-              disabled={gymPlanning}
-              onClick={async () => {
-                sfx.click()
-                setSwapping(e.exId)
-                const res = await gymSwap(e.exId, 'not feeling like this one today')
-                setSwapping(null)
-                if (res === 'none') sfx.error()
-              }}
-            >
-              {swapping === e.exId ? '…' : '🔄 Not this one'}
-            </button>
-            <button
-              className="btn btn--ghost btn--small"
+              style={{ marginTop: 8, width: '100%' }}
               onClick={() => {
+                // "✕" only drops it from today. This removes it from the shared
+                // catalog, so no planner — AI or offline — can ever offer it again.
+                if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
+                  return
                 sfx.click()
-                gymDrop(e.exId)
+                gymDeleteExercise(e.exId)
               }}
             >
-              ✕
+              🗑 Never show this
             </button>
           </div>
-          <button
-            className="btn btn--ghost btn--small"
-            style={{ marginTop: 8, width: '100%' }}
-            onClick={() => {
-              // "✕" only drops it from today. This removes it from the shared
-              // catalog, so no planner — AI or offline — can ever offer it again.
-              if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
-                return
-              sfx.click()
-              gymDeleteExercise(e.exId)
-            }}
-          >
-            🗑 Never show this exercise again
-          </button>
         </div>
       ))}
 
