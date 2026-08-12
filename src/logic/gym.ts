@@ -330,7 +330,7 @@ export function loggedReps(se: Pick<SessionExercise, 'kind' | 'perSide' | 'sets'
 export function learnedSetSeconds(mem: ExerciseMemory | undefined, kind: ExerciseKind, reps: number): number | null {
   if (!mem || (mem.timedSets ?? 0) < 3) return null
   // seconds-per-rep generalises across prescriptions, so 12 reps can be predicted from 8
-  if (kind === 'reps' && mem.repSecLearned) return Math.round(mem.repSecLearned * reps)
+  if ((kind === 'weight' || kind === 'bodyweight') && mem.repSecLearned) return Math.round(mem.repSecLearned * reps)
   // a clocked move IS its own duration; the learned average only adds the setup drag
   if (kind === 'timed' || kind === 'cardio') {
     const nominal = setSeconds(kind, reps)
@@ -710,7 +710,7 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
     setSecLearned = Math.round(setSecLearned ? setSecLearned * 0.7 + s.sec! * 0.3 : s.sec!)
     // `reps` is logged per side, and the clock ran across both — so seconds-per-rep
     // here is per PRESCRIBED rep, which is exactly what a plan asks for
-    if (se.kind === 'reps' && s.reps > 0) {
+    if ((se.kind === 'weight' || se.kind === 'bodyweight') && s.reps > 0) {
       const perRep = s.sec! / s.reps
       repSecLearned = round(repSecLearned ? repSecLearned * 0.7 + perRep * 0.3 : perRep)
     }

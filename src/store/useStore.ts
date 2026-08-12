@@ -285,6 +285,10 @@ interface StoreState {
   setDoToday: (taskId: string, on: boolean) => void
   /** Last-day escape hatch: push a requirement's deadline out by `days`. */
   postponeRequired: (taskId: string, days: number) => void
+  /** "Delay" decision: off the checklist (and unfined) until `days` from today. */
+  delayRequired: (taskId: string, days: number) => void
+  /** "Won't do it" decision: write off every occurrence up to today. Repeats still return. */
+  skipRequired: (taskId: string) => void
   /** Last-day escape hatch: stop requiring this task forever (it stays as a normal quest). */
   dropRequired: (taskId: string) => void
   spin: (filter: EffortFilter) => Task | null | 'full'
@@ -1066,6 +1070,9 @@ export const useStore = create<StoreState>((set, get) => {
         // A one-shot requirement with a deadline is finished for good once it's
         // done — and so is a "repeat until done" one, the moment it's ticked.
         if (!task.repeats || task.untilDone) task.archived = true
+        // Doing it settles any decision taken on it: a pending delay must not
+        // keep the next occurrence hidden once the job is actually done.
+        delete (task as unknown as Record<string, unknown>).delayedUntil
 
         if (d.streak.lastCompletionDay !== today) {
           d.streak.current += 1
@@ -1093,6 +1100,27 @@ export const useStore = create<StoreState>((set, get) => {
         if (!t) return
         // Push the deadline out from today, so postponing an already-late item still buys real time.
         t.requiredUntil = addDays(dayKey(), Math.max(1, days))
+      })
+    },
+
+    delayRequired(taskId, days) {
+      commit((d) => {
+        const t = d.tasks.find((x) => x.id === taskId)
+        if (!t) return
+        // Counted from today, so delaying an already-late item buys real time.
+        t.delayedUntil = addDays(dayKey(), Math.max(1, days))
+      })
+    },
+
+    skipRequired(taskId) {
+      commit((d) => {
+        const t = d.tasks.find((x) => x.id === taskId)
+        if (!t) return
+        // Settles the past: the red carry (and today's own fine) stop here. A
+        // repeating quest is back on its next scheduled day; a one-shot is over.
+        t.waivedThrough = dayKey()
+        delete (t as unknown as Record<string, unknown>).delayedUntil
+        if (!t.repeats) t.archived = true
       })
     },
 

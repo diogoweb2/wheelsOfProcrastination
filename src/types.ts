@@ -87,6 +87,19 @@ export interface Task {
    */
   doTodayDay?: string
   /**
+   * "Delay" decision on a must-do (YYYY-MM-DD). The quest is off the checklist,
+   * off the late list and free of the miss fine until this day arrives — then it
+   * comes back exactly as late as it was. Set from today + N days.
+   */
+  delayedUntil?: string
+  /**
+   * "Won't do it" decision on a must-do (YYYY-MM-DD): every occurrence up to and
+   * including this day is written off, so the red carry stops nagging. A
+   * repeating quest still comes back on its NEXT scheduled day — the waiver
+   * settles the past, not the future. A one-shot is archived outright.
+   */
+  waivedThrough?: string
+  /**
    * Auto-split quest ("cut the trees" → 6 sessions). Every part of one split
    * shares a `seriesId` and knows its place (`seriesPart` of `seriesTotal`).
    * Parts are chained through `afterTaskId`, so only the next one is ever live.

@@ -2,17 +2,17 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import type { Task } from '../types'
 import { sfx } from '../audio'
-import { dayKey, daysUntil, prettyDay } from '../logic/dates'
+import { addDays, dayKey, daysUntil, prettyDay } from '../logic/dates'
 import { carriedRequired, dormantReason, dormantRequired, isEveryDayRequired, isStudyTask, missedSince, requiredToday } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
-import { REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
+import { POSTPONE_OPTIONS, REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
 
 /**
  * Today's non-negotiables, sitting beside the wheel. One tap marks an item done —
  * no ceremony, no wheel. Dated requirements shout louder as their last day nears.
  */
 export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void } = {}) {
-  const { data, completeRequired, completedTodayIds, setDoToday } = useStore()
+  const { data, completeRequired, completedTodayIds, setDoToday, delayRequired, skipRequired } = useStore()
   const today = dayKey()
   const doneIds = completedTodayIds()
   const items = useMemo(() => requiredToday(data.tasks, today, data.completions), [data.tasks, today, data.completions])
@@ -24,6 +24,8 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
   )
   const dormant = useMemo(() => dormantRequired(data.tasks, today, data.completions), [data.tasks, today, data.completions])
   const [picking, setPicking] = useState(false)
+  // The open decision sheet, if any: which scheduled must-do is being settled.
+  const [deciding, setDeciding] = useState<string | null>(null)
   // A ticked item leaves the list — what's left on screen is what's left to do.
   // `justDone` keeps the row up for the green celebration beat before it goes,
   // and the "3/5" header still counts today's done items, so nothing is lost.
@@ -50,6 +52,7 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
   const scheduledDone = scheduledTotal - scheduled.filter((t) => !doneIds.has(t.id)).length
   const dailyDone = dailyTotal - daily.filter((t) => !doneIds.has(t.id)).length
   const lateCount = all.filter((t) => !doneIds.has(t.id) && missed.get(t.id)).length
+  const decidingTask = all.find((t) => t.id === deciding) ?? null
 
   function complete(id: string) {
     sfx.gem()
@@ -136,6 +139,16 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
               }
             : undefined
         }
+        // A scheduled must-do can't just be ignored: done, delayed, or written
+        // off. Daily habits have no decision to take — tomorrow brings a new one.
+        onDecide={
+          isEveryDayRequired(t) || isStudyTask(t)
+            ? undefined
+            : () => {
+                sfx.click()
+                setDeciding(t.id)
+              }
+        }
       />
     )
   }
@@ -174,12 +187,110 @@ export function RequiredList({ onTrain }: { onTrain?: (topicId: string) => void 
         </div>
       )}
 
+      {decidingTask && (
+        <DecisionSheet
+          task={decidingTask}
+          lateSince={missed.get(decidingTask.id) ?? null}
+          today={today}
+          onClose={() => setDeciding(null)}
+          onDone={() => {
+            complete(decidingTask.id)
+            setDeciding(null)
+          }}
+          onDelay={(days) => {
+            sfx.click()
+            delayRequired(decidingTask.id, days)
+            setDeciding(null)
+          }}
+          onSkip={() => {
+            sfx.click()
+            skipRequired(decidingTask.id)
+            setDeciding(null)
+          }}
+        />
+      )}
+
       {remaining === 0 && (
         <div className="required-panel">
           <div className="required-clear">🎉 All must-dos cleared!</div>
         </div>
       )}
       {extras}
+    </div>
+  )
+}
+
+/** Nicely-worded delay lengths, so "3d" isn't the only thing on offer. */
+const DELAY_LABEL: Record<number, string> = { 1: 'Tomorrow', 3: '3 days', 7: 'A week', 14: '2 weeks' }
+
+/**
+ * The reckoning for one scheduled must-do: did it, pushing it, or not doing it.
+ * A missed quest keeps nagging in red until one of these three is chosen — which
+ * is the point: ignoring it isn't a decision, and the app won't let it become one.
+ */
+function DecisionSheet(props: {
+  task: Task
+  lateSince: string | null
+  today: string
+  onClose: () => void
+  onDone: () => void
+  onDelay: (days: number) => void
+  onSkip: () => void
+}) {
+  const { task, lateSince, today, onClose, onDone, onDelay, onSkip } = props
+  const [delaying, setDelaying] = useState(false)
+  const [confirmSkip, setConfirmSkip] = useState(false)
+  const lateBy = lateSince ? -daysUntil(lateSince, today) : 0
+
+  return (
+    <div className="overlay overlay--center" onClick={onClose}>
+      <div className="sheet" style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ fontSize: 40 }}>{lateSince ? '⚠️' : '🗓️'}</div>
+        <div className="h2" style={{ margin: '8px 0 2px' }}>{task.name}</div>
+        <p className="muted" style={{ margin: '0 0 14px', fontSize: 12 }}>
+          {lateSince
+            ? `Due ${prettyDay(lateSince)} — ${lateBy === 1 ? '1 day late' : `${lateBy} days late`}. Pick one, it won't go away by itself.`
+            : 'Due today. Pick one, it won’t go away by itself.'}
+        </p>
+
+        <button className="btn" onClick={onDone}>
+          ✓ Done it! (+{requiredReward(task)} 🪙)
+        </button>
+
+        {delaying ? (
+          <div className="field" style={{ marginTop: 14, textAlign: 'left' }}>
+            <label>Back on the list in:</label>
+            <div className="seg seg--act">
+              {POSTPONE_OPTIONS.map((d) => (
+                <button key={d} onClick={() => onDelay(d)}>
+                  {DELAY_LABEL[d] ?? `${d}d`}
+                </button>
+              ))}
+            </div>
+            <p className="muted" style={{ fontSize: 11, margin: '6px 2px 0' }}>
+              It comes back {prettyDay(addDays(today, POSTPONE_OPTIONS[0]))} at the earliest, still just as late. No fine while it waits.
+            </p>
+          </div>
+        ) : (
+          <button className="btn btn--blue" style={{ marginTop: 8 }} onClick={() => setDelaying(true)}>
+            ⏳ Delay it
+          </button>
+        )}
+
+        {confirmSkip ? (
+          <button className="btn btn--red" style={{ marginTop: 8 }} onClick={onSkip}>
+            {task.repeats ? 'Yes — skip this one (it returns next time)' : 'Yes — drop it for good'}
+          </button>
+        ) : (
+          <button className="btn btn--ghost" style={{ marginTop: 8, color: 'var(--red)' }} onClick={() => setConfirmSkip(true)}>
+            ✕ Won't do it
+          </button>
+        )}
+
+        <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
+          Not now
+        </button>
+      </div>
     </div>
   )
 }
@@ -194,8 +305,10 @@ function RequiredRow(props: {
   onToggle: () => void
   onTrain?: () => void
   onRemove?: () => void
+  /** Opens the done / delay / won't-do sheet (scheduled must-dos only). */
+  onDecide?: () => void
 }) {
-  const { task, done, celebrating, lateSince, today, onToggle, onTrain, onRemove } = props
+  const { task, done, celebrating, lateSince, today, onToggle, onTrain, onRemove, onDecide } = props
   const left = task.requiredUntil ? daysUntil(task.requiredUntil, today) : null
   const warning = left !== null && left <= REQUIRED_WARN_DAYS
   const lateBy = lateSince ? -daysUntil(lateSince, today) : 0
@@ -241,10 +354,20 @@ function RequiredRow(props: {
   // A done study row keeps its 🏫 shortcut (more training is always allowed) so
   // it doesn't change width the moment it's ticked. ↩ goes: you can't un-do it.
   const showRemove = onRemove && !done
-  if (!onTrain && !showRemove) return row
+  const showDecide = onDecide && !done
+  if (!onTrain && !showRemove && !showDecide) return row
   return (
     <div className="required-row-wrap">
       {row}
+      {showDecide && (
+        <button
+          className={`required-train${lateSince ? ' required-train--late' : ''}`}
+          onClick={onDecide}
+          aria-label="Decide: done, delay, or won't do it"
+        >
+          ⋯
+        </button>
+      )}
       {onTrain && (
         <button className="required-train" onClick={onTrain} aria-label="Start training">
           🏫

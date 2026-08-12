@@ -536,6 +536,10 @@ input, select { font-family: inherit; }
   text-transform: uppercase;
 }
 .seg button.on { background: var(--card2); color: var(--text); box-shadow: 0 2px 0 rgb(0 0 0 / 30%); }
+/* Every button acts immediately (no selected state to show), so none of them
+   sit in the muted "unpicked" look a normal segmented control uses. */
+.seg--act button { background: var(--card2); color: var(--text); }
+.seg--act button:active { transform: scale(0.94); }
 /* Seven day toggles have to fit one phone row, so they shed the padding. */
 .seg--days { gap: 3px; }
 .seg--days button { padding: 9px 0; font-size: 12px; }
@@ -1956,6 +1960,9 @@ input, select { font-family: inherit; }
   font-size: 18px;
 }
 .required-train:active { transform: scale(0.94); }
+/* The decision button on a LATE row wears the same red as the row itself: the
+   quest is waiting on a call, not on the checkbox. */
+.required-train--late { border-color: var(--red); color: var(--red); }
 
 .required-box {
   flex: none;

@@ -84,6 +84,10 @@ export function isRequiredOn(
   if (task.archived && !opts.ignoreJustDone) return false
   // Volunteered for today by hand: skip the window, the day scope and the cooldown.
   if (task.doTodayDay === today) return true
+  // A decision was taken on it: delayed to a later day, or written off up to a
+  // given day. Either way it isn't being asked for — and isn't a miss.
+  if (task.delayedUntil && today < task.delayedUntil) return false
+  if (task.waivedThrough && today <= task.waivedThrough) return false
   if (task.requiredFrom && today < task.requiredFrom) return false
   if (task.requiredUntil && today > task.requiredUntil) return false
   return isAvailableOn(task, today, completions, tasks, { ignoreCooldown: opts.ignoreJustDone })
@@ -124,6 +128,11 @@ export function isEveryDayRequired(task: Task): boolean {
   if (task.seasons?.length && task.seasons.length < 4) return false
   if (task.requiredFrom || task.requiredUntil || task.startDate) return false
   return true
+}
+
+/** Was this must-do pushed to a later day, and is that day still ahead? */
+export function isDelayed(task: Task, today: string = dayKey()): boolean {
+  return !!task.delayedUntil && today < task.delayedUntil
 }
 
 /** How far back the checklist looks for a scheduled must-do that was never ticked. */
@@ -178,6 +187,7 @@ export function carriedRequired(tasks: Task[], today: string = dayKey(), complet
         !done.has(t.id) &&
         !isRequiredOn(t, today, completions, tasks) &&
         isUnlockedOn(t, today, completions, tasks) &&
+        !isDelayed(t, today) && // a decision was taken: it comes back on its own day
         missedSince(t, today, completions, tasks) !== null,
     )
     .sort((a, b) => (missedSince(a, today, completions) ?? '').localeCompare(missedSince(b, today, completions) ?? ''))
@@ -199,8 +209,9 @@ export function dormantRequired(tasks: Task[], today: string = dayKey(), complet
         !done.has(t.id) && // done today: it's on the checklist wearing a ✓, not dormant
         !isRequiredOn(t, today, completions, tasks) &&
         isUnlockedOn(t, today, completions, tasks) &&
-        // already carried onto the checklist in red — offering it again would double it up
-        missedSince(t, today, completions, tasks) === null &&
+        // already carried onto the checklist in red — offering it again would double it
+        // up. A delayed one is off the checklist, so it belongs in the picker again.
+        (missedSince(t, today, completions, tasks) === null || isDelayed(t, today)) &&
         !(t.requiredUntil && today > t.requiredUntil), // its deadline has passed — it's over, not dormant
     )
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -208,6 +219,10 @@ export function dormantRequired(tasks: Task[], today: string = dayKey(), complet
 
 /** Why a dormant must-do isn't on today's list, in a few words for the picker. */
 export function dormantReason(task: Task, today: string = dayKey(), completions: Completion[] = []): string {
+  if (isDelayed(task, today)) {
+    const d = daysUntil(task.delayedUntil!, today)
+    return d === 1 ? '⏳ delayed to tomorrow' : `⏳ delayed ${d}d`
+  }
   const back = cooldownUntil(task, completions, today)
   if (back && today < back) {
     const d = daysUntil(back, today)
