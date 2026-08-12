@@ -117,6 +117,7 @@ import {
   exerciseById,
   isPersonalRecord,
   learnFromExercise,
+  loggedReps,
   seedBrief,
   sessionBonus,
   setSeconds,
@@ -2315,7 +2316,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (!active || !target) return 'none'
       const keep = active.exercises.filter((e) => e.exId !== exId)
 
-      set({ gymPlanning: true })
+      set({ gymPlanning: true, gymFellBack: null })
       try {
         const replacement = await coachSwap(
           {
@@ -2331,6 +2332,7 @@ export const useStore = create<StoreState>((set, get) => {
           target,
           keep,
           reason ?? '',
+          (why) => set({ gymFellBack: why }),
         )
         if (!replacement) return 'none'
         commit((d) => {
@@ -2496,7 +2498,7 @@ export const useStore = create<StoreState>((set, get) => {
           d.gym.streak = bumpStreak(d.gym.streak, day)
           d.gym.totals.sessions += 1
           d.gym.totals.minutes += Math.round((s.activeSec ?? s.minutes * 60) / 60)
-          d.gym.totals.reps += s.exercises.reduce((n, e) => n + e.sets.reduce((m, x) => m + x.reps, 0), 0)
+          d.gym.totals.reps += s.exercises.reduce((n, e) => n + loggedReps(e), 0)
           d.gym.totals.coins += coins
           d.economy.gems += coins
           d.economy.totalGemsEarned += coins

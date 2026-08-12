@@ -19,6 +19,7 @@ import {
   exerciseSeconds,
   ladderIsTest,
   ladderReps,
+  learnedSetSeconds,
   partFatigue,
   pickReplacement,
   planSession,
@@ -111,7 +112,7 @@ export async function coachPlan(input: CoachInput): Promise<CoachOutcome> {
         source: 'ai',
         model,
         note: parsed.note?.slice(0, 300),
-        exercises: trimToBudget(exercises, input.minutes),
+        exercises: topUpToBudget(trimToBudget(exercises, input.minutes), input, day),
         coins: 0,
         followUp: input.followUp ? true : undefined,
       },
@@ -131,6 +132,8 @@ export async function coachSwap(
   replacing: SessionExercise,
   keep: SessionExercise[],
   reason: string,
+  /** Told why the coach was skipped, so a swap can be as honest as a plan. */
+  onFallback?: (why: string) => void,
 ): Promise<SessionExercise | null> {
   const day = input.day ?? dayKey()
   const offline = () =>
@@ -171,17 +174,23 @@ Answer with ONLY this JSON object, no prose and no markdown fence:
 
     const reply = await ask(input.ai!.openrouterKey!.trim(), model, prompt)
     const obj = JSON.parse(sliceJson(reply, '{', '}')) as CoachRow
-    return materialise(obj, pool, input.gym) ?? offline()
-  } catch {
+    const picked = materialise(obj, pool, input.gym)
+    if (!picked) onFallback?.('the coach picked something we don’t own — swapped offline')
+    return picked ?? offline()
+  } catch (e) {
+    onFallback?.(shortError(e))
     return offline()
   }
 }
 
 // --- request ----------------------------------------------------------------
 
+/** DeepSeek and friends can think for a long minute. Waiting beats a silent offline fallback. */
+const TIMEOUT_MS = 180_000
+
 async function ask(key: string, model: string, prompt: string): Promise<string> {
   const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), 30_000)
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
   try {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
@@ -205,10 +214,16 @@ async function ask(key: string, model: string, prompt: string): Promise<string> 
         ],
       }),
     })
-    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${(await res.text()).slice(0, 160)}`)
-    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] }
+    if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status} (${model}): ${(await res.text()).slice(0, 300)}`)
+    // OpenRouter can answer 200 with an error body, or with an empty choice when
+    // the upstream model times out on its side. Say which one it was.
+    const json = (await res.json()) as {
+      choices?: { message?: { content?: string }; finish_reason?: string }[]
+      error?: { message?: string; code?: number }
+    }
+    if (json.error) throw new Error(`OpenRouter said: ${json.error.message ?? JSON.stringify(json.error)} (${model})`)
     const text = json.choices?.[0]?.message?.content
-    if (!text) throw new Error('empty reply')
+    if (!text) throw new Error(`${model} sent an empty reply (finish_reason=${json.choices?.[0]?.finish_reason ?? 'none'})`)
     return text
   } finally {
     clearTimeout(timer)
@@ -244,12 +259,16 @@ function catalogBlock(pool: ExerciseDef[], gym: GymState): string {
       `typical=${e.defaultSets}x${e.defaultReps}`,
       `baseRest=${e.restSec}s`,
     ]
+    if (e.perSide) bits.push('PER-SIDE (one limb at a time — your number is per side)')
     if (m?.rating) bits.push(`FEELS=${m.rating}`)
     if (m?.timesDone) bits.push(`done=${m.timesDone}x`)
     if (m?.lastDay) bits.push(`lastDone=${daysSince(m.lastDay)}d ago`)
     if (m?.suggestedWeight) bits.push(`weight=${m.suggestedWeight}`)
     if (m?.lastAdjust && m.lastAdjust !== 'same') bits.push(`lastTimeTooLight/Heavy=${m.lastAdjust === 'up' ? 'too light' : 'too heavy'}`)
     if (m?.restLearned) bits.push(`theirRealRest=${m.restLearned}s`)
+    // measured, not guessed: what a set of this actually costs THEM
+    const pace = learnedSetSeconds(m, e.kind, e.defaultReps)
+    if (pace) bits.push(`theirRealSetTime=${pace}s@${e.defaultReps}reps`)
     if (m?.bestReps) bits.push(`best=${m.bestReps}`)
     if (m?.notes) bits.push(`note="${m.notes.slice(0, 80)}"`)
     return `- ${bits.join(' ')}`
@@ -308,12 +327,18 @@ ${gearLine}
 ${catalogBlock(pool, input.gym)}
 
 Build today's session:
+- The numbers in "sets" carry the exercise's own unit: reps for kind=bodyweight/weight, SECONDS OF HOLD for kind=timed (a plank is [40, 40, 30], never [12, 12]), MINUTES for kind=cardio. "typical" in the list is already in that unit — stay near it.
+- On a PER-SIDE exercise the number is what they do on ONE side, and they then repeat it on the other — so it costs twice the time. Do not double the number yourself.
 - Respect recovery: do not hammer a muscle group trained in the last ~48 hours (core and cardio recover faster).
 - Order it well: light/ramp-in moves first, the hardest work while they are fresh, core and holds last.
 - Prescribe rest from what they ACTUALLY take (theirRealRest) when it is known, not from the base value.
+- Budget with THEIR measured numbers: where theirRealSetTime is given, the app has clocked them doing it — one set costs that, scaled to the reps you prescribe, plus theirRealRest between sets. Where it is missing, assume ~3.5s per rep.
 - When a weight is known, prescribe it — and account for the last-time-too-light/too-heavy signal.
 - Favour what they like, avoid what they dislike, and every few sessions slip in ONE exercise they have never tried.
-- The total time (work + rest) must fit ${input.minutes} minutes. Fewer, better exercises beat a rushed list.
+- FILL THE TIME. One exercise (3 sets plus rest) costs roughly 5 minutes, so ${input.minutes} minutes needs about ${targetMoves(
+    input.minutes,
+  )} exercises. A plan that only fills half the session is wrong — they asked for ${input.minutes} minutes and want to train for ${input.minutes} minutes.
+- The total (work + rest) must land between ${Math.round(input.minutes * 0.85)} and ${input.minutes} minutes. Add sets or another exercise rather than finishing early.
 
 Answer with ONLY this JSON object, no prose and no markdown fence:
 {
@@ -391,11 +416,54 @@ function materialise(row: CoachRow, pool: ExerciseDef[], gym: GymState): Session
     how: def.how,
     plan: { reps, weight, restSec },
     sets: [],
+    paceSec: learnedSetSeconds(mem, def.kind, reps[0]) ?? undefined,
+    perSide: def.perSide,
     ladder: !!ladder,
     ladderTest,
     why: typeof row.why === 'string' ? row.why.slice(0, 90) : undefined,
     coins: 0,
   }
+}
+
+/** ~5 minutes per exercise, sets and rest included. Used to brief the model and to sanity-check it. */
+function targetMoves(minutes: number): number {
+  return Math.max(2, Math.round(minutes / 5))
+}
+
+/**
+ * Models under-fill: ask for 60 minutes and you get a tidy 30-minute plan. Top the
+ * session up from the offline picker until it uses at least 85% of the budget, so
+ * the number on the button is the session you actually get.
+ */
+function topUpToBudget(list: SessionExercise[], input: CoachInput, day: string): SessionExercise[] {
+  const budget = input.minutes * 60
+  const out = [...list]
+  let spent = out.reduce((s, e) => s + exerciseSeconds(e), 0)
+  let guard = 0
+
+  while (spent < budget * 0.85 && guard++ < 12) {
+    const extra = pickReplacement(
+      {
+        catalog: input.catalog,
+        gym: input.gym,
+        minutes: input.minutes,
+        mood: input.mood,
+        gearMode: input.gearMode,
+        followUp: input.followUp,
+        day,
+        exclude: out.map((e) => e.exId),
+      },
+      out[out.length - 1],
+      out,
+    )
+    if (!extra) break
+    const cost = exerciseSeconds(extra)
+    if (spent + cost > budget * 1.05) break
+    // say where it came from — the coach didn't pick this one, the app did
+    out.push({ ...extra, why: `added to fill your ${input.minutes} minutes` })
+    spent += cost
+  }
+  return out
 }
 
 /** Models are optimists about time. Drop trailing exercises until the plan fits. */
@@ -412,8 +480,11 @@ function trimToBudget(list: SessionExercise[], minutes: number): SessionExercise
   return out
 }
 
+/** Kept verbatim wherever possible — a vague reason is worse than a long one. */
 function shortError(e: unknown): string {
-  const msg = e instanceof Error ? e.message : String(e)
-  if (msg.includes('abort')) return 'the coach took too long'
-  return msg.slice(0, 120)
+  const msg = e instanceof Error ? `${e.name === 'Error' ? '' : `${e.name}: `}${e.message}` : String(e)
+  if (/abort/i.test(msg)) return `no answer in ${TIMEOUT_MS / 1000}s — the model is overloaded or too slow`
+  if (/failed to fetch|networkerror|load failed/i.test(msg)) return `network error reaching OpenRouter (offline? blocked?) — ${msg}`
+  if (/JSON/i.test(msg)) return `the model's answer wasn't valid JSON — ${msg}`
+  return msg.slice(0, 300)
 }

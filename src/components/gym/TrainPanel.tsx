@@ -39,6 +39,36 @@ const MOODS: { id: Mood; label: string; emoji: string }[] = [
 
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 
+/** Seconds since `on` became true. A slow model is fine; a frozen button is not. */
+function useElapsed(on: boolean): number {
+  const [secs, setSecs] = useState(0)
+  useEffect(() => {
+    setSecs(0)
+    if (!on) return
+    const t = setInterval(() => setSecs((s) => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [on])
+  return secs
+}
+
+/** The exact reason the coach was skipped — verbatim, never rounded off to "something went wrong". */
+function CoachFailure({ why }: { why: string }) {
+  return (
+    <div className="card" style={{ borderColor: '#b45309', background: 'rgba(180,83,9,0.12)', marginTop: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 800 }}>⚠️ The AI coach didn’t answer — planned offline instead</div>
+      <p
+        className="muted"
+        style={{ fontSize: 12, marginTop: 6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, monospace' }}
+      >
+        {why}
+      </p>
+      <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
+        This is still a real session, built from your own history. “Plan a different one” retries the coach.
+      </p>
+    </div>
+  )
+}
+
 /** Minute buttons offered by the "do more" card — a bonus block is a short one. */
 const MORE_MINUTES = [5, 10, 15, 20] as const
 
@@ -91,6 +121,7 @@ function Setup() {
   const [gearMode, setGearMode] = useState<GearMode>('mixed')
   const gym = data.gym
   const coachOn = gym.aiOn && coachReady(aiConfig)
+  const waited = useElapsed(gymPlanning)
 
   return (
     <>
@@ -155,8 +186,13 @@ function Setup() {
             void gymPlan(minutes, mood, { gearMode })
           }}
         >
-          {gymPlanning ? '🧠 Building your session…' : '📋 Build my session'}
+          {gymPlanning ? `🧠 Asking your coach… ${waited}s` : '📋 Build my session'}
         </button>
+        {gymPlanning && waited > 20 && (
+          <p className="muted" style={{ fontSize: 11, marginTop: 6, textAlign: 'center' }}>
+            The model is thinking. It gets up to 3 minutes before we plan offline instead.
+          </p>
+        )}
 
         <p className="muted" style={{ fontSize: 11, marginTop: 10, textAlign: 'center' }}>
           {coachOn
@@ -215,12 +251,9 @@ function Preview({ session }: { session: GymSession }) {
           {session.followUp && <span className="chip chip--test">➕ Bonus block</span>}
         </div>
         {session.note && <p style={{ fontSize: 14, fontWeight: 700, marginTop: 8 }}>“{session.note}”</p>}
-        {gymFellBack && (
-          <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
-            The coach didn’t answer ({gymFellBack}), so this one was planned offline from your history. It’s still a real session.
-          </p>
-        )}
       </div>
+
+      {gymFellBack && <CoachFailure why={gymFellBack} />}
 
       {session.exercises.length === 0 && (
         <div className="card" style={{ textAlign: 'center' }}>
@@ -484,6 +517,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             </div>
           </div>
 
+          {current.perSide && (
+            <div className="gym-banner">
+              ↔️ <strong>Both sides.</strong> Every set is {plannedReps} {current.kind === 'timed' ? 'seconds' : 'reps'} on the
+              left <em>and</em> {plannedReps} on the right. Log it once, when both are done.
+            </div>
+          )}
+
           {current.ladderTest && (
             <div className="gym-banner">
               🏁 <strong>Max test.</strong> One all-out set — as many as you can. Your whole ladder is rebuilt from this number.
@@ -514,7 +554,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
           {phase === 'working' && isClocked(current) ? (
             // a plank or a run: no numbers to type, just a clock that keeps going
-            <WorkClock startedAt={startedAt} target={plannedReps} kind={current.kind} />
+            // a per-side hold has to cover both sides before the bell makes sense
+            <WorkClock startedAt={startedAt} target={current.perSide ? plannedReps * 2 : plannedReps} kind={current.kind} />
           ) : phase === 'working' ? (
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
@@ -751,6 +792,7 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
   const report = sessionReport(session)
   const [more, setMore] = useState(false)
   const [gearMode, setGearMode] = useState<GearMode>(session.gearMode ?? 'mixed')
+  const waited = useElapsed(gymPlanning)
 
   return (
     <>
@@ -834,7 +876,7 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
               setMore(false)
             }}
           >
-            {gymPlanning ? '🧠 Building it…' : '← Actually, I’m done'}
+            {gymPlanning ? `🧠 Asking your coach… ${waited}s` : '← Actually, I’m done'}
           </button>
         </div>
       )}
@@ -923,9 +965,10 @@ function Stepper({
 }
 
 function repLabel(e: SessionExercise): string {
-  if (e.kind === 'timed') return 'seconds'
-  if (e.kind === 'cardio') return 'minutes'
-  return 'reps'
+  const unit = e.kind === 'timed' ? 'seconds' : e.kind === 'cardio' ? 'minutes' : 'reps'
+  // one limb at a time: the number is what each side gets, so say so — otherwise
+  // "2 × 15" reads as the whole job when it is really half of it
+  return e.perSide ? `${unit} per side` : unit
 }
 
 function planLine(e: SessionExercise, unit: string): string {

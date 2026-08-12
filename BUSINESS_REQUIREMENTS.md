@@ -437,6 +437,8 @@ Once you are training there is exactly one button on screen at a time, and the l
 - **Weight** — the same, for `weight` exercises.
 - **Holds and runs** (`timed` / `cardio`) — **nothing to type**. A big count-up clock replaces the stepper, beeps when it passes the target, and **keeps counting**. Asked for a 30 s plank and held it for a minute? DONE at 1:00 logs 60 seconds, and the next session is planned from that.
 
+**One limb at a time gets said out loud (`perSide`).** For a single-arm row, a side plank or a side-lying rotation, the prescription is **per side**: "2 × 15" means fifteen left *and* fifteen right. The plan line reads `reps per side`, a ↔️ banner sits on the card while you work, and for a per-side hold the clock's target covers **both** sides before it beeps. You log the set **once, when both sides are done** — the app doubles it behind the scenes for session totals, body-part volume and lifetime reps, while `bestReps` stays per side so it is still comparable with history. `timed` / `cardio` are never doubled: their number is measured across the whole set and already covers both sides. The flag is set by the AI when an exercise is generated, backfilled once over the existing catalog by `npm run gym:per-side`, and **overridable by hand** — Gym → Gear → tap the exercise → ↔️. Anything that alternates *within* the count ("alternating lunges", dead bug) is **not** per-side; there the number is already the total.
+
 **Not tapping NEXT is how you ask for more rest.** There is no "+30 s" button any more: the rest timer counts past zero and what gets learned (§18d) is the moment you actually tapped NEXT. Rest longer, and the app plans longer rests; get back to work early, and it packs more in.
 
 While you rest, the card says what NEXT will start — the next set, or the next exercise with its full prescription — so it is never a blind tap. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
@@ -549,7 +551,20 @@ Ids are slugs of the name, so **re-running is idempotent** — existing items ar
 
 ### 18l. Exercise demos — `npm run gym:demos`
 
-Every exercise can carry a **still image and a looping animation of the movement**, sourced from [ExerciseDB's free open endpoint](https://oss.exercisedb.dev/api/v1) — 1,500 exercises, **no API key and no account required**. We take only the handful that match exercises we actually own and re-host those ourselves, so the app never depends on their CDN and we never mirror a library we don't use.
+Every exercise can carry a **still image and a looping animation of the movement**, sourced from **three places, tried in order**. We take only the handful that match exercises we actually own and re-host those ourselves, so the app never depends on someone else's CDN and we never mirror a library we don't use.
+
+1. **[ExerciseDB's free open endpoint](https://oss.exercisedb.dev/api/v1)** — 1,500 exercises, **no API key and no account required**, a real GIF of the movement.
+2. **[free-exercise-db](https://github.com/yuhonas/free-exercise-db)** — 873 exercises, public domain (Unlicense), one static JSON file on GitHub, no key and no rate limit. It has **no GIFs**: every entry is two photos, the **start and the end** of the movement, which the script turns into a **two-frame animation** (1 s a frame). Less pretty than a GIF, but it covers basics the free ExerciseDB tier simply does not have — `superman`, `dead bug`, `arm circles`, `plank`, `glute bridge` — and a two-photo demo of the right movement beats an emoji.
+
+3. **The open web** — a **Giphy search**, for the moves neither library has. Giphy because its search page is plain server-rendered HTML: an image-search page is JavaScript and has nothing to fetch, and Giphy's own API answers `403 BANNED` to the old public demo key.
+
+**Each source only sees what the one before it could not match**, so nothing already animated is downgraded to a flip or a stranger's GIF. Source 2's rows are reshaped into ExerciseDB's field names (muscles → body parts, `body only` → `body weight`) so the scoring, the shortlist and the AI tie-breaker below work on it unchanged. `--no-photos` and `--no-web` skip sources 2 and 3.
+
+**Source 3's results are mostly garbage, and that is the interesting part.** A search for *"bird dog exercise"* returns, in order: a beagle on a treadmill, an Angry Birds cartoon, a band called BirdDog — and, **eighth**, an actual demonstration. Titles cannot separate those (*"dogs bird GIF"* vs *"Bird Dog Calisthenics GIF"*) and no text score ever will. **So the model looks at them**: three frames of each of the top 6 are written to disk and the claude CLI is asked to *read the images* and name the one that shows the movement with correct form — or answer none, which it is told is the more common right answer. That is the §18l rule applied to a worse source, so **`--no-ai` disables source 3 completely** rather than falling back to a text guess: nothing from the open web is ever taken unseen. What it finds is a stranger's GIF re-hosted for one family's app; the source URL is recorded on the demo and Gear removes a bad one in a tap.
+
+**Hand-picked GIFs are thinned to fit the budget.** The libraries ship ~30-frame line-art loops; a real phone video from the web is 77 frames and 3.4 MB, which converts to ~150 KB — seven times the budget for something the eye cannot tell from a sixth of the frames. So any source with more than 14 frames keeps every Nth and gives each survivor the airtime of the frames it replaced, preserving the true speed. Bird dog: 3.4 MB → **23 KB, 13 frames**.
+
+⚠️ **Overwriting a file in Firebase Storage rotates its download token**, so a demo URL changes when it is re-run. The catalog always holds the current one; don't bookmark them.
 
 **Two files per exercise, and the split is the data budget.** Their GIFs are 180×180 / ~67 KB; we store a **~21 KB animated WebP** (the movement) plus a **~2 KB still** (one frame). A list of ten exercises renders only stills (~20 KB); the animation is fetched when you are actually looking at that one movement. The service worker then caches both **CacheFirst for a year** (`gym-demos` cache, see `vite.config.ts`), so a second view transfers nothing and works with no signal at all. ~120 exercises ≈ 2.7 MB total.
 
@@ -574,27 +589,28 @@ Two bugs this design exists to prevent, both of which shipped in earlier drafts 
 - A numeric accept-threshold matched **"Wall sit" → *"march sit (wall)"*** and **"Pike push-ups" → *"side push-up"***. The scored auto-accept is gone.
 - Treating `weighted` as a filler word matched **"Pull-ups" → *"weighted pull-up"*** and **"Bodyweight squats" → *"weighted squat"*** — loaded movements prescribed as bodyweight ones. `weighted` is now significant, and the exact-name shortcut also requires equipment agreement.
 
-**Coverage is partial, and that is a data limit rather than a matching bug.** Verified against the downloaded index: the free 1,500-row tier contains **no** plain `plank`, `squat`, `glute bridge`, `wall sit`, `bird dog`, `jumping jack`, `arm circle` or `hollow hold`. On the 20 built-in bodyweight moves it matches **12** (4 of them flagged approximate). Gear exercises do much better — standard names like "dumbbell bench press" and "dumbbell lateral raise" hit exactly.
+**Coverage is partial, and that is a data limit rather than a matching bug.** Verified against the downloaded indexes: the free 1,500-row ExerciseDB tier contains **no** plain `plank`, `squat`, `glute bridge`, `wall sit`, `bird dog`, `jumping jack`, `arm circle` or `hollow hold` — source 2 covers `plank`, `superman`, `dead bug`, `arm circles` and `glute bridge`, and **neither** has `bird dog`, `hollow hold`, `wall sit` or `jumping jacks`. Gear exercises do much better than either — standard names like "dumbbell bench press" and "dumbbell lateral raise" hit exactly.
 
-#### If coverage isn't good enough — the options, and what they actually buy
+#### If coverage still isn't good enough — the remaining options, and what they actually buy
 
 Not decided; recorded so the research isn't repeated. **Do nothing until the real basement catalog exists** — gear exercises match well already, so the gap may not be worth acting on.
 
 | Option | Exercises | Media | Cost / friction |
 |---|---|---|---|
-| **Free tier** (current) | 1,500 | 180p GIF | none — no key, no account |
+| **ExerciseDB free tier** (source 1) | 1,500 | 180p GIF | none — no key, no account |
+| **free-exercise-db** (source 2) | 873 | 2 static JPGs (start/end) | none — public domain, no key, no rate limit |
 | **ExerciseDB v1 paid** | ~2,000 | GIF to 1080p, extra metadata | RapidAPI subscription |
 | **ExerciseDB v2 paid** | 11,000+ | images + **MP4, no GIFs** | separate subscription; free tier is watermarked |
-| **free-exercise-db** | 873 | 2 static JPGs (start/end) | none — public domain, no key, no rate limit |
 
 - **The v1 key is already supported in code**: set `EXERCISEDB_KEY` (or `--key=`) and the script switches host, adds the `X-RapidAPI-Key`/`X-RapidAPI-Host` headers, drops the request spacing and caches to a separate index file — same pagination, same response shape, nothing else to change. **But it is only ~500 more exercises**, so it is unlikely to contain the missing basics. (An earlier draft of this document claimed that key was the 11,000-exercise tier. It is not — that is v2, a different subscription.)
 - **v2 is the only tier with the full library**, but it serves MP4 rather than GIF, so adopting it means changing the media pipeline (§18l's animated-WebP conversion assumes a GIF input) and its free tier watermarks the assets.
-- **[yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db) is the cheapest way to close the specific gaps.** Public domain, one static JSON file, no key and no rate limit. Checked against our actual misses: it **has** `plank`, `arm circles`, `superman` and `glute bridge` — four of the eight — and still lacks `wall sit`, `bird dog`, `jumping jack` and `hollow hold`. It ships two photos per exercise (start and end position) instead of an animation; alternating those two frames reads as a movement demo. It would slot in as a **secondary source consulted only for exercises the primary can't cover**, reusing the same scoring, the same `ExerciseDemo` record and the same `close`/null honesty rules.
+- **free-exercise-db is already in** (source 2 above), which was the cheapest way to close the specific gaps, and **the web search (source 3) covers what it missed** — `bird dog`, `wall sit` and `hollow body rock` all have real animations now, found and vision-checked automatically. `hollow hold`, `jumping jacks` and `skater jumps` are still emoji: the model looked at what came back and honestly answered "none of these".
+- **`--gif=<ourId>:<url>` is the hand-picked door**, and it is deliberately manual. Scraping an image search is not an option — those pages are JavaScript, so there is nothing to fetch — and picking a demo that shows *correct form* is a judgement call, which is the same reason scoring never auto-accepts. You copy the image address, the script does the rest: GIF, WebP, PNG, JPG or SVG, resized to 180px and converted into the identical `anim` + `poster` pair a library match produces, recorded as `manual` with the host as its attribution. Bird dog currently uses [Birddog_exercise.svg](https://commons.wikimedia.org/wiki/File:Birddog_exercise.svg) (Pk0001, CC BY-SA 4.0) this way — a still drawing, not an animation. Check anything you paste is licensed for use.
 
 The floor under all of this: an exercise with no honest demo keeps its emoji, which is a supported state, not a defect.
 
 The 20 built-in bodyweight moves are covered too: they live in **`src/logic/gymStarters.json`**, imported by both `src/logic/gym.ts` and the script, so there is one list and no drift. A built-in that finds a demo is written back to the catalog as an override row — the same mechanism the Gear tab uses to edit one.
 
-Re-runnable and idempotent: exercises that already have a demo are skipped unless `--refresh`. Flags: `--dry-run`, `--refresh`, `--reindex`, `--only=<id>`, `--pin=<ourId>:<theirId>` (force a specific ExerciseDB id), `--to=storage|public`, `--no-ai`, `--key=`. In the app, **Gear → an exercise** plays its demo, names the ExerciseDB entry it came from, and offers a one-tap **"Wrong movement — remove it"**. Attribution is shown wherever demos appear.
+Re-runnable and idempotent: exercises that already have a demo are skipped unless `--refresh`. Flags: `--dry-run`, `--refresh`, `--reindex`, `--only=<id>`, `--pin=<ourId>:<theirId>` (force a specific ExerciseDB id), `--to=storage|public`, `--no-ai`, `--no-photos`, `--no-web`, `--gif=<ourId>:<url>`, `--key=`. In the app, **Gear → an exercise** plays its demo, names the library and the entry it came from, and offers a one-tap **"Wrong movement — remove it"**. Attribution is shown wherever demos appear.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

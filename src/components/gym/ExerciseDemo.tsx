@@ -86,7 +86,7 @@ export function DemoCaption({ demo }: { demo?: Demo }) {
 export function DemoCredit() {
   return (
     <p className="muted" style={{ fontSize: 10, textAlign: 'center', marginTop: 14 }}>
-      Exercise animations from ExerciseDB (oss.exercisedb.dev)
+      Exercise animations from ExerciseDB (oss.exercisedb.dev) and free-exercise-db
     </p>
   )
 }

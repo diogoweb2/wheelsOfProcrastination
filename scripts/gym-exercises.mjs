@@ -106,6 +106,7 @@ Answer with ONLY a JSON array, no prose and no markdown fence:
     "restSec": 30-180,
     "defaultReps": number,         // reps; SECONDS for kind "timed"; MINUTES for kind "cardio"
     "defaultSets": 2-5,
+    "perSide": true | false,       // true if ONE limb works at a time (single-arm row, side plank, split squat) — defaultReps is then per side
     "kidSafe": true | false,       // safe for the 12-year-old: no heavy spinal loading, simple form, low injury risk
     "backRisk": true | false,      // true if it meaningfully loads the lower back / spine
     "ladder": true | false,        // true ONLY for bodyweight staples worth a rep-ladder game (push-ups, pull-ups, dips, squats)
@@ -116,6 +117,7 @@ Answer with ONLY a JSON array, no prose and no markdown fence:
 Rules that matter:
 - Only reference equipment from the list. Never invent gear, and never assume a rack, cables or machines that aren't there.
 - Respect the room. If the ceiling is low, nothing standing overhead with a bar.
+- "perSide" is about one limb at a time, not about symmetry. A single-arm row, a side plank, a Bulgarian split squat, a side-lying rotation: true. Anything that alternates within the count ("alternating lunges") or works both limbs together (squat, bench press, plank): false.
 - Be accurate about backRisk and kidSafe — they are HARD FILTERS, not hints. An exercise marked backRisk is never shown to him; one marked kidSafe:false is never shown to the boy.
 - "how" is read mid-set on a phone. Short, concrete, no theory.
 - Prefer standard, widely-used exercise names — the next step looks each one up in an exercise-demo library, and an invented name will not be found.`
@@ -207,6 +209,7 @@ async function main() {
       restSec: Math.min(240, Math.max(15, Number(raw.restSec) || 60)),
       defaultReps: Math.max(1, Number(raw.defaultReps) || 10),
       defaultSets: Math.min(5, Math.max(1, Number(raw.defaultSets) || 3)),
+      perSide: raw.perSide === true,
       kidSafe: raw.kidSafe !== false,
       backRisk: raw.backRisk === true,
       ladder: raw.ladder === true,
@@ -227,7 +230,7 @@ async function main() {
     const gear = a.def.equipmentIds.length
       ? ` [${a.def.equipmentIds.map((id) => equipment.find((e) => e.id === id)?.name).join(' + ')}]`
       : ' [bodyweight]'
-    console.log(`   ${a.def.emoji} ${a.def.name}${gear}${a.def.backRisk ? ' ⚠️ back' : ''}${!a.def.kidSafe ? ' (not Ben)' : ''}`)
+    console.log(`   ${a.def.emoji} ${a.def.name}${gear}${a.def.perSide ? ' ↔️ per side' : ''}${a.def.backRisk ? ' ⚠️ back' : ''}${!a.def.kidSafe ? ' (not Ben)' : ''}`)
     if (a.why) console.log(`      ${a.why}`)
   }
   console.log(`\n   ${withGear.length} use equipment (${combos.length} combine more than one) · ${bodyweight.length} bodyweight`)

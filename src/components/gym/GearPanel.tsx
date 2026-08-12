@@ -293,24 +293,70 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment) => void; o
 
 // --- exercises --------------------------------------------------------------
 
+const KINDS = ['bodyweight', 'weight', 'timed', 'cardio'] as const
+const KIND_LABEL: Record<ExerciseDef['kind'], string> = {
+  bodyweight: 'Reps',
+  weight: 'Weight',
+  timed: 'Seconds',
+  cardio: 'Minutes',
+}
+/** The word for what `defaultReps` counts under a given kind. */
+function amountWord(kind: ExerciseDef['kind']): string {
+  return kind === 'timed' ? 'seconds' : kind === 'cardio' ? 'minutes' : 'reps'
+}
+/** Reps and seconds are not the same number: 12 reps ≈ 40s, 40s ≈ 12 reps. */
+function convertAmount(n: number, from: ExerciseDef['kind'], to: ExerciseDef['kind']): number {
+  const secs = (k: ExerciseDef['kind']) => k === 'timed'
+  const mins = (k: ExerciseDef['kind']) => k === 'cardio'
+  if (mins(from) === mins(to) && secs(from) === secs(to)) return n
+  if (mins(to)) return Math.max(1, Math.round(secs(from) ? n / 60 : 5))
+  if (secs(to)) return Math.max(5, Math.round(mins(from) ? n * 60 : n * 3.5))
+  return Math.max(1, Math.round(secs(from) ? n / 3.5 : mins(from) ? n * 17 : n))
+}
+
 function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => void }) {
   const { data, gymCatalog, gymRateExercise, gymSetExerciseNote } = useStore()
   const [filter, setFilter] = useState<BodyPart | 'all'>('all')
+  const [query, setQuery] = useState('')
   const [open, setOpen] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const unit = data.gym.brief.weightUnit ?? 'lb'
 
   const list = useMemo(() => allExercises(gymCatalog), [gymCatalog])
-  const shown = list.filter((e) => !e.retired && (filter === 'all' || e.parts.includes(filter)))
+  // typing beats tapping once the list is long — match the name first, then the
+  // body parts, so "legs" finds the squats even if the word isn't in the name
+  const q = query.trim().toLowerCase()
+  const matches = (e: ExerciseDef) =>
+    !q || e.name.toLowerCase().includes(q) || e.parts.some((p) => PART_LABEL[p].toLowerCase().includes(q))
+  const shown = list.filter((e) => !e.retired && (filter === 'all' || e.parts.includes(filter)) && matches(e))
   const retiredCount = list.filter((e) => e.retired).length
+
+  // built-in moves live in code, so editing one means storing an override with
+  // the same id — allExercises lets the stored copy win
+  const patch = (e: ExerciseDef, fields: Partial<ExerciseDef>) =>
+    save((c) => ({
+      ...c,
+      exercises: c.exercises.some((x) => x.id === e.id)
+        ? c.exercises.map((x) => (x.id === e.id ? { ...x, ...fields } : x))
+        : [...c.exercises, { ...e, ...fields }],
+    }))
 
   return (
     <>
+      <div className="field" style={{ marginBottom: 10 }}>
+        <input
+          type="search"
+          value={query}
+          placeholder="🔎 Search exercises…"
+          onChange={(ev) => setQuery(ev.target.value)}
+        />
+      </div>
+
       <div className="gym-chip-row gym-chip-row--wrap" style={{ marginBottom: 10 }}>
         <button className={`chip chip--tap ${filter === 'all' ? 'on' : ''}`} onClick={() => { sfx.click(); setFilter('all') }}>
-          All {list.filter((e) => !e.retired).length}
+          All {list.filter((e) => !e.retired && matches(e)).length}
         </button>
-        {ALL_PARTS.filter((p) => list.some((e) => !e.retired && e.parts.includes(p))).map((p) => (
+        {ALL_PARTS.filter((p) => list.some((e) => !e.retired && e.parts.includes(p) && matches(e))).map((p) => (
           <button key={p} className={`chip chip--tap ${filter === p ? 'on' : ''}`} onClick={() => { sfx.click(); setFilter(p) }}>
             {PART_LABEL[p]}
           </button>
@@ -343,7 +389,7 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                     <ExerciseDemo demo={e.demo} emoji={e.emoji} size={140} autoPlay />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="muted" style={{ fontSize: 11, lineHeight: 1.45 }}>
-                        Shown as <strong>“{e.demo.sourceName}”</strong> in ExerciseDB
+                        Shown as <strong>“{e.demo.sourceName}”</strong> in {e.demo.source}
                         {e.demo.match === 'exact'
                           ? ''
                           : e.demo.match === 'ai'
@@ -359,12 +405,7 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                           sfx.click()
                           // wrong movement shown = worse than no picture, so this
                           // is a one-tap removal rather than a re-run of the script
-                          save((c) => ({
-                            ...c,
-                            exercises: c.exercises.some((x) => x.id === e.id)
-                              ? c.exercises.map((x) => (x.id === e.id ? { ...x, demo: undefined } : x))
-                              : [...c.exercises, { ...e, demo: undefined }],
-                          }))
+                          patch(e, { demo: undefined })
                         }}
                       >
                         🚫 Wrong movement — remove it
@@ -411,18 +452,61 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                   />
                 </div>
 
+                <div className="field" style={{ marginBottom: 8 }}>
+                  <label>Measured in</label>
+                  <div className="seg">
+                    {KINDS.map((k) => (
+                      <button
+                        key={k}
+                        className={e.kind === k ? 'on' : ''}
+                        onClick={() => {
+                          sfx.click()
+                          if (k === e.kind) return
+                          // the unit changes what the number MEANS, so carry the
+                          // typical amount over as a sane default for the new unit
+                          patch(e, { kind: k, defaultReps: convertAmount(e.defaultReps, e.kind, k) })
+                        }}
+                      >
+                        {KIND_LABEL[k]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="field" style={{ marginBottom: 8 }}>
+                  <label>Typical {amountWord(e.kind)} per set{e.perSide ? ', per side' : ''}</label>
+                  <input
+                    type="number"
+                    defaultValue={e.defaultReps}
+                    key={`${e.id}-${e.kind}-${e.defaultReps}`}
+                    onBlur={(ev) => {
+                      const n = Math.max(1, Math.round(Number(ev.target.value) || 0))
+                      if (n !== e.defaultReps) patch(e, { defaultReps: n })
+                    }}
+                  />
+                  <span className="muted" style={{ fontSize: 11 }}>
+                    What the coach starts from — it still scales the number to the day.
+                  </span>
+                </div>
+
+                <button
+                  className={`btn btn--small ${e.perSide ? '' : 'btn--ghost'}`}
+                  style={{ marginBottom: 8 }}
+                  onClick={() => {
+                    sfx.click()
+                    // the library gets this right most of the time but not always,
+                    // and only the person doing the movement can settle it
+                    patch(e, { perSide: !e.perSide })
+                  }}
+                >
+                  {e.perSide ? '↔️ Reps are per side' : '↔️ Same reps both sides at once'}
+                </button>
+
                 <button
                   className="btn btn--ghost btn--small"
                   onClick={() => {
                     sfx.click()
-                    // built-in moves live in code, so retiring one means storing an
-                    // override with the same id — allExercises lets it win
-                    save((c) => ({
-                      ...c,
-                      exercises: c.exercises.some((x) => x.id === e.id)
-                        ? c.exercises.map((x) => (x.id === e.id ? { ...x, retired: true } : x))
-                        : [...c.exercises, { ...e, retired: true }],
-                    }))
+                    patch(e, { retired: true })
                   }}
                 >
                   🗄 Retire this exercise for everyone
@@ -432,6 +516,12 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
           </div>
         )
       })}
+
+      {q && shown.length === 0 && (
+        <p className="muted" style={{ fontSize: 12, textAlign: 'center', padding: '12px 0' }}>
+          Nothing matches “{query.trim()}”.{filter !== 'all' ? ' Try the All chip.' : ' Add it below?'}
+        </p>
+      )}
 
       {adding ? (
         <ExerciseForm
@@ -503,9 +593,9 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
       <div className="field">
         <label>Measured in</label>
         <div className="seg">
-          {(['bodyweight', 'weight', 'timed', 'cardio'] as const).map((k) => (
+          {KINDS.map((k) => (
             <button key={k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>
-              {k === 'bodyweight' ? 'Reps' : k === 'weight' ? 'Weight' : k === 'timed' ? 'Seconds' : 'Minutes'}
+              {KIND_LABEL[k]}
             </button>
           ))}
         </div>
@@ -534,7 +624,7 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
       )}
       <div className="gym-inputs">
         <div className="field"><label>Sets</label><input type="number" value={sets} onChange={(e) => setSets(Number(e.target.value) || 1)} /></div>
-        <div className="field"><label>Reps</label><input type="number" value={reps} onChange={(e) => setReps(Number(e.target.value) || 1)} /></div>
+        <div className="field"><label>{amountWord(kind) === 'reps' ? 'Reps' : amountWord(kind) === 'seconds' ? 'Seconds' : 'Minutes'}</label><input type="number" value={reps} onChange={(e) => setReps(Number(e.target.value) || 1)} /></div>
         <div className="field"><label>Rest (s)</label><input type="number" value={rest} onChange={(e) => setRest(Number(e.target.value) || 30)} /></div>
       </div>
       <div className="field">

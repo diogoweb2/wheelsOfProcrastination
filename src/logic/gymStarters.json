@@ -149,6 +149,7 @@
     "restSec": 40,
     "defaultReps": 30,
     "defaultSets": 2,
+    "perSide": true,
     "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
@@ -186,6 +187,7 @@
     "restSec": 40,
     "defaultReps": 16,
     "defaultSets": 3,
+    "perSide": true,
     "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
@@ -224,6 +226,14 @@
     "defaultReps": 25,
     "defaultSets": 3,
     "kidSafe": true,
+    "demo": {
+      "anim": "/gym/moves/bw-hollow.webp",
+      "poster": "/gym/moves/bw-hollow-poster.webp",
+      "source": "self.com",
+      "sourceId": "638a54f2135a7da3eb58934c",
+      "sourceName": "Hollow hold",
+      "match": "manual"
+    },
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },

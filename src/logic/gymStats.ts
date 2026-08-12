@@ -8,7 +8,7 @@
 // from the body-part filter and from direct labels on the marks.
 import type { BodyPart, GymSession, GymState } from '../types'
 import { addDays, dayKey, parseDay } from './dates'
-import { ALL_PARTS, daysSince } from './gym'
+import { ALL_PARTS, daysSince, loggedReps } from './gym'
 
 /** One completed exercise flattened out of the log — the row every aggregate is built from. */
 export interface StatRow {
@@ -30,10 +30,12 @@ export function flatten(sessions: GymSession[], part: BodyPart | 'all' = 'all'):
     for (const e of s.exercises) {
       if (e.skipped || e.sets.length === 0) continue
       if (part !== 'all' && !e.parts.includes(part)) continue
-      const reps = e.sets.reduce((n, x) => n + x.reps, 0)
+      const reps = loggedReps(e)
       const topWeight = Math.max(0, ...e.sets.map((x) => x.weight ?? 0))
       const topReps = Math.max(...e.sets.map((x) => x.reps))
-      const volume = e.sets.reduce((n, x) => n + x.reps * (x.weight && x.weight > 0 ? x.weight : 1), 0)
+      // volume follows the same both-sides rule as `reps`, so keep it in step with loggedReps
+      const sideMult = reps / Math.max(1, e.sets.reduce((n, x) => n + x.reps, 0))
+      const volume = e.sets.reduce((n, x) => n + x.reps * (x.weight && x.weight > 0 ? x.weight : 1), 0) * sideMult
       rows.push({ day: s.day, exId: e.exId, name: e.name, parts: e.parts, sets: e.sets.length, reps, topWeight, topReps, volume })
     }
   }
@@ -101,7 +103,7 @@ export function partSplit(sessions: GymSession[], days = 28, today = dayKey()): 
     if (s.day < cutoff) continue
     for (const e of s.exercises) {
       if (e.skipped || e.sets.length === 0) continue
-      const reps = e.sets.reduce((n, x) => n + x.reps, 0)
+      const reps = loggedReps(e)
       // a set counts once for the primary part; the rest get credit at half
       e.parts.forEach((p, i) => {
         const cur = tally.get(p) ?? { sets: 0, reps: 0 }

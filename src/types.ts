@@ -664,9 +664,11 @@ export interface Equipment {
 
 /**
  * The "what does this actually look like" media for one exercise, fetched by
- * `npm run gym:demos` from ExerciseDB (https://oss.exercisedb.dev) and re-hosted
- * on our own Firebase Storage — only the handful we actually use, never their
- * whole library.
+ * `npm run gym:demos` from ExerciseDB (https://oss.exercisedb.dev) or, for the
+ * moves it doesn't have, free-exercise-db (two photos — start and end of the
+ * movement — flipped into a two-frame animation). Either way it is re-hosted on
+ * our own Firebase Storage: only the handful we actually use, never a whole
+ * library.
  *
  * Two files per exercise on purpose: the poster (~2 KB) is what a list of ten
  * exercises loads, and the animation (~21 KB) is only fetched when you are
@@ -676,7 +678,7 @@ export interface Equipment {
 export interface ExerciseDemo {
   anim: string // animated webp — the movement
   poster: string // single still frame, for lists and as the animation's placeholder
-  source: string // attribution, e.g. "ExerciseDB"
+  source: string // attribution — "ExerciseDB" or "free-exercise-db"
   sourceId: string // their exerciseId, so a bad match can be re-pinned by hand
   sourceName: string // their name for it — this is what you check when a match looks wrong
   /**
@@ -701,6 +703,13 @@ export interface ExerciseDef {
   restSec: number // starting point; personal history overrides it once there is any
   defaultReps: number // reps, or seconds for 'timed', minutes for 'cardio'
   defaultSets: number
+  /**
+   * One limb at a time — a side-lying rotation, a single-arm row, a side plank.
+   * The prescribed reps are then PER SIDE, so "2 × 15" means 15 left and 15
+   * right. Only the wording and the rep tally change; the plan numbers stay as
+   * they are so history before and after this flag stays comparable.
+   */
+  perSide?: boolean
   kidSafe: boolean // safe for a 12-year-old (no heavy spinal loading, simple form)
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
@@ -748,6 +757,12 @@ export interface ExerciseMemory {
   suggestedWeight?: number // what to put in front of you next time
   lastAdjust?: 'up' | 'down' | 'same' // how the last suggestion landed — too light, too heavy, right
   restLearned?: number // rolling average of the rest you ACTUALLY took, seconds
+  /** Rolling average wall-clock seconds for ONE set of this, as YOU do it (both sides included). */
+  setSecLearned?: number
+  /** Rolling average seconds per rep — lets a 12-rep set be predicted from an 8-rep one. 'reps' kind only. */
+  repSecLearned?: number
+  /** How many measured sets those two averages are built from. Under ~3 they are still noisy. */
+  timedSets?: number
   bestReps?: number // best single set ever (seconds for 'timed')
   bestWeight?: number
   notes?: string // your own note; the coach reads it
@@ -787,9 +802,12 @@ export interface SessionExercise {
   restSec?: number // rest you actually took after it, seconds
   rating?: ExerciseRating // asked the first time you meet an exercise; editable later
   skipped?: boolean
+  perSide?: boolean // reps are per side; denormalised like `name` so old sessions read right
   ladder?: boolean
   ladderTest?: boolean // this one is a max-rep test — do as many as you can
   why?: string // the coach's reason, shown on the preview card
+  /** Measured seconds for one set of THIS prescription, from your own history. Beats the formula when set. */
+  paceSec?: number
   coins: number
 }
 

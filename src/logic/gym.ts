@@ -307,9 +307,46 @@ export function setSeconds(kind: ExerciseKind, reps: number): number {
   return Math.round(reps * 3.5)
 }
 
+/**
+ * Reps actually performed, counting BOTH sides for a one-limb-at-a-time move.
+ *
+ * The doubling only applies to exercises you count yourself. A clocked one
+ * (plank, run) is measured by the app across the whole set — left and right
+ * together — so its logged number already covers both sides.
+ */
+export function loggedReps(se: Pick<SessionExercise, 'kind' | 'perSide' | 'sets'>): number {
+  const raw = se.sets.reduce((n, x) => n + x.reps, 0)
+  const clocked = se.kind === 'timed' || se.kind === 'cardio'
+  return se.perSide && !clocked ? raw * 2 : raw
+}
+
+/**
+ * How long ONE set of `reps` really takes YOU, from the sets the app has clocked.
+ * Null until there is enough evidence — three measured sets — to beat the formula.
+ *
+ * This is the whole point of logging `sec` on every set: after a couple of weeks
+ * the time budget stops being a guess about a generic person and becomes yours.
+ */
+export function learnedSetSeconds(mem: ExerciseMemory | undefined, kind: ExerciseKind, reps: number): number | null {
+  if (!mem || (mem.timedSets ?? 0) < 3) return null
+  // seconds-per-rep generalises across prescriptions, so 12 reps can be predicted from 8
+  if (kind === 'reps' && mem.repSecLearned) return Math.round(mem.repSecLearned * reps)
+  // a clocked move IS its own duration; the learned average only adds the setup drag
+  if (kind === 'timed' || kind === 'cardio') {
+    const nominal = setSeconds(kind, reps)
+    return mem.setSecLearned ? Math.round(Math.max(nominal, mem.setSecLearned * 0.5 + nominal * 0.5)) : null
+  }
+  return mem.setSecLearned ?? null
+}
+
 /** Seconds this planned exercise will eat, rest and the walk-over included. */
 export function exerciseSeconds(se: SessionExercise): number {
-  const work = se.plan.reps.reduce((sum, r) => sum + setSeconds(se.kind, r), 0)
+  // a per-side move is prescribed per side, so every set is performed twice —
+  // but a measured pace already covers both sides, it was clocked end to end
+  const perSet = se.perSide ? 2 : 1
+  const work = se.paceSec
+    ? se.paceSec * se.plan.reps.length
+    : se.plan.reps.reduce((sum, r) => sum + setSeconds(se.kind, r) * perSet, 0)
   const rests = Math.max(0, se.plan.reps.length - 1) * se.plan.restSec
   return work + rests + 20 // 20s to walk over and set up
 }
@@ -521,6 +558,8 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     how: e.how,
     plan: { reps, weight, restSec: restFor(e, mem) },
     sets: [],
+    paceSec: learnedSetSeconds(mem, e.kind, reps[0]) ?? undefined,
+    perSide: e.perSide,
     ladder: !!ladder,
     ladderTest: isTest,
     coins: 0,
@@ -637,7 +676,8 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
     return se.rating ? { ...base, rating: se.rating, ratedAt: new Date().toISOString() } : base
   }
 
-  const reps = se.sets.reduce((s, x) => s + x.reps, 0)
+  const reps = loggedReps(se)
+  // best stays PER SIDE — it is compared against past sets of the same exercise
   const bestReps = Math.max(base.bestReps ?? 0, ...se.sets.map((x) => x.reps))
   const weights = se.sets.map((x) => x.weight ?? 0).filter((w) => w > 0)
   const lastWeight = weights.length > 0 ? Math.max(...weights) : base.lastWeight
@@ -660,8 +700,27 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
       ? clamp(Math.round(base.restLearned ? base.restLearned * 0.6 + se.restSec * 0.4 : se.restSec), REST_MIN, REST_MAX)
       : base.restLearned
 
+  // how long a set of this REALLY takes you. Sets the runner clocked (`sec`) are
+  // the only honest source; each one nudges the average by 30%, so a single slow
+  // day drifts it rather than rewriting it.
+  const timed = se.sets.filter((x) => (x.sec ?? 0) > 3 && (x.sec ?? 0) < 1800)
+  let setSecLearned = base.setSecLearned
+  let repSecLearned = base.repSecLearned
+  for (const s of timed) {
+    setSecLearned = Math.round(setSecLearned ? setSecLearned * 0.7 + s.sec! * 0.3 : s.sec!)
+    // `reps` is logged per side, and the clock ran across both — so seconds-per-rep
+    // here is per PRESCRIBED rep, which is exactly what a plan asks for
+    if (se.kind === 'reps' && s.reps > 0) {
+      const perRep = s.sec! / s.reps
+      repSecLearned = round(repSecLearned ? repSecLearned * 0.7 + perRep * 0.3 : perRep)
+    }
+  }
+
   return {
     ...base,
+    setSecLearned,
+    repSecLearned,
+    timedSets: (base.timedSets ?? 0) + timed.length,
     rating: se.rating ?? base.rating,
     ratedAt: se.rating ? new Date().toISOString() : base.ratedAt,
     timesDone: base.timesDone + 1,
