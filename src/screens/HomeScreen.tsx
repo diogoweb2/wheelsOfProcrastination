@@ -15,6 +15,21 @@ import { sfx } from '../audio'
 const HOLD_MS = 320 // press-and-hold before the grid enters arrange mode
 const SLOP = 12 // px of movement that means "this is a scroll, not a hold"
 
+/**
+ * Eat the one click a touch tap fires after pointerup, so it can't reach the
+ * screen that just replaced the icon grid under the finger.
+ */
+function swallowNextClick() {
+  const kill = (e: MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    window.clearTimeout(timer)
+  }
+  window.addEventListener('click', kill, { capture: true, once: true })
+  // no click came (mouse, or the browser skipped it) — stop listening
+  const timer = window.setTimeout(() => window.removeEventListener('click', kill, { capture: true }), 700)
+}
+
 export function HomeScreen({
   onOpen,
   badges,
@@ -276,6 +291,11 @@ function IconGrid({
     if (arrange) return // in edit mode a tap does nothing — tap Done to leave
     if (h && !h.moved) {
       sfx.click()
+      // The tap opens the app on pointerup, but the browser still fires its
+      // synthesized click afterwards — and by then the app's screen is under
+      // the finger. Without this it would tap right through (it was ticking
+      // off must-dos on the spin page). Swallow that one stray click.
+      swallowNextClick()
       onOpen(id)
     }
   }
