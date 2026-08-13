@@ -53,6 +53,13 @@ export const DUEL_REWARD = 25
 export const SOLO_REWARD = 8
 export const SOLO_REWARD_LIMIT = 3
 /**
+ * How many training-hall matches a crewmate may START in a day, before the hall
+ * closes until tomorrow. The captain can raise or lower it per crewmate from the
+ * Parent app (`settings.soloDuelLimit`); this is only the factory setting.
+ * 0 means the training hall is shut.
+ */
+export const SOLO_PLAY_LIMIT_DEFAULT = 2
+/**
  * The Grand Line storm. From this turn on, every hit does double damage — the
  * hard guarantee that a match ends inside ten minutes no matter how defensively
  * both sides play. It also makes the late game genuinely tense, which a slow

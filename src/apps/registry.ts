@@ -215,6 +215,7 @@ export const APPS: AppDef[] = [
     adminOnly: true,
     tabs: [
       { id: 'freezes', label: 'Freezes', icon: '🧊' },
+      { id: 'limits', label: 'Limits', icon: '⏳' },
       { id: 'academies', label: 'Quizzes', icon: '🎓' },
       { id: 'prizes', label: 'Prizes', icon: '🎁' },
       { id: 'audit', label: 'Audit', icon: '📜' },

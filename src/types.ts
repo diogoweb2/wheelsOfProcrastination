@@ -154,6 +154,11 @@ export interface Settings {
   lastGoalPromptDay?: string // YYYY-MM-DD — the periodic "check your streak goal" nudge throttle
   /** Home-screen icon order (app ids). Unknown/new apps append at the end. */
   homeOrder?: string[]
+  /**
+   * Training-hall matches (card game vs the AI) allowed per day. Set by the
+   * captain in the Parent app; undefined means SOLO_PLAY_LIMIT_DEFAULT.
+   */
+  soloDuelLimit?: number
 }
 
 /** One device registered for web push, so a closed app can still be reached. */
@@ -502,6 +507,8 @@ export interface DuelStats {
   /** Solo wins are only paid for the first few each day — this is the day they count for. */
   soloDay: string | null // YYYY-MM-DD
   soloWins: number
+  /** Training-hall matches STARTED on soloDay, capped by settings.soloDuelLimit. */
+  soloPlays: number
   /** Duel ids already counted into wins/losses, so a re-sync can't double-count them. */
   settled: string[]
 }

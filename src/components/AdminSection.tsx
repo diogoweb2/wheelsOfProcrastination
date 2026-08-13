@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
 import { activeQuestions, correctAnswerText, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
+import { SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { QuizSession } from './QuizSession'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
@@ -39,6 +40,8 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
       <div className="h2">🛠️ Captain’s desk</div>
 
       {tab === 'freezes' && <FreezeDesk />}
+
+      {tab === 'limits' && <ScreenLimits />}
 
       {tab === 'audit' && <AuditLog />}
 
@@ -86,6 +89,69 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
         </>
       )}
     </>
+  )
+}
+
+/**
+ * How much of the card game each crewmate may play against the AI in a day.
+ * Set per crewmate, because Ben and Diogo don't need the same leash. Live duels
+ * between the two of them are deliberately NOT capped — those are the social
+ * ones, and they cost the other person's time to start.
+ */
+function ScreenLimits() {
+  const { data, kidData, kidDataFresh, setSettings, setSettingsFor } = useStore()
+  const rows: { who: string; targetId: string; world: AppData | null; ready: boolean }[] = [
+    { who: '⚔️ Ben', targetId: KID_ID, world: kidData, ready: !!kidData && kidDataFresh },
+    { who: '🏴‍☠️ Me', targetId: PARENT_ID, world: data, ready: true },
+  ]
+
+  function setCap(targetId: string, next: number) {
+    sfx.click()
+    const capped = Math.max(0, Math.min(20, next))
+    if (targetId === PARENT_ID) setSettings({ soloDuelLimit: capped })
+    else setSettingsFor(targetId, { soloDuelLimit: capped })
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ fontWeight: 900, marginBottom: 4 }}>🃏 Card game vs the AI</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        Training-hall matches allowed per day, each. A match counts when it starts, win, lose or quit — so backing out
+        isn’t a free retry. Set 0 to shut the hall. Live duels between you two stay unlimited.
+      </p>
+      {rows.map(({ who, targetId, world, ready }) => {
+        const cap = world?.settings.soloDuelLimit ?? SOLO_PLAY_LIMIT_DEFAULT
+        const usedToday = world && world.duel.soloDay === dayKey() ? world.duel.soloPlays : 0
+        return (
+          <div
+            key={targetId}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--line)', padding: '10px 0' }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>{who}</div>
+              <div className="muted" style={{ fontSize: 11 }}>
+                {!ready ? 'loading from the cloud…' : `played ${usedToday} today · ${Math.max(0, cap - usedToday)} left`}
+              </div>
+            </div>
+            <button className="btn btn--ghost btn--small" disabled={!ready || cap <= 0} onClick={() => setCap(targetId, cap - 1)}>
+              −
+            </button>
+            <b style={{ minWidth: 26, textAlign: 'center', fontSize: 16 }}>{cap}</b>
+            <button className="btn btn--ghost btn--small" disabled={!ready || cap >= 20} onClick={() => setCap(targetId, cap + 1)}>
+              +
+            </button>
+            <button
+              className="btn btn--small"
+              disabled={!ready || cap === SOLO_PLAY_LIMIT_DEFAULT}
+              title={`Back to the default ${SOLO_PLAY_LIMIT_DEFAULT} a day`}
+              onClick={() => setCap(targetId, SOLO_PLAY_LIMIT_DEFAULT)}
+            >
+              ↩︎ {SOLO_PLAY_LIMIT_DEFAULT}
+            </button>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

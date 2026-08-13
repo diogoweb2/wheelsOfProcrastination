@@ -79,6 +79,7 @@ import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../l
 import {
   DECK_SIZE,
   DUEL_REWARD,
+  SOLO_PLAY_LIMIT_DEFAULT,
   SOLO_REWARD,
   SOLO_REWARD_LIMIT,
   applyMove,
@@ -419,6 +420,10 @@ interface StoreState {
   settleDuels: () => void
   /** Log a solo match against the training dummy. Returns the Berries it paid. */
   recordSoloResult: (won: boolean) => number
+  /** Training-hall matches left today: the captain's daily cap minus the ones already started. */
+  soloPlaysLeft: () => number
+  /** Spend one training-hall play. False (and nothing spent) when today's cap is used up. */
+  spendSoloPlay: () => boolean
 
   // --- Chess & Checkers (the 🎮 Games folder) ---
   /** Challenge the other crewmate to a board game. One live match per game at a time. */
@@ -441,6 +446,8 @@ interface StoreState {
   equipBackground: (id: string | null) => void
   setStreakGoal: (goal: number) => void
   setSettings: (patch: Partial<AppData['settings']>) => void
+  /** Admin: change a crewmate's settings (Ben's world included). */
+  setSettingsFor: (targetId: string, patch: Partial<AppData['settings']>) => void
 
   // --- gym (the 💪 Training Deck) ---
   /**
@@ -2119,6 +2126,30 @@ export const useStore = create<StoreState>((set, get) => {
       )
     },
 
+    soloPlaysLeft() {
+      const { data } = get()
+      const cap = data.settings.soloDuelLimit ?? SOLO_PLAY_LIMIT_DEFAULT
+      const played = data.duel.soloDay === dayKey() ? data.duel.soloPlays : 0
+      return Math.max(0, cap - played)
+    },
+
+    // The cap is spent when a match STARTS, not when it ends — otherwise backing
+    // out of a losing board would be a free retry.
+    spendSoloPlay() {
+      if (get().soloPlaysLeft() <= 0) return false
+      const today = dayKey()
+      commit((d) => {
+        const freshDay = d.duel.soloDay !== today
+        d.duel.soloDay = today
+        if (freshDay) {
+          d.duel.soloWins = 0
+          d.duel.soloPlays = 0
+        }
+        d.duel.soloPlays += 1
+      })
+      return true
+    },
+
     recordSoloResult(won) {
       const today = dayKey()
       const { data } = get()
@@ -2130,6 +2161,8 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         d.duel.soloDay = today
         d.duel.soloWins = soloWins + (won ? 1 : 0)
+        // midnight can roll over mid-match; the new day starts with this match counted
+        if (freshDay) d.duel.soloPlays = 1
         if (pay > 0) {
           d.economy.gems += pay
           d.economy.totalGemsEarned += pay
@@ -2306,6 +2339,14 @@ export const useStore = create<StoreState>((set, get) => {
         Object.assign(d.settings, patch)
         setMuted(!d.settings.soundOn)
       })
+    },
+
+    setSettingsFor(targetId, patch) {
+      commitFor(targetId, (d) => {
+        Object.assign(d.settings, patch)
+      })
+      // muting only ever applies to THIS device's own login
+      if (get().activeProfileId === targetId) setMuted(!get().data.settings.soundOn)
     },
 
     // --- gym ----------------------------------------------------------------

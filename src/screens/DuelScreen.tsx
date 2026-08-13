@@ -8,6 +8,7 @@ import {
   DECK_SIZE,
   DUEL_REWARD,
   KOS_TO_WIN,
+  SOLO_PLAY_LIMIT_DEFAULT,
   SOLO_REWARD,
   SOLO_REWARD_LIMIT,
   STORM_TURN,
@@ -82,7 +83,10 @@ function FightTab() {
   const {
     data, duels, activeProfileId, profiles,
     challengeDuel, answerChallenge, playDuelMove, resignDuel, cancelDuel, recordSoloResult,
+    soloPlaysLeft, spendSoloPlay,
   } = useStore()
+  // recomputed every render off `data`, so it drops the moment a match starts
+  const playsLeft = soloPlaysLeft()
   const { deck, enough } = useDeck()
   const [solo, setSolo] = useState<{ state: DuelState; foe: AiOpponent } | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
@@ -168,6 +172,12 @@ function FightTab() {
   }, [board?.id, board?.status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function startSolo(foe: AiOpponent) {
+    // the cap is spent up front: quitting a match you're losing doesn't buy a retry
+    if (!spendSoloPlay()) {
+      sfx.error()
+      setMsg('The training hall is closed for today. Come back tomorrow! 🌙')
+      return
+    }
     banked.current = false
     setMsg(null)
     sfx.fanfare()
@@ -308,18 +318,31 @@ function FightTab() {
         </button>
       )}
 
-      <div className="duel-head">🏝️ Training hall</div>
+      <div className="duel-head">
+        🏝️ Training hall
+        <span className={playsLeft > 0 ? 'chip' : 'chip chip--urgent'} style={{ marginLeft: 8, fontSize: 11 }}>
+          {playsLeft > 0 ? `${playsLeft} left today` : 'closed until tomorrow'}
+        </span>
+      </div>
       <p className="muted" style={{ fontSize: 12, marginTop: -4 }}>
-        Practise any time. First {SOLO_REWARD_LIMIT} wins a day pay {SOLO_REWARD} Berries each.
+        {playsLeft > 0
+          ? `${playsLeft} match${playsLeft === 1 ? '' : 'es'} left today. First ${SOLO_REWARD_LIMIT} wins a day pay ${SOLO_REWARD} Berries each.`
+          : 'You’ve used all of today’s practice matches. Call out your crewmate instead — live duels don’t count.'}
       </p>
       {AI_OPPONENTS.map((foe) => (
-        <button key={foe.id} className="duel-foe" onClick={() => startSolo(foe)}>
+        <button
+          key={foe.id}
+          className="duel-foe"
+          disabled={playsLeft <= 0}
+          style={playsLeft <= 0 ? { opacity: 0.45 } : undefined}
+          onClick={() => startSolo(foe)}
+        >
           <span className="duel-foe-icon">{foe.emoji}</span>
           <span>
             <b>{foe.name}</b>
             <em>{foe.blurb}</em>
           </span>
-          <span className="duel-foe-go">▶</span>
+          <span className="duel-foe-go">{playsLeft > 0 ? '▶' : '🔒'}</span>
         </button>
       ))}
 
@@ -442,6 +465,7 @@ function DeckTab() {
 // --- rules ------------------------------------------------------------------
 
 function RulesTab() {
+  const cap = useStore((s) => s.data.settings.soloDuelLimit) ?? SOLO_PLAY_LIMIT_DEFAULT
   return (
     <div className="rules">
       <ol className="rules-steps">
@@ -536,6 +560,10 @@ function RulesTab() {
         <li>
           Beat a training-hall crew: <BerryCoin size={13} /> <b>{SOLO_REWARD} Berries</b> (first {SOLO_REWARD_LIMIT}{' '}
           wins each day)
+        </li>
+        <li>
+          The training hall opens <b>{cap} time{cap === 1 ? '' : 's'} a day</b> — a match counts the moment it starts,
+          win or lose. Live duels with your crewmate are unlimited. The captain sets the number.
         </li>
       </ul>
       <div className="duel-head">👆 On the board</div>

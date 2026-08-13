@@ -48,7 +48,7 @@ export function defaultData(): AppData {
     giftcards: [],
     bank: defaultBankState(),
     album: defaultAlbumState(),
-    duel: { wins: 0, losses: 0, deck: [], soloDay: null, soloWins: 0, settled: [] },
+    duel: { wins: 0, losses: 0, deck: [], soloDay: null, soloWins: 0, soloPlays: 0, settled: [] },
     games: {
       chess: { wins: 0, losses: 0, draws: 0 },
       checkers: { wins: 0, losses: 0, draws: 0 },
