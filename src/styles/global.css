@@ -2462,6 +2462,27 @@ input, select { font-family: inherit; }
 }
 .gym-quit { background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 900; color: var(--yellow); cursor: pointer; }
 
+/* --- wall clock (the one number the app can't measure for you) --- */
+.gym-wallclock {
+  flex: none; font-variant-numeric: tabular-nums; font-weight: 900;
+  font-size: 12px; color: var(--text); white-space: nowrap;
+}
+.gym-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.gym-title-row .gym-wallclock { font-size: 14px; color: var(--muted); }
+
+/* --- setup countdown (rest is over, the set hasn't started yet) --- */
+.gym-setup {
+  margin-top: 14px; padding: 10px 12px; border-radius: 12px;
+  background: var(--bg2); border: 2px solid var(--gold);
+}
+.gym-setup-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: 12px; font-weight: 900; color: var(--muted);
+}
+.gym-setup-head strong { font-size: 26px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.gym-setup-bar { height: 8px; margin-top: 8px; border-radius: 999px; background: var(--card2); overflow: hidden; }
+.gym-setup-bar span { display: block; height: 100%; background: var(--gold); border-radius: 999px; transition: width 200ms linear; }
+
 /* Planned sets as pills: filled = logged, outlined+gold = the one you're on. */
 .gym-set-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .gym-set {

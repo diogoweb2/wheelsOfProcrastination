@@ -29,6 +29,7 @@ import { coachReady } from '../../logic/gymCoach'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
+import { SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
@@ -49,6 +50,23 @@ function useElapsed(on: boolean): number {
     return () => clearInterval(t)
   }, [on])
   return secs
+}
+
+/**
+ * The time on the wall. A gym session eats time without you noticing — this is
+ * the one number the app can't measure for you, so it just shows it.
+ */
+function WallClock() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
+  return (
+    <span className="gym-wallclock">
+      🕒 {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    </span>
+  )
 }
 
 /** The exact reason the coach was skipped — verbatim, never rounded off to "something went wrong". */
@@ -125,7 +143,10 @@ function Setup() {
 
   return (
     <>
-      <div className="h2">💪 Today’s session</div>
+      <div className="gym-title-row">
+        <div className="h2" style={{ margin: 0 }}>💪 Today’s session</div>
+        <WallClock />
+      </div>
 
       {gym.streak.current > 0 && (
         <div className="card gym-streak">
@@ -366,11 +387,11 @@ function Preview({ session }: { session: GymSession }) {
 }
 
 // --- runner -----------------------------------------------------------------
-// GO → DONE → rest → NEXT → DONE → … Three buttons and no bookkeeping: the app
+// GO → DONE → rest → NEXT → 15s setup → DONE → … Three buttons and no bookkeeping: the app
 // times every set itself, so "how long did that actually take" is a measurement
 // rather than something you have to remember at the end.
 
-type Phase = 'ready' | 'working' | 'resting'
+type Phase = 'ready' | 'working' | 'resting' | 'setup'
 
 function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Banked) => void }) {
   const { data, gymLogSet, gymUndoSet, gymLogRest, gymRateInSession, gymSkip, gymAbandon } = useStore()
@@ -451,11 +472,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     else setFinishing(true)
   }
 
-  /** NEXT — rest is over (however long it really took); start the next set or exercise. */
+  /**
+   * NEXT — rest is over (however long it really took). What follows is NOT the
+   * set: it is 15s of setup time, so walking to the rack and loading it isn't
+   * measured as work. The rest that gets learned from is the rest you took, not
+   * the setup on top of it.
+   */
   const next = (restedSec: number) => {
     gymLogRest(current.exId, restedSec, current.plan.restSec)
     if (setsLeft > 0) {
-      begin()
+      setPhase('setup')
       return
     }
     if (isLast) {
@@ -463,8 +489,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       return
     }
     setIdx(idx + 1)
-    setStartedAt(Date.now())
-    setPhase('working')
+    setPhase('setup')
   }
 
   return (
@@ -477,6 +502,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           <span>
             Exercise {idx + 1} / {list.length} · set {Math.min(nextSetNo + 1, current.plan.reps.length)} / {current.plan.reps.length}
           </span>
+          <WallClock />
           <button
             className="gym-quit"
             onClick={() => {
@@ -552,6 +578,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               ))}
           </div>
 
+          {phase === 'setup' && <SetupCountdown onDone={begin} />}
+
           {phase === 'working' && isClocked(current) ? (
             // a plank or a run: no numbers to type, just a clock that keeps going
             // a per-side hold has to cover both sides before the bell makes sense
@@ -585,7 +613,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 begin()
               }}
             >
-              ▶️ GO
+              {phase === 'setup' ? '▶️ GO NOW' : '▶️ GO'}
             </button>
           )}
 
