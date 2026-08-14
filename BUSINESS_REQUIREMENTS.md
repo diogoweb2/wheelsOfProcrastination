@@ -42,7 +42,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
-| ✍️ **Essays** | *Ben:* Write · Words · Marked — *Diogo:* Desk · Topics · Words · Marked |
+| ✍️ **Essays** | *Ben:* Write · Ideas · Words · Marked — *Diogo:* Desk · Red pen · Topics · Words · Marked |
 | 💡 **Ideas** | Open · Done · New |
 | 🕐 **Clocks** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
@@ -648,7 +648,7 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.
 
-Code: `src/logic/essay.ts` (rules, grades, mark-up), `src/logic/essayAi.ts` (the four AI calls), `src/logic/openrouter.ts` (shared with the Gym coach), `src/screens/EssayScreen.tsx` + `src/components/essay/*`, push in `functions/index.js` (`onEssaysWrite`).
+Code: `src/logic/essay.ts` (rules, grades, mark-up), `src/logic/essayAi.ts` (the four AI calls), `src/logic/openrouter.ts` (shared with the Gym coach), `src/screens/EssayScreen.tsx` + `src/components/essay/*` (the red pen is `FocusReview.tsx`), push in `functions/index.js` (`onEssaysWrite`).
 
 ### 19a. Who is writing
 
@@ -689,8 +689,8 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 
 ### 19e. The loop
 
-1. **Hand it in.** Diogo gets a push and a banner.
-2. **The app's own rules run first, for free** (§19e-2) — capitals, spacing, "I", stray articles. The AI never has to be asked about those.
+1. **Hand it in — and the app checks its own rules before anyone else sees it** (§19e-4). Capitals, spacing, "I", stray articles: if any of those are open, the essay does not move. It comes straight back to Ben, instantly and for free, saying in as many words that *nobody has read it yet*. Only once the rules are clean does Diogo get a push and a banner.
+2. **The same rules keep running** (§19e-2) — on every hand-in and every time the desk opens the essay. The AI never has to be asked about them.
 3. **🤖 Mark it up — mechanics only.** The AI proofreads for exactly three things: **spelling**, **punctuation**, and **capital letters** (a lowercase "i", a sentence starting small, a name without its capital). It is told explicitly to say nothing about ideas, structure or clarity. Each note carries the **exact quote** to mark — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not marked; the note still shows. "It found nothing" is a real answer and is said out loud, so it can't be mistaken for "it never ran".
 4. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
 5. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
@@ -700,13 +700,22 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 
 **🔎 Go to it.** Every note that still has something to point at carries a button that scrolls the essay back into view and pulses the mark for three seconds. A note naming a word is useless if finding that word across four paragraphs is the reader's problem.
 
-**Two lists, not one.** The desk separates **🤖 the machine's marks** (spelling, punctuation, capitals — found by the AI, closed by the app, there only to be read or binned) from **✍️ my notes** (Diogo's own, with the full keep/reword/close controls). Sorted marks collapse behind a "show the N he already sorted" toggle, so the list is never a pile of things already dealt with.
+**Two lists, not one.** The desk separates **🤖 the machine's marks** (spelling, punctuation, capitals — found by the AI, closed by the app, there only to be read or binned) from **✍️ my notes** (Diogo's own, with the full keep/reword/close controls). Sorted marks collapse behind a "show the N he already sorted" toggle, so the list is never a pile of things already dealt with. Writing a note of his own is one button away — 🖍️ **Mark it by hand**, which is the Red pen tab (§19e-1).
 
 **It never hands him the answer.** A note is a *tip*, not a correction: point at the part of the word that's wrong, name the rule ("this one follows i-before-e"), or tell him what to do ("say it out loud slowly — one sound isn't written"). The prompt bans the corrected word four different ways, including spelling it out letter by letter, and **the app checks the output anyway**: any note containing the correct spelling is thrown away and replaced with a generic tip. One leak undoes the exercise — he only has to be handed a word once to stop working it out — and a blander note is a far smaller loss than a free answer. The same scrub runs on the fix-check verdicts. Canadian spellings are explicitly correct and never flagged.
 
-#### 19e-1. Adding a note: point, don't type
+#### 19e-1. Marking by hand — the 🖍️ Red pen (its own tab)
 
-A hand-written note used to mean retyping his sentence into a text box character for character — and a quote that doesn't match exactly never gets marked, so the fiddliest part of reviewing was also the part most likely to fail silently. Instead: **tap the first word, then tap the last word**. The same word twice is a one-word note. A 📌 button takes the whole paragraph. The quote is sliced straight out of his text, so it always matches. Then pick the kind and write the note.
+A hand-written note used to mean retyping his sentence into a text box character for character — and a quote that doesn't match exactly never gets marked, so the fiddliest part of reviewing was also the part most likely to fail silently. Instead: **tap the first word, then tap the last word**. The same word twice is a one-word note. A 📌 button takes the whole paragraph. The quote is sliced straight out of his text, so it always matches.
+
+**It is a mode, not a corner of the desk** — `/essay/pen`, its own tab next to Desk. Reviewing by hand is the one thing on that screen that wants the whole screen, and it is built to be fast:
+
+- **The text never leaves.** Nothing here navigates anywhere. The note form arrives as a **sheet from the bottom**, over his essay rather than instead of it; writing the note and closing it leaves you looking at the same paragraph with the new mark on it, ready for the next one.
+- **Every mark already on the essay is visible while marking** — the AI's, the app's rules', and Diogo's own, in their issue colour. That is the whole point: knowing what has already been said is what stops the same thing being said twice.
+- **Tapping an existing mark opens it** instead of starting a selection: what it says, who raised it, and the usual last word — ✏️ reword it, ✕ disagree, ✓ he fixed it, 🔎 find it. A tap anywhere else starts a new note, so one gesture does both jobs without a mode switch.
+- **A selection that lands on words that are already marked says so**, right in the form, above the box.
+- The kind of problem is a **row of chips**, one tap, not a dropdown.
+- **The desk and the red pen hold the same essay.** Opening one on the Desk and stepping across to the pen keeps it; the pen's own list is only there for a cold start (a bookmark straight to `/essay/pen`).
 
 **The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
 
@@ -727,7 +736,9 @@ A hand-written note used to mean retyping his sentence into a text box character
 
 **One note per rule per paragraph**, carrying the count ("there are 4 in this paragraph"), because a note is only useful while it still has something to point at — the mark simply moves to the next one as he fixes them. Rules must be **near-certain**: anything ambiguous ("a" before a `u`, a lowercase word after a comma) is deliberately left out rather than guessed at, since a false positive costs the reviewer a tap.
 
-**Disagreeing with a rule note settles it for good** (`dismissed`) rather than deleting it — the rules re-run on every open, so a deleted one would be back within the second.
+**The rules own their notes, and one pass keeps all three ends true** (`syncRuleNotes`): a rule that no longer fires **closes its note**, a rule that still fires **has its note's quote refreshed** so the mark moves on to the next offender, and a rule firing with no open note **gets one**. Closing on "does the rule still fire?" rather than "is the quoted text still there?" matters: fixing the one lowercase sentence-start a note pointed at used to leave that note open if any other paragraph happened to contain the same word — and with §19e-4 a note stuck open like that would be a locked door. Wording Diogo rewrote by hand is never overwritten: the rule owns the mark, the human owns the words.
+
+**Disagreeing with a rule note settles it for good** (`dismissed`) rather than deleting it — the rules re-run on every open, so a deleted one would be back within the second. It is also the escape hatch from §19e-4: a rule that is somehow wrong about his text is one tap from being out of his way.
 
 `scripts/essay-proofread.mts` runs the same rules over Firestore for essays written before the rules existed (`--write` to save; dry run by default). It imports `src/logic/proofreader.ts` directly, so there is no second copy to drift.
 
@@ -740,6 +751,20 @@ A hand-written note used to mean retyping his sentence into a text box character
 **Whole-word matching is not a nicety.** A note quoting the single letter "i" once matched the **i inside "life"**, so the app drew a red circle around a perfectly good word and told a 12-year-old to fix it. Quotes only match where their own edges are letters butting against non-letters. Apostrophes deliberately don't count as letters: quotes routinely start against one ("that's roblox"), and treating it as part of a word would make those quotes look absent — silently closing a note nobody fixed. Over-marking is recoverable; a vanished note is not.
 
 **Then, and only then, the spelling gate.** If words are *still* misspelled after the free pass, his send button spends an AI call to check, and refuses to pass the essay on while any spelling note stands. He is told how many are wrong and pointed back at the marks — never told what the words should be. That call **locks the button for five minutes**: it costs real money, and "send" is otherwise a free spellchecker to mash. The button counts the wait down and says why. Most rounds never reach this point, and cost nothing. Diogo's own check button has no limit.
+
+#### 19e-4. The rules gate — the app reads it before anybody else does
+
+**Nothing leaves Ben's hands while the app's own rules have something open.** His send button — the very first hand-in included — runs §19e-2 before it runs anything else, and if the rules find something, the essay does not move: no push to Diogo, no AI call, no round number. It comes straight back to him.
+
+The reasoning is the same as the rules' own: a missing capital has a right answer, so paying a model to find it and making a person carry it to the desk is absurd — and hearing about it two days later teaches nothing. It is also cheaper on the one resource that actually runs out, which is Diogo's evenings.
+
+- **He is told plainly that this is not the review.** "Nobody has read your essay yet. This is just the app checking the rules that always have the same answer — capital letters, spaces, full stops. Fix these, send it again, and *then* it gets read properly." The word "review" is kept for the thing a person does.
+- **The list is live, off the text in front of him** — not the saved copy. It shrinks as he types, and turns into "✅ All tidy — send it now" when it empties. That makes it feel like a spellchecker rather than a rejection.
+- **Each item also sits under the box it belongs to**, so "paragraph 3" never has to be worked out.
+- **Free, instant, offline, and unlimited.** There is no cooldown on it, because there is nothing to spend.
+- **The escape hatch is Diogo's** — a rule note he disagrees with is `dismissed` and never blocks again (§19e-2).
+
+Because rule notes are raised before anyone has read the essay, **they don't count as "it has been marked"**: an essay carrying nothing but rule notes cannot be sent back or graded, and the desk says so.
 
 ### 19f. The word bank — "My Words" (the 🔤 tab)
 

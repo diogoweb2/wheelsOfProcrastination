@@ -658,7 +658,7 @@ function AppBodyRouter({
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'essay':
-      return <EssayScreen tab={open.tab} />
+      return <EssayScreen tab={open.tab} setTab={setTab} />
     case 'ideas':
       return <IdeasScreen tab={open.tab} onDone={() => setTab('open')} />
     case 'logpose':

@@ -3645,10 +3645,76 @@ input, select { font-family: inherit; }
 }
 .essay-mark--span.is-done { border-bottom-style: dashed; }
 
-/* Word-picking mode: tap the first word, then the last one. */
-.wp-word { border-radius: 5px; padding: 1px 1px; cursor: pointer; }
-.wp-word:active { background: var(--card2); }
-.wp-word.is-anchor { background: var(--yellow); color: #3a2000; font-weight: 900; }
+/* ---------- 🖍️ the red pen: focus mode ---------- */
+/* His text is the screen. Every tap either starts a note or opens one, and the
+   text never scrolls away — the note sheets come up from the bottom over it. */
+
+/* Sticks just under the app header (which is sticky at the top of the page), so
+   who wrote it and how much is still open never scrolls away while marking. */
+.fw-head { position: sticky; top: calc(48px + env(safe-area-inset-top)); z-index: 15; margin-bottom: 8px; padding: 10px 12px; }
+.fw-hint { font-size: 12px; line-height: 1.4; margin: 0 0 10px; }
+.fw-text { padding-bottom: 90px; }
+
+.fw-part { font-size: 16px; line-height: 2; white-space: pre-wrap; margin: 0; }
+.fw-part--title { font-size: 19px; font-weight: 900; }
+
+.fw-word { border-radius: 5px; padding: 2px 1px; cursor: pointer; }
+.fw-word:active { background: var(--card2); }
+.fw-word.is-anchor { background: var(--yellow); color: #3a2000; font-weight: 900; }
+/* Same language as the read-back view: the mark's colour is its kind. */
+.fw-word--marked {
+  border-bottom: 2px solid var(--mark, var(--red));
+  background: rgb(255 255 255 / 7%);
+}
+.fw-word--marked sup { font-size: 9px; margin-left: 2px; }
+.fw-word--done { opacity: 0.5; border-bottom-style: dashed; }
+.fw-word.is-flash { animation: mark-flash 0.6s ease-in-out 5; scroll-margin: 40vh 0; }
+
+/* Half a note in progress — above the tab bar, in reach of a thumb. */
+.fw-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: var(--app-w);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--yellow);
+  color: #3a2000;
+  font-size: 13px;
+  font-weight: 900;
+}
+.fw-bar span { flex: 1; }
+.fw-bar .btn { color: #3a2000; border-color: #3a2000; }
+
+/* Kind of problem, picked with one tap instead of a dropdown. */
+.fw-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.fw-kind {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: var(--card2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+.fw-kind.is-on { background: var(--mark); border-color: var(--mark); color: #10230a; }
+
+/* What the machine already said about these exact words — the reason not to
+   write the same note a second time. */
+.fw-already {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--orange);
+  background: var(--card2);
+  font-size: 12px;
+  line-height: 1.4;
+}
 
 /* Word-bank quiz: one big tappable spelling per row. */
 .word-opt {

@@ -11,8 +11,9 @@ import { TopicsPanel } from '../components/essay/TopicsPanel'
 import { ReviewPanel } from '../components/essay/ReviewPanel'
 import { WordsPanel } from '../components/essay/WordsPanel'
 import { AskTopicPanel } from '../components/essay/AskTopicPanel'
+import { FocusReview } from '../components/essay/FocusReview'
 
-export function EssayScreen({ tab }: { tab: string }) {
+export function EssayScreen({ tab, setTab }: { tab: string; setTab: (tab: string) => void }) {
   const { activeProfileId } = useStore()
   const isParent = activeProfileId === PARENT_ID
 
@@ -21,7 +22,10 @@ export function EssayScreen({ tab }: { tab: string }) {
       {isParent ? (
         <>
           {tab === 'topics' && <TopicsPanel />}
-          {tab === 'desk' && <ReviewPanel />}
+          {tab === 'desk' && <ReviewPanel onPen={() => setTab('pen')} />}
+          {/* marking by hand is its own tab (§19e-1): the essay is shared state,
+              so stepping between the desk and the pen keeps the same one open */}
+          {tab === 'pen' && <FocusReview onDesk={() => setTab('desk')} />}
           {tab === 'words' && <WordsPanel readOnly />}
           {tab === 'marked' && <HistoryPanel />}
         </>

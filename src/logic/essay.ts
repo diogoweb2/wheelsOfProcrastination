@@ -1,7 +1,7 @@
 // Essay rules — everything that doesn't need the network or React.
 // Keep in sync with BUSINESS_REQUIREMENTS.md §19.
 import type { Essay, EssayComment, EssayGrade, EssayTopic, EssayWord, EssayWordTest } from '../types'
-import { proofread } from './proofreader'
+import { proofread, type RuleHit } from './proofreader'
 
 /** Best first. The list is also the order the "what each grade pays" table shows. */
 export const GRADES: EssayGrade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-']
@@ -63,9 +63,21 @@ export function openComments(essay: Essay): EssayComment[] {
   return essay.comments.filter((c) => c.status === 'open' && c.issue !== 'praise')
 }
 
-/** Nothing left to argue about — the essay can be graded. */
+/**
+ * Nothing left to argue about — the essay can be graded.
+ *
+ * The app's own rule notes deliberately don't count as "it has been marked":
+ * they are raised before anyone reads the essay (§19e-4), so an essay that
+ * arrives already tidy would otherwise look ready to grade before a single
+ * person or model had looked at it.
+ */
 export function readyToGrade(essay: Essay): boolean {
-  return essay.comments.length > 0 && openComments(essay).length === 0
+  return wasMarked(essay) && openComments(essay).length === 0
+}
+
+/** Has anything other than the built-in rules had its say on this essay yet? */
+export function wasMarked(essay: Essay): boolean {
+  return essay.comments.some((c) => c.source !== 'app')
 }
 
 /** Notes raised in the current round, newest round first — what the writer is looking at right now. */
@@ -129,8 +141,23 @@ export function containsQuote(text: string, quote: string): boolean {
   }
 }
 
-export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[] {
-  const spans: { start: number; end: number; comment: EssayComment }[] = []
+/** Where one note lands in one part of the text. */
+export interface MarkSpan {
+  start: number
+  end: number
+  comment: EssayComment
+}
+
+/**
+ * Every note's slice of this paragraph, in reading order and never overlapping.
+ *
+ * Both ways of showing a marked-up essay are built on this: the read-back view
+ * (which splits the text into plain and circled chunks) and the reviewer's focus
+ * mode (which needs to know, per word, whether something is already flagged
+ * there).
+ */
+export function markSpans(paragraph: string, comments: EssayComment[]): MarkSpan[] {
+  const spans: MarkSpan[] = []
   const taken: [number, number][] = []
 
   for (const c of comments) {
@@ -150,7 +177,11 @@ export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[]
     }
   }
 
-  spans.sort((a, b) => a.start - b.start)
+  return spans.sort((a, b) => a.start - b.start)
+}
+
+export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[] {
+  const spans = markSpans(paragraph, comments)
   const out: TextChunk[] = []
   let cursor = 0
   for (const s of spans) {
@@ -281,28 +312,84 @@ export function isMachineNote(c: EssayComment): boolean {
 }
 
 /**
- * Turn the built-in rules loose on an essay and return the notes that aren't
- * already on it.
+ * Re-run the built-in rules and make the note list say what they say right now.
  *
- * One note per rule per paragraph, and a rule the reviewer has already thrown
- * out (`dismissed`) never comes back — otherwise disagreeing with it would last
- * exactly until the next time anyone opened the essay.
+ * Three things happen in one pass, because they're the same question asked from
+ * different ends:
+ *
+ * - a rule that no longer fires **closes its note** — the exact test, rather
+ *   than "is the quoted text still there?", which got this wrong: fixing the
+ *   one lowercase sentence-start the note pointed at left the note open if any
+ *   other paragraph happened to contain that same word;
+ * - a rule that still fires **refreshes its note's quote**, so the mark moves on
+ *   to the next offender instead of pointing at text he already fixed. The
+ *   invariant is that an open note always has something visible to point at;
+ * - a rule that fires with no open note of its own **gets one**.
+ *
+ * One note per rule per part throughout. A rule the reviewer threw out
+ * (`dismissed`) never comes back, and wording the reviewer rewrote is never
+ * overwritten — the rule owns the mark, the human owns the words.
+ *
+ * Returns null when nothing moved, so callers can skip a pointless write.
  */
-export function ruleNotes(essay: Essay): Omit<EssayComment, 'id' | 'round' | 'status'>[] {
-  return proofread(essay)
-    .filter((hit) => {
-      const existing = essay.comments.filter((c) => c.rule === hit.rule && c.para === hit.para)
-      if (existing.some((c) => c.dismissed || c.status === 'open')) return false
-      return true
-    })
-    .map((hit) => ({
+export function syncRuleNotes(essay: Essay, round: number): EssayComment[] | null {
+  const hits = proofread(essay)
+  const now = new Date().toISOString()
+  let changed = false
+
+  const next: EssayComment[] = essay.comments.map((c) => {
+    if (!c.rule || c.status !== 'open') return c
+    const hit = hits.find((h) => h.rule === c.rule && h.para === c.para)
+    if (!hit) {
+      changed = true
+      return { ...c, status: 'fixed' as const, resolvedAt: now }
+    }
+    const text = c.edited ? c.text : hit.text
+    if (hit.quote === c.quote && text === c.text) return c
+    changed = true
+    return { ...c, quote: hit.quote, text }
+  })
+
+  for (const hit of hits) {
+    const seen = essay.comments.filter((c) => c.rule === hit.rule && c.para === hit.para)
+    if (seen.some((c) => c.dismissed)) continue
+    if (next.some((c) => c.rule === hit.rule && c.para === hit.para && c.status === 'open')) continue
+    changed = true
+    next.push({
+      id: crypto.randomUUID(),
+      round,
+      status: 'open',
       para: hit.para,
       quote: hit.quote,
       text: hit.text,
       issue: hit.issue,
-      source: 'app' as const,
+      source: 'app',
       rule: hit.rule,
-    }))
+    })
+  }
+
+  return changed ? next : null
+}
+
+/**
+ * The app's own rule notes that are still open — the gate the writer has to get
+ * through before anyone (or anything) reads his essay (§19e-4).
+ */
+export function openRuleNotes(essay: Essay): EssayComment[] {
+  return essay.comments.filter((c) => c.source === 'app' && c.status === 'open')
+}
+
+/**
+ * What the rules say about the text he has in front of him *right now*, before
+ * any of it is saved. This is what makes the gate feel like a spell-checker
+ * instead of a submission: the list shrinks as he types.
+ *
+ * Rules the reviewer already disagreed with are left out, exactly as they are
+ * on the stored list.
+ */
+export function liveRuleHits(essay: Essay, draft: { title: string; paragraphs: string[] }): RuleHit[] {
+  const dismissed = new Set(essay.comments.filter((c) => c.dismissed).map((c) => `${c.rule}:${c.para}`))
+  return proofread(draft).filter((h) => !dismissed.has(`${h.rule}:${h.para}`))
 }
 
 /** Still-open notes the app is willing to judge on its own. */

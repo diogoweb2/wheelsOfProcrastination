@@ -153,9 +153,10 @@ import {
   titleTaken,
   newEssay,
   openComments,
+  openRuleNotes,
   openSpelling,
   resendWaitMs,
-  ruleNotes,
+  syncRuleNotes,
 } from '../logic/essay'
 import {
   checkFixes,
@@ -285,6 +286,12 @@ interface StoreState {
   essayError: string | null // the last AI failure, verbatim — the desk shows it instead of pretending
   /** The result of the writer's last self-check: did his fixes get past the spelling gate? */
   essayCheck: { ok: boolean; stillWrong: number } | null
+  /**
+   * Which essay the reviewer has open. It lives here rather than inside the Desk
+   * screen because the red pen is its own tab: switching between the two must
+   * not lose the essay you were holding.
+   */
+  essayDeskId: string | null
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
   gymFellBack: string | null
@@ -573,8 +580,10 @@ interface StoreState {
    * button is locked for five minutes afterwards, because each check is a real
    * AI call.
    */
-  essaySubmitChecked: (essayId: string) => Promise<'sent' | 'spelling' | 'wait' | 'failed'>
+  essaySubmitChecked: (essayId: string) => Promise<'sent' | 'rules' | 'spelling' | 'wait' | 'failed'>
   essayClearCheck: () => void
+  /** Reviewer side: which essay the desk and the red pen are both holding. */
+  essaySetDeskEssay: (essayId: string | null) => void
   /**
    * Close every machine note whose problem has visibly gone from the text. Free
    * and local — no AI, no credits. Safe to call on every open.
@@ -988,6 +997,7 @@ export const useStore = create<StoreState>((set, get) => {
     essayAttempt: null,
     essayError: null,
     essayCheck: null,
+    essayDeskId: null,
     gymPlanning: false,
     gymFellBack: null,
 
@@ -3077,26 +3087,38 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     /**
-     * The writer's own send button. From round 2 on it costs an AI call: the
-     * spelling has to be actually fixed before Dad's desk hears about it again,
-     * and a failed check locks the button for five minutes so "send" can't be
-     * used as a spellchecker.
+     * The writer's own send button.
+     *
+     * Two gates, cheapest first. **The app's own rules go before everything** —
+     * a missing capital is not worth a minute of a model's time or a trip to
+     * Dad's desk, so it comes straight back to him, instantly and for free, with
+     * the word "review" carefully not used. Only once the rules are clean does
+     * round 2 onwards spend an AI call on the spelling, and a failed check locks
+     * the button for five minutes so "send" can't be used as a spellchecker.
      */
     async essaySubmitChecked(essayId) {
       const before = get().essays.find((e) => e.id === essayId)
       if (!before) return 'sent'
+
+      // Gate one: the rules that have right answers. Free, instant, offline, and
+      // it runs on every hand-in including the very first — nothing goes to a
+      // person or a model while one of these is open.
+      get().essayAutoResolve(essayId)
+      get().essayProofread(essayId)
+      const ruled = get().essays.find((e) => e.id === essayId)
+      if (ruled && openRuleNotes(ruled).length > 0) return 'rules'
+
       // The first hand-in has nothing to check against, and a draft with no
-      // notes on it is just a draft.
-      if (before.round === 0 || openComments(before).length === 0) {
+      // notes left open on it is just a draft. The free pass above has already
+      // closed anything he visibly fixed, so most rounds end right here — no AI
+      // call, no credits, no waiting.
+      const settled = ruled ?? before
+      if (settled.round === 0 || openComments(settled).length === 0) {
         get().essaySubmit(essayId)
         return 'sent'
       }
 
-      // Free pass first: anything the app can see he fixed closes without an AI
-      // call. Most rounds end here, which costs nothing and is instant.
-      get().essayAutoResolve(essayId)
-      const settled = get().essays.find((e) => e.id === essayId)
-      if (settled && openSpelling(settled).length === 0) {
+      if (openSpelling(settled).length === 0) {
         get().essaySubmit(essayId)
         return 'sent'
       }
@@ -3127,16 +3149,17 @@ export const useStore = create<StoreState>((set, get) => {
       set({ essayCheck: null })
     },
 
+    essaySetDeskEssay(essayId) {
+      set({ essayDeskId: essayId })
+    },
+
     essayProofread(essayId) {
       const essay = get().essays.find((e) => e.id === essayId)
       if (!essay) return
-      const found = ruleNotes(essay)
-      if (!found.length) return
+      const next = syncRuleNotes(essay, Math.max(1, essay.round))
+      if (!next) return // the rules say exactly what the list already says
       patchEssay(essayId, (e) => {
-        e.comments = [
-          ...e.comments,
-          ...found.map((n) => ({ ...n, id: crypto.randomUUID(), round: Math.max(1, e.round), status: 'open' as const })),
-        ]
+        e.comments = next
         return e
       })
     },

@@ -1,28 +1,28 @@
 // The reviewer's desk.
 //
 // The AI proofreads — spelling, punctuation, capital letters, and nothing else.
-// Whether the writing is any GOOD is the parent's call, made by hand: tap the
-// first word, tap the last, say what's wrong. And the parent has the last word
-// on the machine's notes too — keep it, reword it, or bin it.
+// Whether the writing is any GOOD is the parent's call, made by hand in the
+// 🖍️ Red pen tab (see FocusReview). And the parent has the last word on the
+// machine's notes too — keep it, reword it, or bin it.
 //
 // The loop: mark it → send it back → he fixes → check the fixes → agree or send
 // it round again → grade. Spelling and capitals close themselves, because both
 // have a right answer and nobody should tick off thirty of those by hand.
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
-import type { Essay, EssayComment, EssayIssue } from '../../types'
-import { ISSUE_LABEL, essayWords, hasMark, isMachineNote, openComments, readyToGrade } from '../../logic/essay'
+import type { Essay } from '../../types'
+import { essayWords, hasMark, isMachineNote, openComments, readyToGrade, wasMarked } from '../../logic/essay'
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
 import { AiWaiting } from './AiWaiting'
-import { WordPicker, type WordPick } from './WordPicker'
 import { sfx } from '../../audio'
 
-export function ReviewPanel() {
-  const { essays } = useStore()
-  const [openId, setOpenId] = useState<string | null>(null)
-  const open = essays.find((e) => e.id === openId)
-  if (open) return <ReviewOne essay={open} onClose={() => setOpenId(null)} />
+export function ReviewPanel({ onPen }: { onPen: () => void }) {
+  // Which essay is open lives in the store, not here: the red pen is a separate
+  // tab, and stepping across to it must not put the essay down.
+  const { essays, essayDeskId, essaySetDeskEssay: setOpenId } = useStore()
+  const open = essays.find((e) => e.id === essayDeskId)
+  if (open) return <ReviewOne essay={open} onClose={() => setOpenId(null)} onPen={onPen} />
 
   const waiting = essays.filter((e) => e.status === 'submitted').reverse()
   const withHim = essays.filter((e) => e.status === 'returned' || e.status === 'writing').reverse()
@@ -38,7 +38,7 @@ export function ReviewPanel() {
             {e.authorName} · round {e.round} · {essayWords(e)} words · {e.topicTitle}
           </div>
           <button className="btn btn--small" style={{ marginTop: 10 }}>
-            {e.comments.length === 0 ? '🔍 Review it' : '🔁 Check his fixes'}
+            {!wasMarked(e) ? '🔍 Review it' : '🔁 Check his fixes'}
           </button>
         </div>
       ))}
@@ -60,14 +60,13 @@ export function ReviewPanel() {
   )
 }
 
-function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
+function ReviewOne({ essay, onClose, onPen }: { essay: Essay; onClose: () => void; onPen: () => void }) {
   const {
     essayBusy,
     essayError,
     essayClearError,
     essayAiReview,
     essayAiCheckFixes,
-    essayAddComment,
     essayEditComment,
     essayDeleteComment,
     essayResolveComment,
@@ -79,9 +78,6 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
 
   const [picked, setPicked] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null)
-  // Two steps: point at the words, then say what's wrong with them.
-  const [picking, setPicking] = useState(false)
-  const [adding, setAdding] = useState<WordPick | null>(null)
   // "It found nothing" and "it never ran" look identical on screen otherwise.
   const [ranReview, setRanReview] = useState(false)
   const [showSorted, setShowSorted] = useState(false)
@@ -183,7 +179,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
       <div className="h2">✍️ My notes — {mine.filter((c) => c.status === 'open').length} open</div>
       {mine.length === 0 && (
         <p className="muted" style={{ fontSize: 13 }}>
-          Nothing from you yet. Tap words below to say what needs saying about the writing itself.
+          Nothing from you yet. Pick up the 🖍️ red pen below to say what needs saying about the writing itself.
         </p>
       )}
       {mine.map((c) => (
@@ -225,26 +221,11 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
         </div>
       ))}
 
-      {picking && (
-        <WordPicker
-          essay={essay}
-          onCancel={() => setPicking(false)}
-          onPick={(p) => { setPicking(false); setAdding(p) }}
-        />
-      )}
-      {adding && (
-        <AddNote
-          pick={adding}
-          onRepick={() => { setAdding(null); setPicking(true) }}
-          onDone={() => setAdding(null)}
-          onAdd={(n) => essayAddComment(essay.id, n)}
-        />
-      )}
-      {!picking && !adding && (
-        <button className="btn btn--ghost" onClick={() => { sfx.click(); setPicking(true) }}>
-          ➕ Add my own note
-        </button>
-      )}
+      {/* Writing notes is a mode of its own — full-screen text, two taps a note,
+          every existing mark visible so the same thing isn't said twice. */}
+      <button className="btn btn--blue" onClick={() => { sfx.click(); onPen() }}>
+        🖍️ Mark it by hand
+      </button>
 
       {/* Not a to-do list. These are found by the machine and closed by the app
           the moment his text stops containing the problem — the parent never
@@ -298,7 +279,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
       <div style={{ marginTop: 16 }}>
         <button
           className="btn"
-          disabled={essay.comments.length === 0 || essay.status !== 'submitted'}
+          disabled={!wasMarked(essay) || essay.status !== 'submitted'}
           onClick={() => { sfx.gem(); essayReturn(essay.id); onClose() }}
         >
           📬 Send the notes back to {essay.authorName}
@@ -313,75 +294,13 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
         </button>
         {!canGrade && (
           <p className="muted" style={{ fontSize: 12, marginTop: 6, textAlign: 'center' }}>
-            {essay.comments.length === 0
-              ? 'Mark it up first.'
+            {!wasMarked(essay)
+              ? 'Mark it up first — the app’s own rules don’t count as a review.'
               : `${open.length} note${open.length === 1 ? '' : 's'} still open — agree they’re fixed, or send it round again.`}
           </p>
         )}
       </div>
     </>
-  )
-}
-
-/**
- * The parent's own note. The words are already chosen — copied straight out of
- * his text by the picker, so the quote always matches and always gets marked.
- * All that's left is what kind of problem it is and what to say about it.
- */
-function AddNote({
-  pick,
-  onAdd,
-  onDone,
-  onRepick,
-}: {
-  pick: WordPick
-  onAdd: (n: Omit<EssayComment, 'id' | 'round' | 'source' | 'status'>) => void
-  onDone: () => void
-  onRepick: () => void
-}) {
-  const [issue, setIssue] = useState<EssayIssue>('clarity')
-  const [text, setText] = useState('')
-  const issues: EssayIssue[] = ['clarity', 'idea', 'praise', 'spelling', 'punctuation', 'case']
-
-  return (
-    <div className="card">
-      <div className="essay-para-head">
-        <span>{pick.para === -1 ? 'Title' : `Paragraph ${pick.para + 1}`}</span>
-        <button className="btn btn--ghost btn--small essay-para-x" style={{ color: 'var(--text)' }} onClick={onRepick}>
-          ↺ Pick again
-        </button>
-      </div>
-      <div className="essay-note-quote" style={{ marginBottom: 10 }}>
-        {pick.quote ? `“${pick.quote}”` : '(the whole thing)'}
-      </div>
-      <div className="field">
-        <label>Kind</label>
-        <select value={issue} onChange={(e) => setIssue(e.target.value as EssayIssue)}>
-          {issues.map((i) => (
-            <option key={i} value={i}>{ISSUE_LABEL[i]}</option>
-          ))}
-        </select>
-      </div>
-      <div className="field">
-        <label>The note (he reads this exactly as written)</label>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Say what’s wrong — don’t write the fix." />
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button
-          className="btn btn--small"
-          style={{ flex: 1 }}
-          disabled={!text.trim()}
-          onClick={() => {
-            sfx.click()
-            onAdd({ para: pick.para, issue, text: text.trim(), ...(pick.quote ? { quote: pick.quote } : {}) })
-            onDone()
-          }}
-        >
-          ➕ Add note
-        </button>
-        <button className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={onDone}>Cancel</button>
-      </div>
-    </div>
   )
 }
 

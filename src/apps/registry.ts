@@ -179,6 +179,9 @@ export const APPS: AppDef[] = [
     ],
     adminTabs: [
       { id: 'desk', label: 'Desk', icon: '🖊️' },
+      // marking by hand is a mode, not a corner of the desk: the text fills the
+      // screen and every tap either writes a note or opens one
+      { id: 'pen', label: 'Red pen', icon: '🖍️' },
       { id: 'topics', label: 'Topics', icon: '💡' },
       { id: 'words', label: 'Words', icon: '🔤' },
       { id: 'marked', label: 'Marked', icon: '📚' },
