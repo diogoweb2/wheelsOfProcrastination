@@ -108,11 +108,32 @@ export interface TextChunk {
   comment?: EssayComment
 }
 
-// Letters and digits only. An apostrophe deliberately does NOT count: quotes
-// routinely start or end against one ("that's roblox"), and treating it as part
-// of a word would make those quotes look absent — which would silently close a
-// note that nobody had fixed. Over-marking is recoverable; a vanished note is not.
 const WORD_CHAR = /[A-Za-z0-9]/
+const APOSTROPHE = /['’]/
+
+/**
+ * Is the character at `i` part of a word?
+ *
+ * Letters and digits always are. An apostrophe counts **only when it sits
+ * between two letters** — inside "that's" it is part of the word, at either
+ * edge ("'roblox", "friends'") it isn't. That split matters in both directions:
+ *
+ * - a quote may legitimately start or end against an apostrophe that belongs to
+ *   the quote itself, so an apostrophe can't be word-glue everywhere;
+ * - a quote must not be allowed to start **inside** a word. The AI came back
+ *   with the quote `s roblox` for a missing apostrophe in "thats roblox"; once
+ *   he fixed it to "that's roblox", that quote still matched — the apostrophe
+ *   wasn't a word character, so "s" looked like a word of its own. The note
+ *   could never close, so a problem he had fixed stayed circled forever and the
+ *   essay could never be graded.
+ */
+function wordCharAt(text: string, i: number): boolean {
+  const ch = text[i]
+  if (!ch) return false
+  if (WORD_CHAR.test(ch)) return true
+  if (!APOSTROPHE.test(ch)) return false
+  return WORD_CHAR.test(text[i - 1] ?? '') && WORD_CHAR.test(text[i + 1] ?? '')
+}
 
 /**
  * Is the match at `at` a whole word rather than a fragment of a bigger one?
@@ -123,10 +144,9 @@ const WORD_CHAR = /[A-Za-z0-9]/
  * where its own edges are word characters butting against non-word ones.
  */
 function wholeWordAt(text: string, at: number, quote: string): boolean {
-  const before = text[at - 1]
-  const after = text[at + quote.length]
-  if (WORD_CHAR.test(quote[0]) && before && WORD_CHAR.test(before)) return false
-  if (WORD_CHAR.test(quote[quote.length - 1]) && after && WORD_CHAR.test(after)) return false
+  if (wordCharAt(quote, 0) && wordCharAt(text, at - 1)) return false
+  const last = quote.length - 1
+  if (wordCharAt(quote, last) && wordCharAt(text, at + quote.length)) return false
   return true
 }
 

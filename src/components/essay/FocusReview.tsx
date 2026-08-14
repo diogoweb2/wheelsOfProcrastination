@@ -35,10 +35,17 @@ function tokenize(text: string): Token[] {
   return [...text.matchAll(/\S+/g)].map((m) => ({ text: m[0], start: m.index ?? 0, end: (m.index ?? 0) + m[0].length }))
 }
 
-/** The words picked out for a new note: which part they're in, and the exact text. */
+/**
+ * The words picked out for a new note: which part they're in, the exact text,
+ * and where in that part he tapped. The offsets matter: a short quote like "i"
+ * occurs all over a paragraph, so looking the text up again would land on the
+ * wrong one (the "i" inside "friends") and blame a note somewhere else.
+ */
 interface Pick {
   para: number // -1 = the title
   quote: string // '' = the whole part
+  start: number
+  end: number
 }
 
 export function FocusReview({ onDesk }: { onDesk: () => void }) {
@@ -131,7 +138,12 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
     const to = Math.max(anchor.index, index)
     const text = parts.find((p) => p.para === para)!.text
     setAnchor(null)
-    setPick({ para, quote: text.slice(tokens[from].start, tokens[to].end) })
+    setPick({
+      para,
+      quote: text.slice(tokens[from].start, tokens[to].end),
+      start: tokens[from].start,
+      end: tokens[to].end,
+    })
   }
 
   function goToMark(id: string) {
@@ -180,7 +192,13 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
                 <button
                   className="btn btn--ghost btn--small essay-para-x"
                   style={{ color: 'var(--text)' }}
-                  onClick={() => { sfx.click(); setAnchor(null); setPick({ para: part.para, quote: '' }) }}
+                  onClick={() => {
+                    sfx.click()
+                    setAnchor(null)
+                    // no quote: the note is about the whole part, so the span it
+                    // "covers" for the already-marked check is all of it
+                    setPick({ para: part.para, quote: '', start: 0, end: part.text.length })
+                  }}
                 >
                   📌 Whole thing
                 </button>
@@ -285,11 +303,8 @@ function AddNoteSheet({
   const already = useMemo(() => {
     if (!pick.quote) return essay.comments.filter((c) => c.para === pick.para && c.status === 'open')
     const part = partText(essay, pick.para)
-    const at = part.indexOf(pick.quote)
-    if (at === -1) return []
-    const end = at + pick.quote.length
     return markSpans(part, essay.comments.filter((c) => c.para === pick.para))
-      .filter((s) => s.start < end && at < s.end)
+      .filter((s) => s.start < pick.end && pick.start < s.end)
       .map((s) => s.comment)
   }, [essay, pick])
 
