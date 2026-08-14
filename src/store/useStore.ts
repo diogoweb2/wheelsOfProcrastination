@@ -338,6 +338,8 @@ interface StoreState {
   /** "Do it later" — park the question on the Spin screen until it's answered (or midnight bites). */
   postponeDailyQuiz: () => void
   setTopicUnlocked: (targetId: string, topicId: string, unlocked: boolean) => void // admin
+  /** Admin: stamp a topic CONQUERED by hand (a pass taken off-app, or one the app missed), or take the stamp back. */
+  setTopicPassed: (targetId: string, topicId: string, passed: boolean) => void
   grantDevilFruit: (targetId: string, topicId: string) => void // admin bonus 🍇
   revokeDevilFruit: (targetId: string, topicId: string) => void // admin: undo a bonus 🍇 (never below 0)
   removeQuizQuestion: (qid: string) => void // admin: flag removed (stays in db so AI won't regenerate it)
@@ -1479,6 +1481,30 @@ export const useStore = create<StoreState>((set, get) => {
         if (unlocked && !has) d.quiz.unlockedTopics.push(topicId)
         if (!unlocked && has) d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((t) => t !== topicId)
         syncQuizTasks(d, targetId) // keep the owner's wheel habits in step with the locks
+      })
+    },
+
+    setTopicPassed(targetId, topicId, passed) {
+      commitFor(targetId, (d) => {
+        const has = d.quiz.passedTopics.includes(topicId)
+        if (has === passed) return
+        if (passed) {
+          // Same bookkeeping as a real pass, minus the Devil Fruit — the prize was
+          // already handed over (or Dad grants it with the +1 🍇 button).
+          d.quiz.passedTopics.push(topicId)
+          d.quiz.unlockedTopics = d.quiz.unlockedTopics.filter((id) => id !== topicId)
+          const next = nextTopicToUnlock(d, targetId, topicId)
+          if (next) {
+            syncTopicUnlocks(d, targetId) // ladder bookkeeping (autoUnlocked)
+            if (!d.quiz.unlockedTopics.includes(next.id)) d.quiz.unlockedTopics.push(next.id)
+            if (!d.quiz.autoUnlocked?.includes(next.id)) d.quiz.autoUnlocked = [...(d.quiz.autoUnlocked ?? []), next.id]
+          }
+        } else {
+          // Undo: the topic comes back to the wheel so it can be sat again.
+          d.quiz.passedTopics = d.quiz.passedTopics.filter((id) => id !== topicId)
+          if (!d.quiz.unlockedTopics.includes(topicId)) d.quiz.unlockedTopics.push(topicId)
+        }
+        syncQuizTasks(d, targetId)
       })
     },
 
