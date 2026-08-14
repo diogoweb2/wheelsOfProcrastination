@@ -11,6 +11,7 @@ export function MarkedEssay({
   comments,
   selectedId,
   flashId,
+  flashIds,
   onSelect,
 }: {
   essay: Pick<Essay, 'title' | 'paragraphs'>
@@ -18,8 +19,11 @@ export function MarkedEssay({
   selectedId?: string | null
   /** Briefly lit up because someone jumped here from its note. */
   flashId?: string | null
+  /** Several marks lit up at once — "here is what the app just found". */
+  flashIds?: string[]
   onSelect?: (commentId: string) => void
 }) {
+  const lit = new Set(flashIds ?? [])
   return (
     <div className="essay-read">
       <Line
@@ -28,6 +32,7 @@ export function MarkedEssay({
         className="essay-read-title"
         selectedId={selectedId}
         flashId={flashId}
+        lit={lit}
         onSelect={onSelect}
       />
       {essay.paragraphs.map((p, i) => (
@@ -38,6 +43,7 @@ export function MarkedEssay({
           className="essay-read-para"
           selectedId={selectedId}
           flashId={flashId}
+          lit={lit}
           onSelect={onSelect}
         />
       ))}
@@ -51,6 +57,7 @@ function Line({
   className,
   selectedId,
   flashId,
+  lit,
   onSelect,
 }: {
   text: string
@@ -58,6 +65,7 @@ function Line({
   className: string
   selectedId?: string | null
   flashId?: string | null
+  lit: Set<string>
   onSelect?: (commentId: string) => void
 }) {
   const chunks = markUp(text, comments)
@@ -72,7 +80,9 @@ function Line({
             key={i}
             className={`essay-mark${/\s/.test(chunk.text.trim()) ? ' essay-mark--span' : ''}${
               selectedId === chunk.comment.id ? ' is-picked' : ''
-            }${chunk.comment.status === 'fixed' ? ' is-done' : ''}${flashId === chunk.comment.id ? ' is-flash' : ''}`}
+            }${chunk.comment.status === 'fixed' ? ' is-done' : ''}${flashId === chunk.comment.id ? ' is-flash' : ''}${
+              lit.has(chunk.comment.id) ? ' is-flash is-flash--long' : ''
+            }`}
             data-note={chunk.comment.id}
             style={{ '--mark': issueTint(chunk.comment.issue) } as React.CSSProperties}
             onClick={() => onSelect?.(chunk.comment!.id)}

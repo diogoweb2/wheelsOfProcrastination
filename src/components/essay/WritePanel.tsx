@@ -229,7 +229,12 @@ function FixPhase({ essay }: { essay: Essay }) {
     essayResolveComment,
   } = useStore()
   const [fixing, setFix] = useState<string | null>(null)
-  const [gated, setGated] = useState(false)
+  // Set the moment the app's own rules turn a send back. It is a flash, not a
+  // wall: the marks light up for five seconds so he can see *where* the app is
+  // pointing, then everything goes quiet again and the circles speak for
+  // themselves. A banner that stays on screen for the rest of the round only
+  // adds noise to a page that is already covered in notes.
+  const [gatedAt, setGatedAt] = useState(0)
   const [, tick] = useState(0)
 
   // The saved essay is the only copy here: every fix is committed the moment he
@@ -250,8 +255,18 @@ function FixPhase({ essay }: { essay: Essay }) {
     return () => clearInterval(t)
   }, [wait])
 
+  const [gated, setGated] = useState(false)
+  useEffect(() => {
+    if (!gatedAt) return
+    setGated(true)
+    const t = setTimeout(() => setGated(false), 5000)
+    return () => clearTimeout(t)
+  }, [gatedAt])
+
   const note = essay.comments.find((c) => c.id === fixing) ?? null
   const stuck = openSpelling(essay).length
+  // While the flash is up: every circle the app itself put there.
+  const flashIds = gated ? open.filter((c) => c.source === 'app').map((c) => c.id) : undefined
 
   /**
    * One mark, dealt with. The fix is saved straight away rather than debounced —
@@ -302,11 +317,7 @@ function FixPhase({ essay }: { essay: Essay }) {
 
       {gated && (
         <div className="card" style={{ marginBottom: 12, borderColor: 'var(--orange)' }}>
-          <div style={{ fontWeight: 900, fontSize: 14 }}>🧰 The app found a few more</div>
-          <p className="muted" style={{ fontSize: 13, marginTop: 4, lineHeight: 1.4 }}>
-            <strong>Nobody has read it again yet.</strong> These are just the rules that always have the same answer —
-            capital letters, spaces, full stops. They’re circled below with a 📏 note on them. Sort those and send again.
-          </p>
+          <div style={{ fontWeight: 900, fontSize: 14 }}>🧰 The app found a few more — look at the flashing ones</div>
         </div>
       )}
 
@@ -315,6 +326,7 @@ function FixPhase({ essay }: { essay: Essay }) {
           essay={essay}
           comments={essay.comments}
           selectedId={fixing}
+          flashIds={flashIds}
           // a sorted mark (and every ⭐) is there to be read, not reopened
           onSelect={(id) => {
             if (!open.some((c) => c.id === id)) return
@@ -383,7 +395,7 @@ function FixPhase({ essay }: { essay: Essay }) {
         disabled={!!essayBusy || wait > 0}
         onClick={async () => {
           sfx.gem()
-          if ((await essaySubmitChecked(essay.id)) === 'rules') setGated(true)
+          if ((await essaySubmitChecked(essay.id)) === 'rules') setGatedAt(Date.now())
         }}
       >
         {essayBusy

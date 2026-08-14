@@ -114,11 +114,9 @@ export function proofreadPart(text: string, para: number): RuleHit[] {
       'A full stop or comma sticks to the word before it — no space in front of it.', floating.length)
   }
 
-  const doubleSpace = [...text.matchAll(/\S {2,}\S/g)]
-  if (doubleSpace.length) {
-    add('double-space', expand(text, doubleSpace[0].index, doubleSpace[0].index + doubleSpace[0][0].length), 'punctuation',
-      'There are two spaces between these words. One is enough.', doubleSpace.length)
-  }
+  // Two spaces between words is deliberately NOT a rule. It is invisible on the
+  // page, a phone keyboard puts one there by itself, and circling it spends a
+  // twelve-year-old's attention on something no reader will ever notice.
 
   const doublePunct = [...text.matchAll(/([,!?;:])\1+|\.{2}(?!\.)/g)]
   if (doublePunct.length) {

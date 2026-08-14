@@ -729,11 +729,13 @@ A hand-written note used to mean retyping his sentence into a text box character
 | `lone-i` · `lone-i-contraction` | `i` and `i'm` / `i've` / `i'll` as lowercase |
 | `sentence-capital` | a paragraph or a sentence starting lowercase (abbreviations like "Mr." excluded) |
 | `space-after-punct` · `space-before-punct` | `inside.Everytime`, `also,make`, `roblox .` |
-| `double-space` · `double-punct` | two spaces between words, `!!`, `,,` |
+| `double-punct` | `!!`, `,,` |
 | `end-stop` | a paragraph that never finishes its last sentence |
 | `a-an` · `double-article` | "a app"; "a another" (which needs a word *deleted*, so it gets its own advice) |
 | `repeated-word` | "the the" |
 | `apostrophe` | `dont`, `didnt`, `thats`, `im`… — squashed contractions with no other meaning |
+
+**Two spaces between words is deliberately not a rule.** It is invisible on the page, a phone keyboard puts one there by itself, and circling it spends Ben's attention on something no reader will ever notice.
 
 **One note per rule per paragraph**, carrying the count ("there are 4 in this paragraph"), because a note is only useful while it still has something to point at — the mark simply moves to the next one as he fixes them. Rules must be **near-certain**: anything ambiguous ("a" before a `u`, a lowercase word after a comma) is deliberately left out rather than guessed at, since a false positive costs the reviewer a tap.
 
@@ -766,6 +768,7 @@ The reasoning is the same as the rules' own: a missing capital has a right answe
 - **Each item also sits under the box it belongs to**, so "paragraph 3" never has to be worked out.
 - **Free, instant, offline, and unlimited.** There is no cooldown on it, because there is nothing to spend.
 - **The escape hatch is Diogo's** — a rule note he disagrees with is `dismissed` and never blocks again (§19e-2).
+- **In phase 2 the gate is a flash, not a wall.** When a send is turned back by the rules on the marked-up essay, the circles the app raised **pulse for five seconds** — that is the whole announcement. Then the page goes quiet and the circles speak for themselves. A banner that stayed up for the rest of the round only added noise to a page already covered in notes.
 
 Because rule notes are raised before anyone has read the essay, **they don't count as "it has been marked"**: an essay carrying nothing but rule notes cannot be sent back or graded, and the desk says so.
 
