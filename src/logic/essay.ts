@@ -95,6 +95,39 @@ export interface TextChunk {
   comment?: EssayComment
 }
 
+// Letters and digits only. An apostrophe deliberately does NOT count: quotes
+// routinely start or end against one ("that's roblox"), and treating it as part
+// of a word would make those quotes look absent — which would silently close a
+// note that nobody had fixed. Over-marking is recoverable; a vanished note is not.
+const WORD_CHAR = /[A-Za-z0-9]/
+
+/**
+ * Is the match at `at` a whole word rather than a fragment of a bigger one?
+ *
+ * This is not a nicety. A note quoting the single letter "i" matched the **i in
+ * "life"** with a plain substring search, so the app drew a red circle around a
+ * perfectly good word and told a 12-year-old to fix it. A quote only counts
+ * where its own edges are word characters butting against non-word ones.
+ */
+function wholeWordAt(text: string, at: number, quote: string): boolean {
+  const before = text[at - 1]
+  const after = text[at + quote.length]
+  if (WORD_CHAR.test(quote[0]) && before && WORD_CHAR.test(before)) return false
+  if (WORD_CHAR.test(quote[quote.length - 1]) && after && WORD_CHAR.test(after)) return false
+  return true
+}
+
+/** Does this exact text still appear in the essay, as its own word? */
+export function containsQuote(text: string, quote: string): boolean {
+  let from = 0
+  for (;;) {
+    const at = text.indexOf(quote, from)
+    if (at === -1) return false
+    if (wholeWordAt(text, at, quote)) return true
+    from = at + 1
+  }
+}
+
 export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[] {
   const spans: { start: number; end: number; comment: EssayComment }[] = []
   const taken: [number, number][] = []
@@ -107,7 +140,7 @@ export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[]
       const at = paragraph.indexOf(quote, from)
       if (at === -1) break
       const end = at + quote.length
-      if (!taken.some(([s, e]) => at < e && s < end)) {
+      if (wholeWordAt(paragraph, at, quote) && !taken.some(([s, e]) => at < e && s < end)) {
         spans.push({ start: at, end, comment: c })
         taken.push([at, end])
         break
@@ -192,6 +225,38 @@ export function resendWaitMs(essay: Essay, now = Date.now()): number {
 export function waitClock(ms: number): string {
   const total = Math.ceil(ms / 1000)
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
+/**
+ * Close the machine's notes the app can settle by itself, for free.
+ *
+ * The reviewer should never have to tick off spelling. The AI finds it, the
+ * writer fixes it, and the app notices — no button, no second AI call, no
+ * credits. The test is deliberately literal:
+ *
+ * - the flagged text is **gone from the essay** (whole-word, so "realy" is not
+ *   found inside "really"), and
+ * - where we know the right spelling, it is **now present**.
+ *
+ * A word he changed into a *different* wrong spelling therefore stays open,
+ * which is exactly right: he hasn't fixed it. Only the AI's own mechanical
+ * notes are eligible — a note the parent wrote by hand is the parent's to close.
+ *
+ * Returns null when nothing moved, so callers can skip a pointless write.
+ */
+export function autoResolve(essay: Essay): EssayComment[] | null {
+  const text = essayText(essay)
+  let changed = false
+  const next = essay.comments.map((c) => {
+    if (c.status !== 'open' || c.source !== 'ai' || !MECHANICAL_ISSUES.includes(c.issue)) return c
+    const quote = c.quote?.trim()
+    if (!quote || containsQuote(text, quote)) return c
+    // he changed it into something else wrong — not our call to close
+    if (c.correct && !containsQuote(text, c.correct)) return c
+    changed = true
+    return { ...c, status: 'fixed' as const, resolvedAt: new Date().toISOString() }
+  })
+  return changed ? next : null
 }
 
 /** Still-open notes the app is willing to judge on its own. */

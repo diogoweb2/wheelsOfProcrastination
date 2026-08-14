@@ -144,6 +144,7 @@ import { coachPlan, coachSwap } from '../logic/gymCoach'
 import {
   AUTO_CLOSE_ISSUES,
   DEFAULT_MIN_WORDS,
+  autoResolve,
   ESSAY_CAP,
   WORD_CAP,
   WORD_COIN,
@@ -562,6 +563,11 @@ interface StoreState {
    */
   essaySubmitChecked: (essayId: string) => Promise<'sent' | 'spelling' | 'wait' | 'failed'>
   essayClearCheck: () => void
+  /**
+   * Close every machine note whose problem has visibly gone from the text. Free
+   * and local — no AI, no credits. Safe to call on every open.
+   */
+  essayAutoResolve: (essayId: string) => void
   /** Parent side: run the AI over the submission and add its notes. */
   essayAiReview: (essayId: string) => Promise<void>
   /** Parent side: ask the AI whether each open note was actually fixed. */
@@ -3007,6 +3013,15 @@ export const useStore = create<StoreState>((set, get) => {
         get().essaySubmit(essayId)
         return 'sent'
       }
+
+      // Free pass first: anything the app can see he fixed closes without an AI
+      // call. Most rounds end here, which costs nothing and is instant.
+      get().essayAutoResolve(essayId)
+      const settled = get().essays.find((e) => e.id === essayId)
+      if (settled && openSpelling(settled).length === 0) {
+        get().essaySubmit(essayId)
+        return 'sent'
+      }
       if (resendWaitMs(before) > 0) return 'wait'
 
       set({ essayCheck: null })
@@ -3032,6 +3047,17 @@ export const useStore = create<StoreState>((set, get) => {
 
     essayClearCheck() {
       set({ essayCheck: null })
+    },
+
+    essayAutoResolve(essayId) {
+      const essay = get().essays.find((e) => e.id === essayId)
+      if (!essay) return
+      const resolved = autoResolve(essay)
+      if (!resolved) return // nothing moved — don't write for the sake of writing
+      patchEssay(essayId, (e) => {
+        e.comments = resolved
+        return e
+      })
     },
 
     essayAddComment(essayId, c) {

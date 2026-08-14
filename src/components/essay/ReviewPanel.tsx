@@ -8,10 +8,10 @@
 // The loop: mark it → send it back → he fixes → check the fixes → agree or send
 // it round again → grade. Spelling and capitals close themselves, because both
 // have a right answer and nobody should tick off thirty of those by hand.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
-import { ISSUE_LABEL, essayWords, openComments, readyToGrade } from '../../logic/essay'
+import { ISSUE_LABEL, MECHANICAL_ISSUES, essayWords, openComments, readyToGrade } from '../../logic/essay'
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
 import { AiWaiting } from './AiWaiting'
@@ -73,6 +73,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
     essayResolveComment,
     essayReturn,
     essayGrade,
+    essayAutoResolve,
   } = useStore()
 
   const [picked, setPicked] = useState<string | null>(null)
@@ -82,10 +83,25 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
   const [adding, setAdding] = useState<WordPick | null>(null)
   // "It found nothing" and "it never ran" look identical on screen otherwise.
   const [ranReview, setRanReview] = useState(false)
+  const [showSorted, setShowSorted] = useState(false)
+
+  // Free and local: anything he visibly fixed closes the moment this opens, so
+  // the list is never a pile of things already dealt with.
+  useEffect(() => {
+    essayAutoResolve(essay.id)
+  }, [essay.id, essay.round, essayAutoResolve])
 
   const open = openComments(essay)
   const canGrade = readyToGrade(essay)
   const reviewed = essay.comments.some((c) => c.round === essay.round)
+
+  // The machine's marks are not the parent's job: spelling, punctuation and
+  // capitals are found by the AI and closed by the app. What's left — the
+  // writing itself — is the only list worth a person's attention.
+  const isMachine = (c: EssayComment) => c.source === 'ai' && MECHANICAL_ISSUES.includes(c.issue)
+  const machine = essay.comments.filter(isMachine)
+  const machineOpen = machine.filter((c) => c.status === 'open')
+  const mine = essay.comments.filter((c) => !isMachine(c))
 
   return (
     <>
@@ -142,35 +158,21 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
         </div>
       )}
 
-      <div className="h2">📝 Notes — {open.length} open</div>
-      {essay.comments.length === 0 && (
+      <div className="h2">✍️ My notes — {mine.filter((c) => c.status === 'open').length} open</div>
+      {mine.length === 0 && (
         <p className="muted" style={{ fontSize: 13 }}>
-          {ranReview
-            ? '✅ The proofreader found no spelling, punctuation or capital-letter mistakes. Anything about the writing itself is yours to add.'
-            : 'No notes yet. Mark it up, or write your own below.'}
+          Nothing from you yet. Tap words below to say what needs saying about the writing itself.
         </p>
       )}
-      {essay.comments.map((c) => (
+      {mine.map((c) => (
         <div key={c.id} style={{ marginBottom: 10 }}>
           {editing?.id === c.id ? (
-            <div className="card">
-              <div className="field" style={{ marginBottom: 8 }}>
-                <label>Say it your way</label>
-                <textarea value={editing.text} onChange={(e) => setEditing({ id: c.id, text: e.target.value })} />
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  className="btn btn--small"
-                  style={{ flex: 1 }}
-                  onClick={() => { sfx.click(); essayEditComment(essay.id, c.id, editing.text); setEditing(null) }}
-                >
-                  ✓ Save
-                </button>
-                <button className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={() => setEditing(null)}>
-                  Cancel
-                </button>
-              </div>
-            </div>
+            <EditNote
+              text={editing.text}
+              onText={(text) => setEditing({ id: c.id, text })}
+              onSave={() => { sfx.click(); essayEditComment(essay.id, c.id, editing.text); setEditing(null) }}
+              onCancel={() => setEditing(null)}
+            />
           ) : (
             <NoteCard note={c}>
               <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing({ id: c.id, text: c.text }) }}>
@@ -181,7 +183,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
                 style={{ color: 'var(--red)' }}
                 onClick={() => { sfx.click(); essayDeleteComment(essay.id, c.id) }}
               >
-                ✕ Disagree
+                ✕ Delete
               </button>
               {c.issue !== 'praise' && (
                 <button
@@ -214,6 +216,50 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
       {!picking && !adding && (
         <button className="btn btn--ghost" onClick={() => { sfx.click(); setPicking(true) }}>
           ➕ Add my own note
+        </button>
+      )}
+
+      {/* Not a to-do list. These are found by the machine and closed by the app
+          the moment his text stops containing the problem — the parent never
+          ticks off spelling. They're here to be read, or binned if one is wrong. */}
+      <div className="h2">🤖 The machine’s marks — {machineOpen.length} still open</div>
+      <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 10, lineHeight: 1.4 }}>
+        Spelling, punctuation and capitals. These tick themselves off as he fixes them — nothing here needs you unless
+        one of them is plain wrong.
+      </p>
+      {machine.length === 0 && (
+        <p className="muted" style={{ fontSize: 13 }}>
+          {ranReview ? '✅ Nothing misspelled — his mechanics are clean.' : 'Not marked up yet.'}
+        </p>
+      )}
+      {(showSorted ? machine : machineOpen).map((c) => (
+        <div key={c.id} style={{ marginBottom: 10 }}>
+          {editing?.id === c.id ? (
+            <EditNote
+              text={editing.text}
+              onText={(text) => setEditing({ id: c.id, text })}
+              onSave={() => { sfx.click(); essayEditComment(essay.id, c.id, editing.text); setEditing(null) }}
+              onCancel={() => setEditing(null)}
+            />
+          ) : (
+            <NoteCard note={c}>
+              <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing({ id: c.id, text: c.text }) }}>
+                ✏️ Edit
+              </button>
+              <button
+                className="btn btn--ghost btn--small"
+                style={{ color: 'var(--red)' }}
+                onClick={() => { sfx.click(); essayDeleteComment(essay.id, c.id) }}
+              >
+                ✕ Disagree
+              </button>
+            </NoteCard>
+          )}
+        </div>
+      ))}
+      {machine.length > machineOpen.length && (
+        <button className="btn btn--ghost btn--small" onClick={() => setShowSorted(!showSorted)}>
+          {showSorted ? 'Hide' : 'Show'} the {machine.length - machineOpen.length} he already sorted
         </button>
       )}
 
@@ -302,6 +348,32 @@ function AddNote({
           ➕ Add note
         </button>
         <button className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={onDone}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+/** Reword a note in place — Ben reads exactly what ends up here. */
+function EditNote({
+  text,
+  onText,
+  onSave,
+  onCancel,
+}: {
+  text: string
+  onText: (v: string) => void
+  onSave: () => void
+  onCancel: () => void
+}) {
+  return (
+    <div className="card">
+      <div className="field" style={{ marginBottom: 8 }}>
+        <label>Say it your way</label>
+        <textarea value={text} onChange={(e) => onText(e.target.value)} />
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button className="btn btn--small" style={{ flex: 1 }} onClick={onSave}>✓ Save</button>
+        <button className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={onCancel}>Cancel</button>
       </div>
     </div>
   )

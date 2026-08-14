@@ -673,8 +673,10 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 3. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
 4. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
 5. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
-6. **He sends it again — and the app checks him first** (§19e-2). Once it's past that gate, Diogo's **🔁 Check his fixes** gives one AI verdict per open note, fixed or not, with a one-line reason. **Spelling and capital-letter verdicts close themselves** — both have a right answer, and making a parent tick off thirty obvious ones is how a good idea stops getting used. **Punctuation and anything Diogo wrote wait for his ✓.**
+6. **He sends it again — and the app closes what he fixed, by itself** (§19e-2). No button, no AI call: the app looks for the flagged text and, when it is gone, the note is done. **Diogo never reviews spelling.** For the leftovers, **🔁 Check his fixes** asks the AI for a verdict per note with a one-line reason.
 7. **Round again, or grade.** The loop repeats until no note is open.
+
+**Two lists, not one.** The desk separates **🤖 the machine's marks** (spelling, punctuation, capitals — found by the AI, closed by the app, there only to be read or binned) from **✍️ my notes** (Diogo's own, with the full keep/reword/close controls). Sorted marks collapse behind a "show the N he already sorted" toggle, so the list is never a pile of things already dealt with.
 
 **It never hands him the answer.** A note is a *tip*, not a correction: point at the part of the word that's wrong, name the rule ("this one follows i-before-e"), or tell him what to do ("say it out loud slowly — one sound isn't written"). The prompt bans the corrected word four different ways, including spelling it out letter by letter, and **the app checks the output anyway**: any note containing the correct spelling is thrown away and replaced with a generic tip. One leak undoes the exercise — he only has to be handed a word once to stop working it out — and a blander note is a far smaller loss than a free answer. The same scrub runs on the fix-check verdicts. Canadian spellings are explicitly correct and never flagged.
 
@@ -684,11 +686,13 @@ A hand-written note used to mean retyping his sentence into a text box character
 
 **The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
 
-#### 19e-2. The spelling gate, and the five-minute wait
+#### 19e-2. Closing a note without asking anyone
 
-From round 2 on, **his own send button spends an AI call first**: it checks his fixes, and if any word is *still* misspelled it does not go to Diogo. He is told how many are wrong and pointed back at the marks — never told what the words should be.
+**The app settles the machine's notes itself, for free.** The test is deliberately literal: the flagged text is *gone from the essay* (whole-word — "realy" is not found inside "really"), and where the right spelling is known, it is *now present*. A word he changed into a **different** wrong spelling therefore stays open, which is correct — he hasn't fixed it. Only the AI's own mechanical notes are eligible; a note Diogo wrote by hand is Diogo's to close. This runs when he sends, and again whenever Diogo opens the essay, so a stale list heals itself on sight.
 
-Either way, **the button then locks for five minutes**. The check costs real money and "send" is otherwise a free spellchecker he can mash. The button counts the wait down and says why. Diogo's own check button has no such limit.
+**Whole-word matching is not a nicety.** A note quoting the single letter "i" once matched the **i inside "life"**, so the app drew a red circle around a perfectly good word and told a 12-year-old to fix it. Quotes only match where their own edges are letters butting against non-letters. Apostrophes deliberately don't count as letters: quotes routinely start against one ("that's roblox"), and treating it as part of a word would make those quotes look absent — silently closing a note nobody fixed. Over-marking is recoverable; a vanished note is not.
+
+**Then, and only then, the spelling gate.** If words are *still* misspelled after the free pass, his send button spends an AI call to check, and refuses to pass the essay on while any spelling note stands. He is told how many are wrong and pointed back at the marks — never told what the words should be. That call **locks the button for five minutes**: it costs real money, and "send" is otherwise a free spellchecker to mash. The button counts the wait down and says why. Most rounds never reach this point, and cost nothing. Diogo's own check button has no limit.
 
 ### 19f. The word bank — "My Words" (the 🔤 tab)
 
