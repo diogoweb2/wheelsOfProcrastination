@@ -171,6 +171,9 @@ export const APPS: AppDef[] = [
     tint: ['#60bff5', '#123252'],
     tabs: [
       { id: 'write', label: 'Write', icon: '✍️' },
+      // his own topic ideas: a tab of its own so it's reachable while an essay
+      // is already in flight, which is exactly when the next idea turns up
+      { id: 'ideas', label: 'Ideas', icon: '💡' },
       { id: 'words', label: 'Words', icon: '🔤' },
       { id: 'marked', label: 'Marked', icon: '📚' },
     ],

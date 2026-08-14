@@ -28,10 +28,11 @@ import { appById, tabsFor } from './apps/registry'
 import { LANDING, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
+import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
   // the URL we were opened with decides the first screen (see lib/route.ts)
   const [open, setOpen] = useState<OpenApp>(() => pathToRoute(window.location.pathname, null))
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
@@ -255,6 +256,35 @@ export default function App() {
     prevToFix.current = essaysToFix.length
   }, [essaysToFix.length])
 
+  // Topic suggestions: the parent hears that Ben asked for one, Ben hears the
+  // answer. Same two-sided shape as the essay itself — an ask nobody answers is
+  // worse than no ask at all.
+  const topicAsks = activeProfileId === PARENT_ID ? pendingTopics(essayTopics) : []
+  const prevAskCount = useRef(topicAsks.length)
+  useEffect(() => {
+    if (topicAsks.length > prevAskCount.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('🙋 Ben suggested an essay topic!', { body: 'Open the Essays app → Topics to say yes or no.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevAskCount.current = topicAsks.length
+  }, [topicAsks.length])
+
+  const topicAnswers = unseenTopicAnswers(essayTopics, activeProfileId)
+  const prevAnswers = useRef(topicAnswers.length)
+  useEffect(() => {
+    if (topicAnswers.length > prevAnswers.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('💡 Dad answered your topic!', { body: 'Open the Essays app → Ideas to see what he said.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevAnswers.current = topicAnswers.length
+  }, [topicAnswers.length])
+
   // ping Diogo when Ben asks for a free freeze (his streak is usually on the line)
   const freezeAsks =
     activeProfileId === PARENT_ID ? freezeRequests.filter((r) => r.status === 'pending' && r.fromId === KID_ID) : []
@@ -328,7 +358,7 @@ export default function App() {
     checkers: boardWaiting('checkers'),
     admin: freezeAsks.length + unpaidGifts.length,
     bank: pendingPaybacks.length,
-    essay: essaysToMark.length + essaysToFix.length,
+    essay: essaysToMark.length + essaysToFix.length + topicAsks.length + topicAnswers.length,
   }
 
   const openDef = open ? appById(open.app) : undefined
@@ -464,6 +494,38 @@ export default function App() {
           </div>
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('essay', 'write') }}>
             Fix it
+          </button>
+        </div>
+      ))}
+
+      {topicAsks.map((t) => (
+        <div className="banner" key={t.id}>
+          <span style={{ fontSize: 20 }}>🙋</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              {t.suggestedByName ?? 'Ben'} wants to write “{t.title}”
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>his own idea · say yes or no</div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('essay', 'topics') }}>
+            Decide
+          </button>
+        </div>
+      ))}
+
+      {topicAnswers.map((t) => (
+        <div className="banner" key={t.id}>
+          <span style={{ fontSize: 20 }}>💡</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              Dad {t.status === 'kept' ? 'said yes' : 'said no'} to “{t.title}”
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>
+              {t.status === 'kept' ? 'it’s on your Write list now' : 'send him another idea'}
+            </div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('essay', 'ideas') }}>
+            See it
           </button>
         </div>
       ))}

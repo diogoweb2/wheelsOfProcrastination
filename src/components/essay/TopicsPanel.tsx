@@ -6,7 +6,7 @@
 // Ben only ever sees the ones that are on.
 import { useState } from 'react'
 import { useStore } from '../../store/useStore'
-import { TOPIC_BATCH } from '../../logic/essay'
+import { TOPIC_BATCH, pendingTopics } from '../../logic/essay'
 import { ESSAY_MODEL_NOTE, manualTopic, type TopicOffer } from '../../logic/essayAi'
 import { AiWaiting } from './AiWaiting'
 import { sfx } from '../../audio'
@@ -22,6 +22,7 @@ export function TopicsPanel() {
     essaySetTopicEnabled,
     essaySetTopicWords,
     essayDeleteTopic,
+    essayDecideTopic,
     aiConfig,
   } = useStore()
 
@@ -30,6 +31,7 @@ export function TopicsPanel() {
   const [manual, setManual] = useState({ title: '', blurb: '', subject: '' })
   const kept = essayTopics.filter((t) => t.status === 'kept')
   const binned = essayTopics.filter((t) => t.status === 'rejected')
+  const asked = pendingTopics(essayTopics)
 
   async function ask() {
     sfx.click()
@@ -46,6 +48,41 @@ export function TopicsPanel() {
 
   return (
     <>
+      {/* His own asks go first: they're the only thing on this screen that
+          somebody is waiting on, and an idea he chose is one he'll want to
+          write. Approve and it joins the list exactly like one you wrote. */}
+      {asked.length > 0 && (
+        <>
+          <div className="h2">🙋 {asked.length} idea{asked.length === 1 ? '' : 's'} from Ben</div>
+          {asked.map((t) => (
+            <div className="card" key={t.id} style={{ marginBottom: 10, borderColor: 'var(--gold)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="chip">{t.subject}</span>
+                <span className="chip">🙋 {t.suggestedByName ?? 'Ben'}</span>
+              </div>
+              <div style={{ fontWeight: 900, fontSize: 16, marginTop: 6 }}>{t.title}</div>
+              {t.blurb && <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>{t.blurb}</p>}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <button
+                  className="btn btn--small"
+                  style={{ flex: 1 }}
+                  onClick={() => { sfx.click(); essayDecideTopic(t.id, true) }}
+                >
+                  ✓ Approve
+                </button>
+                <button
+                  className="btn btn--ghost btn--small"
+                  style={{ flex: 1 }}
+                  onClick={() => { sfx.click(); essayDecideTopic(t.id, false) }}
+                >
+                  ✕ Turn down
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
       <div className="h2">💡 New topics</div>
       <div className="card">
         <div className="field" style={{ marginBottom: 10 }}>
@@ -105,6 +142,7 @@ export function TopicsPanel() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="chip">{t.subject}</span>
             {t.source === 'parent' && <span className="chip">✍️ yours</span>}
+            {t.source === 'kid' && <span className="chip">🙋 {t.suggestedByName ?? 'Ben'} asked for this</span>}
             <button
               className={`btn btn--small ${t.enabled ? '' : 'btn--ghost'}`}
               style={{ marginLeft: 'auto' }}

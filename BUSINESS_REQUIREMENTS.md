@@ -671,6 +671,16 @@ Last-write-wins on one doc is safe here for the same reason it is on the duel bo
 3. A kept topic has a **switch**: Ben only ever sees the enabled ones. Dropping a topic hides it *and* records it as a rejection, so it can't come back through the front door.
 4. Diogo can write topics by hand, and set each topic's **word target** (default 150).
 
+#### 19c-1. Ben suggests a topic — Diogo approves it
+
+A topic he picked himself is the one he'll actually want to write, so the road in exists — it just goes past Dad.
+
+1. Ben has his own **💡 Ideas** tab (its own tab, not a corner of the Write screen, so it's still reachable while an essay is in flight — which is exactly when the next idea turns up). Title, optionally why he wants it and a subject, then **📨 Send it to Dad**. Plain keyboard: a topic title is never marked or graded, so §19d's no-autocorrect rule doesn't apply to it.
+2. The ask lands in the same `topics[]` list as everything else with status **`suggested`**, `source: 'kid'`, and who asked. Two consequences, both deliberate: the AI is told never to offer that title (it's already on the list), and **nothing appears on Ben's Write list** — `suggested` is inert until it's answered.
+3. **Three asks may be waiting at once.** Not a punishment: a queue of thirty is how a good idea turns into something nobody answers. A duplicate title is refused on the spot.
+4. Diogo's **Topics** tab shows his asks **first**, above everything else — they're the only thing on that screen someone is waiting on. **✓ Approve** → the topic becomes `kept` + enabled and **joins the normal flow exactly as if Diogo had written it** (same word target, same switch, same everything, with a chip saying whose idea it was). **✕ Turn down** → `rejected`, which also means the AI is told never to offer it.
+5. **The answer always comes back.** Ben gets a push and a home-screen banner either way, and the Ideas tab keeps every ask he ever sent with what happened to it. An ask nobody answers is worse than no ask at all.
+
 ### 19d. Writing — our own keyboard
 
 Every field in the editor is `inputMode="none"` with spellcheck, autocorrect and autocapitalise off, so **the Android keyboard never opens** and `<PenKeyboard>` is what he types on. This is not decoration: a keyboard that silently fixes "definately" means he never finds out he can't spell it, and an essay is exactly where that is supposed to be found out. The layout is the **standard US phone layout** key for key (letters / `?123` / `#+=`, shift with a double-tap caps lock), so nothing learned here has to be unlearned on a real keyboard. There are no word suggestions.
@@ -747,6 +757,6 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 
 ### 19i. Notifications
 
-`onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, and Ben once (never once per topic) when new topics go up. Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
+`onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, Ben once (never once per topic) when new topics go up, Diogo when Ben suggests a topic, and Ben when that suggestion is answered either way (§19c-1). Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

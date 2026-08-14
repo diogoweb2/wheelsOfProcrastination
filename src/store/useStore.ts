@@ -145,10 +145,12 @@ import {
   AUTO_CLOSE_ISSUES,
   DEFAULT_MIN_WORDS,
   autoResolve,
+  canSuggestTopic,
   ESSAY_CAP,
   WORD_CAP,
   WORD_COIN,
   gradeCoins,
+  titleTaken,
   newEssay,
   openComments,
   openSpelling,
@@ -547,6 +549,15 @@ interface StoreState {
   essaySuggestTopics: (count: number, steer: string) => Promise<TopicOffer[]>
   /** Keep an offer (goes on Ben's list, enabled) or bin it (never offered again). */
   essayJudgeTopic: (offer: TopicOffer, keep: boolean, source?: 'ai' | 'parent') => void
+  /**
+   * The writer's side: ask for a topic of his own. It lands `suggested` and does
+   * nothing at all until the parent answers. Returns why it was refused, or ''.
+   */
+  essayAskTopic: (input: { title: string; blurb: string; subject: string }) => string
+  /** The parent's answer to one of his asks: approved (goes live) or turned down. */
+  essayDecideTopic: (topicId: string, approve: boolean) => void
+  /** The asker has read the answer — stops the badge and the banner. */
+  essayMarkTopicSeen: (topicId: string) => void
   essaySetTopicEnabled: (topicId: string, enabled: boolean) => void
   essaySetTopicWords: (topicId: string, minWords: number) => void
   essayDeleteTopic: (topicId: string) => void
@@ -2893,6 +2904,64 @@ export const useStore = create<StoreState>((set, get) => {
         createdAt: new Date().toISOString(),
       }
       saveEssayDesk({ topics: [...essayTopics, topic] })
+    },
+
+    /**
+     * Ben asks for a topic of his own.
+     *
+     * It goes into the same list as everything else, so it is covered by the
+     * "never offer this again" list from the moment he types it — the AI can't
+     * propose an idea that is already sitting on Dad's desk. `suggested` is
+     * inert: `writableTopics` ignores it, so nothing appears on his write screen
+     * until the answer comes back.
+     */
+    essayAskTopic({ title, blurb, subject }) {
+      const { essayTopics, activeProfileId } = get()
+      const me = get().activeProfile()
+      if (!activeProfileId || !me) return 'Sign in first.'
+      const clean = title.trim().slice(0, 120)
+      if (!clean) return 'Give your idea a title.'
+      if (titleTaken(essayTopics, clean)) return 'That one is already on the list.'
+      const room = canSuggestTopic(essayTopics, activeProfileId)
+      if (!room.ok) return room.why
+      const topic: EssayTopic = {
+        id: crypto.randomUUID(),
+        title: clean,
+        blurb: blurb.trim().slice(0, 240),
+        subject: subject.trim().slice(0, 40) || 'My idea',
+        status: 'suggested',
+        enabled: false,
+        minWords: DEFAULT_MIN_WORDS,
+        source: 'kid',
+        createdAt: new Date().toISOString(),
+        suggestedById: activeProfileId,
+        suggestedByName: me.name,
+      }
+      saveEssayDesk({ topics: [...essayTopics, topic] })
+      return ''
+    },
+
+    /**
+     * The parent's answer. Approved joins the normal flow exactly as if Diogo
+     * had written the topic himself — kept, enabled, same word target, same
+     * everything. Turned down keeps it as a rejection, so the AI is told never
+     * to offer it either.
+     */
+    essayDecideTopic(topicId, approve) {
+      const now = new Date().toISOString()
+      saveEssayDesk({
+        topics: get().essayTopics.map((t) =>
+          t.id === topicId
+            ? { ...t, status: approve ? ('kept' as const) : ('rejected' as const), enabled: approve, decidedAt: now }
+            : t,
+        ),
+      })
+    },
+
+    essayMarkTopicSeen(topicId) {
+      saveEssayDesk({
+        topics: get().essayTopics.map((t) => (t.id === topicId ? { ...t, seenAt: new Date().toISOString() } : t)),
+      })
     },
 
     essaySetTopicEnabled(topicId, enabled) {

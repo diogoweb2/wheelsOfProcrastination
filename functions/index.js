@@ -296,13 +296,35 @@ export const onEssaysWrite = onDocumentWritten('app/essays', async (event) => {
   }
 
   // New topics going up is worth exactly one buzz, however many landed at once.
-  const knownTopics = new Set((beforeDoc.topics ?? []).map((t) => t.id))
+  const knownTopics = new Map((beforeDoc.topics ?? []).map((t) => [t.id, t]))
   const fresh = (afterDoc.topics ?? []).filter((t) => !knownTopics.has(t.id) && t.status === 'kept' && t.enabled)
   if (fresh.length) {
     await pushTo(KID_ID, {
       title: `💡 ${fresh.length} new essay topic${fresh.length === 1 ? '' : 's'}!`,
       body: `${fresh.map((t) => t.title).slice(0, 2).join(' · ')}${fresh.length > 2 ? '…' : ''} — pick one and write.`,
     })
+  }
+
+  // Ben asking for a topic of his own, and the answer coming back (§19c-1).
+  // Both halves are diffed by id + status, so re-saving the desk is silent.
+  const asked = (afterDoc.topics ?? []).filter((t) => !knownTopics.has(t.id) && t.status === 'suggested')
+  for (const t of asked) {
+    await pushTo(PARENT_ID, {
+      title: `🙋 ${t.suggestedByName ?? 'Ben'} suggested an essay topic`,
+      body: `"${t.title}" — open the Essays app → Topics to approve or turn it down.`,
+    })
+  }
+
+  for (const t of afterDoc.topics ?? []) {
+    const prev = knownTopics.get(t.id)
+    if (!prev || prev.status !== 'suggested' || t.status === 'suggested') continue
+    if (!t.suggestedById) continue
+    await pushTo(
+      t.suggestedById,
+      t.status === 'kept'
+        ? { title: '✅ Your topic got approved!', body: `"${t.title}" is on your Write list — go and write it.` }
+        : { title: '💡 Dad turned that topic down', body: `Not "${t.title}" this time. Send him another idea.` },
+    )
   }
 })
 

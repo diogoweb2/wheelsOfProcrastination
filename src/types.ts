@@ -924,18 +924,29 @@ export type EssayGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C
  * proposal ends up here either `kept` (the parent liked it) or `rejected` (they
  * didn't) — and BOTH lists are sent back to the AI as "never offer these
  * again", which is what stops it circling the same five ideas forever.
+ *
+ * Ben can propose one too (§19c-1): it lands as `suggested` and sits there,
+ * invisible to him as something to write, until Diogo approves it (→ `kept`) or
+ * turns it down (→ `rejected`). A topic he chose himself is the one he'll
+ * actually want to write, so the road in exists — it just goes past Dad.
  */
 export interface EssayTopic {
   id: string
   title: string
   blurb: string // one line of what the essay should cover, in his language
   subject: string // "Science", "Community", "Sports" — just for the chip on the card
-  status: 'kept' | 'rejected'
+  status: 'kept' | 'rejected' | 'suggested'
   /** Kept topics still have a switch: Ben only ever sees the enabled ones. */
   enabled: boolean
   minWords: number // the target length, shown as a progress bar while he writes
-  source: 'ai' | 'parent'
+  source: 'ai' | 'parent' | 'kid'
   createdAt: string
+  /** `kid` topics only: who asked for it, so the answer goes back to the right person. */
+  suggestedById?: string
+  suggestedByName?: string
+  /** When the parent answered a suggestion, and whether the asker has read the answer. */
+  decidedAt?: string
+  seenAt?: string
 }
 
 /**

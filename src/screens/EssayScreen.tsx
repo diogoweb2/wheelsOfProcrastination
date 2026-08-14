@@ -10,6 +10,7 @@ import { HistoryPanel } from '../components/essay/HistoryPanel'
 import { TopicsPanel } from '../components/essay/TopicsPanel'
 import { ReviewPanel } from '../components/essay/ReviewPanel'
 import { WordsPanel } from '../components/essay/WordsPanel'
+import { AskTopicPanel } from '../components/essay/AskTopicPanel'
 
 export function EssayScreen({ tab }: { tab: string }) {
   const { activeProfileId } = useStore()
@@ -27,6 +28,7 @@ export function EssayScreen({ tab }: { tab: string }) {
       ) : (
         <>
           {tab === 'write' && <WritePanel />}
+          {tab === 'ideas' && <AskTopicPanel />}
           {tab === 'words' && <WordsPanel />}
           {tab === 'marked' && <HistoryPanel authorId={activeProfileId ?? undefined} />}
         </>

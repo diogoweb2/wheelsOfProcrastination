@@ -294,6 +294,56 @@ export function usedTitles(topics: EssayTopic[]): string[] {
   return topics.map((t) => t.title)
 }
 
+// --- the writer's own ideas (§19c-1) ----------------------------------------
+//
+// A topic he picked himself is the one he'll actually want to write, so he can
+// ask for one — but asking is all he can do. The suggestion sits in the same
+// list as everything else, marked `suggested`, and nothing about it reaches his
+// write screen until Diogo approves it.
+
+/**
+ * How many of his asks can be waiting at once. Not a punishment: three pending
+ * ideas is already more than a parent wants to read in one sitting, and a queue
+ * of thirty is how a good idea turns into something nobody answers.
+ */
+export const SUGGEST_CAP = 3
+
+/** Everything waiting on the parent's answer, oldest first — that's the order to read them in. */
+export function pendingTopics(topics: EssayTopic[]): EssayTopic[] {
+  return topics.filter((t) => t.status === 'suggested')
+}
+
+/** One writer's asks — pending and answered — newest first. */
+export function myTopicAsks(topics: EssayTopic[], profileId: string | null | undefined): EssayTopic[] {
+  if (!profileId) return []
+  return topics
+    .filter((t) => t.source === 'kid' && t.suggestedById === profileId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+/** Answered, but he hasn't read the answer yet — what the badge and the banner are counting. */
+export function unseenTopicAnswers(topics: EssayTopic[], profileId: string | null | undefined): EssayTopic[] {
+  return myTopicAsks(topics, profileId).filter((t) => t.status !== 'suggested' && t.decidedAt && !t.seenAt)
+}
+
+/** May he send another one? Only the still-unanswered ones count against the cap. */
+export function canSuggestTopic(
+  topics: EssayTopic[],
+  profileId: string | null | undefined,
+): { ok: boolean; why: string } {
+  const waiting = pendingTopics(topics).filter((t) => t.suggestedById === profileId).length
+  if (waiting >= SUGGEST_CAP) {
+    return { ok: false, why: `You already have ${waiting} ideas waiting for Dad. Wait for those first.` }
+  }
+  return { ok: true, why: '' }
+}
+
+/** Is this title already on the list (in any state)? Stops the same idea being asked twice. */
+export function titleTaken(topics: EssayTopic[], title: string): boolean {
+  const want = title.trim().toLowerCase()
+  return !!want && topics.some((t) => t.title.trim().toLowerCase() === want)
+}
+
 // --- the word bank ----------------------------------------------------------
 //
 // Every word the proofreader catches goes in here with the right spelling and a
