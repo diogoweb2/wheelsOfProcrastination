@@ -715,6 +715,7 @@ A hand-written note used to mean retyping his sentence into a text box character
 - **Tapping an existing mark opens it** instead of starting a selection: what it says, who raised it, and the usual last word — ✏️ reword it, ✕ disagree, ✓ he fixed it, 🔎 find it. A tap anywhere else starts a new note, so one gesture does both jobs without a mode switch.
 - **A selection that lands on words that are already marked says so**, right in the form, above the box.
 - The kind of problem is a **row of chips**, one tap, not a dropdown.
+- **The written note is optional.** A circled word tagged 🔤 Spelling has already said what is wrong; making Diogo type "spelling" underneath it is a toll on the marks that need no words, and a toll paid often enough gets marks skipped. Leave the box empty and the note reads as the chip's own standard sentence ("Spelling — fix this word."), so Ben still gets a sentence to read on the fix sheet. Typing something replaces it.
 - **The desk and the red pen hold the same essay.** Opening one on the Desk and stepping across to the pen keeps it; the pen's own list is only there for a cold start (a bookmark straight to `/essay/pen`).
 
 **The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
@@ -774,7 +775,7 @@ Because rule notes are raised before anyone has read the essay, **they don't cou
 
 What replaces it: **his marked-up essay is the screen**, and every fix starts by tapping the thing that is circled.
 
-- **The sheet opens over his text**, the same way the red pen's does, and it holds one note: what was said, the words it points at, a box, and **Before** and **After** one above the other so he can see the change before committing to it.
+- **The sheet opens over his text**, the same way the red pen's does, and it holds one note: what was said, the words it points at, a **Before** panel, and the box he types in. The box *is* the after — a third panel echoing his own typing back at him is a copy of the thing he is already looking at.
 - **How much he gets to edit depends on what is wrong** (`editWindow`). A **spelling** or a **missing capital** opens **the word alone** — those have one right answer inside one word, and handing him the sentence invites him to rewrite around the problem instead of solving it. Everything else (clarity, punctuation, an idea that needs work) opens **the sentence the mark sits in**, capped at ten words either side: "hard to follow" on three words is almost never fixable inside those three words, and the words on either side usually have to move too.
 - **Only the marked slice is spliced back in.** The rest of the paragraph cannot be touched from here, so a round of fixes can't quietly become a rewrite.
 - **It is the same no-autocorrect keyboard** as the editor (§19d). A sheet that let Android's keyboard fix his spelling would undo the entire exercise.

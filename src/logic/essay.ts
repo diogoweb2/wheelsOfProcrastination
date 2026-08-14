@@ -306,6 +306,20 @@ export const ISSUE_LABEL: Record<EssayComment['issue'], string> = {
   praise: 'Nice one',
 }
 
+/**
+ * What the note says when the reviewer didn't write anything. Some marks don't
+ * need a sentence — a circled word tagged "spelling" has already said it — but
+ * Ben still reads a note on the fix sheet, so it can never be blank.
+ */
+export const ISSUE_DEFAULT_NOTE: Record<EssayComment['issue'], string> = {
+  spelling: 'Spelling — fix this word.',
+  punctuation: 'Punctuation — something is wrong here.',
+  case: 'This needs a capital letter.',
+  clarity: 'This bit is hard to follow.',
+  idea: 'This idea needs more work.',
+  praise: 'Nice one.',
+}
+
 export const ISSUE_EMOJI: Record<EssayComment['issue'], string> = {
   spelling: '🔤',
   punctuation: '✏️',

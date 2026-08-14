@@ -3725,7 +3725,7 @@ input, select { font-family: inherit; }
   text-transform: uppercase; letter-spacing: 0.5px;
   margin: 14px 0 6px;
 }
-.fix-before, .fix-after {
+.fix-before {
   padding: 10px 12px;
   border-radius: 12px;
   border: 2px solid var(--line);
@@ -3735,7 +3735,6 @@ input, select { font-family: inherit; }
   white-space: pre-wrap;
 }
 .fix-before { opacity: 0.75; }
-.fix-after.is-changed { border-color: var(--green); }
 .fix-box {
   width: 100%;
   padding: 12px;

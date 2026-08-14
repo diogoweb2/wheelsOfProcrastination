@@ -14,6 +14,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
 import {
+  ISSUE_DEFAULT_NOTE,
   ISSUE_EMOJI,
   ISSUE_LABEL,
   essayWords,
@@ -343,13 +344,13 @@ function AddNoteSheet({
         </div>
 
         <div className="field">
-          <label>The note (he reads this exactly as written)</label>
+          <label>The note — optional (he reads this exactly as written)</label>
           <textarea
             autoFocus
             rows={3}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Say what’s wrong — don’t write the fix."
+            placeholder={ISSUE_DEFAULT_NOTE[issue]}
           />
         </div>
 
@@ -357,10 +358,11 @@ function AddNoteSheet({
           <button
             className="btn btn--small"
             style={{ flex: 1 }}
-            disabled={!text.trim()}
             onClick={() => {
               sfx.click()
-              onAdd({ para: pick.para, issue, text: text.trim(), ...(pick.quote ? { quote: pick.quote } : {}) })
+              // Nothing typed: the kind of mark says it on its own.
+              const note = text.trim() || ISSUE_DEFAULT_NOTE[issue]
+              onAdd({ para: pick.para, issue, text: note, ...(pick.quote ? { quote: pick.quote } : {}) })
               onClose()
             }}
           >

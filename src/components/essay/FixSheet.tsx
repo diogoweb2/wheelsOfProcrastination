@@ -106,11 +106,13 @@ export function FixSheet({
           )}
         </div>
 
+        {/* No "after" panel: the box IS the after. Showing his own typing back to
+            him a second time is a copy of the thing he is looking at. */}
         <div className="fix-label">
-          Your fix
+          After — your fix
           <span className="muted" style={{ fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
             {' '}
-            — change only this bit
+            (change only this bit)
           </span>
         </div>
         <textarea
@@ -133,11 +135,6 @@ export function FixSheet({
           onChange={(e) => setText(e.target.value)}
           onFocus={() => setTyping(true)}
         />
-
-        <div className="fix-label">After</div>
-        <div className={`fix-after${changed ? ' is-changed' : ''}`}>
-          {text.trim() ? text : <span className="muted">(nothing there yet)</span>}
-        </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
           <button
