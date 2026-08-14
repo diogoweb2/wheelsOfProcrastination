@@ -11,7 +11,7 @@
 // grade or a missing field is dropped rather than trusted. Every call throws a
 // readable error on failure — the desk shows it, nothing is faked.
 import type { AiConfig, Essay, EssayComment, EssayGrade } from '../types'
-import { GRADES, essayText } from './essay'
+import { GRADES, MECHANICAL_ISSUES, essayText } from './essay'
 import { askOpenRouter, shortAiError, sliceJson } from './openrouter'
 
 export { aiReady as essayAiReady } from './openrouter'
@@ -204,9 +204,14 @@ ${essay.paragraphs.map((p, i) => `PARAGRAPH ${i + 1}: ${p}`).join('\n')}`
 }
 
 /**
- * Mark up one submission. The hard rule — repeated three times in the prompt
- * because models love to be helpful — is that it must never supply the
- * corrected text. He has to find the fix himself; that is the entire exercise.
+ * Mark up one submission — **mechanics only**: spelling, punctuation, capital
+ * letters. Whether the argument holds up, whether the paragraph wanders, whether
+ * it's any good: that is the parent's judgement, made by hand, and it is
+ * deliberately not delegated to a cheap model.
+ *
+ * The other hard rule — repeated three times in the prompt, because models love
+ * to be helpful — is that it must never supply the corrected text. He has to
+ * find the fix himself; that is the entire exercise.
  */
 export async function reviewEssay(ctx: EssayCtx, essay: Essay, topicBlurb: string): Promise<DraftComment[]> {
   const prompt = `${whoBlock(essay.authorName)}
@@ -218,44 +223,49 @@ His essay:
 ${essayBlock(essay)}
 """
 
-Mark it up for him. Give:
-1. Every MISSPELLED word — one note each, with the misspelled word EXACTLY as he typed it in "quote".
-2. Every PUNCTUATION mistake — a missing or wrong full stop, comma, apostrophe or capital letter. Put the two or three words around the problem in "quote" so it can be circled.
-3. Two to five notes on the WRITING itself: a sentence that is hard to understand, a paragraph that jumps around, a point that needs an example, a word repeated too often.
-4. One or two "praise" notes on what genuinely works. Be honest — do not invent praise.
+Proofread it. Look ONLY for these three things:
+1. "spelling" — every misspelled word. One note each, with the misspelled word EXACTLY as he typed it in "quote".
+2. "punctuation" — a missing or wrong full stop, comma, question mark or apostrophe. Put the two or three words around the problem in "quote".
+3. "case" — a capital-letter mistake: a lowercase "i" for the word I, a sentence that doesn't start with a capital, a name or a place without one, or a capital in the middle of a word. Put the word in "quote".
+
+Do NOT comment on anything else. Say nothing about his ideas, his structure, how clear it is, how interesting it is, or how it could be better — someone else is handling all of that. If the spelling and punctuation are clean, answer with an empty list.
 
 ABSOLUTE RULES:
-- NEVER write the correction. Do not give the correct spelling, do not rewrite his sentence, do not show him the fixed version. Say WHAT is wrong and WHY it matters, and let him fix it.
+- NEVER write the correction. Do not give the correct spelling, do not rewrite his sentence, do not show him the fixed version. Say WHAT is wrong and let him fix it.
 - Write every note in simple language a ${schoolProfile().age}-year-old understands. Short sentences. No grammar jargon: say "this needs a full stop" not "terminal punctuation is absent".
-- Be kind but honest. He is practising, and a note he can act on is a gift.
+- Canadian spellings (colour, favourite, centre, travelled) are CORRECT. Never flag one as a misspelling.
 - "quote" must be text copied EXACTLY from the essay, character for character. If you cannot copy it exactly, leave "quote" out.
 - "para" is the paragraph number as labelled above (1, 2, 3…), or 0 for the title.
 
 Answer with ONLY this JSON array, no prose and no markdown fence:
-[{"para": <number>, "quote": "<exact text from the essay, or omit>", "issue": "spelling|punctuation|clarity|idea|praise", "text": "<the note, max 30 words>"}]`
+[{"para": <number>, "quote": "<exact text from the essay>", "issue": "spelling|punctuation|case", "text": "<the note, max 25 words>"}]`
 
   const reply = await askEssay(ctx, {
     system:
-      'You are a patient middle-school writing teacher. You point out what is wrong and never fix it yourself, because the student learns by fixing it. You answer with raw JSON and nothing else.',
+      'You are a careful proofreader for a middle-school student. You mark spelling, punctuation and capital letters ONLY, you never fix anything yourself because the student learns by fixing it, and you answer with raw JSON and nothing else.',
     prompt,
-    temperature: 0.4,
+    temperature: 0.2,
   })
 
   const raw = JSON.parse(sliceJson(reply, '[', ']')) as unknown
   if (!Array.isArray(raw)) throw new Error('the model did not answer with a list')
-  const issues: EssayComment['issue'][] = ['spelling', 'punctuation', 'clarity', 'idea', 'praise']
   const out: DraftComment[] = []
   for (const row of raw as Record<string, unknown>[]) {
     const text = typeof row.text === 'string' ? row.text.trim() : ''
     if (!text) continue
-    const issue = issues.includes(row.issue as EssayComment['issue']) ? (row.issue as EssayComment['issue']) : 'clarity'
+    // Anything off-list lands on `punctuation`, which is the one mechanical kind
+    // the app never closes by itself — a mislabelled note can't slip through.
+    const issue = MECHANICAL_ISSUES.includes(row.issue as EssayComment['issue'])
+      ? (row.issue as EssayComment['issue'])
+      : 'punctuation'
     // "PARAGRAPH 1" is index 0; 0 means the title, which we store as -1
     const paraRaw = Math.round(Number(row.para))
     const para = Number.isFinite(paraRaw) ? Math.min(Math.max(paraRaw - 1, -1), essay.paragraphs.length - 1) : 0
     const quote = typeof row.quote === 'string' ? row.quote.trim() : ''
     out.push({ para, issue, text: text.slice(0, 220), ...(quote ? { quote: quote.slice(0, 120) } : {}) })
   }
-  if (!out.length) throw new Error('the review came back empty')
+  // An empty list is a real answer now: "nothing misspelled" is a thing a
+  // proofreader is allowed to say, and it is what a clean second round looks like.
   return out
 }
 
@@ -294,7 +304,7 @@ ${open
   .join('\n')}
 
 For EACH note, decide whether the new version actually deals with it.
-- "fixed" = the problem is genuinely gone. A spelling note is only fixed when the word is now spelled correctly. A clarity note is fixed when the sentence is now easy to follow — not merely reworded.
+- "fixed" = the problem is genuinely gone. A spelling note is fixed only when the word is now spelled correctly; a capital-letter note only when the capital is right; a punctuation note only when the mark is actually there and correct. Anything else is fixed only when the problem itself is gone, not merely reworded.
 - "unfixed" = still there, or he changed something else instead, or he made it worse.
 - The note is one short sentence for HIM, in simple language. If it is still unfixed, say what is still wrong WITHOUT writing the correction.
 

@@ -939,11 +939,19 @@ export interface EssayTopic {
 }
 
 /**
- * What one note is about. `spelling` is the only kind the app is allowed to
- * close on its own — a word is spelled right or it isn't — everything else waits
- * for the parent to agree.
+ * What one note is about.
+ *
+ * The first three are MECHANICAL — spelling, punctuation, capital letters — and
+ * they are the only things the AI is asked to look for. They have right answers,
+ * which is exactly why a machine can be trusted with them, and two of them
+ * (`spelling`, `case`) are objective enough that the app closes them on its own
+ * once they're fixed.
+ *
+ * The rest — is it clear, is the idea any good — are the parent's to raise by
+ * hand. Judging whether a 12-year-old's argument holds up is not a job to hand
+ * to a cheap model.
  */
-export type EssayIssue = 'spelling' | 'punctuation' | 'clarity' | 'idea' | 'praise'
+export type EssayIssue = 'spelling' | 'punctuation' | 'case' | 'clarity' | 'idea' | 'praise'
 
 /**
  * One note on the essay. Notes never contain the fix: the AI is instructed to
@@ -1007,6 +1015,12 @@ export interface Essay {
   submittedAt?: string
   returnedAt?: string
   gradedAt?: string
+  /**
+   * When the writer last spent an AI call checking his own fixes. Sending is
+   * locked for a few minutes afterwards (see `RESEND_COOLDOWN_MS`) — the check
+   * costs money, and "submit, submit, submit" is otherwise free to him.
+   */
+  lastCheckAt?: string
   /** Set once the author's app has celebrated the grade, so it only pops once. */
   seenAt?: string
 }

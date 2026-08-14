@@ -647,7 +647,7 @@ Born 2014, TCDSB (Toronto Catholic District School Board), Ontario. Every prompt
 
 | Where | What |
 |---|---|
-| `app/essays` (shared) | `topics[]` (the curated list) + `essays[]` (every essay, capped at 40). Both crewmates read it live: an enabled topic appears on Ben's list, a submission appears on Diogo's desk. |
+| `app/essays` (shared) | `topics[]` (the curated list) + `essays[]` (every essay, capped at 40). Both crewmates read it live: an enabled topic appears on Ben's list, a submission appears on Diogo's desk. Each essay also carries `lastCheckAt`, which is what the five-minute resend cooldown is measured from. |
 | `app/aiConfig` (shared) | The same OpenRouter key and model as the Gym coach (§18b). One key, one spend cap. |
 | `profiles/{id}.economy` | Where the Berries land when an essay is graded. |
 
@@ -669,13 +669,26 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 ### 19e. The loop
 
 1. **Hand it in.** Diogo gets a push and a banner.
-2. **🤖 Mark it up.** The AI returns: every misspelled word, every punctuation mistake, two to five notes on the writing itself, and one or two honest bits of praise. Each note carries the **exact quote** to circle — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not circled; the note still shows.
-3. **Diogo has the last word on every note**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote), ✕ **Disagree** (it disappears; Ben never sees it), or add his own note by hand (where, what to circle, what kind, what it says).
-4. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **circled where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
-5. **He sends it again** → **🔁 Check his fixes**: one AI verdict per open note, fixed or not, with a one-line reason. **Spelling verdicts close themselves** — a word is spelled right or it isn't, and making a parent tick off thirty obvious ones is how a good idea stops getting used. **Everything else waits for Diogo to tap ✓.**
-6. **Round again, or grade.** The loop repeats until no note is open.
+2. **🤖 Mark it up — mechanics only.** The AI proofreads for exactly three things: **spelling**, **punctuation**, and **capital letters** (a lowercase "i", a sentence starting small, a name without its capital). It is told explicitly to say nothing about ideas, structure or clarity. Each note carries the **exact quote** to mark — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not marked; the note still shows. "It found nothing" is a real answer and is said out loud, so it can't be mistaken for "it never ran".
+3. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
+4. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
+5. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
+6. **He sends it again — and the app checks him first** (§19e-2). Once it's past that gate, Diogo's **🔁 Check his fixes** gives one AI verdict per open note, fixed or not, with a one-line reason. **Spelling and capital-letter verdicts close themselves** — both have a right answer, and making a parent tick off thirty obvious ones is how a good idea stops getting used. **Punctuation and anything Diogo wrote wait for his ✓.**
+7. **Round again, or grade.** The loop repeats until no note is open.
 
-The AI is told three times, in three different prompts, that it must **never supply the correction**. Notes say what is wrong and why, in language a 12-year-old reads without help — no grammar jargon.
+The AI is told three times, in three different prompts, that it must **never supply the correction**. Notes say what is wrong and why, in language a 12-year-old reads without help — no grammar jargon. Canadian spellings are explicitly correct and never flagged.
+
+#### 19e-1. Adding a note: point, don't type
+
+A hand-written note used to mean retyping his sentence into a text box character for character — and a quote that doesn't match exactly never gets marked, so the fiddliest part of reviewing was also the part most likely to fail silently. Instead: **tap the first word, then tap the last word**. The same word twice is a one-word note. A 📌 button takes the whole paragraph. The quote is sliced straight out of his text, so it always matches. Then pick the kind and write the note.
+
+**The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
+
+#### 19e-2. The spelling gate, and the five-minute wait
+
+From round 2 on, **his own send button spends an AI call first**: it checks his fixes, and if any word is *still* misspelled it does not go to Diogo. He is told how many are wrong and pointed back at the marks — never told what the words should be.
+
+Either way, **the button then locks for five minutes**. The check costs real money and "send" is otherwise a free spellchecker he can mash. The button counts the wait down and says why. Diogo's own check button has no such limit.
 
 ### 19f. The grade and the Berries
 

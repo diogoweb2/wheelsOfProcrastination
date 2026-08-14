@@ -138,7 +138,16 @@ import {
   advanceLadder,
 } from '../logic/gym'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
-import { ESSAY_CAP, DEFAULT_MIN_WORDS, gradeCoins, newEssay, openComments } from '../logic/essay'
+import {
+  AUTO_CLOSE_ISSUES,
+  DEFAULT_MIN_WORDS,
+  ESSAY_CAP,
+  gradeCoins,
+  newEssay,
+  openComments,
+  openSpelling,
+  resendWaitMs,
+} from '../logic/essay'
 import {
   checkFixes,
   essayAiError,
@@ -263,6 +272,8 @@ interface StoreState {
   /** Which model is being waited on, and since when — the desk counts the 60 seconds down out loud. */
   essayAttempt: (EssayAttempt & { startedAt: number }) | null
   essayError: string | null // the last AI failure, verbatim — the desk shows it instead of pretending
+  /** The result of the writer's last self-check: did his fixes get past the spelling gate? */
+  essayCheck: { ok: boolean; stillWrong: number } | null
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
   gymFellBack: string | null
@@ -534,8 +545,16 @@ interface StoreState {
   /** Start (or reopen) an essay on a topic. Returns its id. */
   essayStart: (topicId: string) => string | null
   essaySaveDraft: (essayId: string, patch: { title?: string; paragraphs?: string[] }) => void
-  /** Hand it in — first time, or with this round's fixes. */
+  /** Hand it in — first time, or with this round's fixes. No checks, no questions. */
   essaySubmit: (essayId: string) => void
+  /**
+   * The writer's send button. From round 2 on, the AI checks his fixes first and
+   * refuses to pass it on while words are still misspelled — and either way the
+   * button is locked for five minutes afterwards, because each check is a real
+   * AI call.
+   */
+  essaySubmitChecked: (essayId: string) => Promise<'sent' | 'spelling' | 'wait' | 'failed'>
+  essayClearCheck: () => void
   /** Parent side: run the AI over the submission and add its notes. */
   essayAiReview: (essayId: string) => Promise<void>
   /** Parent side: ask the AI whether each open note was actually fixed. */
@@ -832,6 +851,43 @@ export const useStore = create<StoreState>((set, get) => {
     }
   }
 
+  /**
+   * Ask the AI whether each open note was dealt with, and fold the verdicts in.
+   * Used from both ends of the loop: the parent's "check his fixes" button and
+   * the writer's own send button. Returns false if the AI never answered.
+   */
+  async function runFixCheck(essayId: string): Promise<boolean> {
+    const essay = get().essays.find((e) => e.id === essayId)
+    if (!essay) return false
+    const open = openComments(essay)
+    if (!open.length) return true
+    set({ essayBusy: 'fixes', essayError: null })
+    try {
+      const verdicts = await checkFixes(essayCtx(), essay, open)
+      patchEssay(essayId, (e) => {
+        e.comments = e.comments.map((c) => {
+          const v = verdicts.find((x) => x.id === c.id)
+          if (!v) return c
+          const next: EssayComment = { ...c, aiVerdict: v.verdict, aiNote: v.note }
+          // Spelling and capital letters close themselves — both have a right
+          // answer. Everything else waits for a human to agree.
+          if (v.verdict === 'fixed' && AUTO_CLOSE_ISSUES.includes(c.issue)) {
+            next.status = 'fixed'
+            next.resolvedAt = new Date().toISOString()
+          }
+          return next
+        })
+        return e
+      })
+      return true
+    } catch (e) {
+      set({ essayError: essayAiError(e) })
+      return false
+    } finally {
+      set({ essayBusy: null, essayAttempt: null })
+    }
+  }
+
   /** Patch one essay in the shared desk (local set + write-through). */
   function patchEssay(essayId: string, fn: (e: Essay) => Essay) {
     const { essayTopics, essays } = get()
@@ -885,6 +941,7 @@ export const useStore = create<StoreState>((set, get) => {
     essayBusy: null,
     essayAttempt: null,
     essayError: null,
+    essayCheck: null,
     gymPlanning: false,
     gymFellBack: null,
 
@@ -2898,35 +2955,49 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     async essayAiCheckFixes(essayId) {
-      const essay = get().essays.find((e) => e.id === essayId)
-      if (!essay) return
-      const open = openComments(essay)
-      if (!open.length) return
-      set({ essayBusy: 'fixes', essayError: null })
-      try {
-        const verdicts = await checkFixes(essayCtx(), essay, open)
-        patchEssay(essayId, (e) => {
-          e.comments = e.comments.map((c) => {
-            const v = verdicts.find((x) => x.id === c.id)
-            if (!v) return c
-            const next: EssayComment = { ...c, aiVerdict: v.verdict, aiNote: v.note }
-            // Spelling is the one thing the app closes on its own: a word is
-            // spelled right or it isn't, and making a parent tick off thirty
-            // obvious ones is how a good idea stops getting used. Everything
-            // else waits for a human to agree.
-            if (v.verdict === 'fixed' && c.issue === 'spelling') {
-              next.status = 'fixed'
-              next.resolvedAt = new Date().toISOString()
-            }
-            return next
-          })
-          return e
-        })
-      } catch (e) {
-        set({ essayError: essayAiError(e) })
-      } finally {
-        set({ essayBusy: null, essayAttempt: null })
+      await runFixCheck(essayId)
+    },
+
+    /**
+     * The writer's own send button. From round 2 on it costs an AI call: the
+     * spelling has to be actually fixed before Dad's desk hears about it again,
+     * and a failed check locks the button for five minutes so "send" can't be
+     * used as a spellchecker.
+     */
+    async essaySubmitChecked(essayId) {
+      const before = get().essays.find((e) => e.id === essayId)
+      if (!before) return 'sent'
+      // The first hand-in has nothing to check against, and a draft with no
+      // notes on it is just a draft.
+      if (before.round === 0 || openComments(before).length === 0) {
+        get().essaySubmit(essayId)
+        return 'sent'
       }
+      if (resendWaitMs(before) > 0) return 'wait'
+
+      set({ essayCheck: null })
+      const ok = await runFixCheck(essayId)
+      // The check itself is what costs money, so the clock starts whether it
+      // passed or failed.
+      patchEssay(essayId, (e) => {
+        e.lastCheckAt = new Date().toISOString()
+        return e
+      })
+      if (!ok) return 'failed' // the AI never answered; the error banner says why
+
+      const after = get().essays.find((e) => e.id === essayId)
+      const stillWrong = after ? openSpelling(after).length : 0
+      if (stillWrong > 0) {
+        set({ essayCheck: { ok: false, stillWrong } })
+        return 'spelling'
+      }
+      set({ essayCheck: { ok: true, stillWrong: 0 } })
+      get().essaySubmit(essayId)
+      return 'sent'
+    },
+
+    essayClearCheck() {
+      set({ essayCheck: null })
     },
 
     essayAddComment(essayId, c) {

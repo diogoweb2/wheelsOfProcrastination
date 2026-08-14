@@ -3633,3 +3633,19 @@ input, select { font-family: inherit; }
   border: 1px solid var(--line); overflow: hidden; margin-top: 8px;
 }
 .ai-wait-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
+
+/* A phrase-length note is underlined, not ringed: circling half a sentence
+   reads as "all of this is wrong", which is both untrue and crushing. */
+.essay-mark--span {
+  border: none;
+  border-bottom: 2px dotted var(--mark, var(--red));
+  border-radius: 0;
+  background: rgb(255 255 255 / 7%);
+  padding: 1px 2px;
+}
+.essay-mark--span.is-done { border-bottom-style: dashed; }
+
+/* Word-picking mode: tap the first word, then the last one. */
+.wp-word { border-radius: 5px; padding: 1px 1px; cursor: pointer; }
+.wp-word:active { background: var(--card2); }
+.wp-word.is-anchor { background: var(--yellow); color: #3a2000; font-weight: 900; }

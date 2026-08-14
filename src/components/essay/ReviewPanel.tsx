@@ -1,10 +1,13 @@
-// The reviewer's desk. The AI does the reading; the parent has the last word on
-// every single note — keep it, reword it, bin it, or write one of their own.
+// The reviewer's desk.
+//
+// The AI proofreads — spelling, punctuation, capital letters, and nothing else.
+// Whether the writing is any GOOD is the parent's call, made by hand: tap the
+// first word, tap the last, say what's wrong. And the parent has the last word
+// on the machine's notes too — keep it, reword it, or bin it.
 //
 // The loop: mark it → send it back → he fixes → check the fixes → agree or send
-// it round again → grade. Spelling is the only thing that closes itself, because
-// a word is either spelled right or it isn't and nobody should have to tick off
-// thirty of those by hand.
+// it round again → grade. Spelling and capitals close themselves, because both
+// have a right answer and nobody should tick off thirty of those by hand.
 import { useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
@@ -12,6 +15,7 @@ import { ISSUE_LABEL, essayWords, openComments, readyToGrade } from '../../logic
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
 import { AiWaiting } from './AiWaiting'
+import { WordPicker, type WordPick } from './WordPicker'
 import { sfx } from '../../audio'
 
 export function ReviewPanel() {
@@ -73,7 +77,11 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
 
   const [picked, setPicked] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null)
-  const [adding, setAdding] = useState(false)
+  // Two steps: point at the words, then say what's wrong with them.
+  const [picking, setPicking] = useState(false)
+  const [adding, setAdding] = useState<WordPick | null>(null)
+  // "It found nothing" and "it never ran" look identical on screen otherwise.
+  const [ranReview, setRanReview] = useState(false)
 
   const open = openComments(essay)
   const canGrade = readyToGrade(essay)
@@ -102,7 +110,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
           className="btn btn--blue btn--small"
           style={{ flex: 1 }}
           disabled={!!essayBusy}
-          onClick={() => { sfx.click(); void essayAiReview(essay.id) }}
+          onClick={async () => { sfx.click(); await essayAiReview(essay.id); setRanReview(true) }}
         >
           {essayBusy === 'review' ? '🤖 Reading…' : reviewed ? '🤖 Mark it again' : '🤖 Mark it up'}
         </button>
@@ -136,7 +144,11 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
 
       <div className="h2">📝 Notes — {open.length} open</div>
       {essay.comments.length === 0 && (
-        <p className="muted" style={{ fontSize: 13 }}>No notes yet. Mark it up, or write your own below.</p>
+        <p className="muted" style={{ fontSize: 13 }}>
+          {ranReview
+            ? '✅ The proofreader found no spelling, punctuation or capital-letter mistakes. Anything about the writing itself is yours to add.'
+            : 'No notes yet. Mark it up, or write your own below.'}
+        </p>
       )}
       {essay.comments.map((c) => (
         <div key={c.id} style={{ marginBottom: 10 }}>
@@ -184,10 +196,25 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
         </div>
       ))}
 
-      {adding ? (
-        <AddNote essay={essay} onDone={() => setAdding(false)} onAdd={(n) => essayAddComment(essay.id, n)} />
-      ) : (
-        <button className="btn btn--ghost" onClick={() => { sfx.click(); setAdding(true) }}>➕ Add my own note</button>
+      {picking && (
+        <WordPicker
+          essay={essay}
+          onCancel={() => setPicking(false)}
+          onPick={(p) => { setPicking(false); setAdding(p) }}
+        />
+      )}
+      {adding && (
+        <AddNote
+          pick={adding}
+          onRepick={() => { setAdding(null); setPicking(true) }}
+          onDone={() => setAdding(null)}
+          onAdd={(n) => essayAddComment(essay.id, n)}
+        />
+      )}
+      {!picking && !adding && (
+        <button className="btn btn--ghost" onClick={() => { sfx.click(); setPicking(true) }}>
+          ➕ Add my own note
+        </button>
       )}
 
       <div style={{ marginTop: 16 }}>
@@ -218,36 +245,36 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
   )
 }
 
-/** The parent's own note: point at a paragraph, quote the bit, say what's wrong. */
+/**
+ * The parent's own note. The words are already chosen — copied straight out of
+ * his text by the picker, so the quote always matches and always gets marked.
+ * All that's left is what kind of problem it is and what to say about it.
+ */
 function AddNote({
-  essay,
+  pick,
   onAdd,
   onDone,
+  onRepick,
 }: {
-  essay: Essay
+  pick: WordPick
   onAdd: (n: Omit<EssayComment, 'id' | 'round' | 'source' | 'status'>) => void
   onDone: () => void
+  onRepick: () => void
 }) {
-  const [para, setPara] = useState(0)
-  const [quote, setQuote] = useState('')
   const [issue, setIssue] = useState<EssayIssue>('clarity')
   const [text, setText] = useState('')
-  const issues: EssayIssue[] = ['spelling', 'punctuation', 'clarity', 'idea', 'praise']
+  const issues: EssayIssue[] = ['clarity', 'idea', 'praise', 'spelling', 'punctuation', 'case']
 
   return (
     <div className="card">
-      <div className="field">
-        <label>Where</label>
-        <select value={para} onChange={(e) => setPara(Number(e.target.value))}>
-          <option value={-1}>The title</option>
-          {essay.paragraphs.map((_, i) => (
-            <option key={i} value={i}>Paragraph {i + 1}</option>
-          ))}
-        </select>
+      <div className="essay-para-head">
+        <span>{pick.para === -1 ? 'Title' : `Paragraph ${pick.para + 1}`}</span>
+        <button className="btn btn--ghost btn--small essay-para-x" style={{ color: 'var(--text)' }} onClick={onRepick}>
+          ↺ Pick again
+        </button>
       </div>
-      <div className="field">
-        <label>Circle this bit (optional — must match his text exactly)</label>
-        <input type="text" value={quote} onChange={(e) => setQuote(e.target.value)} />
+      <div className="essay-note-quote" style={{ marginBottom: 10 }}>
+        {pick.quote ? `“${pick.quote}”` : '(the whole thing)'}
       </div>
       <div className="field">
         <label>Kind</label>
@@ -268,7 +295,7 @@ function AddNote({
           disabled={!text.trim()}
           onClick={() => {
             sfx.click()
-            onAdd({ para, issue, text: text.trim(), ...(quote.trim() ? { quote: quote.trim() } : {}) })
+            onAdd({ para: pick.para, issue, text: text.trim(), ...(pick.quote ? { quote: pick.quote } : {}) })
             onDone()
           }}
         >

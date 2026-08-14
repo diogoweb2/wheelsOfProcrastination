@@ -58,17 +58,20 @@ function Line({
     <p className={className}>
       {chunks.map((chunk, i) =>
         chunk.comment ? (
+          // One word gets the teacher's circle. A whole phrase does NOT — ringing
+          // half a sentence reads as "all of this is wrong", which is both untrue
+          // and crushing. A phrase gets a quiet tinted underline instead.
           <mark
             key={i}
-            className={`essay-mark${selectedId === chunk.comment.id ? ' is-picked' : ''}${
-              chunk.comment.status === 'fixed' ? ' is-done' : ''
-            }`}
+            className={`essay-mark${/\s/.test(chunk.text.trim()) ? ' essay-mark--span' : ''}${
+              selectedId === chunk.comment.id ? ' is-picked' : ''
+            }${chunk.comment.status === 'fixed' ? ' is-done' : ''}`}
             style={{ '--mark': issueTint(chunk.comment.issue) } as React.CSSProperties}
             onClick={() => onSelect?.(chunk.comment!.id)}
             title={chunk.comment.text}
           >
             {chunk.text}
-            <sup>{ISSUE_EMOJI[chunk.comment.issue]}</sup>
+            {!/\s/.test(chunk.text.trim()) && <sup>{ISSUE_EMOJI[chunk.comment.issue]}</sup>}
           </mark>
         ) : (
           <span key={i}>{chunk.text}</span>

@@ -135,6 +135,8 @@ export function issueTint(issue: EssayComment['issue']): string {
       return 'var(--red)'
     case 'punctuation':
       return 'var(--orange)'
+    case 'case':
+      return 'var(--ice)'
     case 'praise':
       return 'var(--green)'
     default:
@@ -145,6 +147,7 @@ export function issueTint(issue: EssayComment['issue']): string {
 export const ISSUE_LABEL: Record<EssayComment['issue'], string> = {
   spelling: 'Spelling',
   punctuation: 'Punctuation',
+  case: 'Capital letter',
   clarity: 'Hard to follow',
   idea: 'Make it stronger',
   praise: 'Nice one',
@@ -153,9 +156,52 @@ export const ISSUE_LABEL: Record<EssayComment['issue'], string> = {
 export const ISSUE_EMOJI: Record<EssayComment['issue'], string> = {
   spelling: '🔤',
   punctuation: '✏️',
+  case: '🔠',
   clarity: '🤔',
   idea: '💡',
   praise: '⭐',
+}
+
+/**
+ * What the AI is allowed to look for. Everything here has a right answer, which
+ * is the entire reason a cheap model can be trusted with it.
+ */
+export const MECHANICAL_ISSUES: EssayComment['issue'][] = ['spelling', 'punctuation', 'case']
+
+/**
+ * The two the app closes without asking a human. A word is spelled right or it
+ * isn't, and "i" either got its capital or it didn't — making a parent tick off
+ * thirty of those by hand is how a good idea stops getting used. Punctuation
+ * stays manual: a model's opinion about a comma is an opinion.
+ */
+export const AUTO_CLOSE_ISSUES: EssayComment['issue'][] = ['spelling', 'case']
+
+/**
+ * How long the writer must wait between self-checks. Each one is a real AI call
+ * on Dad's credit, and without a cooldown "send" becomes a button he mashes.
+ */
+export const RESEND_COOLDOWN_MS = 5 * 60_000
+
+/** Milliseconds still to wait before he can send again. 0 = go ahead. */
+export function resendWaitMs(essay: Essay, now = Date.now()): number {
+  if (!essay.lastCheckAt) return 0
+  return Math.max(0, new Date(essay.lastCheckAt).getTime() + RESEND_COOLDOWN_MS - now)
+}
+
+/** m:ss, for a button that has to say how long the wait is. */
+export function waitClock(ms: number): string {
+  const total = Math.ceil(ms / 1000)
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** Still-open notes the app is willing to judge on its own. */
+export function openAutoIssues(essay: Essay): EssayComment[] {
+  return openComments(essay).filter((c) => AUTO_CLOSE_ISSUES.includes(c.issue))
+}
+
+/** Still-misspelled words: the gate he has to get through before Dad sees it again. */
+export function openSpelling(essay: Essay): EssayComment[] {
+  return openComments(essay).filter((c) => c.issue === 'spelling')
 }
 
 /** Topics the writer is allowed to pick from right now. */
