@@ -3773,7 +3773,19 @@ input, select { font-family: inherit; }
 }
 /* The same pulse, held for the five seconds the app gives itself to say
    "these are the ones I just found" — then it gets out of the way. */
-.essay-mark.is-flash--long { animation-iteration-count: 8; }
+.essay-mark.is-flash--long {
+  animation: mark-flash-loud 0.62s ease-in-out 8;
+  scroll-margin: 40vh 0;
+}
+@keyframes mark-flash-loud {
+  0%, 100% { background: rgb(255 255 255 / 7%); box-shadow: none; }
+  50% {
+    background: var(--yellow);
+    color: #3a2000;
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 6px rgb(255 206 0 / 45%);
+  }
+}
 @keyframes mark-flash {
   0%, 100% { background: rgb(255 255 255 / 7%); box-shadow: none; }
   50% { background: var(--yellow); color: #3a2000; box-shadow: 0 0 0 4px rgb(255 206 0 / 35%); }

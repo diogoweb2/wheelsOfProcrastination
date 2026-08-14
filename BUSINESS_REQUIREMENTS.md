@@ -768,7 +768,7 @@ The reasoning is the same as the rules' own: a missing capital has a right answe
 - **Each item also sits under the box it belongs to**, so "paragraph 3" never has to be worked out.
 - **Free, instant, offline, and unlimited.** There is no cooldown on it, because there is nothing to spend.
 - **The escape hatch is Diogo's** — a rule note he disagrees with is `dismissed` and never blocks again (§19e-2).
-- **In phase 2 the gate is a flash, not a wall.** When a send is turned back by the rules on the marked-up essay, the circles the app raised **pulse for five seconds** — that is the whole announcement. Then the page goes quiet and the circles speak for themselves. A banner that stayed up for the rest of the round only added noise to a page already covered in notes.
+- **In phase 2 the gate is a flash, not a wall.** When a send is turned back by the rules on the marked-up essay, the circles the app raised **pulse for five seconds**, and the first of them is scrolled into view — a mark pulsing below the fold is the same as no mark at all. That is the whole announcement. Then the page goes quiet and the circles speak for themselves. A banner that stayed up for the rest of the round only added noise to a page already covered in notes.
 
 Because rule notes are raised before anyone has read the essay, **they don't count as "it has been marked"**: an essay carrying nothing but rule notes cannot be sent back or graded, and the desk says so.
 
@@ -785,7 +785,8 @@ What replaces it: **his marked-up essay is the screen**, and every fix starts by
 - **Saving is immediate**, not the one-second autosave: he pressed a button that says save, and the marks that redraw underneath have to be about text that is actually written down. The app then re-reads it for free — a machine note whose problem has gone closes itself (§19e-3) and the built-in rules re-run over the new sentence.
 - **A note a person wrote is closed by the save**, because nothing can check "is it clearer now?" by itself, and Diogo sees the change next round anyway.
 - **A note with nothing left to circle gets a card of its own** under the essay, with a ✓ *I've sorted this*. Otherwise a note whose words he had already rewritten would vanish off the screen while still counting against him.
-- **A sorted mark, and every ⭐, does not reopen on tap.** They are there to be read.
+- **A sorted mark leaves the page.** Only what is still to do stays circled on his copy (⭐ praise stays too). A settled note used to hang around as a dashed circle it was pointless to tap, and by round three the essay was more old circles than new ones — the one thing left to fix was impossible to spot. It also cost the §19e-4 flash: where two notes' quotes overlap, the mark goes to whichever comes first in the list, so a settled note could quietly steal the circle off an open one. The count and the progress bar still remember them; Diogo's red pen still shows them all.
+- **⭐ praise does not reopen on tap.** It is there to be read.
 - **A progress bar counts what's sorted**, and the send button says what it is for: *🤖 Check my fixes (3 still circled)* while anything is open, *📬 Send it back to Dad* once nothing is. It is never disabled by the count — a spelling he has re-broken would otherwise be a locked door, and the spelling gate (§19e-3) is the thing that decides whether it moves.
 
 ### 19f. The word bank — "My Words" (the 🔤 tab)

@@ -259,8 +259,13 @@ function FixPhase({ essay }: { essay: Essay }) {
   useEffect(() => {
     if (!gatedAt) return
     setGated(true)
+    // Scroll the first one into view — a mark pulsing below the fold is the
+    // same as no mark at all.
+    const raf = requestAnimationFrame(() => {
+      document.querySelector('.essay-mark.is-flash--long')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
     const t = setTimeout(() => setGated(false), 5000)
-    return () => clearTimeout(t)
+    return () => { cancelAnimationFrame(raf); clearTimeout(t) }
   }, [gatedAt])
 
   const note = essay.comments.find((c) => c.id === fixing) ?? null
@@ -324,7 +329,13 @@ function FixPhase({ essay }: { essay: Essay }) {
       <div className="card">
         <MarkedEssay
           essay={essay}
-          comments={essay.comments}
+          // Only what is still to do. A sorted mark hung around as a dashed
+          // circle it was pointless to tap, and by round three the page was
+          // more old circles than new ones — the one thing left to fix was
+          // impossible to spot. It also cost the flash below: overlapping
+          // spans are won by whichever note comes first in the list, so a
+          // settled note could quietly steal the mark off an open one.
+          comments={essay.comments.filter((c) => c.status !== 'fixed')}
           selectedId={fixing}
           flashIds={flashIds}
           // a sorted mark (and every ⭐) is there to be read, not reopened
