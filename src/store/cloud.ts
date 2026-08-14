@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -271,6 +271,29 @@ export function subscribeFinalTests(cb: (tests: FinalTestAuth[]) => void): () =>
 export async function saveFinalTests(tests: FinalTestAuth[]): Promise<void> {
   await ensureAuth()
   await setDoc(finalTestsRef(), { tests })
+}
+
+// --- essays (the topic list Dad curates + the essays Ben writes) ------------
+//
+// One doc, both halves, because the whole feature is a conversation between the
+// two sides: a topic Dad enables shows up on Ben's list, an essay Ben submits
+// shows up on Dad's desk, and the review rounds bounce between them. Same
+// last-write-wins arrangement as the duel board, and safe for the same reason:
+// at any moment exactly one side is holding the essay.
+
+const essaysRef = () => doc(firestore, 'app', 'essays')
+
+/** Live-sync the essay desk: the curated topic list and every essay in flight. */
+export function subscribeEssays(cb: (v: { topics: EssayTopic[]; essays: Essay[] }) => void): () => void {
+  return onSnapshot(essaysRef(), (snap) => {
+    const data = snap.data() as { topics?: EssayTopic[]; essays?: Essay[] } | undefined
+    cb({ topics: data?.topics ?? [], essays: data?.essays ?? [] })
+  })
+}
+
+export async function saveEssays(topics: EssayTopic[], essays: Essay[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(essaysRef(), { topics, essays })
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

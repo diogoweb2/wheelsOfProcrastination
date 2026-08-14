@@ -890,6 +890,109 @@ export interface GymState {
   keepAwake: boolean // hold a screen Wake Lock during a session
 }
 
+// --- Essays (the ✍️ Essay app, shared `app/essays` doc) ---------------------
+//
+// One doc holds both halves: the TOPIC LIST the parent curates (AI proposes,
+// the parent keeps or bins, and a binned title is never proposed again) and the
+// ESSAYS themselves. Both crewmates read it live, because the whole feature is
+// a conversation: Ben writes, Dad reviews, Ben fixes, Dad agrees, Ben gets a
+// grade. See BUSINESS_REQUIREMENTS.md §19.
+
+/** School report-card grades, best first. Nothing below C- exists: this is practice, not a verdict. */
+export type EssayGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-'
+
+/**
+ * One thing Ben can be asked to write about. The AI proposes a batch; every
+ * proposal ends up here either `kept` (the parent liked it) or `rejected` (they
+ * didn't) — and BOTH lists are sent back to the AI as "never offer these
+ * again", which is what stops it circling the same five ideas forever.
+ */
+export interface EssayTopic {
+  id: string
+  title: string
+  blurb: string // one line of what the essay should cover, in his language
+  subject: string // "Science", "Community", "Sports" — just for the chip on the card
+  status: 'kept' | 'rejected'
+  /** Kept topics still have a switch: Ben only ever sees the enabled ones. */
+  enabled: boolean
+  minWords: number // the target length, shown as a progress bar while he writes
+  source: 'ai' | 'parent'
+  createdAt: string
+}
+
+/**
+ * What one note is about. `spelling` is the only kind the app is allowed to
+ * close on its own — a word is spelled right or it isn't — everything else waits
+ * for the parent to agree.
+ */
+export type EssayIssue = 'spelling' | 'punctuation' | 'clarity' | 'idea' | 'praise'
+
+/**
+ * One note on the essay. Notes never contain the fix: the AI is instructed to
+ * say what is wrong and why, never to write the sentence for him.
+ *
+ * `quote` is the exact text to circle in the paragraph. The renderer finds it by
+ * plain string search, so a quote the AI hallucinated simply doesn't get circled
+ * — the note still shows, nothing breaks.
+ */
+export interface EssayComment {
+  id: string
+  round: number // the review round it was raised in
+  para: number // paragraph index; -1 = the title
+  quote?: string // exact substring to circle
+  text: string // the note itself, written for a 12-year-old
+  issue: EssayIssue
+  source: 'ai' | 'parent'
+  edited?: boolean // the parent rewrote the AI's wording
+  /** `open` = he still has to deal with it; `fixed` = settled and out of his way. */
+  status: 'open' | 'fixed'
+  /** The AI's opinion of his fix, on the round after this note was raised. */
+  aiVerdict?: 'fixed' | 'unfixed'
+  aiNote?: string
+  resolvedAt?: string
+}
+
+/** A snapshot of the essay as it was submitted for one round, so the loop can be replayed. */
+export interface EssayVersion {
+  round: number
+  title: string
+  paragraphs: string[]
+  at: string
+}
+
+/**
+ * One essay, from blank page to grade.
+ *
+ * `writing` → he's drafting (autosaved). `submitted` → it's on Dad's desk.
+ * `returned` → the notes are back and he's fixing them. Round by round until no
+ * note is left open, then `graded`: a letter, two sentences of feedback, and the
+ * Berries that go with the letter.
+ */
+export interface Essay {
+  id: string
+  topicId: string
+  topicTitle: string // denormalised so a deleted topic never orphans an essay
+  authorId: string
+  authorName: string
+  title: string
+  paragraphs: string[]
+  status: 'writing' | 'submitted' | 'returned' | 'graded'
+  round: number // 1 on the first submission, +1 on every return
+  comments: EssayComment[]
+  versions: EssayVersion[]
+  grade?: EssayGrade
+  gradeGood?: string // "what you did well"
+  gradeImprove?: string // "what to try next time"
+  coins?: number
+  createdAt: string
+  updatedAt: string
+  submittedAt?: string
+  returnedAt?: string
+  gradedAt?: string
+  /** Set once the author's app has celebrated the grade, so it only pops once. */
+  seenAt?: string
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]

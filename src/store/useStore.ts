@@ -10,6 +10,9 @@ import type {
   DayScope,
   Effort,
   EffortFilter,
+  Essay,
+  EssayComment,
+  EssayTopic,
   ExerciseDef,
   ExerciseRating,
   FinalTestAuth,
@@ -59,6 +62,8 @@ import {
   saveBoardGames,
   saveFreezeDesk,
   saveFinalTests,
+  saveEssays,
+  subscribeEssays,
   subscribeAiConfig,
   subscribeData,
   subscribeGymCatalog,
@@ -125,6 +130,8 @@ import {
   advanceLadder,
 } from '../logic/gym'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
+import { ESSAY_CAP, DEFAULT_MIN_WORDS, gradeCoins, newEssay, openComments } from '../logic/essay'
+import { checkFixes, essayAiError, gradeEssay, reviewEssay, suggestTopics, type DraftComment, type TopicOffer } from '../logic/essayAi'
 
 /** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
 function deviceLabel(): string {
@@ -233,6 +240,10 @@ interface StoreState {
   qotdOpen: boolean // is the Question-of-the-Day modal showing?
   gymCatalog: GymCatalog | null // the shared basement (app/gymCatalog), live-synced
   aiConfig: AiConfig | null // OpenRouter key + model for the Gym coach (app/aiConfig), live-synced
+  essayTopics: EssayTopic[] // the curated topic list (app/essays), live-synced
+  essays: Essay[] // every essay in flight or finished (app/essays), live-synced
+  essayBusy: string | null // what the essay AI is doing right now ('topics' | 'review' | 'fixes' | 'grade'), for the spinner
+  essayError: string | null // the last AI failure, verbatim — the desk shows it instead of pretending
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
   gymFellBack: string | null
@@ -493,6 +504,37 @@ interface StoreState {
   gymSetExerciseNote: (exId: string, note: string) => void
   gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'aiOn' | 'soundOn' | 'keepAwake'>>) => void
   /** Add / edit / retire gear and exercises in the shared basement. */
+  // --- essays (the ✍️ Essay app; every action writes the shared app/essays doc) ---
+  /** Ask the AI for a fresh batch of ideas. Nothing is stored yet — the parent decides. */
+  essaySuggestTopics: (count: number, steer: string) => Promise<TopicOffer[]>
+  /** Keep an offer (goes on Ben's list, enabled) or bin it (never offered again). */
+  essayJudgeTopic: (offer: TopicOffer, keep: boolean, source?: 'ai' | 'parent') => void
+  essaySetTopicEnabled: (topicId: string, enabled: boolean) => void
+  essaySetTopicWords: (topicId: string, minWords: number) => void
+  essayDeleteTopic: (topicId: string) => void
+  /** Start (or reopen) an essay on a topic. Returns its id. */
+  essayStart: (topicId: string) => string | null
+  essaySaveDraft: (essayId: string, patch: { title?: string; paragraphs?: string[] }) => void
+  /** Hand it in — first time, or with this round's fixes. */
+  essaySubmit: (essayId: string) => void
+  /** Parent side: run the AI over the submission and add its notes. */
+  essayAiReview: (essayId: string) => Promise<void>
+  /** Parent side: ask the AI whether each open note was actually fixed. */
+  essayAiCheckFixes: (essayId: string) => Promise<void>
+  essayAddComment: (essayId: string, c: Omit<EssayComment, 'id' | 'round' | 'source' | 'status'>) => void
+  essayEditComment: (essayId: string, commentId: string, text: string) => void
+  /** "I disagree" — the note disappears and Ben never sees it. */
+  essayDeleteComment: (essayId: string, commentId: string) => void
+  /** "That's fixed" — settles one note without waiting for another round. */
+  essayResolveComment: (essayId: string, commentId: string, fixed: boolean) => void
+  /** Send the notes back to the writer. */
+  essayReturn: (essayId: string) => void
+  /** Close it out: the AI writes the grade, the writer gets the Berries. */
+  essayGrade: (essayId: string) => Promise<void>
+  essayMarkSeen: (essayId: string) => void
+  essayDelete: (essayId: string) => void
+  essayClearError: () => void
+
   gymSaveCatalog: (catalog: GymCatalog) => void
   /** Admin: the OpenRouter key + model the coach uses. */
   setAiConfig: (patch: Partial<AiConfig>) => void
@@ -629,6 +671,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
       subscribeFinalTests((tests) => set({ finalTests: tests }))
+      // the essay desk: Dad's topic list and every essay in flight
+      subscribeEssays(({ topics, essays }) => set({ essayTopics: topics, essays }))
       // the shared basement (gear + exercises) and the coach's OpenRouter config
       subscribeGymCatalog((c) => set({ gymCatalog: c }))
       subscribeAiConfig((c) => set({ aiConfig: c }))
@@ -745,6 +789,26 @@ export const useStore = create<StoreState>((set, get) => {
     saveFinalTestList(get().finalTests.map((t) => (t.id === authId ? { ...t, ...patch } : t)))
   }
 
+  /**
+   * Write-through for the essay desk. Capped like the other shared boards: only
+   * the most recent essays stay in the doc, and a graded one has nothing left to
+   * do but be read.
+   */
+  function saveEssayDesk(topics: EssayTopic[], essays: Essay[]) {
+    const kept = essays.slice(-ESSAY_CAP)
+    set({ essayTopics: topics, essays: kept })
+    fireAndForget(saveEssays(topics, kept))
+  }
+
+  /** Patch one essay in the shared desk (local set + write-through). */
+  function patchEssay(essayId: string, fn: (e: Essay) => Essay) {
+    const { essayTopics, essays } = get()
+    saveEssayDesk(
+      essayTopics,
+      essays.map((e) => (e.id === essayId ? { ...fn(structuredClone(e)), updatedAt: new Date().toISOString() } : e)),
+    )
+  }
+
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
     fireAndForget(saveIdeas(ideas))
@@ -784,6 +848,10 @@ export const useStore = create<StoreState>((set, get) => {
     qotdOpen: false,
     gymCatalog: null,
     aiConfig: null,
+    essayTopics: [],
+    essays: [],
+    essayBusy: null,
+    essayError: null,
     gymPlanning: false,
     gymFellBack: null,
 
@@ -2664,6 +2732,263 @@ export const useStore = create<StoreState>((set, get) => {
     gymSaveCatalog(catalog) {
       set({ gymCatalog: catalog })
       fireAndForget(saveGymCatalog(catalog))
+    },
+
+    // --- essays -------------------------------------------------------------
+    // The desk is a shared doc, so every action here is a write-through: the
+    // writer's side and the reviewer's side are literally looking at the same
+    // essay. The AI calls throw on failure and the reason is kept verbatim in
+    // `essayError` — a review that didn't happen must never look like one that
+    // found nothing wrong.
+
+    async essaySuggestTopics(count, steer) {
+      set({ essayBusy: 'topics', essayError: null })
+      try {
+        // every title ever offered, kept or binned — this is what stops it looping
+        const avoid = get().essayTopics.map((t) => t.title)
+        return await suggestTopics(get().aiConfig, count, avoid, steer)
+      } catch (e) {
+        set({ essayError: essayAiError(e) })
+        return []
+      } finally {
+        set({ essayBusy: null })
+      }
+    },
+
+    essayJudgeTopic(offer, keep, source = 'ai') {
+      const { essayTopics, essays } = get()
+      if (essayTopics.some((t) => t.title.toLowerCase() === offer.title.toLowerCase())) return
+      const topic: EssayTopic = {
+        id: crypto.randomUUID(),
+        title: offer.title,
+        blurb: offer.blurb,
+        subject: offer.subject,
+        status: keep ? 'kept' : 'rejected',
+        enabled: keep, // a kept topic is live straight away; the switch is there to take it back
+        minWords: DEFAULT_MIN_WORDS,
+        source,
+        createdAt: new Date().toISOString(),
+      }
+      saveEssayDesk([...essayTopics, topic], essays)
+    },
+
+    essaySetTopicEnabled(topicId, enabled) {
+      const { essayTopics, essays } = get()
+      saveEssayDesk(
+        essayTopics.map((t) => (t.id === topicId ? { ...t, enabled } : t)),
+        essays,
+      )
+    },
+
+    essaySetTopicWords(topicId, minWords) {
+      const { essayTopics, essays } = get()
+      const words = Math.max(30, Math.min(600, Math.round(minWords)))
+      saveEssayDesk(
+        essayTopics.map((t) => (t.id === topicId ? { ...t, minWords: words } : t)),
+        essays,
+      )
+    },
+
+    essayDeleteTopic(topicId) {
+      // Dropped from the list but NOT forgotten: it stays as a rejection so the
+      // AI is still told never to offer it again.
+      const { essayTopics, essays } = get()
+      saveEssayDesk(
+        essayTopics.map((t) => (t.id === topicId ? { ...t, status: 'rejected', enabled: false } : t)),
+        essays,
+      )
+    },
+
+    essayStart(topicId) {
+      const { essayTopics, essays, activeProfileId } = get()
+      const topic = essayTopics.find((t) => t.id === topicId)
+      const me = get().activeProfile()
+      if (!topic || !activeProfileId || !me) return null
+      // one draft per topic per writer — reopening picks up where he left off
+      const existing = essays.find((e) => e.topicId === topicId && e.authorId === activeProfileId && e.status === 'writing')
+      if (existing) return existing.id
+      const essay = newEssay(topic, activeProfileId, me.name)
+      saveEssayDesk(essayTopics, [...essays, essay])
+      return essay.id
+    },
+
+    essaySaveDraft(essayId, patch) {
+      patchEssay(essayId, (e) => {
+        if (patch.title !== undefined) e.title = patch.title.slice(0, 120)
+        if (patch.paragraphs) e.paragraphs = patch.paragraphs.map((p) => p.slice(0, 4000))
+        return e
+      })
+    },
+
+    essaySubmit(essayId) {
+      const now = new Date().toISOString()
+      patchEssay(essayId, (e) => {
+        e.round += 1
+        e.status = 'submitted'
+        e.submittedAt = now
+        // the snapshot is what the next round's fix-check compares against
+        e.versions = [...e.versions, { round: e.round, title: e.title, paragraphs: [...e.paragraphs], at: now }]
+        return e
+      })
+    },
+
+    async essayAiReview(essayId) {
+      const essay = get().essays.find((e) => e.id === essayId)
+      if (!essay) return
+      const topic = get().essayTopics.find((t) => t.id === essay.topicId)
+      set({ essayBusy: 'review', essayError: null })
+      try {
+        const drafts = await reviewEssay(get().aiConfig, essay, topic?.blurb ?? '')
+        patchEssay(essayId, (e) => {
+          e.comments = [
+            ...e.comments,
+            ...drafts.map((d: DraftComment) => ({
+              ...d,
+              id: crypto.randomUUID(),
+              round: e.round,
+              source: 'ai' as const,
+              // praise is not a chore: it shows up and settles itself
+              status: (d.issue === 'praise' ? 'fixed' : 'open') as EssayComment['status'],
+            })),
+          ]
+          return e
+        })
+      } catch (e) {
+        set({ essayError: essayAiError(e) })
+      } finally {
+        set({ essayBusy: null })
+      }
+    },
+
+    async essayAiCheckFixes(essayId) {
+      const essay = get().essays.find((e) => e.id === essayId)
+      if (!essay) return
+      const open = openComments(essay)
+      if (!open.length) return
+      set({ essayBusy: 'fixes', essayError: null })
+      try {
+        const verdicts = await checkFixes(get().aiConfig, essay, open)
+        patchEssay(essayId, (e) => {
+          e.comments = e.comments.map((c) => {
+            const v = verdicts.find((x) => x.id === c.id)
+            if (!v) return c
+            const next: EssayComment = { ...c, aiVerdict: v.verdict, aiNote: v.note }
+            // Spelling is the one thing the app closes on its own: a word is
+            // spelled right or it isn't, and making a parent tick off thirty
+            // obvious ones is how a good idea stops getting used. Everything
+            // else waits for a human to agree.
+            if (v.verdict === 'fixed' && c.issue === 'spelling') {
+              next.status = 'fixed'
+              next.resolvedAt = new Date().toISOString()
+            }
+            return next
+          })
+          return e
+        })
+      } catch (e) {
+        set({ essayError: essayAiError(e) })
+      } finally {
+        set({ essayBusy: null })
+      }
+    },
+
+    essayAddComment(essayId, c) {
+      patchEssay(essayId, (e) => {
+        e.comments = [
+          ...e.comments,
+          { ...c, id: crypto.randomUUID(), round: e.round, source: 'parent', status: c.issue === 'praise' ? 'fixed' : 'open' },
+        ]
+        return e
+      })
+    },
+
+    essayEditComment(essayId, commentId, text) {
+      patchEssay(essayId, (e) => {
+        e.comments = e.comments.map((c) => (c.id === commentId ? { ...c, text: text.slice(0, 300), edited: true } : c))
+        return e
+      })
+    },
+
+    essayDeleteComment(essayId, commentId) {
+      patchEssay(essayId, (e) => {
+        e.comments = e.comments.filter((c) => c.id !== commentId)
+        return e
+      })
+    },
+
+    essayResolveComment(essayId, commentId, fixed) {
+      patchEssay(essayId, (e) => {
+        e.comments = e.comments.map((c) =>
+          c.id === commentId
+            ? { ...c, status: fixed ? 'fixed' : 'open', ...(fixed ? { resolvedAt: new Date().toISOString() } : {}) }
+            : c,
+        )
+        return e
+      })
+    },
+
+    essayReturn(essayId) {
+      const now = new Date().toISOString()
+      patchEssay(essayId, (e) => {
+        e.status = 'returned'
+        e.returnedAt = now
+        return e
+      })
+    },
+
+    async essayGrade(essayId) {
+      const essay = get().essays.find((e) => e.id === essayId)
+      if (!essay) return
+      // Don't grade what we can't pay for: a grade with no Berries behind it is
+      // worse than waiting ten seconds for the writer's world to finish loading.
+      const canPay =
+        essay.authorId === get().activeProfileId || (essay.authorId === KID_ID && !!get().kidData && get().kidDataFresh)
+      if (!canPay) {
+        set({ essayError: `${essay.authorName}’s world hasn’t loaded from the cloud yet — give it a moment and try again.` })
+        return
+      }
+      set({ essayBusy: 'grade', essayError: null })
+      try {
+        const result = await gradeEssay(get().aiConfig, essay)
+        const coins = gradeCoins(result.grade)
+        patchEssay(essayId, (e) => {
+          e.status = 'graded'
+          e.grade = result.grade
+          e.gradeGood = result.good
+          e.gradeImprove = result.improve
+          e.coins = coins
+          e.gradedAt = new Date().toISOString()
+          return e
+        })
+        // the Berries land in the WRITER's world, whichever side is grading
+        commitFor(essay.authorId, (d) => {
+          d.economy.gems += coins
+          d.economy.totalGemsEarned += coins
+        })
+      } catch (e) {
+        set({ essayError: essayAiError(e) })
+      } finally {
+        set({ essayBusy: null })
+      }
+    },
+
+    essayMarkSeen(essayId) {
+      patchEssay(essayId, (e) => {
+        e.seenAt = new Date().toISOString()
+        return e
+      })
+    },
+
+    essayDelete(essayId) {
+      const { essayTopics, essays } = get()
+      saveEssayDesk(
+        essayTopics,
+        essays.filter((e) => e.id !== essayId),
+      )
+    },
+
+    essayClearError() {
+      set({ essayError: null })
     },
 
     setAiConfig(patch) {

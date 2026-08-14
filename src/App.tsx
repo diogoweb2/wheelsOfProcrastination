@@ -22,6 +22,7 @@ import { VoyageScreen } from './screens/VoyageScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { IdeasScreen } from './screens/IdeasScreen'
 import { GymScreen } from './screens/GymScreen'
+import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { scheduleDailyReminder } from './notifications'
@@ -36,7 +37,7 @@ type OpenApp = { app: string; tab: string } | null
 const LANDING: OpenApp = { app: 'wheel', tab: 'spin' }
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays } = useStore()
   const [open, setOpen] = useState<OpenApp>(LANDING)
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
@@ -206,6 +207,34 @@ export default function App() {
     prevTrades.current = openTrades.length
   }, [openTrades.length])
 
+  // Essays: the parent hears about a submission, the writer hears about the
+  // notes coming back. Both sides of the same loop, one effect each way.
+  const essaysToMark = activeProfileId === PARENT_ID ? essays.filter((e) => e.status === 'submitted') : []
+  const prevToMark = useRef(essaysToMark.length)
+  useEffect(() => {
+    if (essaysToMark.length > prevToMark.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('✍️ An essay landed on your desk!', { body: 'Open the Essays app to mark it up.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevToMark.current = essaysToMark.length
+  }, [essaysToMark.length])
+
+  const essaysToFix = essays.filter((e) => e.authorId === activeProfileId && e.status === 'returned')
+  const prevToFix = useRef(essaysToFix.length)
+  useEffect(() => {
+    if (essaysToFix.length > prevToFix.current && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('🔍 Your essay came back!', { body: 'Phase 2: see what’s circled and fix it.' })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevToFix.current = essaysToFix.length
+  }, [essaysToFix.length])
+
   // ping Diogo when Ben asks for a free freeze (his streak is usually on the line)
   const freezeAsks =
     activeProfileId === PARENT_ID ? freezeRequests.filter((r) => r.status === 'pending' && r.fromId === KID_ID) : []
@@ -279,6 +308,7 @@ export default function App() {
     checkers: boardWaiting('checkers'),
     admin: freezeAsks.length + unpaidGifts.length,
     bank: pendingPaybacks.length,
+    essay: essaysToMark.length + essaysToFix.length,
   }
 
   const openDef = open ? appById(open.app) : undefined
@@ -391,6 +421,32 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {essaysToMark.map((e) => (
+        <div className="banner" key={e.id}>
+          <span style={{ fontSize: 20 }}>✍️</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>{e.authorName} handed in “{e.title || e.topicTitle}”</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>round {e.round} · waiting for your red pen</div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('essay', 'desk') }}>
+            Review
+          </button>
+        </div>
+      ))}
+
+      {essaysToFix.map((e) => (
+        <div className="banner" key={e.id}>
+          <span style={{ fontSize: 20 }}>🔍</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Your essay came back!</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>“{e.title}” · fix what’s circled, then send it again</div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('essay', 'write') }}>
+            Fix it
+          </button>
+        </div>
+      ))}
 
       {openTrades.map((t) => (
         <div className="banner" key={t.id} style={{ background: 'var(--red)' }}>
@@ -519,6 +575,8 @@ function AppBodyRouter({
       return <BoardGameScreen kind="checkers" tab={open.tab} />
     case 'gym':
       return <GymScreen tab={open.tab} />
+    case 'essay':
+      return <EssayScreen tab={open.tab} />
     case 'ideas':
       return <IdeasScreen tab={open.tab} onDone={() => setTab('open')} />
     case 'logpose':

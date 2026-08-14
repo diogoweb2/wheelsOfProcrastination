@@ -257,6 +257,55 @@ export const onFinalTestWrite = onDocumentWritten('app/finalTests', async (event
   }
 })
 
+/**
+ * Essays: the loop only works if each side knows the ball is in their court.
+ * Ping Dad when one is handed in, ping the writer when the marked-up copy comes
+ * back, and ping him again when the grade lands. Diffed by id + status, so
+ * autosaving a draft (which writes this doc every few seconds) stays silent.
+ */
+export const onEssaysWrite = onDocumentWritten('app/essays', async (event) => {
+  const beforeDoc = event.data?.before?.data() ?? {}
+  const afterDoc = event.data?.after?.data() ?? {}
+  const before = new Map((beforeDoc.essays ?? []).map((e) => [e.id, e]))
+
+  for (const e of afterDoc.essays ?? []) {
+    const prev = before.get(e.id)
+    if (prev?.status === e.status && prev?.round === e.round) continue // nothing moved
+
+    if (e.status === 'submitted') {
+      await pushTo(PARENT_ID, {
+        title: `✍️ ${e.authorName} handed in an essay`,
+        body: `"${e.title || e.topicTitle}" — round ${e.round}. Open the Essays app to mark it up.`,
+      })
+    }
+
+    if (e.status === 'returned') {
+      const open = (e.comments ?? []).filter((c) => c.status === 'open').length
+      await pushTo(e.authorId, {
+        title: '🔍 Your essay came back!',
+        body: `${open} thing${open === 1 ? '' : 's'} to fix on "${e.title}". Nobody fixes it for you — that's the game.`,
+      })
+    }
+
+    if (e.status === 'graded') {
+      await pushTo(e.authorId, {
+        title: `🏅 Your essay got ${e.grade}!`,
+        body: `+${e.coins ?? 0} Berries for "${e.title}". Open the app to read the feedback.`,
+      })
+    }
+  }
+
+  // New topics going up is worth exactly one buzz, however many landed at once.
+  const knownTopics = new Set((beforeDoc.topics ?? []).map((t) => t.id))
+  const fresh = (afterDoc.topics ?? []).filter((t) => !knownTopics.has(t.id) && t.status === 'kept' && t.enabled)
+  if (fresh.length) {
+    await pushTo(KID_ID, {
+      title: `💡 ${fresh.length} new essay topic${fresh.length === 1 ? '' : 's'}!`,
+      body: `${fresh.map((t) => t.title).slice(0, 2).join(' · ')}${fresh.length > 2 ? '…' : ''} — pick one and write.`,
+    })
+  }
+})
+
 /** Sticker trades: ping whoever has to answer a newly-offered swap. */
 export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', async (event) => {
   const before = event.data?.before?.data() ?? {}

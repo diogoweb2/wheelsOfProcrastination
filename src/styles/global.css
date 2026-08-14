@@ -3498,3 +3498,100 @@ input, select { font-family: inherit; }
 .app-icon--folder .app-icon-emoji { transform: translateY(-6px); }
 
 .folder-page .icon-grid { margin-top: 16px; }
+
+/* ---------- essays (the ✍️ Essay app) ---------- */
+
+.essay-para { margin-bottom: 14px; }
+.essay-para-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  font-size: 12px; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.essay-para-x { margin-left: auto; color: var(--red); padding: 2px 8px; }
+.essay-para textarea {
+  width: 100%; padding: 12px; border-radius: 12px;
+  border: 2px solid var(--line); background: var(--bg2); color: var(--text);
+  font-family: inherit; font-size: 16px; line-height: 1.5; resize: none; overflow: hidden;
+}
+.essay-para textarea:focus { border-color: var(--blue); outline: none; }
+
+.essay-meter { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.essay-meter-bar { flex: 1; height: 10px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--line); overflow: hidden; }
+.essay-meter-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; transition: width 0.3s; }
+
+/* Read-back view: his words, with the problems ringed the way a teacher rings them. */
+.essay-read-title { font-size: 18px; font-weight: 900; margin-bottom: 10px; line-height: 1.3; }
+.essay-read-para { font-size: 15px; line-height: 1.65; margin-bottom: 12px; white-space: pre-wrap; }
+
+.essay-mark {
+  background: none;
+  color: inherit;
+  border: 2px solid var(--mark, var(--red));
+  border-radius: 50% / 46%;
+  padding: 1px 6px;
+  margin: 0 1px;
+  cursor: pointer;
+}
+.essay-mark sup { font-size: 9px; margin-left: 2px; }
+.essay-mark.is-picked { background: rgb(255 255 255 / 12%); }
+.essay-mark.is-done { border-style: dashed; opacity: 0.55; }
+
+.essay-note {
+  border: 2px solid var(--line);
+  border-left: 5px solid var(--mark, var(--red));
+  border-radius: 12px;
+  background: var(--card2);
+  padding: 10px 12px;
+}
+.essay-note-head { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.essay-note-quote { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.essay-note-text { font-size: 14px; line-height: 1.4; }
+.essay-note-verdict { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 800; }
+.essay-note-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.essay-grade { font-size: 56px; font-weight: 900; line-height: 1; }
+.essay-grade--small { font-size: 30px; min-width: 52px; text-align: center; }
+
+.essay-payline { display: flex; flex-wrap: wrap; gap: 6px; }
+.essay-pay {
+  flex: 1 1 60px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 4px; border-radius: 10px; background: var(--bg2); border: 1px solid var(--line);
+}
+
+/* ---------- our own keyboard (no autocorrect, ever) ---------- */
+
+.kb {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--app-w);
+  z-index: 40; /* above the app tab bar: while typing, the tabs are noise */
+  background: var(--bg2);
+  border-top: 2px solid var(--line);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+}
+.kb-bar { display: flex; align-items: center; gap: 8px; padding: 0 4px; }
+.kb-hint { flex: 1; font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kb-row { display: flex; gap: 4px; justify-content: center; }
+.kb-key {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 11px 2px;
+  border-radius: 8px;
+  background: var(--card2);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 40%);
+}
+.kb-key:active { transform: translateY(2px); box-shadow: none; background: var(--blue); color: #0c2338; }
+.kb-key--mod { flex: 1.4 1 0; font-size: 14px; font-weight: 900; background: var(--card); }
+.kb-key--mod.is-on { background: var(--yellow); color: #3a2000; }
+.kb-key--space { flex: 5 1 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+.kb-key--wide { flex: 0 0 auto; padding: 6px 12px; font-size: 12px; font-weight: 900; }

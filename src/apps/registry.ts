@@ -163,6 +163,23 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // write an essay, get it marked up, fix it, get graded — the parent holds
+    // the red pen and the AI does the reading
+    id: 'essay',
+    name: 'Essays',
+    icon: '✍️',
+    tint: ['#60bff5', '#123252'],
+    tabs: [
+      { id: 'write', label: 'Write', icon: '✍️' },
+      { id: 'marked', label: 'Marked', icon: '📚' },
+    ],
+    adminTabs: [
+      { id: 'desk', label: 'Desk', icon: '🖊️' },
+      { id: 'topics', label: 'Topics', icon: '💡' },
+      { id: 'marked', label: 'Marked', icon: '📚' },
+    ],
+  },
+  {
     id: 'gym',
     name: 'Gym',
     icon: '💪',

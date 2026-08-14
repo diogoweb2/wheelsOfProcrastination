@@ -42,6 +42,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
+| ✍️ **Essays** | *Ben:* Write · Marked — *Diogo:* Desk · Topics · Marked |
 | 💡 **Ideas** | Open · Done · New |
 | 🕐 **Clocks** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
@@ -211,7 +212,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
-  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests` and `onStickerTradeWrite` watches `app/stickerTrades`. Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
+  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19g). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
 - **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
   - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
   - **Diogo gets a second, separate push about Ben's** leftovers ("👦 Ben still has 2 must-dos") so he can remind him before bed.
@@ -617,5 +618,66 @@ The floor under all of this: an exercise with no honest demo keeps its emoji, wh
 The 20 built-in bodyweight moves are covered too: they live in **`src/logic/gymStarters.json`**, imported by both `src/logic/gym.ts` and the script, so there is one list and no drift. A built-in that finds a demo is written back to the catalog as an override row — the same mechanism the Gear tab uses to edit one.
 
 Re-runnable and idempotent: exercises that already have a demo are skipped unless `--refresh`. Flags: `--dry-run`, `--refresh`, `--reindex`, `--only=<id>`, `--pin=<ourId>:<theirId>` (force a specific ExerciseDB id), `--to=storage|public`, `--no-ai`, `--no-photos`, `--no-web`, `--gif=<ourId>:<url>`, `--key=`. In the app, **Gear → an exercise** plays its demo, names the library and the entry it came from, and offers a one-tap **"Wrong movement — remove it"**. Attribution is shown wherever demos appear.
+
+
+## 19. Essays — "the red pen" (the ✍️ Essays app)
+
+Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.
+
+Code: `src/logic/essay.ts` (rules, grades, mark-up), `src/logic/essayAi.ts` (the four AI calls), `src/logic/openrouter.ts` (shared with the Gym coach), `src/screens/EssayScreen.tsx` + `src/components/essay/*`, push in `functions/index.js` (`onEssaysWrite`).
+
+### 19a. Who is writing
+
+Born 2014, TCDSB (Toronto Catholic District School Board), Ontario. Every prompt carries that: the school grade is **derived from today's date** (it rolls over each September, so it is right next year without an edit), topics have to fit the Ontario curriculum and be fine for a Catholic school, and spelling is **Canadian English** (colour, favourite, centre).
+
+### 19b. Data
+
+| Where | What |
+|---|---|
+| `app/essays` (shared) | `topics[]` (the curated list) + `essays[]` (every essay, capped at 40). Both crewmates read it live: an enabled topic appears on Ben's list, a submission appears on Diogo's desk. |
+| `app/aiConfig` (shared) | The same OpenRouter key and model as the Gym coach (§18b). One key, one spend cap. |
+| `profiles/{id}.economy` | Where the Berries land when an essay is graded. |
+
+Last-write-wins on one doc is safe here for the same reason it is on the duel board: at any moment exactly one side is holding the essay.
+
+### 19c. Topics — offered, judged, never repeated
+
+1. Diogo taps **🤖 Ask for 6 ideas** (optionally steering it: "something about hockey").
+2. Every idea he sees is judged: **✓ Keep** or **✕ Never again**. Both answers are stored, and **both lists are sent to the AI as "never offer these again"** — that is the whole reason batch ten is still worth reading.
+3. A kept topic has a **switch**: Ben only ever sees the enabled ones. Dropping a topic hides it *and* records it as a rejection, so it can't come back through the front door.
+4. Diogo can write topics by hand, and set each topic's **word target** (default 150).
+
+### 19d. Writing — our own keyboard
+
+Every field in the editor is `inputMode="none"` with spellcheck, autocorrect and autocapitalise off, so **the Android keyboard never opens** and `<PenKeyboard>` is what he types on. This is not decoration: a keyboard that silently fixes "definately" means he never finds out he can't spell it, and an essay is exactly where that is supposed to be found out. The layout is the **standard US phone layout** key for key (letters / `?123` / `#+=`, shift with a double-tap caps lock), so nothing learned here has to be unlearned on a real keyboard. There are no word suggestions.
+
+The editor gives him a **title** and one box per paragraph, plus **➕ Add paragraph** — a new paragraph is a deliberate button press, never an accidental Enter. A live word counter runs against the topic's target. The draft autosaves about a second behind his typing, so closing the app costs a sentence, never the essay. One essay at a time.
+
+### 19e. The loop
+
+1. **Hand it in.** Diogo gets a push and a banner.
+2. **🤖 Mark it up.** The AI returns: every misspelled word, every punctuation mistake, two to five notes on the writing itself, and one or two honest bits of praise. Each note carries the **exact quote** to circle — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not circled; the note still shows.
+3. **Diogo has the last word on every note**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote), ✕ **Disagree** (it disappears; Ben never sees it), or add his own note by hand (where, what to circle, what kind, what it says).
+4. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **circled where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
+5. **He sends it again** → **🔁 Check his fixes**: one AI verdict per open note, fixed or not, with a one-line reason. **Spelling verdicts close themselves** — a word is spelled right or it isn't, and making a parent tick off thirty obvious ones is how a good idea stops getting used. **Everything else waits for Diogo to tap ✓.**
+6. **Round again, or grade.** The loop repeats until no note is open.
+
+The AI is told three times, in three different prompts, that it must **never supply the correction**. Notes say what is wrong and why, in language a 12-year-old reads without help — no grammar jargon.
+
+### 19f. The grade and the Berries
+
+Once nothing is open, **🏅 Grade it**: a letter from **C- to A+**, plus two sentences written straight to him — what he genuinely did well, and the *one* thing to work on next time. Nothing below C- exists: he only reaches this point after fixing everything he was asked to fix, so the grade measures the writing, not his obedience.
+
+| Grade | A+ | A | A- | B+ | B | B- | C+ | C | C- |
+|---|---|---|---|---|---|---|---|---|---|
+| 🪙 Berries | 200 | 170 | 150 | 130 | 110 | 95 | 80 | 65 | 50 |
+
+**The table is shown to him before he starts**, on the topic-picking screen — the reward for trying harder has to be visible while he is deciding how hard to try. Calibrated against the rest of the economy (a hard quest pays 35, a Streak Freeze costs 150): an essay is days of work and a review loop, so even the bottom of the scale beats a quest.
+
+**📚 Marked** keeps every graded essay: the letter, the Berries, the feedback, and the whole marked-up copy one tap away.
+
+### 19g. Notifications
+
+`onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, and Ben once (never once per topic) when new topics go up. Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

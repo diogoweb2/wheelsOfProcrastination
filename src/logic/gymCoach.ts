@@ -28,10 +28,10 @@ import {
   weightFor,
 } from './gym'
 
-const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
+import { DEFAULT_MODEL, askOpenRouter, shortAiError, sliceJson } from './openrouter'
 
 /** Cheap, fast and reliably good at small structured JSON — the right default for one call a day. */
-export const DEFAULT_MODEL = 'deepseek/deepseek-v4-flash'
+export { DEFAULT_MODEL }
 
 /** Offered in Coach → Settings. Any OpenRouter model id can be typed in instead. */
 export const MODEL_PRESETS: { id: string; label: string; note: string }[] = [
@@ -185,49 +185,15 @@ Answer with ONLY this JSON object, no prose and no markdown fence:
 
 // --- request ----------------------------------------------------------------
 
-/** DeepSeek and friends can think for a long minute. Waiting beats a silent offline fallback. */
-const TIMEOUT_MS = 180_000
-
-async function ask(key: string, model: string, prompt: string): Promise<string> {
-  const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
-  try {
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      signal: ctrl.signal,
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'HTTP-Referer': location.origin,
-        'X-Title': 'Wheels of Procrastination Gym',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.7,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a careful, encouraging personal trainer. You only ever prescribe exercises from the list you are given, you respect stated injuries absolutely, and you answer with raw JSON and nothing else.',
-          },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    })
-    if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status} (${model}): ${(await res.text()).slice(0, 300)}`)
-    // OpenRouter can answer 200 with an error body, or with an empty choice when
-    // the upstream model times out on its side. Say which one it was.
-    const json = (await res.json()) as {
-      choices?: { message?: { content?: string }; finish_reason?: string }[]
-      error?: { message?: string; code?: number }
-    }
-    if (json.error) throw new Error(`OpenRouter said: ${json.error.message ?? JSON.stringify(json.error)} (${model})`)
-    const text = json.choices?.[0]?.message?.content
-    if (!text) throw new Error(`${model} sent an empty reply (finish_reason=${json.choices?.[0]?.finish_reason ?? 'none'})`)
-    return text
-  } finally {
-    clearTimeout(timer)
-  }
+function ask(key: string, model: string, prompt: string): Promise<string> {
+  return askOpenRouter({
+    key,
+    model,
+    prompt,
+    title: 'Wheels of Procrastination Gym',
+    system:
+      'You are a careful, encouraging personal trainer. You only ever prescribe exercises from the list you are given, you respect stated injuries absolutely, and you answer with raw JSON and nothing else.',
+  })
 }
 
 // --- prompt -----------------------------------------------------------------
@@ -365,13 +331,6 @@ function parseReply(text: string): { note?: string; exercises: CoachRow[] } {
   return { note: typeof obj.note === 'string' ? obj.note : undefined, exercises: obj.exercises as CoachRow[] }
 }
 
-function sliceJson(text: string, open: string, close: string): string {
-  const a = text.indexOf(open)
-  const b = text.lastIndexOf(close)
-  if (a === -1 || b === -1 || b < a) throw new Error('no JSON in the reply')
-  return text.slice(a, b + 1)
-}
-
 /**
  * Turn one row from the model into a real SessionExercise — or drop it. The
  * model is never trusted with an id, a rep count or a rest time; anything
@@ -482,9 +441,5 @@ function trimToBudget(list: SessionExercise[], minutes: number): SessionExercise
 
 /** Kept verbatim wherever possible — a vague reason is worse than a long one. */
 function shortError(e: unknown): string {
-  const msg = e instanceof Error ? `${e.name === 'Error' ? '' : `${e.name}: `}${e.message}` : String(e)
-  if (/abort/i.test(msg)) return `no answer in ${TIMEOUT_MS / 1000}s — the model is overloaded or too slow`
-  if (/failed to fetch|networkerror|load failed/i.test(msg)) return `network error reaching OpenRouter (offline? blocked?) — ${msg}`
-  if (/JSON/i.test(msg)) return `the model's answer wasn't valid JSON — ${msg}`
-  return msg.slice(0, 300)
+  return shortAiError(e)
 }
