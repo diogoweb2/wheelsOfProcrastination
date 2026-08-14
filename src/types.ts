@@ -979,7 +979,17 @@ export interface EssayComment {
   quote?: string // exact substring to circle
   text: string // the note itself, written for a 12-year-old
   issue: EssayIssue
-  source: 'ai' | 'parent'
+  /**
+   * Who raised it. `app` is the built-in proofreader (§19e-3) — the rules that
+   * have no opinion in them (a sentence starts with a capital, "I" is a capital,
+   * a full stop is followed by a space) and therefore need no model, no network
+   * and no waiting.
+   */
+  source: 'ai' | 'parent' | 'app'
+  /** `app` notes only: which rule found it, so the same one is never raised twice. */
+  rule?: string
+  /** The reviewer disagreed with a rule note; it stays settled and never comes back. */
+  dismissed?: boolean
   edited?: boolean // the parent rewrote the AI's wording
   /** `open` = he still has to deal with it; `fixed` = settled and out of his way. */
   status: 'open' | 'fixed'

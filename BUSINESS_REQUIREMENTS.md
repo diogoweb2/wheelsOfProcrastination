@@ -690,12 +690,13 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 ### 19e. The loop
 
 1. **Hand it in.** Diogo gets a push and a banner.
-2. **🤖 Mark it up — mechanics only.** The AI proofreads for exactly three things: **spelling**, **punctuation**, and **capital letters** (a lowercase "i", a sentence starting small, a name without its capital). It is told explicitly to say nothing about ideas, structure or clarity. Each note carries the **exact quote** to mark — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not marked; the note still shows. "It found nothing" is a real answer and is said out loud, so it can't be mistaken for "it never ran".
-3. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
-4. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
-5. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
-6. **He sends it again — and the app closes what he fixed, by itself** (§19e-2). No button, no AI call: the app looks for the flagged text and, when it is gone, the note is done. **Diogo never reviews spelling.** For the leftovers, **🔁 Check his fixes** asks the AI for a verdict per note with a one-line reason.
-7. **Round again, or grade.** The loop repeats until no note is open.
+2. **The app's own rules run first, for free** (§19e-2) — capitals, spacing, "I", stray articles. The AI never has to be asked about those.
+3. **🤖 Mark it up — mechanics only.** The AI proofreads for exactly three things: **spelling**, **punctuation**, and **capital letters** (a lowercase "i", a sentence starting small, a name without its capital). It is told explicitly to say nothing about ideas, structure or clarity. Each note carries the **exact quote** to mark — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not marked; the note still shows. "It found nothing" is a real answer and is said out loud, so it can't be mistaken for "it never ran".
+4. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
+5. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
+6. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
+7. **He sends it again — and the app closes what he fixed, by itself** (§19e-2). No button, no AI call: the app looks for the flagged text and, when it is gone, the note is done. **Diogo never reviews spelling.** For the leftovers, **🔁 Check his fixes** asks the AI for a verdict per note with a one-line reason.
+8. **Round again, or grade.** The loop repeats until no note is open.
 
 **🔎 Go to it.** Every note that still has something to point at carries a button that scrolls the essay back into view and pulses the mark for three seconds. A note naming a word is useless if finding that word across four paragraphs is the reader's problem.
 
@@ -709,7 +710,28 @@ A hand-written note used to mean retyping his sentence into a text box character
 
 **The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
 
-#### 19e-2. Closing a note without asking anyone
+#### 19e-2. The rules that need no AI (`src/logic/proofreader.ts`)
+
+"A sentence starts with a capital letter" and "the word I is always a capital" are not judgement calls. Waiting on a language model to notice them costs money, takes a minute, and sometimes just misses one — so the app decides them itself: instantly, offline, every time, free. These notes appear the moment he hands in, and again whenever the desk opens the essay; they carry a **📏 rule** chip so it's clear they're a rule, not an opinion.
+
+| Rule | Catches |
+|---|---|
+| `lone-i` · `lone-i-contraction` | `i` and `i'm` / `i've` / `i'll` as lowercase |
+| `sentence-capital` | a paragraph or a sentence starting lowercase (abbreviations like "Mr." excluded) |
+| `space-after-punct` · `space-before-punct` | `inside.Everytime`, `also,make`, `roblox .` |
+| `double-space` · `double-punct` | two spaces between words, `!!`, `,,` |
+| `end-stop` | a paragraph that never finishes its last sentence |
+| `a-an` · `double-article` | "a app"; "a another" (which needs a word *deleted*, so it gets its own advice) |
+| `repeated-word` | "the the" |
+| `apostrophe` | `dont`, `didnt`, `thats`, `im`… — squashed contractions with no other meaning |
+
+**One note per rule per paragraph**, carrying the count ("there are 4 in this paragraph"), because a note is only useful while it still has something to point at — the mark simply moves to the next one as he fixes them. Rules must be **near-certain**: anything ambiguous ("a" before a `u`, a lowercase word after a comma) is deliberately left out rather than guessed at, since a false positive costs the reviewer a tap.
+
+**Disagreeing with a rule note settles it for good** (`dismissed`) rather than deleting it — the rules re-run on every open, so a deleted one would be back within the second.
+
+`scripts/essay-proofread.mts` runs the same rules over Firestore for essays written before the rules existed (`--write` to save; dry run by default). It imports `src/logic/proofreader.ts` directly, so there is no second copy to drift.
+
+#### 19e-3. Closing a note without asking anyone
 
 **The app settles the machine's notes itself, for free.** The test is deliberately literal: the flagged text is *gone from the paragraph it was flagged in* (whole-word — "realy" is not found inside "really"), and where the right spelling is known, it is *now present*.
 

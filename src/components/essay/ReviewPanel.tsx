@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
-import { ISSUE_LABEL, MECHANICAL_ISSUES, essayWords, hasMark, openComments, readyToGrade } from '../../logic/essay'
+import { ISSUE_LABEL, essayWords, hasMark, isMachineNote, openComments, readyToGrade } from '../../logic/essay'
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
 import { AiWaiting } from './AiWaiting'
@@ -74,6 +74,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
     essayReturn,
     essayGrade,
     essayAutoResolve,
+    essayProofread,
   } = useStore()
 
   const [picked, setPicked] = useState<string | null>(null)
@@ -110,7 +111,8 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
   // the list is never a pile of things already dealt with.
   useEffect(() => {
     essayAutoResolve(essay.id)
-  }, [essay.id, essay.round, essayAutoResolve])
+    essayProofread(essay.id) // the rules that need no model, applied on sight
+  }, [essay.id, essay.round, essayAutoResolve, essayProofread])
 
   const open = openComments(essay)
   const canGrade = readyToGrade(essay)
@@ -119,10 +121,9 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
   // The machine's marks are not the parent's job: spelling, punctuation and
   // capitals are found by the AI and closed by the app. What's left — the
   // writing itself — is the only list worth a person's attention.
-  const isMachine = (c: EssayComment) => c.source === 'ai' && MECHANICAL_ISSUES.includes(c.issue)
-  const machine = essay.comments.filter(isMachine)
+  const machine = essay.comments.filter(isMachineNote)
   const machineOpen = machine.filter((c) => c.status === 'open')
-  const mine = essay.comments.filter((c) => !isMachine(c))
+  const mine = essay.comments.filter((c) => !isMachineNote(c))
 
   return (
     <>
@@ -250,8 +251,8 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
           ticks off spelling. They're here to be read, or binned if one is wrong. */}
       <div className="h2">🤖 The machine’s marks — {machineOpen.length} still open</div>
       <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 10, lineHeight: 1.4 }}>
-        Spelling, punctuation and capitals. These tick themselves off as he fixes them — nothing here needs you unless
-        one of them is plain wrong.
+        Spelling, punctuation and capitals — some from the AI, some from the app’s own rules. They tick themselves off
+        as he fixes them; nothing here needs you unless one of them is plain wrong.
       </p>
       {machine.length === 0 && (
         <p className="muted" style={{ fontSize: 13 }}>

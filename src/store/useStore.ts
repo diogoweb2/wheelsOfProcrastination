@@ -155,6 +155,7 @@ import {
   openComments,
   openSpelling,
   resendWaitMs,
+  ruleNotes,
 } from '../logic/essay'
 import {
   checkFixes,
@@ -579,6 +580,11 @@ interface StoreState {
    * and local — no AI, no credits. Safe to call on every open.
    */
   essayAutoResolve: (essayId: string) => void
+  /**
+   * Run the built-in rules (capitals, spacing, "I", …) and add whatever they
+   * find. No model, no network, no waiting — these have right answers.
+   */
+  essayProofread: (essayId: string) => void
   /** Parent side: run the AI over the submission and add its notes. */
   essayAiReview: (essayId: string) => Promise<void>
   /** Parent side: ask the AI whether each open note was actually fixed. */
@@ -3003,6 +3009,9 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     essaySubmit(essayId) {
+      // Free and instant: the mechanical rules get their say on every hand-in,
+      // so the desk always opens onto a complete list.
+      get().essayProofread(essayId)
       const now = new Date().toISOString()
       patchEssay(essayId, (e) => {
         e.round += 1
@@ -3118,6 +3127,20 @@ export const useStore = create<StoreState>((set, get) => {
       set({ essayCheck: null })
     },
 
+    essayProofread(essayId) {
+      const essay = get().essays.find((e) => e.id === essayId)
+      if (!essay) return
+      const found = ruleNotes(essay)
+      if (!found.length) return
+      patchEssay(essayId, (e) => {
+        e.comments = [
+          ...e.comments,
+          ...found.map((n) => ({ ...n, id: crypto.randomUUID(), round: Math.max(1, e.round), status: 'open' as const })),
+        ]
+        return e
+      })
+    },
+
     essayAutoResolve(essayId) {
       const essay = get().essays.find((e) => e.id === essayId)
       if (!essay) return
@@ -3148,6 +3171,16 @@ export const useStore = create<StoreState>((set, get) => {
 
     essayDeleteComment(essayId, commentId) {
       patchEssay(essayId, (e) => {
+        const note = e.comments.find((c) => c.id === commentId)
+        // A rule note can't just be deleted: the rules run again every time the
+        // essay is opened, so it would be back within the second. Disagreeing
+        // with one settles it for good instead.
+        if (note?.rule) {
+          e.comments = e.comments.map((c) =>
+            c.id === commentId ? { ...c, status: 'fixed' as const, dismissed: true, resolvedAt: new Date().toISOString() } : c,
+          )
+          return e
+        }
         e.comments = e.comments.filter((c) => c.id !== commentId)
         return e
       })

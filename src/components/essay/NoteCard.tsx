@@ -14,6 +14,8 @@ export function NoteCard({ note, children }: { note: EssayComment; children?: Re
           {ISSUE_EMOJI[note.issue]} {ISSUE_LABEL[note.issue]}
         </span>
         {note.source === 'parent' && <span className="chip">👨‍👦 Dad</span>}
+        {/* Say where it came from: a rule is not an opinion, and that's worth knowing. */}
+        {note.source === 'app' && <span className="chip">📏 rule</span>}
         {note.edited && <span className="chip">✏️ edited</span>}
         {done && <span className="chip" style={{ background: 'var(--green)', color: '#0c2338' }}>✓ sorted</span>}
       </div>

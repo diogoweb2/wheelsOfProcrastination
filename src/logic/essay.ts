@@ -1,6 +1,7 @@
 // Essay rules — everything that doesn't need the network or React.
 // Keep in sync with BUSINESS_REQUIREMENTS.md §19.
 import type { Essay, EssayComment, EssayGrade, EssayTopic, EssayWord, EssayWordTest } from '../types'
+import { proofread } from './proofreader'
 
 /** Best first. The list is also the order the "what each grade pays" table shows. */
 export const GRADES: EssayGrade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-']
@@ -247,7 +248,7 @@ export function waitClock(ms: number): string {
 export function autoResolve(essay: Essay): EssayComment[] | null {
   let changed = false
   const next = essay.comments.map((c) => {
-    if (c.status !== 'open' || c.source !== 'ai' || !MECHANICAL_ISSUES.includes(c.issue)) return c
+    if (c.status !== 'open' || c.source === 'parent' || !MECHANICAL_ISSUES.includes(c.issue)) return c
     const quote = c.quote?.trim()
     // Scoped to the note's OWN part, exactly like the marking is. Checking the
     // whole essay instead let a note stay open because the same slip appeared in
@@ -272,6 +273,36 @@ export function partText(essay: Pick<Essay, 'title' | 'paragraphs'>, para: numbe
 export function hasMark(essay: Pick<Essay, 'title' | 'paragraphs'>, c: EssayComment): boolean {
   const quote = c.quote?.trim()
   return !!quote && containsQuote(partText(essay, c.para), quote)
+}
+
+/** Notes raised by a machine — the AI's proofreading and the app's own rules. Never the parent's. */
+export function isMachineNote(c: EssayComment): boolean {
+  return c.source !== 'parent' && MECHANICAL_ISSUES.includes(c.issue)
+}
+
+/**
+ * Turn the built-in rules loose on an essay and return the notes that aren't
+ * already on it.
+ *
+ * One note per rule per paragraph, and a rule the reviewer has already thrown
+ * out (`dismissed`) never comes back — otherwise disagreeing with it would last
+ * exactly until the next time anyone opened the essay.
+ */
+export function ruleNotes(essay: Essay): Omit<EssayComment, 'id' | 'round' | 'status'>[] {
+  return proofread(essay)
+    .filter((hit) => {
+      const existing = essay.comments.filter((c) => c.rule === hit.rule && c.para === hit.para)
+      if (existing.some((c) => c.dismissed || c.status === 'open')) return false
+      return true
+    })
+    .map((hit) => ({
+      para: hit.para,
+      quote: hit.quote,
+      text: hit.text,
+      issue: hit.issue,
+      source: 'app' as const,
+      rule: hit.rule,
+    }))
 }
 
 /** Still-open notes the app is willing to judge on its own. */
