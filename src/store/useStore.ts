@@ -139,7 +139,16 @@ import {
 } from '../logic/gym'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
 import { ESSAY_CAP, DEFAULT_MIN_WORDS, gradeCoins, newEssay, openComments } from '../logic/essay'
-import { checkFixes, essayAiError, gradeEssay, reviewEssay, suggestTopics, type DraftComment, type TopicOffer } from '../logic/essayAi'
+import {
+  checkFixes,
+  essayAiError,
+  gradeEssay,
+  reviewEssay,
+  suggestTopics,
+  type DraftComment,
+  type EssayAttempt,
+  type TopicOffer,
+} from '../logic/essayAi'
 
 /** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
 function deviceLabel(): string {
@@ -251,6 +260,8 @@ interface StoreState {
   essayTopics: EssayTopic[] // the curated topic list (app/essays), live-synced
   essays: Essay[] // every essay in flight or finished (app/essays), live-synced
   essayBusy: string | null // what the essay AI is doing right now ('topics' | 'review' | 'fixes' | 'grade'), for the spinner
+  /** Which model is being waited on, and since when — the desk counts the 60 seconds down out loud. */
+  essayAttempt: (EssayAttempt & { startedAt: number }) | null
   essayError: string | null // the last AI failure, verbatim — the desk shows it instead of pretending
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
@@ -808,6 +819,19 @@ export const useStore = create<StoreState>((set, get) => {
     fireAndForget(saveEssays(topics, kept))
   }
 
+  /**
+   * The context every essay AI call takes: the key/model config, plus the hook
+   * that publishes which model is being waited on. The desk turns that into a
+   * live countdown — 60 seconds of silence with no explanation is how a feature
+   * gets a reputation for being broken.
+   */
+  function essayCtx() {
+    return {
+      ai: get().aiConfig,
+      onAttempt: (a: EssayAttempt) => set({ essayAttempt: { ...a, startedAt: Date.now() } }),
+    }
+  }
+
   /** Patch one essay in the shared desk (local set + write-through). */
   function patchEssay(essayId: string, fn: (e: Essay) => Essay) {
     const { essayTopics, essays } = get()
@@ -859,6 +883,7 @@ export const useStore = create<StoreState>((set, get) => {
     essayTopics: [],
     essays: [],
     essayBusy: null,
+    essayAttempt: null,
     essayError: null,
     gymPlanning: false,
     gymFellBack: null,
@@ -2758,12 +2783,12 @@ export const useStore = create<StoreState>((set, get) => {
       try {
         // every title ever offered, kept or binned — this is what stops it looping
         const avoid = get().essayTopics.map((t) => t.title)
-        return await suggestTopics(get().aiConfig, count, avoid, steer)
+        return await suggestTopics(essayCtx(), count, avoid, steer)
       } catch (e) {
         set({ essayError: essayAiError(e) })
         return []
       } finally {
-        set({ essayBusy: null })
+        set({ essayBusy: null, essayAttempt: null })
       }
     },
 
@@ -2850,7 +2875,7 @@ export const useStore = create<StoreState>((set, get) => {
       const topic = get().essayTopics.find((t) => t.id === essay.topicId)
       set({ essayBusy: 'review', essayError: null })
       try {
-        const drafts = await reviewEssay(get().aiConfig, essay, topic?.blurb ?? '')
+        const drafts = await reviewEssay(essayCtx(), essay, topic?.blurb ?? '')
         patchEssay(essayId, (e) => {
           e.comments = [
             ...e.comments,
@@ -2868,7 +2893,7 @@ export const useStore = create<StoreState>((set, get) => {
       } catch (e) {
         set({ essayError: essayAiError(e) })
       } finally {
-        set({ essayBusy: null })
+        set({ essayBusy: null, essayAttempt: null })
       }
     },
 
@@ -2879,7 +2904,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (!open.length) return
       set({ essayBusy: 'fixes', essayError: null })
       try {
-        const verdicts = await checkFixes(get().aiConfig, essay, open)
+        const verdicts = await checkFixes(essayCtx(), essay, open)
         patchEssay(essayId, (e) => {
           e.comments = e.comments.map((c) => {
             const v = verdicts.find((x) => x.id === c.id)
@@ -2900,7 +2925,7 @@ export const useStore = create<StoreState>((set, get) => {
       } catch (e) {
         set({ essayError: essayAiError(e) })
       } finally {
-        set({ essayBusy: null })
+        set({ essayBusy: null, essayAttempt: null })
       }
     },
 
@@ -2961,7 +2986,7 @@ export const useStore = create<StoreState>((set, get) => {
       }
       set({ essayBusy: 'grade', essayError: null })
       try {
-        const result = await gradeEssay(get().aiConfig, essay)
+        const result = await gradeEssay(essayCtx(), essay)
         const coins = gradeCoins(result.grade)
         patchEssay(essayId, (e) => {
           e.status = 'graded'
@@ -2980,7 +3005,7 @@ export const useStore = create<StoreState>((set, get) => {
       } catch (e) {
         set({ essayError: essayAiError(e) })
       } finally {
-        set({ essayBusy: null })
+        set({ essayBusy: null, essayAttempt: null })
       }
     },
 

@@ -11,6 +11,7 @@ import type { Essay, EssayComment, EssayIssue } from '../../types'
 import { ISSUE_LABEL, essayWords, openComments, readyToGrade } from '../../logic/essay'
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
+import { AiWaiting } from './AiWaiting'
 import { sfx } from '../../audio'
 
 export function ReviewPanel() {
@@ -116,6 +117,14 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
           </button>
         )}
       </div>
+
+      {essayBusy && (
+        <div style={{ marginBottom: 12 }}>
+          <AiWaiting
+            label={essayBusy === 'review' ? 'Reading his essay' : essayBusy === 'fixes' ? 'Checking his fixes' : 'Grading it'}
+          />
+        </div>
+      )}
 
       {essayError && (
         <div className="card" style={{ marginBottom: 12, borderColor: 'var(--red)' }}>

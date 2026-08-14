@@ -25,12 +25,22 @@ export interface AskOptions {
   /** Shown on the OpenRouter dashboard, so spend can be read per feature. */
   title: string
   temperature?: number
+  /** How long to wait before giving up on this model. Defaults to TIMEOUT_MS. */
+  timeoutMs?: number
 }
 
 /** One chat completion, returned as raw text. Throws with a reason a human can act on. */
-export async function askOpenRouter({ key, model, system, prompt, title, temperature = 0.7 }: AskOptions): Promise<string> {
+export async function askOpenRouter({
+  key,
+  model,
+  system,
+  prompt,
+  title,
+  temperature = 0.7,
+  timeoutMs = TIMEOUT_MS,
+}: AskOptions): Promise<string> {
   const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
   try {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
@@ -75,9 +85,9 @@ export function sliceJson(text: string, open: string, close: string): string {
 }
 
 /** Kept verbatim wherever possible — a vague reason is worse than a long one. */
-export function shortAiError(e: unknown): string {
+export function shortAiError(e: unknown, timeoutMs = TIMEOUT_MS): string {
   const msg = e instanceof Error ? `${e.name === 'Error' ? '' : `${e.name}: `}${e.message}` : String(e)
-  if (/abort/i.test(msg)) return `no answer in ${TIMEOUT_MS / 1000}s — the model is overloaded or too slow`
+  if (/abort/i.test(msg)) return `no answer in ${timeoutMs / 1000}s — the model is overloaded or too slow`
   if (/failed to fetch|networkerror|load failed/i.test(msg)) return `network error reaching OpenRouter (offline? blocked?) — ${msg}`
   if (/JSON/i.test(msg)) return `the model's answer wasn't valid JSON — ${msg}`
   return msg.slice(0, 300)

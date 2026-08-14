@@ -12,14 +12,95 @@
 // readable error on failure — the desk shows it, nothing is faked.
 import type { AiConfig, Essay, EssayComment, EssayGrade } from '../types'
 import { GRADES, essayText } from './essay'
-import { DEFAULT_MODEL, askOpenRouter, sliceJson } from './openrouter'
+import { askOpenRouter, shortAiError, sliceJson } from './openrouter'
 
-export { aiReady as essayAiReady, shortAiError as essayAiError } from './openrouter'
+export { aiReady as essayAiReady } from './openrouter'
 
-/** Offered in the Topics tab. Any OpenRouter model id can be typed in instead (Gym → Coach owns the setting). */
-export const ESSAY_MODEL_NOTE = 'Uses the same OpenRouter key and model as the Gym coach (Gym → Coach → Settings).'
+/** Shown on the Topics tab, so the desk is honest about whose key is being spent. */
+export const ESSAY_MODEL_NOTE =
+  'Uses the same OpenRouter key as the Gym coach (Gym → Coach → Settings), but picks its own models — 60 seconds each, then the next one.'
 
 const TITLE = 'Wheels of Procrastination Essays'
+
+/**
+ * One minute per model, not three.
+ *
+ * The Gym coach can afford to wait: it plans one session a day and nobody is
+ * watching the screen. The essay desk is different — somebody is sitting there
+ * holding a phone — and a model that hasn't answered in a minute is stuck, not
+ * thinking. So we cut it off and ask a different one.
+ */
+export const ESSAY_TIMEOUT_MS = 60_000
+
+/**
+ * The queue, tried in order until one answers.
+ *
+ * The essay desk picks its own models rather than following the Gym coach's
+ * setting (`aiConfig.model`): the two jobs are different sizes, and one of them
+ * having a slow day should not stall the other. They are all Chinese
+ * open-weight models on OpenRouter, chosen for cost per token rather than
+ * leaderboard position — this job is "read 300 words and answer in small JSON",
+ * which any of them does well, and a frontier model would cost 20× for no
+ * better marking.
+ *
+ * Edit freely: anything OpenRouter serves works, and an id it doesn't recognise
+ * just fails fast onto the next one.
+ */
+export const ESSAY_MODELS = [
+  'z-ai/glm-4.6', // Zhipu — fast, cheap, very steady on structured JSON
+  'qwen/qwen3-235b-a22b-instruct-2507', // Alibaba — cheap, strong on language work
+  'deepseek/deepseek-chat-v3.1', // DeepSeek's always-on chat line, as the backstop
+]
+
+/** Which model we're on right now, so the UI can say so and count down. */
+export interface EssayAttempt {
+  model: string
+  index: number // 1-based
+  total: number
+  timeoutMs: number
+}
+
+export interface EssayCtx {
+  ai: AiConfig | null
+  onAttempt?: (a: EssayAttempt) => void
+}
+
+/** The failure reason, phrased against the 60-second cut-off rather than the Gym's. */
+export function essayAiError(e: unknown): string {
+  return shortAiError(e, ESSAY_TIMEOUT_MS)
+}
+
+/**
+ * Ask the queue. Each model gets 60 seconds; a timeout, a dead id, a rate limit
+ * or a garbled reply all mean the same thing here — move on. The last model's
+ * error is what surfaces, with the ones before it named, so a failure says
+ * which models were actually tried.
+ */
+async function askEssay(
+  ctx: EssayCtx,
+  opts: { system: string; prompt: string; temperature?: number },
+): Promise<string> {
+  const queue = ESSAY_MODELS
+  const tried: string[] = []
+  let last: unknown
+
+  for (const [i, model] of queue.entries()) {
+    ctx.onAttempt?.({ model, index: i + 1, total: queue.length, timeoutMs: ESSAY_TIMEOUT_MS })
+    try {
+      return await askOpenRouter({
+        key: key(ctx.ai),
+        model,
+        title: TITLE,
+        timeoutMs: ESSAY_TIMEOUT_MS,
+        ...opts,
+      })
+    } catch (e) {
+      tried.push(model)
+      last = e
+    }
+  }
+  throw new Error(`${essayAiError(last)}${tried.length > 1 ? ` · tried ${tried.join(', ')}` : ''}`)
+}
 
 /**
  * Who is writing. Ben was born in 2014 and goes to a TCDSB (Toronto Catholic
@@ -48,10 +129,6 @@ Everything must fit the Ontario curriculum for that grade and be appropriate for
 Spelling is CANADIAN English (colour, favourite, neighbour, centre, travelled).`
 }
 
-function model(ai: AiConfig | null): string {
-  return ai?.model?.trim() || DEFAULT_MODEL
-}
-
 function key(ai: AiConfig | null): string {
   const k = ai?.openrouterKey?.trim()
   if (!k) throw new Error('No OpenRouter key set yet — add one in Gym → Coach → Settings.')
@@ -71,7 +148,7 @@ export interface TopicOffer {
  * sent verbatim: this is what keeps the tenth batch from being the first batch
  * with different words.
  */
-export async function suggestTopics(ai: AiConfig | null, count: number, avoid: string[], steer: string): Promise<TopicOffer[]> {
+export async function suggestTopics(ctx: EssayCtx, count: number, avoid: string[], steer: string): Promise<TopicOffer[]> {
   const avoidBlock = avoid.length
     ? `These have ALREADY been offered. Do not repeat any of them, and do not offer a rewording of one:\n${avoid.map((t) => `- ${t}`).join('\n')}`
     : 'Nothing has been offered yet.'
@@ -92,13 +169,10 @@ Rules for the topics:
 Answer with ONLY this JSON array, no prose and no markdown fence:
 [{"title": "<max 8 words>", "blurb": "<one sentence, max 25 words>", "subject": "<one word, e.g. Science / Sports / Community / Opinion / Story>"}]`
 
-  const reply = await askOpenRouter({
-    key: key(ai),
-    model: model(ai),
+  const reply = await askEssay(ctx, {
     system:
       'You design writing assignments for middle-school students. You answer with raw JSON and nothing else, and you never repeat a topic you were told to avoid.',
     prompt,
-    title: TITLE,
     temperature: 1,
   })
 
@@ -134,7 +208,7 @@ ${essay.paragraphs.map((p, i) => `PARAGRAPH ${i + 1}: ${p}`).join('\n')}`
  * because models love to be helpful — is that it must never supply the
  * corrected text. He has to find the fix himself; that is the entire exercise.
  */
-export async function reviewEssay(ai: AiConfig | null, essay: Essay, topicBlurb: string): Promise<DraftComment[]> {
+export async function reviewEssay(ctx: EssayCtx, essay: Essay, topicBlurb: string): Promise<DraftComment[]> {
   const prompt = `${whoBlock(essay.authorName)}
 
 He was asked to write about: "${essay.topicTitle}"${topicBlurb ? ` — ${topicBlurb}` : ''}
@@ -160,13 +234,10 @@ ABSOLUTE RULES:
 Answer with ONLY this JSON array, no prose and no markdown fence:
 [{"para": <number>, "quote": "<exact text from the essay, or omit>", "issue": "spelling|punctuation|clarity|idea|praise", "text": "<the note, max 30 words>"}]`
 
-  const reply = await askOpenRouter({
-    key: key(ai),
-    model: model(ai),
+  const reply = await askEssay(ctx, {
     system:
       'You are a patient middle-school writing teacher. You point out what is wrong and never fix it yourself, because the student learns by fixing it. You answer with raw JSON and nothing else.',
     prompt,
-    title: TITLE,
     temperature: 0.4,
   })
 
@@ -202,7 +273,7 @@ export interface FixVerdict {
  * is right or it isn't); everything else is only ever a recommendation for the
  * parent, who has the last word.
  */
-export async function checkFixes(ai: AiConfig | null, essay: Essay, open: EssayComment[]): Promise<FixVerdict[]> {
+export async function checkFixes(ctx: EssayCtx, essay: Essay, open: EssayComment[]): Promise<FixVerdict[]> {
   const previous = essay.versions[essay.versions.length - 2]
   const prompt = `${whoBlock(essay.authorName)}
 
@@ -230,13 +301,10 @@ For EACH note, decide whether the new version actually deals with it.
 Answer with ONLY this JSON array, no prose and no markdown fence:
 [{"id": "<the id above>", "verdict": "fixed|unfixed", "note": "<max 20 words>"}]`
 
-  const reply = await askOpenRouter({
-    key: key(ai),
-    model: model(ai),
+  const reply = await askEssay(ctx, {
     system:
       'You check a student\'s corrections. You are fair and strict: a note is only "fixed" when the problem is genuinely gone. You never write the correction yourself. You answer with raw JSON and nothing else.',
     prompt,
-    title: TITLE,
     temperature: 0.2,
   })
 
@@ -270,7 +338,7 @@ export interface GradeResult {
  * point after fixing everything he was asked to fix, so the grade measures the
  * writing, not his obedience — and the bottom of the scale is still a pass.
  */
-export async function gradeEssay(ai: AiConfig | null, essay: Essay): Promise<GradeResult> {
+export async function gradeEssay(ctx: EssayCtx, essay: Essay): Promise<GradeResult> {
   const rounds = essay.round
   const prompt = `${whoBlock(essay.authorName)}
 
@@ -294,13 +362,10 @@ Then write two short pieces of feedback, straight to him, in simple language:
 Answer with ONLY this JSON object, no prose and no markdown fence:
 {"grade": "<one of the grades above>", "good": "<max 40 words>", "improve": "<max 40 words>"}`
 
-  const reply = await askOpenRouter({
-    key: key(ai),
-    model: model(ai),
+  const reply = await askEssay(ctx, {
     system:
       'You are an encouraging middle-school teacher writing a report-card comment. You are honest about the grade and kind about the person. You answer with raw JSON and nothing else.',
     prompt,
-    title: TITLE,
     temperature: 0.3,
   })
 

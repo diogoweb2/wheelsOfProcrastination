@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useStore } from '../../store/useStore'
 import { TOPIC_BATCH } from '../../logic/essay'
 import { ESSAY_MODEL_NOTE, manualTopic, type TopicOffer } from '../../logic/essayAi'
+import { AiWaiting } from './AiWaiting'
 import { sfx } from '../../audio'
 
 export function TopicsPanel() {
@@ -63,6 +64,12 @@ export function TopicsPanel() {
           {aiConfig?.openrouterKey ? ESSAY_MODEL_NOTE : `No OpenRouter key set — ${ESSAY_MODEL_NOTE}`}
         </p>
       </div>
+
+      {essayBusy === 'topics' && (
+        <div style={{ marginTop: 10 }}>
+          <AiWaiting label="Thinking up topics" />
+        </div>
+      )}
 
       {essayError && (
         <div className="card" style={{ marginTop: 10, borderColor: 'var(--red)' }}>

@@ -142,7 +142,7 @@ const MISSED_LOOKBACK_DAYS = 90
  * The earliest day in the recent past this scheduled must-do was asked for and
  * never ticked off — or null if it's up to date, or simply due today. Walks back
  * day by day over its own schedule, no further than the day the quest was
- * created, and stops at the first occurrence that WAS done, so only the current
+ * created, and stops at the first day it WAS ticked off, so only the current
  * run of misses counts. Daily habits are exempt: yesterday's floss is gone, but
  * "pay the rent on the 1st" has to keep nagging until it's paid.
  */
@@ -165,8 +165,14 @@ export function missedSince(
     if (born && day < born) break
     if (task.requiredFrom && day < task.requiredFrom) break
     if (task.startDate && day < task.startDate) break
+    // Ticked on this day — caught up, nothing older is still owed. This comes
+    // FIRST, before the schedule check: a late must-do is usually ticked on a day
+    // its own schedule never asked for (and a cooldown quest is never "required"
+    // on the very day it was done, since that completion starts the rest days).
+    // Testing the schedule first would skip right past the catch-up and leave the
+    // quest MISSED forever.
+    if (doneDays.has(day)) break
     if (!isRequiredOn(task, day, completions, tasks)) continue
-    if (doneDays.has(day)) break // caught up as of this occurrence
     earliest = day
   }
   return earliest

@@ -212,7 +212,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
-  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19g). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
+  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19h). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
 - **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
   - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
   - **Diogo gets a second, separate push about Ben's** leftovers ("👦 Ben still has 2 must-dos") so he can remind him before bed.
@@ -689,7 +689,17 @@ Once nothing is open, **🏅 Grade it**: a letter from **C- to A+**, plus two se
 
 **📚 Marked** keeps every graded essay: the letter, the Berries, the feedback, and the whole marked-up copy one tap away.
 
-### 19g. Notifications
+### 19g. When the model doesn't answer
+
+Somebody is sitting there holding a phone, so the essay desk does **not** use the Gym coach's three-minute patience (§18):
+
+- **60 seconds per model.** A model that hasn't answered in a minute is stuck, not thinking.
+- **Then the next model in the queue** (`ESSAY_MODELS` in `src/logic/essayAi.ts`), automatically: **`z-ai/glm-4.6` → `qwen/qwen3-235b-a22b-instruct-2507` → `deepseek/deepseek-chat-v3.1`**. All cheap Chinese open-weight models on OpenRouter, picked on cost per token: the job is "read 300 words and answer in small JSON", and a frontier model would cost 20× for no better marking. A timeout, a dead model id, a rate limit and a garbled reply all mean the same thing — move on.
+- **The desk picks its own models**, deliberately ignoring `aiConfig.model` (which is the Gym coach's choice). Same key, same spend cap; different job, different size, and one having a slow day must not stall the other.
+- **The wait is shown, not hidden**: which model is being asked, *model 2 of 3*, and a live countdown of its 60 seconds. A blank minute is indistinguishable from a hang, and the recovery is invisible unless it's said out loud.
+- If the whole queue fails, the error names every model tried — and **nothing is invented**: a review that didn't happen never looks like one that found nothing wrong.
+
+### 19h. Notifications
 
 `onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, and Ben once (never once per topic) when new topics go up. Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
 

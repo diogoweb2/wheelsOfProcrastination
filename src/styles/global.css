@@ -3623,3 +3623,13 @@ input, select { font-family: inherit; }
 .kb-key--mod.is-on { background: var(--yellow); color: #3a2000; }
 .kb-key--space { flex: 5 1 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 .kb-key--wide { flex: 0 0 auto; padding: 6px 12px; font-size: 12px; font-weight: 900; }
+
+/* The AI wait: which model, how long it has left, what happens when it runs out. */
+.ai-wait { border-color: var(--blue); }
+.ai-wait-head { display: flex; align-items: center; gap: 10px; }
+.ai-wait-spin { font-size: 22px; animation: pulse-soft 1.2s infinite; }
+.ai-wait-bar {
+  height: 6px; border-radius: 999px; background: var(--bg2);
+  border: 1px solid var(--line); overflow: hidden; margin-top: 8px;
+}
+.ai-wait-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
