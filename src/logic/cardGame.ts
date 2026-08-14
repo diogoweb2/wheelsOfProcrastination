@@ -60,6 +60,12 @@ export const SOLO_REWARD_LIMIT = 3
  */
 export const SOLO_PLAY_LIMIT_DEFAULT = 2
 /**
+ * Seconds on the move clock unless the captain says otherwise. Twice the board
+ * games', because a turn here is a real read — energy, both attacks, the bench
+ * and a hand of treasure — not "where does this piece go".
+ */
+export const DUEL_MOVE_SECONDS = 20
+/**
  * The Grand Line storm. From this turn on, every hit does double damage — the
  * hard guarantee that a match ends inside ten minutes no matter how defensively
  * both sides play. It also makes the late game genuinely tense, which a slow
@@ -356,6 +362,20 @@ export function legalMoves(state: DuelState): DuelMove[] {
     if (canSwap(state, i, ci)) moves.push({ kind: 'swap', to: ci })
   })
   return moves
+}
+
+/**
+ * What gets played when the move clock runs out: a random move that actually
+ * ENDS the turn.
+ *
+ * Treasures and the dice are free plays — auto-playing one would hand the turn
+ * straight back to a clock that has already expired, so they're excluded. Focus
+ * is always in the list, so this can never come back empty on a live board.
+ */
+export function timeoutMove(state: DuelState): DuelMove {
+  const moves = legalMoves(state).filter((m) => m.kind !== 'treasure' && m.kind !== 'dice')
+  if (moves.length === 0) return { kind: 'focus' }
+  return moves[Math.floor(Math.random() * moves.length)]
 }
 
 // --- playing a move ---------------------------------------------------------

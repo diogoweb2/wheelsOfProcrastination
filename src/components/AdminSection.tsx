@@ -7,7 +7,8 @@ import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
 import { activeQuestions, correctAnswerText, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
-import { SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
+import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
+import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
@@ -41,7 +42,12 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
 
       {tab === 'freezes' && <FreezeDesk />}
 
-      {tab === 'limits' && <ScreenLimits />}
+      {tab === 'limits' && (
+        <>
+          <ScreenLimits />
+          <MoveClocks />
+        </>
+      )}
 
       {tab === 'audit' && <AuditLog />}
 
@@ -151,6 +157,85 @@ function ScreenLimits() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+/**
+ * The move clock: how long a player gets to make ONE move, in the games.
+ *
+ * Set once for BOTH crewmates rather than per person — a clock only means
+ * anything if both sides of the same board are playing to it. Each dial is
+ * written into both worlds, and a live match keeps whatever it was dealt with
+ * (`moveSeconds` on the shared doc), so moving these never changes a game
+ * already in progress.
+ */
+function MoveClocks() {
+  const { data, kidData, kidDataFresh, setSettings, setSettingsFor } = useStore()
+  const ready = !!kidData && kidDataFresh
+
+  const dials = [
+    {
+      key: 'boardMoveSeconds' as const,
+      label: '♟️ Chess & Checkers',
+      hint: 'One move. Run out and the board plays a random legal move for you.',
+      def: BOARD_MOVE_SECONDS,
+      now: data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS,
+    },
+    {
+      key: 'duelMoveSeconds' as const,
+      label: '🃏 Card game',
+      hint: 'One turn. Treasure cards and the dice are free — each one buys a fresh clock.',
+      def: DUEL_MOVE_SECONDS,
+      now: data.settings.duelMoveSeconds ?? DUEL_MOVE_SECONDS,
+    },
+  ]
+
+  function set(key: 'boardMoveSeconds' | 'duelMoveSeconds', next: number) {
+    sfx.click()
+    const secs = Math.max(0, Math.min(60, next))
+    setSettings({ [key]: secs })
+    setSettingsFor(KID_ID, { [key]: secs })
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ fontWeight: 900, marginBottom: 4 }}>⏱️ Move clock</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        How long each player gets to make one move. Set for both of you at once — a clock only works if both sides of
+        the board are on it. <b>0 turns it off.</b> A match already running keeps the clock it was dealt with.
+      </p>
+      {!ready && (
+        <p className="muted" style={{ fontSize: 11, marginBottom: 6 }}>
+          loading Ben’s log from the cloud…
+        </p>
+      )}
+      {dials.map((d) => (
+        <div
+          key={d.key}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--line)', padding: '10px 0' }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>{d.label}</div>
+            <div className="muted" style={{ fontSize: 11 }}>{d.hint}</div>
+          </div>
+          <button className="btn btn--ghost btn--small" disabled={!ready || d.now <= 0} onClick={() => set(d.key, d.now - 5)}>
+            −
+          </button>
+          <b style={{ minWidth: 42, textAlign: 'center', fontSize: 16 }}>{d.now === 0 ? 'off' : `${d.now}s`}</b>
+          <button className="btn btn--ghost btn--small" disabled={!ready || d.now >= 60} onClick={() => set(d.key, d.now + 5)}>
+            +
+          </button>
+          <button
+            className="btn btn--small"
+            disabled={!ready || d.now === d.def}
+            title={`Back to the default ${d.def}s`}
+            onClick={() => set(d.key, d.def)}
+          >
+            ↩︎ {d.def}s
+          </button>
+        </div>
+      ))}
     </div>
   )
 }

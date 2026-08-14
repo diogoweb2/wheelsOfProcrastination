@@ -6,10 +6,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID, KID_ID } from '../store/storage'
 import {
+  BOARD_MOVE_SECONDS,
   BOARD_REWARD,
   kitFor,
   lessonsFor,
   squareName,
+  timeoutMove,
   type BoardKind,
   type BoardMove,
   type BoardState,
@@ -17,6 +19,7 @@ import {
   type GameKit,
 } from '../logic/boardGames'
 import { GameBoard, type BoardTarget } from '../components/GameBoard'
+import { MoveTimer } from '../components/MoveTimer'
 import { BerryCoin } from '../components/BerryCoin'
 import { boardSfx, sfx } from '../audio'
 
@@ -60,6 +63,8 @@ function PlayTab({ kit }: { kit: GameKit }) {
   const [msg, setMsg] = useState<string | null>(null)
   const [dismissed, setDismissed] = useState<string[]>([])
   const [flipped, setFlipped] = useState(false)
+  /** "the clock played that one for you" — clears itself after a beat */
+  const [flash, setFlash] = useState<string | null>(null)
 
   const hints = data.games.hints
   const mateId = activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
@@ -88,7 +93,19 @@ function PlayTab({ kit }: { kit: GameKit }) {
   // upside down; online always shows your own crew at the bottom
   const view: Color = online ? (mySide ?? 'w') : flipped ? (state?.turn === 'w' ? 'b' : 'w') : (state?.turn ?? 'w')
 
+  // An online board plays on the clock stamped when the challenge went out, so
+  // the captain moving the dial can't change a game already running. Pass & play
+  // has no shared doc to stamp, so it reads the dial live.
+  const clock = online ? (match!.moveSeconds ?? BOARD_MOVE_SECONDS) : (data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS)
+
   useBoardSounds(kit, state, mySide, online)
+
+  // the timeout notice clears itself — it's a flash, not a thing to dismiss
+  useEffect(() => {
+    if (!flash) return
+    const t = window.setTimeout(() => setFlash(null), 2600)
+    return () => window.clearTimeout(t)
+  }, [flash])
 
   // Every new position clears any half-finished selection, so a stale highlight
   // can never be tapped into a move. The one exception is a checkers multi-jump:
@@ -155,6 +172,22 @@ function PlayTab({ kit }: { kit: GameKit }) {
       setLocal(next) // the seq effect re-picks the piece if a jump chain is still running
     }
     setInspect(move.to)
+  }
+
+  /**
+   * The clock hit zero. Neither game lets you pass, so the board plays for you —
+   * a random legal move, announced out loud so nobody thinks the app moved a
+   * piece on its own.
+   */
+  function timeUp() {
+    if (!state || state.over || !myTurn) return
+    const move = timeoutMove(kit, state)
+    if (!move) return // no legal move: the engine has already ended the game
+    setPromo(null)
+    setSelected(null)
+    boardSfx.nope()
+    setFlash('⏰ Out of time — the clock played a random move.')
+    commit(move)
   }
 
   function tap(i: number) {
@@ -291,6 +324,16 @@ function PlayTab({ kit }: { kit: GameKit }) {
               : kit.score(state, online ? mySide! : state.turn)}
           </div>
         )}
+        {!state.over && (
+          <MoveTimer
+            seconds={clock}
+            running={myTurn && !promo}
+            resetKey={`${state.seq}-${state.turn}`}
+            onExpire={timeUp}
+            note={promo ? 'paused — pick your piece' : myTurn ? 'random move at 0' : undefined}
+          />
+        )}
+        {flash && <div className="move-clock-flash">{flash}</div>}
       </div>
 
       <GameBoard
@@ -483,7 +526,22 @@ function PiecesTab({ kit }: { kit: GameKit }) {
 // --- how to -----------------------------------------------------------------
 
 function RulesTab({ kit }: { kit: GameKit }) {
-  return kit.kind === 'chess' ? <ChessRules /> : <CheckersRules />
+  const secs = useStore((s) => s.data.settings.boardMoveSeconds) ?? BOARD_MOVE_SECONDS
+  return (
+    <>
+      {kit.kind === 'chess' ? <ChessRules /> : <CheckersRules />}
+      {secs > 0 && (
+        <div className="rules">
+          <h3>⏱️ The clock</h3>
+          <p>
+            You get <strong>{secs} seconds</strong> to make each move. The bar under the board turns gold halfway and
+            red at the end — and if it runs out, <strong>the board plays a random legal move for you</strong>. It will
+            not be a good one. The captain sets the time, and can switch the clock off.
+          </p>
+        </div>
+      )}
+    </>
+  )
 }
 
 function ChessRules() {

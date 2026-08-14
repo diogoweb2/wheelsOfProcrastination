@@ -83,6 +83,7 @@ import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
 import {
   DECK_SIZE,
+  DUEL_MOVE_SECONDS,
   DUEL_REWARD,
   SOLO_PLAY_LIMIT_DEFAULT,
   SOLO_REWARD,
@@ -92,7 +93,14 @@ import {
   type DuelMove,
   type DuelState,
 } from '../logic/cardGame'
-import { BOARD_REWARD, kitFor, type BoardKind, type BoardMove, type BoardState } from '../logic/boardGames'
+import {
+  BOARD_MOVE_SECONDS,
+  BOARD_REWARD,
+  kitFor,
+  type BoardKind,
+  type BoardMove,
+  type BoardState,
+} from '../logic/boardGames'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -2103,6 +2111,9 @@ export const useStore = create<StoreState>((set, get) => {
           status: 'pending',
           state: null,
           createdAt: new Date().toISOString(),
+          // the clock is fixed when the call goes out, so both phones play the
+          // same match even if the captain moves the dial mid-duel
+          moveSeconds: get().data.settings.duelMoveSeconds ?? DUEL_MOVE_SECONDS,
         },
       ])
       return 'ok'
@@ -2298,6 +2309,7 @@ export const useStore = create<StoreState>((set, get) => {
           status: 'pending',
           state: null,
           createdAt: new Date().toISOString(),
+          moveSeconds: get().data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS,
         },
       ])
       return 'ok'

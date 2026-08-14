@@ -6,6 +6,7 @@ import {
   CARD_ARCHETYPES,
   CARD_ELEMENTS,
   DECK_SIZE,
+  DUEL_MOVE_SECONDS,
   DUEL_REWARD,
   KOS_TO_WIN,
   SOLO_PLAY_LIMIT_DEFAULT,
@@ -21,6 +22,7 @@ import {
   elementInfo,
   startDuel,
   statsFor,
+  timeoutMove,
   type AiOpponent,
   type DuelState,
 } from '../logic/cardGame'
@@ -212,6 +214,11 @@ function FightTab() {
           state={solo.state}
           myIndex={0}
           onMove={(m) => setSolo((cur) => (cur ? { ...cur, state: applyMove(cur.state, m) } : cur))}
+          moveSeconds={data.settings.duelMoveSeconds ?? DUEL_MOVE_SECONDS}
+          clockPaused={!!chest}
+          onTimeout={() =>
+            setSolo((cur) => (cur ? { ...cur, state: applyMove(cur.state, timeoutMove(cur.state)) } : cur))
+          }
           waitingFor={solo.foe.name}
           onResign={() =>
             setSolo((cur) =>
@@ -247,6 +254,11 @@ function FightTab() {
           state={board.state}
           myIndex={myIndex}
           onMove={(m) => playDuelMove(board.id, m)}
+          // the clock stamped on the duel when the call went out, so the two
+          // phones are never playing to different times
+          moveSeconds={board.moveSeconds ?? DUEL_MOVE_SECONDS}
+          clockPaused={!!chest}
+          onTimeout={() => board.state && playDuelMove(board.id, timeoutMove(board.state))}
           waitingFor={board.state.sides[1 - myIndex]?.name}
           onResign={board.status === 'active' ? () => resignDuel(board.id) : undefined}
           onExit={() => {
@@ -466,6 +478,7 @@ function DeckTab() {
 
 function RulesTab() {
   const cap = useStore((s) => s.data.settings.soloDuelLimit) ?? SOLO_PLAY_LIMIT_DEFAULT
+  const secs = useStore((s) => s.data.settings.duelMoveSeconds) ?? DUEL_MOVE_SECONDS
   return (
     <div className="rules">
       <ol className="rules-steps">
@@ -551,6 +564,17 @@ function RulesTab() {
           </div>
         ))}
       </div>
+
+      {secs > 0 && (
+        <>
+          <div className="duel-head">⏱️ The clock</div>
+          <p className="muted" style={{ fontSize: 12, marginTop: -4 }}>
+            You get <b>{secs} seconds</b> a turn. A <b>treasure card or the dice gives you a fresh {secs}</b> — they're
+            free plays, so spending one never eats the turn you were thinking about. Run the clock out and a{' '}
+            <b>random move</b> is played for you: an attack, a swap or Focus. The captain sets the time.
+          </p>
+        </>
+      )}
 
       <div className="duel-head">💰 What you win</div>
       <ul className="rules-list">

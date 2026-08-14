@@ -56,6 +56,13 @@ export interface BoardMove {
 /** Berries the winner of a head-to-head takes, matching the duel's payout scale. */
 export const BOARD_REWARD = 25
 
+/**
+ * Seconds on the move clock unless the captain says otherwise. Ten is long
+ * enough for a nine-year-old to see the board and short enough that nobody
+ * wanders off mid-game.
+ */
+export const BOARD_MOVE_SECONDS = 10
+
 /** How one square should be drawn. `null` for an empty square. */
 export interface CellPiece {
   color: Color
@@ -194,6 +201,22 @@ export const CHECKERS_KIT: GameKit = {
 
 export const KITS: Record<BoardKind, GameKit> = { chess: CHESS_KIT, checkers: CHECKERS_KIT }
 export const kitFor = (kind: BoardKind): GameKit => KITS[kind]
+
+/**
+ * What gets played when the move clock runs out: a random legal move.
+ *
+ * Neither game lets you pass, so a timeout has to resolve to something, and the
+ * rule has to be one a nine-year-old can state before it happens — "run out of
+ * time and the board plays for you, badly". Anything cleverer (avoid hanging a
+ * piece, take the free capture) would quietly play better than the kid does and
+ * make the clock a reward. Promotions arrive fully specified from `allMoves`,
+ * so the picker is never owed an answer.
+ */
+export function timeoutMove(kit: GameKit, state: BoardState): BoardMove | null {
+  const moves = kit.allMoves(state)
+  if (moves.length === 0) return null // checkmate/blocked — the engine has already ended it
+  return moves[Math.floor(Math.random() * moves.length)]
+}
 
 export { crewSheet }
 

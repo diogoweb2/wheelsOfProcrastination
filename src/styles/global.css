@@ -3444,6 +3444,34 @@ input, select { font-family: inherit; }
 .board-status-line.is-check { color: var(--red); }
 .board-status-line.is-over { color: var(--gold); }
 
+/* The move clock. Shared by both board games and the card duel, so it reads the
+   same wherever it appears: a bar that drains, a number, and — in the last three
+   seconds — a red pulse you can see out of the corner of your eye while your
+   eyes are on the board. */
+.move-clock { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.move-clock-bar {
+  flex: 1; height: 6px; border-radius: 999px; overflow: hidden;
+  background: rgb(12 35 56 / 70%); border: 1px solid var(--line);
+}
+.move-clock-fill { height: 100%; background: var(--green); transition: width 120ms linear; }
+.move-clock-num { font-size: 12px; font-weight: 900; color: var(--muted); min-width: 30px; text-align: right; }
+.move-clock-note { font-size: 10px; color: var(--muted); }
+.move-clock.is-low .move-clock-fill { background: var(--yellow); }
+.move-clock.is-low .move-clock-num { color: var(--yellow); }
+.move-clock.is-panic .move-clock-fill { background: var(--red); }
+.move-clock.is-panic .move-clock-num { color: var(--red); animation: clock-panic 0.5s ease-in-out infinite; }
+.move-clock.is-idle .move-clock-fill { background: var(--line); opacity: 0.5; }
+@keyframes clock-panic { 50% { transform: scale(1.25); } }
+.move-clock-flash {
+  margin-top: 6px; font-size: 12px; font-weight: 800; color: var(--red);
+}
+/* in the arena the clock sits in the middle strip, under the turn pill */
+.arena-mid .move-clock { flex-basis: 100%; padding: 0 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .move-clock.is-panic .move-clock-num { animation: none; }
+}
+
 .board-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .board-tools .chip { cursor: pointer; }
 .chip--on { background: var(--green); color: #0c2338; }

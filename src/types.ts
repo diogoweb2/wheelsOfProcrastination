@@ -159,6 +159,14 @@ export interface Settings {
    * captain in the Parent app; undefined means SOLO_PLAY_LIMIT_DEFAULT.
    */
   soloDuelLimit?: number
+  /**
+   * Seconds each player gets to make ONE move, set by the captain in the Parent
+   * app. Two dials, because a board move and a card turn are not the same size
+   * of decision. `0` switches the clock off; undefined means the default
+   * (BOARD_MOVE_SECONDS / DUEL_MOVE_SECONDS).
+   */
+  boardMoveSeconds?: number
+  duelMoveSeconds?: number
 }
 
 /** One device registered for web push, so a closed app can still be reached. */
@@ -536,6 +544,14 @@ export interface CardDuel {
   winnerId?: string
   /** Set once the winner's Berries have been paid, so a re-render can't pay twice. */
   paidAt?: string
+  /**
+   * The move clock this match is played on, stamped from the challenger's
+   * settings when the call goes out. On the match rather than read live from
+   * settings so the two phones can never disagree mid-duel — and so changing
+   * the dial never moves the goalposts on a game already in progress. `0` is a
+   * match with no clock; undefined is one dealt before clocks existed.
+   */
+  moveSeconds?: number
 }
 
 // --- Board games (Chess & Checkers, the 🎮 Games folder) --------------------
@@ -565,6 +581,8 @@ export interface BoardMatch {
   draw?: boolean
   /** Set once each side has banked its own result, so a re-sync can't pay twice. */
   paidAt?: string
+  /** The move clock, stamped at challenge time — see `CardDuel.moveSeconds`. */
+  moveSeconds?: number
 }
 
 /** One crewmate's record in one board game. */

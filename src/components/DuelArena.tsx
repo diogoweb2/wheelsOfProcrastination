@@ -25,6 +25,7 @@ import {
 import { DICE_FACES, treasureById } from '../logic/treasures'
 import { stickerUrl } from '../logic/album'
 import { BattleCard, BoardCard } from './BattleCard'
+import { MoveTimer } from './MoveTimer'
 import { duelSfx, sfx } from '../audio'
 
 /** How long a blow is animated for. The action bar is locked for exactly this long. */
@@ -123,6 +124,9 @@ export function DuelArena({
   waitingFor,
   onResign,
   onExit,
+  moveSeconds = 0,
+  clockPaused = false,
+  onTimeout,
 }: {
   state: DuelState
   myIndex: number
@@ -131,6 +135,15 @@ export function DuelArena({
   waitingFor?: string | null
   onResign?: () => void
   onExit: () => void
+  /** Seconds on the move clock; 0 means this match is played without one. */
+  moveSeconds?: number
+  /** Hold the clock — the treasure chest ceremony is over the board. */
+  clockPaused?: boolean
+  /**
+   * Time's up. The arena reports it and decides nothing, the same as every
+   * other action here: what gets played is the caller's call.
+   */
+  onTimeout?: () => void
 }) {
   const fx = useDuelFx(state)
   const [peek, setPeek] = useState<string | null>(null)
@@ -273,6 +286,17 @@ export function DuelArena({
           ) : stormIn <= 6 ? (
             <span className="arena-storm">⛈️ storm in {stormIn}</span>
           ) : null)}
+        {!state.over && onTimeout && (
+          <MoveTimer
+            seconds={moveSeconds}
+            running={myTurn && !locked && !clockPaused}
+            // a treasure or a dice roll is a FREE play: it bumps `seq` without
+            // handing the turn over, and it buys a fresh clock to use what it gave you
+            resetKey={`${state.seq}-${state.turn}`}
+            onExpire={onTimeout}
+            note={myTurn ? 'random move at 0' : undefined}
+          />
+        )}
       </div>
 
       <div className={`arena-row is-me ${fx?.side === myIndex ? 'is-acting' : ''}`}>
