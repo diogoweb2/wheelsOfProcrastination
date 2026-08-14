@@ -161,8 +161,10 @@ import {
 import {
   checkFixes,
   essayAiError,
+  essayAiReady,
   gradeEssay,
   reviewEssay,
+  spellWord,
   suggestTopics,
   type DraftComment,
   type EssayAttempt,
@@ -889,6 +891,74 @@ export const useStore = create<StoreState>((set, get) => {
     }
     set({ essayTopics: now.topics, essays: now.essays, essayWords: now.words, essayWordTests: now.wordTests })
     fireAndForget(saveEssays(now))
+  }
+
+  /**
+   * File misspelled words into the bank — the one door every source uses, the
+   * AI proofreader and the parent's red pen alike.
+   *
+   * A word already in the bank is not skipped: its miss count goes up, and if it
+   * had been nailed it stops being nailed. Getting "because" wrong again, weeks
+   * after passing it in a test, is exactly the signal the practice round wants —
+   * and it means the word can pay a second time, which it has earned.
+   */
+  function absorbWords(
+    essayId: string,
+    authorId: string,
+    found: { typed: string; correct: string; options: string[] }[],
+  ) {
+    if (!found.length) return
+    const now = new Date().toISOString()
+    const words = [...get().essayWords]
+    for (const f of found) {
+      const key = f.correct.toLowerCase()
+      const at = words.findIndex((w) => w.authorId === authorId && w.correct.toLowerCase() === key)
+      if (at >= 0) {
+        const w = words[at]
+        words[at] = {
+          ...w,
+          misses: (w.misses ?? 1) + 1,
+          lastMissedAt: now,
+          typed: f.typed, // the freshest version of how he gets it wrong
+          options: w.options.length ? w.options : f.options,
+          masteredAt: undefined,
+        }
+        continue
+      }
+      words.push({
+        id: crypto.randomUUID(),
+        typed: f.typed,
+        correct: f.correct,
+        options: f.options,
+        authorId,
+        fromEssayId: essayId,
+        addedAt: now,
+        asked: 0,
+        right: 0,
+        misses: 1,
+        lastMissedAt: now,
+      })
+    }
+    saveEssayDesk({ words })
+  }
+
+  /**
+   * A word the parent circled: ask the model what it should have been, then bank
+   * it. Silent by design — this runs while the red pen is still moving, so a
+   * missing key or a model timeout must never interrupt the marking.
+   */
+  async function bankMarkedWord(essayId: string, typed: string, para: number) {
+    const essay = get().essays.find((e) => e.id === essayId)
+    if (!essay || !essayAiReady(get().aiConfig)) return
+    const sentence = para < 0 ? essay.title : (essay.paragraphs[para] ?? '')
+    try {
+      const found = await spellWord(essayCtx(), typed, sentence)
+      // Nothing to bank if the model decides the word was spelled right all along.
+      if (!found || found.correct.toLowerCase() === typed.trim().toLowerCase()) return
+      absorbWords(essayId, essay.authorId, [{ typed: typed.trim(), correct: found.correct, options: found.options }])
+    } catch {
+      // the note still stands; only the bank entry is lost
+    }
   }
 
   /**
@@ -3043,24 +3113,13 @@ export const useStore = create<StoreState>((set, get) => {
         // Every word it caught joins the bank, right now — a word he misspelled
         // once is a word he'll misspell again, and this list is the only
         // spelling list that is actually about him.
-        const known = new Set(get().essayWords.map((w) => w.correct.toLowerCase()))
-        const fresh: EssayWord[] = []
-        for (const d of drafts) {
-          if (d.issue !== 'spelling' || !d.correct || known.has(d.correct.toLowerCase())) continue
-          known.add(d.correct.toLowerCase())
-          fresh.push({
-            id: crypto.randomUUID(),
-            typed: d.quote ?? d.correct,
-            correct: d.correct,
-            options: d.options ?? [],
-            authorId: essay.authorId,
-            fromEssayId: essayId,
-            addedAt: new Date().toISOString(),
-            asked: 0,
-            right: 0,
-          })
-        }
-        if (fresh.length) saveEssayDesk({ words: [...get().essayWords, ...fresh] })
+        absorbWords(
+          essayId,
+          essay.authorId,
+          drafts
+            .filter((d) => d.issue === 'spelling' && d.correct)
+            .map((d) => ({ typed: d.quote ?? d.correct!, correct: d.correct!, options: d.options ?? [] })),
+        )
         patchEssay(essayId, (e) => {
           e.comments = [
             ...e.comments,
@@ -3183,6 +3242,11 @@ export const useStore = create<StoreState>((set, get) => {
         ]
         return e
       })
+      // A word circled by hand belongs in the bank just as much as one the model
+      // caught. The note only carries the wrong spelling, so the right one is
+      // fetched in the background — the parent never waits for it, and a failed
+      // lookup costs nothing but that one word.
+      if (c.issue === 'spelling' && c.quote) void bankMarkedWord(essayId, c.quote, c.para)
     },
 
     essayEditComment(essayId, commentId, text) {

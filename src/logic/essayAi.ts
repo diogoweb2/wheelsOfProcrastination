@@ -302,6 +302,47 @@ function safeTip(text: string, correct: string): string {
   return 'Say this word out loud, slowly, and listen to every sound — one part of it isn’t written the way it sounds.'
 }
 
+/**
+ * One word, circled by hand.
+ *
+ * The parent's red pen says "this is misspelled" and nothing more — the note
+ * carries the wrong word, never the right one. The bank needs the right one, so
+ * the smallest possible call goes and gets it, along with the near misses the
+ * test is built from. Nothing the model returns here is ever shown to him: he
+ * only ever sees the seven options.
+ */
+export async function spellWord(
+  ctx: EssayCtx,
+  typed: string,
+  sentence: string,
+): Promise<{ correct: string; options: string[] } | null> {
+  const prompt = `A ${schoolProfile().age}-year-old Canadian student misspelled a word in his essay.
+
+He wrote: "${typed}"
+The sentence it came from: "${sentence.slice(0, 240)}"
+
+Give the word spelled properly, plus ${WORD_OPTIONS - 1} WRONG spellings of that same word — plausible ones a ${schoolProfile().age}-year-old would actually produce (a doubled letter, two letters swapped, a missing vowel, ie/ei the wrong way round). Do NOT include the correct spelling among the wrong ones.
+
+Canadian spellings (colour, favourite, centre, travelled) are CORRECT — if he already spelled it the Canadian way, that IS the correct spelling.
+If "${typed}" is in fact spelled correctly, answer with {"correct": "${typed}", "options": []}.
+
+Answer with ONLY this JSON object, no prose and no markdown fence:
+{"correct": "<the right spelling>", "options": [<${WORD_OPTIONS - 1} wrong spellings>]}`
+
+  const reply = await askEssay(ctx, {
+    system:
+      'You are a careful proofreader for a middle-school student. You answer with raw JSON and nothing else.',
+    prompt,
+    temperature: 0.2,
+  })
+
+  const row = JSON.parse(sliceJson(reply, '{', '}')) as Record<string, unknown>
+  const correct = typeof row.correct === 'string' ? row.correct.trim() : ''
+  if (!correct) return null
+  const offered = Array.isArray(row.options) ? row.options.filter((o): o is string => typeof o === 'string') : []
+  return { correct, options: buildOptions(correct, offered) }
+}
+
 // --- 3. did he fix it? ------------------------------------------------------
 
 export interface FixVerdict {

@@ -604,11 +604,41 @@ export function shuffle<T>(list: T[]): T[] {
   return out
 }
 
-/** The words a practice round asks about: the shaky ones first, then anything. */
+/**
+ * How many slots a word gets in the practice draw. Misspelling "because" four
+ * times is the app being told, four times, which word to drill — so it comes up
+ * four times as often as a word he got wrong once. Capped, because one word
+ * cannot be allowed to swallow every round.
+ */
+export const MISS_WEIGHT_CAP = 5
+export function wordWeight(w: EssayWord): number {
+  return Math.min(Math.max(w.misses ?? 1, 1), MISS_WEIGHT_CAP)
+}
+
+/**
+ * The words a practice round asks about: shaky ones first, mastered ones only
+ * to fill up. Within each group the draw is weighted by how many times he has
+ * actually misspelled the word — no word appears twice in one round, but the
+ * repeat offenders turn up in far more rounds.
+ */
 export function practiceSet(words: EssayWord[], size = PRACTICE_SIZE): EssayWord[] {
-  const shaky = shuffle(shakyWords(words))
-  const rest = shuffle(words.filter((w) => w.masteredAt))
-  return [...shaky, ...rest].slice(0, size)
+  const shaky = weightedDraw(shakyWords(words), size)
+  if (shaky.length >= size) return shaky
+  const rest = weightedDraw(words.filter((w) => w.masteredAt), size - shaky.length)
+  return [...shaky, ...rest]
+}
+
+/** Pick `size` distinct words, each word's chance proportional to its miss count. */
+function weightedDraw(words: EssayWord[], size: number): EssayWord[] {
+  const pool = [...words]
+  const out: EssayWord[] = []
+  while (out.length < size && pool.length) {
+    let roll = Math.random() * pool.reduce((sum, w) => sum + wordWeight(w), 0)
+    let i = 0
+    while (i < pool.length - 1 && (roll -= wordWeight(pool[i])) > 0) i++
+    out.push(pool.splice(i, 1)[0])
+  }
+  return out
 }
 
 /**

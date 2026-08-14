@@ -791,8 +791,10 @@ What replaces it: **his marked-up essay is the screen**, and every fix starts by
 
 When the proofreader flags a misspelling it also returns, in fields **he never sees**, the correct spelling and six plausible wrong ones — a doubled letter, two letters swapped, a missing vowel, ie/ei reversed. (If it returns too few, the app generates the near-misses itself with the same rules, so a lazy answer still makes a real question.) That becomes one multiple-choice question: **"Which one is spelled right?"**
 
+- **Both pens fill the bank.** A misspelling the AI proofreader catches goes in with its correction attached. A word **Diogo circles by hand** as a spelling note goes in too: the note itself only carries the wrong word, so the app makes one small AI call in the background to fetch the right spelling and the near-misses. That call is silent and never blocks the marking — if there is no key, or the model doesn't answer, the note still stands and only the bank entry is missed.
 - **The list never closes.** New words join it after every review; nothing is ever retired.
-- **🎯 Quick practice** — 5 words, shaky ones first, no Berries, no record.
+- **A repeat is counted, not ignored.** Misspelling a word that is already in the bank raises its **miss count** instead of adding a duplicate — and it stops being "nailed", so it can pay again. The count is what weights the practice draw: a word missed 4× is drawn 4× as often as one missed once (capped at 5×, so one word can't swallow every round). Diogo's side shows "missed 4×" on the word.
+- **🎯 Quick practice** — 5 words, shaky ones first, drawn by miss count, no Berries, no record.
 - **🏁 Final test** — every word in his bank, **retakable as often as he likes**.
 - **A word pays 🪙 5 the FIRST time he gets it right in a final test, and never again.** That is what makes unlimited retakes safe: the second correct answer for a word is worth zero, so a retake is practice, not a Berry tap.
 - **"🆕 4 new words since your last test"** sits on the card — the line that makes the test worth reopening.

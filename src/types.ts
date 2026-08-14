@@ -1075,6 +1075,13 @@ export interface EssayWord {
   asked: number
   right: number
   /**
+   * How many times he has misspelled this word in an essay — 1 when it first
+   * lands. A word he keeps getting wrong is a word the practice round should
+   * keep putting in front of him, so this is what weights the draw.
+   */
+  misses: number
+  lastMissedAt?: string
+  /**
    * The first time he picks it correctly **in a final test**. Pays Berries once,
    * then never again — which is what stops unlimited retakes being a Berry tap.
    */

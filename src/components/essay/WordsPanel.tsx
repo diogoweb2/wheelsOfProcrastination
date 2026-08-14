@@ -102,6 +102,9 @@ export function WordsPanel({ readOnly }: { readOnly?: boolean }) {
               <div style={{ fontWeight: 900 }}>{readOnly ? w.correct : w.typed}</div>
               <div className="muted" style={{ fontSize: 11, fontWeight: 800, marginTop: 2 }}>
                 {readOnly && `he wrote “${w.typed}” · `}
+                {/* The count is the whole point of a bank made of his own mistakes:
+                    a word missed five times gets asked five times as often. */}
+                {(w.misses ?? 1) > 1 && `missed ${w.misses}× · `}
                 {w.asked > 0 ? `${w.right}/${w.asked} right` : 'not tested yet'}
                 {w.masteredAt ? ' · nailed' : ''}
               </div>
