@@ -11,7 +11,7 @@
 // grade or a missing field is dropped rather than trusted. Every call throws a
 // readable error on failure — the desk shows it, nothing is faked.
 import type { AiConfig, Essay, EssayComment, EssayGrade } from '../types'
-import { GRADES, MECHANICAL_ISSUES, essayText } from './essay'
+import { GRADES, MECHANICAL_ISSUES, WORD_OPTIONS, buildOptions, essayText } from './essay'
 import { askOpenRouter, shortAiError, sliceJson } from './openrouter'
 
 export { aiReady as essayAiReady } from './openrouter'
@@ -224,25 +224,30 @@ ${essayBlock(essay)}
 """
 
 Proofread it. Look ONLY for these three things:
-1. "spelling" — every misspelled word. One note each, with the misspelled word EXACTLY as he typed it in "quote".
+1. "spelling" — every misspelled word. One note each, with the misspelled word EXACTLY as he typed it in "quote". For these, ALSO fill in two extra fields the app needs and he never sees:
+   - "correct": the word spelled properly.
+   - "options": ${WORD_OPTIONS - 1} WRONG spellings of that same word — plausible ones a 12-year-old would actually produce (a doubled letter, two letters swapped, a missing vowel, ie/ei the wrong way round). Do NOT include the correct spelling in this list.
 2. "punctuation" — a missing or wrong full stop, comma, question mark or apostrophe. Put the two or three words around the problem in "quote".
 3. "case" — a capital-letter mistake: a lowercase "i" for the word I, a sentence that doesn't start with a capital, a name or a place without one, or a capital in the middle of a word. Put the word in "quote".
 
 Do NOT comment on anything else. Say nothing about his ideas, his structure, how clear it is, how interesting it is, or how it could be better — someone else is handling all of that. If the spelling and punctuation are clean, answer with an empty list.
 
 ABSOLUTE RULES:
-- NEVER write the correction. Do not give the correct spelling, do not rewrite his sentence, do not show him the fixed version. Say WHAT is wrong and let him fix it.
+- The "text" of a note is the ONLY thing he reads, and it must NEVER contain the answer.
+  * BANNED in "text": the correctly spelled word, in any form. Never "it should be 'because'", never "the right spelling is...", never "change it to...", never spelling it out letter by letter, never the word in quotes, brackets or capitals.
+  * INSTEAD, "text" is a TIP that helps him work it out himself: point at the part of the word that is wrong ("the middle of this word has a sound you didn't write"), name the rule ("this one follows i-before-e"), or tell him what to do ("say it out loud slowly and count the sounds — one is missing").
+  * The same goes for punctuation and capitals: say what is missing or wrong, not the corrected text.
 - Write every note in simple language a ${schoolProfile().age}-year-old understands. Short sentences. No grammar jargon: say "this needs a full stop" not "terminal punctuation is absent".
 - Canadian spellings (colour, favourite, centre, travelled) are CORRECT. Never flag one as a misspelling.
 - "quote" must be text copied EXACTLY from the essay, character for character. If you cannot copy it exactly, leave "quote" out.
 - "para" is the paragraph number as labelled above (1, 2, 3…), or 0 for the title.
 
 Answer with ONLY this JSON array, no prose and no markdown fence:
-[{"para": <number>, "quote": "<exact text from the essay>", "issue": "spelling|punctuation|case", "text": "<the note, max 25 words>"}]`
+[{"para": <number>, "quote": "<exact text from the essay>", "issue": "spelling|punctuation|case", "text": "<the tip, max 25 words, NEVER containing the answer>", "correct": "<spelling notes only>", "options": [<spelling notes only>]}]`
 
   const reply = await askEssay(ctx, {
     system:
-      'You are a careful proofreader for a middle-school student. You mark spelling, punctuation and capital letters ONLY, you never fix anything yourself because the student learns by fixing it, and you answer with raw JSON and nothing else.',
+      'You are a careful proofreader for a middle-school student. You mark spelling, punctuation and capital letters ONLY. You never give the answer: your notes are hints that help the student find the mistake himself, because being handed the correct spelling teaches him nothing. You answer with raw JSON and nothing else.',
     prompt,
     temperature: 0.2,
   })
@@ -262,11 +267,39 @@ Answer with ONLY this JSON array, no prose and no markdown fence:
     const paraRaw = Math.round(Number(row.para))
     const para = Number.isFinite(paraRaw) ? Math.min(Math.max(paraRaw - 1, -1), essay.paragraphs.length - 1) : 0
     const quote = typeof row.quote === 'string' ? row.quote.trim() : ''
-    out.push({ para, issue, text: text.slice(0, 220), ...(quote ? { quote: quote.slice(0, 120) } : {}) })
+    const correct = issue === 'spelling' && typeof row.correct === 'string' ? row.correct.trim() : ''
+    const offered = Array.isArray(row.options) ? row.options.filter((o): o is string => typeof o === 'string') : []
+    out.push({
+      para,
+      issue,
+      // The prompt forbids leaking the answer; this is what happens when it does
+      // it anyway. Models are helpful by reflex and one slip hands him the word.
+      text: safeTip(text, correct).slice(0, 220),
+      ...(quote ? { quote: quote.slice(0, 120) } : {}),
+      ...(correct ? { correct, options: buildOptions(correct, offered) } : {}),
+    })
   }
   // An empty list is a real answer now: "nothing misspelled" is a thing a
   // proofreader is allowed to say, and it is what a clean second round looks like.
   return out
+}
+
+/**
+ * The last line of defence on "never give him the answer".
+ *
+ * The prompt says it four ways, and a helpful model will still occasionally
+ * write "it should be *because*". One leak undoes the exercise, and he only has
+ * to be handed the word once to stop looking it up — so anything containing the
+ * correct spelling is thrown away and replaced with a tip that carries no
+ * answer. A blander note is a far smaller loss than a free answer.
+ */
+function safeTip(text: string, correct: string): string {
+  if (!correct) return text
+  const leaks = new RegExp(`\\b${correct.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+  // letter-by-letter spelling ("b-e-c-a-u-s-e") sneaks past a word-boundary test
+  const spelledOut = correct.length > 3 && text.toLowerCase().includes(correct.toLowerCase().split('').join('-'))
+  if (!leaks.test(text) && !spelledOut) return text
+  return 'Say this word out loud, slowly, and listen to every sound — one part of it isn’t written the way it sounds.'
 }
 
 // --- 3. did he fix it? ------------------------------------------------------
@@ -306,7 +339,7 @@ ${open
 For EACH note, decide whether the new version actually deals with it.
 - "fixed" = the problem is genuinely gone. A spelling note is fixed only when the word is now spelled correctly; a capital-letter note only when the capital is right; a punctuation note only when the mark is actually there and correct. Anything else is fixed only when the problem itself is gone, not merely reworded.
 - "unfixed" = still there, or he changed something else instead, or he made it worse.
-- The note is one short sentence for HIM, in simple language. If it is still unfixed, say what is still wrong WITHOUT writing the correction.
+- The note is one short sentence for HIM, in simple language. If it is still unfixed, say what is still wrong WITHOUT writing the correction — never spell the word out for him, never say "it should be X". A hint about the sound or the rule, nothing more.
 
 Answer with ONLY this JSON array, no prose and no markdown fence:
 [{"id": "<the id above>", "verdict": "fixed|unfixed", "note": "<max 20 words>"}]`
@@ -320,15 +353,17 @@ Answer with ONLY this JSON array, no prose and no markdown fence:
 
   const raw = JSON.parse(sliceJson(reply, '[', ']')) as unknown
   if (!Array.isArray(raw)) throw new Error('the model did not answer with a list')
-  const known = new Set(open.map((c) => c.id))
+  const byId = new Map(open.map((c) => [c.id, c]))
   const out: FixVerdict[] = []
   for (const row of raw as Record<string, unknown>[]) {
     const id = typeof row.id === 'string' ? row.id : ''
-    if (!known.has(id) || out.some((v) => v.id === id)) continue
+    const note = byId.get(id)
+    if (!note || out.some((v) => v.id === id)) continue
     out.push({
       id,
       verdict: row.verdict === 'fixed' ? 'fixed' : 'unfixed',
-      note: typeof row.note === 'string' ? row.note.trim().slice(0, 200) : '',
+      // scrubbed against the same word, for the same reason as the review itself
+      note: typeof row.note === 'string' ? safeTip(row.note.trim(), note.correct ?? '').slice(0, 200) : '',
     })
   }
   if (!out.length) throw new Error('it answered about none of the notes')

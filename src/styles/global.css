@@ -3649,3 +3649,19 @@ input, select { font-family: inherit; }
 .wp-word { border-radius: 5px; padding: 1px 1px; cursor: pointer; }
 .wp-word:active { background: var(--card2); }
 .wp-word.is-anchor { background: var(--yellow); color: #3a2000; font-weight: 900; }
+
+/* Word-bank quiz: one big tappable spelling per row. */
+.word-opt {
+  width: 100%;
+  padding: 13px 12px;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 2px solid var(--line);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+}
+.word-opt:active { transform: scale(0.98); }
+.word-opt--right { background: var(--green); border-color: var(--green); color: #0c2338; }
+.word-opt--wrong { background: var(--red); border-color: var(--red); color: #fff; }

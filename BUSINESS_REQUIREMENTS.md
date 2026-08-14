@@ -42,7 +42,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
-| ✍️ **Essays** | *Ben:* Write · Marked — *Diogo:* Desk · Topics · Marked |
+| ✍️ **Essays** | *Ben:* Write · Words · Marked — *Diogo:* Desk · Topics · Words · Marked |
 | 💡 **Ideas** | Open · Done · New |
 | 🕐 **Clocks** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
@@ -212,7 +212,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
-  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19h). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
+  - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19i). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
 - **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
   - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
   - **Diogo gets a second, separate push about Ben's** leftovers ("👦 Ben still has 2 must-dos") so he can remind him before bed.
@@ -647,7 +647,7 @@ Born 2014, TCDSB (Toronto Catholic District School Board), Ontario. Every prompt
 
 | Where | What |
 |---|---|
-| `app/essays` (shared) | `topics[]` (the curated list) + `essays[]` (every essay, capped at 40). Both crewmates read it live: an enabled topic appears on Ben's list, a submission appears on Diogo's desk. Each essay also carries `lastCheckAt`, which is what the five-minute resend cooldown is measured from. |
+| `app/essays` (shared) | `topics[]` (the curated list), `essays[]` (every essay, capped at 40), `words[]` (the word bank, capped at 300) and `wordTests[]` (the last 40 sittings). Both crewmates read it live: an enabled topic appears on Ben's list, a submission appears on Diogo's desk. Each essay also carries `lastCheckAt`, which is what the five-minute resend cooldown is measured from. |
 | `app/aiConfig` (shared) | The same OpenRouter key and model as the Gym coach (§18b). One key, one spend cap. |
 | `profiles/{id}.economy` | Where the Berries land when an essay is graded. |
 
@@ -676,7 +676,7 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 6. **He sends it again — and the app checks him first** (§19e-2). Once it's past that gate, Diogo's **🔁 Check his fixes** gives one AI verdict per open note, fixed or not, with a one-line reason. **Spelling and capital-letter verdicts close themselves** — both have a right answer, and making a parent tick off thirty obvious ones is how a good idea stops getting used. **Punctuation and anything Diogo wrote wait for his ✓.**
 7. **Round again, or grade.** The loop repeats until no note is open.
 
-The AI is told three times, in three different prompts, that it must **never supply the correction**. Notes say what is wrong and why, in language a 12-year-old reads without help — no grammar jargon. Canadian spellings are explicitly correct and never flagged.
+**It never hands him the answer.** A note is a *tip*, not a correction: point at the part of the word that's wrong, name the rule ("this one follows i-before-e"), or tell him what to do ("say it out loud slowly — one sound isn't written"). The prompt bans the corrected word four different ways, including spelling it out letter by letter, and **the app checks the output anyway**: any note containing the correct spelling is thrown away and replaced with a generic tip. One leak undoes the exercise — he only has to be handed a word once to stop working it out — and a blander note is a far smaller loss than a free answer. The same scrub runs on the fix-check verdicts. Canadian spellings are explicitly correct and never flagged.
 
 #### 19e-1. Adding a note: point, don't type
 
@@ -690,7 +690,21 @@ From round 2 on, **his own send button spends an AI call first**: it checks his 
 
 Either way, **the button then locks for five minutes**. The check costs real money and "send" is otherwise a free spellchecker he can mash. The button counts the wait down and says why. Diogo's own check button has no such limit.
 
-### 19f. The grade and the Berries
+### 19f. The word bank — "My Words" (the 🔤 tab)
+
+**Every word he misspells is kept forever.** A word he got wrong once is a word he will get wrong again, and a spelling list made entirely of *his* mistakes beats any list off the internet.
+
+When the proofreader flags a misspelling it also returns, in fields **he never sees**, the correct spelling and six plausible wrong ones — a doubled letter, two letters swapped, a missing vowel, ie/ei reversed. (If it returns too few, the app generates the near-misses itself with the same rules, so a lazy answer still makes a real question.) That becomes one multiple-choice question: **"Which one is spelled right?"**
+
+- **The list never closes.** New words join it after every review; nothing is ever retired.
+- **🎯 Quick practice** — 5 words, shaky ones first, no Berries, no record.
+- **🏁 Final test** — every word in his bank, **retakable as often as he likes**.
+- **A word pays 🪙 5 the FIRST time he gets it right in a final test, and never again.** That is what makes unlimited retakes safe: the second correct answer for a word is worth zero, so a retake is practice, not a Berry tap.
+- **"🆕 4 new words since your last test"** sits on the card — the line that makes the test worth reopening.
+- His side shows the word **as he wrote it** (working out the right spelling is the exercise). Diogo's side shows the correct spelling, what he actually typed, and per-word hit rate, and can delete a word.
+- Each word belongs to whoever wrote the essay, so the two crewmates never share a list.
+
+### 19g. The grade and the Berries
 
 Once nothing is open, **🏅 Grade it**: a letter from **C- to A+**, plus two sentences written straight to him — what he genuinely did well, and the *one* thing to work on next time. Nothing below C- exists: he only reaches this point after fixing everything he was asked to fix, so the grade measures the writing, not his obedience.
 
@@ -702,7 +716,7 @@ Once nothing is open, **🏅 Grade it**: a letter from **C- to A+**, plus two se
 
 **📚 Marked** keeps every graded essay: the letter, the Berries, the feedback, and the whole marked-up copy one tap away.
 
-### 19g. When the model doesn't answer
+### 19h. When the model doesn't answer
 
 Somebody is sitting there holding a phone, so the essay desk does **not** use the Gym coach's three-minute patience (§18):
 
@@ -712,7 +726,7 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 - **The wait is shown, not hidden**: which model is being asked, *model 2 of 3*, and a live countdown of its 60 seconds. A blank minute is indistinguishable from a hang, and the recovery is invisible unless it's said out loud.
 - If the whole queue fails, the error names every model tried — and **nothing is invented**: a review that didn't happen never looks like one that found nothing wrong.
 
-### 19h. Notifications
+### 19i. Notifications
 
 `onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, and Ben once (never once per topic) when new topics go up. Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
 

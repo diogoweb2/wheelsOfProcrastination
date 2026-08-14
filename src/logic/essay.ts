@@ -1,6 +1,6 @@
 // Essay rules — everything that doesn't need the network or React.
 // Keep in sync with BUSINESS_REQUIREMENTS.md §19.
-import type { Essay, EssayComment, EssayGrade, EssayTopic } from '../types'
+import type { Essay, EssayComment, EssayGrade, EssayTopic, EssayWord, EssayWordTest } from '../types'
 
 /** Best first. The list is also the order the "what each grade pays" table shows. */
 export const GRADES: EssayGrade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-']
@@ -212,6 +212,95 @@ export function writableTopics(topics: EssayTopic[]): EssayTopic[] {
 /** Every title the AI must never propose again — kept AND binned. */
 export function usedTitles(topics: EssayTopic[]): string[] {
   return topics.map((t) => t.title)
+}
+
+// --- the word bank ----------------------------------------------------------
+//
+// Every word the proofreader catches goes in here with the right spelling and a
+// set of near-identical wrong ones. It is a spelling list made entirely of HIS
+// mistakes, it never closes, and the test can be taken as often as he likes —
+// but each word only pays the first time he gets it right, so a retake is
+// practice, not a Berry tap.
+
+/** Berries for a word answered correctly for the first time ever, in a final test. */
+export const WORD_COIN = 5
+
+/** How many options one question shows. */
+export const WORD_OPTIONS = 7
+
+/** A practice round is short on purpose — it should be over before it feels like homework. */
+export const PRACTICE_SIZE = 5
+
+/** The bank is permanent, but not infinite. */
+export const WORD_CAP = 300
+
+export function wordsAddedSince(words: EssayWord[], tests: EssayWordTest[]): EssayWord[] {
+  const last = tests[tests.length - 1]
+  if (!last) return words
+  return words.filter((w) => w.addedAt > last.at)
+}
+
+/** Words he has never yet got right in a test — what practice should be made of. */
+export function shakyWords(words: EssayWord[]): EssayWord[] {
+  return words.filter((w) => !w.masteredAt)
+}
+
+export function shuffle<T>(list: T[]): T[] {
+  const out = [...list]
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
+/** The words a practice round asks about: the shaky ones first, then anything. */
+export function practiceSet(words: EssayWord[], size = PRACTICE_SIZE): EssayWord[] {
+  const shaky = shuffle(shakyWords(words))
+  const rest = shuffle(words.filter((w) => w.masteredAt))
+  return [...shaky, ...rest].slice(0, size)
+}
+
+/**
+ * Plausible wrong spellings, generated locally — the safety net for when the
+ * model returns too few. Every rule here is a mistake a real 12-year-old makes:
+ * doubling the wrong letter, swapping two letters over, dropping a vowel,
+ * getting ie/ei the wrong way round.
+ */
+export function nearMisses(word: string): string[] {
+  const out = new Set<string>()
+  const w = word.toLowerCase()
+  const vowels = 'aeiou'
+
+  for (let i = 0; i < w.length; i++) {
+    if (w[i] === w[i + 1]) out.add(w.slice(0, i) + w.slice(i + 1)) // undouble
+    else out.add(w.slice(0, i + 1) + w[i] + w.slice(i + 1)) // double
+    if (i < w.length - 1) out.add(w.slice(0, i) + w[i + 1] + w[i] + w.slice(i + 2)) // swap
+    if (vowels.includes(w[i]) && w.length > 3) out.add(w.slice(0, i) + w.slice(i + 1)) // drop a vowel
+  }
+  out.add(w.replace('ie', 'ei'))
+  out.add(w.replace('ei', 'ie'))
+  out.add(`${w}e`)
+  out.delete(w)
+  return [...out].filter((x) => x.length > 1)
+}
+
+/**
+ * The final option list: the right spelling, plus wrong ones, shuffled. The
+ * model's suggestions come first (they're the interesting near-misses), topped
+ * up locally so a lazy answer still produces a real question.
+ */
+export function buildOptions(correct: string, offered: string[]): string[] {
+  const seen = new Set([correct.toLowerCase()])
+  const wrong: string[] = []
+  for (const o of [...offered, ...nearMisses(correct)]) {
+    const clean = o.trim()
+    if (!clean || seen.has(clean.toLowerCase())) continue
+    seen.add(clean.toLowerCase())
+    wrong.push(clean)
+    if (wrong.length >= WORD_OPTIONS - 1) break
+  }
+  return shuffle([correct, ...wrong])
 }
 
 export function newEssay(topic: EssayTopic, authorId: string, authorName: string): Essay {

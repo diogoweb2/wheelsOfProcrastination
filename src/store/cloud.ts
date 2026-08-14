@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -283,17 +283,32 @@ export async function saveFinalTests(tests: FinalTestAuth[]): Promise<void> {
 
 const essaysRef = () => doc(firestore, 'app', 'essays')
 
-/** Live-sync the essay desk: the curated topic list and every essay in flight. */
-export function subscribeEssays(cb: (v: { topics: EssayTopic[]; essays: Essay[] }) => void): () => void {
+/** Everything the essay app owns, in one document. */
+export interface EssayDesk {
+  topics: EssayTopic[]
+  essays: Essay[]
+  /** The word bank: every word he has ever misspelled, with the quiz built in. */
+  words: EssayWord[]
+  /** Word-test history — what "new words since your last test" is measured against. */
+  wordTests: EssayWordTest[]
+}
+
+/** Live-sync the essay desk: topics, essays in flight, and the word bank. */
+export function subscribeEssays(cb: (v: EssayDesk) => void): () => void {
   return onSnapshot(essaysRef(), (snap) => {
-    const data = snap.data() as { topics?: EssayTopic[]; essays?: Essay[] } | undefined
-    cb({ topics: data?.topics ?? [], essays: data?.essays ?? [] })
+    const data = snap.data() as Partial<EssayDesk> | undefined
+    cb({
+      topics: data?.topics ?? [],
+      essays: data?.essays ?? [],
+      words: data?.words ?? [],
+      wordTests: data?.wordTests ?? [],
+    })
   })
 }
 
-export async function saveEssays(topics: EssayTopic[], essays: Essay[]): Promise<void> {
+export async function saveEssays(desk: EssayDesk): Promise<void> {
   await ensureAuth()
-  await setDoc(essaysRef(), { topics, essays })
+  await setDoc(essaysRef(), desk)
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

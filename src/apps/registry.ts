@@ -171,11 +171,13 @@ export const APPS: AppDef[] = [
     tint: ['#60bff5', '#123252'],
     tabs: [
       { id: 'write', label: 'Write', icon: '✍️' },
+      { id: 'words', label: 'Words', icon: '🔤' },
       { id: 'marked', label: 'Marked', icon: '📚' },
     ],
     adminTabs: [
       { id: 'desk', label: 'Desk', icon: '🖊️' },
       { id: 'topics', label: 'Topics', icon: '💡' },
+      { id: 'words', label: 'Words', icon: '🔤' },
       { id: 'marked', label: 'Marked', icon: '📚' },
     ],
   },

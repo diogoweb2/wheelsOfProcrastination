@@ -9,6 +9,7 @@ import { WritePanel } from '../components/essay/WritePanel'
 import { HistoryPanel } from '../components/essay/HistoryPanel'
 import { TopicsPanel } from '../components/essay/TopicsPanel'
 import { ReviewPanel } from '../components/essay/ReviewPanel'
+import { WordsPanel } from '../components/essay/WordsPanel'
 
 export function EssayScreen({ tab }: { tab: string }) {
   const { activeProfileId } = useStore()
@@ -20,11 +21,13 @@ export function EssayScreen({ tab }: { tab: string }) {
         <>
           {tab === 'topics' && <TopicsPanel />}
           {tab === 'desk' && <ReviewPanel />}
+          {tab === 'words' && <WordsPanel readOnly />}
           {tab === 'marked' && <HistoryPanel />}
         </>
       ) : (
         <>
           {tab === 'write' && <WritePanel />}
+          {tab === 'words' && <WordsPanel />}
           {tab === 'marked' && <HistoryPanel authorId={activeProfileId ?? undefined} />}
         </>
       )}

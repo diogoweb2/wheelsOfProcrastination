@@ -972,6 +972,17 @@ export interface EssayComment {
   edited?: boolean // the parent rewrote the AI's wording
   /** `open` = he still has to deal with it; `fixed` = settled and out of his way. */
   status: 'open' | 'fixed'
+  /**
+   * Spelling notes only: the word as it is actually spelled, and ~7 plausible
+   * spellings to choose between later.
+   *
+   * **Neither is ever shown to him as part of the note.** They exist so the app
+   * can (a) check that the AI didn't smuggle the answer into its own wording and
+   * (b) build the word-bank quiz (§19f). Finding the right spelling is the
+   * exercise; being handed it is the failure mode.
+   */
+  correct?: string
+  options?: string[]
   /** The AI's opinion of his fix, on the round after this note was raised. */
   aiVerdict?: 'fixed' | 'unfixed'
   aiNote?: string
@@ -1023,6 +1034,39 @@ export interface Essay {
   lastCheckAt?: string
   /** Set once the author's app has celebrated the grade, so it only pops once. */
   seenAt?: string
+}
+
+/**
+ * One word he got wrong, kept forever in the word bank.
+ *
+ * The bank is the point of the whole essay loop: a word he misspelled once is a
+ * word he will misspell again, and a list of *his* words is worth ten spelling
+ * lists off the internet. It never closes and it only grows.
+ */
+export interface EssayWord {
+  id: string
+  typed: string // exactly as he wrote it — this is what makes it his list
+  correct: string
+  options: string[] // ~7 near-identical spellings, the right one among them
+  authorId: string // whose list it belongs to — a word is only yours if you wrote it
+  fromEssayId: string
+  addedAt: string
+  asked: number
+  right: number
+  /**
+   * The first time he picks it correctly **in a final test**. Pays Berries once,
+   * then never again — which is what stops unlimited retakes being a Berry tap.
+   */
+  masteredAt?: string
+}
+
+/** One sitting of the word test. Kept so "new words since your last test" means something. */
+export interface EssayWordTest {
+  id: string
+  at: string
+  total: number
+  right: number
+  coins: number
 }
 
 export interface AppData {

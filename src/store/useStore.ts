@@ -13,6 +13,8 @@ import type {
   Essay,
   EssayComment,
   EssayTopic,
+  EssayWord,
+  EssayWordTest,
   ExerciseDef,
   ExerciseRating,
   FinalTestAuth,
@@ -64,6 +66,7 @@ import {
   saveFinalTests,
   saveEssays,
   subscribeEssays,
+  type EssayDesk,
   subscribeAiConfig,
   subscribeData,
   subscribeGymCatalog,
@@ -142,6 +145,8 @@ import {
   AUTO_CLOSE_ISSUES,
   DEFAULT_MIN_WORDS,
   ESSAY_CAP,
+  WORD_CAP,
+  WORD_COIN,
   gradeCoins,
   newEssay,
   openComments,
@@ -268,6 +273,8 @@ interface StoreState {
   aiConfig: AiConfig | null // OpenRouter key + model for the Gym coach (app/aiConfig), live-synced
   essayTopics: EssayTopic[] // the curated topic list (app/essays), live-synced
   essays: Essay[] // every essay in flight or finished (app/essays), live-synced
+  essayWords: EssayWord[] // the word bank: every word he has ever misspelled (app/essays)
+  essayWordTests: EssayWordTest[] // word-test history, newest last
   essayBusy: string | null // what the essay AI is doing right now ('topics' | 'review' | 'fixes' | 'grade'), for the spinner
   /** Which model is being waited on, and since when — the desk counts the 60 seconds down out loud. */
   essayAttempt: (EssayAttempt & { startedAt: number }) | null
@@ -570,6 +577,13 @@ interface StoreState {
   /** Close it out: the AI writes the grade, the writer gets the Berries. */
   essayGrade: (essayId: string) => Promise<void>
   essayMarkSeen: (essayId: string) => void
+  /**
+   * Bank one sitting of the word test and pay for it. Only a `final` test can
+   * master a word, and a word only pays the first time — so the test can be
+   * retaken forever without becoming a Berry tap. Returns the Berries paid.
+   */
+  essayFinishWordTest: (results: { wordId: string; right: boolean }[], final: boolean) => number
+  essayDeleteWord: (wordId: string) => void
   essayDelete: (essayId: string) => void
   essayClearError: () => void
 
@@ -710,7 +724,9 @@ export const useStore = create<StoreState>((set, get) => {
       // remote final tests: Dad's authorisations and the results coming back
       subscribeFinalTests((tests) => set({ finalTests: tests }))
       // the essay desk: Dad's topic list and every essay in flight
-      subscribeEssays(({ topics, essays }) => set({ essayTopics: topics, essays }))
+      subscribeEssays(({ topics, essays, words, wordTests }) =>
+        set({ essayTopics: topics, essays, essayWords: words, essayWordTests: wordTests }),
+      )
       // the shared basement (gear + exercises) and the coach's OpenRouter config
       subscribeGymCatalog((c) => set({ gymCatalog: c }))
       subscribeAiConfig((c) => set({ aiConfig: c }))
@@ -832,10 +848,15 @@ export const useStore = create<StoreState>((set, get) => {
    * the most recent essays stay in the doc, and a graded one has nothing left to
    * do but be read.
    */
-  function saveEssayDesk(topics: EssayTopic[], essays: Essay[]) {
-    const kept = essays.slice(-ESSAY_CAP)
-    set({ essayTopics: topics, essays: kept })
-    fireAndForget(saveEssays(topics, kept))
+  function saveEssayDesk(patch: Partial<EssayDesk>) {
+    const now: EssayDesk = {
+      topics: patch.topics ?? get().essayTopics,
+      essays: (patch.essays ?? get().essays).slice(-ESSAY_CAP),
+      words: (patch.words ?? get().essayWords).slice(-WORD_CAP),
+      wordTests: (patch.wordTests ?? get().essayWordTests).slice(-40),
+    }
+    set({ essayTopics: now.topics, essays: now.essays, essayWords: now.words, essayWordTests: now.wordTests })
+    fireAndForget(saveEssays(now))
   }
 
   /**
@@ -890,11 +911,11 @@ export const useStore = create<StoreState>((set, get) => {
 
   /** Patch one essay in the shared desk (local set + write-through). */
   function patchEssay(essayId: string, fn: (e: Essay) => Essay) {
-    const { essayTopics, essays } = get()
-    saveEssayDesk(
-      essayTopics,
-      essays.map((e) => (e.id === essayId ? { ...fn(structuredClone(e)), updatedAt: new Date().toISOString() } : e)),
-    )
+    saveEssayDesk({
+      essays: get().essays.map((e) =>
+        e.id === essayId ? { ...fn(structuredClone(e)), updatedAt: new Date().toISOString() } : e,
+      ),
+    })
   }
 
   function saveIdeaList(ideas: Idea[]) {
@@ -938,6 +959,8 @@ export const useStore = create<StoreState>((set, get) => {
     aiConfig: null,
     essayTopics: [],
     essays: [],
+    essayWords: [],
+    essayWordTests: [],
     essayBusy: null,
     essayAttempt: null,
     essayError: null,
@@ -2850,7 +2873,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     essayJudgeTopic(offer, keep, source = 'ai') {
-      const { essayTopics, essays } = get()
+      const { essayTopics } = get()
       if (essayTopics.some((t) => t.title.toLowerCase() === offer.title.toLowerCase())) return
       const topic: EssayTopic = {
         id: crypto.randomUUID(),
@@ -2863,34 +2886,24 @@ export const useStore = create<StoreState>((set, get) => {
         source,
         createdAt: new Date().toISOString(),
       }
-      saveEssayDesk([...essayTopics, topic], essays)
+      saveEssayDesk({ topics: [...essayTopics, topic] })
     },
 
     essaySetTopicEnabled(topicId, enabled) {
-      const { essayTopics, essays } = get()
-      saveEssayDesk(
-        essayTopics.map((t) => (t.id === topicId ? { ...t, enabled } : t)),
-        essays,
-      )
+      saveEssayDesk({ topics: get().essayTopics.map((t) => (t.id === topicId ? { ...t, enabled } : t)) })
     },
 
     essaySetTopicWords(topicId, minWords) {
-      const { essayTopics, essays } = get()
-      const words = Math.max(30, Math.min(600, Math.round(minWords)))
-      saveEssayDesk(
-        essayTopics.map((t) => (t.id === topicId ? { ...t, minWords: words } : t)),
-        essays,
-      )
+      const target = Math.max(30, Math.min(600, Math.round(minWords)))
+      saveEssayDesk({ topics: get().essayTopics.map((t) => (t.id === topicId ? { ...t, minWords: target } : t)) })
     },
 
     essayDeleteTopic(topicId) {
       // Dropped from the list but NOT forgotten: it stays as a rejection so the
       // AI is still told never to offer it again.
-      const { essayTopics, essays } = get()
-      saveEssayDesk(
-        essayTopics.map((t) => (t.id === topicId ? { ...t, status: 'rejected', enabled: false } : t)),
-        essays,
-      )
+      saveEssayDesk({
+        topics: get().essayTopics.map((t) => (t.id === topicId ? { ...t, status: 'rejected' as const, enabled: false } : t)),
+      })
     },
 
     essayStart(topicId) {
@@ -2902,7 +2915,7 @@ export const useStore = create<StoreState>((set, get) => {
       const existing = essays.find((e) => e.topicId === topicId && e.authorId === activeProfileId && e.status === 'writing')
       if (existing) return existing.id
       const essay = newEssay(topic, activeProfileId, me.name)
-      saveEssayDesk(essayTopics, [...essays, essay])
+      saveEssayDesk({ essays: [...essays, essay] })
       return essay.id
     },
 
@@ -2933,6 +2946,27 @@ export const useStore = create<StoreState>((set, get) => {
       set({ essayBusy: 'review', essayError: null })
       try {
         const drafts = await reviewEssay(essayCtx(), essay, topic?.blurb ?? '')
+        // Every word it caught joins the bank, right now — a word he misspelled
+        // once is a word he'll misspell again, and this list is the only
+        // spelling list that is actually about him.
+        const known = new Set(get().essayWords.map((w) => w.correct.toLowerCase()))
+        const fresh: EssayWord[] = []
+        for (const d of drafts) {
+          if (d.issue !== 'spelling' || !d.correct || known.has(d.correct.toLowerCase())) continue
+          known.add(d.correct.toLowerCase())
+          fresh.push({
+            id: crypto.randomUUID(),
+            typed: d.quote ?? d.correct,
+            correct: d.correct,
+            options: d.options ?? [],
+            authorId: essay.authorId,
+            fromEssayId: essayId,
+            addedAt: new Date().toISOString(),
+            asked: 0,
+            right: 0,
+          })
+        }
+        if (fresh.length) saveEssayDesk({ words: [...get().essayWords, ...fresh] })
         patchEssay(essayId, (e) => {
           e.comments = [
             ...e.comments,
@@ -3088,15 +3122,61 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     essayDelete(essayId) {
-      const { essayTopics, essays } = get()
-      saveEssayDesk(
-        essayTopics,
-        essays.filter((e) => e.id !== essayId),
-      )
+      saveEssayDesk({ essays: get().essays.filter((e) => e.id !== essayId) })
     },
 
     essayClearError() {
       set({ essayError: null })
+    },
+
+    /**
+     * Bank one sitting of the word test.
+     *
+     * Practice changes nothing but the counters. A FINAL test can mark a word
+     * mastered — the first time he picks it correctly there, and only then, it
+     * pays. That is what lets the test be retaken forever without turning into
+     * a Berry tap: the second correct answer for a word is worth zero.
+     */
+    essayFinishWordTest(results, final) {
+      const now = new Date().toISOString()
+      let coins = 0
+      const words = get().essayWords.map((w) => {
+        const r = results.find((x) => x.wordId === w.id)
+        if (!r) return w
+        const next: EssayWord = { ...w, asked: w.asked + 1, right: w.right + (r.right ? 1 : 0) }
+        if (final && r.right && !w.masteredAt) {
+          next.masteredAt = now
+          coins += WORD_COIN
+        }
+        return next
+      })
+
+      const patch: Partial<EssayDesk> = { words }
+      if (final) {
+        patch.wordTests = [
+          ...get().essayWordTests,
+          {
+            id: crypto.randomUUID(),
+            at: now,
+            total: results.length,
+            right: results.filter((r) => r.right).length,
+            coins,
+          },
+        ]
+      }
+      saveEssayDesk(patch)
+
+      if (coins > 0) {
+        commit((d) => {
+          d.economy.gems += coins
+          d.economy.totalGemsEarned += coins
+        })
+      }
+      return coins
+    },
+
+    essayDeleteWord(wordId) {
+      saveEssayDesk({ words: get().essayWords.filter((w) => w.id !== wordId) })
     },
 
     setAiConfig(patch) {
