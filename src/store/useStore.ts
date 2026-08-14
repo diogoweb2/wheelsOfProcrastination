@@ -3315,6 +3315,10 @@ export const useStore = create<StoreState>((set, get) => {
           e.gradeImprove = result.improve
           e.coins = coins
           e.gradedAt = new Date().toISOString()
+          // The round-by-round snapshots existed to answer "what did he change?"
+          // while the loop was running. It has stopped: what's left is the final
+          // essay, and every old draft is dead weight in a shared doc.
+          e.versions = []
           return e
         })
         // the Berries land in the WRITER's world, whichever side is grading

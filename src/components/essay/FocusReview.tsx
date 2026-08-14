@@ -10,6 +10,11 @@
 // point of seeing the machine's marks is not writing the same note twice: tap
 // one and it opens as a popup with the reviewer's usual last word — reword it,
 // or bin it.
+//
+// And round five looks like round four unless the app says otherwise: the words
+// he changed since the last hand-in are painted red, and the rounds before this
+// one can be read back, so "he fixed two things and I can't see where" stops
+// being the reviewer's problem.
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
@@ -24,17 +29,17 @@ import {
   openComments,
   partText,
 } from '../../logic/essay'
+import {
+  changedCount,
+  changedParts,
+  draftAt,
+  draftBefore,
+  draftParts,
+  revisions,
+  tokenize,
+  type Token,
+} from '../../logic/essayDiff'
 import { sfx } from '../../audio'
-
-interface Token {
-  text: string
-  start: number
-  end: number
-}
-
-function tokenize(text: string): Token[] {
-  return [...text.matchAll(/\S+/g)].map((m) => ({ text: m[0], start: m.index ?? 0, end: (m.index ?? 0) + m[0].length }))
-}
 
 /**
  * The words picked out for a new note: which part they're in, the exact text,
@@ -95,6 +100,11 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
   const [peek, setPeek] = useState<{ id: string; para: number; index: number } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const flashTimer = useRef<number | undefined>(undefined)
+  // Which round is on screen (null = the text as it stands now) and whether his
+  // changes are painted. Both stay on by default: the whole reason to open this
+  // on round five is to see the two words that moved.
+  const [viewRound, setViewRound] = useState<number | null>(null)
+  const [showDiff, setShowDiff] = useState(true)
 
   // Same free housekeeping the desk does on open: close what he visibly fixed,
   // re-run the rules. Marking a stale list is worse than not marking at all.
@@ -105,15 +115,40 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
 
   useEffect(() => () => window.clearTimeout(flashTimer.current), [])
 
-  const parts = useMemo(
-    () => [
-      // his raw title, never a placeholder: a quote is sliced out of this text,
-      // so marking "(no title)" would mark something he never wrote
-      { para: -1, text: essay.title, label: 'Title' },
-      ...essay.paragraphs.map((p, i) => ({ para: i, text: p, label: `Paragraph ${i + 1}` })),
-    ],
-    [essay.title, essay.paragraphs],
+  // Every round there's a snapshot for, plus the one he's on now.
+  const rounds = useMemo(
+    () => [...new Set([...revisions(essay).map((v) => v.round), essay.round])].sort((a, b) => a - b),
+    [essay],
   )
+  const round = viewRound ?? essay.round
+  const past = round < essay.round // an old round is read-only: it's history
+  const draft = draftAt(essay, round)
+  const previous = draftBefore(essay, round)
+
+  const parts = useMemo(() => draftParts(draft), [draft])
+  const diff = useMemo(() => changedParts(draft, previous), [draft, previous])
+  const newWords = changedCount(diff)
+  const paint = showDiff && newWords > 0
+  const at = rounds.indexOf(round)
+
+  // Reading an old round while half a note is in progress makes no sense — the
+  // words being marked are on a different page.
+  function goRound(r: number | null) {
+    sfx.click()
+    setAnchor(null)
+    setPeek(null)
+    setViewRound(r)
+    window.scrollTo({ top: 0 })
+  }
+
+  /** Straight to the first word he changed — the whole point of the red. */
+  function goToChange() {
+    sfx.click()
+    setShowDiff(true)
+    requestAnimationFrame(() =>
+      document.querySelector('[data-new="1"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    )
+  }
 
   const peeked = essay.comments.find((c) => c.id === peek?.id)
   const open = openComments(essay)
@@ -178,35 +213,89 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
             ✓ Done
           </button>
         </div>
+
+        {/* Which draft is on screen, and what he changed to get to it. One row,
+            in the sticky header, because it answers "where did he fix it?" —
+            the question the reviewer arrives with. */}
+        {rounds.length > 1 && (
+          <div className="fw-rounds">
+            <button
+              className="btn btn--ghost btn--small"
+              disabled={at <= 0}
+              onClick={() => goRound(rounds[at - 1])}
+            >
+              ◀ round {rounds[Math.max(at - 1, 0)]}
+            </button>
+            <span className={past ? 'fw-rounds-at is-past' : 'fw-rounds-at'}>
+              {past ? `round ${round} · read-only` : `round ${round} · now`}
+            </span>
+            <button
+              className="btn btn--ghost btn--small"
+              disabled={at < 0 || at >= rounds.length - 1}
+              onClick={() => goRound(rounds[at + 1] === essay.round ? null : rounds[at + 1])}
+            >
+              round {rounds[Math.min(at + 1, rounds.length - 1)]} ▶
+            </button>
+          </div>
+        )}
+
+        {previous && (
+          <div className="fw-rounds">
+            {newWords === 0 ? (
+              <span className="fw-rounds-at">nothing changed since round {round - 1}</span>
+            ) : (
+              <>
+                <button className={`fw-diff-toggle${paint ? ' is-on' : ''}`} onClick={() => { sfx.click(); setShowDiff(!showDiff) }}>
+                  🔴 {newWords} word{newWords === 1 ? '' : 's'} changed
+                </button>
+                <button className="btn btn--ghost btn--small" onClick={goToChange}>🔎 Find it</button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <p className="muted fw-hint">
-        Tap the first word of the bit you mean, then the last one — same word twice is just that word. Tap something
-        already marked to read it, reword it, bin it — or start a new note right there.
+        {past ? (
+          <>
+            This is round {round} as he handed it in, with the notes it got — nothing here can be changed.{' '}
+            <button className="btn btn--ghost btn--small" onClick={() => goRound(null)}>↩︎ Back to now</button>
+          </>
+        ) : (
+          <>
+            Tap the first word of the bit you mean, then the last one — same word twice is just that word. Tap something
+            already marked to read it, reword it, bin it — or start a new note right there.
+          </>
+        )}
       </p>
 
       <div className="card fw-text">
         {parts.map((part) => {
           const tokens = tokenize(part.text)
-          const spans = markSpans(part.text, essay.comments.filter((c) => c.para === part.para))
+          // An old round shows the notes IT got; now shows every note there is.
+          const onPart = essay.comments.filter((c) => c.para === part.para && (!past || c.round === round))
+          const spans = markSpans(part.text, onPart)
           const commentAt = (t: Token) => spans.find((s) => s.start < t.end && t.start < s.end)?.comment
+          const isNew = diff.get(part.para) ?? []
           return (
             <div key={part.para} style={{ marginBottom: 14 }}>
               <div className="essay-para-head">
                 <span>{part.label}</span>
-                <button
-                  className="btn btn--ghost btn--small essay-para-x"
-                  style={{ color: 'var(--text)' }}
-                  onClick={() => {
-                    sfx.click()
-                    setAnchor(null)
-                    // no quote: the note is about the whole part, so the span it
-                    // "covers" for the already-marked check is all of it
-                    setPick({ para: part.para, quote: '', start: 0, end: part.text.length })
-                  }}
-                >
-                  📌 Whole thing
-                </button>
+                {!past && (
+                  <button
+                    className="btn btn--ghost btn--small essay-para-x"
+                    style={{ color: 'var(--text)' }}
+                    onClick={() => {
+                      sfx.click()
+                      setAnchor(null)
+                      // no quote: the note is about the whole part, so the span it
+                      // "covers" for the already-marked check is all of it
+                      setPick({ para: part.para, quote: '', start: 0, end: part.text.length })
+                    }}
+                  >
+                    📌 Whole thing
+                  </button>
+                )}
               </div>
               <p className={part.para === -1 ? 'fw-part fw-part--title' : 'fw-part'}>
                 {tokens.length === 0 && <span className="muted">(empty)</span>}
@@ -222,8 +311,10 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
                       <span
                         className={[
                           'fw-word',
+                          past ? 'fw-word--read' : '',
                           c ? 'fw-word--marked' : '',
                           c?.status === 'fixed' ? 'fw-word--done' : '',
+                          paint && isNew[i] ? 'fw-word--new' : '',
                           picked ? 'is-anchor' : '',
                           flash && c?.id === flash ? 'is-flash' : '',
                         ]
@@ -231,7 +322,8 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
                           .join(' ')}
                         style={c ? ({ '--mark': issueTint(c.issue) } as React.CSSProperties) : undefined}
                         {...(c ? { 'data-note': c.id } : {})}
-                        onClick={() => tapWord(part.para, tokens, i, c)}
+                        {...(paint && isNew[i] ? { 'data-new': '1' } : {})}
+                        onClick={past ? undefined : () => tapWord(part.para, tokens, i, c)}
                       >
                         {t.text}
                         {c && last && <sup>{ISSUE_EMOJI[c.issue]}</sup>}

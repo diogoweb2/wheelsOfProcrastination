@@ -40,8 +40,25 @@ export async function askOpenRouter({
   timeoutMs = TIMEOUT_MS,
 }: AskOptions): Promise<string> {
   const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  let timer: ReturnType<typeof setTimeout> | undefined
+  // A hard wall, not just an abort. `abort()` reliably kills a request that is
+  // still waiting for headers, but a body that stalls half-read doesn't always
+  // reject — and a promise that never settles is a spinner that never moves and
+  // a queue that never reaches the next model. So the clock rejects by itself
+  // and the abort is only there to release the socket.
+  const wall = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      ctrl.abort()
+      reject(new Error(`${model} gave no answer in ${timeoutMs / 1000}s`))
+    }, timeoutMs)
+  })
   try {
+    return await Promise.race([call(), wall])
+  } finally {
+    clearTimeout(timer)
+  }
+
+  async function call(): Promise<string> {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       signal: ctrl.signal,
@@ -71,8 +88,6 @@ export async function askOpenRouter({
     const text = json.choices?.[0]?.message?.content
     if (!text) throw new Error(`${model} sent an empty reply (finish_reason=${json.choices?.[0]?.finish_reason ?? 'none'})`)
     return text
-  } finally {
-    clearTimeout(timer)
   }
 }
 

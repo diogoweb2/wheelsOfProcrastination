@@ -16,7 +16,7 @@ export function AiWaiting({ label }: { label: string }) {
   }, [])
 
   if (!essayAttempt) return null
-  const { model, index, total, timeoutMs, startedAt } = essayAttempt
+  const { model, index, total, timeoutMs, startedAt, lastError } = essayAttempt
   const elapsed = Date.now() - startedAt
   const left = Math.max(0, Math.ceil((timeoutMs - elapsed) / 1000))
   const pct = Math.max(0, Math.min(100, 100 - (elapsed / timeoutMs) * 100))
@@ -33,6 +33,12 @@ export function AiWaiting({ label }: { label: string }) {
         </div>
       </div>
       <div className="ai-wait-bar"><span style={{ width: `${pct}%` }} /></div>
+      {/* Why we moved on. A swap with no reason looks like the app losing interest. */}
+      {lastError && (
+        <p className="muted" style={{ fontSize: 11, marginTop: 6, color: 'var(--red)', fontWeight: 800 }}>
+          Model {index - 1} dropped: {lastError}
+        </p>
+      )}
       <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
         {index < total
           ? 'If it doesn’t answer in time, the next model gets asked automatically.'

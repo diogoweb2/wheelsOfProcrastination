@@ -713,12 +713,23 @@ A hand-written note used to mean retyping his sentence into a text box character
 - **The text never leaves.** Nothing here navigates anywhere. The note form arrives as a **sheet from the bottom**, over his essay rather than instead of it; writing the note and closing it leaves you looking at the same paragraph with the new mark on it, ready for the next one.
 - **Every mark already on the essay is visible while marking** — the AI's, the app's rules', and Diogo's own, in their issue colour. That is the whole point: knowing what has already been said is what stops the same thing being said twice.
 - **Tapping an existing mark opens it** instead of starting a selection: what it says, who raised it, and the usual last word — ✏️ reword it, ✕ disagree, ✓ he fixed it, 🔎 find it. A tap anywhere else starts a new note, so one gesture does both jobs without a mode switch.
+- **…and that popup can hand the words back**: ✍️ **New note here** closes it and makes the word he tapped the start of a fresh selection. One set of words can have two things wrong with it, and a mark he has already sorted must not lock those words up for good — otherwise the second problem in the same sentence is unmarkable.
 - **A selection that lands on words that are already marked says so**, right in the form, above the box.
 - The kind of problem is a **row of chips**, one tap, not a dropdown.
 - **The written note is optional.** A circled word tagged 🔤 Spelling has already said what is wrong; making Diogo type "spelling" underneath it is a toll on the marks that need no words, and a toll paid often enough gets marks skipped. Leave the box empty and the note reads as the chip's own standard sentence ("Spelling — fix this word."), so Ben still gets a sentence to read on the fix sheet. Typing something replaces it.
 - **The desk and the red pen hold the same essay.** Opening one on the Desk and stepping across to the pen keeps it; the pen's own list is only there for a cold start (a bookmark straight to `/essay/pen`).
 
 **The marking is proportional.** A single word gets the teacher's red circle. A phrase gets a **quiet tinted underline** instead — ringing half a sentence reads as "all of this is wrong", which is both untrue and crushing.
+
+#### 19e-1a. Rounds — what he changed, and what it looked like before
+
+Round five reads exactly like round four: three hundred identical words, two of them different. Re-reading the whole essay to find the two is how reviewing stops happening — so the app finds them.
+
+- **Every hand-in is snapshotted** (`essay.versions`, one per round, taken at submit). This already existed for the AI fix-check; the red pen now reads it too.
+- **What he changed since the last hand-in is painted red** in the red pen, on by default, with a count — *🔴 4 words changed* — and a 🔎 that jumps to the first one. The diff is **word-level** (longest common subsequence over words) and compares the exact word, punctuation included: `again` → `again.` is precisely the fix that is otherwise invisible. Deletions are not painted — the reviewer is reading the text that exists, and a marker where a word used to be helps nobody.
+- **Paragraphs are matched by position.** He rewrites in place and adds at the end, so this is right nearly always, and wrong in the safe direction when it isn't: a whole paragraph shown as new.
+- **Earlier rounds can be read back** — ◀ / ▶ across the rounds, each one showing that draft with **the notes it got on that round**, and its own changes painted against the round before it. An old round is **read-only**: no tapping, no new marks, no 📌. History is not a place to leave notes.
+- **Approval bins the history.** On 🏅 grade, `versions` is emptied: the snapshots existed to answer "what did he change?" while the loop was running, the loop has stopped, and every old draft is dead weight in a doc both crewmates sync live. The final essay is what's kept.
 
 #### 19e-2. The rules that need no AI (`src/logic/proofreader.ts`)
 
@@ -822,9 +833,10 @@ Once nothing is open, **🏅 Grade it**: a letter from **C- to A+**, plus two se
 Somebody is sitting there holding a phone, so the essay desk does **not** use the Gym coach's three-minute patience (§18):
 
 - **60 seconds per model.** A model that hasn't answered in a minute is stuck, not thinking.
-- **Then the next model in the queue** (`ESSAY_MODELS` in `src/logic/essayAi.ts`), automatically: **`z-ai/glm-4.6` → `qwen/qwen3-235b-a22b-instruct-2507` → `deepseek/deepseek-chat-v3.1`**. All cheap Chinese open-weight models on OpenRouter, picked on cost per token: the job is "read 300 words and answer in small JSON", and a frontier model would cost 20× for no better marking. A timeout, a dead model id, a rate limit and a garbled reply all mean the same thing — move on.
+- **Then the next model in the queue** (`ESSAY_MODELS` in `src/logic/essayAi.ts`), automatically: **`qwen/qwen3.7-flash` → `z-ai/glm-4.7-flash` → `deepseek/deepseek-v4-flash`**. All cheap Chinese open-weight models on OpenRouter, and all of the "flash" tier on purpose: the job is "read 300 words and answer in small JSON", so what matters is answering fast and cheaply, not leaderboard position — a frontier model would cost 20× for no better marking. A timeout, a dead model id, a rate limit and a garbled reply all mean the same thing — move on.
+- **A retired model id is the ordinary case, not an exception.** These ids get withdrawn from OpenRouter without notice, so the queue must survive one going dead — and the 60 seconds is a hard wall on the clock, not a request abort, because a half-read reply that never lands would otherwise hang the whole queue with a spinner that never moves.
 - **The desk picks its own models**, deliberately ignoring `aiConfig.model` (which is the Gym coach's choice). Same key, same spend cap; different job, different size, and one having a slow day must not stall the other.
-- **The wait is shown, not hidden**: which model is being asked, *model 2 of 3*, and a live countdown of its 60 seconds. A blank minute is indistinguishable from a hang, and the recovery is invisible unless it's said out loud.
+- **The wait is shown, not hidden**: which model is being asked, *model 2 of 3*, and a live countdown of its 60 seconds. A blank minute is indistinguishable from a hang, and the recovery is invisible unless it's said out loud. When the queue moves on, the card also says **why the last one was dropped** — a swap with no reason reads as the app losing interest.
 - If the whole queue fails, the error names every model tried — and **nothing is invented**: a review that didn't happen never looks like one that found nothing wrong.
 
 ### 19i. Notifications

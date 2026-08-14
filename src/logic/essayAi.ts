@@ -47,9 +47,9 @@ export const ESSAY_TIMEOUT_MS = 60_000
  * just fails fast onto the next one.
  */
 export const ESSAY_MODELS = [
-  'z-ai/glm-4.6', // Zhipu — fast, cheap, very steady on structured JSON
-  'qwen/qwen3-235b-a22b-instruct-2507', // Alibaba — cheap, strong on language work
-  'deepseek/deepseek-chat-v3.1', // DeepSeek's always-on chat line, as the backstop
+  'qwen/qwen3.7-flash', // Alibaba — the cheapest of the three and the quickest to answer
+  'z-ai/glm-4.7-flash', // Zhipu — cheap, fast, very steady on structured JSON
+  'deepseek/deepseek-v4-flash', // DeepSeek's flash line, as the backstop
 ]
 
 /** Which model we're on right now, so the UI can say so and count down. */
@@ -58,6 +58,8 @@ export interface EssayAttempt {
   index: number // 1-based
   total: number
   timeoutMs: number
+  /** Why the previous model was dropped, so a swap mid-wait explains itself. */
+  lastError?: string
 }
 
 export interface EssayCtx {
@@ -85,7 +87,15 @@ async function askEssay(
   let last: unknown
 
   for (const [i, model] of queue.entries()) {
-    ctx.onAttempt?.({ model, index: i + 1, total: queue.length, timeoutMs: ESSAY_TIMEOUT_MS })
+    ctx.onAttempt?.({
+      model,
+      index: i + 1,
+      total: queue.length,
+      timeoutMs: ESSAY_TIMEOUT_MS,
+      // The swap is the visible event; without the reason it reads as the app
+      // giving up on its own. A retired model id is exactly this case.
+      ...(last ? { lastError: essayAiError(last) } : {}),
+    })
     try {
       return await askOpenRouter({
         key: key(ctx.ai),
