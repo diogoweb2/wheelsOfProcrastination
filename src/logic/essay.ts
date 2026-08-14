@@ -213,6 +213,74 @@ export function markUp(paragraph: string, comments: EssayComment[]): TextChunk[]
   return out.length ? out : [{ text: paragraph }]
 }
 
+/**
+ * How much text around a mark the writer gets to edit (§19e-5).
+ *
+ * A spelling note is about one word, and handing him the sentence to retype
+ * invites him to rewrite around the problem instead of solving it — so spelling
+ * (and a missing capital, which is the same word with a different first letter)
+ * opens the **word alone**.
+ *
+ * Everything else is rarely fixable inside the mark: "hard to follow" on three
+ * words usually needs the words on either side moving too. Those open the
+ * **sentence** the mark sits in, capped at `CONTEXT_WORDS` either side so a
+ * paragraph written as one long sentence doesn't become the whole paragraph.
+ */
+export const CONTEXT_WORDS = 10
+
+/** Issues that open just the marked word, with no room around it. */
+const TIGHT_ISSUES: EssayComment['issue'][] = ['spelling', 'case']
+
+const SENTENCE_END = '.!?\n'
+
+function backWords(text: string, at: number, n: number): number {
+  let i = at
+  for (let w = 0; w < n && i > 0; w++) {
+    while (i > 0 && /\s/.test(text[i - 1])) i--
+    while (i > 0 && !/\s/.test(text[i - 1])) i--
+  }
+  return i
+}
+
+function forwardWords(text: string, at: number, n: number): number {
+  let i = at
+  for (let w = 0; w < n && i < text.length; w++) {
+    while (i < text.length && /\s/.test(text[i])) i++
+    while (i < text.length && !/\s/.test(text[i])) i++
+  }
+  return i
+}
+
+/** The slice of `text` the writer edits to deal with one mark. */
+export function editWindow(
+  text: string,
+  span: { start: number; end: number },
+  issue: EssayComment['issue'],
+): { start: number; end: number } {
+  if (TIGHT_ISSUES.includes(issue)) return { start: span.start, end: span.end }
+
+  let start = 0
+  for (let i = span.start - 1; i > 0; i--) {
+    if (SENTENCE_END.includes(text[i])) {
+      start = i + 1
+      break
+    }
+  }
+  let end = text.length
+  for (let i = span.end; i < text.length; i++) {
+    if (SENTENCE_END.includes(text[i])) {
+      end = i + 1
+      break
+    }
+  }
+
+  start = Math.max(start, backWords(text, span.start, CONTEXT_WORDS))
+  end = Math.min(end, forwardWords(text, span.end, CONTEXT_WORDS))
+  // never open on a leading space — it reads as a typo he didn't make
+  while (start < span.start && /\s/.test(text[start])) start++
+  return { start, end }
+}
+
 /** The colour a circled word gets, by what's wrong with it. */
 export function issueTint(issue: EssayComment['issue']): string {
   switch (issue) {

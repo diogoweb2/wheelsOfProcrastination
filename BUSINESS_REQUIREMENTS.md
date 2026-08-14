@@ -694,7 +694,7 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 3. **🤖 Mark it up — mechanics only.** The AI proofreads for exactly three things: **spelling**, **punctuation**, and **capital letters** (a lowercase "i", a sentence starting small, a name without its capital). It is told explicitly to say nothing about ideas, structure or clarity. Each note carries the **exact quote** to mark — quotes, not offsets, so a note survives him editing the sentence around it. A quote that doesn't match anything is simply not marked; the note still shows. "It found nothing" is a real answer and is said out loud, so it can't be mistaken for "it never ran".
 4. **Everything about the writing itself is Diogo's, by hand** (§19e-1). Judging whether a 12-year-old's argument holds up is not a job for a cheap model, and pretending otherwise produces confident nonsense.
 5. **Diogo has the last word on the machine's notes too**: ✏️ **Edit** (reword it — Ben reads exactly what Diogo wrote) or ✕ **Disagree** (it disappears; Ben never sees it).
-6. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**, each note sitting under the paragraph it belongs to. He fixes them himself. He can flip between **📝 Fix it** and **🔴 See the marks**.
+6. **📬 Send the notes back** → **Phase 2** on Ben's side: a push, then his own text with the problems **marked where they are**. There is one view and it is the marked-up essay: he taps a circle and fixes that bit in a sheet (§19e-5). He fixes them himself.
 7. **He sends it again — and the app closes what he fixed, by itself** (§19e-2). No button, no AI call: the app looks for the flagged text and, when it is gone, the note is done. **Diogo never reviews spelling.** For the leftovers, **🔁 Check his fixes** asks the AI for a verdict per note with a one-line reason.
 8. **Round again, or grade.** The loop repeats until no note is open.
 
@@ -767,6 +767,22 @@ The reasoning is the same as the rules' own: a missing capital has a right answe
 - **The escape hatch is Diogo's** — a rule note he disagrees with is `dismissed` and never blocks again (§19e-2).
 
 Because rule notes are raised before anyone has read the essay, **they don't count as "it has been marked"**: an essay carrying nothing but rule notes cannot be sent back or graded, and the desk says so.
+
+#### 19e-5. Fixing it — one mark at a time (the writer's sheet)
+
+**There is no "edit the whole essay" view in phase 2.** There was — a 📝 Fix it tab holding the full editor with the notes listed under each paragraph — and it was the worst screen in the app: four paragraphs, a pile of notes, and finding the words each note was about was *his* problem. That is exactly the step a 12-year-old abandons.
+
+What replaces it: **his marked-up essay is the screen**, and every fix starts by tapping the thing that is circled.
+
+- **The sheet opens over his text**, the same way the red pen's does, and it holds one note: what was said, the words it points at, a box, and **Before** and **After** one above the other so he can see the change before committing to it.
+- **How much he gets to edit depends on what is wrong** (`editWindow`). A **spelling** or a **missing capital** opens **the word alone** — those have one right answer inside one word, and handing him the sentence invites him to rewrite around the problem instead of solving it. Everything else (clarity, punctuation, an idea that needs work) opens **the sentence the mark sits in**, capped at ten words either side: "hard to follow" on three words is almost never fixable inside those three words, and the words on either side usually have to move too.
+- **Only the marked slice is spliced back in.** The rest of the paragraph cannot be touched from here, so a round of fixes can't quietly become a rewrite.
+- **It is the same no-autocorrect keyboard** as the editor (§19d). A sheet that let Android's keyboard fix his spelling would undo the entire exercise.
+- **Saving is immediate**, not the one-second autosave: he pressed a button that says save, and the marks that redraw underneath have to be about text that is actually written down. The app then re-reads it for free — a machine note whose problem has gone closes itself (§19e-3) and the built-in rules re-run over the new sentence.
+- **A note a person wrote is closed by the save**, because nothing can check "is it clearer now?" by itself, and Diogo sees the change next round anyway.
+- **A note with nothing left to circle gets a card of its own** under the essay, with a ✓ *I've sorted this*. Otherwise a note whose words he had already rewritten would vanish off the screen while still counting against him.
+- **A sorted mark, and every ⭐, does not reopen on tap.** They are there to be read.
+- **A progress bar counts what's sorted**, and the send button says what it is for: *🤖 Check my fixes (3 still circled)* while anything is open, *📬 Send it back to Dad* once nothing is. It is never disabled by the count — a spelling he has re-broken would otherwise be a locked door, and the spelling gate (§19e-3) is the thing that decides whether it moves.
 
 ### 19f. The word bank — "My Words" (the 🔤 tab)
 

@@ -3716,6 +3716,41 @@ input, select { font-family: inherit; }
   line-height: 1.4;
 }
 
+/* ---------- fixing one mark (the writer's sheet) ---------- */
+/* Before, the box, after — one under the other, so the change he is about to
+   make is visible before he commits to it. */
+
+.fix-label {
+  font-size: 11px; font-weight: 800; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin: 14px 0 6px;
+}
+.fix-before, .fix-after {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--card2);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.fix-before { opacity: 0.75; }
+.fix-after.is-changed { border-color: var(--green); }
+.fix-box {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--blue);
+  background: var(--bg2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: none;
+  overflow: hidden;
+}
+.fix-box:focus { outline: none; box-shadow: 0 0 0 3px rgb(96 191 245 / 25%); }
+
 /* Word-bank quiz: one big tappable spelling per row. */
 .word-opt {
   width: 100%;
