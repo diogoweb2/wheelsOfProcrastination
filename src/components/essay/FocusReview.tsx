@@ -90,7 +90,9 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
   // Two taps make a note: the first word, then the last one.
   const [anchor, setAnchor] = useState<{ para: number; index: number } | null>(null)
   const [pick, setPick] = useState<Pick | null>(null)
-  const [peek, setPeek] = useState<string | null>(null)
+  // Where the tap landed as well as which note it hit: a second problem can sit
+  // on the same words, so the popup has to be able to hand the word back.
+  const [peek, setPeek] = useState<{ id: string; para: number; index: number } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const flashTimer = useRef<number | undefined>(undefined)
 
@@ -113,7 +115,7 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
     [essay.title, essay.paragraphs],
   )
 
-  const peeked = essay.comments.find((c) => c.id === peek)
+  const peeked = essay.comments.find((c) => c.id === peek?.id)
   const open = openComments(essay)
   const mine = essay.comments.filter((c) => !isMachineNote(c))
   const machineOpen = essay.comments.filter((c) => isMachineNote(c) && c.status === 'open')
@@ -122,10 +124,12 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
   function tapWord(para: number, tokens: Token[], index: number, comment?: EssayComment) {
     sfx.click()
     if (!anchor) {
-      // Something is already flagged here — say what it is rather than letting
-      // the same problem get a second note.
+      // Something is already flagged here — say what it is first, rather than
+      // letting the same problem get a second note by accident. The popup still
+      // offers "new note here" for when it's a different problem on the same
+      // words, or when that mark is already sorted.
       if (comment) {
-        setPeek(comment.id)
+        setPeek({ id: comment.id, para, index })
         return
       }
       setAnchor({ para, index })
@@ -178,7 +182,7 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
 
       <p className="muted fw-hint">
         Tap the first word of the bit you mean, then the last one — same word twice is just that word. Tap something
-        already marked to read it, reword it, or bin it.
+        already marked to read it, reword it, bin it — or start a new note right there.
       </p>
 
       <div className="card fw-text">
@@ -270,6 +274,11 @@ function Focus({ essay, onDesk }: { essay: Essay; onDesk: () => void }) {
           onDelete={() => { essayDeleteComment(essay.id, peeked.id); setPeek(null) }}
           onResolve={(fixed) => essayResolveComment(essay.id, peeked.id, fixed)}
           onFind={() => goToMark(peeked.id)}
+          onMarkAnyway={() => {
+            // hand the tapped word back as the first word of a fresh selection
+            if (peek) setAnchor({ para: peek.para, index: peek.index })
+            setPeek(null)
+          }}
         />
       )}
     </>
@@ -389,6 +398,7 @@ function NoteSheet({
   onDelete,
   onResolve,
   onFind,
+  onMarkAnyway,
 }: {
   note: EssayComment
   onClose: () => void
@@ -396,6 +406,7 @@ function NoteSheet({
   onDelete: () => void
   onResolve: (fixed: boolean) => void
   onFind: () => void
+  onMarkAnyway: () => void
 }) {
   const [editing, setEditing] = useState<string | null>(null)
   const machine = isMachineNote(note)
@@ -441,6 +452,11 @@ function NoteSheet({
               </button>
               <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onFind() }}>
                 🔎 Find it
+              </button>
+              {/* One set of words can have two things wrong with it, and a
+                  sorted mark shouldn't lock the words up for good. */}
+              <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onMarkAnyway() }}>
+                ✍️ New note here
               </button>
               {note.issue !== 'praise' && (
                 <button
