@@ -245,18 +245,33 @@ export function waitClock(ms: number): string {
  * Returns null when nothing moved, so callers can skip a pointless write.
  */
 export function autoResolve(essay: Essay): EssayComment[] | null {
-  const text = essayText(essay)
   let changed = false
   const next = essay.comments.map((c) => {
     if (c.status !== 'open' || c.source !== 'ai' || !MECHANICAL_ISSUES.includes(c.issue)) return c
     const quote = c.quote?.trim()
-    if (!quote || containsQuote(text, quote)) return c
+    // Scoped to the note's OWN part, exactly like the marking is. Checking the
+    // whole essay instead let a note stay open because the same slip appeared in
+    // a paragraph it wasn't about — leaving the reviewer with a note in the list
+    // and nothing circled in the text. An open note always has a visible mark.
+    const part = partText(essay, c.para)
+    if (!quote || containsQuote(part, quote)) return c
     // he changed it into something else wrong — not our call to close
-    if (c.correct && !containsQuote(text, c.correct)) return c
+    if (c.correct && !containsQuote(part, c.correct)) return c
     changed = true
     return { ...c, status: 'fixed' as const, resolvedAt: new Date().toISOString() }
   })
   return changed ? next : null
+}
+
+/** The text one note points at: the title for -1, otherwise that paragraph ('' if it's gone). */
+export function partText(essay: Pick<Essay, 'title' | 'paragraphs'>, para: number): string {
+  return para < 0 ? essay.title : (essay.paragraphs[para] ?? '')
+}
+
+/** Is there something to circle for this note right now? Drives the "go to it" button. */
+export function hasMark(essay: Pick<Essay, 'title' | 'paragraphs'>, c: EssayComment): boolean {
+  const quote = c.quote?.trim()
+  return !!quote && containsQuote(partText(essay, c.para), quote)
 }
 
 /** Still-open notes the app is willing to judge on its own. */

@@ -2,6 +2,10 @@
 
 Rules for the game live in BUSINESS_REQUIREMENTS.md — that file is canonical.
 
+## Routes (IMPORTANT)
+
+Every new feature MUST be reachable at its own URL — `/<app>/<tab>`, matching the ids in `src/apps/registry.ts`. Two sub-apps never share a URL. See BUSINESS_REQUIREMENTS.md §1c.
+
 ## Images (IMPORTANT — low storage available)
 
 Every image added to `public/` MUST be resized and compressed before use:

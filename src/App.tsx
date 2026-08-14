@@ -25,20 +25,15 @@ import { GymScreen } from './screens/GymScreen'
 import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
+import { LANDING, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
 import { sfx } from './audio'
 
-/** Which app is open, and which of its bottom-menu tabs. `null` = home screen. */
-type OpenApp = { app: string; tab: string } | null
-
-/** Where the app lands on open: the wheel, not the dashboard. The dashboard is
-    one tap away behind the header's "Apps" button. */
-const LANDING: OpenApp = { app: 'wheel', tab: 'spin' }
-
 export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays } = useStore()
-  const [open, setOpen] = useState<OpenApp>(LANDING)
+  // the URL we were opened with decides the first screen (see lib/route.ts)
+  const [open, setOpen] = useState<OpenApp>(() => pathToRoute(window.location.pathname, null))
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
@@ -51,9 +46,34 @@ export default function App() {
     setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id })
   }
 
-  // switching crewmate drops you back on the landing page — the roster differs
+  // Who's looking decides which apps exist, so the URL is only trustworthy once
+  // we're past the PIN: re-read it on the first unlock (that's the bookmark
+  // landing where it was meant to), and from then on switching crewmate drops
+  // you back on the landing page — the roster differs.
+  const seenProfile = useRef<string | null>(null)
   useEffect(() => {
-    setOpen(LANDING)
+    if (activeProfileId === null) return
+    const first = seenProfile.current === null
+    seenProfile.current = activeProfileId
+    setOpen(first ? pathToRoute(window.location.pathname, activeProfileId) : LANDING)
+  }, [activeProfileId])
+
+  // State → URL. A move to a different app/tab is a new history entry (so back
+  // works); a route we merely cleaned up (unknown tab, `/`) replaces it, which
+  // keeps junk out of the history.
+  useEffect(() => {
+    if (!unlocked) return
+    const path = routeToPath(open)
+    if (window.location.pathname === path) return
+    const clean = sameRoute(pathToRoute(window.location.pathname, activeProfileId), open)
+    window.history[clean ? 'replaceState' : 'pushState'](null, '', path)
+  }, [open, unlocked, activeProfileId])
+
+  // URL → state, for the browser/phone back button
+  useEffect(() => {
+    const onPop = () => setOpen(pathToRoute(window.location.pathname, activeProfileId))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
   }, [activeProfileId])
 
   // process missed days on open and whenever the app regains focus (day may have flipped)

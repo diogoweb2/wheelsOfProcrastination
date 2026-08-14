@@ -10,11 +10,14 @@ export function MarkedEssay({
   essay,
   comments,
   selectedId,
+  flashId,
   onSelect,
 }: {
   essay: Pick<Essay, 'title' | 'paragraphs'>
   comments: EssayComment[]
   selectedId?: string | null
+  /** Briefly lit up because someone jumped here from its note. */
+  flashId?: string | null
   onSelect?: (commentId: string) => void
 }) {
   return (
@@ -24,6 +27,7 @@ export function MarkedEssay({
         comments={comments.filter((c) => c.para === -1)}
         className="essay-read-title"
         selectedId={selectedId}
+        flashId={flashId}
         onSelect={onSelect}
       />
       {essay.paragraphs.map((p, i) => (
@@ -33,6 +37,7 @@ export function MarkedEssay({
           comments={comments.filter((c) => c.para === i)}
           className="essay-read-para"
           selectedId={selectedId}
+          flashId={flashId}
           onSelect={onSelect}
         />
       ))}
@@ -45,12 +50,14 @@ function Line({
   comments,
   className,
   selectedId,
+  flashId,
   onSelect,
 }: {
   text: string
   comments: EssayComment[]
   className: string
   selectedId?: string | null
+  flashId?: string | null
   onSelect?: (commentId: string) => void
 }) {
   const chunks = markUp(text, comments)
@@ -65,7 +72,8 @@ function Line({
             key={i}
             className={`essay-mark${/\s/.test(chunk.text.trim()) ? ' essay-mark--span' : ''}${
               selectedId === chunk.comment.id ? ' is-picked' : ''
-            }${chunk.comment.status === 'fixed' ? ' is-done' : ''}`}
+            }${chunk.comment.status === 'fixed' ? ' is-done' : ''}${flashId === chunk.comment.id ? ' is-flash' : ''}`}
+            data-note={chunk.comment.id}
             style={{ '--mark': issueTint(chunk.comment.issue) } as React.CSSProperties}
             onClick={() => onSelect?.(chunk.comment!.id)}
             title={chunk.comment.text}

@@ -54,6 +54,17 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 
 App tile artwork is generated from art already in `public/` (see CLAUDE.md's image rules) into 128px webp files named `public/app-*.webp`. Apps without artwork fall back to their emoji on a coloured squircle.
 
+## 1c. URLs — **every page has its own, always**
+
+**Rule for all new features: a page you can open must be a page you can bookmark.** One sub-app must never share a URL with another. If a feature adds a screen, that screen gets a route — no exceptions, no "it's only a modal-ish thing".
+
+- **The shape is `/<app>/<tab>`** — `/gym/train`, `/bank/chests`, `/essay/write`, `/chess/play`. The two segments are exactly the app id and tab id from the roster ([src/apps/registry.ts](src/apps/registry.ts)), so **adding an app or a tab adds its route for free** — there is nothing to register.
+- **`/home`** is the Dashboard. **`/`** lands on the wheel (`/wheel/spin`) and rewrites itself there; it stays the PWA `start_url`.
+- **Reload, bookmark, share** all land on the same page. Firebase Hosting rewrites `**` → `/index.html` (`firebase.json`), so a hard reload on a deep link serves the app instead of a 404.
+- **Back button works.** Moving to a different app/tab pushes a history entry, so the phone's back gesture walks back through the apps you opened rather than leaving the app. A route that was merely cleaned up (unknown tab, `/`) *replaces* the entry instead, keeping junk out of the history.
+- **The URL is not a way past a gate.** A path is only honoured once we're past the PIN, and it is re-checked against who is logged in: `/admin/...` in Ben's hands falls back to the landing page, as does any unknown app. `gate`d apps (Clocks) *are* reachable by URL — a gate hides an icon, it isn't a lock.
+- Implementation: [src/lib/route.ts](src/lib/route.ts) (`pathToRoute` / `routeToPath`) plus the three sync effects in [src/App.tsx](src/App.tsx). No router library — the whole navigation state is `{app, tab}`, so the History API is enough.
+
 ## 2. Tasks
 
 Fields when creating a task:
@@ -676,6 +687,8 @@ The editor gives him a **title** and one box per paragraph, plus **➕ Add parag
 6. **He sends it again — and the app closes what he fixed, by itself** (§19e-2). No button, no AI call: the app looks for the flagged text and, when it is gone, the note is done. **Diogo never reviews spelling.** For the leftovers, **🔁 Check his fixes** asks the AI for a verdict per note with a one-line reason.
 7. **Round again, or grade.** The loop repeats until no note is open.
 
+**🔎 Go to it.** Every note that still has something to point at carries a button that scrolls the essay back into view and pulses the mark for three seconds. A note naming a word is useless if finding that word across four paragraphs is the reader's problem.
+
 **Two lists, not one.** The desk separates **🤖 the machine's marks** (spelling, punctuation, capitals — found by the AI, closed by the app, there only to be read or binned) from **✍️ my notes** (Diogo's own, with the full keep/reword/close controls). Sorted marks collapse behind a "show the N he already sorted" toggle, so the list is never a pile of things already dealt with.
 
 **It never hands him the answer.** A note is a *tip*, not a correction: point at the part of the word that's wrong, name the rule ("this one follows i-before-e"), or tell him what to do ("say it out loud slowly — one sound isn't written"). The prompt bans the corrected word four different ways, including spelling it out letter by letter, and **the app checks the output anyway**: any note containing the correct spelling is thrown away and replaced with a generic tip. One leak undoes the exercise — he only has to be handed a word once to stop working it out — and a blander note is a far smaller loss than a free answer. The same scrub runs on the fix-check verdicts. Canadian spellings are explicitly correct and never flagged.
@@ -688,7 +701,9 @@ A hand-written note used to mean retyping his sentence into a text box character
 
 #### 19e-2. Closing a note without asking anyone
 
-**The app settles the machine's notes itself, for free.** The test is deliberately literal: the flagged text is *gone from the essay* (whole-word — "realy" is not found inside "really"), and where the right spelling is known, it is *now present*. A word he changed into a **different** wrong spelling therefore stays open, which is correct — he hasn't fixed it. Only the AI's own mechanical notes are eligible; a note Diogo wrote by hand is Diogo's to close. This runs when he sends, and again whenever Diogo opens the essay, so a stale list heals itself on sight.
+**The app settles the machine's notes itself, for free.** The test is deliberately literal: the flagged text is *gone from the paragraph it was flagged in* (whole-word — "realy" is not found inside "really"), and where the right spelling is known, it is *now present*.
+
+**Scoped to that paragraph, because the marking is.** Checking the whole essay instead left a note open because the same slip appeared somewhere the note wasn't about — so the reviewer saw two notes and one circle. The invariant is: **an open machine note always has a visible mark**, and a note with nothing left to point at is done. A word he changed into a **different** wrong spelling therefore stays open, which is correct — he hasn't fixed it. Only the AI's own mechanical notes are eligible; a note Diogo wrote by hand is Diogo's to close. This runs when he sends, and again whenever Diogo opens the essay, so a stale list heals itself on sight.
 
 **Whole-word matching is not a nicety.** A note quoting the single letter "i" once matched the **i inside "life"**, so the app drew a red circle around a perfectly good word and told a 12-year-old to fix it. Quotes only match where their own edges are letters butting against non-letters. Apostrophes deliberately don't count as letters: quotes routinely start against one ("that's roblox"), and treating it as part of a word would make those quotes look absent — silently closing a note nobody fixed. Over-marking is recoverable; a vanished note is not.
 

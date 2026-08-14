@@ -3665,3 +3665,13 @@ input, select { font-family: inherit; }
 .word-opt:active { transform: scale(0.98); }
 .word-opt--right { background: var(--green); border-color: var(--green); color: #0c2338; }
 .word-opt--wrong { background: var(--red); border-color: var(--red); color: #fff; }
+
+/* "Go to it": the mark pulses for three seconds so the eye can find it. */
+.essay-mark.is-flash {
+  animation: mark-flash 0.6s ease-in-out 5;
+  scroll-margin: 40vh 0;
+}
+@keyframes mark-flash {
+  0%, 100% { background: rgb(255 255 255 / 7%); box-shadow: none; }
+  50% { background: var(--yellow); color: #3a2000; box-shadow: 0 0 0 4px rgb(255 206 0 / 35%); }
+}

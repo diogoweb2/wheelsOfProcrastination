@@ -8,10 +8,10 @@
 // The loop: mark it → send it back → he fixes → check the fixes → agree or send
 // it round again → grade. Spelling and capitals close themselves, because both
 // have a right answer and nobody should tick off thirty of those by hand.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { Essay, EssayComment, EssayIssue } from '../../types'
-import { ISSUE_LABEL, MECHANICAL_ISSUES, essayWords, openComments, readyToGrade } from '../../logic/essay'
+import { ISSUE_LABEL, MECHANICAL_ISSUES, essayWords, hasMark, openComments, readyToGrade } from '../../logic/essay'
 import { MarkedEssay } from './MarkedEssay'
 import { NoteCard } from './NoteCard'
 import { AiWaiting } from './AiWaiting'
@@ -84,6 +84,27 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
   // "It found nothing" and "it never ran" look identical on screen otherwise.
   const [ranReview, setRanReview] = useState(false)
   const [showSorted, setShowSorted] = useState(false)
+  const [flash, setFlash] = useState<string | null>(null)
+  const flashTimer = useRef<number | undefined>(undefined)
+
+  /**
+   * "Where is it?" — scroll the essay back into view and light the mark up for a
+   * few seconds. A note that names a word is useless if finding that word in
+   * three paragraphs is the reader's problem.
+   */
+  function goToMark(id: string) {
+    sfx.click()
+    setPicked(id)
+    setFlash(id)
+    window.clearTimeout(flashTimer.current)
+    flashTimer.current = window.setTimeout(() => setFlash(null), 3000)
+    // after this render, so the mark carrying the anchor exists
+    requestAnimationFrame(() =>
+      document.querySelector(`[data-note="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    )
+  }
+
+  useEffect(() => () => window.clearTimeout(flashTimer.current), [])
 
   // Free and local: anything he visibly fixed closes the moment this opens, so
   // the list is never a pile of things already dealt with.
@@ -118,7 +139,7 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
       </div>
 
       <div className="card" style={{ marginBottom: 12 }}>
-        <MarkedEssay essay={essay} comments={essay.comments} selectedId={picked} onSelect={setPicked} />
+        <MarkedEssay essay={essay} comments={essay.comments} selectedId={picked} flashId={flash} onSelect={setPicked} />
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -175,6 +196,11 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
             />
           ) : (
             <NoteCard note={c}>
+              {hasMark(essay, c) && (
+                <button className="btn btn--ghost btn--small" onClick={() => goToMark(c.id)}>
+                  🔎 Go to it
+                </button>
+              )}
               <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing({ id: c.id, text: c.text }) }}>
                 ✏️ Edit
               </button>
@@ -243,6 +269,11 @@ function ReviewOne({ essay, onClose }: { essay: Essay; onClose: () => void }) {
             />
           ) : (
             <NoteCard note={c}>
+              {hasMark(essay, c) && (
+                <button className="btn btn--ghost btn--small" onClick={() => goToMark(c.id)}>
+                  🔎 Go to it
+                </button>
+              )}
               <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing({ id: c.id, text: c.text }) }}>
                 ✏️ Edit
               </button>
