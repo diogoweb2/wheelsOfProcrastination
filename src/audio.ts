@@ -265,6 +265,35 @@ export const seaSfx = {
   nope() {
     tone(180, 0.1, 'square', 0.07)
   },
+  /**
+   * The foil tearing. A fast descending rasp — six clicks close enough together
+   * to read as one rip, which is as near as a synth gets to paper.
+   */
+  rip() {
+    for (let i = 0; i < 6; i++) tone(900 - i * 110, 0.035, 'square', 0.05, i * 0.028)
+    tone(240, 0.12, 'sawtooth', 0.07, 0.16, 120)
+  },
+  /** A common card lands: two flat notes, over quickly. */
+  common() {
+    tone(520, 0.1, 'triangle', 0.11, 0)
+    tone(700, 0.18, 'triangle', 0.11, 0.08)
+  },
+  /**
+   * A RARE lands. A rising five-note fanfare with the top note held — the one
+   * sound in Sea Battle that outlasts the animation, so the room hears it.
+   */
+  rare() {
+    const notes = [523, 659, 784, 1047, 1319]
+    notes.forEach((f, i) => tone(f, 0.14, 'square', 0.1, i * 0.075))
+    tone(1568, 0.7, 'triangle', 0.14, 0.38)
+    tone(784, 0.8, 'sine', 0.1, 0.38)
+    tone(196, 0.9, 'sawtooth', 0.07, 0.38, 130)
+  },
+  /** The two seconds a card gives a square away: a thin, prying sonar ping. */
+  reveal() {
+    tone(1180, 0.16, 'sine', 0.1, 0, 1480)
+    tone(1480, 0.5, 'sine', 0.07, 0.16, 900)
+  },
   /** A card going into the water during setup — a small, soft thunk. */
   bury() {
     tone(300, 0.08, 'triangle', 0.09, 0, 180)

@@ -675,9 +675,24 @@ function Battle({
   const sprungCard = sprung ? seaCardById(sprung.card) : undefined
   const sprungArt = sprung ? (sideTraps(state[sprung.owner]).find((t) => t.at === sprung.at)?.art ?? '') : ''
 
+  /**
+   * A sprung card is opened like a pack, not shown like a dialog: the sealed
+   * foil rattles for a beat first. The beat is the whole point — it is where
+   * "what is it?" happens, and a rare pays it off with a fanfare and rays.
+   */
+  const rare = sprungCard?.rarity === 'rare'
+  const [opened, setOpened] = useState(false)
   useEffect(() => {
     onCardOpen?.(Boolean(sprung))
-    if (sprung) seaSfx.card()
+    setOpened(false)
+    if (!sprung) return
+    seaSfx.card()
+    const t = window.setTimeout(() => {
+      setOpened(true)
+      seaSfx.rip()
+      window.setTimeout(() => (rare ? seaSfx.rare() : seaSfx.common()), 190)
+    }, 950)
+    return () => window.clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sprung?.seq, Boolean(sprung)])
 
@@ -692,7 +707,10 @@ function Battle({
     if (!sprung) return
     sfx.click()
     setReadCard(sprung.seq)
-    if (sprung.show.length > 0 && sprung.showOn) setSpy({ on: sprung.showOn, at: sprung.show })
+    if (sprung.show.length > 0 && sprung.showOn) {
+      seaSfx.reveal()
+      setSpy({ on: sprung.showOn, at: sprung.show })
+    }
   }
 
   // The square just fired at sits on the grid of whoever was SHOT AT — which is
@@ -816,7 +834,7 @@ function Battle({
 
       {state.over && (
         <div className="card" style={{ marginTop: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 34 }}>{state.winner === mySide ? '🏆' : '😤'}</div>
+          <div className="sea-verdict">{state.winner === mySide ? '🏆' : '😤'}</div>
           <div style={{ fontWeight: 900, marginTop: 4 }}>{seaStatus(state, nameOf)}</div>
           {state.winner === mySide && (online || (paid ?? 0) > 0) && (
             <div
@@ -838,8 +856,22 @@ function Battle({
       )}
 
       {sprung && sprungCard && (
-        <div className="sea-pop" role="dialog" aria-modal="true">
-          <div className={`sea-pop-card sea-pop-card--${sprungCard.side}`}>
+        <div className={`sea-pop${rare && opened ? ' is-rare' : ''}`} role="dialog" aria-modal="true">
+          {!opened ? (
+            <div className="sea-pack">
+              <div className="sea-pack-foil">
+                <span className="sea-pack-mark">🏴‍☠️</span>
+                <span className="sea-pack-shine" aria-hidden />
+              </div>
+              <div className="sea-pack-where">
+                💥 {nameOf(sprung.by)} hit something buried at {cellName(sprung.at)}…
+              </div>
+            </div>
+          ) : (
+          <>
+          {rare && <span className="sea-rays" aria-hidden />}
+          <div className={`sea-pop-card sea-pop-card--${sprungCard.side}${rare ? ' is-rare' : ''}`}>
+            {rare && <span className="sea-pop-rare">★ RARE ★</span>}
             <div className="sea-pop-where">
               💥 {nameOf(sprung.by)} hit a card buried at {cellName(sprung.at)}
             </div>
@@ -858,6 +890,8 @@ function Battle({
               {sprung.show.length > 0 ? 'Show me 👀' : 'Dismiss'}
             </button>
           </div>
+          </>
+          )}
         </div>
       )}
 
