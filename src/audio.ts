@@ -265,6 +265,22 @@ export const seaSfx = {
   nope() {
     tone(180, 0.1, 'square', 0.07)
   },
+  /** A card going into the water during setup — a small, soft thunk. */
+  bury() {
+    tone(300, 0.08, 'triangle', 0.09, 0, 180)
+    tone(140, 0.12, 'sine', 0.08, 0.05)
+  },
+  /**
+   * A buried card springing. Deliberately unlike every other sound in the game:
+   * a rising three-note sting, so you know something happened that no ordinary
+   * shot could have caused before you have read a single word.
+   */
+  card() {
+    tone(440, 0.1, 'square', 0.1, 0)
+    tone(660, 0.1, 'square', 0.1, 0.09)
+    tone(880, 0.26, 'triangle', 0.13, 0.18, 1320)
+    tone(220, 0.4, 'sawtooth', 0.08, 0.18, 110)
+  },
 }
 
 // --- background-safe alerts (the Gym's rest timer) --------------------------

@@ -623,31 +623,33 @@ function TradeTab() {
 
           {/* Nothing they need? Pay instead. No fixed price — that's what the
               counter-offers are for. */}
-          <div className="trade-head">
-            💰 Sweeten it
-            <span className="trade-head-note">you hold <BerryCoin size={12} /> {purse}</span>
-          </div>
+          <div className="trade-head">💰 Sweeten it</div>
           <div className="trade-sweeten">
-            <GemStepper value={gems} max={purse} onChange={setGems} />
+            <div className="trade-sweeten-row">
+              <GemStepper value={gems} max={purse} onChange={setGems} />
+              <button
+                className="btn btn--ghost btn--small"
+                disabled={want.length === 0 || hint > purse}
+                onClick={() => { sfx.click(); setGems(Math.min(purse, hint)) }}
+              >
+                fair ≈ {hint}
+              </button>
+            </div>
             <button
-              className="btn btn--ghost btn--small"
-              disabled={want.length === 0 || hint > purse}
-              onClick={() => { sfx.click(); setGems(Math.min(purse, hint)) }}
+              className={`trade-pack-toss ${pack ? 'is-on' : ''}`}
+              disabled={!freeReady}
+              onClick={() => { sfx.click(); setPack(!pack) }}
             >
-              ≈ {hint}
+              <span>{pack ? '☑' : '☐'}</span>
+              <span>
+                🎁 …and today’s free pack
+                {!freeReady && <span className="muted"> — already opened</span>}
+              </span>
             </button>
+            <div className="trade-purse">
+              you hold <BerryCoin size={13} /> {purse}
+            </div>
           </div>
-          <button
-            className={`trade-pack-toss ${pack ? 'is-on' : ''}`}
-            disabled={!freeReady}
-            onClick={() => { sfx.click(); setPack(!pack) }}
-          >
-            <span>{pack ? '☑' : '☐'}</span>
-            <span>
-              🎁 …and today’s free pack
-              {!freeReady && <span className="muted"> — already opened</span>}
-            </span>
-          </button>
 
           <div className="trade-scale">
             {sweetened ? (

@@ -20,27 +20,37 @@ import {
   SEA_SOLO_REWARD_LIMIT,
   SIZE,
   aiShot,
+  buryAtRandom,
   canPlace,
   cellName,
+  dealFleetArt,
   emptyWaters,
   fire as fireAt,
   fleetReady,
   foeOf,
   levelDef,
+  liveTraps,
   newSea,
+  paintFleet,
   placeShip,
   placedIds,
   randomFleet,
   randomShot,
+  randomSide,
   seaScore,
   seaStatus,
   shipById,
+  sideCards,
+  sideTraps,
   sunkIds,
   type Color,
   type SeaLevel,
   type SeaSide,
   type SeaState,
+  type SeaTrap,
 } from '../logic/seaBattle'
+import { SEA_CARDS, TRAPS_PER_SIDE, cardBadge, dealSeaCards, seaCardById } from '../logic/seaCards'
+import { ALL_STICKER_IDS, ownedIds, stickerUrl } from '../logic/album'
 import { SeaGrid } from '../components/SeaGrid'
 import { MoveTimer } from '../components/MoveTimer'
 import { BerryCoin } from '../components/BerryCoin'
@@ -89,6 +99,15 @@ function PlayTab() {
   const [msg, setMsg] = useState<string | null>(null)
   const [dismissed, setDismissed] = useState<string[]>([])
   const [paid, setPaid] = useState<number | null>(null)
+  /** A sprung card is on screen. The Marines wait — you can't read past a banner. */
+  const [cardUp, setCardUp] = useState(false)
+
+  // Your ships are crewed by cards you actually own. An empty album falls back
+  // to the whole catalog, so a brand-new captain still gets a painted fleet.
+  const pool = useMemo(() => {
+    const owned = ownedIds(data.album)
+    return owned.length > 0 ? owned : ALL_STICKER_IDS
+  }, [data.album])
 
   const mateId = activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
   const mateName = profiles.find((p) => p.id === mateId)?.name ?? 'your crewmate'
@@ -109,7 +128,7 @@ function PlayTab() {
   // landing rather than appearing. Re-checked inside the setter because the
   // timeout can outlive the position that scheduled it.
   useEffect(() => {
-    if (!solo || solo.state.over || solo.state.turn !== 'b') return
+    if (!solo || solo.state.over || solo.state.turn !== 'b' || cardUp) return
     const t = window.setTimeout(() => {
       setSolo((cur) => {
         if (!cur || cur.state.over || cur.state.turn !== 'b') return cur
@@ -120,7 +139,7 @@ function PlayTab() {
     }, 900)
     return () => window.clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [solo?.state.seq, solo?.state.turn, solo?.state.over])
+  }, [solo?.state.seq, solo?.state.turn, solo?.state.over, cardUp])
 
   // Bank the solo result exactly once, the moment the board is over.
   const bankedSolo = useRef<string | null>(null)
@@ -153,17 +172,20 @@ function PlayTab() {
               : 'You fire first. Nobody can see your waters but you.'
         }
         readyLabel={setup.for === 'solo' ? '🎯 Open fire!' : setup.for === 'accept' ? '✓ Accept & fight' : '📞 Send the challenge'}
+        pool={pool}
         onCancel={() => { sfx.click(); setSetup(null) }}
-        onReady={(ships) => {
+        onReady={(side) => {
           sfx.click()
           if (setup.for === 'solo') {
             bankedSolo.current = null
             setPaid(null)
-            setSolo({ level: setup.level, state: newSea(ships, randomFleet()) })
+            // the Marines paint their fleet from the whole catalog and bury
+            // three cards of their own — the AI plays by the identical rules
+            setSolo({ level: setup.level, state: newSea(side, randomSide(ALL_STICKER_IDS, dealSeaCards())) })
           } else if (setup.for === 'accept') {
-            answerSeaChallenge(setup.matchId, ships)
+            answerSeaChallenge(setup.matchId, side)
           } else {
-            const r = challengeSeaBattle(ships)
+            const r = challengeSeaBattle(side)
             setMsg(r === 'ok' ? `Challenge sent to ${mateName}! 📞` : 'There’s already a battle on the water.')
           }
           setSetup(null)
@@ -183,6 +205,7 @@ function PlayTab() {
         clock={data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS}
         nameOf={(c) => (c === 'w' ? '👒 You' : `${level.emoji} ${level.name}`)}
         paid={paid}
+        onCardOpen={setCardUp}
         onFire={(at) => {
           const next = fireAt(solo.state, at)
           if (next) setSolo({ ...solo, state: next })
@@ -311,40 +334,78 @@ function PlayTab() {
  * Setup. It opens with a legal random fleet already on the water, because "roll
  * again" is a much better first move than an empty grid and a manual: nothing
  * here can be left half-done, and the Ready button is never a trap.
+ *
+ * Moving a ship is two taps, and both of them are ON the ship or ON the sea —
+ * there is no mode to remember and nothing to set before you start:
+ *
+ *   1. **Tap the ship.** ↔️ / ↕️ pop up right beside it, the current lie marked.
+ *   2. **Tap one.** The popover closes, every square that ship could legally
+ *      start on lights up, and the next tap drops it there.
+ *
+ * An orientation toggle parked in a toolbar (which is what this was) reads as a
+ * setting rather than as a step, so you turn it and nothing happens.
  */
 function Placement({
   title,
   note,
   readyLabel,
+  pool,
   onReady,
   onCancel,
 }: {
   title: string
   note: string
   readyLabel: string
-  onReady: (ships: string[]) => void
+  /** Sticker ids this captain's ships are painted with. */
+  pool: string[]
+  onReady: (side: SeaSide) => void
   onCancel: () => void
 }) {
   const [waters, setWaters] = useState<string[]>(() => randomFleet())
-  const [holding, setHolding] = useState<string | null>(null)
-  const [horiz, setHoriz] = useState(true)
+  /** Which faces crew which ship. Fixed at the start so a ship keeps its crew. */
+  const [art] = useState(() => dealFleetArt(pool))
+  const painted = useMemo(() => paintFleet(waters, art), [waters, art])
 
-  const held = holding ? shipById(holding) : undefined
+  /** Setup runs in two acts: hide the fleet, then bury the three cards. */
+  const [phase, setPhase] = useState<'ships' | 'cards'>('ships')
+  const [hand] = useState<string[]>(() => dealSeaCards())
+  const [traps, setTraps] = useState<SeaTrap[]>([])
+  /** The card in hand, as an index into `hand`. */
+  const [inHand, setInHand] = useState(0)
+  /** Step 1: the ship tapped, and the square the ↔️/↕️ popover hangs off. */
+  const [picking, setPicking] = useState<{ id: string; at: number } | null>(null)
+  /** Step 2: the ship in hand, turned the way it's about to be laid down. */
+  const [holding, setHolding] = useState<{ id: string; horiz: boolean } | null>(null)
+
+  const held = holding ? shipById(holding.id) : undefined
+  const picked = picking ? shipById(picking.id) : undefined
   const placed = new Set(placedIds(waters))
 
-  // Every square the held ship could legally start on, so "where does it go?"
-  // is answered by the board rather than by trial and error.
+  /** The squares one ship covers right now — what "this one" means on the board. */
+  const cellsOf = (id: string) => waters.reduce<number[]>((out, c, i) => (c === id ? [...out, i] : out), [])
+
+  // Every square the held ship could legally start on, so "where does it go?" is
+  // answered by the board rather than by trial and error.
   const legal = useMemo(() => {
-    if (!held) return []
+    if (!held || !holding) return []
     const bare = waters.map((c) => (c === held.id ? '' : c))
     const out: number[] = []
-    for (let i = 0; i < bare.length; i++) if (canPlace(bare, held.size, i, horiz)) out.push(i)
+    for (let i = 0; i < bare.length; i++) if (canPlace(bare, held.size, i, holding.horiz)) out.push(i)
     return out
-  }, [waters, held, horiz])
+  }, [waters, held, holding])
+
+  /** Tap a ship — anywhere along it — to start moving it. */
+  function grab(id: string, at: number) {
+    if (at < 0) return // never happens: setup always starts with a full fleet on the water
+    sfx.click()
+    setHolding(null)
+    setPicking({ id, at })
+  }
 
   function tap(i: number) {
-    if (held) {
-      const next = placeShip(waters, held, i, horiz)
+    // step 2: drop it
+    if (held && holding) {
+      const next = placeShip(waters, held, i, holding.horiz)
       if (!next) {
         seaSfx.nope()
         return
@@ -354,16 +415,127 @@ function Placement({
       setHolding(null)
       return
     }
-    // tapping a ship on the board picks it up, keeping the way it's already lying
     const id = waters[i]
+    // tapping another ship moves the popover to it; tapping open water puts it away
     if (!id) {
-      seaSfx.nope()
+      if (picking) setPicking(null)
+      else seaSfx.nope()
       return
     }
-    const first = waters.indexOf(id)
-    setHoriz(waters[first + 1] === id)
-    setHolding(id)
+    grab(id, i)
+  }
+
+  /** ↔️ or ↕️ was tapped: the ship comes off the board and the sea lights up. */
+  function turn(horiz: boolean) {
+    if (!picking) return
     sfx.click()
+    setHolding({ id: picking.id, horiz })
+    setPicking(null)
+  }
+
+  const lyingAcross = picking ? waters[waters.indexOf(picking.id) + 1] === picking.id : true
+  const col = picking ? picking.at % SIZE : 0
+  const row = picking ? Math.floor(picking.at / SIZE) : 0
+
+  // --- act two: burying the three cards ---
+
+  const buriedIds = new Set(traps.map((t) => t.card))
+  const inHandCard = hand[inHand] && !buriedIds.has(hand[inHand]) ? hand[inHand] : null
+  const artFor = () => (pool.length ? pool[Math.floor(Math.random() * pool.length)] : '')
+
+  function bury(i: number) {
+    const already = traps.find((t) => t.at === i)
+    if (already) {
+      // tapping a buried card digs it back up, so nothing here is a one-way door
+      sfx.click()
+      setTraps(traps.filter((t) => t.at !== i))
+      setInHand(hand.indexOf(already.card))
+      return
+    }
+    if (!inHandCard) return
+    seaSfx.bury()
+    const next = [...traps, { card: inHandCard, at: i, art: artFor(), sprung: false }]
+    setTraps(next)
+    const buried = new Set(next.map((t) => t.card))
+    const nextUp = hand.findIndex((c) => !buried.has(c))
+    setInHand(nextUp >= 0 ? nextUp : inHand)
+  }
+
+  const side = (): SeaSide => ({ ships: waters, shots: emptyWaters(), cards: painted, traps })
+
+  if (phase === 'cards') {
+    const done = traps.length >= hand.length
+    const card = inHandCard ? seaCardById(inHandCard) : undefined
+    return (
+      <>
+        <div className="board-status">
+          <div className="board-status-line">🃏 Bury your three cards</div>
+          <div className="muted" style={{ fontSize: 11 }}>
+            Nothing happens until they fire on the square. 💀 hurts you, 🛡️ hurts them.
+          </div>
+        </div>
+
+        <div className="sea-hint">
+          {card
+            ? `${card.emoji} ${card.name} in hand — tap any square to bury it.`
+            : done
+              ? 'All three are down. Tap one to dig it back up, or set sail.'
+              : 'Pick a card below.'}
+        </div>
+
+        <SeaGrid
+          mode="place"
+          ships={waters}
+          shots={emptyWaters()}
+          cards={painted}
+          traps={traps}
+          bury={inHandCard}
+          onTap={bury}
+        />
+
+        <div className="board-tools">
+          <button
+            className="chip"
+            onClick={() => { sfx.click(); setTraps(buryAtRandom(hand, pool, [])); setInHand(0) }}
+          >
+            🎲 Bury them for me
+          </button>
+          {traps.length > 0 && (
+            <button className="chip" onClick={() => { sfx.click(); setTraps([]); setInHand(0) }}>
+              ✕ Dig them all up
+            </button>
+          )}
+          <button className="chip" onClick={() => { sfx.click(); setPhase('ships') }}>◀ Back to the fleet</button>
+        </div>
+
+        <div className="sea-hand">
+          {hand.map((id, n) => {
+            const c = seaCardById(id)
+            if (!c) return null
+            const at = traps.find((t) => t.card === id)
+            return (
+              <button
+                key={id}
+                className={`sea-card${at ? ' is-buried' : ''}${inHand === n && !at ? ' is-held' : ''} sea-card--${c.side}`}
+                onClick={() => { sfx.click(); setInHand(n) }}
+              >
+                <span className="sea-card-top">
+                  <span className="sea-card-emoji">{c.emoji}</span>
+                  <span className="sea-card-badge">{cardBadge(c)}</span>
+                </span>
+                <span className="sea-card-name">{c.name}</span>
+                <span className="sea-card-text">{c.text}</span>
+                <span className="sea-card-foot">{at ? `buried at ${cellName(at.at)}` : 'not buried yet'}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <button className="btn" style={{ marginTop: 12 }} disabled={!done} onClick={() => onReady(side())}>
+          {done ? readyLabel : `Bury ${hand.length - traps.length} more`}
+        </button>
+      </>
+    )
   }
 
   return (
@@ -375,31 +547,58 @@ function Placement({
 
       <div className="sea-hint">
         {held
-          ? `Holding the ${held.emoji} ${held.name} (${held.size} long) — tap a glowing square to drop its ${horiz ? 'left end' : 'top end'} there.`
-          : 'Tap any ship to pick it up and move it. 🎲 Scatter re-hides the whole fleet.'}
+          ? `${held.emoji} ${held.name} in hand — tap any glowing square to drop it there.`
+          : picked
+            ? `${picked.emoji} ${picked.name} — across ↔️ or down ↕️?`
+            : 'Tap a ship to move it. 🎲 Scatter re-hides the whole fleet.'}
       </div>
 
-      <SeaGrid mode="place" ships={waters} shots={emptyWaters()} hint={legal} onTap={tap} />
+      <SeaGrid
+        mode="place"
+        ships={waters}
+        shots={emptyWaters()}
+        cards={painted}
+        hint={legal}
+        focus={picking ? cellsOf(picking.id) : held ? cellsOf(held.id) : []}
+        overlayAt={picking?.at ?? null}
+        overlay={
+          picking && (
+            <div
+              className={`sea-turn${row === 0 ? ' is-below' : ''}${col <= 1 ? ' is-left' : col >= SIZE - 2 ? ' is-right' : ''}`}
+            >
+              <button className={`sea-turn-btn${lyingAcross ? ' is-on' : ''}`} onClick={() => turn(true)}>
+                ↔️ Across
+              </button>
+              <button className={`sea-turn-btn${lyingAcross ? '' : ' is-on'}`} onClick={() => turn(false)}>
+                ↕️ Down
+              </button>
+            </div>
+          )
+        }
+        onTap={tap}
+      />
 
       <div className="board-tools">
-        <button className={`chip${horiz ? ' chip--on' : ''}`} onClick={() => { sfx.click(); setHoriz(true) }}>
-          ↔️ Across
-        </button>
-        <button className={`chip${horiz ? '' : ' chip--on'}`} onClick={() => { sfx.click(); setHoriz(false) }}>
-          ↕️ Down
-        </button>
-        <button className="chip" onClick={() => { sfx.click(); setHolding(null); setWaters(randomFleet()) }}>
+        <button
+          className="chip"
+          onClick={() => { sfx.click(); setPicking(null); setHolding(null); setWaters(randomFleet()) }}
+        >
           🎲 Scatter
         </button>
-        <button className="chip" onClick={onCancel}>✕ Back</button>
+        {(picking || holding) && (
+          <button className="chip" onClick={() => { sfx.click(); setPicking(null); setHolding(null) }}>
+            ✕ Never mind
+          </button>
+        )}
+        <button className="chip" onClick={onCancel}>◀ Back</button>
       </div>
 
       <div className="sea-strip" style={{ marginTop: 10 }}>
         {FLEET.map((s) => (
           <button
             key={s.id}
-            className={`sea-ship${holding === s.id ? ' is-held' : ''}${placed.has(s.id) ? '' : ' is-off'}`}
-            onClick={() => { sfx.click(); setHolding(holding === s.id ? null : s.id) }}
+            className={`sea-ship${picking?.id === s.id || holding?.id === s.id ? ' is-held' : ''}${placed.has(s.id) ? '' : ' is-off'}`}
+            onClick={() => grab(s.id, waters.indexOf(s.id))}
           >
             <span className="sea-ship-emoji">{s.emoji}</span>
             <span className="sea-ship-name">{s.name}</span>
@@ -408,8 +607,13 @@ function Placement({
         ))}
       </div>
 
-      <button className="btn" style={{ marginTop: 12 }} disabled={!fleetReady(waters)} onClick={() => onReady(waters)}>
-        {readyLabel}
+      <button
+        className="btn"
+        style={{ marginTop: 12 }}
+        disabled={!fleetReady(waters)}
+        onClick={() => { sfx.click(); setPicking(null); setHolding(null); setPhase('cards') }}
+      >
+        Next: bury your {TRAPS_PER_SIDE} cards 🃏
       </button>
     </>
   )
@@ -424,6 +628,7 @@ function Battle({
   clock,
   nameOf,
   paid,
+  onCardOpen,
   onFire,
   onResign,
   onClose,
@@ -435,12 +640,18 @@ function Battle({
   nameOf: (c: Color) => string
   /** Berries a finished solo battle paid, or null (online pays through the store). */
   paid: number | null
+  /** Told whenever a sprung-card banner opens or closes, so the AI can hold fire. */
+  onCardOpen?: (open: boolean) => void
   onFire: (at: number) => void
   onResign?: () => void
   onClose: () => void
 }) {
   const [aim, setAim] = useState<number | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
+  /** The sprung card's `seq`, once this device has read and dismissed it. */
+  const [readCard, setReadCard] = useState<number | null>(null)
+  /** Squares a card gave away, lit for two seconds after the banner is closed. */
+  const [spy, setSpy] = useState<{ on: Color; at: number[] } | null>(null)
 
   const theirSide = foeOf(mySide)
   const me = state[mySide]
@@ -457,6 +668,32 @@ function Battle({
     const t = window.setTimeout(() => setFlash(null), 2600)
     return () => window.clearTimeout(t)
   }, [flash])
+
+  // A card that went off. Both captains get the same banner — the whole point
+  // is that neither is left guessing why the board changed under them.
+  const sprung = state.flash && state.flash.seq !== readCard ? state.flash : null
+  const sprungCard = sprung ? seaCardById(sprung.card) : undefined
+  const sprungArt = sprung ? (sideTraps(state[sprung.owner]).find((t) => t.at === sprung.at)?.art ?? '') : ''
+
+  useEffect(() => {
+    onCardOpen?.(Boolean(sprung))
+    if (sprung) seaSfx.card()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sprung?.seq, Boolean(sprung)])
+
+  // The reveal starts when the banner closes, not while it is covering the board.
+  useEffect(() => {
+    if (!spy) return
+    const t = window.setTimeout(() => setSpy(null), 2000)
+    return () => window.clearTimeout(t)
+  }, [spy])
+
+  function dismissCard() {
+    if (!sprung) return
+    sfx.click()
+    setReadCard(sprung.seq)
+    if (sprung.show.length > 0 && sprung.showOn) setSpy({ on: sprung.showOn, at: sprung.show })
+  }
 
   // The square just fired at sits on the grid of whoever was SHOT AT — which is
   // whoever is now to move, unless the shot ended the game.
@@ -514,11 +751,19 @@ function Battle({
         {flash && <div className="move-clock-flash">{flash}</div>}
       </div>
 
-      <div className="sea-label">🎯 Enemy waters — {nameOf(theirSide)}</div>
+      <div className="sea-label">
+        🎯 Enemy waters — {nameOf(theirSide)}
+        {liveTraps(them).length > 0 && (
+          <span className="sea-buried-count"> · 🃏 {liveTraps(them).length} of their cards still buried</span>
+        )}
+      </div>
       <SeaGrid
         mode="target"
         ships={them.ships}
         shots={them.shots}
+        cards={sideCards(them)}
+        traps={sideTraps(them)}
+        spy={spy?.on === theirSide ? spy.at : []}
         last={struck === theirSide ? state.last : null}
         aim={aim}
         disabled={!myTurn}
@@ -532,9 +777,22 @@ function Battle({
       )}
       <FleetStrip side={them} theirs />
 
-      <div className="sea-label" style={{ marginTop: 14 }}>⛵ Your waters — {nameOf(mySide)}</div>
+      <div className="sea-label" style={{ marginTop: 14 }}>
+        ⛵ Your waters — {nameOf(mySide)}
+        {liveTraps(me).length > 0 && (
+          <span className="sea-buried-count"> · 🃏 {liveTraps(me).length} of yours still buried</span>
+        )}
+      </div>
       <div className="sea-own">
-        <SeaGrid mode="own" ships={me.ships} shots={me.shots} last={struck === mySide ? state.last : null} />
+        <SeaGrid
+          mode="own"
+          ships={me.ships}
+          shots={me.shots}
+          cards={sideCards(me)}
+          traps={sideTraps(me)}
+          spy={spy?.on === mySide ? spy.at : []}
+          last={struck === mySide ? state.last : null}
+        />
       </div>
       <FleetStrip side={me} />
 
@@ -576,6 +834,30 @@ function Battle({
           <button className="btn btn--small" style={{ marginTop: 10 }} onClick={() => { sfx.click(); onClose() }}>
             Done
           </button>
+        </div>
+      )}
+
+      {sprung && sprungCard && (
+        <div className="sea-pop" role="dialog" aria-modal="true">
+          <div className={`sea-pop-card sea-pop-card--${sprungCard.side}`}>
+            <div className="sea-pop-where">
+              💥 {nameOf(sprung.by)} hit a card buried at {cellName(sprung.at)}
+            </div>
+            <div className="sea-pop-art">
+              {sprungArt ? <img src={stickerUrl(sprungArt)} alt="" /> : null}
+              <span className="sea-pop-emoji">{sprungCard.emoji}</span>
+            </div>
+            <div className="sea-pop-name">{sprungCard.name}</div>
+            <div className="sea-pop-side">
+              {cardBadge(sprungCard)} {sprungCard.side === 'bad' ? 'Bad news for whoever buried it' : 'It backfires on whoever found it'}
+            </div>
+            <div className="sea-pop-text">{sprungCard.text}</div>
+            <div className="sea-pop-note">{sprung.note}</div>
+            <div className="sea-pop-who">{sprungCard.who}</div>
+            <button className="btn btn--small" onClick={dismissCard}>
+              {sprung.show.length > 0 ? 'Show me 👀' : 'Dismiss'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -695,6 +977,32 @@ function RulesTab() {
           checkerboard — which means firing on <strong>every second square</strong> finds every ship in half the shots.
           Once you land a hit, stop hunting and <strong>work outwards from it</strong> until the ship sinks.
         </p>
+        <h3>🃏 The three buried cards</h3>
+        <p>
+          This is the one thing the box does not have. Once your fleet is hidden you are dealt{' '}
+          <strong>{TRAPS_PER_SIDE} special cards</strong> — you do not pick them — and you bury each one on a square of
+          your own sea. Nothing happens until <strong>the enemy fires at that exact square</strong>. Then it springs,
+          both captains are shown the card, and the board changes.
+        </p>
+        <ul>
+          <li><strong>💀 cards hurt you</strong>, the captain who buried them. Bury those where nobody would bother shooting.</li>
+          <li><strong>🛡️ cards backfire on them</strong>, the captain who found them. Those are bait — bury them somewhere obvious.</li>
+          <li>A card can sit <strong>on a ship square or on open water</strong>. Two cards never share a square.</li>
+          <li>A card is spent the moment it goes off, and cards can <strong>sink the last ship</strong> or <strong>raise one back up</strong>, so the game is never over until the board says so.</li>
+        </ul>
+        <div className="sea-hand sea-hand--sheet">
+          {SEA_CARDS.map((c) => (
+            <div key={c.id} className={`sea-card sea-card--${c.side}`}>
+              <span className="sea-card-top">
+                <span className="sea-card-emoji">{c.emoji}</span>
+                <span className="sea-card-badge">{cardBadge(c)}</span>
+              </span>
+              <span className="sea-card-name">{c.name}</span>
+              <span className="sea-card-text">{c.text}</span>
+              <span className="sea-card-foot">{c.rarity === 'rare' ? '★ rare' : 'common'}</span>
+            </div>
+          ))}
+        </div>
         <h3>Playing the Marines</h3>
         <p>
           🐣 <strong>Coby</strong> fires at random. 🚬 <strong>Smoker</strong> searches on every second square and hunts

@@ -119,12 +119,13 @@ import {
 } from '../logic/boardGames'
 import {
   SEA_REWARD,
-  emptyWaters,
   SEA_SOLO_REWARD,
   SEA_SOLO_REWARD_LIMIT,
   fire as fireSea,
   newSea,
   resignSea,
+  emptySide,
+  type SeaSide,
   type SeaState,
 } from '../logic/seaBattle'
 import {
@@ -539,9 +540,9 @@ interface StoreState {
 
   // --- Sea Battle (the 🚢 app) ---
   /** Challenge the other crewmate, with my fleet already hidden. One live battle at a time. */
-  challengeSeaBattle: (ships: string[]) => 'ok' | 'busy'
+  challengeSeaBattle: (side: SeaSide) => 'ok' | 'busy'
   /** Answer a challenge aimed at me: `ships` accepts and starts the fight, `null` declines. */
-  answerSeaChallenge: (matchId: string, ships: string[] | null) => void
+  answerSeaChallenge: (matchId: string, side: SeaSide | null) => void
   /** Fire one shot. Ignored unless the shared board says it's my turn and the square is open. */
   playSeaShot: (matchId: string, at: number) => void
   /** Strike the colours: the other side takes the win (and the Berries). */
@@ -2783,7 +2784,7 @@ export const useStore = create<StoreState>((set, get) => {
     // accepter's with the accept. There is never a moment where both phones
     // hold the pen.
 
-    challengeSeaBattle(ships) {
+    challengeSeaBattle(side) {
       const { activeProfileId, profiles } = get()
       if (!activeProfileId) return 'busy'
       const me = profiles.find((p) => p.id === activeProfileId)
@@ -2803,7 +2804,7 @@ export const useStore = create<StoreState>((set, get) => {
           status: 'pending',
           // the accepter's waters stay empty until they answer; the challenger
           // fires first, exactly as they move first in the board games
-          state: newSea(ships, emptyWaters()),
+          state: newSea(side, emptySide()),
           createdAt: new Date().toISOString(),
           moveSeconds: get().data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS,
         },
@@ -2811,11 +2812,11 @@ export const useStore = create<StoreState>((set, get) => {
       return 'ok'
     },
 
-    answerSeaChallenge(matchId, ships) {
+    answerSeaChallenge(matchId, side) {
       const { seaBattles, activeProfileId } = get()
       const match = seaBattles.find((m) => m.id === matchId)
       if (!match || match.status !== 'pending' || match.toId !== activeProfileId) return
-      if (!ships) {
+      if (!side) {
         saveSeaList(
           seaBattles.map((m) =>
             m.id === matchId ? { ...m, status: 'declined' as const, resolvedAt: new Date().toISOString() } : m,
@@ -2826,7 +2827,7 @@ export const useStore = create<StoreState>((set, get) => {
       saveSeaList(
         seaBattles.map((m) =>
           m.id === matchId
-            ? { ...m, status: 'active' as const, state: { ...m.state, b: { ships, shots: m.state.b.shots } } }
+            ? { ...m, status: 'active' as const, state: { ...m.state, b: { ...side, shots: m.state.b.shots } } }
             : m,
         ),
       )

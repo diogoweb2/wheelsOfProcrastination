@@ -34,7 +34,7 @@ import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, seaBattles, settleSeaBattles, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, answerChallenge, boardGames, settleBoardGames, answerBoardChallenge, seaBattles, settleSeaBattles, answerSeaChallenge, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
   // the URL we were opened with decides the first screen (see lib/route.ts)
   const [open, setOpen] = useState<OpenApp>(() => pathToRoute(window.location.pathname, null))
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
@@ -486,6 +486,7 @@ export default function App() {
               {duelCall ? 'Card game — winner takes the Berries' : 'The other captain is waiting on you'}
             </div>
           </div>
+          {duelCall && <DeclineCall onDecline={() => answerChallenge(duelCall.id, false)} />}
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('duel', 'fight') }}>
             {duelCall ? 'Answer' : 'Play'}
           </button>
@@ -505,6 +506,7 @@ export default function App() {
               {boardCall ? 'Winner takes the Berries' : 'The other captain is waiting on you'}
             </div>
           </div>
+          {boardCall && <DeclineCall onDecline={() => answerBoardChallenge(boardCall.id, false)} />}
           <button
             className="btn btn--small"
             onClick={() => {
@@ -528,6 +530,7 @@ export default function App() {
               {seaCall ? 'Hide your fleet and fight — winner takes the Berries' : 'The other captain is waiting on you'}
             </div>
           </div>
+          {seaCall && <DeclineCall onDecline={() => answerSeaChallenge(seaCall.id, null)} />}
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('seabattle', 'play') }}>
             {seaCall ? 'Answer' : 'Fire'}
           </button>
@@ -687,6 +690,39 @@ export default function App() {
       {/* mandatory decision — rendered last so it sits above the other prompts */}
       <RequiredDeadline />
     </div>
+  )
+}
+
+/**
+ * "Not now" on a challenge banner. Declining marks the invite resolved, so the
+ * banner leaves for good — until the other captain calls again, which makes a
+ * brand-new invite. It sits a tap away from "Answer" on a phone, so it asks
+ * once before it fires; a mis-tap shouldn't wave off a game.
+ */
+function DeclineCall({ onDecline }: { onDecline: () => void }) {
+  const [sure, setSure] = useState(false)
+  return (
+    <button
+      className="btn btn--small"
+      style={{
+        background: 'transparent',
+        color: '#fff',
+        boxShadow: 'inset 0 0 0 2px rgb(255 255 255 / 45%)',
+        padding: '8px 10px',
+        fontSize: 12,
+      }}
+      onClick={() => {
+        if (!sure) {
+          sfx.click()
+          setSure(true)
+          return
+        }
+        sfx.sad()
+        onDecline()
+      }}
+    >
+      {sure ? 'Sure?' : 'Decline'}
+    </button>
   )
 }
 

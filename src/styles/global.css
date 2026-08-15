@@ -1668,10 +1668,18 @@ input, select { font-family: inherit; }
   min-width: 84px; text-align: center; font-size: 16px; font-weight: 900;
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
 }
-.trade-sweeten { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.trade-sweeten {
+  padding: 12px; background: var(--card); border: 2px solid var(--line); border-radius: var(--radius);
+}
+.trade-sweeten-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.trade-purse {
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  margin-top: 8px; font-size: 11px; font-weight: 900; color: var(--muted);
+}
 .trade-pack-toss {
-  display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 10px 12px;
-  background: var(--card); border: 2px solid var(--line); border-radius: 12px;
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  margin-top: 10px; padding: 10px 0 0; border-top: 2px solid var(--line);
+  background: none; border-left: 0; border-right: 0; border-bottom: 0; border-radius: 0;
   color: inherit; font: inherit; font-size: 13px; font-weight: 900; text-align: left;
 }
 .trade-pack-toss.is-on { border-color: var(--yellow); color: var(--yellow); }
@@ -3924,6 +3932,44 @@ input, select { font-family: inherit; }
 .sea-cell.is-aim { box-shadow: inset 0 0 0 3px var(--green); background: rgb(96 191 245 / 30%); }
 /* while placing: everywhere the held ship could legally go */
 .sea-cell.is-hint { box-shadow: inset 0 0 0 1px rgb(96 191 245 / 80%); background: #1d557f; }
+/* the ship you just tapped — "this one", said on the board rather than in a label */
+.sea-cell.is-focus { box-shadow: inset 0 0 0 2px var(--yellow); }
+
+/* ↔️ / ↕️ hanging off the ship you tapped. It is its own grid item placed on the
+   ship's square, so it lands exactly there with no measured pixel anywhere —
+   and it is never a <button> inside a <button>, which the squares are. */
+.sea-overlay { position: relative; z-index: 5; pointer-events: none; }
+.sea-turn {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -7px);
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+  pointer-events: auto;
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 55%));
+}
+/* a ship on the top row would push it off the board, so it drops underneath */
+.sea-turn.is-below { bottom: auto; top: 100%; transform: translate(-50%, 7px); }
+/* near an edge it tucks in rather than hanging off the side of the phone */
+.sea-turn.is-left { left: 0; transform: translate(0, -7px); }
+.sea-turn.is-left.is-below { transform: translate(0, 7px); }
+.sea-turn.is-right { left: auto; right: 0; transform: translate(0, -7px); }
+.sea-turn.is-right.is-below { transform: translate(0, 7px); }
+
+.sea-turn-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--card2);
+  border: 2px solid var(--line);
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text);
+  cursor: pointer;
+}
+/* the way the ship is lying right now — tapping it keeps that and moves on */
+.sea-turn-btn.is-on { background: var(--yellow); border-color: var(--yellow); color: #3a2000; }
 
 .sea-label { font-size: 12px; font-weight: 900; color: var(--muted); margin: 0 0 5px; }
 .sea-own { width: 68%; max-width: 300px; }
@@ -3970,3 +4016,151 @@ input, select { font-family: inherit; }
   cursor: pointer;
 }
 .sea-level-emoji { font-size: 30px; line-height: 1; flex: none; }
+
+/* ---------- Sea Battle: album art + buried cards ---------- */
+/*
+   A ship square is a card the captain actually owns, out of the sticker album —
+   a 4-square ship is four different pirates lined up in the hull. The art is
+   pure decoration: every rule in logic/seaBattle.ts reads `ships`, never this,
+   so an empty album just falls back to the ship's emoji.
+*/
+.sea-cell--art { overflow: hidden; background: linear-gradient(180deg, #d98530, #8a4c14); }
+.sea-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
+}
+/* a wreck: the crew is still drawn, but the fire is what you read first */
+.sea-cell--hit .sea-art { opacity: 0.35; filter: grayscale(0.6) brightness(0.6); }
+.sea-cell--sunk .sea-art { opacity: 0.25; }
+.sea-cell .sea-mark { position: relative; z-index: 2; text-shadow: 0 1px 3px rgb(0 0 0 / 80%); }
+
+/* A card you buried, on your own board. The enemy board is handed these too
+   (SeaGrid needs them to mark one that has gone off) and hides any still armed. */
+.sea-buried {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  font-size: clamp(7px, 2vw, 11px);
+  line-height: 1;
+  padding: 1px;
+  border-radius: 3px 0 0;
+  background: rgb(0 0 0 / 55%);
+}
+.sea-buried.is-sprung { filter: grayscale(1); opacity: 0.75; }
+.sea-cell.is-buried { box-shadow: inset 0 0 0 2px #c08bff; }
+/* while burying: every free square says "here, if you like" */
+.sea-bury-ghost {
+  position: absolute;
+  inset: 22%;
+  border-radius: 3px;
+  border: 1px dashed rgb(234 244 255 / 30%);
+  pointer-events: none;
+}
+/* the two seconds a card sold a square out */
+.sea-cell.is-spied {
+  box-shadow: inset 0 0 0 3px var(--yellow);
+  animation: sea-spy 0.5s ease-in-out infinite alternate;
+}
+@keyframes sea-spy {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.6); }
+}
+.sea-buried-count { font-weight: 700; color: #c08bff; }
+
+/* --- the hand of three, and the rules-tab gallery --- */
+.sea-hand {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+.sea-hand--sheet { grid-template-columns: repeat(2, 1fr); margin: 10px 0 4px; }
+.sea-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 7px;
+  border-radius: 9px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  font-size: 10px;
+  line-height: 1.25;
+  min-width: 0;
+}
+/* 💀 is yours to regret, 🛡️ is theirs — the colour says which before the words do */
+.sea-card--bad { border-color: rgb(230 80 80 / 55%); }
+.sea-card--good { border-color: rgb(96 200 130 / 55%); }
+.sea-card.is-held { border-color: var(--yellow); box-shadow: 0 0 0 2px rgb(255 206 0 / 40%); }
+.sea-card.is-buried { opacity: 0.5; }
+.sea-card-top { display: flex; align-items: center; justify-content: space-between; }
+.sea-card-emoji { font-size: 20px; line-height: 1; }
+.sea-card-badge { font-size: 12px; }
+.sea-card-name { font-weight: 900; font-size: 11px; }
+.sea-card-text { color: var(--muted); }
+.sea-card-foot { margin-top: auto; font-size: 9px; font-weight: 800; color: var(--muted); }
+
+/* --- a card going off --- */
+.sea-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgb(0 0 0 / 72%);
+  animation: sea-pop-in 0.18s ease-out;
+}
+@keyframes sea-pop-in { from { opacity: 0; } to { opacity: 1; } }
+.sea-pop-card {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  padding: 14px;
+  border-radius: 16px;
+  border: 3px solid var(--bronze);
+  background: var(--card);
+  box-shadow: 0 12px 0 rgb(0 0 0 / 45%);
+  animation: sea-pop-card 0.4s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+@keyframes sea-pop-card {
+  from { transform: scale(0.5) rotate(-8deg); }
+  to { transform: scale(1) rotate(0); }
+}
+.sea-pop-card--bad { border-color: var(--red); }
+.sea-pop-card--good { border-color: var(--green); }
+.sea-pop-where { font-size: 11px; font-weight: 800; color: var(--muted); }
+.sea-pop-art {
+  position: relative;
+  height: 120px;
+  margin: 6px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sea-pop-art img { max-height: 120px; max-width: 100%; object-fit: contain; }
+.sea-pop-emoji {
+  position: absolute;
+  right: 6px;
+  bottom: 0;
+  font-size: 40px;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 70%));
+  animation: sea-pop-emoji 0.9s ease-in-out infinite alternate;
+}
+@keyframes sea-pop-emoji {
+  from { transform: translateY(0) rotate(-6deg); }
+  to { transform: translateY(-6px) rotate(6deg); }
+}
+.sea-pop-name { font-weight: 900; font-size: 18px; }
+.sea-pop-side { font-size: 11px; font-weight: 800; color: var(--muted); margin-top: 2px; }
+.sea-pop-text { font-size: 13px; margin-top: 7px; }
+.sea-pop-note { font-size: 13px; font-weight: 800; margin-top: 7px; color: var(--yellow); }
+.sea-pop-who { font-size: 11px; font-style: italic; color: var(--muted); margin: 7px 0 10px; }
