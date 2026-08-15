@@ -255,11 +255,24 @@ export const seaSfx = {
     tone(160, 0.22, 'sawtooth', 0.15, 0.06, 60)
     tone(760, 0.1, 'square', 0.09, 0.07, 220)
   },
-  /** A ship goes down: the crack, then the long slide under. */
+  /**
+   * A ship goes down. The biggest sound in the game, and built in four beats so
+   * it reads as an event rather than a noise: the hull cracks, the magazine
+   * goes up, the timber groans over, and the whole thing slides under.
+   */
   sink() {
-    tone(150, 0.3, 'sawtooth', 0.16, 0.06, 50)
-    tone(400, 0.5, 'triangle', 0.13, 0.16, 80)
-    tone(200, 0.6, 'sine', 0.1, 0.3, 60)
+    // the crack
+    tone(170, 0.14, 'sawtooth', 0.18, 0, 70)
+    tone(900, 0.08, 'square', 0.12, 0)
+    // the blast
+    tone(80, 0.5, 'sawtooth', 0.2, 0.1, 40)
+    tone(300, 0.35, 'square', 0.11, 0.1, 90)
+    // the groan of it rolling over
+    tone(420, 0.45, 'triangle', 0.12, 0.3, 150)
+    tone(240, 0.5, 'triangle', 0.1, 0.42, 110)
+    // and under
+    tone(180, 0.9, 'sine', 0.12, 0.6, 45)
+    tone(600, 0.7, 'sine', 0.07, 0.68, 90)
   },
   /** A square already fired at. */
   nope() {

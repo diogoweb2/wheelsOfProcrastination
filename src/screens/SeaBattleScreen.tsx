@@ -50,8 +50,9 @@ import {
   type SeaTrap,
 } from '../logic/seaBattle'
 import { SEA_CARDS, TRAPS_PER_SIDE, cardBadge, dealSeaCards, seaCardById } from '../logic/seaCards'
-import { ALL_STICKER_IDS, ownedIds, stickerUrl } from '../logic/album'
+import { ALL_STICKER_IDS, ownedIds } from '../logic/album'
 import { SeaGrid } from '../components/SeaGrid'
+import { SeaCardReveal } from '../components/SeaCardReveal'
 import { MoveTimer } from '../components/MoveTimer'
 import { BerryCoin } from '../components/BerryCoin'
 import { boardSfx, seaSfx, sfx } from '../audio'
@@ -372,6 +373,16 @@ function Placement({
   const [traps, setTraps] = useState<SeaTrap[]>([])
   /** The card in hand, as an index into `hand`. */
   const [inHand, setInHand] = useState(0)
+  /**
+   * How many of the three have been opened. The hand is DEALT, one card at a
+   * time, each one sitting there until it is read — you cannot bury a card
+   * sensibly before you know what it does.
+   */
+  const [dealt, setDealt] = useState(0)
+  /** A picture for each card in the hand, fixed once so it doesn't reshuffle. */
+  const [handArt] = useState<string[]>(() =>
+    Array.from({ length: TRAPS_PER_SIDE }, () => (pool.length ? pool[Math.floor(Math.random() * pool.length)] : '')),
+  )
   /** Step 1: the ship tapped, and the square the ↔️/↕️ popover hangs off. */
   const [picking, setPicking] = useState<{ id: string; at: number } | null>(null)
   /** Step 2: the ship in hand, turned the way it's about to be laid down. */
@@ -441,7 +452,7 @@ function Placement({
 
   const buriedIds = new Set(traps.map((t) => t.card))
   const inHandCard = hand[inHand] && !buriedIds.has(hand[inHand]) ? hand[inHand] : null
-  const artFor = () => (pool.length ? pool[Math.floor(Math.random() * pool.length)] : '')
+  const artFor = (card: string) => handArt[hand.indexOf(card)] ?? ''
 
   function bury(i: number) {
     const already = traps.find((t) => t.at === i)
@@ -454,7 +465,7 @@ function Placement({
     }
     if (!inHandCard) return
     seaSfx.bury()
-    const next = [...traps, { card: inHandCard, at: i, art: artFor(), sprung: false }]
+    const next = [...traps, { card: inHandCard, at: i, art: artFor(inHandCard), sprung: false }]
     setTraps(next)
     const buried = new Set(next.map((t) => t.card))
     const nextUp = hand.findIndex((c) => !buried.has(c))
@@ -465,9 +476,20 @@ function Placement({
 
   if (phase === 'cards') {
     const done = traps.length >= hand.length
+    const dealing = dealt < hand.length ? seaCardById(hand[dealt]) : undefined
     const card = inHandCard ? seaCardById(inHandCard) : undefined
     return (
       <>
+        {dealing && (
+          <SeaCardReveal
+            card={dealing}
+            art={handArt[dealt]}
+            top={`Your card ${dealt + 1} of ${hand.length}`}
+            counter={`${dealt + 1} / ${hand.length}`}
+            buttonLabel={dealt + 1 < hand.length ? 'Next card →' : 'Bury them 🃏'}
+            onDone={() => setDealt(dealt + 1)}
+          />
+        )}
         <div className="board-status">
           <div className="board-status-line">🃏 Bury your three cards</div>
           <div className="muted" style={{ fontSize: 11 }}>
@@ -601,7 +623,7 @@ function Placement({
             onClick={() => grab(s.id, waters.indexOf(s.id))}
           >
             <span className="sea-ship-emoji">{s.emoji}</span>
-            <span className="sea-ship-name">{s.name}</span>
+            <span className="sea-ship-name">{s.name} ({s.size})</span>
             <span className="sea-ship-size">{'▪'.repeat(s.size)}</span>
           </button>
         ))}
@@ -653,6 +675,9 @@ function Battle({
   /** Squares a card gave away, lit for two seconds after the banner is closed. */
   const [spy, setSpy] = useState<{ on: Color; at: number[] } | null>(null)
 
+  /** The ship that just went down, held long enough to shout about it. */
+  const [wreck, setWreck] = useState<{ text: string; mine: boolean; seq: number } | null>(null)
+
   const theirSide = foeOf(mySide)
   const me = state[mySide]
   const them = state[theirSide]
@@ -662,6 +687,31 @@ function Battle({
 
   // a new position can never leave a stale crosshair sitting on the board
   useEffect(() => setAim(null), [state.seq])
+
+  /**
+   * Sinking a ship is the loudest thing that happens in Battleship and it used
+   * to be one grey line in the log. Read off the position's own log, so a ship
+   * sunk on the other phone lands here too — and so a ship finished off by a
+   * BURIED CARD counts exactly the same as one finished off by a shot.
+   */
+  const sinkings = state.log.filter((l) => /goes down/.test(l.text))
+  const sawSinkings = useRef<number | null>(null)
+  useEffect(() => {
+    // reopening a finished board is not a ship going down
+    const first = sawSinkings.current === null
+    sawSinkings.current = sinkings.length
+    if (first || sinkings.length === 0) return
+    const line = sinkings.at(-1)!
+    const name = /the ([^!]+) goes down/.exec(line.text)?.[1] ?? 'A ship'
+    setWreck({ text: name, mine: line.by !== mySide, seq: state.seq })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sinkings.length])
+
+  useEffect(() => {
+    if (!wreck) return
+    const t = window.setTimeout(() => setWreck(null), 2200)
+    return () => window.clearTimeout(t)
+  }, [wreck])
 
   useEffect(() => {
     if (!flash) return
@@ -675,26 +725,10 @@ function Battle({
   const sprungCard = sprung ? seaCardById(sprung.card) : undefined
   const sprungArt = sprung ? (sideTraps(state[sprung.owner]).find((t) => t.at === sprung.at)?.art ?? '') : ''
 
-  /**
-   * A sprung card is opened like a pack, not shown like a dialog: the sealed
-   * foil rattles for a beat first. The beat is the whole point — it is where
-   * "what is it?" happens, and a rare pays it off with a fanfare and rays.
-   */
-  const rare = sprungCard?.rarity === 'rare'
-  const [opened, setOpened] = useState(false)
   useEffect(() => {
     onCardOpen?.(Boolean(sprung))
-    setOpened(false)
-    if (!sprung) return
-    seaSfx.card()
-    const t = window.setTimeout(() => {
-      setOpened(true)
-      seaSfx.rip()
-      window.setTimeout(() => (rare ? seaSfx.rare() : seaSfx.common()), 190)
-    }, 950)
-    return () => window.clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sprung?.seq, Boolean(sprung)])
+  }, [Boolean(sprung)])
 
   // The reveal starts when the banner closes, not while it is covering the board.
   useEffect(() => {
@@ -748,6 +782,15 @@ function Battle({
 
   return (
     <>
+      <div className={`sea-shaker${wreck ? ' is-shaking' : ''}`}>
+      {wreck && (
+        <div className={`sea-wreck-toast${wreck.mine ? ' is-mine' : ''}`} key={wreck.seq}>
+          <span className="sea-wreck-boom">💥</span>
+          <span>
+            {wreck.mine ? 'They sank your' : 'You sank their'} <strong>{wreck.text}</strong>!
+          </span>
+        </div>
+      )}
       <div className="board-status">
         <div className={`board-status-line${state.over ? ' is-over' : ''}`}>
           {state.over
@@ -760,7 +803,9 @@ function Battle({
         {!state.over && (
           <MoveTimer
             seconds={clock}
-            running={myTurn}
+            /* A card on screen stops the clock on BOTH phones — each side is
+               reading the same banner, and neither should lose a turn to it. */
+            running={myTurn && !sprung}
             resetKey={`${state.seq}-${state.turn}`}
             onExpire={timeUp}
             note={myTurn ? 'a blind shot at 0' : undefined}
@@ -855,44 +900,17 @@ function Battle({
         </div>
       )}
 
+      </div>
+
       {sprung && sprungCard && (
-        <div className={`sea-pop${rare && opened ? ' is-rare' : ''}`} role="dialog" aria-modal="true">
-          {!opened ? (
-            <div className="sea-pack">
-              <div className="sea-pack-foil">
-                <span className="sea-pack-mark">🏴‍☠️</span>
-                <span className="sea-pack-shine" aria-hidden />
-              </div>
-              <div className="sea-pack-where">
-                💥 {nameOf(sprung.by)} hit something buried at {cellName(sprung.at)}…
-              </div>
-            </div>
-          ) : (
-          <>
-          {rare && <span className="sea-rays" aria-hidden />}
-          <div className={`sea-pop-card sea-pop-card--${sprungCard.side}${rare ? ' is-rare' : ''}`}>
-            {rare && <span className="sea-pop-rare">★ RARE ★</span>}
-            <div className="sea-pop-where">
-              💥 {nameOf(sprung.by)} hit a card buried at {cellName(sprung.at)}
-            </div>
-            <div className="sea-pop-art">
-              {sprungArt ? <img src={stickerUrl(sprungArt)} alt="" /> : null}
-              <span className="sea-pop-emoji">{sprungCard.emoji}</span>
-            </div>
-            <div className="sea-pop-name">{sprungCard.name}</div>
-            <div className="sea-pop-side">
-              {cardBadge(sprungCard)} {sprungCard.side === 'bad' ? 'Bad news for whoever buried it' : 'It backfires on whoever found it'}
-            </div>
-            <div className="sea-pop-text">{sprungCard.text}</div>
-            <div className="sea-pop-note">{sprung.note}</div>
-            <div className="sea-pop-who">{sprungCard.who}</div>
-            <button className="btn btn--small" onClick={dismissCard}>
-              {sprung.show.length > 0 ? 'Show me 👀' : 'Dismiss'}
-            </button>
-          </div>
-          </>
-          )}
-        </div>
+        <SeaCardReveal
+          card={sprungCard}
+          art={sprungArt}
+          top={`💥 ${nameOf(sprung.by)} hit a card buried at ${cellName(sprung.at)}`}
+          note={sprung.note}
+          buttonLabel={sprung.show.length > 0 ? 'Show me 👀' : 'Dismiss'}
+          onDone={dismissCard}
+        />
       )}
 
       {state.log.length > 0 && (
@@ -924,7 +942,9 @@ function FleetStrip({ side, theirs = false }: { side: SeaSide; theirs?: boolean 
         return (
           <div key={s.id} className={`sea-ship${sunk ? ' is-sunk' : ''}`}>
             <span className="sea-ship-emoji">{sunk ? '🔥' : s.emoji}</span>
-            <span className="sea-ship-name">{s.name}</span>
+            {/* the length in a number as well as in pips: "how many squares am
+                I still looking for?" is the question you ask most often */}
+            <span className="sea-ship-name">{s.name} ({s.size})</span>
             <span className="sea-ship-size">
               {sunk ? 'sunk' : theirs ? '▪'.repeat(s.size) : '▪'.repeat(s.size - hit) + '✖'.repeat(hit)}
             </span>

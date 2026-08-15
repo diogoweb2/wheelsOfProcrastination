@@ -4309,3 +4309,64 @@ input, select { font-family: inherit; }
   .sea-verdict,
   .sea-cell.is-last.sea-cell--hit { animation-duration: 0.01s; }
 }
+
+
+/* ---------- Sea Battle: a ship going down ---------- */
+/*
+   Sinking a ship is the loudest thing that happens in Battleship and it used to
+   be one grey line in the log. Now the whole board takes the hit. The shaker
+   deliberately does NOT wrap the card modal — a transform on an ancestor turns
+   position:fixed into position:absolute and the modal would ride along with it.
+*/
+.sea-shaker.is-shaking { animation: sea-quake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+@keyframes sea-quake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  10% { transform: translate(-7px, 3px) rotate(-0.7deg); }
+  25% { transform: translate(6px, -4px) rotate(0.6deg); }
+  40% { transform: translate(-5px, -2px) rotate(-0.5deg); }
+  55% { transform: translate(4px, 3px) rotate(0.4deg); }
+  70% { transform: translate(-3px, -1px) rotate(-0.2deg); }
+  85% { transform: translate(2px, 1px) rotate(0.1deg); }
+}
+.sea-wreck-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 3px solid var(--green);
+  background: linear-gradient(180deg, #14492c, #0d2f1d);
+  font-size: 14px;
+  font-weight: 800;
+  animation: sea-wreck-in 0.45s cubic-bezier(0.2, 1.6, 0.35, 1);
+}
+/* your own ship going down is the same event wearing the other colour */
+.sea-wreck-toast.is-mine { border-color: var(--red); background: linear-gradient(180deg, #5c1414, #300a0a); }
+@keyframes sea-wreck-in {
+  0% { transform: scale(0.7) translateY(-14px); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.sea-wreck-boom { font-size: 26px; animation: sea-wreck-boom 0.6s ease-out; }
+@keyframes sea-wreck-boom {
+  0% { transform: scale(0.2) rotate(-40deg); }
+  55% { transform: scale(1.7) rotate(12deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* The effect line is the only line on a card that changes what you do next, so
+   it is the biggest type on it — everything else is name, flavour and colour. */
+.sea-pop-effect {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+  margin-top: 6px;
+}
+.sea-pop-count { font-size: 11px; font-weight: 900; color: var(--yellow); letter-spacing: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sea-shaker.is-shaking,
+  .sea-wreck-boom { animation: none; }
+  .sea-wreck-toast { animation-duration: 0.01s; }
+}

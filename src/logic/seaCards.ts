@@ -38,7 +38,10 @@ export interface SeaCardDef {
   /** Who it hurts: 'bad' the captain who buried it, 'good' the captain who found it. */
   side: 'bad' | 'good'
   rarity: 'common' | 'rare'
-  /** The line printed on the card, written to the captain holding it. */
+  /**
+   * What it does, in as few words as fit on a card at phone size. Deliberately
+   * terse: the long version is `who`, and it is only ever read on the big card.
+   */
   text: string
   /** Flavour — the One Piece reason it does that. */
   who: string
@@ -56,7 +59,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🕰️',
     side: 'bad',
     rarity: 'common',
-    text: 'You lose your next turn — they fire twice in a row.',
+    text: 'You lose your next turn.',
     who: 'Law drops a Room over your deck and nobody moves for a while.',
   },
   {
@@ -65,7 +68,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '💣',
     side: 'bad',
     rarity: 'common',
-    text: 'One square of a random ship of yours is blown apart.',
+    text: 'One square of your fleet is destroyed.',
     who: 'Five vice admirals answer a signal nobody meant to send.',
   },
   {
@@ -74,7 +77,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '👁️',
     side: 'bad',
     rarity: 'rare',
-    text: 'They see one square of your fleet for two seconds.',
+    text: 'They see one of your squares. 2s.',
     who: 'Katakuri looks a moment ahead and finds you in it.',
   },
   {
@@ -83,7 +86,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🔥',
     side: 'bad',
     rarity: 'common',
-    text: 'One of your other buried cards is destroyed.',
+    text: 'One of your other buried cards dies.',
     who: 'They came aboard while you were busy at the guns.',
   },
   {
@@ -92,7 +95,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🩺',
     side: 'bad',
     rarity: 'rare',
-    text: 'They raise one of their own sunk ships. No effect if none are down.',
+    text: 'They raise one of their sunk ships.',
     who: 'Chopper does what a doctor does, and does it to the wrong fleet.',
   },
   {
@@ -101,7 +104,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🌀',
     side: 'bad',
     rarity: 'common',
-    text: 'One of their untouched ships leaps to a new hiding place.',
+    text: 'One of their ships moves somewhere new.',
     who: 'Franky fires the cola and the Sunny is simply somewhere else.',
   },
   {
@@ -110,7 +113,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🔫',
     side: 'bad',
     rarity: 'rare',
-    text: 'They fire two more shots, right now.',
+    text: 'They fire 2 extra shots now.',
     who: 'Once Luffy starts throwing punches he does not throw one.',
   },
   {
@@ -119,7 +122,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🧭',
     side: 'bad',
     rarity: 'common',
-    text: 'They are told which row of your sea hides the most ship.',
+    text: 'They learn your fullest row.',
     who: 'The needle swings, and it does not swing at nothing.',
   },
 
@@ -130,7 +133,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '💥',
     side: 'good',
     rarity: 'common',
-    text: 'They lose their next turn — you fire twice in a row.',
+    text: 'They lose their next turn.',
     who: 'Mr. 5 left something in the water that goes off when touched.',
   },
   {
@@ -139,7 +142,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🌫️',
     side: 'good',
     rarity: 'common',
-    text: 'Their next shot goes wherever it likes, not where they aim.',
+    text: 'Their next shot goes wild.',
     who: 'Smoker fills the whole bay and nobody can see the sea.',
   },
   {
@@ -148,7 +151,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🍖',
     side: 'good',
     rarity: 'rare',
-    text: 'You raise one of your own sunk ships. No effect if none are down.',
+    text: 'You raise one of your sunk ships.',
     who: 'Meat, sleep, and the ship floats again. That is the whole method.',
   },
   {
@@ -157,7 +160,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '💰',
     side: 'good',
     rarity: 'common',
-    text: 'One of THEIR buried cards is destroyed.',
+    text: 'One of THEIR buried cards dies.',
     who: 'She was in their hold the entire time you were arguing.',
   },
   {
@@ -166,7 +169,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🐑',
     side: 'good',
     rarity: 'common',
-    text: 'One of your untouched ships slips away to a new hiding place.',
+    text: 'One of your ships moves somewhere new.',
     who: 'The Merry sails herself when the crew needs her to.',
   },
   {
@@ -175,7 +178,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '⚔️',
     side: 'good',
     rarity: 'rare',
-    text: 'You see one square of THEIR fleet for two seconds.',
+    text: 'You see one of their squares. 2s.',
     who: 'You look at the sea hard enough and the sea gives it up.',
   },
   {
@@ -184,7 +187,7 @@ export const SEA_CARDS: SeaCardDef[] = [
     emoji: '🍱',
     side: 'good',
     rarity: 'common',
-    text: 'Nothing happens. Everyone is fed.',
+    text: 'Nothing happens.',
     who: 'Not every crate in the hold is gunpowder.',
   },
 ]
