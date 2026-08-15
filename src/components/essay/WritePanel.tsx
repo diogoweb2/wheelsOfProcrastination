@@ -37,7 +37,7 @@ export function WritePanel() {
   const mine = essays.filter((e) => e.authorId === activeProfileId)
   const live = mine.find((e) => e.status !== 'graded')
   const fresh = mine.filter((e) => e.status === 'graded' && !e.seenAt).slice(-1)[0]
-  const topics = writableTopics(essayTopics)
+  const topics = writableTopics(essayTopics, essays, activeProfileId)
 
   // The grade lands as a celebration, once. After that it lives in History.
   if (fresh) {

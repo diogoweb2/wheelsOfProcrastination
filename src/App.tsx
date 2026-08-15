@@ -15,6 +15,7 @@ import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
 import { DuelScreen } from './screens/DuelScreen'
 import { BoardGameScreen } from './screens/BoardGameScreen'
+import { SeaBattleScreen } from './screens/SeaBattleScreen'
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
@@ -28,11 +29,12 @@ import { appById, tabsFor } from './apps/registry'
 import { LANDING, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
+import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, boardGames, settleBoardGames, seaBattles, settleSeaBattles, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
   // the URL we were opened with decides the first screen (see lib/route.ts)
   const [open, setOpen] = useState<OpenApp>(() => pathToRoute(window.location.pathname, null))
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
@@ -156,6 +158,21 @@ export default function App() {
       (m.state.turn === 'w' ? m.fromId : m.toId) === activeProfileId,
   )
 
+  // Sea Battle settles exactly like the board games: both phones bank their own
+  // side off the same sunk fleet.
+  useEffect(() => {
+    settleSeaBattles()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seaBattles, dataLoaded])
+
+  const seaCall = seaBattles.find((m) => m.status === 'pending' && m.toId === activeProfileId)
+  const mySea = seaBattles.find(
+    (m) =>
+      m.status === 'active' &&
+      !m.state.over &&
+      (m.state.turn === 'w' ? m.fromId : m.toId) === activeProfileId,
+  )
+
   const duelCall = duels.find((d) => d.status === 'pending' && d.toId === activeProfileId)
   const myDuel = duels.find(
     (d) => d.status === 'active' && d.state && !d.state.over && d.state.sides[d.state.turn]?.profileId === activeProfileId,
@@ -214,19 +231,46 @@ export default function App() {
     prevBoard.current = boardPing
   }, [boardPing]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ping when a sticker swap offer lands while the app is open
-  const openTrades = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId)
-  const prevTrades = useRef(openTrades.length)
+  // Same snail for the sea: a challenge, or the other captain handing the shot
+  // back. Keyed on the position number so every shot pings, background only.
+  const prevSea = useRef<string | null>(null)
+  const seaPing = seaCall ? `call:${seaCall.id}` : mySea ? `turn:${mySea.id}:${mySea.state.seq}` : null
   useEffect(() => {
-    if (openTrades.length > prevTrades.current && 'Notification' in window && Notification.permission === 'granted') {
+    if (
+      seaPing &&
+      seaPing !== prevSea.current &&
+      document.visibilityState === 'hidden' &&
+      'Notification' in window &&
+      Notification.permission === 'granted'
+    ) {
+      try {
+        new Notification(seaCall ? '🚢 A Sea Battle challenge!' : '🚢 Your shot!', {
+          body: seaCall ? `${seaCall.fromName} has hidden their fleet.` : 'The cannons are waiting on you.',
+        })
+      } catch {
+        /* notifications unavailable; the in-app banner still shows */
+      }
+    }
+    prevSea.current = seaPing
+  }, [seaPing]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ping when a swap lands in MY court while the app is open — a counter-offer
+  // bounced back is just as much my move as the first offer was, so the ping
+  // watches the haggle round too, not only how many offers are open.
+  const openTrades = trades.filter((t) => awaitsAnswer(t, activeProfileId))
+  const tradePing = openTrades.map((t) => `${t.id}:${tradeRound(t)}`).join('|')
+  const prevTrades = useRef(tradePing)
+  useEffect(() => {
+    const fresh = openTrades.length > 0 && tradePing !== prevTrades.current
+    if (fresh && 'Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Stickers app.' })
       } catch {
         /* notifications unavailable; the in-app banner still shows */
       }
     }
-    prevTrades.current = openTrades.length
-  }, [openTrades.length])
+    prevTrades.current = tradePing
+  }, [tradePing]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Essays: the parent hears about a submission, the writer hears about the
   // notes coming back. Both sides of the same loop, one effect each way.
@@ -356,6 +400,7 @@ export default function App() {
     duel: (duelCall ? 1 : 0) + (myDuel ? 1 : 0),
     chess: boardWaiting('chess'),
     checkers: boardWaiting('checkers'),
+    seabattle: (seaCall ? 1 : 0) + (mySea ? 1 : 0),
     admin: freezeAsks.length + unpaidGifts.length,
     bank: pendingPaybacks.length,
     essay: essaysToMark.length + essaysToFix.length + topicAsks.length + topicAnswers.length,
@@ -472,6 +517,23 @@ export default function App() {
         </div>
       )}
 
+      {(seaCall || mySea) && (
+        <div className="banner" style={{ background: 'var(--red)' }}>
+          <span style={{ fontSize: 20 }}>🚢</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              {seaCall ? `${seaCall.fromName} calls you out to Sea Battle!` : 'Your shot in the Sea Battle!'}
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              {seaCall ? 'Hide your fleet and fight — winner takes the Berries' : 'The other captain is waiting on you'}
+            </div>
+          </div>
+          <button className="btn btn--small" onClick={() => { sfx.click(); openApp('seabattle', 'play') }}>
+            {seaCall ? 'Answer' : 'Fire'}
+          </button>
+        </div>
+      )}
+
       {essaysToMark.map((e) => (
         <div className="banner" key={e.id}>
           <span style={{ fontSize: 20 }}>✍️</span>
@@ -534,9 +596,20 @@ export default function App() {
         <div className="banner" key={t.id} style={{ background: 'var(--red)' }}>
           <span style={{ fontSize: 20 }}>🤝</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 900, fontSize: 13 }}>{t.fromName} wants to trade stickers!</div>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>
+              {tradeRound(t) > 0
+                ? `${t.fromId === activeProfileId ? t.toName : t.fromName} countered your trade!`
+                : `${t.fromName} wants to trade stickers!`}
+            </div>
             <div style={{ fontSize: 11, opacity: 0.9 }}>
-              {t.give.length} for {t.want.length} · tap to see the deal
+              {[
+                t.give.length > 0 ? `${t.give.length} card${t.give.length === 1 ? '' : 's'}` : null,
+                tradeGems(t) > 0 ? `${tradeGems(t)} 🪙` : null,
+                t.givePack ? 'a pack 🎁' : null,
+              ]
+                .filter(Boolean)
+                .join(' + ')}{' '}
+              for {t.want.length} · tap to see the deal
             </div>
           </div>
           <button className="btn btn--small" onClick={() => { sfx.click(); openApp('album', 'trade') }}>
@@ -655,6 +728,8 @@ function AppBodyRouter({
       return <BoardGameScreen kind="chess" tab={open.tab} />
     case 'checkers':
       return <BoardGameScreen kind="checkers" tab={open.tab} />
+    case 'seabattle':
+      return <SeaBattleScreen tab={open.tab} />
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'essay':

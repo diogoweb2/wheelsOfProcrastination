@@ -177,8 +177,8 @@ function MoveClocks() {
   const dials = [
     {
       key: 'boardMoveSeconds' as const,
-      label: '♟️ Chess & Checkers',
-      hint: 'One move. Run out and the board plays a random legal move for you.',
+      label: '♟️ Chess, Checkers & Sea Battle',
+      hint: 'One move. Run out and the board plays it for you — a random legal move, or a blind shot.',
       def: BOARD_MOVE_SECONDS,
       now: data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS,
     },

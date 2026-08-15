@@ -150,6 +150,20 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // Battleship, played on the Grand Line. The only game here with an AI —
+    // hiding a fleet works on one phone in a way a chess board never does.
+    id: 'seabattle',
+    name: 'Sea Battle',
+    icon: '🚢',
+    tint: ['#2e63a4', '#0c2338'],
+    folder: 'games',
+    tabs: [
+      { id: 'play', label: 'Play', icon: '🎯' },
+      { id: 'fleet', label: 'Fleet', icon: '⛵' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
     // official 8×8 English draughts — the checkers board everyone in Canada owns
     id: 'checkers',
     name: 'Checkers',

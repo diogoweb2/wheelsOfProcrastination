@@ -33,6 +33,7 @@ import type {
   QuizTestRecord,
   CardDuel,
   BoardMatch,
+  SeaMatch,
   StickerTrade,
   Task,
 } from '../types'
@@ -62,6 +63,7 @@ import {
   saveStickerTrades,
   saveCardDuels,
   saveBoardGames,
+  saveSeaBattles,
   saveFreezeDesk,
   saveFinalTests,
   saveEssays,
@@ -74,6 +76,7 @@ import {
   subscribeStickerTrades,
   subscribeCardDuels,
   subscribeBoardGames,
+  subscribeSeaBattles,
   subscribeFreezeDesk,
   subscribeFinalTests,
   subscribeMarketData,
@@ -83,7 +86,17 @@ import {
 import type { AuditCategory, AuditEntry, Season } from '../types'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
-import { PACK_COST, freePackReady, isBalanced, rollPack, spareCount } from '../logic/album'
+import {
+  PACK_COST,
+  awaitsAnswer,
+  freePackReady,
+  isBalanced,
+  packCredits,
+  rollPack,
+  spareCount,
+  tradeGems,
+  tradeRound,
+} from '../logic/album'
 import {
   DECK_SIZE,
   DUEL_MOVE_SECONDS,
@@ -104,6 +117,16 @@ import {
   type BoardMove,
   type BoardState,
 } from '../logic/boardGames'
+import {
+  SEA_REWARD,
+  emptyWaters,
+  SEA_SOLO_REWARD,
+  SEA_SOLO_REWARD_LIMIT,
+  fire as fireSea,
+  newSea,
+  resignSea,
+  type SeaState,
+} from '../logic/seaBattle'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -268,6 +291,7 @@ interface StoreState {
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
   boardGames: BoardMatch[] // shared Chess/Checkers board (app/boardGames), live-synced
+  seaBattles: SeaMatch[] // shared Sea Battle table (app/seaBattles), live-synced
   freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
@@ -457,12 +481,21 @@ interface StoreState {
   registerPushDevice: () => Promise<string | null>
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
   // --- sticker album ---
-  /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries. Returns the drawn sticker ids. */
-  openPack: (kind: 'free' | 'buy') => string[] | 'broke' | 'used'
-  /** Offer a swap to the other crewmate. Values must balance (1 red = 2 whites). */
-  proposeTrade: (give: string[], want: string[], note?: string) => 'ok' | 'unbalanced' | 'busy'
-  /** Answer a swap addressed to me. Accepting moves the cards in BOTH albums. */
+  /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries; 'credit' opens one won in a trade. */
+  openPack: (kind: 'free' | 'buy' | 'credit') => string[] | 'broke' | 'used'
+  /**
+   * Offer a swap. Card-for-card must balance (1 red = 2 whites); adding Berries
+   * or today's free pack drops the value gate and opens the haggle instead.
+   */
+  proposeTrade: (
+    give: string[],
+    want: string[],
+    opts?: { gems?: number; pack?: boolean; note?: string },
+  ) => 'ok' | 'unbalanced' | 'busy' | 'empty' | 'broke' | 'nopack'
+  /** Answer the swap sitting in my court. Accepting moves cards, Berries and the pack in BOTH worlds. */
   answerTrade: (tradeId: string, accept: boolean) => void
+  /** Counter the swap in my court with a different Berry amount, and hand the decision back. */
+  counterTrade: (tradeId: string, gems: number) => 'ok' | 'busy'
   /** Withdraw a swap I proposed and that hasn't been answered yet. */
   cancelTrade: (tradeId: string) => void
 
@@ -503,6 +536,22 @@ interface StoreState {
   settleBoardGames: () => void
   /** Turn the coaching highlights (legal-move dots, danger rings, labels) on or off. */
   setBoardHints: (on: boolean) => void
+
+  // --- Sea Battle (the 🚢 app) ---
+  /** Challenge the other crewmate, with my fleet already hidden. One live battle at a time. */
+  challengeSeaBattle: (ships: string[]) => 'ok' | 'busy'
+  /** Answer a challenge aimed at me: `ships` accepts and starts the fight, `null` declines. */
+  answerSeaChallenge: (matchId: string, ships: string[] | null) => void
+  /** Fire one shot. Ignored unless the shared board says it's my turn and the square is open. */
+  playSeaShot: (matchId: string, at: number) => void
+  /** Strike the colours: the other side takes the win (and the Berries). */
+  resignSeaBattle: (matchId: string) => void
+  /** Withdraw a challenge I sent that hasn't been answered yet. */
+  cancelSeaBattle: (matchId: string) => void
+  /** Bank the record + Berries for any finished battle of mine not yet counted. Safe to call repeatedly. */
+  settleSeaBattles: () => void
+  /** Log a battle against the AI. Returns the Berries it paid (0 past the daily few). */
+  recordSeaSolo: (won: boolean) => number
 
   buyBackground: () => string | 'broke' | 'complete'
   /** Equip an owned background as the app background; null = default solid color. */
@@ -753,6 +802,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeCardDuels((duels) => set({ duels }))
       // shared Chess/Checkers board — same deal, one doc for both games
       subscribeBoardGames((boardGames) => set({ boardGames }))
+      // shared Sea Battle table — its own doc: four 100-square grids per match
+      subscribeSeaBattles((seaBattles) => set({ seaBattles }))
       // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
@@ -860,6 +911,28 @@ export const useStore = create<StoreState>((set, get) => {
     if (state.winner) done.winnerId = state.winner === 'w' ? match.fromId : match.toId
     else done.draw = true
     return done
+  }
+
+  /**
+   * Write-through for the Sea Battle table. Trimmed hardest of the lot: one
+   * battle carries four 100-square grids, so three of them is already more
+   * document than a chess history of six.
+   */
+  function saveSeaList(matches: SeaMatch[]) {
+    const kept = matches.slice(-3)
+    set({ seaBattles: kept })
+    fireAndForget(saveSeaBattles(kept))
+  }
+
+  /** The match fields that follow from a new position. Sea Battle cannot draw. */
+  function seaSettledFields(match: SeaMatch, state: SeaState): Partial<SeaMatch> {
+    if (!state.over) return { state }
+    return {
+      state,
+      status: 'finished',
+      resolvedAt: new Date().toISOString(),
+      winnerId: state.winner === 'w' ? match.fromId : match.toId,
+    }
   }
 
   function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
@@ -1049,6 +1122,7 @@ export const useStore = create<StoreState>((set, get) => {
     trades: [],
     duels: [],
     boardGames: [],
+    seaBattles: [],
     freezeRequests: [],
     finalTests: [],
     freezeGifts: [],
@@ -2196,10 +2270,12 @@ export const useStore = create<StoreState>((set, get) => {
       const today = dayKey()
       if (kind === 'free' && !freePackReady(data.album, today)) return 'used'
       if (kind === 'buy' && data.economy.gems < PACK_COST) return 'broke'
+      if (kind === 'credit' && packCredits(data.album) < 1) return 'used'
 
       const drawn = rollPack(data.album)
       commit((d) => {
         if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - PACK_COST)
+        else if (kind === 'credit') d.album.packCredits = Math.max(0, (d.album.packCredits ?? 0) - 1)
         else d.album.lastFreePackDay = today
         for (const id of drawn) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
         d.album.packsOpened += 1
@@ -2207,12 +2283,21 @@ export const useStore = create<StoreState>((set, get) => {
       return drawn
     },
 
-    proposeTrade(give, want, note) {
+    proposeTrade(give, want, opts) {
       const me = get().activeProfile()
       const mateId = get().activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
       const mate = get().profiles.find((p) => p.id === mateId)
       if (!me || !mate) return 'busy'
-      if (give.length === 0 || want.length === 0 || !isBalanced(give, want)) return 'unbalanced'
+
+      const gems = Math.max(0, Math.round(opts?.gems ?? 0))
+      const pack = opts?.pack === true
+      // Something has to be asked for, and something has to be put up for it.
+      if (want.length === 0 || (give.length === 0 && gems === 0 && !pack)) return 'empty'
+      // Card-for-card still has to balance. Berries or a pack on the table mean
+      // there is no fair price to enforce — that's what the haggle is for.
+      if (gems === 0 && !pack && !isBalanced(give, want)) return 'unbalanced'
+      if (gems > get().data.economy.gems) return 'broke'
+      if (pack && !freePackReady(get().data.album, dayKey())) return 'nopack'
       // one open offer at a time in each direction keeps the swap table readable
       if (get().trades.some((t) => t.status === 'pending' && t.fromId === me.id)) return 'busy'
 
@@ -2224,9 +2309,14 @@ export const useStore = create<StoreState>((set, get) => {
         toName: mate.name,
         give,
         want,
+        giveGems: gems,
+        givePack: pack,
+        turn: 'to',
+        round: 0,
+        haggle: gems > 0 ? [{ byId: me.id, byName: me.name, gems, at: new Date().toISOString() }] : [],
         status: 'pending',
         createdAt: new Date().toISOString(),
-        ...(note ? { note } : {}),
+        ...(opts?.note ? { note: opts.note } : {}),
       }
       saveTradeList([...get().trades, trade])
       return 'ok'
@@ -2235,10 +2325,11 @@ export const useStore = create<StoreState>((set, get) => {
     answerTrade(tradeId, accept) {
       const { trades, activeProfileId, mateData } = get()
       const trade = trades.find((t) => t.id === tradeId)
-      // only the addressee can answer, and only while it's still open
-      if (!trade || trade.status !== 'pending' || trade.toId !== activeProfileId) return
+      // only whoever's court it's in can answer, and only while it's still open
+      if (!trade || !awaitsAnswer(trade, activeProfileId)) return
 
       if (!accept) {
+        // walking away without a counter is what ends the haggle
         saveTradeList(
           trades.map((t) => (t.id === tradeId ? { ...t, status: 'declined' as const, resolvedAt: new Date().toISOString() } : t)),
         )
@@ -2249,11 +2340,22 @@ export const useStore = create<StoreState>((set, get) => {
       // The UI keeps Accept disabled until it has.
       if (!mateData || !get().mateDataFresh) return
 
-      // Re-check both sides still hold the spares they promised — either album
-      // may have changed since the offer was made (packs opened, other swaps).
-      const senderOk = trade.give.every((id) => spareCount(mateData.album, id) > 0)
-      const meOk = trade.want.every((id) => spareCount(get().data.album, id) > 0)
-      if (!senderOk || !meOk) {
+      // The proposer puts up `give` + Berries + maybe the free pack; the
+      // addressee puts up `want`. Whoever accepts settles BOTH sides, so work
+      // out which side of that I'm standing on.
+      const iPropose = trade.fromId === activeProfileId
+      const mine = get().data
+      const proposer = iPropose ? mine : mateData
+      const answerer = iPropose ? mateData : mine
+      const gems = tradeGems(trade)
+
+      // Re-check the deal still stands — either world may have moved since the
+      // offer was made (packs opened, other swaps, Berries spent).
+      const proposerCardsOk = trade.give.every((id) => spareCount(proposer.album, id) > 0)
+      const answererCardsOk = trade.want.every((id) => spareCount(answerer.album, id) > 0)
+      const gemsOk = proposer.economy.gems >= gems
+      const packOk = !trade.givePack || freePackReady(proposer.album, dayKey())
+      if (!proposerCardsOk || !answererCardsOk || !gemsOk || !packOk) {
         saveTradeList(
           trades.map((t) =>
             t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t,
@@ -2262,22 +2364,70 @@ export const useStore = create<StoreState>((set, get) => {
         return
       }
 
-      // my side: hand over what they wanted, receive what they offered
+      const today = dayKey()
+      // my side of the counter
       commit((d) => {
-        for (const id of trade.want) d.album.counts[id] = (d.album.counts[id] ?? 0) - 1
-        for (const id of trade.give) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
+        const out = iPropose ? trade.give : trade.want
+        const inn = iPropose ? trade.want : trade.give
+        for (const id of out) d.album.counts[id] = (d.album.counts[id] ?? 0) - 1
+        for (const id of inn) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
+        if (gems > 0) d.economy.gems = Math.max(0, d.economy.gems + (iPropose ? -gems : gems))
+        if (trade.givePack) {
+          if (iPropose) d.album.lastFreePackDay = today // I spend today's free pack
+          else d.album.packCredits = (d.album.packCredits ?? 0) + 1 // it lands here, still sealed
+        }
       })
-      // their side: mirror image, written straight into their doc
+      // their side: the mirror image, written straight into their doc
       const theirs: AppData = JSON.parse(JSON.stringify(mateData))
-      for (const id of trade.give) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
-      for (const id of trade.want) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
+      const theirOut = iPropose ? trade.want : trade.give
+      const theirIn = iPropose ? trade.give : trade.want
+      for (const id of theirOut) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
+      for (const id of theirIn) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
+      if (gems > 0) theirs.economy.gems = Math.max(0, theirs.economy.gems + (iPropose ? gems : -gems))
+      if (trade.givePack) {
+        if (iPropose) theirs.album.packCredits = (theirs.album.packCredits ?? 0) + 1
+        else theirs.album.lastFreePackDay = today
+      }
+      const mateId = iPropose ? trade.toId : trade.fromId
       set({ mateData: theirs, mateAlbum: theirs.album })
-      fireAndForget(saveDataFields(trade.fromId, { album: theirs.album })) // only their album moves in a swap
-      auditDiff(trade.fromId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's album change
+      // Berries move too now, so the swap writes their economy alongside the album
+      fireAndForget(saveDataFields(mateId, { album: theirs.album, economy: theirs.economy }))
+      auditDiff(mateId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's change
 
       saveTradeList(
         trades.map((t) => (t.id === tradeId ? { ...t, status: 'accepted' as const, resolvedAt: new Date().toISOString() } : t)),
       )
+    },
+
+    counterTrade(tradeId, gems) {
+      const { trades, activeProfileId } = get()
+      const me = get().activeProfile()
+      const trade = trades.find((t) => t.id === tradeId)
+      if (!me || !trade || !awaitsAnswer(trade, activeProfileId)) return 'busy'
+      const amount = Math.max(0, Math.round(gems))
+      // Only the Berry amount moves in a counter; the cards on both sides stay
+      // put, so the offer card stays readable however long the haggle runs.
+      if (amount === tradeGems(trade)) return 'busy'
+      // Never let a counter ask for Berries the proposer doesn't have — an
+      // impossible number just stalls the loop.
+      const iPropose = trade.fromId === activeProfileId
+      const purse = iPropose ? get().data.economy.gems : get().mateData?.economy.gems
+      if (purse !== undefined && amount > purse) return 'busy'
+
+      saveTradeList(
+        trades.map((t) =>
+          t.id === tradeId
+            ? {
+                ...t,
+                giveGems: amount,
+                turn: (iPropose ? 'to' : 'from') as 'to' | 'from', // hand the decision back
+                round: tradeRound(t) + 1,
+                haggle: [...(t.haggle ?? []), { byId: me.id, byName: me.name, gems: amount, at: new Date().toISOString() }],
+              }
+            : t,
+        ),
+      )
+      return 'ok'
     },
 
     cancelTrade(tradeId) {
@@ -2621,6 +2771,153 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         d.games.hints = on
       })
+    },
+
+    // --- Sea Battle ---------------------------------------------------------
+    //
+    // The same single-writer shape as everything above, with one wrinkle the
+    // other games don't have: BOTH captains have to set up before anyone fires.
+    // Doing that as a "placing" phase on the shared doc would put two devices
+    // in it at once, so instead each side's fleet is written by the same tap
+    // that moves the match forward — the challenger's with the challenge, the
+    // accepter's with the accept. There is never a moment where both phones
+    // hold the pen.
+
+    challengeSeaBattle(ships) {
+      const { activeProfileId, profiles } = get()
+      if (!activeProfileId) return 'busy'
+      const me = profiles.find((p) => p.id === activeProfileId)
+      const mate = profiles.find((p) => p.id !== activeProfileId)
+      if (!me || !mate) return 'busy'
+      if (get().seaBattles.some((m) => m.status === 'pending' || m.status === 'active')) return 'busy'
+      saveSeaList([
+        ...get().seaBattles,
+        {
+          id: `sb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          fromId: me.id,
+          fromName: me.name,
+          fromEmoji: me.emoji,
+          toId: mate.id,
+          toName: mate.name,
+          toEmoji: mate.emoji,
+          status: 'pending',
+          // the accepter's waters stay empty until they answer; the challenger
+          // fires first, exactly as they move first in the board games
+          state: newSea(ships, emptyWaters()),
+          createdAt: new Date().toISOString(),
+          moveSeconds: get().data.settings.boardMoveSeconds ?? BOARD_MOVE_SECONDS,
+        },
+      ])
+      return 'ok'
+    },
+
+    answerSeaChallenge(matchId, ships) {
+      const { seaBattles, activeProfileId } = get()
+      const match = seaBattles.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.toId !== activeProfileId) return
+      if (!ships) {
+        saveSeaList(
+          seaBattles.map((m) =>
+            m.id === matchId ? { ...m, status: 'declined' as const, resolvedAt: new Date().toISOString() } : m,
+          ),
+        )
+        return
+      }
+      saveSeaList(
+        seaBattles.map((m) =>
+          m.id === matchId
+            ? { ...m, status: 'active' as const, state: { ...m.state, b: { ships, shots: m.state.b.shots } } }
+            : m,
+        ),
+      )
+    },
+
+    playSeaShot(matchId, at) {
+      const { seaBattles, activeProfileId } = get()
+      const match = seaBattles.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active' || match.state.over) return
+      // the board itself is the referee: only the side it says is to fire may write
+      const mySide = match.fromId === activeProfileId ? 'w' : match.toId === activeProfileId ? 'b' : null
+      if (mySide !== match.state.turn) return
+      const state = fireSea(match.state, at)
+      if (!state) return // already fired there, or a stale tap from the other phone
+      saveSeaList(seaBattles.map((m) => (m.id === matchId ? { ...m, ...seaSettledFields(m, state) } : m)))
+    },
+
+    resignSeaBattle(matchId) {
+      const { seaBattles, activeProfileId } = get()
+      const match = seaBattles.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active' || !activeProfileId) return
+      const mySide = match.fromId === activeProfileId ? 'w' : match.toId === activeProfileId ? 'b' : null
+      if (!mySide) return
+      const state = resignSea(match.state, mySide)
+      saveSeaList(seaBattles.map((m) => (m.id === matchId ? { ...m, ...seaSettledFields(m, state) } : m)))
+    },
+
+    cancelSeaBattle(matchId) {
+      const { seaBattles, activeProfileId } = get()
+      const match = seaBattles.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.fromId !== activeProfileId) return
+      saveSeaList(
+        seaBattles.map((m) =>
+          m.id === matchId ? { ...m, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : m,
+        ),
+      )
+    },
+
+    settleSeaBattles() {
+      const { seaBattles, activeProfileId, data, dataLoaded } = get()
+      if (!activeProfileId || !dataLoaded) return
+      const counted = new Set(data.games.seaSettled)
+      const mine = seaBattles.filter(
+        (m) =>
+          m.status === 'finished' &&
+          (m.fromId === activeProfileId || m.toId === activeProfileId) &&
+          !counted.has(m.id),
+      )
+      if (mine.length === 0) return
+
+      commit((d, events) => {
+        for (const match of mine) {
+          d.games.seaSettled = [...d.games.seaSettled, match.id].slice(-20)
+          if (match.winnerId === activeProfileId) {
+            d.games.seabattle.wins += 1
+            d.economy.gems += SEA_REWARD
+            d.economy.totalGemsEarned += SEA_REWARD
+            events.push({
+              type: 'goal',
+              title: 'Sea Battle won!',
+              emoji: '🚢',
+              description: `You sank ${match.fromId === activeProfileId ? match.toName : match.fromName}’s whole fleet — +${SEA_REWARD} Berries.`,
+            })
+          } else if (match.winnerId) {
+            d.games.seabattle.losses += 1
+          }
+        }
+      })
+      const ids = new Set(mine.map((m) => m.id))
+      saveSeaList(
+        get().seaBattles.map((m) => (ids.has(m.id) ? { ...m, paidAt: `${m.paidAt ?? ''}|${activeProfileId}` } : m)),
+      )
+    },
+
+    recordSeaSolo(won) {
+      const today = dayKey()
+      const { data } = get()
+      const freshDay = data.games.seaDay !== today
+      const wonToday = freshDay ? 0 : data.games.seaWins
+      // The Marines are practice, not a Berry printer — the same rule the card
+      // game's training hall plays by.
+      const pay = won && wonToday < SEA_SOLO_REWARD_LIMIT ? SEA_SOLO_REWARD : 0
+      commit((d) => {
+        d.games.seaDay = today
+        d.games.seaWins = wonToday + (won ? 1 : 0)
+        if (pay > 0) {
+          d.economy.gems += pay
+          d.economy.totalGemsEarned += pay
+        }
+      })
+      return pay
     },
 
     buyBackground() {
@@ -3320,6 +3617,16 @@ export const useStore = create<StoreState>((set, get) => {
           // essay, and every old draft is dead weight in a shared doc.
           e.versions = []
           return e
+        })
+        // …and the topic is spent for this writer. Stamped here rather than read
+        // back off `essays[]`, which is capped: the essay eventually falls out of
+        // history and the topic must not reappear on his list when it does.
+        saveEssayDesk({
+          topics: get().essayTopics.map((t) =>
+            t.id === essay.topicId && !(t.writtenBy ?? []).includes(essay.authorId)
+              ? { ...t, writtenBy: [...(t.writtenBy ?? []), essay.authorId] }
+              : t,
+          ),
         })
         // the Berries land in the WRITER's world, whichever side is grading
         commitFor(essay.authorId, (d) => {

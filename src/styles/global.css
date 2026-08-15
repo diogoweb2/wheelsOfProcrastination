@@ -1661,6 +1661,30 @@ input, select { font-family: inherit; }
 .trade-offer-arrow { font-size: 20px; color: var(--yellow); }
 .trade-offer-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
 
+/* haggling: Berries and the free pack thrown in when cards alone can't do it */
+.gem-stepper { display: flex; align-items: center; gap: 10px; }
+.gem-stepper .btn { min-width: 40px; font-size: 18px; font-weight: 900; }
+.gem-stepper-val {
+  min-width: 84px; text-align: center; font-size: 16px; font-weight: 900;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.trade-sweeten { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.trade-pack-toss {
+  display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 10px 12px;
+  background: var(--card); border: 2px solid var(--line); border-radius: 12px;
+  color: inherit; font: inherit; font-size: 13px; font-weight: 900; text-align: left;
+}
+.trade-pack-toss.is-on { border-color: var(--yellow); color: var(--yellow); }
+.trade-pack-toss:disabled { opacity: 0.5; }
+.trade-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px;
+  background: var(--bg2); border: 2px solid var(--yellow); border-radius: 10px;
+  font-size: 12px; font-weight: 900; color: var(--yellow);
+}
+.trade-haggle { margin-top: 8px; font-size: 12px; font-weight: 900; color: var(--yellow); }
+.trade-counter { margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--line); }
+.trade-counter-label { font-size: 11px; font-weight: 900; color: var(--muted); margin-bottom: 8px; }
+
 .trade-log {
   display: flex; justify-content: space-between; align-items: center; gap: 8px;
   padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
@@ -3832,3 +3856,117 @@ input, select { font-family: inherit; }
   0%, 100% { background: rgb(255 255 255 / 7%); box-shadow: none; }
   50% { background: var(--yellow); color: #3a2000; box-shadow: 0 0 0 4px rgb(255 206 0 / 35%); }
 }
+
+/* ---------- Sea Battle (the 🚢 app, in the 🎮 Games folder) ---------- */
+
+/* Two charts on one phone screen, so the enemy's takes the full width and your
+   own sits under it at two-thirds. Eleven columns: a thin axis gutter, then the
+   ten squares. `aspect-ratio` on the squares keeps the grid square without a
+   measured pixel anywhere. */
+.sea-board {
+  display: grid;
+  grid-template-columns: 0.85rem repeat(10, 1fr);
+  gap: 1px;
+  width: 100%;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgb(12 35 56 / 70%);
+  border: 3px solid var(--bronze);
+  box-shadow: 0 5px 0 rgb(0 0 0 / 35%);
+  touch-action: manipulation;
+}
+/* not your turn: still readable, just visibly not yours */
+.sea-board.is-waiting { filter: saturate(0.7) brightness(0.9); }
+
+.sea-axis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.sea-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: #17456f; /* open water */
+  box-shadow: inset 0 0 0 1px rgb(46 99 164 / 55%);
+  padding: 0;
+}
+.sea-cell:disabled { cursor: default; }
+
+/* Your own deck. Only ever drawn on a board you're allowed to see — the target
+   grid passes an empty layout for anything still afloat. */
+.sea-cell--ship { background: var(--bronze); box-shadow: inset 0 0 0 1px rgb(255 206 0 / 35%); }
+.sea-cell--miss { background: #12395e; }
+.sea-cell--hit { background: var(--red); }
+.sea-cell--sunk { background: #6b0000; }
+
+/* A miss is a small pale dot, not an emoji: it has to be visible at 26px and
+   still read as "nothing here". */
+.sea-miss {
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgb(234 244 255 / 45%);
+}
+.sea-mark { font-size: clamp(9px, 2.6vw, 15px); line-height: 1; }
+.sea-mark--ship { opacity: 0.95; }
+
+/* the square just fired at — the shot that arrived while you were looking away */
+.sea-cell.is-last { box-shadow: inset 0 0 0 2px var(--yellow); }
+/* lined up but not fired yet: two taps to shoot, so a fat thumb can't waste a turn */
+.sea-cell.is-aim { box-shadow: inset 0 0 0 3px var(--green); background: rgb(96 191 245 / 30%); }
+/* while placing: everywhere the held ship could legally go */
+.sea-cell.is-hint { box-shadow: inset 0 0 0 1px rgb(96 191 245 / 80%); background: #1d557f; }
+
+.sea-label { font-size: 12px; font-weight: 900; color: var(--muted); margin: 0 0 5px; }
+.sea-own { width: 68%; max-width: 300px; }
+.sea-hint {
+  font-size: 12px;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 10px;
+  margin-bottom: 8px;
+}
+
+/* The fleet strip: five ships, what's left of each. Doubles as the placement
+   picker, where tapping one picks it up. */
+.sea-strip { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.sea-ship {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text);
+}
+.sea-ship.is-sunk { opacity: 0.5; border-color: var(--red); }
+.sea-ship.is-sunk .sea-ship-name { text-decoration: line-through; }
+.sea-ship.is-held { border-color: var(--yellow); background: var(--card2); box-shadow: 0 0 0 2px rgb(255 206 0 / 45%); }
+.sea-ship.is-off { opacity: 0.45; }
+.sea-ship-emoji { font-size: 14px; line-height: 1; }
+.sea-ship-size { color: var(--muted); letter-spacing: 1px; }
+
+/* the three AI captains, in the lobby */
+.sea-level {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.sea-level-emoji { font-size: 30px; line-height: 1; flex: none; }

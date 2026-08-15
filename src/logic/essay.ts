@@ -504,9 +504,27 @@ export function openSpelling(essay: Essay): EssayComment[] {
   return openComments(essay).filter((c) => c.issue === 'spelling')
 }
 
-/** Topics the writer is allowed to pick from right now. */
-export function writableTopics(topics: EssayTopic[]): EssayTopic[] {
-  return topics.filter((t) => t.status === 'kept' && t.enabled)
+/**
+ * Topics the writer is allowed to pick from right now.
+ *
+ * One essay per topic per writer. A topic he has already handed in — whether
+ * it's still on the desk or graded weeks ago — is not offered again: seeing
+ * "write this one" under the essay he just got an A- for reads as the app not
+ * having noticed. Both halves matter: `writtenBy` is the durable stamp that
+ * survives the 40-essay cap, and the live list covers the in-flight one that
+ * hasn't been graded yet. Delete a draft and the topic comes back, which is the
+ * behaviour you want the one time it matters.
+ */
+export function writableTopics(topics: EssayTopic[], essays: Essay[], authorId: string | null | undefined): EssayTopic[] {
+  const mine = new Set(essays.filter((e) => e.authorId === authorId).map((e) => e.topicId))
+  return topics.filter(
+    (t) => t.status === 'kept' && t.enabled && !mine.has(t.id) && !(t.writtenBy ?? []).includes(authorId ?? ''),
+  )
+}
+
+/** Has anyone written this topic yet? The parent's list says so rather than silently shrinking. */
+export function topicWritten(topic: EssayTopic, essays: Essay[]): boolean {
+  return (topic.writtenBy?.length ?? 0) > 0 || essays.some((e) => e.topicId === topic.id)
 }
 
 /** Every title the AI must never propose again — kept AND binned. */

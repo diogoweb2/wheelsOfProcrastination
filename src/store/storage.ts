@@ -52,7 +52,11 @@ export function defaultData(): AppData {
     games: {
       chess: { wins: 0, losses: 0, draws: 0 },
       checkers: { wins: 0, losses: 0, draws: 0 },
+      seabattle: { wins: 0, losses: 0, draws: 0 },
       settled: [],
+      seaSettled: [],
+      seaDay: null,
+      seaWins: 0,
       hints: true, // the coaching highlights are the point; you opt OUT of them
     },
     gym: defaultGymState(),
@@ -87,7 +91,9 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       ...parsed.games,
       chess: { ...base.games.chess, ...parsed.games?.chess },
       checkers: { ...base.games.checkers, ...parsed.games?.checkers },
+      seabattle: { ...base.games.seabattle, ...parsed.games?.seabattle },
       settled: parsed.games?.settled ?? [],
+      seaSettled: parsed.games?.seaSettled ?? [],
     },
     gym: {
       ...base.gym,

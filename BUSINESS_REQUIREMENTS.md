@@ -41,6 +41,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 🃏 **Card Game** *(in 🎮 Games)* | Play · Deck · How to |
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |
+| 🚢 **Sea Battle** *(in 🎮 Games)* | Play · Fleet · How to |
 | 💪 **Gym** | Train · Stats · Gear · Coach |
 | ✍️ **Essays** | *Ben:* Write · Ideas · Words · Marked — *Diogo:* Desk · Red pen · Topics · Words · Marked |
 | 💡 **Ideas** | Open · Done · New |
@@ -49,7 +50,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 👨‍👦 **Parent** (Diogo only) | Freezes · Limits · Quizzes · Prizes · Audit |
 
 - **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
-- **Folders.** An app may declare a `folder`, and every app naming the same one collapses into a single Dashboard tile that opens onto them — exactly what a phone does. **🎮 Games** holds ⚔️ Davy Back, ♟️ Chess and 🔴 Checkers; three games in a row of icons is three games' worth of noise. The folder tile carries a strip of the icons inside it and **one red badge summing everything waiting in there**, so nothing gets buried by being grouped. Dragging still works: the saved order (`settings.homeOrder`) holds tile ids, and a folder that has never been dragged inherits the earliest slot any app inside it held — which is why the Games folder appears where the Davy Back icon used to be rather than at the end.
+- **Folders.** An app may declare a `folder`, and every app naming the same one collapses into a single Dashboard tile that opens onto them — exactly what a phone does. **🎮 Games** holds ⚔️ Davy Back, ♟️ Chess, 🔴 Checkers and 🚢 Sea Battle; four games in a row of icons is four games' worth of noise. The folder tile carries a strip of the icons inside it and **one red badge summing everything waiting in there**, so nothing gets buried by being grouped. Dragging still works: the saved order (`settings.homeOrder`) holds tile ids, and a folder that has never been dragged inherits the earliest slot any app inside it held — which is why the Games folder appears where the Davy Back icon used to be rather than at the end.
 - **Situational apps.** An app may declare a `gate` and then only appears on the home screen while that gate is open. **Clocks** (crew time zones) is gated on `converter` — it shows up only while **trip mode / the Brazil money converter** is switched on for Ben's bank (§8b), and disappears again when the trip is over.
 
 App tile artwork is generated from art already in `public/` (see CLAUDE.md's image rules) into 128px webp files named `public/app-*.webp`. Apps without artwork fall back to their emoji on a coloured squircle.
@@ -302,16 +303,20 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 A Panini-style collection both crewmates fill and trade from. Rules live in `src/logic/album.ts`.
 
-- **Packs** (`📖 Album → 🎁 Packs`): **70 🪙 for 7 stickers**, unlimited. Plus **one free pack per calendar day** ("Daily Delivery" from the News Coo) — `album.lastFreePackDay` throttles it.
+- **Packs** (`📖 Album → 🎁 Packs`): **70 🪙 for 7 stickers**, unlimited. Plus **one free pack per calendar day** ("Daily Delivery" from the News Coo) — `album.lastFreePackDay` throttles it — and any **Traded Pack** won in a swap, which sits sealed on the same shelf until it's opened.
 - **Opening ceremony**: tap the sealed pack → cards come out one at a time, face-down, and flip on tap. New cards read **NEW!**, repeats read **SPARE** ("trade bait"), red rares fire confetti + `sfx.bigWin()`. Ends on a summary of the 7 with a new/to-trade tally.
 - **Rarity comes from the source folder**, not the data: `assets/Album/` → **common (white border)**, `assets/Album/special stickers/` → **special (red border)**. Reds appear at `SPECIAL_CHANCE` (~6% per slot, so ~1 pack in 3 holds one) and are marked with a ★.
 - **Repeats are deliberate and common** — trading is the point. `REPEAT_FLOOR` (40%) of every pack is forced to be a card you already own, from the very first pack. The remaining slots draw at true random from the whole pool, so the last few cards get genuinely hard and trading becomes the fastest way to finish (~40+ packs to complete a 65-card album).
 - **Crews**: cards are grouped into 6 One Piece crews (Straw Hats, Emperors, Marines, Warlords, Worst Generation, Revolutionaries) shown as album sections with a `got/total` counter and a ★ COMPLETE marker. Assignment is a **stable hash of the sticker id, dealt round-robin** so crews stay evenly sized and **adding images never reshuffles cards anyone already owns**.
 - **Trading** (`🤝 Trade`, shared `app/stickerTrades` doc, live-synced both ways):
   - Only **spares** (copies beyond the one glued in the album) can be offered.
-  - **Value must balance: 1 red = 2 whites** (`TRADE_VALUE`); the Send button stays disabled until both sides are worth the same.
+  - **Card for card, value must balance: 1 red = 2 whites** (`TRADE_VALUE`); the Send button stays disabled until both sides are worth the same.
   - Flow: propose → the other crewmate gets a **topbar banner + notification** ("wants to trade!") and a badge on the Log Book icon → **🤝 Shake on it!** / **✕ No deal**. Accepting moves the cards in **both** albums (the accepter writes the other profile's doc; both sides are re-checked for the promised spares first, and the swap is cancelled if either no longer holds them). The proposer can withdraw while it's pending; one open offer per person at a time.
   - **Trade radar** always shows *"N cards {mate} can spare that you need"* and *"N of your spares that {mate} needs"* — so the answer to "can we trade?" is visible before asking. When neither holds anything the other needs, the screen says so instead of offering an impossible swap. 🎯 marks a spare the mate is missing; 🤝 marks an album gap the mate can fill.
+  - **Nothing to trade? Pay for it.** The radar's dead end — *they* hold a card you need, *you* hold nothing they need — is the common case late in an album, and it used to end the conversation. On top of (or instead of) cards, an offer can carry **Berries** and **today's unopened free pack** (`giveGems` / `givePack`). The pack lands as a **sealed pack credit** (`album.packCredits`) on the Packs tab, so the receiver still gets the opening ceremony, and the giver's `lastFreePackDay` is spent — one free pack a day, whoever ends up opening it.
+  - **Berries have no fixed price, on purpose.** The moment coins or a pack are on the table the fair-value gate is **off** — any amount can be offered. The ⚖️ scale only *hints* (`GEMS_PER_POINT` = 25 a point, a pack ≈ its 70 🪙 shelf price) and reads "😍 generous / 👍 about right / 🤏 a bit light". Enforcing a price would delete the negotiation, and the negotiation is the point.
+  - **The haggle loop.** Whoever the offer is sitting with can **✕ No deal**, **🤝 Shake on it!**, or **💰 Ask more** — a Berry stepper that rewrites the amount, hands the decision straight back (`turn` flips, `round` +1) and leaves the cards on both sides untouched, so the offer card stays readable however long the loop runs. It bounces until somebody accepts or **refuses without a counter** — that refusal is the only thing that ends it. Every round is printed on the card as a chain (`40 → 65 → 50`) so neither side has to remember the last number, and each bounce fires a fresh push (`onStickerTradeWrite` keys on **id + round**, and pings whoever's court it's in — the proposer included).
+  - A counter can never ask for **more Berries than the payer actually holds**, and Accept is disabled if the payer's purse has since dropped below the agreed amount — an impossible number would stall the loop forever. Settlement re-checks cards, Berries *and* the free pack before anything moves.
 
 **Adding stickers later**: drop images into `assets/Album/` (or `assets/Album/special stickers/`) and run **`npm run stickers`** (also runs automatically before `dev`/`build`). It normalizes every image to one card ratio on a transparent canvas, compresses to webp (output in `public/stickers/`, originals untouched — they live outside `public/` so the full-size art never ships), regenerates `src/logic/stickerCatalog.generated.ts`, **and gives every card its Davy Back Fight battle stats** (§15c). Card names come from `scripts/sticker-names.json` — the script prints any sticker still using a guessed name so it can be curated.
 
@@ -376,15 +381,45 @@ Two **real** board games, played **head-to-head only** — there is no AI oppone
 
 **⏱️ The move clock** (see §15e). **10 seconds a move by default.** Neither game lets you pass, so running out has to resolve to something: the board plays a **random legal move** for you, buzzes, and says so out loud — *"⏰ Out of time — the clock played a random move."* Deliberately not a clever move: anything that avoided hanging a piece or took the free capture would quietly play better than the kid does, and turn the clock into a reward. A checkers chain and a compulsory maximum capture are respected, because the random pick comes from the engine's own legal-move list. The clock is **held while the promotion picker is open** — the move is already chosen, and rolling a random one instead would throw away a decision that was made in time.
 
-### 15e. The move clock (all three games)
+### 15e. The move clock (all four games)
 
-One clock, one rule, shared by Chess, Checkers and the card game ([src/components/MoveTimer.tsx](src/components/MoveTimer.tsx)): **how long one player gets to make one move.**
+One clock, one rule, shared by Chess, Checkers, Sea Battle and the card game ([src/components/MoveTimer.tsx](src/components/MoveTimer.tsx)): **how long one player gets to make one move.**
 
-- **The captain sets it**, in the Parent app (⏳ Limits, §16): one dial for the board games (default **10s**), one for the card game (default **20s**) — a card turn is a real read (energy, two attacks, the bench, a hand of treasure), a board move mostly isn't. **0 turns the clock off.**
+- **The captain sets it**, in the Parent app (⏳ Limits, §16): one dial for the board games and Sea Battle (default **10s**), one for the card game (default **20s**) — a card turn is a real read (energy, two attacks, the bench, a hand of treasure), a board move mostly isn't. **0 turns the clock off.**
 - **Set for both crewmates at once**, not per person: a clock only means anything if both sides of the same board are playing to it.
 - **A live match is stamped with the clock it was dealt** (`moveSeconds` on the shared doc, from the challenger's settings). Moving the dial never changes a game already in progress, and the two phones can never disagree about the time even mid-duel.
 - **The clock belongs to whoever is holding the phone**: it only runs on your turn, on your device — which is also the only device allowed to write that move. No server keeps time, and nothing has to be reconciled. A clock that expired while the app was closed expires the moment the app is looked at again, which is what a clock means.
 - **It is loud before it is fatal**: the bar drains green → gold at halfway → red, and the last five seconds tick audibly with the number pulsing.
+
+## 15f. Sea Battle (the 🚢 app, inside the 🎮 Games folder)
+
+**Official Battleship** — the Milton Bradley box, not a playground variant — fought as a cannon duel on the Grand Line. Rules live in [src/logic/seaBattle.ts](src/logic/seaBattle.ts) as pure JSON-only functions with no React and no Firestore, the same contract the other games follow, which is why one engine drives a match against the AI held in React state and a live one through a shared document.
+
+- **10 × 10 sea, five ships: 5, 4, 3, 3 and 2 squares.** They lie across or down, never diagonally, never off the edge, never overlapping. **Touching is allowed** — that is the real game.
+- **One shot per turn, and the turn passes whether you hit or miss.** "Hit and go again" is the playground rule; it turns the game into a runaway and it is not in the box.
+- **You are told hit or miss and nothing more** — until a ship's last square goes, and then you are told *which ship* sank, by name. Sink all five to win.
+- **Two taps to fire**: the first takes aim 🎯, the second shoots. On a 10 × 10 grid at phone size, a one-tap shot is a wasted turn waiting to happen.
+- Covered by a self-play harness: 3 000 scattered fleets asserted legal (straight, in bounds, non-overlapping, 17 squares), 800 full AI-vs-AI games asserting every shot is legal and no game ends with a ship still afloat, plus the refusals — the same square twice, a square off the board, any shot after the end — and the rule that a hit passes the turn.
+
+**One Piece paint, never in place of the game.** The sizes are the box's sizes; only the nameplates change. 🐋 **Moby Dick** (5, Whitebeard's flagship) · ☀️ **Thousand Sunny** (4) · ⛵ **Red Force** (3, Shanks') · 🐑 **Going Merry** (3) · 🍳 **Baratie** (2, the sea restaurant). Both captains sail the identical fleet, so nobody starts ahead, and the **Fleet tab** is a straight lesson: each ship's real length and who it is.
+
+**Setup can never be got wrong.** The placement screen opens with a **legal fleet already scattered**, so there is no empty grid to stare at and Ready is never a trap. Tap any ship to pick it up, ↔️/↕️ to turn it, and **every square it could legally go to lights up** — the board answers "where does this fit?" rather than making a nine-year-old find out by failing. 🎲 re-hides the whole fleet.
+
+**This is the one game here with an AI, and that is a rule about the game, not a change of heart** (§15d still stands for Chess and Checkers). Battleship hides information, so a solo match against the phone is a *real* game of Battleship; pass-and-play on one phone is not, because both fleets are on the screen. Three captains, and each only ever knows what your answers told it — none of them reads your grid:
+
+- 🐣 **Coby** — fires at random. ~93 shots to clear a fleet.
+- 🚬 **Smoker** — searches on **every second square** (the smallest ship is 2 long, so it cannot hide from a checkerboard) and hunts along a ship once he finds one. ~52 shots.
+- 🌋 **Akainu** — counts, for every square, **how many ways a still-afloat ship could still cover it**, weighting placements that would explain a hit nobody has sunk yet, and fires where the most of them fit. That one count does the hunting and the finishing. ~45 shots, and he beats Smoker ~75% of the time.
+
+**Berries.** Head-to-head pays the same **25 🪙** as the other games. A win over the AI pays **8 🪙 for the first 3 wins each day** (`games.seaDay` / `games.seaWins`) — practice, not a Berry printer. There is no daily play cap: unlike the card game's training hall, a Sea Battle costs nothing to deal.
+
+**Live vs the other crewmate** (shared `app/seaBattles` doc, live-synced) — challenge → topbar banner, home-screen badge and a notification on the other phone → they accept and the shooting starts. The challenger fires first. One live battle at a time. **The setup phase is the one thing this game has that the board games don't**, and it is solved by never letting two devices hold the pen: **the challenger's fleet is written by the same tap that sends the challenge, and the accepter's by the same tap that accepts.** From then on only the side whose turn it is writes, so last-write-wins is safe by construction exactly as it is everywhere else. Both devices bank their own W/L off the same finished board, guarded by `games.seaSettled` locally and `paidAt` on the shared doc. Sea Battle **cannot draw**, so the record has two columns.
+
+**Secrecy is by convention, not by cryptography** — the same trade the card duel makes with a player's hand (§15c). The shared document physically holds both fleets, because a wreck has to be drawable. The rule that a ship is never rendered until it has sunk lives in **one place** — `<SeaGrid mode="target">` — so no screen can leak a fleet by forgetting to check.
+
+**Sound is synthesized** ([src/audio.ts](src/audio.ts) `seaSfx`) and carries the whole game without looking: the cannon fires, then either a short falling **splash**, a low **crack** of timber, or the long slide of a ship **going under**. Sounds fire off the position's own last log line, which is what makes them work for a shot that arrived from the other phone.
+
+**⏱️ The shot clock** (see §15e), on the board-games dial. Run out and **the gunner fires blind** — a random square not yet tried. You cannot pass in Battleship, so a timeout has to resolve to something, and a blind shot is the version a nine-year-old can state before it happens.
 
 ## 16. Admin (Diogo) — the "Captain's desk" (🛠️ Captain app, Diogo only)
 
@@ -670,6 +705,7 @@ Last-write-wins on one doc is safe here for the same reason it is on the duel bo
 2. Every idea he sees is judged: **✓ Keep** or **✕ Never again**. Both answers are stored, and **both lists are sent to the AI as "never offer these again"** — that is the whole reason batch ten is still worth reading.
 3. A kept topic has a **switch**: Ben only ever sees the enabled ones. Dropping a topic hides it *and* records it as a rejection, so it can't come back through the front door.
 4. Diogo can write topics by hand, and set each topic's **word target** (default 150).
+5. **A topic is written once, then it's spent.** The moment an essay is graded the topic drops off Ben's list for good — being offered "✍️ Write this one" under the essay he just got a grade for reads as the app not having noticed he did it. The topic itself carries who has written it (`writtenBy`), not just the essay list, because that list is capped at 40 and a topic must not come back from the dead when his history rolls over. Deleting an unfinished draft *does* put the topic back; that is the one case where he hasn't written it. On Diogo's Topics tab a spent topic stays visible with a **✅ written** chip instead of its switch, and stops counting towards *"N open"* — a topic that vanishes with no explanation is worse than one that says what happened.
 
 #### 19c-1. Ben suggests a topic — Diogo approves it
 

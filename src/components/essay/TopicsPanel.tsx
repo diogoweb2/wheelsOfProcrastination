@@ -6,7 +6,7 @@
 // Ben only ever sees the ones that are on.
 import { useState } from 'react'
 import { useStore } from '../../store/useStore'
-import { TOPIC_BATCH, pendingTopics } from '../../logic/essay'
+import { TOPIC_BATCH, pendingTopics, topicWritten } from '../../logic/essay'
 import { ESSAY_MODEL_NOTE, manualTopic, type TopicOffer } from '../../logic/essayAi'
 import { AiWaiting } from './AiWaiting'
 import { sfx } from '../../audio'
@@ -23,6 +23,7 @@ export function TopicsPanel() {
     essaySetTopicWords,
     essayDeleteTopic,
     essayDecideTopic,
+    essays,
     aiConfig,
   } = useStore()
 
@@ -135,21 +136,33 @@ export function TopicsPanel() {
         </>
       )}
 
-      <div className="h2">📋 On Ben’s list — {kept.filter((t) => t.enabled).length} open</div>
+      {/* "Open" means open TO HIM: a topic he has already written is spent, and
+          counting it here would explain nothing about why it left his list. */}
+      <div className="h2">
+        📋 On Ben’s list — {kept.filter((t) => t.enabled && !topicWritten(t, essays)).length} open
+      </div>
       {kept.length === 0 && <p className="muted" style={{ fontSize: 13 }}>Nothing kept yet.</p>}
-      {kept.map((t) => (
-        <div className="card" key={t.id} style={{ marginBottom: 10, opacity: t.enabled ? 1 : 0.6 }}>
+      {kept.map((t) => {
+        const written = topicWritten(t, essays)
+        return (
+        <div className="card" key={t.id} style={{ marginBottom: 10, opacity: t.enabled && !written ? 1 : 0.6 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="chip">{t.subject}</span>
             {t.source === 'parent' && <span className="chip">✍️ yours</span>}
             {t.source === 'kid' && <span className="chip">🙋 {t.suggestedByName ?? 'Ben'} asked for this</span>}
-            <button
-              className={`btn btn--small ${t.enabled ? '' : 'btn--ghost'}`}
-              style={{ marginLeft: 'auto' }}
-              onClick={() => { sfx.click(); essaySetTopicEnabled(t.id, !t.enabled) }}
-            >
-              {t.enabled ? '👁️ Open' : '🚫 Hidden'}
-            </button>
+            {written ? (
+              <span className="chip" style={{ marginLeft: 'auto', background: 'var(--green)', color: '#042a12' }}>
+                ✅ written
+              </span>
+            ) : (
+              <button
+                className={`btn btn--small ${t.enabled ? '' : 'btn--ghost'}`}
+                style={{ marginLeft: 'auto' }}
+                onClick={() => { sfx.click(); essaySetTopicEnabled(t.id, !t.enabled) }}
+              >
+                {t.enabled ? '👁️ Open' : '🚫 Hidden'}
+              </button>
+            )}
           </div>
           <div style={{ fontWeight: 900, fontSize: 16, marginTop: 6 }}>{t.title}</div>
           {t.blurb && <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>{t.blurb}</p>}
@@ -173,7 +186,8 @@ export function TopicsPanel() {
             </button>
           </div>
         </div>
-      ))}
+        )
+      })}
 
       <div className="h2">✍️ Write your own</div>
       <div className="card">

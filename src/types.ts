@@ -3,6 +3,7 @@
 // only the stored shapes belong here.
 import type { DuelState } from './logic/cardGame'
 import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
+import type { SeaState } from './logic/seaBattle'
 
 export type { BoardGameKind }
 
@@ -483,21 +484,40 @@ export interface AlbumState {
   packsOpened: number
   lastFreePackDay: string | null // YYYY-MM-DD — the daily free pack throttle
   trades: string[] // ids of trades this profile has already seen resolved (dedupes the celebration)
+  /** Unopened packs won in a trade — they wait on the Packs tab for their own ceremony. */
+  packCredits: number
 }
 
 /**
  * A swap between the two crewmates, in the shared app/stickerTrades doc so both
- * sides see it live. The sender offers spares and names the cards they want; the
- * receiver accepts or declines. Values must balance (1 red = 2 whites).
+ * sides see it live. The proposer offers spares — and, when they have no spare
+ * the other side needs, Berries and/or today's unopened free pack — and names
+ * the cards they want back.
+ *
+ * Card-for-card offers must still balance (1 red = 2 whites). The moment
+ * Berries are on the table there is no fair-value gate: the haggle settles the
+ * price. Either side can counter with a different Berry amount, which flips
+ * `turn` and bumps `round`, and it stays pending until somebody shakes on it or
+ * walks away without a counter.
  */
 export interface StickerTrade {
   id: string
   fromId: string // profile who proposed
   fromName: string
-  toId: string // profile who must answer
+  toId: string // profile who must answer first
   toName: string
-  give: string[] // sticker ids the sender hands over
-  want: string[] // sticker ids the sender is asking for
+  give: string[] // sticker ids the proposer hands over
+  want: string[] // sticker ids the proposer is asking for
+  /** Berries the proposer throws in on top of `give`. Rewritten by every counter. */
+  giveGems?: number
+  /** The proposer also hands over today's unopened free pack (lands as a pack credit). */
+  givePack?: boolean
+  /** Whose answer the offer is waiting on: 'to' = the addressee, 'from' = the proposer (after a counter). */
+  turn?: 'to' | 'from'
+  /** Haggle round — 0 on the original offer, +1 per counter. Wakes the push notification up again. */
+  round?: number
+  /** Every Berry amount asked for so far, oldest first — the haggle printed on the offer card. */
+  haggle?: { byId: string; byName: string; gems: number; at: string }[]
   status: 'pending' | 'accepted' | 'declined' | 'cancelled'
   createdAt: string
   resolvedAt?: string
@@ -595,10 +615,51 @@ export interface BoardGameStats {
 export interface BoardGamesState {
   chess: BoardGameStats
   checkers: BoardGameStats
+  /** Sea Battle, head-to-head only. It cannot draw, so `draws` stays 0. */
+  seabattle: BoardGameStats
   /** Match ids already counted into the record, so a re-sync can't double-count. */
   settled: string[]
+  /** Sea Battle match ids already counted — its own list, since it's its own doc. */
+  seaSettled: string[]
+  /** Day (YYYY-MM-DD) the Sea Battle AI wins below were banked on. */
+  seaDay: string | null
+  /** Wins over the AI on `seaDay` — only the first few pay (see SEA_SOLO_REWARD_LIMIT). */
+  seaWins: number
   /** Coaching highlights (legal moves, danger rings, piece labels). On by default. */
   hints: boolean
+}
+
+// --- Sea Battle (the 🚢 app, inside the 🎮 Games folder) ---------------------
+
+/**
+ * One head-to-head Sea Battle, in the SHARED app/seaBattles doc. Same
+ * single-writer arrangement as the board games — only the side whose turn it is
+ * writes — with one extra twist for the setup phase: the CHALLENGER's fleet is
+ * already in `state` when the challenge goes out, and the accepter's is written
+ * in the same breath as the accept. So there is never a moment where both
+ * phones are laying ships into the same document.
+ *
+ * The doc physically holds both fleets; the UI simply never renders one that
+ * hasn't sunk. Same trade the card duel makes with a player's hand.
+ */
+export interface SeaMatch {
+  id: string
+  fromId: string // who challenged — fires first
+  fromName: string
+  fromEmoji: string
+  toId: string // who must answer
+  toName: string
+  toEmoji: string
+  status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled'
+  /** Never null: the challenger's fleet is dealt at challenge time. */
+  state: SeaState
+  createdAt: string
+  resolvedAt?: string
+  winnerId?: string
+  /** Set once each side has banked its own result, so a re-sync can't pay twice. */
+  paidAt?: string
+  /** The shot clock, stamped at challenge time — see `CardDuel.moveSeconds`. */
+  moveSeconds?: number
 }
 
 // --- Free freezes from Dad (shared app/freezeRequests doc) ------------------
@@ -947,6 +1008,16 @@ export interface EssayTopic {
   /** When the parent answered a suggestion, and whether the asker has read the answer. */
   decidedAt?: string
   seenAt?: string
+  /**
+   * Who has already written this one and been graded. A topic is asked once per
+   * writer: once it's marked and done it drops off his list, because being
+   * offered the essay you just finished reads as the app not having noticed.
+   *
+   * Stamped on the topic rather than worked out from `essays[]` alone, because
+   * that list is capped at 40 and the oldest fall off — a topic must not come
+   * back from the dead the day his history rolls over.
+   */
+  writtenBy?: string[]
 }
 
 /**

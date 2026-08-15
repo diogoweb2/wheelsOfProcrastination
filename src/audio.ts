@@ -236,6 +236,37 @@ export const boardSfx = {
   },
 }
 
+/**
+ * Sea Battle. Three sounds carry the whole game, and the point is that you can
+ * tell hit from miss from sinking WITHOUT looking — the shot that matters most
+ * is the one that arrived from the other phone while you were looking away.
+ */
+export const seaSfx = {
+  /** The cannon going off — every shot starts with this. */
+  fire() {
+    tone(320, 0.06, 'square', 0.09, 0, 90)
+  },
+  /** Into open water: a short falling plop, and nothing else. */
+  splash() {
+    tone(520, 0.16, 'sine', 0.11, 0.06, 150)
+  },
+  /** Timber. A low crack that is impossible to mistake for the splash. */
+  hit() {
+    tone(160, 0.22, 'sawtooth', 0.15, 0.06, 60)
+    tone(760, 0.1, 'square', 0.09, 0.07, 220)
+  },
+  /** A ship goes down: the crack, then the long slide under. */
+  sink() {
+    tone(150, 0.3, 'sawtooth', 0.16, 0.06, 50)
+    tone(400, 0.5, 'triangle', 0.13, 0.16, 80)
+    tone(200, 0.6, 'sine', 0.1, 0.3, 60)
+  },
+  /** A square already fired at. */
+  nope() {
+    tone(180, 0.1, 'square', 0.07)
+  },
+}
+
 // --- background-safe alerts (the Gym's rest timer) --------------------------
 //
 // Everything above runs through WebAudio, which the browser SUSPENDS the moment

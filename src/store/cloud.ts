@@ -20,7 +20,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -235,6 +235,28 @@ export function subscribeBoardGames(cb: (matches: BoardMatch[]) => void): () => 
 export async function saveBoardGames(matches: BoardMatch[]): Promise<void> {
   await ensureAuth()
   await setDoc(boardGamesRef(), { matches })
+}
+
+// --- sea battles (Battleship, its own shared board) -------------------------
+//
+// Its own document rather than a `kind` on the board-game one: a Sea Battle
+// carries four 100-square arrays where a chess position carries one of 64, and
+// the two would push each other out of a doc that only keeps the last few
+// matches. Same single-writer safety as everything above.
+
+const seaBattlesRef = () => doc(firestore, 'app', 'seaBattles')
+
+/** Live-sync the sea. Fires on a challenge, an accept, and every shot the other side takes. */
+export function subscribeSeaBattles(cb: (matches: SeaMatch[]) => void): () => void {
+  return onSnapshot(seaBattlesRef(), (snap) => {
+    const data = snap.data() as { matches?: SeaMatch[] } | undefined
+    cb(data?.matches ?? [])
+  })
+}
+
+export async function saveSeaBattles(matches: SeaMatch[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(seaBattlesRef(), { matches })
 }
 
 // --- free freezes (shared: the kid's asks + Dad's gifts) -------------------

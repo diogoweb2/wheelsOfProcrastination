@@ -6,12 +6,17 @@ import {
   STICKER_CATALOG,
   STICKER_CREWS,
   albumProgress,
+  awaitsAnswer,
   freePackReady,
+  gemHint,
   offerValue,
+  offerWorth,
   ownsSticker,
+  packCredits,
   spareCount,
   stickerById,
   type StickerDef,
+  tradeGems,
   tradeableFor,
 } from '../logic/album'
 import { CARDS_PER_TEAM, TOTAL_WC_TEAMS } from '../logic/stickerCatalog.generated'
@@ -325,9 +330,10 @@ function PacksTab() {
   const today = dayKey()
   const freeReady = freePackReady(data.album, today)
   const canBuy = data.economy.gems >= PACK_COST
+  const traded = packCredits(data.album)
   const complete = albumProgress(data.album).pct === 100
 
-  function open(kind: 'free' | 'buy') {
+  function open(kind: 'free' | 'buy' | 'credit') {
     // snapshot the album first — the reveal needs to know what was new
     setOwnedBefore(new Set(ALL_STICKER_IDS.filter((id) => ownsSticker(data.album, id))))
     const result = openPack(kind)
@@ -361,6 +367,22 @@ function PacksTab() {
           </button>
         </div>
 
+        {/* a pack won in a swap waits here, still sealed — the ceremony is the point */}
+        {traded > 0 && (
+          <div className="pack-card is-ready">
+            <div className="pack-card-art">🤝</div>
+            <div className="pack-card-body">
+              <div className="pack-card-title">Traded Pack{traded > 1 ? ` ×${traded}` : ''}</div>
+              <div className="muted" style={{ fontSize: 12 }}>
+                Won in a swap — still sealed.
+              </div>
+            </div>
+            <button className="btn btn--small" onClick={() => { sfx.click(); open('credit') }}>
+              Open
+            </button>
+          </div>
+        )}
+
         <div className="pack-card is-ready">
           <div className="pack-card-art">📦</div>
           <div className="pack-card-body">
@@ -390,10 +412,34 @@ function PacksTab() {
 
 // --- trade ------------------------------------------------------------------
 
+/** Berry stepper — big taps, ±10 a time, never past what the payer holds. */
+function GemStepper({ value, max, onChange }: { value: number; max: number; onChange: (v: number) => void }) {
+  const step = (by: number) => {
+    sfx.click()
+    onChange(Math.max(0, Math.min(max, value + by)))
+  }
+  return (
+    <div className="gem-stepper">
+      <button className="btn btn--ghost btn--small" disabled={value <= 0} onClick={() => step(-10)}>
+        −
+      </button>
+      <span className="gem-stepper-val">
+        <BerryCoin size={16} /> {value}
+      </span>
+      <button className="btn btn--ghost btn--small" disabled={value >= max} onClick={() => step(10)}>
+        +
+      </button>
+    </div>
+  )
+}
+
 function TradeTab() {
-  const { data, mateAlbum, trades, activeProfileId, profiles, proposeTrade, answerTrade, cancelTrade } = useStore()
+  const { data, mateAlbum, mateData, trades, activeProfileId, profiles, proposeTrade, answerTrade, counterTrade, cancelTrade } =
+    useStore()
   const [give, setGive] = useState<string[]>([])
   const [want, setWant] = useState<string[]>([])
+  const [gems, setGems] = useState(0)
+  const [pack, setPack] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const zoom = useStickerZoom()
 
@@ -405,16 +451,31 @@ function TradeTab() {
   const iCanHelp = mateAlbum ? tradeableFor(data.album, mateAlbum) : []
   const theyCanHelp = mateAlbum ? tradeableFor(mateAlbum, data.album) : []
 
-  const incoming = trades.filter((t) => t.status === 'pending' && t.toId === activeProfileId)
+  const myTurn = trades.filter((t) => awaitsAnswer(t, activeProfileId))
+  const theirTurn = trades.filter(
+    (t) =>
+      t.status === 'pending' &&
+      !awaitsAnswer(t, activeProfileId) &&
+      (t.fromId === activeProfileId || t.toId === activeProfileId),
+  )
   const outgoing = trades.filter((t) => t.status === 'pending' && t.fromId === activeProfileId)
   const recent = useMemo(
     () => trades.filter((t) => t.status !== 'pending').slice(-4).reverse(),
     [trades],
   )
 
+  const purse = data.economy.gems
+  const freeReady = freePackReady(data.album, dayKey())
   const giveVal = offerValue(give)
   const wantVal = offerValue(want)
+  const sweetened = gems > 0 || pack
+  // Cards for cards still has to weigh the same. Berries or the free pack turn
+  // the offer into a haggle instead, and a haggle has no fair price to enforce.
   const balanced = give.length > 0 && want.length > 0 && giveVal === wantVal
+  const canSend = want.length > 0 && (give.length > 0 || sweetened) && (sweetened || balanced)
+  const hint = gemHint(want)
+  const worth = offerWorth({ give, giveGems: gems, givePack: pack })
+  const verdict = worth >= hint * 1.15 ? '😍 generous' : worth >= hint * 0.85 ? '👍 about right' : '🤏 a bit light'
 
   function toggle(list: string[], setList: (v: string[]) => void, id: string) {
     sfx.click()
@@ -422,10 +483,19 @@ function TradeTab() {
   }
 
   function send() {
-    const result = proposeTrade(give, want)
+    const result = proposeTrade(give, want, { gems, pack })
     if (result === 'unbalanced') {
       sfx.error()
-      setMsg('Both sides must be worth the same. A red star counts as two whites!')
+      setMsg('Card for card, both sides must be worth the same. A red star counts as two whites — or throw in Berries instead!')
+    } else if (result === 'empty') {
+      sfx.error()
+      setMsg('Pick what you want, and put something up for it.')
+    } else if (result === 'broke') {
+      sfx.error()
+      setMsg('You don’t have that many Berries.')
+    } else if (result === 'nopack') {
+      sfx.error()
+      setMsg('Today’s free pack is already open — nothing left to hand over.')
     } else if (result === 'busy') {
       sfx.error()
       setMsg('You already have an offer on the table. Cancel it first.')
@@ -433,6 +503,8 @@ function TradeTab() {
       sfx.fanfare()
       setGive([])
       setWant([])
+      setGems(0)
+      setPack(false)
       setMsg(`Offer sent to ${mateName}! 🕊️`)
     }
   }
@@ -453,19 +525,42 @@ function TradeTab() {
           onClose={zoom.close}
         />
       )}
-      {/* offers waiting on me */}
-      {incoming.map((t) => (
+      {/* offers waiting on me — mine to accept, refuse, or haggle */}
+      {myTurn.map((t) => (
         <TradeOffer
           key={t.id}
           trade={t}
-          mine={false}
+          viewerId={activeProfileId}
+          myPurse={purse}
+          matePurse={mateData?.economy.gems ?? null}
+          payerPackReady={
+            t.fromId === activeProfileId ? freeReady : mateAlbum ? freePackReady(mateAlbum, dayKey()) : null
+          }
           onAccept={() => { sfx.bigWin(); answerTrade(t.id, true) }}
           onDecline={() => { sfx.sad(); answerTrade(t.id, false) }}
+          onCounter={(amount) => {
+            const r = counterTrade(t.id, amount)
+            if (r === 'ok') { sfx.gem(); setMsg('Counter sent — the ball’s in their court. 💰') }
+            else sfx.error()
+            return r
+          }}
+          onCancel={t.fromId === activeProfileId ? () => { sfx.click(); cancelTrade(t.id) } : undefined}
           onPeek={zoom.open}
         />
       ))}
-      {outgoing.map((t) => (
-        <TradeOffer key={t.id} trade={t} mine onCancel={() => { sfx.click(); cancelTrade(t.id) }} onPeek={zoom.open} />
+      {theirTurn.map((t) => (
+        <TradeOffer
+          key={t.id}
+          trade={t}
+          viewerId={activeProfileId}
+          myPurse={purse}
+          matePurse={mateData?.economy.gems ?? null}
+          payerPackReady={
+            t.fromId === activeProfileId ? freeReady : mateAlbum ? freePackReady(mateAlbum, dayKey()) : null
+          }
+          onCancel={t.fromId === activeProfileId ? () => { sfx.click(); cancelTrade(t.id) } : undefined}
+          onPeek={zoom.open}
+        />
       ))}
 
       <div className="trade-radar">
@@ -485,27 +580,21 @@ function TradeTab() {
         </p>
       )}
 
-      {outgoing.length === 0 && (theyCanHelp.length > 0 || iCanHelp.length > 0) && (
+      {outgoing.length === 0 && theyCanHelp.length > 0 && (
         <>
           <div className="trade-head">🎯 You want from {mateName}</div>
-          {theyCanHelp.length === 0 ? (
-            <p className="muted" style={{ fontSize: 12 }}>
-              {mateName} has no spares you’re missing right now.
-            </p>
-          ) : (
-            <div className="album-grid">
-              {theyCanHelp.map((s) => (
-                <Sticker
-                  key={s.id}
-                  sticker={s}
-                  size="sm"
-                  selected={want.includes(s.id)}
-                  onClick={() => toggle(want, setWant, s.id)}
-                  onLongPress={(e) => zoom.open(s, e)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="album-grid">
+            {theyCanHelp.map((s) => (
+              <Sticker
+                key={s.id}
+                sticker={s}
+                size="sm"
+                selected={want.includes(s.id)}
+                onClick={() => toggle(want, setWant, s.id)}
+                onLongPress={(e) => zoom.open(s, e)}
+              />
+            ))}
+          </div>
 
           <div className="trade-head">
             🎁 You give from your spares
@@ -513,7 +602,7 @@ function TradeTab() {
           </div>
           {iCanHelp.length === 0 ? (
             <p className="muted" style={{ fontSize: 12 }}>
-              None of your spares are ones {mateName} needs right now.
+              None of your spares are ones {mateName} needs right now — pay in Berries instead. 👇
             </p>
           ) : (
             <div className="album-grid">
@@ -532,16 +621,60 @@ function TradeTab() {
             </div>
           )}
 
+          {/* Nothing they need? Pay instead. No fixed price — that's what the
+              counter-offers are for. */}
+          <div className="trade-head">
+            💰 Sweeten it
+            <span className="trade-head-note">you hold <BerryCoin size={12} /> {purse}</span>
+          </div>
+          <div className="trade-sweeten">
+            <GemStepper value={gems} max={purse} onChange={setGems} />
+            <button
+              className="btn btn--ghost btn--small"
+              disabled={want.length === 0 || hint > purse}
+              onClick={() => { sfx.click(); setGems(Math.min(purse, hint)) }}
+            >
+              ≈ {hint}
+            </button>
+          </div>
+          <button
+            className={`trade-pack-toss ${pack ? 'is-on' : ''}`}
+            disabled={!freeReady}
+            onClick={() => { sfx.click(); setPack(!pack) }}
+          >
+            <span>{pack ? '☑' : '☐'}</span>
+            <span>
+              🎁 …and today’s free pack
+              {!freeReady && <span className="muted"> — already opened</span>}
+            </span>
+          </button>
+
           <div className="trade-scale">
-            <span className={balanced ? 'is-ok' : ''}>You give {giveVal}</span>
-            <span className="trade-scale-mid">{balanced ? '⚖️ fair deal' : '⚖️'}</span>
-            <span className={balanced ? 'is-ok' : ''}>You get {wantVal}</span>
+            {sweetened ? (
+              <>
+                <span className="is-ok">
+                  You put up ≈ <BerryCoin size={13} /> {worth}
+                </span>
+                <span className="trade-scale-mid">⚖️ {verdict}</span>
+                <span className="is-ok">
+                  asking ≈ <BerryCoin size={13} /> {hint}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className={balanced ? 'is-ok' : ''}>You give {giveVal}</span>
+                <span className="trade-scale-mid">{balanced ? '⚖️ fair deal' : '⚖️'}</span>
+                <span className={balanced ? 'is-ok' : ''}>You get {wantVal}</span>
+              </>
+            )}
           </div>
           <p className="muted" style={{ fontSize: 11, textAlign: 'center' }}>
-            ★ red rare = 2 · white = 1 · hold a card to see it big
+            {sweetened
+              ? 'Berries have no fixed price — offer what you like, they can ask for more.'
+              : '★ red rare = 2 · white = 1 · hold a card to see it big'}
           </p>
 
-          <button className="btn" style={{ width: '100%', marginTop: 10 }} disabled={!balanced} onClick={send}>
+          <button className="btn" style={{ width: '100%', marginTop: 10 }} disabled={!canSend} onClick={send}>
             🕊️ Send offer to {mateName}
           </button>
         </>
@@ -555,7 +688,15 @@ function TradeTab() {
           {recent.map((t) => (
             <div key={t.id} className="trade-log">
               <span>
-                {t.fromName} → {t.toName} · {t.give.length} for {t.want.length}
+                {t.fromName} → {t.toName} ·{' '}
+                {[
+                  t.give.length > 0 ? `${t.give.length} card${t.give.length === 1 ? '' : 's'}` : null,
+                  tradeGems(t) > 0 ? `${tradeGems(t)} 🪙` : null,
+                  t.givePack ? 'a pack 🎁' : null,
+                ]
+                  .filter(Boolean)
+                  .join(' + ')}{' '}
+                for {t.want.length}
               </span>
               <span className={`trade-log-status is-${t.status}`}>
                 {t.status === 'accepted' ? '✓ done' : t.status === 'declined' ? '✕ passed' : '— off'}
@@ -568,21 +709,50 @@ function TradeTab() {
   )
 }
 
+/**
+ * One offer on the table. The same card serves both sides and every round of a
+ * haggle: it always reads from the viewer's point of view, and only shows the
+ * buttons whoever is looking is actually allowed to press.
+ */
 function TradeOffer({
   trade,
-  mine,
+  viewerId,
+  myPurse,
+  matePurse,
+  payerPackReady,
   onAccept,
   onDecline,
+  onCounter,
   onCancel,
   onPeek,
 }: {
   trade: StickerTrade
-  mine: boolean
+  viewerId: string | null
+  myPurse: number
+  matePurse: number | null
+  /** Is the payer's daily free pack still unopened? null = their world hasn't loaded. */
+  payerPackReady: boolean | null
   onAccept?: () => void
   onDecline?: () => void
+  onCounter?: (gems: number) => 'ok' | 'busy'
   onCancel?: () => void
   onPeek?: (s: StickerDef, e: React.MouseEvent<HTMLElement>) => void
 }) {
+  const iProposed = trade.fromId === viewerId
+  const myTurn = awaitsAnswer(trade, viewerId)
+  const gems = tradeGems(trade)
+  const haggle = trade.haggle ?? []
+  // Whoever proposed is the one paying Berries, whatever round we're on.
+  const payerPurse = iProposed ? myPurse : matePurse
+  const payerName = iProposed ? 'You' : trade.fromName
+  const waitingOn = (trade.turn ?? 'to') === 'to' ? trade.toName : trade.fromName
+
+  const [asking, setAsking] = useState(false)
+  const [ask, setAsk] = useState(gems)
+  // A counter can't ask for Berries the payer doesn't have — an impossible
+  // number would just stall the loop forever.
+  const askCap = payerPurse ?? gems
+
   const cards = (ids: string[]) =>
     ids.map((id, i) => {
       const s = stickerById(id)
@@ -592,39 +762,113 @@ function TradeOffer({
       ) : null
     })
 
+  const sweeteners = (
+    <>
+      {gems > 0 && (
+        <span className="trade-chip">
+          <BerryCoin size={14} /> {gems}
+        </span>
+      )}
+      {trade.givePack && <span className="trade-chip">🎁 free pack</span>}
+    </>
+  )
+
+  const head = myTurn
+    ? haggle.length > 1
+      ? `💰 ${haggle[haggle.length - 1].byName} asked for ${gems} — your call`
+      : `📨 ${iProposed ? 'Your offer' : `${trade.fromName} wants to trade!`}`
+    : `⏳ Waiting on ${waitingOn}`
+
+  // The deal can go stale while it sits there: Berries get spent, and the free
+  // pack promised can get opened. Say so instead of letting Accept quietly
+  // cancel the swap.
+  const shortGems = gems > 0 && payerPurse !== null && payerPurse !== undefined && payerPurse < gems
+  const packGone = trade.givePack === true && payerPackReady === false
+  const shortPayer = shortGems || packGone
+
   return (
     <div className="trade-offer">
-      <div className="trade-offer-head">
-        {mine ? `⏳ Waiting on ${trade.toName}` : `📨 ${trade.fromName} wants to trade!`}
-      </div>
+      <div className="trade-offer-head">{head}</div>
       <div className="trade-offer-sides">
         <div>
-          <div className="trade-offer-label">{mine ? 'You give' : `${trade.fromName} gives`}</div>
-          <div className="trade-offer-row">{cards(trade.give)}</div>
+          <div className="trade-offer-label">{iProposed ? 'You give' : `${trade.fromName} gives`}</div>
+          <div className="trade-offer-row">
+            {cards(trade.give)}
+            {sweeteners}
+          </div>
         </div>
         <div className="trade-offer-arrow">⇄</div>
         <div>
-          <div className="trade-offer-label">{mine ? 'You get' : 'They want'}</div>
+          <div className="trade-offer-label">{iProposed ? 'You get' : 'They want'}</div>
           <div className="trade-offer-row">{cards(trade.want)}</div>
         </div>
       </div>
+
+      {/* the whole haggle so far, so nobody has to remember the last number */}
+      {haggle.length > 1 && (
+        <p className="trade-haggle">
+          {haggle.map((h, i) => (
+            <span key={i}>
+              {i > 0 && ' → '}
+              <b>{h.gems}</b> <span className="muted">({h.byName})</span>
+            </span>
+          ))}
+        </p>
+      )}
+
       {trade.note && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>“{trade.note}”</p>}
-      <div className="trade-offer-actions">
-        {mine ? (
-          <button className="btn btn--ghost btn--small" onClick={onCancel}>
-            Withdraw offer
-          </button>
-        ) : (
-          <>
-            <button className="btn btn--ghost btn--small" onClick={onDecline}>
-              ✕ No deal
+
+      {shortPayer && (
+        <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+          {shortGems
+            ? `${payerName} ${iProposed ? 'don’t' : 'doesn’t'} have ${gems} Berries any more — ask for less, or call it off.`
+            : `That free pack has already been opened — the deal can’t be paid as it stands.`}
+        </p>
+      )}
+
+      {asking ? (
+        <div className="trade-counter">
+          <div className="trade-counter-label">{iProposed ? 'Change your offer to:' : `Ask ${payerName} for:`}</div>
+          <GemStepper value={ask} max={askCap} onChange={setAsk} />
+          <div className="trade-offer-actions">
+            <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setAsking(false) }}>
+              Back
             </button>
-            <button className="btn btn--small" onClick={onAccept}>
-              🤝 Shake on it!
+            <button
+              className="btn btn--small"
+              disabled={ask === gems}
+              onClick={() => {
+                if (onCounter?.(ask) === 'ok') setAsking(false)
+              }}
+            >
+              💰 Send counter
             </button>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      ) : (
+        <div className="trade-offer-actions">
+          {onCancel && !myTurn && (
+            <button className="btn btn--ghost btn--small" onClick={onCancel}>
+              Withdraw
+            </button>
+          )}
+          {myTurn && (
+            <>
+              <button className="btn btn--ghost btn--small" onClick={onDecline}>
+                ✕ No deal
+              </button>
+              {onCounter && (
+                <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setAsk(gems); setAsking(true) }}>
+                  💰 Ask more
+                </button>
+              )}
+              <button className="btn btn--small" disabled={shortPayer} onClick={onAccept}>
+                🤝 Shake on it!
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

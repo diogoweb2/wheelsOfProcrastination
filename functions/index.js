@@ -333,12 +333,29 @@ export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', async 
   const before = event.data?.before?.data() ?? {}
   const after = event.data?.after?.data() ?? {}
 
-  const known = new Set((before.trades ?? []).map((t) => t.id))
+  // Keyed by id AND haggle round: a counter-offer rewrites the same trade, and
+  // the person it bounced back to has to hear about it just like the first offer.
+  const seen = new Map((before.trades ?? []).map((t) => [t.id, t.round ?? 0]))
   for (const t of after.trades ?? []) {
-    if (known.has(t.id) || t.status !== 'pending') continue
-    await pushTo(t.toId, {
-      title: '🤝 A trade offer!',
-      body: `${t.fromName} wants to swap ${t.give.length} for ${t.want.length}. Open the Album tab.`,
+    if (t.status !== 'pending') continue
+    const round = t.round ?? 0
+    if (seen.has(t.id) && seen.get(t.id) === round) continue
+    // whoever's court it's in now — the addressee, or the proposer after a counter
+    const target = (t.turn ?? 'to') === 'to' ? t.toId : t.fromId
+    const gems = Math.max(0, Math.round(t.giveGems ?? 0))
+    const puts = [
+      t.give.length > 0 ? `${t.give.length} card${t.give.length === 1 ? '' : 's'}` : null,
+      gems > 0 ? `${gems} Berries` : null,
+      t.givePack ? 'a free pack' : null,
+    ]
+      .filter(Boolean)
+      .join(' + ')
+    await pushTo(target, {
+      title: round > 0 ? '💰 A counter-offer!' : '🤝 A trade offer!',
+      body:
+        round > 0
+          ? `The deal is now ${puts} for ${t.want.length}. Your call — open the Album tab.`
+          : `${t.fromName} offers ${puts} for ${t.want.length}. Open the Album tab.`,
     })
   }
 })
