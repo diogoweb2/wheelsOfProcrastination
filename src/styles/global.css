@@ -4038,22 +4038,28 @@ input, select { font-family: inherit; }
 /* a wreck: the crew is still drawn, but the fire is what you read first */
 .sea-cell--hit .sea-art { opacity: 0.35; filter: grayscale(0.6) brightness(0.6); }
 .sea-cell--sunk .sea-art { opacity: 0.25; }
-.sea-cell .sea-mark { position: relative; z-index: 2; text-shadow: 0 1px 3px rgb(0 0 0 / 80%); }
+.sea-cell .sea-mark { position: relative; z-index: 4; text-shadow: 0 1px 3px rgb(0 0 0 / 80%); }
 
 /* A card you buried, on your own board. The enemy board is handed these too
    (SeaGrid needs them to mark one that has gone off) and hides any still armed. */
+/* A buried card OWNS its square — it fills it, the same way a ship does. A
+   corner badge read as a speck of dirt on the board at phone size. */
 .sea-buried {
   position: absolute;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 3;
-  font-size: clamp(7px, 2vw, 11px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-size: clamp(13px, 3.8vw, 22px);
   line-height: 1;
-  padding: 1px;
-  border-radius: 3px 0 0;
-  background: rgb(0 0 0 / 55%);
+  background: rgb(120 60 200 / 55%);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 75%);
 }
-.sea-buried.is-sprung { filter: grayscale(1); opacity: 0.75; }
+/* on a ship square the crew is still there underneath, just dimmed */
+.sea-cell--art .sea-buried { background: rgb(120 60 200 / 45%); }
+.sea-buried.is-sprung { filter: grayscale(1); background: rgb(0 0 0 / 45%); opacity: 0.8; }
 .sea-cell.is-buried { box-shadow: inset 0 0 0 2px #c08bff; }
 /* while burying: every free square says "here, if you like" */
 .sea-bury-ghost {
