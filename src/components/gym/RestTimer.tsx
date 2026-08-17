@@ -21,20 +21,37 @@
 // the screen OFF, the beeps still fire, but a heavily throttled browser may run
 // them a few seconds late.
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import type { ExerciseDemo as Demo } from '../../types'
 import { REST_MIN } from '../../logic/gym'
 import { gymSfx, holdAudioSession } from '../../audio'
+import { ExerciseDemo } from './ExerciseDemo'
 
 /** Seconds left when the "get ready" double blip fires. */
 const WARN_AT = 10
 
+/**
+ * The next movement, drawn big. Rest is exactly when you should be walking over
+ * and loading the thing, and a sentence can't tell you which bench that is —
+ * the animation can, from across the room.
+ */
+const NEXT_ART = 170
+
 export function RestTimer({
   seconds,
   upNext,
+  nextDemo,
+  nextEmoji,
+  footNote,
   onNext,
 }: {
   seconds: number
   /** What NEXT will start — shown so you never tap it blind. */
   upNext?: ReactNode
+  /** The animation for what's coming, played big while you rest. */
+  nextDemo?: Demo
+  nextEmoji?: string
+  /** Rides above NEXT in the foot bar — the runner puts the session countdown here. */
+  footNote?: ReactNode
   /** Tapped NEXT. The argument is how long you ACTUALLY rested — the number the app learns from. */
   onNext: (actualSeconds: number) => void
 }) {
@@ -73,39 +90,72 @@ export function RestTimer({
   const circumference = 2 * Math.PI * r
 
   return (
-    <div className="card gym-rest">
-      <div className="h2" style={{ margin: '0 0 6px' }}>{over ? '⏱️ Rest is over' : '⏱️ Resting'}</div>
+    <>
+      <div className="card gym-rest">
+        <div className="h2" style={{ margin: '0 0 6px' }}>{over ? '⏱️ Rest is over' : '⏱️ Resting'}</div>
 
-      <svg viewBox="0 0 130 130" width="150" height="150" style={{ margin: '0 auto', display: 'block' }} role="img" aria-label={`${Math.abs(left)} seconds ${over ? 'over' : 'left'}`}>
-        <circle cx="65" cy="65" r={r} fill="none" stroke="var(--bg2)" strokeWidth="9" />
-        <circle
-          cx="65"
-          cy="65"
-          r={r}
-          fill="none"
-          stroke={over ? 'var(--gold)' : 'var(--blue)'}
-          strokeWidth="9"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - pct)}
-          transform="rotate(-90 65 65)"
-          style={{ transition: 'stroke-dashoffset 0.25s linear' }}
-        />
-        <text x="65" y="60" textAnchor="middle" fontSize="30" fontWeight="900" fill="var(--text)">
-          {over ? `+${Math.abs(left)}` : left}
-        </text>
-        <text x="65" y="80" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--muted)">
-          {over ? 'SECONDS OVER' : 'SECONDS'}
-        </text>
-      </svg>
+        {/* the clock and what's coming, side by side — rest is when you walk
+            over and load the next thing, so the next thing is on screen */}
+        <div className="gym-rest-row">
+          <svg
+            viewBox="0 0 130 130"
+            width="140"
+            height="140"
+            style={{ display: 'block', flex: 'none' }}
+            role="img"
+            aria-label={`${Math.abs(left)} seconds ${over ? 'over' : 'left'}`}
+          >
+            <circle cx="65" cy="65" r={r} fill="none" stroke="var(--bg2)" strokeWidth="9" />
+            <circle
+              cx="65"
+              cy="65"
+              r={r}
+              fill="none"
+              stroke={over ? 'var(--gold)' : 'var(--blue)'}
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference * (1 - pct)}
+              transform="rotate(-90 65 65)"
+              style={{ transition: 'stroke-dashoffset 0.25s linear' }}
+            />
+            <text x="65" y="60" textAnchor="middle" fontSize="30" fontWeight="900" fill="var(--text)">
+              {over ? `+${Math.abs(left)}` : left}
+            </text>
+            <text x="65" y="80" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--muted)">
+              {over ? 'SECONDS OVER' : 'SECONDS'}
+            </text>
+          </svg>
 
-      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-        {over ? 'Take longer if you need it — every extra second is being learned.' : `Asked for ${target}s, based on your own history.`}
-      </p>
+          {nextEmoji && (
+            <div className="gym-next-art">
+              <ExerciseDemo demo={nextDemo} emoji={nextEmoji} size={NEXT_ART} autoPlay />
+            </div>
+          )}
+        </div>
 
-      {upNext && <div className="gym-upnext">{upNext}</div>}
+        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+          {over
+            ? 'Take longer if you need it — every extra second is being learned.'
+            : `Asked for ${target}s, based on your own history.`}
+        </p>
 
-      <button className="btn btn--blue" style={{ marginTop: 12 }} onClick={() => onNext(elapsed)}>
+        {upNext && <div className="gym-upnext">{upNext}</div>}
+      </div>
+      <Foot elapsed={elapsed} footNote={footNote} onNext={onNext} />
+    </>
+  )
+}
+
+/**
+ * NEXT, in the pinned foot bar (§18c-1) — big enough to hit with a foot, and
+ * always on screen however far the card above it has been scrolled.
+ */
+function Foot({ elapsed, footNote, onNext }: { elapsed: number; footNote?: ReactNode; onNext: (s: number) => void }) {
+  return (
+    <div className="gym-foot">
+      {footNote}
+      <button className="btn btn--blue" onClick={() => onNext(elapsed)}>
         ▶️ NEXT
       </button>
     </div>

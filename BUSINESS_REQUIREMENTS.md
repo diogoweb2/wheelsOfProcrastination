@@ -508,7 +508,7 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI la
 ### 18c. The session loop
 
 1. **Set up** — how many minutes (5/10/15/20/25/30/45/60), how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal) and **what you want to use** (§18c-2). Mood changes set counts, rep targets and how hard the planner leans.
-2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks for a replacement in the same body area) or **✕** to drop it. Also **🎲 Plan a different one** and **🗑 Cancel**.
+2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks the coach for a replacement in the same body area) or **⚡ Offline** (the same thing from the offline planner — instant, free, no network). **Neither ever leaves a hole**: you asked for 30 minutes, so the slot gets refilled from your own history with something that fits what the rest of the session is working, and the card says so ("swapped in offline for X"). It only empties when there is genuinely nothing left to offer. Also **🎲 Plan a different one** and **🗑 Cancel**.
 3. **Train — three buttons, never more** (§18c-1).
 4. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
 5. **Finish** — 1–5 stars plus optional free text for the trainer, then Berries are paid and everything is folded into memory. Leaving early keeps whatever you logged (and pays for it); a session with nothing logged is thrown away rather than polluting the history.
@@ -534,9 +534,15 @@ Once you are training there is exactly one button on screen at a time, and the l
 
 **One limb at a time gets said out loud (`perSide`).** For a single-arm row, a side plank or a side-lying rotation, the prescription is **per side**: "2 × 15" means fifteen left *and* fifteen right. The plan line reads `reps per side`, a ↔️ banner sits on the card while you work, and for a per-side hold the clock's target covers **both** sides before it beeps. You log the set **once, when both sides are done** — the app doubles it behind the scenes for session totals, body-part volume and lifetime reps, while `bestReps` stays per side so it is still comparable with history. `timed` / `cardio` are never doubled: their number is measured across the whole set and already covers both sides. The flag is set by the AI when an exercise is generated, backfilled once over the existing catalog by `npm run gym:per-side`, and **overridable by hand** — Gym → Gear → tap the exercise → ↔️. Anything that alternates *within* the count ("alternating lunges", dead bug) is **not** per-side; there the number is already the total.
 
+**The one button is at the bottom, and it is huge.** GO / DONE / NEXT is pinned above the app's bottom menu, 78 px tall and full width, wherever the card above it has been scrolled to — because mid-set the phone is on the floor and the button gets pressed **with a foot**. Everything else on the runner (skip, next exercise, undo, leave) stays small and out of the way.
+
 **Not tapping NEXT is how you ask for more rest.** There is no "+30 s" button any more: the rest timer counts past zero and what gets learned (§18d) is the moment you actually tapped NEXT. Rest longer, and the app plans longer rests; get back to work early, and it packs more in.
 
-While you rest, the card says what NEXT will start — the next set, or the next exercise with its full prescription — so it is never a blind tap. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
+**Rest is when you go and set the next thing up, so rest shows you what it is.** Beside the countdown ring, the rest screen plays the **animation of what NEXT starts** — the same exercise if there are sets left, otherwise the next one — at 170 px, big enough to recognise the bench from across the room. Under it, the same thing in words with its full prescription, so it is never a blind tap.
+
+#### 18c-1b. The session countdown
+
+You said 20 minutes, so the app shows you 20 minutes: a small `⏳ 12:34 left of 20 min` rides above the foot button for the whole workout and is never scrolled away. **It does not stop at zero** — going over is allowed and expected; the clock just turns amber and counts `−2:10 over your 20 min`. It is information, not a buzzer: nothing about the session changes when it passes zero, and (since §18c-3) nothing about the grade does either. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
 
 #### 18c-2. Weights, bodyweight, or both
 
@@ -546,32 +552,38 @@ The split is by **load, not by gear** — `kind === 'weight'` is the weights hal
 
 #### 18c-3. The report and the grade
 
-Every finished session ends on a scorecard with two honest comparisons and one letter:
+**The grade is about the training, not the stopwatch.** It used to be one number — total time taken ÷ total time planned — and that punished the honest version of a good session: grinding a set slowly, going heavier than asked, squeezing out an extra rep all *take longer*. So the letter is now **three components worth 100 points**, and every one of them is shown with the sentence that earned it:
 
-| | Measured | Target |
+| | Out of | What moves it |
 |---|---|---|
-| 🏋️ **Working** | wall clock, GO/NEXT → DONE, summed | what the plan asked those sets to take |
-| 😮‍💨 **Resting** | wall clock, DONE → NEXT, summed | the rest that was offered |
+| 💪 **Work done** | 60 (+10) | Reps × load × how hard the movement is, **done ÷ asked for**. Doing the prescription is the full 60; beating it earns up to 10 more, so a big session can carry a long rest. |
+| 🔥 **How hard it was** | 20 | The intensity of the moves themselves (light 1 → heavy 3), **plus** loading more than prescribed, **plus** 2 per completed 🏁 max test. A light day scores like a light day. |
+| 😮‍💨 **Rest** | 20 | The only place the clock still counts. At or under the rest offered = full marks; **twice** the rest offered = zero. |
 
-**Grade** = total time taken ÷ total time asked for. Under 1 means you were quicker than the plan:
+One set's worth of "work" = its reps (a hold counts ~6 s to the rep, a cardio minute ~8), doubled for a `perSide` move, × `1 + weight/40`, × `0.7 + intensity×0.3`. The exchange rates only need to be consistent, because every number in the grade is a ratio of *done ÷ asked*.
 
-| Ratio | Grade |
+| Score | Grade |
 |---|---|
-| < 0.80 | **A+** — way quicker than the plan |
-| < 0.95 | **A** — ahead of it |
-| ≤ 1.10 | **B** — right around target |
-| ≤ 1.30 | **C** — a bit slower |
-| ≤ 1.60 | **D** — a lot of it wasn't training |
-| above | **F** — more time resting than working |
+| ≥ 92 | **A+** |
+| ≥ 82 | **A** |
+| ≥ 70 | **B** |
+| ≥ 57 | **C** |
+| ≥ 44 | **D** |
+| below | **F** |
 
-**The targets are accumulated per set, as you do it** — never from the whole plan. Skip half the session and only the half you did is graded, so a good letter cannot be bought by walking out early. A session with nothing timed gets no grade rather than a fake one.
+Time spent working is still measured and still shown ("time working: 8:20, planned 7:40") — as information, never as a score. **Slow, controlled reps are training, not dawdling.**
+
+**An exercise you started is graded against its whole prescription; one you never touched isn't counted at all.** Stop at one set of three and that is a third of the work, and the letter says so — but walking out after two of six exercises grades those two properly instead of failing you for the four you never began. A short honest session is not a failed long one. A session with nothing logged gets no grade rather than a fake one.
+
+Worked examples, same 3 × 10 @ 25 lb: doing it exactly, in the rest offered → **A** (91). Doing it exactly but with every rep twice as slow → **A** (91, *identical* — that is the whole point). Doing it exactly but resting double → **B** (71). 12 reps at 32 lb instead → **A+** (100). One set of the three → **D** (46).
 
 Then: **➕ Do more exercises** for 5 / 10 / 15 / 20 more minutes, with the gear question asked again. The bonus block is **planned around the session that just ended** — its exercises are excluded outright, the muscles it hit are minutes old so recovery scoring buries them, and the coach is told in as many words that this is an extension of a workout already done, not a fresh one. It carries a **➕ Bonus block** chip on the preview.
 
 ### 18d. What it learns, and how
 
 - **Rest** — `restLearned` is a rolling average (60/40) of the rest you actually took, not what was offered; the next offer is that blended 75/25 with the exercise's own default, clamped to 15–240 s. Take longer and the sessions get shorter and more honest; skip rest and it packs more work into the same minutes.
-- **Weight** — you loaded **more** than asked → too light → next suggestion goes up a step (5%, min 2.5); **less** → too heavy → down a step; the same → hold. First time on a loaded exercise there is no suggestion; whatever you type becomes the baseline.
+- **Weight** — you loaded **more** than asked → too light → next suggestion goes up **one notch**; **less** → too heavy → down one notch; the same → hold. First time on a loaded exercise there is no suggestion; whatever you type becomes the baseline.
+- **The dumbbell has holes, not a dial.** The adjustable pair in the basement (TruLap, up to 90 lb) can only be set to `8.5 · 12 · 15.5 · 18.5 · 22 · 25 · 28.5 · 32 · 35.5 · 38.5 · 42 · 45.5 · 48.5 · 52 · 55.5 · 58.5 · 62 · 65 · 68.5 · 72 · 75 · 78.5 · 82 · 85.5 · 88.5 · 92` lb, so the app never asks for 20 lb. Every suggested weight — offline planner, AI coach, the 50%/75% warm-up ramp — is **snapped onto that ladder** (`DUMBBELL_LB`), and **+ / − in the runner walk it one notch at a time**. Typing a number by hand is still free-form, for a barbell or a machine, and a profile set to **kg** keeps the old free 2.5 steps.
 - **Preference** — ratings score into the picker (`love` +45, `like` +25, `ok` 0, `dislike` −40, `hate` = excluded).
 - **Recovery** — the planner reads the real timestamps of past sessions: chest/back/legs/glutes want ~48 h, shoulders/arms ~40 h, core ~24 h, cardio ~12 h. A part trained recently is heavily penalised, so the app spaces the body out on its own.
 - **Variety** — days since last done adds up to +63; every repeat of a body part already in today's session costs −45; a small random jitter means no two sessions are identical.
@@ -580,16 +592,21 @@ Then: **➕ Do more exercises** for 5 / 10 / 15 / 20 more minutes, with the gear
 
 Diogo doesn't warm up, so there is **no warm-up block**. Instead the planner forces the first two moves to be light (intensity 1) and scales their prescribed weight to **50% then 75%** of the working suggestion. Order after that: hardest compound work while fresh, core and holds last. Toggle: Coach → "No warm-up block".
 
+**The one exception: the roman chair opens every session.** A back extension before anything else is a standing instruction — it wakes the lower back up before the session asks it for a favour, which is the whole point of §18g's lower-back rule. Coach → **"Roman chair first, always"**, **ON by default** (a profile saved before the setting existed still gets it — it is read as `!== false`).
+
+It is enforced on **both layers**, because that is the §18a rule: the coach is told about it in as many words as a HARD RULE with the exact exercise id, and then the app checks the answer — if the opener isn't first it is moved there, and if it isn't in the answer at all it is planned offline and pushed onto the front. The offline planner pins it at index 0 and ordering only shuffles what comes after it. The bench is found by name (`roman chair` / `back extension` / `hyperextension`) in the shared catalog; with no such bench catalogued the setting says so and does nothing. A **➕ bonus block** never re-opens with it — it is a continuation of a session, not a new one.
+
 ### 18f. Rep ladders
 
 The motivating pattern from Diogo's old push-up app, for bodyweight staples (`ladder: true` — push-ups, pull-ups, dips, squats): five sets that creep up a rep at a time — `4 4 4 4 4` → `4 5 4 5 4` → `5 5 4 5 4` → … built from `round(max × 0.4)`. Every **6 cycles** the session prescribes a **🏁 max test** — one all-out set — and the whole ladder is rebuilt from that number. A ladder is seeded automatically from your first honest set of that exercise. The coach gets no vote on ladder reps.
 
 ### 18g. Body briefs
 
-Free text the coach reads **verbatim** before every session, plus three hard rules the offline planner enforces too (it can't read prose):
+Free text the coach reads **verbatim** before every session, plus four hard rules the offline planner enforces too (it can't read prose):
 
 - **Protect my lower back** — `backRisk` exercises are filtered out entirely.
 - **No warm-up block** — see §18e.
+- **Roman chair first, always** — see §18e. Default ON.
 - **Kid mode** — bodyweight first, nothing heavy; non-`kidSafe` exercises are filtered out.
 
 Seeded per profile on first login (`seedBrief`) and then fully editable — **Diogo**: 43, pickleball is his cardio, core + lower back are the priority, wants a good chest, likes high-rep dynamic sets and rep ladders. **Ben**: 12, kid mode, the goal is enjoying it and building the habit.

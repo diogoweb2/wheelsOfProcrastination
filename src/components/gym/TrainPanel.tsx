@@ -21,9 +21,11 @@ import {
   RATING_LABEL,
   SESSION_MINUTES,
   allExercises,
+  loadSteps,
   mmss,
   sessionReport,
   sessionSeconds,
+  stepLoad,
 } from '../../logic/gym'
 import { coachReady } from '../../logic/gymCoach'
 import { keepScreenAwake } from '../../logic/wakeLock'
@@ -321,12 +323,16 @@ function Preview({ session }: { session: GymSession }) {
               </button>
               <button
                 className="btn btn--ghost btn--small"
+                // Same idea, no coach: the offline planner fills the slot from
+                // your own history, instantly and for free. It only ever leaves
+                // a hole when there is genuinely nothing left to offer.
+                title="Swap it offline, instantly"
                 onClick={() => {
                   sfx.click()
-                  gymDrop(e.exId)
+                  if (gymDrop(e.exId) === 'dropped') sfx.error()
                 }}
               >
-                ✕
+                ⚡ Offline
               </button>
             </div>
             <button
@@ -437,6 +443,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const setsLeft = current ? Math.max(0, current.plan.reps.length - current.sets.length) : 0
   const isLast = idx >= list.length - 1
   const upNext = list[idx + 1]
+  /** What NEXT actually starts: another set of this, or the next exercise. */
+  const nextUpEx = setsLeft > 0 ? current : upNext
 
   if (finishing) return <FinishCard session={session} onBanked={onBanked} onBack={() => setFinishing(false)} />
   if (!current) return null
@@ -516,8 +524,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       </div>
 
       {phase === 'resting' ? (
+        // the picture is of what comes NEXT — the same exercise if there are
+        // sets left, otherwise the one you should be walking over to now
         <RestTimer
           seconds={current.plan.restSec}
+          nextDemo={demos.get(nextUpEx?.exId ?? '')}
+          nextEmoji={nextUpEx?.emoji}
+          footNote={<SessionCountdown session={session} />}
           upNext={
             setsLeft > 0 ? (
               <>
@@ -593,29 +606,14 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                   value={weight ?? 0}
                   step={2.5}
                   min={0}
+                  // + and − walk the dumbbell's real notches, not arithmetic
+                  notches={loadSteps(unit)}
                   onChange={setWeight}
                   hint={current.plan.weight != null ? `asked for ${current.plan.weight}` : 'first time — set it'}
                 />
               )}
             </div>
           ) : null}
-
-          {phase === 'working' ? (
-            <button className="btn" style={{ marginTop: 14 }} onClick={done}>
-              ✓ DONE
-            </button>
-          ) : (
-            <button
-              className="btn"
-              style={{ marginTop: 14 }}
-              onClick={() => {
-                sfx.fanfare()
-                begin()
-              }}
-            >
-              {phase === 'setup' ? '▶️ GO NOW' : '▶️ GO'}
-            </button>
-          )}
 
           {current.sets.length > 0 && phase === 'ready' && (
             <button
@@ -691,7 +689,57 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       >
         Leave (keeps whatever you logged)
       </button>
+
+      {/* One action, pinned to the bottom and 78px tall — you are meant to be
+          able to hit it with a foot without picking the phone up. The rest
+          screen brings its own foot bar, because NEXT lives there. */}
+      <div className="gym-foot-gap" />
+      {phase !== 'resting' && (
+        <div className="gym-foot">
+          <SessionCountdown session={session} />
+          {phase === 'working' ? (
+            <button className="btn" onClick={done}>
+              ✓ DONE
+            </button>
+          ) : (
+            <button
+              className="btn"
+              onClick={() => {
+                sfx.fanfare()
+                begin()
+              }}
+            >
+              {phase === 'setup' ? '▶️ GO NOW' : '▶️ GO'}
+            </button>
+          )}
+        </div>
+      )}
     </>
+  )
+}
+
+/**
+ * "I said 20 minutes — how am I doing?" On screen for the whole workout, small,
+ * and it does NOT stop at zero: running over is allowed, the clock just turns
+ * amber and counts the other way.
+ */
+function SessionCountdown({ session }: { session: GymSession }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  const startedAt = session.startedAt ? Date.parse(session.startedAt) : now
+  const left = Math.round(session.minutes * 60 - (now - startedAt) / 1000)
+  const over = left < 0
+
+  return (
+    <div className={`gym-countdown ${over ? 'over' : ''}`}>
+      <span>⏳</span>
+      <strong>{over ? `−${mmss(-left)}` : mmss(left)}</strong>
+      <span>{over ? `over your ${session.minutes} min` : `left of ${session.minutes} min`}</span>
+    </div>
   )
 }
 
@@ -831,17 +879,44 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
           <div className={`gym-grade grade-${report.grade[0].toLowerCase()}`}>{report.grade}</div>
           <p style={{ fontWeight: 800, fontSize: 14, margin: '4px 0 0' }}>{report.blurb}</p>
           <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
-            {mmss(report.totalSec)} against a {mmss(report.totalTargetSec)} target — {Math.round(report.ratio * 100)}% of the time it
-            was meant to take.
+            {report.score} / 100 — the work you did, how heavy it was, and how long you rested.
           </p>
 
-          <div className="gym-report">
-            <ReportRow emoji="🏋️" label="Working" actual={report.workSec} target={report.workTargetSec} lowerIsBetter />
-            <ReportRow emoji="😮‍💨" label="Resting" actual={report.restSec} target={report.restTargetSec} lowerIsBetter />
+          <div className="gym-score">
+            <ScoreRow
+              emoji="💪"
+              label="Work done"
+              points={report.workPoints}
+              max={60}
+              note={`${Math.round(report.workRatio * 100)}% of the reps × weight the plan asked for${
+                report.workRatio > 1 ? ' — you went past it' : ''
+              }`}
+            />
+            <ScoreRow
+              emoji="🔥"
+              label="How hard it was"
+              points={report.effortPoints}
+              max={20}
+              note={`${['', 'light', 'moderate', 'heavy'][Math.round(report.intensity)] ?? 'moderate'} movements${
+                report.loadOverPlan > 0.02 ? ` · ${Math.round(report.loadOverPlan * 100)}% heavier than prescribed` : ''
+              }`}
+            />
+            <ScoreRow
+              emoji="😮‍💨"
+              label="Rest"
+              points={report.restPoints}
+              max={20}
+              note={`${mmss(report.restSec)} taken against the ${mmss(report.restTargetSec)} offered`}
+            />
           </div>
 
-          <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>
-            Targets only count the sets you actually did, so skipping never buys a better grade.
+          <div className="gym-report" style={{ marginTop: 6 }}>
+            <ReportRow emoji="🏋️" label="Time working" actual={report.workSec} target={report.workTargetSec} />
+          </div>
+
+          <p className="muted" style={{ fontSize: 11, marginTop: 10, lineHeight: 1.45 }}>
+            Time spent on the reps is reported, not graded — slow, controlled reps are training, not dawdling. Targets only count
+            the sets you actually did, so skipping never buys a better grade.
           </p>
         </div>
       )}
@@ -851,7 +926,7 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
         <div style={{ fontWeight: 900, fontSize: 20 }}>+{coins} Berries banked</div>
         {!report && (
           <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            Nothing timed this session — the pace grade needs at least one set done with GO and DONE.
+            Nothing logged this session — a grade needs at least one set done.
           </p>
         )}
       </div>
@@ -912,21 +987,33 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
   )
 }
 
-function ReportRow({
-  emoji,
-  label,
-  actual,
-  target,
-  lowerIsBetter,
-}: {
-  emoji: string
-  label: string
-  actual: number
-  target: number
-  lowerIsBetter?: boolean
-}) {
+/**
+ * One of the three things the letter is made of. The bar is the share of that
+ * component you earned, and the note says in words what moved it — a grade you
+ * can't argue with is a grade you can't learn from.
+ */
+function ScoreRow({ emoji, label, points, max, note }: { emoji: string; label: string; points: number; max: number; note: string }) {
+  return (
+    <div className="gym-score-row">
+      <div className="gym-score-head">
+        <span>
+          {emoji} {label}
+        </span>
+        <b>
+          {points}/{max}
+        </b>
+      </div>
+      <div className="gym-score-bar">
+        <span style={{ width: `${Math.min(100, (points / max) * 100)}%` }} />
+      </div>
+      <span className="gym-score-note">{note}</span>
+    </div>
+  )
+}
+
+/** Measured against planned, in minutes and seconds. Reported, not scored. */
+function ReportRow({ emoji, label, actual, target }: { emoji: string; label: string; actual: number; target: number }) {
   const diff = actual - target
-  const good = lowerIsBetter ? diff <= 0 : diff >= 0
   return (
     <div className="gym-report-row">
       <span className="gym-report-label">
@@ -934,9 +1021,9 @@ function ReportRow({
       </span>
       <span className="gym-report-nums">
         <strong>{mmss(actual)}</strong>
-        <em>target {mmss(target)}</em>
+        <em>planned {mmss(target)}</em>
       </span>
-      <span className={`gym-report-diff ${good ? 'good' : 'bad'}`}>
+      <span className="gym-report-diff">
         {diff === 0 ? 'spot on' : `${diff > 0 ? '+' : '−'}${mmss(Math.abs(diff))}`}
       </span>
     </div>
@@ -945,11 +1032,18 @@ function ReportRow({
 
 // --- bits -------------------------------------------------------------------
 
+/**
+ * − / value / +. When `notches` is given (the adjustable dumbbell's real holes,
+ * §18d), the buttons walk that ladder instead of adding `step` — pressing + on
+ * 22 lb gives 25, because 24.5 is not a thing the dumbbell can be. Typing a
+ * number by hand is still free-form: a barbell or a machine ignores the ladder.
+ */
 function Stepper({
   label,
   value,
   step,
   min,
+  notches,
   onChange,
   hint,
 }: {
@@ -957,35 +1051,30 @@ function Stepper({
   value: number
   step: number
   min: number
+  notches?: readonly number[]
   onChange: (v: number) => void
   hint?: string
 }) {
+  const bump = (dir: 1 | -1) => {
+    sfx.click()
+    if (notches && notches.length > 0 && value > 0) return onChange(stepLoad(value, dir, 'lb'))
+    // no ladder, or nothing loaded yet — the first + lands on the lightest notch
+    if (notches && notches.length > 0 && dir === 1) return onChange(notches[0])
+    onChange(Math.max(min, Math.round((value + dir * step) * 2) / 2))
+  }
+
   return (
     <div className="gym-stepper">
       <label>{label}</label>
       <div className="gym-stepper-row">
-        <button
-          onClick={() => {
-            sfx.click()
-            onChange(Math.max(min, Math.round((value - step) * 2) / 2))
-          }}
-        >
-          −
-        </button>
+        <button onClick={() => bump(-1)}>−</button>
         <input
           type="number"
           inputMode="decimal"
           value={value}
           onChange={(e) => onChange(Math.max(min, Number(e.target.value) || 0))}
         />
-        <button
-          onClick={() => {
-            sfx.click()
-            onChange(Math.round((value + step) * 2) / 2)
-          }}
-        >
-          +
-        </button>
+        <button onClick={() => bump(1)}>+</button>
       </div>
       {hint && <span className="gym-stepper-hint">{hint}</span>}
     </div>

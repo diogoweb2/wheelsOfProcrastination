@@ -36,6 +36,42 @@ export const GYM_LOG_CAP = 220
 export const REST_MIN = 15
 export const REST_MAX = 240
 
+/**
+ * The adjustable dumbbell's real notches, in pounds — the TruLap 90 lb pair in
+ * the basement. It cannot be set to 20 lb, so the app never asks for 20 lb:
+ * every suggested weight is snapped onto this ladder, and + / − in the runner
+ * walk it one notch at a time instead of stepping by 2.5.
+ *
+ * Only meaningful in pounds. A profile on kg keeps the old free 2.5 steps.
+ */
+export const DUMBBELL_LB = [
+  8.5, 12, 15.5, 18.5, 22, 25, 28.5, 32, 35.5, 38.5, 42, 45.5, 48.5, 52, 55.5, 58.5, 62, 65, 68.5, 72, 75, 78.5, 82, 85.5,
+  88.5, 92,
+] as const
+
+/** The notches available for a given unit — empty when there is no ladder to follow. */
+export function loadSteps(unit: 'lb' | 'kg' | undefined): readonly number[] {
+  return (unit ?? 'lb') === 'lb' ? DUMBBELL_LB : []
+}
+
+/** The closest notch to `w`. Values outside the ladder clamp to its ends. */
+export function snapLoad(w: number, unit: 'lb' | 'kg' | undefined = 'lb'): number {
+  const steps = loadSteps(unit)
+  if (steps.length === 0 || !Number.isFinite(w)) return round(w)
+  return steps.reduce((best, s) => (Math.abs(s - w) < Math.abs(best - w) ? s : best), steps[0])
+}
+
+/** One notch up (`dir` 1) or down (−1) from `w`. Off a ladder, a 5% step of at least 2.5. */
+export function stepLoad(w: number, dir: 1 | -1, unit: 'lb' | 'kg' | undefined = 'lb'): number {
+  const steps = loadSteps(unit)
+  if (steps.length === 0) {
+    const step = Math.max(2.5, Math.round(w * 0.05))
+    return round(Math.max(step, w + dir * step))
+  }
+  const i = steps.indexOf(snapLoad(w, unit))
+  return steps[clamp(i + dir, 0, steps.length - 1)]
+}
+
 /** Max exercises in a session, by minute budget. */
 const MAX_MOVES: Record<number, number> = { 5: 3, 10: 4, 15: 5, 20: 6, 25: 7, 30: 8, 45: 10, 60: 12 }
 
@@ -109,6 +145,7 @@ const DIOGO_BRIEF: GymBrief = {
   age: 43,
   avoidBackLoad: true,
   noWarmup: true,
+  romanChairWarmup: true,
   weightUnit: 'lb',
   text: `43 years old. Plays pickleball regularly — that IS my cardio, don't add extra cardio work.
 Goals, in order: (1) a bulletproof core and lower back so I can play pickleball for decades, (2) a good-looking chest, (3) stay consistent.
@@ -221,6 +258,34 @@ export function usableExercises(
   return wanted.length >= 3 ? wanted : pool
 }
 
+// --- the roman-chair opener -------------------------------------------------
+// A back extension before anything else is Diogo's standing instruction: it
+// wakes the lower back up before the session asks anything of it. It is a
+// SETTING (Coach → "Roman chair warm-up", ON by default), enforced by the
+// offline planner AND bolted onto whatever the AI coach answers — the model
+// gets told about it, but the app doesn't rely on it obeying.
+
+/** Names that mean "the back-extension bench". Matched against the catalog, id included. */
+const ROMAN_CHAIR = /roman[\s-]?chair|back\s?extension|hyper[\s-]?extension|hyperext/i
+
+export function wantsRomanChair(brief: GymBrief): boolean {
+  return brief.romanChairWarmup !== false
+}
+
+/**
+ * The exercise that opens the session when the setting is on, or undefined when
+ * the basement has no such bench catalogued. Gear mode is deliberately ignored:
+ * a back extension is bodyweight, and the warm-up happens on a weights day too.
+ */
+export function romanChairMove(
+  catalog: GymCatalog | null,
+  brief: GymBrief,
+  memory: Record<string, ExerciseMemory>,
+): ExerciseDef | undefined {
+  if (!wantsRomanChair(brief)) return undefined
+  return usableExercises(catalog, brief, memory, 'mixed').find((e) => ROMAN_CHAIR.test(e.name) || ROMAN_CHAIR.test(e.id))
+}
+
 /** Seconds of rest to offer: what you actually take, blended with the exercise's own default. */
 export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number {
   const learned = mem?.restLearned
@@ -232,15 +297,17 @@ export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number
  * The weight to put in front of you. Starts from what you lifted last time and
  * moves with how you corrected the last suggestion: you loaded MORE than asked
  * (it was too easy) → nudge up; you loaded LESS (too hard) → nudge down.
+ *
+ * The answer always lands on a real notch of the dumbbell (see `DUMBBELL_LB`),
+ * so "nudge up" means the next hole, not an arithmetic 5%.
  */
-export function weightFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number | undefined {
+export function weightFor(e: ExerciseDef, mem: ExerciseMemory | undefined, unit: 'lb' | 'kg' = 'lb'): number | undefined {
   if (e.kind !== 'weight') return undefined
   const last = mem?.suggestedWeight ?? mem?.lastWeight
   if (!last) return undefined
-  const step = Math.max(2.5, Math.round(last * 0.05))
-  if (mem?.lastAdjust === 'up') return round(last + step)
-  if (mem?.lastAdjust === 'down') return round(Math.max(step, last - step))
-  return round(last)
+  if (mem?.lastAdjust === 'up') return stepLoad(last, 1, unit)
+  if (mem?.lastAdjust === 'down') return stepLoad(last, -1, unit)
+  return snapLoad(last, unit)
 }
 
 function round(n: number): number {
@@ -425,6 +492,15 @@ export function planSession(input: PlanInput): GymSession {
   }
 }
 
+/**
+ * Prescribe ONE named exercise — same reps, weight, rest and pace logic as a
+ * planned session, just for a single move. The coach layer uses it to bolt the
+ * roman-chair opener onto a plan the model built.
+ */
+export function planOne(e: ExerciseDef, input: PlanInput, index = 0): SessionExercise {
+  return buildSessionExercise(e, input, index)
+}
+
 /** Pick ONE replacement for an exercise you don't feel like doing today. */
 export function pickReplacement(input: PlanInput, replacing: SessionExercise, keep: SessionExercise[]): SessionExercise | null {
   const day = input.day ?? dayKey()
@@ -492,6 +568,16 @@ function pickExercises(input: PlanInput, day: string): ExerciseDef[] {
   const partsUsed: BodyPart[] = []
   let seconds = 0
 
+  // the standing instruction: the lower back gets woken up before anything else
+  // asks it for a favour. A "do more" block is a continuation, so it doesn't
+  // start over with the warm-up.
+  const opener = input.followUp ? undefined : romanChairMove(input.catalog, input.gym.brief, input.gym.ex)
+  if (opener && !(input.exclude ?? []).includes(opener.id)) {
+    chosen.push(opener)
+    partsUsed.push(...opener.parts)
+    seconds += exerciseSeconds(buildSessionExercise(opener, input, 0))
+  }
+
   while (chosen.length < maxMoves) {
     const ranked = scoreCandidates(input, day, partsUsed).filter((c) => !chosen.some((x) => x.id === c.e.id))
     if (ranked.length === 0) break
@@ -507,6 +593,8 @@ function pickExercises(input: PlanInput, day: string): ExerciseDef[] {
     seconds += cost
   }
 
+  // the opener stays the opener — ordering only shuffles what comes after it
+  if (chosen[0] === opener) return [chosen[0], ...orderSession(chosen.slice(1))]
   return orderSession(chosen)
 }
 
@@ -546,8 +634,9 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
 
   // the ramp-in: the first two moves of the session run light, so no separate
   // warm-up block is ever needed (see the "I don't like to warm up" brief)
-  let weight = weightFor(e, mem)
-  if (weight != null && index < 2) weight = round(Math.max(2.5, weight * (index === 0 ? 0.5 : 0.75)))
+  const unit = gym.brief.weightUnit ?? 'lb'
+  let weight = weightFor(e, mem, unit)
+  if (weight != null && index < 2) weight = snapLoad(Math.max(2.5, weight * (index === 0 ? 0.5 : 0.75)), unit)
 
   return {
     exId: e.id,
@@ -555,6 +644,7 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     emoji: e.emoji,
     kind: e.kind,
     parts: e.parts,
+    intensity: e.intensity,
     how: e.how,
     plan: { reps, weight, restSec: restFor(e, mem) },
     sets: [],
@@ -613,19 +703,42 @@ export function sessionBonus(s: GymSession, doneCount: number): number {
 }
 
 // --- the end-of-session report ----------------------------------------------
-// Two honest comparisons — how long the work took vs how long it was supposed
-// to take, and how long you rested vs what was offered — plus one letter.
+// The grade is about the TRAINING, not the clock.
 //
-// The targets are accumulated PER SET as you do it (see the store), never from
-// the whole plan, so walking out after two exercises grades those two exercises
-// and nothing else. You can't buy an A+ by skipping.
+// The old one was a stopwatch: total time taken ÷ total time planned. That
+// punished the honest version of a good session — grinding a set slowly, going
+// heavier than asked, adding a rep — because all of those take longer. So the
+// letter is now three things, worth 100 points between them:
+//
+//   💪 Work (60)      — the reps you actually did, weighted by load and by how
+//                       hard the movement is, against what the plan asked for.
+//   🔥 Effort (20)    — how heavy the session itself was: the intensity of the
+//                       moves, going above the prescribed weight, max tests.
+//   😮‍💨 Rest (20)      — the ONLY place the clock still counts. Resting as long
+//                       as offered is full marks; doubling it is zero.
+//
+// Time spent working is reported (it is interesting) but never graded. Targets
+// are still accumulated PER SET as you do it, so walking out after two
+// exercises grades those two exercises and nothing else — you can't buy an A+
+// by skipping.
 
 export type SessionGrade = 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
 
 export interface SessionReport {
   grade: SessionGrade
-  /** Total time taken ÷ total time asked for. Under 1 = quicker than target. */
-  ratio: number
+  /** 0–100, the three components below added up. */
+  score: number
+  /** Reps × load × difficulty, done vs asked for. 1 = exactly the prescription. */
+  workRatio: number
+  workPoints: number
+  /** Average movement intensity of what you did, 1–3. */
+  intensity: number
+  effortPoints: number
+  /** Rest taken ÷ rest offered. Under 1 = you got back to work early. */
+  restRatio: number
+  restPoints: number
+  /** How much heavier than prescribed you loaded, as a share (0.1 = 10% up). */
+  loadOverPlan: number
   workSec: number
   workTargetSec: number
   restSec: number
@@ -636,29 +749,127 @@ export interface SessionReport {
   blurb: string
 }
 
-const GRADE_BANDS: { max: number; grade: SessionGrade; blurb: string }[] = [
-  { max: 0.8, grade: 'A+', blurb: 'Way quicker than the plan. Relentless.' },
-  { max: 0.95, grade: 'A', blurb: 'Ahead of the plan — exactly the pace it was built for.' },
-  { max: 1.1, grade: 'B', blurb: 'Right around target. Solid, honest session.' },
-  { max: 1.3, grade: 'C', blurb: 'A bit slower than planned. Cut the standing around.' },
-  { max: 1.6, grade: 'D', blurb: 'A lot of the session was spent not training.' },
-  { max: Infinity, grade: 'F', blurb: 'More time resting than working. Shorter rests next time.' },
+const GRADE_BANDS: { min: number; grade: SessionGrade }[] = [
+  { min: 92, grade: 'A+' },
+  { min: 82, grade: 'A' },
+  { min: 70, grade: 'B' },
+  { min: 57, grade: 'C' },
+  { min: 44, grade: 'D' },
+  { min: -Infinity, grade: 'F' },
 ]
+
+/**
+ * What one set is worth. Reps carry the load with them: 10 reps at 40 lb is
+ * more work than 10 at 20, and 10 of something heavy is more work than 10 of
+ * something light. A hold is counted at roughly six seconds to the rep, a
+ * cardio minute at eight — the exchange rates only have to be consistent,
+ * because every number here is a ratio of done ÷ asked.
+ */
+function setEffort(
+  se: Pick<SessionExercise, 'kind' | 'perSide' | 'intensity'>,
+  reps: number,
+  weight: number | undefined,
+): number {
+  const clocked = se.kind === 'timed' || se.kind === 'cardio'
+  const total = se.perSide && !clocked ? reps * 2 : reps
+  const units = se.kind === 'timed' ? total / 6 : se.kind === 'cardio' ? total * 8 : total
+  const load = weight && weight > 0 ? 1 + weight / 40 : 1
+  const hard = 0.7 + (se.intensity ?? 2) * 0.3 // 1 → 1.0, 2 → 1.3, 3 → 1.6
+  return units * load * hard
+}
 
 /** The report for a finished session, or null when nothing was logged to grade. */
 export function sessionReport(s: GymSession): SessionReport | null {
-  const workTargetSec = Math.round(s.workTargetSec ?? 0)
-  const restTargetSec = Math.round(s.restTargetSec ?? 0)
-  const totalTargetSec = workTargetSec + restTargetSec
-  if (totalTargetSec <= 0) return null
+  let done = 0
+  let asked = 0
+  let intensitySum = 0
+  let intensityN = 0
+  let loadDone = 0
+  let loadAsked = 0
+
+  // An exercise you STARTED is graded against its whole prescription — stopping
+  // at one set of three is a third of the work, and the letter says so. An
+  // exercise you never touched isn't counted at all, which is what stops a short
+  // honest session from being graded as a failed long one.
+  for (const se of s.exercises) {
+    if (se.skipped || se.sets.length === 0) continue
+
+    for (const set of se.sets) {
+      done += setEffort(se, set.reps, set.weight)
+      // load is compared set-for-set, so "heavier than asked" means the same
+      // thing whether you did one set or all five
+      if (se.plan.weight && se.plan.weight > 0) {
+        loadDone += set.weight ?? 0
+        loadAsked += se.plan.weight
+      }
+    }
+    for (const planned of se.plan.reps) asked += setEffort(se, planned, se.plan.weight)
+    intensitySum += se.intensity ?? 2
+    intensityN += 1
+  }
+
+  if (asked <= 0 || intensityN === 0) return null
 
   const workSec = Math.round(s.workSec ?? 0)
+  const workTargetSec = Math.round(s.workTargetSec ?? 0)
   const restSec = Math.round(s.restTotalSec ?? 0)
-  const totalSec = workSec + restSec
-  const ratio = totalSec / totalTargetSec
-  const band = GRADE_BANDS.find((b) => ratio < b.max) ?? GRADE_BANDS[GRADE_BANDS.length - 1]
+  const restTargetSec = Math.round(s.restTargetSec ?? 0)
 
-  return { grade: band.grade, ratio, workSec, workTargetSec, restSec, restTargetSec, totalSec, totalTargetSec, blurb: band.blurb }
+  // 💪 work — full marks for doing the prescription, and up to a fifth again on
+  // top for beating it (more reps, heavier, an extra set)
+  const workRatio = done / asked
+  const workPoints = clamp(Math.min(workRatio, 1) * 60 + Math.max(0, Math.min(workRatio - 1, 0.25)) * 40, 0, 70)
+
+  // 🔥 effort — how heavy the session itself was. Light day, light score: this is
+  // the part you move by choosing "fired up" and by loading more than asked.
+  const intensity = intensitySum / intensityN
+  const loadOverPlan = loadAsked > 0 ? loadDone / loadAsked - 1 : 0
+  const tests = s.exercises.filter((e) => e.ladderTest && e.sets.length > 0).length
+  const effortPoints = clamp(
+    ((intensity - 1) / 2) * 14 + 4 + clamp(loadOverPlan, 0, 0.25) * 24 + tests * 2,
+    0,
+    20,
+  )
+
+  // 😮‍💨 rest — the only stopwatch left. At or under the offered rest is full
+  // marks; twice the offered rest is none of them.
+  const restRatio = restTargetSec > 0 ? restSec / restTargetSec : 1
+  const restPoints = restTargetSec > 0 ? clamp(2 - restRatio, 0, 1) * 20 : 20
+
+  const score = Math.round(clamp(workPoints + effortPoints + restPoints, 0, 100))
+  const grade = (GRADE_BANDS.find((b) => score >= b.min) ?? GRADE_BANDS[GRADE_BANDS.length - 1]).grade
+
+  return {
+    grade,
+    score,
+    workRatio,
+    workPoints: Math.round(workPoints),
+    intensity,
+    effortPoints: Math.round(effortPoints),
+    restRatio,
+    restPoints: Math.round(restPoints),
+    loadOverPlan,
+    workSec,
+    workTargetSec,
+    restSec,
+    restTargetSec,
+    totalSec: workSec + restSec,
+    totalTargetSec: workTargetSec + restTargetSec,
+    blurb: gradeBlurb(grade, workRatio, restRatio, loadOverPlan),
+  }
+}
+
+/** Says which of the three things earned (or cost) the letter — never just "good job". */
+function gradeBlurb(grade: SessionGrade, workRatio: number, restRatio: number, loadOverPlan: number): string {
+  if (workRatio >= 1.1 && loadOverPlan > 0.05) return 'More reps AND more weight than the plan asked for. That is a great session.'
+  if (workRatio >= 1.1) return 'You did more than the plan asked for. Take the win.'
+  if (loadOverPlan > 0.05) return 'You went heavier than prescribed — the next plan will ask for more.'
+  if (restRatio > 1.6) return 'The work was fine; the rests were nearly double what was offered.'
+  if (restRatio > 1.2) return 'Solid work, a bit long between sets.'
+  if (workRatio >= 0.95) return 'The whole prescription, done properly. Exactly what was asked.'
+  if (workRatio >= 0.75) return 'Most of the session landed. Slow reps are fine — missing ones aren’t.'
+  if (grade === 'F') return 'Barely any of the plan got done. Come back and finish it.'
+  return 'A chunk of the plan didn’t get done. Shorter session next time, fully finished, beats this.'
 }
 
 /** `m:ss`, for the report and the live timers. */

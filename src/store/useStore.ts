@@ -159,6 +159,7 @@ import {
   isPersonalRecord,
   learnFromExercise,
   loggedReps,
+  pickReplacement,
   seedBrief,
   sessionBonus,
   setSeconds,
@@ -571,8 +572,12 @@ interface StoreState {
   gymPlan: (minutes: number, mood: Mood, opts?: { gearMode?: GearMode; followUp?: GymSession | null }) => Promise<void>
   /** "Not that one today." Swaps one exercise on the preview for something else. */
   gymSwap: (exId: string, reason?: string) => Promise<'ok' | 'none'>
-  /** Drop an exercise from the preview outright. */
-  gymDrop: (exId: string) => void
+  /**
+   * Take an exercise off the preview and put something sensible in its place,
+   * instantly and offline — no coach call, no credits, no waiting. Returns
+   * 'dropped' when there was nothing left to swap in and the slot just closed.
+   */
+  gymDrop: (exId: string) => 'swapped' | 'dropped'
   /** Kill an exercise for good: out of the shared catalog and never planned again. */
   gymDeleteExercise: (exId: string) => void
   /** Throw away the previewed session. */
@@ -3027,10 +3032,39 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymDrop(exId) {
+      // "I don't want this one" used to just leave a hole in the session — you
+      // asked for 30 minutes and quietly got 25. The offline planner knows what
+      // the rest of the session is working, so it fills the slot on the spot:
+      // same body area where it can, never something already on the list.
+      const { data, gymCatalog } = get()
+      const active = data.gym.active
+      const target = active?.exercises.find((e) => e.exId === exId)
+      if (!active || !target) return 'dropped'
+      const keep = active.exercises.filter((e) => e.exId !== exId)
+
+      const replacement = pickReplacement(
+        {
+          catalog: gymCatalog,
+          gym: data.gym,
+          minutes: active.minutes,
+          mood: active.mood,
+          gearMode: active.gearMode,
+          day: active.day,
+          exclude: keep.map((k) => k.exId),
+        },
+        target,
+        keep,
+      )
+
       commit((d) => {
         if (!d.gym.active) return
-        d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
+        d.gym.active.exercises = replacement
+          ? d.gym.active.exercises.map((e) =>
+              e.exId === exId ? { ...replacement, why: `swapped in offline for ${target.name}` } : e,
+            )
+          : d.gym.active.exercises.filter((e) => e.exId !== exId)
       })
+      return replacement ? 'swapped' : 'dropped'
     },
 
     gymDeleteExercise(exId) {

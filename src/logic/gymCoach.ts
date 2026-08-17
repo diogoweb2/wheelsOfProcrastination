@@ -22,8 +22,11 @@ import {
   learnedSetSeconds,
   partFatigue,
   pickReplacement,
+  planOne,
   planSession,
   restFor,
+  romanChairMove,
+  snapLoad,
   usableExercises,
   weightFor,
 } from './gym'
@@ -112,7 +115,7 @@ export async function coachPlan(input: CoachInput): Promise<CoachOutcome> {
         source: 'ai',
         model,
         note: parsed.note?.slice(0, 300),
-        exercises: topUpToBudget(trimToBudget(exercises, input.minutes), input, day),
+        exercises: withOpener(topUpToBudget(trimToBudget(exercises, input.minutes), input, day), input),
         coins: 0,
         followUp: input.followUp ? true : undefined,
       },
@@ -160,7 +163,7 @@ export async function coachSwap(
 
   try {
     const model = input.ai?.model?.trim() || DEFAULT_MODEL
-    const prompt = `${briefBlock(input)}
+    const prompt = `${briefBlock(input, false)}
 Today's session, already agreed:
 ${keep.map((k, i) => `${i + 1}. ${k.name} (${k.parts.join('/')})`).join('\n') || '(nothing else yet)'}
 
@@ -198,12 +201,19 @@ function ask(key: string, model: string, prompt: string): Promise<string> {
 
 // --- prompt -----------------------------------------------------------------
 
-function briefBlock(input: CoachInput): string {
+function briefBlock(input: CoachInput, withOpener = true): string {
   const b = input.gym.brief
+  // only worth saying when the bench actually exists in the catalog — and the
+  // app bolts it on afterwards either way, so this is a hint, not a dependency.
+  // A swap never hears about it: it is replacing one move, not rebuilding the
+  // session, and the opener is not up for negotiation.
+  const opener = withOpener && !input.followUp ? romanChairMove(input.catalog, b, input.gym.ex) : undefined
   const rules = [
     b.avoidBackLoad && 'HARD RULE: nothing that loads the lower back or spine heavily.',
     b.kidMode && 'HARD RULE: this is a child — bodyweight first, nothing heavy, keep it fun and short.',
     b.noWarmup && 'They refuse to do a warm-up block. Make the first one or two moves light or bodyweight so the warm-up happens naturally.',
+    opener &&
+      `HARD RULE: the session ALWAYS opens with "${opener.name}" (id=${opener.id}) as the warm-up — it wakes the lower back up before anything else loads it. Make it the FIRST entry in your list, easy reps, and plan the rest of the session around it.`,
   ].filter(Boolean)
   return `Athlete: ${input.name}${b.age ? `, ${b.age} years old` : ''}.
 Their own words:
@@ -363,8 +373,11 @@ function materialise(row: CoachRow, pool: ExerciseDef[], gym: GymState): Session
   const restRaw = Number(row.restSec)
   const restSec = Number.isFinite(restRaw) && restRaw > 0 ? Math.min(REST_MAX, Math.max(REST_MIN, Math.round(restRaw))) : restFor(def, mem)
 
+  // the dumbbell has holes, not a dial: whatever the model says is snapped onto
+  // a real notch, exactly like the offline planner's suggestion
+  const unit = gym.brief.weightUnit ?? 'lb'
   const wRaw = Number(row.weight)
-  const weight = def.kind === 'weight' && Number.isFinite(wRaw) && wRaw > 0 ? Math.round(wRaw * 2) / 2 : weightFor(def, mem)
+  const weight = def.kind === 'weight' && Number.isFinite(wRaw) && wRaw > 0 ? snapLoad(wRaw, unit) : weightFor(def, mem, unit)
 
   return {
     exId: def.id,
@@ -372,6 +385,7 @@ function materialise(row: CoachRow, pool: ExerciseDef[], gym: GymState): Session
     emoji: def.emoji,
     kind: def.kind,
     parts: def.parts,
+    intensity: def.intensity,
     how: def.how,
     plan: { reps, weight, restSec },
     sets: [],
@@ -382,6 +396,32 @@ function materialise(row: CoachRow, pool: ExerciseDef[], gym: GymState): Session
     why: typeof row.why === 'string' ? row.why.slice(0, 90) : undefined,
     coins: 0,
   }
+}
+
+/**
+ * The roman-chair warm-up is a setting, not a suggestion (§18e). The model is
+ * told about it, but the app never depends on it having listened: if the opener
+ * isn't first in the answer, it is moved there — and if it isn't in the answer
+ * at all, it is built offline and pushed onto the front.
+ */
+function withOpener(list: SessionExercise[], input: CoachInput): SessionExercise[] {
+  if (input.followUp) return list // a bonus block continues a session, it doesn't restart it
+  const opener = romanChairMove(input.catalog, input.gym.brief, input.gym.ex)
+  if (!opener) return list
+  if (list[0]?.exId === opener.id) return list
+
+  const already = list.find((e) => e.exId === opener.id)
+  if (already) return [already, ...list.filter((e) => e !== already)]
+
+  const built = planOne(opener, {
+    catalog: input.catalog,
+    gym: input.gym,
+    minutes: input.minutes,
+    mood: input.mood,
+    gearMode: input.gearMode,
+    day: input.day,
+  })
+  return [{ ...built, why: 'lower-back warm-up — always first' }, ...list]
 }
 
 /** ~5 minutes per exercise, sets and rest included. Used to brief the model and to sanity-check it. */

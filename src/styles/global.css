@@ -2574,6 +2574,37 @@ input, select { font-family: inherit; }
 }
 .gym-upnext strong { color: var(--text); }
 
+/* The clock and the big picture of what's coming, side by side: the rest is
+   spent walking over and loading the thing, not reading a sentence about it. */
+.gym-rest-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.gym-next-art { display: flex; justify-content: center; flex: none; }
+.gym-next-art .gym-demo { border-radius: 16px; }
+
+/* --- the foot button ---
+   The one action of the runner (GO / DONE / NEXT), pinned above the app's
+   bottom menu and big enough to hit with a foot mid-set. The session countdown
+   rides on top of it, so "how am I doing on time" is never scrolled away. */
+.gym-foot {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(62px + env(safe-area-inset-bottom));
+  width: 100%; max-width: var(--app-w);
+  padding: 8px 12px 10px;
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+  z-index: 25;
+}
+.gym-foot .btn { min-height: 78px; font-size: 25px; margin-top: 0; }
+/* the runner's content has to clear the pinned button */
+.gym-foot-gap { height: 108px; }
+
+.gym-countdown {
+  display: flex; align-items: baseline; justify-content: center; gap: 6px;
+  margin-bottom: 6px; font-size: 13px; font-weight: 900;
+  font-variant-numeric: tabular-nums; color: var(--muted);
+}
+.gym-countdown strong { font-size: 16px; color: var(--text); }
+.gym-countdown.over strong,
+.gym-countdown.over { color: var(--yellow); }
+
 /* --- the work clock (planks, runs: the app times it, you don't type it) --- */
 .gym-clock { margin-top: 16px; text-align: center; }
 .gym-clock-time { font-size: 52px; font-weight: 900; line-height: 1; letter-spacing: -1px; color: var(--text); }
@@ -2606,6 +2637,19 @@ input, select { font-family: inherit; }
 .gym-report-diff { min-width: 62px; text-align: right; font-size: 11px; font-weight: 900; }
 .gym-report-diff.good { color: var(--green); }
 .gym-report-diff.bad { color: var(--yellow); }
+
+/* the three things the grade is actually made of */
+.gym-score { margin-top: 14px; text-align: left; }
+.gym-score-row { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.gym-score-row:last-child { border-bottom: none; }
+.gym-score-head { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 900; }
+.gym-score-head b { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--gold); }
+.gym-score-bar {
+  height: 7px; margin-top: 6px; border-radius: 999px;
+  background: var(--bg2); border: 1px solid var(--line); overflow: hidden;
+}
+.gym-score-bar span { display: block; height: 100%; background: var(--gold); border-radius: 999px; }
+.gym-score-note { display: block; margin-top: 5px; font-size: 11px; font-weight: 800; color: var(--muted); line-height: 1.4; }
 
 /* --- stats --- */
 .gym-card-head {

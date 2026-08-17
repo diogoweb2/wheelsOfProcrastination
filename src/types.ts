@@ -894,6 +894,12 @@ export interface SessionExercise {
   emoji: string
   kind: ExerciseKind
   parts: BodyPart[]
+  /**
+   * How hard the movement itself is (1 light … 3 heavy), copied off the catalog
+   * at plan time. Denormalised like `name` because the end-of-session grade is
+   * built from it and a session must stay gradable after a catalog edit.
+   */
+  intensity?: 1 | 2 | 3
   how?: string
   /** The ask. `reps` is per-set, so a ladder is literally [2,3,2,3,2]. */
   plan: { reps: number[]; weight?: number; restSec: number }
@@ -951,6 +957,12 @@ export interface GymBrief {
   age?: number
   avoidBackLoad?: boolean // lower-back history — heavy spinal loading is filtered out
   noWarmup?: boolean // no warmup block; ramp in with light sets of the real work instead
+  /**
+   * Always open the session on the roman chair (back extension), to protect the
+   * lower back. ON unless explicitly switched off — read everywhere as
+   * `!== false`, so profiles saved before this flag existed still get it.
+   */
+  romanChairWarmup?: boolean
   kidMode?: boolean // bodyweight-first, nothing heavy, short and fun
   weightUnit?: 'lb' | 'kg'
   updatedAt?: string

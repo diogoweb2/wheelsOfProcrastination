@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import { PARENT_ID } from '../../store/storage'
 import type { ExerciseRating } from '../../types'
-import { RATING_LABEL, allExercises, seedBrief } from '../../logic/gym'
+import { RATING_LABEL, allExercises, romanChairMove, seedBrief } from '../../logic/gym'
 import { DEFAULT_MODEL, MODEL_PRESETS, coachReady } from '../../logic/gymCoach'
 import { wakeLockSupported } from '../../logic/wakeLock'
 import { sfx } from '../../audio'
@@ -26,6 +26,9 @@ export function CoachPanel() {
   }, [brief.text, dirty])
 
   const moves = allExercises(gymCatalog).filter((e) => !e.retired)
+  // said out loud in the toggle's hint: the setting is only worth anything if
+  // there is actually a bench in the basement for it to prescribe
+  const romanChair = romanChairMove(gymCatalog, { ...brief, romanChairWarmup: true }, gym.ex)
   const known = moves.filter((e) => gym.ex[e.id]?.timesDone).length
   const rated = moves.filter((e) => gym.ex[e.id]?.rating).length
   const readiness = Math.min(100, Math.round((gym.sessions.length / 20) * 50 + (known / Math.max(1, moves.length)) * 50))
@@ -107,6 +110,16 @@ export function CoachPanel() {
           label="No warm-up block"
           hint="The first one or two exercises run light instead, so the warm-up happens by itself."
           onChange={(v) => gymSetBrief({ noWarmup: v })}
+        />
+        <Toggle
+          on={brief.romanChairWarmup !== false}
+          label="Roman chair first, always"
+          hint={
+            romanChair
+              ? `Every session opens with ${romanChair.name} to wake the lower back up. The AI coach is told, and the app puts it there whether or not the coach listened.`
+              : 'On, but there is no roman chair / back-extension bench in the catalog yet — add one in the Gear tab and it will start opening every session.'
+          }
+          onChange={(v) => gymSetBrief({ romanChairWarmup: v })}
         />
         <Toggle
           on={!!brief.kidMode}
