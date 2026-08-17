@@ -183,6 +183,16 @@ export function markSpans(paragraph: string, comments: EssayComment[]): MarkSpan
   for (const c of comments) {
     const quote = c.quote?.trim()
     if (!quote) continue
+    // The reviewer tapped a specific word: honour where he tapped, as long as
+    // the same words are still sitting there.
+    if (c.at !== undefined && paragraph.slice(c.at, c.at + quote.length) === quote) {
+      const end = c.at + quote.length
+      if (!taken.some(([s, e]) => c.at! < e && s < end)) {
+        spans.push({ start: c.at, end, comment: c })
+        taken.push([c.at, end])
+        continue
+      }
+    }
     let from = 0
     for (;;) {
       const at = paragraph.indexOf(quote, from)

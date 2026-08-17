@@ -463,7 +463,13 @@ function AddNoteSheet({
               sfx.click()
               // Nothing typed: the kind of mark says it on its own.
               const note = text.trim() || ISSUE_DEFAULT_NOTE[issue]
-              onAdd({ para: pick.para, issue, text: note, ...(pick.quote ? { quote: pick.quote } : {}) })
+              onAdd({
+                para: pick.para,
+                issue,
+                text: note,
+                // the offset goes with the quote, so "a" means the "a" he tapped
+                ...(pick.quote ? { quote: pick.quote, at: pick.start } : {}),
+              })
               onClose()
             }}
           >

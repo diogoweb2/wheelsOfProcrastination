@@ -34,6 +34,28 @@ export function EssayEditor({
   const [focused, setFocused] = useState<string | null>(null)
   // where the caret has to land once React has re-rendered the new value
   const caretAfterRender = useRef<{ key: string; at: number } | null>(null)
+  // the text each box was last measured at, so we only re-measure what changed
+  const measured = useRef<Record<string, string>>({})
+
+  // Each paragraph box grows to fit its text. Measuring means collapsing it to
+  // `auto` first, and that shrinks the page for an instant — long enough for the
+  // browser to clamp the scroll position, which left the whole screen nudged up
+  // and down on every single keypress. So: never measure a box whose text
+  // hasn't changed, and put the scroll back where it was afterwards.
+  useLayoutEffect(() => {
+    const boxes = Object.entries(fields.current).filter(
+      ([key, el]) => el instanceof HTMLTextAreaElement && (measured.current[key] !== el.value || !el.style.height),
+    ) as [string, HTMLTextAreaElement][]
+    if (!boxes.length) return
+
+    const y = window.scrollY
+    for (const [key, el] of boxes) {
+      measured.current[key] = el.value
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    }
+    if (window.scrollY !== y) window.scrollTo(0, y)
+  })
 
   useLayoutEffect(() => {
     const pending = caretAfterRender.current
@@ -127,13 +149,7 @@ export function EssayEditor({
           </div>
           <textarea
             {...noHelp}
-            ref={(el) => {
-              fields.current[`p${i}`] = el
-              if (el) {
-                el.style.height = 'auto'
-                el.style.height = `${el.scrollHeight}px`
-              }
-            }}
+            ref={(el) => { fields.current[`p${i}`] = el }}
             value={p}
             onChange={(e) => onParagraph(i, e.target.value)}
             onFocus={() => setFocused(`p${i}`)}

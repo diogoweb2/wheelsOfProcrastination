@@ -1048,6 +1048,15 @@ export interface EssayComment {
   round: number // the review round it was raised in
   para: number // paragraph index; -1 = the title
   quote?: string // exact substring to circle
+  /**
+   * Where that substring started in the part, at the moment it was picked.
+   *
+   * A short quote ("a", "i", "the") occurs all over a paragraph, so looking the
+   * text up again lands on the first one and circles a word the reviewer never
+   * tapped. Notes made by hand carry the offset; anything that arrives without
+   * one (or whose text has moved since) falls back to the search.
+   */
+  at?: number
   text: string // the note itself, written for a 12-year-old
   issue: EssayIssue
   /**
