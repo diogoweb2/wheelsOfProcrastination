@@ -25,6 +25,10 @@ import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayT
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
+import { CANADA_GEOGRAPHY_2_SEED } from '../quiz/canadaGeography2Seed'
+import { CANADA_HISTORY_SEED } from '../quiz/canadaHistorySeed'
+import { ONTARIO_GEOGRAPHY_SEED } from '../quiz/ontarioGeographySeed'
+import { TORONTO_GEOGRAPHY_SEED } from '../quiz/torontoGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
 import { AGENTS_SEED } from '../quiz/agentsSeed'
 import { SCIENCE_6_SEED } from '../quiz/science6Seed'
@@ -33,6 +37,10 @@ import { LOGIC_6_SEED } from '../quiz/logic6Seed'
 
 const ALL_SEEDS = [
   ...CANADA_GEOGRAPHY_SEED,
+  ...CANADA_GEOGRAPHY_2_SEED,
+  ...CANADA_HISTORY_SEED,
+  ...ONTARIO_GEOGRAPHY_SEED,
+  ...TORONTO_GEOGRAPHY_SEED,
   ...AI_DEV_SEED,
   ...AGENTS_SEED,
   ...SCIENCE_6_SEED,

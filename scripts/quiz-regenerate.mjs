@@ -48,6 +48,12 @@ const TOPICS = [
     brief:
       'Claude Code mastery for a senior frontend dev using it for personal projects: CLAUDE.md, /init, plan mode, subagents, hooks, MCP, headless -p and piping, /compact vs /clear, --continue/--resume, permissions allowlists, custom slash commands/skills, git worktrees, model selection, token-efficient workflows, extended thinking. funFact = a concrete pro tip.',
   },
+  {
+    id: 'canada-history',
+    target: 50,
+    brief:
+      'Canada history for a 12-year-old (born Feb 2014, Ontario grade 6): First Peoples (First Nations, Inuit, Métis), Vikings, French & British explorers, New France, the fur trade, the War of 1812, the Underground Railroad, Confederation, the Canadian Pacific Railway, Louis Riel and the Métis, the Klondike, residential schools (honest but age-appropriate), the world wars and remembrance, the 1965 flag, Nunavut, famous Canadians. AVOID date-memorisation: ask about the story, not the calendar. If a year IS the answer, every wrong option must be centuries away (e.g. 1492 / 1776 / 1867 / 1965 / 1999). Fun tone, light One Piece flavor in funFact only (never in the question itself).',
+  },
   // When a new Ben topic goes live, add it here AND flip comingSoon in src/logic/quiz.ts:
   // { id: 'science-6', target: 50, brief: 'Ontario grade 6 science: space, electricity, flight, biodiversity…' },
 ]
