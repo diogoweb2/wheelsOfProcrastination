@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import { BACKGROUND_CATALOG, backgroundUrl } from '../logic/backgrounds'
 import { BACKGROUND_COST } from '../logic/economy'
-import { giftCardDaysLeft, prizesFor } from '../logic/quiz'
+import { prizeAllowance, prizesFor, type Prize } from '../logic/quiz'
 import { BerryCoin } from '../components/BerryCoin'
 import { DevilFruit } from '../components/DevilFruit'
 import { sfx } from '../audio'
@@ -204,29 +204,30 @@ function BackgroundsTab() {
 // --- treasures (real prizes paid with Devil Fruits from final tests) --------
 
 function TreasuresTab() {
-  const { data, activeProfileId, buyGiftCard } = useStore()
+  const { data, activeProfileId, buyGiftCard, prizeCatalog } = useStore()
   const [confirming, setConfirming] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
 
-  // each profile shops from its own catalog with its own 🍇
-  const catalog = prizesFor(activeProfileId ?? '')
+  // each profile shops from its own catalog with its own 🍇, and every treasure
+  // carries its own allowance — candy can be a habit, sushi stays an event
+  const catalog = prizesFor(activeProfileId ?? '', prizeCatalog)
   const fruits = data.economy.devilFruits
   const unpaidCount = data.giftcards.filter((p) => !p.paidAt).length
-  const daysLeft = giftCardDaysLeft(data)
   const isAdmin = activeProfileId !== KID_ID
 
-  function buy(itemId: string, cost: number) {
-    const result = buyGiftCard(itemId)
+  function buy(item: Prize) {
+    const result = buyGiftCard(item.id)
     setConfirming(null)
     if (result === 'ok') {
       sfx.bigWin()
       setMsg(isAdmin ? 'Ordered! It’s on your Captain’s desk to settle. 🏴‍☠️' : 'Ordered! Dad got the signal — he’ll sort out the real prize. 🏴‍☠️')
     } else {
       sfx.error()
+      const { daysLeft } = prizeAllowance(item, data)
       setMsg(
         result === 'broke'
-          ? `You need ${cost} 🍇 for that — pass official final tests in the Quiz app!`
-          : `The merchant ship returns in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. One treasure per month!`,
+          ? `You need ${item.cost} 🍇 for that — pass official final tests in the Quiz app!`
+          : `The merchant ship brings ${item.label} back in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`,
       )
     }
   }
@@ -239,12 +240,6 @@ function TreasuresTab() {
           <div style={{ fontWeight: 900 }}>{fruits} Devil Fruit{fruits === 1 ? '' : 's'}</div>
           <div className="muted" style={{ fontSize: 12 }}>Win them by passing official final tests in the Quiz app.</div>
         </div>
-        {daysLeft > 0 && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: 900, fontSize: 20, color: 'var(--orange)' }}>{daysLeft}</div>
-            <div className="muted" style={{ fontSize: 10 }}>days until next<br />treasure</div>
-          </div>
-        )}
       </div>
 
       {unpaidCount > 0 && (
@@ -257,32 +252,57 @@ function TreasuresTab() {
         </div>
       )}
 
-      {catalog.map((g) => (
-        <div key={g.id} className="card" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src={g.logo} alt={g.label} width={46} height={46} draggable={false} className="spin-loop prize-logo" />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 900 }}>{g.emoji} {g.label}</div>
-            <div className="muted" style={{ fontSize: 12 }}>A real treasure. Limit: 1 purchase per month.</div>
-          </div>
-          {confirming === g.id ? (
-            <button className="btn btn--red btn--small" onClick={() => buy(g.id, g.cost)}>
-              Confirm 🍇{g.cost}
-            </button>
-          ) : (
-            <button
-              className="btn btn--small"
-              disabled={fruits < g.cost || daysLeft > 0}
-              onClick={() => {
-                sfx.click()
-                setConfirming(g.id)
-                window.setTimeout(() => setConfirming((c) => (c === g.id ? null : c)), 3000)
-              }}
-            >
-              🍇{g.cost}
-            </button>
-          )}
+      {catalog.length === 0 && (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 44 }}>🏝️</div>
+          <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+            The shelf is bare. {isAdmin ? 'Stock it from the Parent app → Prizes.' : 'Ask Dad to stock the black market!'}
+          </p>
         </div>
-      ))}
+      )}
+
+      {catalog.map((g) => {
+        const { left, daysLeft } = prizeAllowance(g, data)
+        const soldOut = left <= 0
+        return (
+          <div key={g.id} className="card" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+            {g.logo ? (
+              <img src={g.logo} alt={g.label} width={46} height={46} draggable={false} className="spin-loop prize-logo" />
+            ) : (
+              <div className="spin-loop" style={{ width: 46, height: 46, fontSize: 34, display: 'grid', placeItems: 'center' }}>
+                {g.emoji}
+              </div>
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 900 }}>{g.emoji} {g.label}</div>
+              <div className="muted" style={{ fontSize: 12 }}>
+                {soldOut
+                  ? `Sold out — back in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`
+                  : !g.perMonth
+                    ? 'A real treasure. Buy as many as you can afford.'
+                    : `A real treasure. ${left} of ${g.perMonth} left this month.`}
+              </div>
+            </div>
+            {confirming === g.id ? (
+              <button className="btn btn--red btn--small" onClick={() => buy(g)}>
+                Confirm 🍇{g.cost}
+              </button>
+            ) : (
+              <button
+                className="btn btn--small"
+                disabled={fruits < g.cost || soldOut}
+                onClick={() => {
+                  sfx.click()
+                  setConfirming(g.id)
+                  window.setTimeout(() => setConfirming((c) => (c === g.id ? null : c)), 3000)
+                }}
+              >
+                🍇{g.cost}
+              </button>
+            )}
+          </div>
+        )
+      })}
       {msg && (
         <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
           {msg}

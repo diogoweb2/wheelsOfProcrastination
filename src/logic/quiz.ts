@@ -254,7 +254,7 @@ export function prerequisiteOf(topic: QuizTopic): QuizTopic | undefined {
 
 export const REPEAT_FACTOR = 0.5 // reward halves once a question has ever been answered correctly
 export const PASS_PCT = 80
-export const GIFT_CARD_COOLDOWN_DAYS = 30 // 1 prize per month (per profile)
+export const PRIZE_WINDOW_DAYS = 30 // the rolling window every prize limit is counted over
 export const TEST_TIME_BUDGET_MS = 13 * 60_000 // keep the whole test under ~15 min
 export const TEST_MIN_QUESTIONS = 10
 export const TEST_MAX_QUESTIONS = 14
@@ -267,21 +267,25 @@ export interface Prize {
   label: string
   emoji: string
   cost: number // Devil Fruits 🍇
-  logo: string // /prizes/*.png — spins like the Luffy tab icon
+  perMonth: number // purchases allowed per 30-day window; 0 = as many as he can afford
+  logo?: string // /prizes/*.png — spins like the Luffy tab icon; without one the emoji is the logo
 }
+
+/** Every profile's shelf. Lives in Firestore (`app/prizeCatalog`) once seeded; this is the seed. */
+export type PrizeCatalog = Record<string, Prize[]>
 
 /** Each profile shops from its own catalog. Duplicates accumulate as separate purchases. */
-export const PRIZES: Record<string, Prize[]> = {
+export const DEFAULT_PRIZES: PrizeCatalog = {
   ben: [
-    { id: 'roblox10', label: 'Roblox $10', emoji: '🎮', cost: 3, logo: '/prizes/roblox.png' },
-    { id: 'dollarama-candy', label: 'Dollarama candy', emoji: '🍬', cost: 2, logo: '/prizes/dollarama.png' },
-    { id: 'costco-sushi', label: 'Costco Sushi', emoji: '🍣', cost: 6, logo: '/prizes/costco.png' },
+    { id: 'roblox10', label: 'Roblox $10', emoji: '🎮', cost: 3, perMonth: 1, logo: '/prizes/roblox.png' },
+    { id: 'dollarama-candy', label: 'Dollarama candy', emoji: '🍬', cost: 2, perMonth: 1, logo: '/prizes/dollarama.png' },
+    { id: 'costco-sushi', label: 'Costco Sushi', emoji: '🍣', cost: 6, perMonth: 1, logo: '/prizes/costco.png' },
   ],
-  diogo: [{ id: 'lcbo10', label: 'LCBO $10', emoji: '🍷', cost: 3, logo: '/prizes/lcbo.png' }],
+  diogo: [{ id: 'lcbo10', label: 'LCBO $10', emoji: '🍷', cost: 3, perMonth: 1, logo: '/prizes/lcbo.png' }],
 }
 
-export function prizesFor(ownerId: string): Prize[] {
-  return PRIZES[ownerId] ?? []
+export function prizesFor(ownerId: string, catalog?: PrizeCatalog | null): Prize[] {
+  return (catalog ?? DEFAULT_PRIZES)[ownerId] ?? []
 }
 
 /** Berries a training answer pays right now (0 if already rewarded today). */
@@ -290,11 +294,25 @@ export function trainingReward(q: QuizQuestion, stat: QuizStat | undefined, toda
   return stat?.everCorrect ? Math.ceil(q.points * REPEAT_FACTOR) : q.points
 }
 
-/** Days until the kid may buy another gift card (0 = can buy now). */
-export function giftCardDaysLeft(data: AppData, today: string = dayKey()): number {
-  const last = data.giftcards.reduce<string | null>((acc, p) => (acc === null || p.day > acc ? p.day : acc), null)
-  if (!last) return 0
-  return Math.max(0, GIFT_CARD_COOLDOWN_DAYS + daysUntil(last, today))
+/**
+ * How much of one prize's allowance is left, and when the next slot frees up.
+ *
+ * Limits are counted per prize over a rolling 30 days — candy can be weekly
+ * while sushi stays a once-a-month event — and `perMonth: 0` means no limit at
+ * all, so the 🍇 balance is the only thing standing in the way.
+ */
+export function prizeAllowance(prize: Prize, data: AppData, today: string = dayKey()): { left: number; daysLeft: number } {
+  if (!prize.perMonth) return { left: Infinity, daysLeft: 0 }
+  // for each purchase still inside the window: how many days until it rolls out of it
+  const inWindow = data.giftcards
+    .filter((p) => p.itemId === prize.id)
+    .map((p) => PRIZE_WINDOW_DAYS + daysUntil(p.day, today))
+    .filter((n) => n > 0)
+    .sort((a, b) => a - b)
+  const left = Math.max(0, prize.perMonth - inWindow.length)
+  // enough must roll out to drop the count below the limit — that's the (n - perMonth)-th oldest
+  const daysLeft = left > 0 ? 0 : inWindow[inWindow.length - prize.perMonth]
+  return { left, daysLeft }
 }
 
 // --- answer checking -------------------------------------------------------

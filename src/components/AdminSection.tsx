@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
-import { activeQuestions, correctAnswerText, lastOfficialAttempt, topicsFor, type QuizTopic } from '../logic/quiz'
+import { activeQuestions, correctAnswerText, lastOfficialAttempt, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
 import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
@@ -55,6 +55,7 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
         <>
           <PendingPrizes />
           {pending.length > 0 && <PendingReview pending={pending} />}
+          <PrizeShelves />
         </>
       )}
 
@@ -422,6 +423,202 @@ function PendingPrizes() {
       ))}
     </div>
   )
+}
+
+/**
+ * The treasure shelves: what each crewmate can order, what it costs in 🍇, and
+ * how often.
+ *
+ * The limit is per treasure and per 30 rolling days, which is the whole point:
+ * candy is allowed to be a steady habit while sushi stays an event. `0` means
+ * no limit at all, so the 🍇 balance is the only thing in the way.
+ *
+ * Deleting a treasure only takes it off the shelf — every order already placed
+ * keeps its own label and cost, so the Orders log and the "to settle" list
+ * never lose a row.
+ */
+function PrizeShelves() {
+  const { prizeCatalog, savePrizeShelf } = useStore()
+  const shelves = [
+    { who: '⚔️ Ben’s shelf', ownerId: KID_ID },
+    { who: '🏴‍☠️ My shelf', ownerId: PARENT_ID },
+  ]
+
+  return (
+    <>
+      {shelves.map(({ who, ownerId }) => (
+        <PrizeShelf
+          key={ownerId}
+          who={who}
+          prizes={prizesFor(ownerId, prizeCatalog)}
+          onSave={(next) => savePrizeShelf(ownerId, next)}
+        />
+      ))}
+      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+        Limits count the last 30 days, per treasure. Lowering one never claws back something already ordered.
+      </p>
+    </>
+  )
+}
+
+function PrizeShelf({ who, prizes, onSave }: { who: string; prizes: Prize[]; onSave: (prizes: Prize[]) => void }) {
+  const [editing, setEditing] = useState<string | null>(null) // prize id, or 'new'
+
+  function save(prize: Prize) {
+    sfx.gem()
+    const exists = prizes.some((p) => p.id === prize.id)
+    onSave(exists ? prizes.map((p) => (p.id === prize.id ? prize : p)) : [...prizes, prize])
+    setEditing(null)
+  }
+
+  function remove(id: string) {
+    sfx.click()
+    onSave(prizes.filter((p) => p.id !== id))
+    setEditing(null)
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ fontWeight: 900, marginBottom: 4 }}>{who}</div>
+      {prizes.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing on it — the Treasures tab is empty.</p>}
+      {prizes.map((p) =>
+        editing === p.id ? (
+          <PrizeForm key={p.id} prize={p} onSave={save} onDelete={() => remove(p.id)} onCancel={() => setEditing(null)} />
+        ) : (
+          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--line)', padding: '8px 0' }}>
+            <div style={{ fontSize: 22 }}>{p.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 800, fontSize: 14 }}>{p.label}</div>
+              <div className="muted" style={{ fontSize: 11 }}>
+                🍇{p.cost} · {p.perMonth ? `max ${p.perMonth} per 30 days` : 'no limit'}
+              </div>
+            </div>
+            <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing(p.id) }}>✏️</button>
+          </div>
+        ),
+      )}
+      {editing === 'new' ? (
+        <PrizeForm onSave={save} onCancel={() => setEditing(null)} />
+      ) : (
+        <button className="btn btn--small" style={{ marginTop: 10 }} onClick={() => { sfx.click(); setEditing('new') }}>
+          ＋ Add a treasure
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** Add or edit one treasure. A new one gets a slug id; an edited one keeps its id so its order history still counts. */
+function PrizeForm({
+  prize,
+  onSave,
+  onDelete,
+  onCancel,
+}: {
+  prize?: Prize
+  onSave: (p: Prize) => void
+  onDelete?: () => void
+  onCancel: () => void
+}) {
+  const [label, setLabel] = useState(prize?.label ?? '')
+  const [emoji, setEmoji] = useState(prize?.emoji ?? '🎁')
+  const [cost, setCost] = useState(prize?.cost ?? 3)
+  const [perMonth, setPerMonth] = useState(prize?.perMonth ?? 1)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  function submit() {
+    const name = label.trim()
+    if (!name) return
+    const id = prize?.id ?? `${slug(name)}-${crypto.randomUUID().slice(0, 4)}`
+    onSave({ ...prize, id, label: name, emoji: emoji.trim() || '🎁', cost, perMonth })
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', padding: '10px 0' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+        <input
+          type="text"
+          value={emoji}
+          maxLength={4}
+          aria-label="Emoji"
+          style={{ width: 56, textAlign: 'center', fontSize: 20 }}
+          onChange={(e) => setEmoji(e.target.value)}
+        />
+        <input
+          type="text"
+          value={label}
+          maxLength={40}
+          placeholder="Costco Sushi"
+          style={{ flex: 1 }}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+      </div>
+      <Stepper label="Price 🍇" value={cost} min={1} max={30} onChange={setCost} />
+      <Stepper
+        label="Per 30 days"
+        value={perMonth}
+        min={0}
+        max={30}
+        format={(n) => (n ? String(n) : '∞')}
+        hint={perMonth ? undefined : 'as many as he can afford'}
+        onChange={setPerMonth}
+      />
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="btn btn--small" disabled={!label.trim()} onClick={submit}>✓ Save</button>
+        <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onCancel() }}>Cancel</button>
+        {onDelete && (
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ marginLeft: 'auto', color: 'var(--red)' }}
+            onClick={() => {
+              sfx.click()
+              if (confirmDelete) onDelete()
+              else {
+                setConfirmDelete(true)
+                window.setTimeout(() => setConfirmDelete(false), 3000)
+              }
+            }}
+          >
+            {confirmDelete ? 'Sure? Delete' : '🗑️ Delete'}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Stepper({
+  label,
+  value,
+  min,
+  max,
+  format,
+  hint,
+  onChange,
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  format?: (n: number) => string
+  hint?: string
+  onChange: (n: number) => void
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 800, fontSize: 13 }}>{label}</div>
+        {hint && <div className="muted" style={{ fontSize: 11 }}>{hint}</div>}
+      </div>
+      <button className="btn btn--ghost btn--small" disabled={value <= min} onClick={() => { sfx.click(); onChange(value - 1) }}>−</button>
+      <b style={{ minWidth: 26, textAlign: 'center', fontSize: 16 }}>{format ? format(value) : value}</b>
+      <button className="btn btn--ghost btn--small" disabled={value >= max} onClick={() => { sfx.click(); onChange(value + 1) }}>+</button>
+    </div>
+  )
+}
+
+function slug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 20) || 'treasure'
 }
 
 function PendingReview({ pending }: { pending: QuizQuestion[] }) {

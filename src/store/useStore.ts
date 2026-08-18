@@ -57,6 +57,8 @@ import {
   setWriteErrorHandler,
   saveAiConfig,
   saveGymCatalog,
+  loadPrizeCatalog,
+  savePrizeCatalog,
   saveIdeas,
   saveQuizBank,
   saveRoster,
@@ -81,6 +83,7 @@ import {
   subscribeFinalTests,
   subscribeMarketData,
   subscribeQuizBank,
+  subscribePrizeCatalog,
   subscribeRoster,
 } from './cloud'
 import type { AuditCategory, AuditEntry, Season } from '../types'
@@ -144,7 +147,7 @@ import {
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, missedSince, pickWeighted, studyLockedIds } from '../logic/wheel'
 import { newBadges } from '../logic/badges'
-import { PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, giftCardDaysLeft, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat } from '../logic/quiz'
+import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowance, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat, type Prize, type PrizeCatalog } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -286,6 +289,7 @@ interface StoreState {
   events: AppEvent[]
   quizBank: QuizQuestion[] // shared question bank (app/quizBank), live-synced
   quizBankLoaded: boolean
+  prizeCatalog: PrizeCatalog | null // every profile's treasure shelf (app/prizeCatalog), live-synced; null = still loading, use the seed
   kidData: AppData | null // Ben's world, live-synced while the PARENT is logged in (banner, official tests, grants)
   kidDataFresh: boolean // kidData has arrived from the SERVER (not just the local cache) — guards writes into Ben's world
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
@@ -434,6 +438,7 @@ interface StoreState {
   // --- prizes (each profile buys from its own catalog with its own 🍇) ---
   buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown'
   markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
+  savePrizeShelf: (ownerId: string, prizes: Prize[]) => void // admin: add/edit/delete one profile's treasures
 
   // --- Grand Line Bank (the bank lives in BEN's world; admin edits reach it via kidData) ---
   /** Move real dollars between Ben's chests. Fully free — College deposits get Dad's match; College withdrawals burn it. */
@@ -798,6 +803,9 @@ export const useStore = create<StoreState>((set, get) => {
       const questions = await loadQuizBank()
       set({ quizBank: questions, quizBankLoaded: true })
       subscribeQuizBank((qs) => set({ quizBank: qs, quizBankLoaded: true }))
+      // shared treasure shelves: seed once, then live-sync (a repriced prize lands on both phones)
+      set({ prizeCatalog: await loadPrizeCatalog() })
+      subscribePrizeCatalog((c) => set({ prizeCatalog: c }))
       // shared market series (fetched monthly by the bank:market script)
       subscribeMarketData((m) => set({ market: m }))
       // shared idea list — no seeding needed, an empty doc is a valid empty list
@@ -1121,6 +1129,7 @@ export const useStore = create<StoreState>((set, get) => {
     events: [],
     quizBank: [],
     quizBankLoaded: false,
+    prizeCatalog: null,
     kidData: null,
     kidDataFresh: false,
     market: null,
@@ -1900,10 +1909,10 @@ export const useStore = create<StoreState>((set, get) => {
     buyGiftCard(itemId) {
       const me = get().activeProfileId
       if (!me) return 'broke'
-      const item = prizesFor(me).find((g) => g.id === itemId)
+      const item = prizesFor(me, get().prizeCatalog).find((g) => g.id === itemId)
       const d = get().data
       if (!item) return 'broke'
-      if (giftCardDaysLeft(d) > 0) return 'cooldown' // 1 per 30 days; duplicates simply accumulate over months
+      if (prizeAllowance(item, d).left <= 0) return 'cooldown' // this prize's own 30-day allowance is spent
       if (d.economy.devilFruits < item.cost) return 'broke'
       commit((b) => {
         b.economy.devilFruits -= item.cost
@@ -1918,6 +1927,12 @@ export const useStore = create<StoreState>((set, get) => {
         })
       })
       return 'ok'
+    },
+
+    savePrizeShelf(ownerId, prizes) {
+      const catalog = { ...(get().prizeCatalog ?? DEFAULT_PRIZES), [ownerId]: prizes }
+      set({ prizeCatalog: catalog })
+      fireAndForget(savePrizeCatalog(catalog))
     },
 
     markGiftCardPaid(targetId, purchaseId) {

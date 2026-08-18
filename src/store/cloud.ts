@@ -1,6 +1,7 @@
 // Firestore data layer. Three shapes:
 //   app/roster            → { profiles: Profile[] }     the crew + their PIN hashes (synced across devices)
 //   app/quizBank          → { questions: QuizQuestion[] } the shared question bank (incl. removed/pending flags)
+//   app/prizeCatalog      → { prizes: PrizeCatalog }   the treasures on each crewmate's shelf
 //   profiles/{id}         → AppData                     one whole world per crewmate
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import {
@@ -22,6 +23,7 @@ import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'fire
 import { app, ensureAuth, firestore } from '../lib/firebase'
 import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
+import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
 import { AGENTS_SEED } from '../quiz/agentsSeed'
@@ -342,6 +344,36 @@ export function subscribeMarketData(cb: (m: MarketData | null) => void): () => v
   return onSnapshot(marketRef(), (snap) => {
     cb(snap.exists() ? (snap.data() as MarketData) : null)
   })
+}
+
+// --- prize catalog (the treasures on each crewmate's shelf) ----------------
+// One doc for every profile's shelf, edited from the Captain's desk. Kept out
+// of the profiles so the kid can't rewrite his own prices, and shared so both
+// devices see an edit straight away.
+
+const prizeCatalogRef = () => doc(firestore, 'app', 'prizeCatalog')
+
+/** Read the shelf, writing the built-in seed on first run so the desk has something to edit. */
+export async function loadPrizeCatalog(): Promise<PrizeCatalog> {
+  await ensureAuth()
+  const snap = await getDoc(prizeCatalogRef())
+  const data = snap.data() as { prizes?: PrizeCatalog } | undefined
+  if (data?.prizes) return data.prizes
+  await setDoc(prizeCatalogRef(), { prizes: DEFAULT_PRIZES, updatedAt: new Date().toISOString() })
+  return DEFAULT_PRIZES
+}
+
+/** Live-sync the shelf: an edit on the laptop reprices the store on the phone. */
+export function subscribePrizeCatalog(cb: (c: PrizeCatalog) => void): () => void {
+  return onSnapshot(prizeCatalogRef(), (snap) => {
+    const data = snap.data() as { prizes?: PrizeCatalog } | undefined
+    if (data?.prizes) cb(data.prizes)
+  })
+}
+
+export async function savePrizeCatalog(prizes: PrizeCatalog): Promise<void> {
+  await ensureAuth()
+  await setDoc(prizeCatalogRef(), { prizes, updatedAt: new Date().toISOString() })
 }
 
 // --- gym catalog (the shared basement: gear + the exercises it makes possible) ---

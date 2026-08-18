@@ -293,10 +293,10 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 ## 15. Store pages & Treasures (prizes)
 
-- Store pages: **🖼️ Wallpapers** (mystery gacha), **🍇 Treasures**, and **🧾 Orders** (every treasure ever ordered + its paid/pending status). Each profile shops from its OWN catalog with its OWN 🍇 (`PRIZES` in `src/logic/quiz.ts`); prize logos live in `public/prizes/` and spin like the Luffy tab icon.
-  - **Ben**: Roblox $10 (3 🍇), Dollarama candy (2 🍇), Costco Sushi (6 🍇).
-  - **Diogo**: LCBO $10 (3 🍇).
-- Limit **1 purchase per 30 days per profile** (store shows a days-left counter). Unpaid purchases **accumulate** — duplicates of the same item are fine, each is its own row; nothing blocks a new purchase except the 30-day window and the 🍇 balance.
+- Store pages: **🖼️ Wallpapers** (mystery gacha), **🍇 Treasures**, and **🧾 Orders** (every treasure ever ordered + its paid/pending status). Each profile shops from its OWN shelf with its OWN 🍇; prize logos live in `public/prizes/` and spin like the Luffy tab icon, and a prize **without** a logo spins its emoji instead.
+- **The shelves are data, not code** — one shared doc `app/prizeCatalog`, live-synced, seeded once from `DEFAULT_PRIZES` in `src/logic/quiz.ts` and after that the cloud copy is the source of truth. Diogo **adds, edits and deletes** treasures from the Admin desk → **Prizes** (emoji, label, 🍇 price, limit), per profile. Deleting only takes it off the shelf: every order already placed carries its own label and cost, so the Orders log and the "to settle" list never lose a row.
+  - Seed — **Ben**: Roblox $10 (3 🍇), Dollarama candy (2 🍇), Costco Sushi (6 🍇). **Diogo**: LCBO $10 (3 🍇). All seeded at 1 per 30 days.
+- **The limit is per treasure**, counted over a rolling 30 days (`perMonth`, `prizeAllowance`), so candy can be a steady habit while sushi stays an event. **`perMonth: 0` = no limit** — the 🍇 balance is the only thing in the way. Each store card shows its own state ("2 of 3 left this month" / "Sold out — back in 9 days"); a treasure being sold out never blocks the others. Lowering a limit never claws back something already ordered. Unpaid purchases **accumulate** — duplicates of the same item are fine, each is its own row.
 - Buying creates an unpaid purchase on the buyer's data. **Diogo sees persistent banners** at the top of the app for every unsettled purchase (Ben's and his own) with a **Paid** button; they're also listed in the Admin desk under "Prizes to settle".
 
 ## 15b. Sticker album — "Grand Line Log Book" (the 📖 Log Book app)
@@ -459,7 +459,7 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
 - **⏳ Limits**: how many **training-hall card matches vs the AI** each crewmate may start per day (§13) — separate dials for Ben and Diogo, default **2**, 0 to shut the hall, 20 max, each row showing what has been played today and a one-tap reset to the default. Ben's dial is written into his world through the `kidData` subscription, so it only moves once his doc has arrived from the server. The same tab holds **⏱️ Move clock** — seconds per move for the board games and for the card game (§15e), 5-second steps up to 60, 0 to switch the clock off, written into **both** worlds at once because a clock only works if both sides of the board are on it.
 - **🧊 Free freezes for Ben** (top of the desk): answer his freeze asks or gift unprompted — count + custom message, revives a dead streak for free. See §6.
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
-- Prize settlement: "Prizes to settle" list + topbar banners (see §15).
+- Prize settlement: "Prizes to settle" list + topbar banners, and the **treasure shelves** themselves — add/edit/delete a prize and set its 30-day limit, per profile (see §15).
 - **Scripts** (both talk to Firestore via the public web config + anonymous auth):
   - `npm run quiz:regen` (claude CLI, opus) — refills every live topic to its target after removals; new questions land `pending`.
   - `npm run gym:equipment` (claude CLI, **opus**, vision) — turns basement photos into gear + exercises; deletes the photos afterwards (§18k).
