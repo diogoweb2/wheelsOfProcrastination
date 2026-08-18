@@ -3,7 +3,8 @@ import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import { BACKGROUND_CATALOG, backgroundUrl } from '../logic/backgrounds'
 import { BACKGROUND_COST } from '../logic/economy'
-import { prizeAllowance, prizesFor, type Prize } from '../logic/quiz'
+import { prizeAllowance, PRIZE_WINDOW_DAYS, prizesFor, type Prize } from '../logic/quiz'
+import { prettyDay } from '../logic/dates'
 import { BerryCoin } from '../components/BerryCoin'
 import { DevilFruit } from '../components/DevilFruit'
 import { sfx } from '../audio'
@@ -212,6 +213,8 @@ function TreasuresTab() {
   // carries its own allowance — candy can be a habit, sushi stays an event
   const catalog = prizesFor(activeProfileId ?? '', prizeCatalog)
   const fruits = data.economy.devilFruits
+  // the shelf header answers the first question before he scrolls: what can I buy today?
+  const readyNow = catalog.filter((g) => prizeAllowance(g, data).left > 0 && fruits >= g.cost).length
   const unpaidCount = data.giftcards.filter((p) => !p.paidAt).length
   const isAdmin = activeProfileId !== KID_ID
 
@@ -223,11 +226,11 @@ function TreasuresTab() {
       setMsg(isAdmin ? 'Ordered! It’s on your Captain’s desk to settle. 🏴‍☠️' : 'Ordered! Dad got the signal — he’ll sort out the real prize. 🏴‍☠️')
     } else {
       sfx.error()
-      const { daysLeft } = prizeAllowance(item, data)
+      const { daysLeft, readyDay } = prizeAllowance(item, data)
       setMsg(
         result === 'broke'
           ? `You need ${item.cost} 🍇 for that — pass official final tests in the Quiz app!`
-          : `The merchant ship brings ${item.label} back in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`,
+          : `The merchant ship brings ${item.label} back in ${daysLeft} day${daysLeft === 1 ? '' : 's'} — ${prettyDay(readyDay)}.`,
       )
     }
   }
@@ -261,44 +264,77 @@ function TreasuresTab() {
         </div>
       )}
 
+      {catalog.length > 0 && (
+        <div className="h2" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          🏆 Treasure shelf
+          <span className="muted" style={{ fontSize: 12, fontWeight: 700 }}>
+            {readyNow} of {catalog.length} ready to buy
+          </span>
+        </div>
+      )}
+
       {catalog.map((g) => {
-        const { left, daysLeft } = prizeAllowance(g, data)
+        const { left, daysLeft, readyDay } = prizeAllowance(g, data)
         const soldOut = left <= 0
+        const short = g.cost - fruits // Devil Fruits still missing
+        // one line, one answer: can he buy it right now, and if not, what's missing
+        const status = soldOut
+          ? { cls: 'wait', text: `🔒 In ${daysLeft} day${daysLeft === 1 ? '' : 's'}` }
+          : short > 0
+            ? { cls: 'broke', text: `🍇 ${short} more to go` }
+            : { cls: 'ready', text: '✅ Available now' }
         return (
-          <div key={g.id} className="card" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-            {g.logo ? (
-              <img src={g.logo} alt={g.label} width={46} height={46} draggable={false} className="spin-loop prize-logo" />
-            ) : (
-              <div className="spin-loop" style={{ width: 46, height: 46, fontSize: 34, display: 'grid', placeItems: 'center' }}>
-                {g.emoji}
+          <div
+            key={g.id}
+            className={`card prize-card ${soldOut ? 'prize-card--locked' : short > 0 ? '' : 'prize-card--ready'}`}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {g.logo ? (
+                <img src={g.logo} alt={g.label} width={46} height={46} draggable={false} className="spin-loop prize-logo" />
+              ) : (
+                <div className="spin-loop" style={{ width: 46, height: 46, fontSize: 34, display: 'grid', placeItems: 'center' }}>
+                  {g.emoji}
+                </div>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 900 }}>{g.emoji} {g.label}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                  <span className={`prize-status prize-status--${status.cls}`}>{status.text}</span>
+                  <span className="muted" style={{ fontSize: 12 }}>
+                    {soldOut
+                      ? `back on ${prettyDay(readyDay)}`
+                      : !g.perMonth
+                        ? 'no limit'
+                        : `${left} of ${g.perMonth} left this month`}
+                  </span>
+                </div>
               </div>
-            )}
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 900 }}>{g.emoji} {g.label}</div>
-              <div className="muted" style={{ fontSize: 12 }}>
-                {soldOut
-                  ? `Sold out — back in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`
-                  : !g.perMonth
-                    ? 'A real treasure. Buy as many as you can afford.'
-                    : `A real treasure. ${left} of ${g.perMonth} left this month.`}
-              </div>
+              {confirming === g.id ? (
+                <button className="btn btn--red btn--small" onClick={() => buy(g)}>
+                  Confirm 🍇{g.cost}
+                </button>
+              ) : (
+                <button
+                  className="btn btn--small"
+                  disabled={short > 0 || soldOut}
+                  onClick={() => {
+                    sfx.click()
+                    setConfirming(g.id)
+                    window.setTimeout(() => setConfirming((c) => (c === g.id ? null : c)), 3000)
+                  }}
+                >
+                  🍇{g.cost}
+                </button>
+              )}
             </div>
-            {confirming === g.id ? (
-              <button className="btn btn--red btn--small" onClick={() => buy(g)}>
-                Confirm 🍇{g.cost}
-              </button>
-            ) : (
-              <button
-                className="btn btn--small"
-                disabled={fruits < g.cost || soldOut}
-                onClick={() => {
-                  sfx.click()
-                  setConfirming(g.id)
-                  window.setTimeout(() => setConfirming((c) => (c === g.id ? null : c)), 3000)
-                }}
-              >
-                🍇{g.cost}
-              </button>
+            {soldOut && (
+              /* how much of the 30-day wait is already behind him */
+              <div className="prize-bar" title={`${daysLeft} of ${PRIZE_WINDOW_DAYS} days left`}>
+                <div
+                  className="prize-bar__fill"
+                  style={{ width: `${Math.round(((PRIZE_WINDOW_DAYS - daysLeft) / PRIZE_WINDOW_DAYS) * 100)}%` }}
+                />
+              </div>
             )}
           </div>
         )

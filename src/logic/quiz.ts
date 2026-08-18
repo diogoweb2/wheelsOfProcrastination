@@ -1,6 +1,6 @@
 // Grand Line Academy — quiz rules. Keep in sync with BUSINESS_REQUIREMENTS.md §14–15.
 import type { AppData, QuizQuestion, QuizState, QuizStat } from '../types'
-import { dayKey, daysUntil } from './dates'
+import { addDays, dayKey, daysUntil } from './dates'
 
 // --- topics ----------------------------------------------------------------
 
@@ -335,9 +335,16 @@ export function trainingReward(q: QuizQuestion, stat: QuizStat | undefined, toda
  * Limits are counted per prize over a rolling 30 days — candy can be weekly
  * while sushi stays a once-a-month event — and `perMonth: 0` means no limit at
  * all, so the 🍇 balance is the only thing standing in the way.
+ *
+ * `readyDay` is the calendar day the shelf restocks (today when it's already
+ * buyable), so the shop can show a real date instead of only a countdown.
  */
-export function prizeAllowance(prize: Prize, data: AppData, today: string = dayKey()): { left: number; daysLeft: number } {
-  if (!prize.perMonth) return { left: Infinity, daysLeft: 0 }
+export function prizeAllowance(
+  prize: Prize,
+  data: AppData,
+  today: string = dayKey(),
+): { left: number; daysLeft: number; readyDay: string } {
+  if (!prize.perMonth) return { left: Infinity, daysLeft: 0, readyDay: today }
   // for each purchase still inside the window: how many days until it rolls out of it
   const inWindow = data.giftcards
     .filter((p) => p.itemId === prize.id)
@@ -347,7 +354,7 @@ export function prizeAllowance(prize: Prize, data: AppData, today: string = dayK
   const left = Math.max(0, prize.perMonth - inWindow.length)
   // enough must roll out to drop the count below the limit — that's the (n - perMonth)-th oldest
   const daysLeft = left > 0 ? 0 : inWindow[inWindow.length - prize.perMonth]
-  return { left, daysLeft }
+  return { left, daysLeft, readyDay: addDays(today, daysLeft) }
 }
 
 // --- answer checking -------------------------------------------------------

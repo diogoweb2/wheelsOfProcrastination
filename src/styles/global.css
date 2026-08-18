@@ -1107,6 +1107,40 @@ input, select { font-family: inherit; }
 /* prize logos spin like the Luffy tab icon */
 .prize-logo { object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; flex-shrink: 0; }
 
+/* --- treasure shelf: is this prize buyable, and if not, when? ------------- */
+.prize-card { margin-bottom: 10px; }
+.prize-card--locked { opacity: 0.72; }
+.prize-card--ready { border-color: var(--green); }
+
+.prize-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+.prize-status--ready { background: var(--green); color: #0c2338; }
+.prize-status--broke { background: var(--yellow); color: #3a2000; }
+.prize-status--wait { background: var(--orange); color: #3a2000; }
+
+/* how far through the 30-day cooldown this prize is */
+.prize-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.prize-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--yellow));
+  transition: width 0.4s;
+}
+
 /* berries flying from the quiz to the topbar counter */
 .berry-fly {
   position: fixed;
