@@ -27,7 +27,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
   - **Reordering icons**: tap **✥ Arrange** (or press and hold any icon for ~0.3s) to enter edit mode — the grid jiggles and a plain drag moves an icon into a new slot; tap **✓ Done** to leave. The order is saved to `settings.homeOrder` (per profile, synced). Newly shipped apps append at the end; "Reset icon layout" lives in Settings → About.
   - Icons carry an iOS-style **red badge** when something needs attention (incoming sticker trades, freeze asks + unpaid prizes on the Captain app, unacknowledged paybacks on the Bank).
 - **Inside an app**: one sticky header row holds the **`⌂ Main` button**, the app name, and the **🪙 Berry counter** (it lives here because earned coins fly to it — `logic/fx.ts` targets `.stat--gem`). Below that, each app has **its own bottom menu**. An app with a single page shows no menu.
-- **The roster** ([src/apps/registry.ts](src/apps/registry.ts)) is the single source of truth — one entry per app (name, artwork, tile colours, bottom-menu tabs, `adminOnly`, `gate`), plus one branch in `AppBodyRouter` ([src/App.tsx](src/App.tsx)). Adding an app touches nothing else.
+- **The roster** ([src/apps/registry.ts](src/apps/registry.ts)) is the single source of truth — one entry per app (name, artwork, tile colours, bottom-menu tabs, `adminOnly`, `gate`, `hidden`, `inheritSlotFrom`), plus one branch in `AppBodyRouter` ([src/App.tsx](src/App.tsx)). Adding an app touches nothing else.
 
 **App names are deliberately plain.** The One Piece flavour lives in the artwork, the copy and the game content — never in the icon label. "Log Book", "Davy Back", "Captain" and "Log Pose" were unreadable as navigation: you cannot find the sticker album from a tile called Log Book. Each tile now says what the app *is*; the flavour name (Grand Line Academy, Nami's Black Market, Davy Back Fight) survives as a subtitle inside.
 
@@ -37,7 +37,8 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 🎓 **Quiz** | Topics · Study · Progress |
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🛒 **Shop** | Wallpapers · Treasures · Orders |
-| 🖼️ **Stickers** | Album · Packs · Trade |
+| 🎴 **One Piece Album** | Binder · Packs · Trade |
+| 🖼️ **Stickers** *(hidden — still at `/album/*`)* | Album · Packs · Trade |
 | 🃏 **Card Game** *(in 🎮 Games)* | Play · Deck · How to |
 | ♟️ **Chess** *(in 🎮 Games)* | Play · Pieces · How to |
 | 🔴 **Checkers** *(in 🎮 Games)* | Play · Pieces · How to |

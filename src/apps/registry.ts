@@ -30,6 +30,17 @@ export interface AppDef {
    * the Dashboard groups the icons, the way a phone does.
    */
   folder?: string
+  /**
+   * Off the home screen, but still routable at its own URL. The feature stays
+   * built and reachable; it just isn't shown. See §1c.
+   */
+  hidden?: boolean
+  /**
+   * Take this (usually hidden) app's saved home-screen slot when the user's
+   * order has never heard of us — how a replacement lands where the app it
+   * replaced used to sit.
+   */
+  inheritSlotFrom?: string
 }
 
 /** A home-screen folder: one tile that opens onto the apps inside it. */
@@ -111,6 +122,25 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // The One Piece Album: the same collecting game as the sticker album (§14),
+    // over every card printed for the One Piece TCG. Its own app rather than a
+    // tab on `album`, so each collection keeps its own progress and its own
+    // swap table.
+    id: 'binder',
+    name: 'One Piece Album',
+    inheritSlotFrom: 'album',
+    icon: '🎴',
+    tint: ['#c9302c', '#3a1a00'],
+    tabs: [
+      { id: 'binder', label: 'Binder', icon: '🎴' },
+      { id: 'packs', label: 'Packs', icon: '🎁' },
+      { id: 'trade', label: 'Trade', icon: '🤝' },
+    ],
+  },
+  {
+    // hidden for now: the One Piece Album took its place on the home screen.
+    // The feature is untouched and still lives at /album/*.
+    hidden: true,
     id: 'album',
     name: 'Stickers',
     icon: '🖼️',
@@ -134,21 +164,6 @@ export const APPS: AppDef[] = [
       { id: 'fight', label: 'Play', icon: '⚔️' },
       { id: 'deck', label: 'Deck', icon: '🃏' },
       { id: 'rules', label: 'How to', icon: '📜' },
-    ],
-  },
-  {
-    // The One Piece Album: the same collecting game as the sticker album (§14),
-    // over every card printed for the One Piece TCG. Its own app rather than a
-    // tab on `album`, so each collection keeps its own progress and its own
-    // swap table.
-    id: 'binder',
-    name: 'One Piece Album',
-    icon: '🎴',
-    tint: ['#c9302c', '#3a1a00'],
-    tabs: [
-      { id: 'binder', label: 'Binder', icon: '🎴' },
-      { id: 'packs', label: 'Packs', icon: '🎁' },
-      { id: 'trade', label: 'Trade', icon: '🤝' },
     ],
   },
   {
@@ -305,14 +320,15 @@ export function tabsFor(app: AppDef, profileId: string | null): AppTabDef[] {
 /** Apps this profile may open right now, in the user's saved home-screen order. */
 export function appsFor(profileId: string | null, order: string[] | undefined, gates: Gates): AppDef[] {
   const allowed = APPS.filter(
-    (a) => (!a.adminOnly || profileId === PARENT_ID) && (!a.gate || gates[a.gate]),
+    (a) => !a.hidden && (!a.adminOnly || profileId === PARENT_ID) && (!a.gate || gates[a.gate]),
   )
   if (!order?.length) return allowed
   const rank = new Map(order.map((id, i) => [id, i]))
-  // apps the saved order never heard of (newly shipped) land at the end, in registry order
-  return [...allowed].sort(
-    (a, b) => (rank.get(a.id) ?? 1000 + APPS.indexOf(a)) - (rank.get(b.id) ?? 1000 + APPS.indexOf(b)),
-  )
+  // apps the saved order never heard of (newly shipped) land at the end, in
+  // registry order — unless they inherit the slot of the app they replaced
+  const rankOf = (a: AppDef) =>
+    rank.get(a.id) ?? (a.inheritSlotFrom ? rank.get(a.inheritSlotFrom) : undefined) ?? 1000 + APPS.indexOf(a)
+  return [...allowed].sort((a, b) => rankOf(a) - rankOf(b))
 }
 
 /**
