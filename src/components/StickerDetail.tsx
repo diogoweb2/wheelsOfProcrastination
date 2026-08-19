@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { STICKER_CREWS, spareCount, stickerUrl, type StickerDef } from '../logic/album'
+import { STICKER_CREWS, spareCount, stickerUrl } from '../logic/album'
+import type { CardFace } from './Sticker'
 import { sfx } from '../audio'
 import type { AlbumState } from '../types'
 
@@ -16,8 +17,14 @@ export function StickerDetail({
   mateName,
   origin,
   onClose,
+  shelf,
+  note,
 }: {
-  sticker: StickerDef
+  sticker: CardFace & { crew?: string }
+  /** Overrides the album's crew line — the binder names a set instead. */
+  shelf?: string
+  /** Printed under the card. The binder puts the card's own rules text here. */
+  note?: string
   album: AlbumState
   mateAlbum: AlbumState | null
   mateName: string
@@ -71,7 +78,7 @@ export function StickerDetail({
 
         <div className={`detail-art sticker--${sticker.rarity} ${owned === 0 ? 'is-missing' : ''}`}>
           {owned > 0 ? (
-            <img src={stickerUrl(sticker.id)} alt={sticker.name} draggable={false} />
+            <DetailArt sticker={sticker} />
           ) : (
             <span className="detail-ghost">?</span>
           )}
@@ -81,15 +88,21 @@ export function StickerDetail({
         <div className="detail-body">
           <div className="detail-name">{owned > 0 ? sticker.name : '???'}</div>
           <div className="detail-meta">
-            {crew && (
-              <span className="detail-chip">
-                <img className="crew-flag" src={crew.flag} alt="" /> {crew.name}
-              </span>
+            {shelf ? (
+              <span className="detail-chip">{shelf}</span>
+            ) : (
+              crew && (
+                <span className="detail-chip">
+                  <img className="crew-flag" src={crew.flag} alt="" /> {crew.name}
+                </span>
+              )
             )}
             <span className={`detail-chip ${sticker.rarity === 'special' ? 'is-special' : 'is-common'}`}>
               {sticker.rarity === 'special' ? '★ Legendary · worth 2' : 'Common · worth 1'}
             </span>
           </div>
+
+          {note && owned > 0 && <p className="detail-note">{note}</p>}
 
           <div className="detail-status">
             {owned === 0 ? (
@@ -111,4 +124,15 @@ export function StickerDetail({
       </div>
     </div>
   )
+}
+
+/**
+ * The big picture, with the binder's mirror fallback. The album's own art never
+ * fails (it ships with the app), so this only ever matters for hotlinked cards.
+ */
+function DetailArt({ sticker }: { sticker: CardFace }) {
+  const [step, setStep] = useState(0)
+  const src = step === 0 ? (sticker.img ?? stickerUrl(sticker.id)) : sticker.imgFallback
+  if (!src) return <span className="detail-ghost">{sticker.name}</span>
+  return <img src={src} alt={sticker.name} draggable={false} onError={() => setStep((n) => n + 1)} />
 }

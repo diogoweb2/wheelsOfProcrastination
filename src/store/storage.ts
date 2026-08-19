@@ -59,6 +59,7 @@ export function defaultData(): AppData {
       seaWins: 0,
       hints: true, // the coaching highlights are the point; you opt OUT of them
     },
+    cards: { counts: {}, packsOpened: 0, lastFreePackDay: null, trades: [], packCredits: 0 },
     optcg: { decks: [], activeDeck: 'st01', wins: 0, losses: 0, settled: [], soloDay: null, soloWins: 0 },
     gym: defaultGymState(),
     pushTokens: [],
@@ -81,6 +82,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     giftcards: parsed.giftcards ?? base.giftcards,
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
+    cards: { ...base.cards, ...parsed.cards, counts: { ...parsed.cards?.counts } },
     duel: {
       ...base.duel,
       ...parsed.duel,

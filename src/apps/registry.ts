@@ -137,6 +137,21 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // The One Piece Album: the same collecting game as the sticker album (§14),
+    // over every card printed for the One Piece TCG. Its own app rather than a
+    // tab on `album`, so each collection keeps its own progress and its own
+    // swap table.
+    id: 'binder',
+    name: 'One Piece Album',
+    icon: '🎴',
+    tint: ['#c9302c', '#3a1a00'],
+    tabs: [
+      { id: 'binder', label: 'Binder', icon: '🎴' },
+      { id: 'packs', label: 'Packs', icon: '🎁' },
+      { id: 'trade', label: 'Trade', icon: '🤝' },
+    ],
+  },
+  {
     // the REAL One Piece Card Game: the printed cards, the printed rules. Its
     // own app rather than a tab on `duel`, which is the sticker album's own
     // made-up TCG and stays exactly as it is.

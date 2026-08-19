@@ -77,6 +77,8 @@ import {
   subscribeGymCatalog,
   subscribeIdeas,
   subscribeStickerTrades,
+  subscribeCardTrades,
+  saveCardTrades,
   subscribeCardDuels,
   subscribeBoardGames,
   subscribeSeaBattles,
@@ -103,6 +105,14 @@ import {
   tradeGems,
   tradeRound,
 } from '../logic/album'
+import { isBalancedIn, type CollectRarity } from '../logic/collections'
+import { CARD_SPECIAL_SET } from '../logic/cardBinderIndex.generated'
+
+/** Which of the two collections (§14, §14b) an album action is about. */
+export type CollectionSlice = 'album' | 'cards'
+
+const cardRarity = (id: string): CollectRarity => (CARD_SPECIAL_SET.has(id) ? 'special' : 'common')
+const isBalancedCards = (give: string[], want: string[]) => isBalancedIn(cardRarity, give, want)
 import {
   DECK_SIZE,
   DUEL_MOVE_SECONDS,
@@ -308,6 +318,7 @@ interface StoreState {
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
+  cardTrades: StickerTrade[] // shared One Piece Album swaps (app/cardTrades), live-synced
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
   boardGames: BoardMatch[] // shared Chess/Checkers board (app/boardGames), live-synced
   seaBattles: SeaMatch[] // shared Sea Battle table (app/seaBattles), live-synced
@@ -502,8 +513,21 @@ interface StoreState {
   registerPushDevice: () => Promise<string | null>
   /** Buy a random unowned background. Returns the won catalog id, or why it failed. */
   // --- sticker album ---
-  /** Open a pack. 'free' uses the daily free pack; 'buy' spends Berries; 'credit' opens one won in a trade. */
-  openPack: (kind: 'free' | 'buy' | 'credit') => string[] | 'broke' | 'used'
+  /**
+   * Open a pack. 'free' uses the daily free pack; 'buy' spends Berries;
+   * 'credit' opens one won in a trade.
+   *
+   * `col` picks the collection (§14 stickers / §14b cards) and `roll` supplies
+   * the draw: the binder's catalog is a megabyte and must stay out of the main
+   * bundle, so the screen that already has it rolls the pack and the store only
+   * checks the price and applies the result.
+   */
+  openPack: (
+    kind: 'free' | 'buy' | 'credit',
+    col?: CollectionSlice,
+    roll?: (album: AlbumState) => string[],
+    cost?: number,
+  ) => string[] | 'broke' | 'used'
   /**
    * Offer a swap. Card-for-card must balance (1 red = 2 whites); adding Berries
    * or today's free pack drops the value gate and opens the haggle instead.
@@ -511,14 +535,14 @@ interface StoreState {
   proposeTrade: (
     give: string[],
     want: string[],
-    opts?: { gems?: number; pack?: boolean; note?: string },
+    opts?: { gems?: number; pack?: boolean; note?: string; col?: CollectionSlice },
   ) => 'ok' | 'unbalanced' | 'busy' | 'empty' | 'broke' | 'nopack'
   /** Answer the swap sitting in my court. Accepting moves cards, Berries and the pack in BOTH worlds. */
-  answerTrade: (tradeId: string, accept: boolean) => void
+  answerTrade: (tradeId: string, accept: boolean, col?: CollectionSlice) => void
   /** Counter the swap in my court with a different Berry amount, and hand the decision back. */
-  counterTrade: (tradeId: string, gems: number) => 'ok' | 'busy'
+  counterTrade: (tradeId: string, gems: number, col?: CollectionSlice) => 'ok' | 'busy'
   /** Withdraw a swap I proposed and that hasn't been answered yet. */
-  cancelTrade: (tradeId: string) => void
+  cancelTrade: (tradeId: string, col?: CollectionSlice) => void
 
   // --- Davy Back Duel (the card game) ---
   /** Throw down the gauntlet with this line-up. One live duel between the crewmates at a time. */
@@ -847,6 +871,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeIdeas((ideas) => set({ ideas }))
       // shared sticker swap table (same deal — empty doc is a valid empty list)
       subscribeStickerTrades((trades) => set({ trades }))
+      // the One Piece Album's own swap table — same game, its own pile of cards
+      subscribeCardTrades((cardTrades) => set({ cardTrades }))
       // shared duel board: challenges, and every move the other phone plays
       subscribeCardDuels((duels) => set({ duels }))
       // shared Chess/Checkers board — same deal, one doc for both games
@@ -914,10 +940,33 @@ export const useStore = create<StoreState>((set, get) => {
     auditDiff(targetId, get().activeProfileId ?? 'unknown', kid, data) // actor = the admin acting on Ben's world
   }
 
-  function saveTradeList(trades: StickerTrade[]) {
+  /**
+   * Which collection an action is about. The two albums play the identical
+   * game (§14, §14b) over different piles, so every action below takes this and
+   * nothing else changes: `album` is the Grand Line sticker album, `cards` is
+   * the ONE PIECE TCG binder.
+   */
+  function tradesIn(col: CollectionSlice): StickerTrade[] {
+    return col === 'cards' ? get().cardTrades : get().trades
+  }
+
+  function saveTradeList(trades: StickerTrade[], col: CollectionSlice = 'album') {
+    if (col === 'cards') {
+      set({ cardTrades: trades })
+      fireAndForget(saveCardTrades(trades))
+      return
+    }
     set({ trades })
     fireAndForget(saveStickerTrades(trades))
   }
+
+  /**
+   * A card's swap value depends on its rarity, and the binder's rarities live
+   * in their own tiny generated list precisely so the store never has to import
+   * the ~1 MB card catalog.
+   */
+  const balancedIn = (col: CollectionSlice, give: string[], want: string[]) =>
+    col === 'cards' ? isBalancedCards(give, want) : isBalanced(give, want)
 
   /**
    * The duel fields that follow from a new position: the board itself, plus the
@@ -1191,6 +1240,7 @@ export const useStore = create<StoreState>((set, get) => {
     market: null,
     ideas: [],
     trades: [],
+    cardTrades: [],
     duels: [],
     boardGames: [],
     seaBattles: [],
@@ -2343,25 +2393,28 @@ export const useStore = create<StoreState>((set, get) => {
 
     // --- sticker album ------------------------------------------------------
 
-    openPack(kind) {
+    openPack(kind, col = 'album', roll = rollPack, cost = PACK_COST) {
       const { data } = get()
+      const album = data[col]
       const today = dayKey()
-      if (kind === 'free' && !freePackReady(data.album, today)) return 'used'
-      if (kind === 'buy' && data.economy.gems < PACK_COST) return 'broke'
-      if (kind === 'credit' && packCredits(data.album) < 1) return 'used'
+      if (kind === 'free' && !freePackReady(album, today)) return 'used'
+      if (kind === 'buy' && data.economy.gems < cost) return 'broke'
+      if (kind === 'credit' && packCredits(album) < 1) return 'used'
 
-      const drawn = rollPack(data.album)
+      const drawn = roll(album)
       commit((d) => {
-        if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - PACK_COST)
-        else if (kind === 'credit') d.album.packCredits = Math.max(0, (d.album.packCredits ?? 0) - 1)
-        else d.album.lastFreePackDay = today
-        for (const id of drawn) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
-        d.album.packsOpened += 1
+        const a = d[col]
+        if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - cost)
+        else if (kind === 'credit') a.packCredits = Math.max(0, (a.packCredits ?? 0) - 1)
+        else a.lastFreePackDay = today
+        for (const id of drawn) a.counts[id] = (a.counts[id] ?? 0) + 1
+        a.packsOpened += 1
       })
       return drawn
     },
 
     proposeTrade(give, want, opts) {
+      const col: CollectionSlice = opts?.col ?? 'album'
       const me = get().activeProfile()
       const mateId = get().activeProfileId === PARENT_ID ? KID_ID : PARENT_ID
       const mate = get().profiles.find((p) => p.id === mateId)
@@ -2373,11 +2426,11 @@ export const useStore = create<StoreState>((set, get) => {
       if (want.length === 0 || (give.length === 0 && gems === 0 && !pack)) return 'empty'
       // Card-for-card still has to balance. Berries or a pack on the table mean
       // there is no fair price to enforce — that's what the haggle is for.
-      if (gems === 0 && !pack && !isBalanced(give, want)) return 'unbalanced'
+      if (gems === 0 && !pack && !balancedIn(col, give, want)) return 'unbalanced'
       if (gems > get().data.economy.gems) return 'broke'
-      if (pack && !freePackReady(get().data.album, dayKey())) return 'nopack'
+      if (pack && !freePackReady(get().data[col], dayKey())) return 'nopack'
       // one open offer at a time in each direction keeps the swap table readable
-      if (get().trades.some((t) => t.status === 'pending' && t.fromId === me.id)) return 'busy'
+      if (tradesIn(col).some((t) => t.status === 'pending' && t.fromId === me.id)) return 'busy'
 
       const trade: StickerTrade = {
         id: `trade-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -2396,12 +2449,13 @@ export const useStore = create<StoreState>((set, get) => {
         createdAt: new Date().toISOString(),
         ...(opts?.note ? { note: opts.note } : {}),
       }
-      saveTradeList([...get().trades, trade])
+      saveTradeList([...tradesIn(col), trade], col)
       return 'ok'
     },
 
-    answerTrade(tradeId, accept) {
-      const { trades, activeProfileId, mateData } = get()
+    answerTrade(tradeId, accept, col = 'album') {
+      const { activeProfileId, mateData } = get()
+      const trades = tradesIn(col)
       const trade = trades.find((t) => t.id === tradeId)
       // only whoever's court it's in can answer, and only while it's still open
       if (!trade || !awaitsAnswer(trade, activeProfileId)) return
@@ -2410,6 +2464,7 @@ export const useStore = create<StoreState>((set, get) => {
         // walking away without a counter is what ends the haggle
         saveTradeList(
           trades.map((t) => (t.id === tradeId ? { ...t, status: 'declined' as const, resolvedAt: new Date().toISOString() } : t)),
+          col,
         )
         return
       }
@@ -2429,15 +2484,16 @@ export const useStore = create<StoreState>((set, get) => {
 
       // Re-check the deal still stands — either world may have moved since the
       // offer was made (packs opened, other swaps, Berries spent).
-      const proposerCardsOk = trade.give.every((id) => spareCount(proposer.album, id) > 0)
-      const answererCardsOk = trade.want.every((id) => spareCount(answerer.album, id) > 0)
+      const proposerCardsOk = trade.give.every((id) => spareCount(proposer[col], id) > 0)
+      const answererCardsOk = trade.want.every((id) => spareCount(answerer[col], id) > 0)
       const gemsOk = proposer.economy.gems >= gems
-      const packOk = !trade.givePack || freePackReady(proposer.album, dayKey())
+      const packOk = !trade.givePack || freePackReady(proposer[col], dayKey())
       if (!proposerCardsOk || !answererCardsOk || !gemsOk || !packOk) {
         saveTradeList(
           trades.map((t) =>
             t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t,
           ),
+          col,
         )
         return
       }
@@ -2447,38 +2503,43 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         const out = iPropose ? trade.give : trade.want
         const inn = iPropose ? trade.want : trade.give
-        for (const id of out) d.album.counts[id] = (d.album.counts[id] ?? 0) - 1
-        for (const id of inn) d.album.counts[id] = (d.album.counts[id] ?? 0) + 1
+        const a = d[col]
+        for (const id of out) a.counts[id] = (a.counts[id] ?? 0) - 1
+        for (const id of inn) a.counts[id] = (a.counts[id] ?? 0) + 1
         if (gems > 0) d.economy.gems = Math.max(0, d.economy.gems + (iPropose ? -gems : gems))
         if (trade.givePack) {
-          if (iPropose) d.album.lastFreePackDay = today // I spend today's free pack
-          else d.album.packCredits = (d.album.packCredits ?? 0) + 1 // it lands here, still sealed
+          if (iPropose) a.lastFreePackDay = today // I spend today's free pack
+          else a.packCredits = (a.packCredits ?? 0) + 1 // it lands here, still sealed
         }
       })
       // their side: the mirror image, written straight into their doc
       const theirs: AppData = JSON.parse(JSON.stringify(mateData))
       const theirOut = iPropose ? trade.want : trade.give
       const theirIn = iPropose ? trade.give : trade.want
-      for (const id of theirOut) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) - 1
-      for (const id of theirIn) theirs.album.counts[id] = (theirs.album.counts[id] ?? 0) + 1
+      for (const id of theirOut) theirs[col].counts[id] = (theirs[col].counts[id] ?? 0) - 1
+      for (const id of theirIn) theirs[col].counts[id] = (theirs[col].counts[id] ?? 0) + 1
       if (gems > 0) theirs.economy.gems = Math.max(0, theirs.economy.gems + (iPropose ? gems : -gems))
       if (trade.givePack) {
-        if (iPropose) theirs.album.packCredits = (theirs.album.packCredits ?? 0) + 1
-        else theirs.album.lastFreePackDay = today
+        if (iPropose) theirs[col].packCredits = (theirs[col].packCredits ?? 0) + 1
+        else theirs[col].lastFreePackDay = today
       }
       const mateId = iPropose ? trade.toId : trade.fromId
       set({ mateData: theirs, mateAlbum: theirs.album })
       // Berries move too now, so the swap writes their economy alongside the album
-      fireAndForget(saveDataFields(mateId, { album: theirs.album, economy: theirs.economy }))
+      fireAndForget(
+        saveDataFields(mateId, col === 'cards' ? { cards: theirs.cards, economy: theirs.economy } : { album: theirs.album, economy: theirs.economy }),
+      )
       auditDiff(mateId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's change
 
       saveTradeList(
         trades.map((t) => (t.id === tradeId ? { ...t, status: 'accepted' as const, resolvedAt: new Date().toISOString() } : t)),
+        col,
       )
     },
 
-    counterTrade(tradeId, gems) {
-      const { trades, activeProfileId } = get()
+    counterTrade(tradeId, gems, col = 'album') {
+      const { activeProfileId } = get()
+      const trades = tradesIn(col)
       const me = get().activeProfile()
       const trade = trades.find((t) => t.id === tradeId)
       if (!me || !trade || !awaitsAnswer(trade, activeProfileId)) return 'busy'
@@ -2504,16 +2565,19 @@ export const useStore = create<StoreState>((set, get) => {
               }
             : t,
         ),
+        col,
       )
       return 'ok'
     },
 
-    cancelTrade(tradeId) {
-      const { trades, activeProfileId } = get()
+    cancelTrade(tradeId, col = 'album') {
+      const { activeProfileId } = get()
+      const trades = tradesIn(col)
       const trade = trades.find((t) => t.id === tradeId)
       if (!trade || trade.status !== 'pending' || trade.fromId !== activeProfileId) return
       saveTradeList(
         trades.map((t) => (t.id === tradeId ? { ...t, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : t)),
+        col,
       )
     },
 

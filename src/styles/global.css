@@ -1460,7 +1460,9 @@ input, select { font-family: inherit; }
 .sticker--selected { outline: 3px solid var(--yellow); outline-offset: 1px; transform: translateY(-3px); }
 
 .sticker--sm { width: 100%; }
-.sticker--lg { width: 190px; }
+/* The reveal and the end-of-pack stack are for READING a card, so it takes the
+   screen: on a phone that is most of the width, on a desktop a real card size. */
+.sticker--lg { width: min(300px, 78vw); }
 .sticker--reveal { box-shadow: 0 0 34px rgb(255 206 0 / 55%), 0 8px 20px rgb(0 0 0 / 50%); }
 .sticker--lg .sticker-name { font-size: 13px; padding: 6px 2px 3px; }
 
@@ -1790,7 +1792,7 @@ input, select { font-family: inherit; }
 
 /* starts scaled/translated onto the tapped thumbnail, then flies to center */
 .detail-card {
-  position: relative; width: 230px; max-width: 76vw;
+  position: relative; width: min(340px, 84vw);
   transform-origin: center center;
   transition:
     transform 340ms cubic-bezier(0.2, 0.9, 0.3, 1.15),
@@ -4527,3 +4529,21 @@ input, select { font-family: inherit; }
 .optcg-color--black { background: #333; color: #fff; }
 .optcg-color--yellow { background: #d6a700; color: #2b2b00; }
 .optcg-hint { font-size: 11px; margin-top: 2px; }
+
+/* --- One Piece Album (§14b) ----------------------------------------------------
+   Rides on the sticker album's own classes (.album-grid, .pack-card, .trade-*)
+   because it is the same game; only the progress bar and the picker row are
+   its own. */
+.binder-bar { height: 8px; border-radius: 99px; background: rgb(255 255 255 / 12%); overflow: hidden; }
+.binder-bar span { display: block; height: 100%; background: linear-gradient(90deg, #d70000, #ffce00); }
+.trade-gems { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; }
+.trade-gems input { width: 90px; }
+
+/* the end-of-pack stack: one card at a time, with its text and a pager */
+.pack-stack-name { font-weight: 900; margin-top: 8px; font-size: 15px; }
+.pack-stack-note { font-size: 12px; line-height: 1.45; max-width: min(340px, 84vw); margin: 6px auto 0; opacity: 0.85; white-space: pre-wrap; }
+.pack-stack-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+.pack-stack-dots { display: flex; gap: 4px; }
+.pack-stack-dots span { width: 6px; height: 6px; border-radius: 99px; background: rgb(255 255 255 / 30%); }
+.pack-stack-dots span.is-on { background: var(--yellow, #ffce00); }
+.detail-note { font-size: 12px; line-height: 1.45; white-space: pre-wrap; background: rgb(255 255 255 / 8%); border-radius: 8px; padding: 8px 10px; margin: 8px 0 0; text-align: left; }

@@ -30,10 +30,59 @@ const field = (block, cls) => {
   return strip(m[1].replace(/<h3>[\s\S]*?<\/h3>/, ''))
 }
 
-async function seriesIds() {
+/**
+ * The series picker, read straight off the page: each option carries the set's
+ * real name and its printed code — "STARTER DECK -RED Monkey.D.Luffy- [ST-01]".
+ * Both are harvested, so the Card Binder can name a shelf without anybody
+ * hand-typing 59 set titles.
+ */
+/**
+ * The series picker, read straight off the page: each option carries the set's
+ * real name and its printed code — "STARTER DECK -RED Monkey.D.Luffy- [ST-01]".
+ * Both are harvested, so the Card Binder can name a shelf without anybody
+ * hand-typing 59 set titles.
+ */
+const SMALL = new Set(['of', 'the', 'in', 'on', 'a', 'an', 'and', 'to', 'at', 'for', 'his', 'her'])
+const titleCase = (s) => {
+  // The site shouts its set names ("ROMANCE DAWN"); a shelf label should not.
+  if (s !== s.toUpperCase()) return s
+  return s
+    .toLowerCase()
+    .replace(/(^|[\s("'-])([a-z])/g, (_, p, c) => p + c.toUpperCase())
+    .split(' ')
+    .map((w, i) => (i > 0 && SMALL.has(w.toLowerCase()) ? w.toLowerCase() : w))
+    .join(' ')
+}
+
+async function seriesList() {
   const html = await (await fetch(LIST, { headers: UA })).text()
-  const ids = [...html.matchAll(/<option value="(\d{6})"/g)].map((m) => m[1])
-  return [...new Set(ids)]
+  const out = []
+  for (const m of html.matchAll(/<option value="(\d{6})"[^>]*>([\s\S]*?)<\/option>/g)) {
+    // strip() decodes the entities first — the label arrives with &lt;br&gt; in it
+    const label = strip(m[2]).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    // "[OP-01]" → OP01, and a combined "[OP15-EB04]" names two sets at once
+    const tail = label.match(/\[([^\]]+)\]\s*$/)
+    const codes = tail
+      ? tail[1].split('-').reduce((acc, part, i, arr) => {
+          if (/^\d+$/.test(part)) return acc
+          const num = /^\d+$/.test(arr[i + 1] ?? '') ? arr[i + 1] : ''
+          const inline = part.match(/^([A-Z]+)(\d+)$/)
+          if (inline) acc.push(`${inline[1]}${inline[2]}`)
+          else if (num) acc.push(`${part}${num}`)
+          return acc
+        }, [])
+      : []
+    const name = titleCase(
+      label
+        .replace(/\[[^\]]*\]\s*$/, '')
+        .replace(/^(BOOSTER PACK|STARTER DECK EX|STARTER DECK|EXTRA BOOSTER|PREMIUM BOOSTER|PROMOTION CARDS?)\s*/i, '')
+        .trim()
+        .replace(/^-+|-+$/g, '')
+        .trim(),
+    )
+    out.push({ id: m[1], codes, name })
+  }
+  return out.filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i)
 }
 
 /** One card per code — parallel arts repeat the same data, so the first wins. */
@@ -64,13 +113,18 @@ function parse(html, out) {
   }
 }
 
-const ids = await seriesIds()
+const series = await seriesList()
 const out = {}
-for (const id of ids) {
-  const html = await (await fetch(`${LIST}?series=${id}`, { headers: UA })).text()
+const setNames = {}
+for (const s of series) {
+  const html = await (await fetch(`${LIST}?series=${s.id}`, { headers: UA })).text()
   const before = Object.keys(out).length
   parse(html, out)
-  console.log(`series ${id}: +${Object.keys(out).length - before}`)
+  for (const code of s.codes) if (s.name && !setNames[code]) setNames[code] = s.name
+  console.log(`series ${s.id} ${s.codes.join('+') || '?'}: +${Object.keys(out).length - before}`)
 }
 await writeFile(OUT, JSON.stringify(out, null, 0))
 console.log(`${Object.keys(out).length} cards → ${OUT}`)
+const SETS_OUT = new URL('./data/optcg-sets.json', import.meta.url).pathname
+await writeFile(SETS_OUT, JSON.stringify(setNames, null, 1))
+console.log(`${Object.keys(setNames).length} set names → ${SETS_OUT}`)

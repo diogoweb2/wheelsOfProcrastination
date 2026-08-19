@@ -1,6 +1,20 @@
 // The Grand Line Sticker Album — pack odds, trade values and album math.
 // Catalog + crews are generated from assets/Album/ by `npm run stickers`.
 import { STICKER_CATALOG, STICKER_CREWS, type StickerDef } from './stickerCatalog.generated'
+import {
+  type CollectionKit,
+  type CollectRarity,
+  isBalancedIn,
+  offerValueIn,
+  ownedIdsIn,
+  ownsIn,
+  progressIn,
+  rollPackIn,
+  spareCountIn,
+  sparesIn,
+  tradeableIn,
+  TRADE_VALUE as COLLECT_TRADE_VALUE,
+} from './collections'
 import type { AlbumState, StickerTrade } from '../types'
 
 export { STICKER_CATALOG, STICKER_CREWS }
@@ -20,8 +34,8 @@ export const SPECIAL_CHANCE = 0.06
  * cards early instead of only once the album is nearly full.
  */
 export const REPEAT_FLOOR = 0.4
-/** A red rare is worth two whites in a swap. */
-export const TRADE_VALUE: Record<StickerDef['rarity'], number> = { common: 1, special: 2 }
+/** A red rare is worth two whites in a swap. Shared with the One Piece Album. */
+export const TRADE_VALUE = COLLECT_TRADE_VALUE
 /**
  * What one point of swap value is *roughly* worth in Berries. Only a hint on
  * the scale — a Berry offer is never blocked for being low, because haggling
@@ -37,6 +51,33 @@ export const stickerUrl = (id: string) => `/stickers/${id}.webp`
 const BY_ID = new Map(STICKER_CATALOG.map((s) => [s.id, s]))
 export const stickerById = (id: string): StickerDef | undefined => BY_ID.get(id)
 
+/**
+ * The album as a collection kit — the same shape the One Piece Album uses, so the
+ * rules (packs, spares, swap value, the race) are written once in
+ * logic/collections.ts and this file is only the album's own numbers.
+ */
+export const STICKER_KIT: CollectionKit = {
+  id: 'stickers',
+  slice: 'album',
+  name: 'Sticker Album',
+  emoji: '🖼️',
+  items: STICKER_CATALOG.map((s) => ({
+    id: s.id,
+    name: s.name,
+    rarity: s.rarity,
+    group: s.crew,
+    img: stickerUrl(s.id),
+  })),
+  groups: STICKER_CREWS.map((c) => ({ id: c.id, name: c.name, flag: c.flag })),
+  packCost: PACK_COST,
+  packSize: PACK_SIZE,
+  specialChance: SPECIAL_CHANCE,
+  repeatFloor: REPEAT_FLOOR,
+  gemsPerPoint: GEMS_PER_POINT,
+}
+
+const rarityOfSticker = (id: string): CollectRarity => stickerById(id)?.rarity ?? 'common'
+
 export function defaultAlbumState(): AlbumState {
   return { counts: {}, packsOpened: 0, lastFreePackDay: null, trades: [], packCredits: 0 }
 }
@@ -44,73 +85,31 @@ export function defaultAlbumState(): AlbumState {
 /** Every sticker id the album can hold, in catalog (crew-grouped) order. */
 export const ALL_STICKER_IDS = STICKER_CATALOG.map((s) => s.id)
 
-export const ownedIds = (a: AlbumState) => Object.keys(a.counts).filter((id) => (a.counts[id] ?? 0) > 0)
-export const ownsSticker = (a: AlbumState, id: string) => (a.counts[id] ?? 0) > 0
+export const ownedIds = (a: AlbumState) => ownedIdsIn(a)
+export const ownsSticker = (a: AlbumState, id: string) => ownsIn(a, id)
 /** Copies beyond the one glued into the album — these are the tradeable pile. */
-export const spareCount = (a: AlbumState, id: string) => Math.max(0, (a.counts[id] ?? 0) - 1)
+export const spareCount = (a: AlbumState, id: string) => spareCountIn(a, id)
 
-export function albumProgress(a: AlbumState): { owned: number; total: number; pct: number } {
-  const total = STICKER_CATALOG.length
-  const owned = STICKER_CATALOG.filter((s) => ownsSticker(a, s.id)).length
-  return { owned, total, pct: total === 0 ? 0 : Math.round((owned / total) * 100) }
-}
+export const albumProgress = (a: AlbumState) => progressIn(STICKER_KIT, a)
 
-/** Spare cards, newest-catalog-order, expanded per duplicate copy count. */
+/** Spare cards, catalog order, with how many copies are going spare. */
 export function spares(a: AlbumState): { sticker: StickerDef; count: number }[] {
-  return STICKER_CATALOG.filter((s) => spareCount(a, s.id) > 0).map((s) => ({
-    sticker: s,
-    count: spareCount(a, s.id),
-  }))
+  return sparesIn(STICKER_KIT, a).map(({ item, count }) => ({ sticker: stickerById(item.id) as StickerDef, count }))
 }
 
 /** Cards `wanter` is still missing that `holder` can spare — the "I can help you" list. */
 export function tradeableFor(holder: AlbumState, wanter: AlbumState): StickerDef[] {
-  return STICKER_CATALOG.filter((s) => spareCount(holder, s.id) > 0 && !ownsSticker(wanter, s.id))
+  return tradeableIn(STICKER_KIT, holder, wanter).map((i) => stickerById(i.id) as StickerDef)
 }
 
-const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
-
-/**
- * Roll one pack. Each slot picks a rarity first, then a sticker of that rarity —
- * biased so that at least REPEAT_FLOOR of the pack is stuff you already own
- * (duplicates you can trade away), with the rest favouring new cards.
- *
- * Returns the drawn ids in order; duplicates within one pack are allowed and
- * expected. The caller applies them to the album.
- */
-export function rollPack(album: AlbumState, size = PACK_SIZE): string[] {
-  const drawn: string[] = []
-  // track what the album *would* look like mid-pack so "new" stays accurate
-  const have = new Set(ownedIds(album))
-
-  for (let i = 0; i < size; i++) {
-    const rarity: StickerDef['rarity'] = Math.random() < SPECIAL_CHANCE ? 'special' : 'common'
-    let pool = STICKER_CATALOG.filter((s) => s.rarity === rarity)
-    if (pool.length === 0) pool = STICKER_CATALOG
-
-    const owned = pool.filter((s) => have.has(s.id))
-
-    // Force a duplicate for the first REPEAT_FLOOR slots when we can, so there's
-    // always something to trade. The remaining slots are NOT guaranteed new:
-    // they draw at true random from the whole pool, so the closer the album gets
-    // to full the harder the last cards are to find — which is exactly when
-    // trading with the other crewmate becomes the fastest way to finish.
-    const wantDupe = i < Math.floor(size * REPEAT_FLOOR)
-    const from = wantDupe && owned.length > 0 ? owned : pool
-    const s = pick(from.length > 0 ? from : pool)
-    drawn.push(s.id)
-    have.add(s.id)
-  }
-  return drawn
-}
+/** Roll one pack out of the album's pool. The rules live in logic/collections.ts. */
+export const rollPack = (album: AlbumState, size = PACK_SIZE): string[] => rollPackIn(STICKER_KIT, album, size)
 
 /** Total swap value of a side of a trade (red = 2, white = 1). */
-export function offerValue(ids: string[]): number {
-  return ids.reduce((sum, id) => sum + TRADE_VALUE[stickerById(id)?.rarity ?? 'common'], 0)
-}
+export const offerValue = (ids: string[]): number => offerValueIn(rarityOfSticker, ids)
 
 /** A trade is fair when both sides carry the same swap value. */
-export const isBalanced = (give: string[], want: string[]) => offerValue(give) === offerValue(want)
+export const isBalanced = (give: string[], want: string[]) => isBalancedIn(rarityOfSticker, give, want)
 
 export const isPendingTrade = (t: StickerTrade) => t.status === 'pending'
 

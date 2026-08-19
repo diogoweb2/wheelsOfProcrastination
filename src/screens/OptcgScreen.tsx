@@ -27,7 +27,7 @@ import {
   type OptcgSide,
   type OptcgState,
 } from '../logic/optcg'
-import { OPTCG_CARDS, OPTCG_SETS } from '../logic/optcgCards'
+import { OPTCG_CARDS, OPTCG_SETS, OPTCG_SET_NAMES } from '../logic/optcgCards'
 import { OPTCG_PRESETS } from '../logic/optcgDecks'
 import { isScripted } from '../logic/optcgEffects'
 import { aiDefend, aiTurn } from '../logic/optcgAi'
@@ -432,7 +432,9 @@ function DeckTab() {
         <select className="optcg-input" value={set} onChange={(e) => setSet(e.target.value)}>
           <option value="">All sets</option>
           {OPTCG_SETS.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {OPTCG_SET_NAMES[s] ? `${s} — ${OPTCG_SET_NAMES[s]}` : s}
+            </option>
           ))}
         </select>
       </div>

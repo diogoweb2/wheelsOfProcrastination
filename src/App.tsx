@@ -34,6 +34,7 @@ import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
 
+const CardBinderScreen = lazy(() => import('./screens/CardBinderScreen').then((m) => ({ default: m.CardBinderScreen })))
 const OptcgScreen = lazy(() => import('./screens/OptcgScreen').then((m) => ({ default: m.OptcgScreen })))
 
 export default function App() {
@@ -769,6 +770,14 @@ function AppBodyRouter({
       return <BoardGameScreen kind="checkers" tab={open.tab} />
     case 'seabattle':
       return <SeaBattleScreen tab={open.tab} />
+    case 'binder':
+      // Lazy for the same reason as the card game: the binder is drawn from the
+      // same ~2 600-card catalog.
+      return (
+        <Suspense fallback={<div className="screen"><p className="muted">Opening the binder…</p></div>}>
+          <CardBinderScreen tab={open.tab} />
+        </Suspense>
+      )
     case 'optcg':
       // Lazy on purpose: this screen pulls in the ~2600-card catalog, which is
       // bigger than the rest of the app put together. Nobody who never opens

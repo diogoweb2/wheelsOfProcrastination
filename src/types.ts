@@ -1252,6 +1252,13 @@ export interface AppData {
   album: AlbumState
   duel: DuelStats
   games: BoardGamesState
+  /**
+   * The One Piece Album (§14b) — the second collection, holding every printed ONE
+   * PIECE TCG card. Deliberately the same shape as `album`: it is the same
+   * game over a different pile, so one set of rules and one set of screens
+   * serve both.
+   */
+  cards: AlbumState
   /** The One Piece TCG app: this crewmate's built decks and their record. */
   optcg: OptcgProfileState
   gym: GymState

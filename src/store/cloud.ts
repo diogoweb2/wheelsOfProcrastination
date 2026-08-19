@@ -269,6 +269,26 @@ export async function saveSeaBattles(matches: SeaMatch[]): Promise<void> {
   await setDoc(seaBattlesRef(), { matches })
 }
 
+// --- card binder swaps (its own shared table) -------------------------------
+//
+// The One Piece Album trades the same way the sticker album does, but in its own
+// document: the two collections are separate piles, and a swap list that mixed
+// them would be unreadable.
+
+const cardTradesRef = () => doc(firestore, 'app', 'cardTrades')
+
+export function subscribeCardTrades(cb: (trades: StickerTrade[]) => void): () => void {
+  return onSnapshot(cardTradesRef(), (snap) => {
+    const data = snap.data() as { trades?: StickerTrade[] } | undefined
+    cb(data?.trades ?? [])
+  })
+}
+
+export async function saveCardTrades(trades: StickerTrade[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(cardTradesRef(), { trades })
+}
+
 // --- One Piece TCG (its own shared table) -----------------------------------
 //
 // Its own document for the same reason Sea Battle has one: a card game carries

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { stickerById } from '../logic/album'
-import { Sticker } from './Sticker'
+import { Sticker, type CardFace } from './Sticker'
 import { sfx } from '../audio'
 
 /** Big gold burst from both corners — reserved for a brand-new red rare. */
@@ -62,15 +62,31 @@ export function PackOpening({
   drawn,
   ownedBefore,
   onDone,
+  lookup = stickerById,
+  note,
 }: {
   drawn: string[]
   ownedBefore: Set<string> // album contents BEFORE the pack — decides new vs. repeat
   onDone: () => void
+  /**
+   * How to turn a drawn id into a card face. Defaults to the Grand Line album;
+   * the One Piece Album passes its own, which is the whole reason the ceremony is
+   * shared rather than copied.
+   */
+  lookup?: (id: string) => CardFace | undefined
+  /**
+   * One line about a card, printed under it in the end-of-pack stack. The Card
+   * Binder passes the card's effect text — the mirrored scans have an empty
+   * text box, so this is the only place that text can come from.
+   */
+  note?: (id: string) => string
 }) {
   const [phase, setPhase] = useState<'sealed' | 'tearing' | 'cards' | 'newbies' | 'summary'>('sealed')
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [charging, setCharging] = useState(false) // suspense wobble before a flip
+  /** Which card the end-of-pack stack is showing. */
+  const [stack, setStack] = useState(0)
   const timers = useRef<number[]>([])
 
   // things already seen earlier in THIS pack count as repeats too
@@ -81,14 +97,15 @@ export function PackOpening({
     return isNew
   })
 
-  const current = stickerById(drawn[index])
+  const current = lookup(drawn[index])
+  const stackCard = lookup(drawn[stack])
   const isNew = marks[index]
   const isRare = current?.rarity === 'special'
   const isBig = Boolean(isRare && isNew) // the moment worth a party
 
   // the haul that actually changes the album — the reason to keep buying packs
   const newIds = drawn.filter((_, i) => marks[i])
-  const newHasRare = newIds.some((id) => stickerById(id)?.rarity === 'special')
+  const newHasRare = newIds.some((id) => lookup(id)?.rarity === 'special')
   const newSpread =
     newIds.length === 1 ? 'is-one' : newIds.length === 2 ? 'is-two' : newIds.length <= 4 ? 'is-few' : 'is-lots'
 
@@ -179,7 +196,7 @@ export function PackOpening({
 
   const newCount = marks.filter(Boolean).length
   const dupeCount = drawn.length - newCount
-  const rareCount = drawn.filter((id) => stickerById(id)?.rarity === 'special').length
+  const rareCount = drawn.filter((id) => lookup(id)?.rarity === 'special').length
 
   return (
     <div className="pack-overlay">
@@ -254,7 +271,7 @@ export function PackOpening({
           {/* fewer cards → bigger cards; a full new pack still fits without scrolling */}
           <div className={`pack-newbies ${newSpread}`}>
             {newIds.map((id, i) => {
-              const s = stickerById(id)
+              const s = lookup(id)
               return s ? (
                 <div className="pack-newbie" key={id} style={{ animationDelay: `${i * 140}ms` }}>
                   <Sticker sticker={s} state="reveal" size="lg" badge="NEW!" />
@@ -270,16 +287,44 @@ export function PackOpening({
       )}
 
       {phase === 'summary' && (
-        <div className="pack-stage">
+        <div className="pack-stage" onClick={(e) => e.stopPropagation()}>
           <div className="pack-summary-title">Pack opened!</div>
-          <div className="pack-summary-row">
-            {drawn.map((id, i) => {
-              const s = stickerById(id)
-              return s ? (
-                <Sticker key={`${id}-${i}`} sticker={s} size="sm" badge={marks[i] ? 'NEW' : undefined} />
-              ) : null
-            })}
-          </div>
+
+          {/* The haul, one full-size card at a time. A 7-card contact sheet is
+              too small to read anything on, and reading the card you just pulled
+              is the whole reason to look at it twice. */}
+          {stackCard && (
+            <>
+              <div className="pack-counter">
+                {stack + 1} / {drawn.length}
+              </div>
+              <Sticker sticker={stackCard} state="reveal" size="lg" badge={marks[stack] ? 'NEW!' : 'SPARE'} />
+              <div className="pack-stack-name">{stackCard.name}</div>
+              {note?.(drawn[stack]) && <p className="pack-stack-note">{note(drawn[stack])}</p>}
+              <div className="pack-stack-nav">
+                <button
+                  className="btn btn--small btn--ghost"
+                  disabled={stack === 0}
+                  onClick={() => { sfx.click(); setStack((i) => Math.max(0, i - 1)) }}
+                >
+                  ← Prev
+                </button>
+                <div className="pack-stack-dots">
+                  {drawn.map((id, i) => (
+                    <span key={`${id}-${i}`} className={i === stack ? 'is-on' : ''} />
+                  ))}
+                </div>
+                <button
+                  className="btn btn--small btn--ghost"
+                  disabled={stack === drawn.length - 1}
+                  onClick={() => { sfx.click(); setStack((i) => Math.min(drawn.length - 1, i + 1)) }}
+                >
+                  Next →
+                </button>
+              </div>
+            </>
+          )}
+
           <div className="pack-summary-stats">
             <span className="pack-stat pack-stat--new">{newCount} new</span>
             <span className="pack-stat pack-stat--dupe">{dupeCount} to trade</span>

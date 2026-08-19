@@ -1,8 +1,29 @@
-import { useRef } from 'react'
-import { stickerUrl, type StickerDef } from '../logic/album'
+import { useRef, useState } from 'react'
+import { stickerUrl } from '../logic/album'
+import type { CollectRarity } from '../logic/collections'
 
 /**
- * One Panini-style card. White border = common, red = special.
+ * The least a thing needs to be drawable as a card: an id, a name and a rarity.
+ * A `CollectItem` out of either collection satisfies it, and so does a
+ * `StickerDef` straight out of the album catalog (whose picture is derived from
+ * its id).
+ */
+export interface CardFace {
+  id: string
+  name: string
+  rarity: CollectRarity
+  img?: string
+  imgFallback?: string
+}
+
+/**
+ * One Panini-style card, in either collection. White border = common, red =
+ * special.
+ *
+ * The picture comes from the item itself when it has one (the One Piece Album's are
+ * hotlinked off a public mirror, with a second mirror to fall back on) and from
+ * our own `public/stickers/` when it does not — which is what every sticker in
+ * the Grand Line album does.
  * `state`:
  *   'owned'   — full colour, glued in
  *   'missing' — silhouetted placeholder slot in the album
@@ -19,7 +40,7 @@ export function Sticker({
   badge,
   wanted = false,
 }: {
-  sticker: StickerDef
+  sticker: CardFace
   state?: 'owned' | 'missing' | 'reveal'
   count?: number // copies owned; >1 shows the spare pill
   size?: 'sm' | 'md' | 'lg'
@@ -49,6 +70,10 @@ export function Sticker({
 
   // Long-press to peek. Held presses suppress the click that follows, so a peek
   // on the trade screen doesn't also toggle the card into the offer.
+  // Hotlinked art can 404: try the item's fallback mirror, then give up and
+  // show the name, so a dead link is never an empty hole in the album.
+  const [imgStep, setImgStep] = useState(0)
+  const src = imgStep === 0 ? (sticker.img ?? stickerUrl(sticker.id)) : sticker.imgFallback
   const held = useRef(false)
   const timer = useRef<number | null>(null)
   const clearHold = () => {
@@ -86,8 +111,16 @@ export function Sticker({
       <div className="sticker-art">
         {state === 'missing' ? (
           <span className="sticker-ghost">?</span>
+        ) : src ? (
+          <img
+            src={src}
+            alt={sticker.name}
+            loading="lazy"
+            draggable={false}
+            onError={() => setImgStep((n) => n + 1)}
+          />
         ) : (
-          <img src={stickerUrl(sticker.id)} alt={sticker.name} loading="lazy" draggable={false} />
+          <span className="sticker-ghost">{sticker.name}</span>
         )}
       </div>
       <div className="sticker-name">{state === 'missing' ? '???' : sticker.name}</div>
