@@ -31,15 +31,89 @@ import { OPTCG_CARDS, OPTCG_SETS } from '../logic/optcgCards'
 import { OPTCG_PRESETS } from '../logic/optcgDecks'
 import { isScripted } from '../logic/optcgEffects'
 import { aiDefend, aiTurn } from '../logic/optcgAi'
+import { TUTORIAL_STEPS, newTutorialMatch } from '../logic/optcgTutorial'
 import { OptcgBoard } from '../components/optcg/OptcgBoard'
 import { OptcgCardImg } from '../components/optcg/OptcgCardImg'
 import { BerryCoin } from '../components/BerryCoin'
 import { sfx } from '../audio'
 
-export function OptcgScreen({ tab }: { tab: string }) {
+export function OptcgScreen({ tab, setTab }: { tab: string; setTab: (tab: string) => void }) {
+  if (tab === 'learn') return <LearnTab onPlay={() => setTab('play')} />
   if (tab === 'deck') return <DeckTab />
   if (tab === 'rules') return <RulesTab />
-  return <PlayTab />
+  return <PlayTab onLearn={() => setTab('learn')} />
+}
+
+// --- the tutorial ----------------------------------------------------------------
+
+/**
+ * A real game with a coach on top of it. The step list lives in
+ * logic/optcgTutorial.ts; this only decides when a step is finished — a step
+ * with a `done` test waits for the board to satisfy it, and one without waits
+ * for "Got it". Nothing here can let you make a move the engine would refuse.
+ */
+function LearnTab({ onPlay }: { onPlay: () => void }) {
+  const [state, setState] = useState<OptcgState>(() => newTutorialMatch())
+  const [at, setAt] = useState(0)
+
+  const step = TUTORIAL_STEPS[at]
+  const last = at >= TUTORIAL_STEPS.length - 1
+
+  // The opponent answers like the AI does, just slower — this is a lesson, and
+  // a move you didn't see happen is a move you didn't learn from.
+  useEffect(() => {
+    if (state.over || toAct(state) !== 'p2') return
+    const t = setTimeout(() => {
+      setState((s) => {
+        if (s.over || toAct(s) !== 'p2') return s
+        if (s.turn === 'p2' && s.phase === 'main') return aiTurn(s, 'p2')
+        return aiDefend(s, 'p2')
+      })
+    }, 900)
+    return () => clearTimeout(t)
+  }, [state])
+
+  // A step with a test advances itself the moment the board satisfies it.
+  useEffect(() => {
+    if (!step?.done) return
+    if (step.done(state)) {
+      const t = setTimeout(() => setAt((i) => Math.min(i + 1, TUTORIAL_STEPS.length - 1)), 700)
+      return () => clearTimeout(t)
+    }
+  }, [state, step])
+
+  return (
+    <div className="screen">
+      <div className="optcg-coach">
+        <div className="optcg-coach-top">
+          <b>🎓 {step.title}</b>
+          <span className="muted">
+            {at + 1}/{TUTORIAL_STEPS.length}
+          </span>
+        </div>
+        <p>{step.body.split('**').map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}</p>
+        <div className="optcg-coach-row">
+          {step.done ? (
+            <span className="muted">↓ Do it on the board — this moves on by itself.</span>
+          ) : last ? (
+            <button className="btn btn--small" onClick={onPlay}>Play a real game</button>
+          ) : (
+            <button className="btn btn--small" onClick={() => { sfx.click(); setAt(at + 1) }}>Got it</button>
+          )}
+          {at > 0 && (
+            <button className="btn btn--small btn--ghost" onClick={() => setAt(at - 1)}>Back</button>
+          )}
+          <button
+            className="btn btn--small btn--ghost"
+            onClick={() => { setState(newTutorialMatch()); setAt(0) }}
+          >
+            Start over
+          </button>
+        </div>
+      </div>
+      <OptcgBoard state={state} mySide="p1" onState={setState} waiting={toAct(state) !== 'p1'} />
+    </div>
+  )
 }
 
 /** Every deck this crewmate can take into a game: the presets plus their builds. */
@@ -52,13 +126,13 @@ function useMyDecks(): { decks: OptcgDeck[]; active: OptcgDeck } {
 
 // --- play ----------------------------------------------------------------------
 
-function PlayTab() {
-  const { activeProfileId, profiles, optcgMatches, data } = useStore((s) => ({
-    activeProfileId: s.activeProfileId,
-    profiles: s.profiles,
-    optcgMatches: s.optcgMatches,
-    data: s.data,
-  }))
+function PlayTab({ onLearn }: { onLearn: () => void }) {
+  // One field per selector on purpose: a selector returning a fresh object
+  // gives zustand a new snapshot every render, which is an infinite loop.
+  const activeProfileId = useStore((s) => s.activeProfileId)
+  const profiles = useStore((s) => s.profiles)
+  const optcgMatches = useStore((s) => s.optcgMatches)
+  const data = useStore((s) => s.data)
   const challengeOptcg = useStore((s) => s.challengeOptcg)
   const answerOptcgChallenge = useStore((s) => s.answerOptcgChallenge)
   const playOptcgMove = useStore((s) => s.playOptcgMove)
@@ -153,6 +227,10 @@ function PlayTab() {
   return (
     <div className="screen">
       <h2>Card Game</h2>
+      <div className="card">
+        <b>New to this?</b> <span className="muted">A guided first game — nine steps, each one waits for you.</span>
+        <div><button className="btn" onClick={onLearn}>🎓 Learn to play</button></div>
+      </div>
       <div className="card">
         <b>Your deck:</b> {active.name}{' '}
         <span className="muted">
@@ -392,6 +470,7 @@ function RulesTab() {
     <div className="screen rules">
       <h2>How to play</h2>
       <ol>
+        <li><b>Reading a card.</b> Press and hold it. The card pictures are the publisher's sample scans with an empty text box, so the game prints the cost, power, Counter and effect itself.</li>
         <li><b>Goal.</b> Knock out the other Leader. Every hit takes one Life card; a hit with no Life left ends it.</li>
         <li><b>Your turn.</b> Everything stands up, you draw a card, and you get 2 DON!! (1 on the very first turn).</li>
         <li><b>DON!!</b> Rest them to pay for cards, or GIVE one to your Leader or a Character for +1000 power until the end of your turn.</li>

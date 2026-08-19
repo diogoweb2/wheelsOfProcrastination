@@ -4455,10 +4455,10 @@ input, select { font-family: inherit; }
    on the BOX, not the image, and .optcg-card--blank fills the same footprint
    with the card's printed name. */
 .optcg-card { border-radius: 6px; background: #0c2338; object-fit: cover; display: block; box-shadow: 0 1px 4px rgb(0 0 0 / 35%); }
-.optcg-card--xs { width: 46px; height: 64px; }
-.optcg-card--sm { width: 64px; height: 89px; }
-.optcg-card--md { width: 84px; height: 117px; }
-.optcg-card--lg { width: 120px; height: 168px; }
+.optcg-card--xs { width: 54px; height: 75px; }
+.optcg-card--sm { width: 78px; height: 109px; }
+.optcg-card--md { width: 100px; height: 140px; }
+.optcg-card--lg { width: 132px; height: 184px; }
 .optcg-card--rested { transform: rotate(90deg); }
 .optcg-card--live { cursor: pointer; }
 .optcg-card--blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; text-align: center; font-size: 9px; font-weight: 800; color: #fff; border: 1px solid rgb(255 255 255 / 20%); }
@@ -4467,10 +4467,10 @@ input, select { font-family: inherit; }
 
 .optcg-board { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .optcg-side { display: flex; flex-direction: column; gap: 6px; }
-.optcg-side--foe { opacity: 0.95; }
+
 .optcg-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; min-height: 96px; }
-.optcg-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 72px; }
-.optcg-slot--leader { width: 92px; }
+.optcg-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 86px; }
+.optcg-slot--leader { width: 108px; }
 .optcg-slot--lit .optcg-card { outline: 2px solid var(--green); outline-offset: 2px; }
 .optcg-slot-foot { display: flex; gap: 3px; align-items: center; font-size: 10px; font-weight: 800; }
 .optcg-power { color: #fff; }
@@ -4483,8 +4483,12 @@ input, select { font-family: inherit; }
 
 .optcg-tray { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .optcg-hand { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
-.optcg-handcard { display: flex; flex-direction: column; align-items: center; opacity: 0.65; }
-.optcg-handcard--live { opacity: 1; }
+/* The dimming sits on the IMAGE, never on the wrapper: `opacity` on an
+   ancestor makes a stacking context, which would drag the hold-to-read overlay
+   (position: fixed) down to 65% with it. */
+.optcg-handcard { display: flex; flex-direction: column; align-items: center; }
+.optcg-handcard .optcg-card { opacity: 0.6; }
+.optcg-handcard--live .optcg-card { opacity: 1; }
 .optcg-handcard--live .optcg-card { outline: 1px solid var(--green); }
 .optcg-hand-backs { display: flex; gap: 2px; opacity: 0.5; }
 .optcg-battle, .optcg-status { background: rgb(255 255 255 / 8%); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
@@ -4495,3 +4499,31 @@ input, select { font-family: inherit; }
 .optcg-pool { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 .optcg-poolcard { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .optcg-input { padding: 6px 8px; border-radius: 8px; border: 1px solid rgb(255 255 255 / 20%); background: rgb(12 35 56 / 60%); color: #fff; font-size: 13px; }
+
+/* the tutorial's coach panel — sticky, because the board is what you are
+   looking at and the instruction has to stay readable while you tap */
+.optcg-coach { position: sticky; top: 0; z-index: 3; background: rgb(12 35 56 / 96%); border: 1px solid rgb(255 255 255 / 15%); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.optcg-coach-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.optcg-coach p { margin: 6px 0 8px; font-size: 13px; line-height: 1.45; }
+.optcg-coach-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+/* hold-to-read: the mirrored scans are the official SAMPLE images and their
+   text box is blank, so the sheet PRINTS the card instead of magnifying it */
+.optcg-card { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.optcg-peek { position: fixed; inset: 0; z-index: 60; background: rgb(4 12 20 / 80%); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.optcg-peek-box { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; justify-content: center; background: #0c2338; border: 1px solid rgb(255 255 255 / 18%); border-radius: 12px; padding: 14px; max-width: 720px; max-height: 92vh; overflow-y: auto; }
+/* The picture is the point of the peek: it takes as much width as the sheet
+   can spare, and on a phone it is the full column with the text underneath. */
+.optcg-peek-art { width: 340px; max-width: min(78vw, 46vh); border-radius: 10px; display: block; }
+.optcg-peek-text { flex: 1 1 240px; min-width: 220px; max-width: 340px; }
+.optcg-peek-text h3 { margin: 0 0 6px; }
+.optcg-peek-line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; font-size: 13px; }
+.optcg-peek-effect { font-size: 13px; line-height: 1.5; background: rgb(255 255 255 / 8%); border-radius: 8px; padding: 8px 10px; margin: 6px 0; white-space: pre-wrap; }
+.optcg-peek-trigger { border-left: 3px solid var(--green); }
+.optcg-color--red { background: #c9302c; color: #fff; }
+.optcg-color--green { background: #2f7d4f; color: #fff; }
+.optcg-color--blue { background: #2e63a4; color: #fff; }
+.optcg-color--purple { background: #6b3fa0; color: #fff; }
+.optcg-color--black { background: #333; color: #fff; }
+.optcg-color--yellow { background: #d6a700; color: #2b2b00; }
+.optcg-hint { font-size: 11px; margin-top: 2px; }

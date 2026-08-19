@@ -775,7 +775,7 @@ function AppBodyRouter({
       // the card game should download it.
       return (
         <Suspense fallback={<div className="screen"><p className="muted">Shuffling…</p></div>}>
-          <OptcgScreen tab={open.tab} />
+          <OptcgScreen tab={open.tab} setTab={setTab} />
         </Suspense>
       )
     case 'gym':

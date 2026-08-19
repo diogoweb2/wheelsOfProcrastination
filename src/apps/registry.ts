@@ -147,6 +147,7 @@ export const APPS: AppDef[] = [
     folder: 'games',
     tabs: [
       { id: 'play', label: 'Play', icon: '⚔️' },
+      { id: 'learn', label: 'Learn', icon: '🎓' },
       { id: 'deck', label: 'Decks', icon: '🃏' },
       { id: 'rules', label: 'How to', icon: '📜' },
     ],

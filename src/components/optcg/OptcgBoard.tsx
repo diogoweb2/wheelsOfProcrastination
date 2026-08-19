@@ -387,6 +387,7 @@ export function OptcgBoard({
           <span className="muted">{state.log[state.log.length - 1]?.text ?? 'Your move.'}</span>
         )}
       </div>
+      <div className="optcg-hint muted">Hold any card to read what it does.</div>
       <div className="optcg-hand-backs">
         {foe.hand.map((_, i) => (
           <OptcgCardBack key={i} size="xs" />
