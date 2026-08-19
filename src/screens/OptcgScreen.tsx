@@ -165,7 +165,9 @@ function PlayTab({ onLearn }: { onLearn: () => void }) {
         if (s.turn === 'p2' && s.phase === 'main') return aiTurn(s, 'p2')
         return aiDefend(s, 'p2')
       })
-    }, 550)
+      // Slow enough that its attack can actually be watched land — the board's
+      // reactions are the game's only commentary.
+    }, 800)
     return () => clearTimeout(t)
   }, [solo])
 
@@ -195,8 +197,10 @@ function PlayTab({ onLearn }: { onLearn: () => void }) {
           <span className="muted">
             vs the AI · {soloWonToday}/{OPTCG_SOLO_LIMIT} paid wins today (<BerryCoin /> {OPTCG_SOLO_REWARD})
           </span>
-          {!solo.over && (
+          {!solo.over ? (
             <button className="btn btn--small btn--ghost" onClick={() => setSolo(resign(solo, 'p1'))}>Resign</button>
+          ) : (
+            <button className="btn btn--small" onClick={startSolo}>🔁 Rematch</button>
           )}
         </div>
         <OptcgBoard state={solo} mySide="p1" onState={setSolo} waiting={toAct(solo) !== 'p1'} />

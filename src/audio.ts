@@ -464,3 +464,82 @@ export function holdAudioSession(on: boolean) {
   }
   void keeper.play().catch(() => {})
 }
+
+/**
+ * The ONE PIECE Card Game. The board is quiet on its own — cards do not clatter
+ * — so the sound carries the beats the eye can miss: the DON!! going on, the
+ * swing, whether it got through, and how close the Leader is to going down.
+ *
+ * Built like `seaSfx`: you should be able to tell a blocked attack from a hit
+ * from a K.O. without looking, because half of them arrive from the other phone.
+ */
+export const optcgSfx = {
+  /** A card leaves your hand and lands on the field. */
+  play() {
+    tone(300, 0.07, 'triangle', 0.1, 0, 520)
+    tone(620, 0.09, 'sine', 0.07, 0.05)
+  },
+  /** One DON!! given: a coin going down on the table. */
+  don() {
+    tone(880, 0.05, 'square', 0.09)
+    tone(1320, 0.09, 'sine', 0.08, 0.04)
+  },
+  /** The swing itself — a short rising slash, the same every time. */
+  attack() {
+    tone(260, 0.09, 'sawtooth', 0.12, 0, 760)
+    tone(1200, 0.06, 'square', 0.06, 0.05)
+  },
+  /** A [Blocker] steps in: something solid stops something moving. */
+  block() {
+    tone(180, 0.14, 'square', 0.13, 0, 120)
+    tone(1400, 0.09, 'triangle', 0.08, 0.02)
+  },
+  /** A Counter card off the hand — a parry, brighter and quicker than a block. */
+  counter() {
+    tone(1500, 0.06, 'triangle', 0.1)
+    tone(2100, 0.08, 'sine', 0.07, 0.05)
+  },
+  /** The attack was held: two flat notes that go nowhere, on purpose. */
+  hold() {
+    tone(420, 0.12, 'sine', 0.09)
+    tone(420, 0.16, 'sine', 0.08, 0.11)
+  },
+  /** A Character is K.O.'d: the crack of it leaving the field. */
+  ko() {
+    tone(200, 0.16, 'sawtooth', 0.15, 0, 70)
+    tone(760, 0.1, 'square', 0.09, 0.03, 220)
+  },
+  /**
+   * The Leader takes a hit. The heaviest sound in the game, and it gets heavier
+   * as the Life runs out — `left` is how many Life cards remain after the hit,
+   * so the last one lands like a drum.
+   */
+  damage(left = 3) {
+    const heavy = left <= 1
+    tone(140, heavy ? 0.4 : 0.22, 'sawtooth', heavy ? 0.22 : 0.16, 0, 50)
+    tone(520, 0.12, 'square', 0.09, 0.04, 180)
+    if (heavy) tone(90, 0.5, 'sine', 0.18, 0.12, 40)
+  },
+  /** A [Trigger] fires off a Life card — a small piece of luck, so it rises. */
+  trigger() {
+    const notes = [660, 880, 1320]
+    notes.forEach((f, i) => tone(f, 0.12, 'triangle', 0.12, i * 0.06))
+  },
+  /** Your turn starts: one ship's bell. */
+  turn() {
+    tone(880, 0.16, 'sine', 0.12)
+    tone(1320, 0.22, 'sine', 0.08, 0.05)
+  },
+  /** Tapped something that cannot be played. */
+  nope() {
+    tone(170, 0.11, 'square', 0.07)
+  },
+  win() {
+    const notes = [523, 659, 784, 1047, 1319, 1568]
+    notes.forEach((f, i) => tone(f, 0.18, 'triangle', 0.18, i * 0.09))
+  },
+  lose() {
+    tone(392, 0.34, 'sawtooth', 0.12, 0, 196)
+    tone(196, 0.5, 'sawtooth', 0.1, 0.3, 90)
+  },
+}

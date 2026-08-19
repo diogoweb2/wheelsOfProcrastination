@@ -8,7 +8,7 @@
 // The one thing it owns is what the player is being ASKED right now — pick a
 // target for an effect, pick a blocker, add counters — which is local, throwaway
 // UI state and has no business in a synced document.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   attackers,
   block,
@@ -44,7 +44,8 @@ import {
   type OptcgEffect,
 } from '../../logic/optcgEffects'
 import { OptcgCardBack, OptcgCardImg } from './OptcgCardImg'
-import { sfx } from '../../audio'
+import { optcgSfx, sfx } from '../../audio'
+import confetti from 'canvas-confetti'
 
 const clone = (s: OptcgState): OptcgState => JSON.parse(JSON.stringify(s)) as OptcgState
 
@@ -60,6 +61,97 @@ type Prompt =
   /** DON!! given by tapping the next card. */
   | { kind: 'don' }
 
+
+/**
+ * The board's reactions — every sound and every flash on this screen.
+ *
+ * They are read off the POSITION, never off the tap that caused them: half the
+ * moves in a live game arrive from the other phone, and a reaction wired to the
+ * button would be silent for exactly the moves you most need to notice. Same
+ * arrangement Sea Battle uses, for the same reason.
+ */
+interface OptcgFx {
+  /** Board-wide shake, for a hit that took Life. */
+  shake: boolean
+  /** uid (or 'leader') of the card lunging, and the one being hit. */
+  lunge: string
+  struck: string
+  /** The banner that drops in on a big beat — damage, a K.O., the end. */
+  toast: { text: string; tone: 'hit' | 'ko' | 'good' | 'end' } | null
+}
+
+function useOptcgFx(state: OptcgState, mySide: OptcgSide): OptcgFx {
+  const prev = useRef<OptcgState | null>(null)
+  const [fx, setFx] = useState<OptcgFx>({ shake: false, lunge: '', struck: '', toast: null })
+
+  useEffect(() => {
+    const before = prev.current
+    prev.current = state
+    if (!before || before.seq === state.seq) return
+
+    const foeSide = other(mySide)
+    const myLifeLost = before[mySide].life.length - state[mySide].life.length
+    const foeLifeLost = before[foeSide].life.length - state[foeSide].life.length
+    const myKos = before[mySide].chars.length - state[mySide].chars.length
+    const foeKos = before[foeSide].chars.length - state[foeSide].chars.length
+    const next: Partial<OptcgFx> = {}
+
+    // a new attack: the attacker lunges at whatever it declared on
+    if (state.battle && !before.battle) {
+      optcgSfx.attack()
+      next.lunge = state.battle.attacker
+      next.struck = state.battle.target
+    }
+    if (state.phase === 'counter' && before.phase === 'block' && state.battle?.blocked) optcgSfx.block()
+    if ((state.battle?.counter ?? 0) > (before.battle?.counter ?? 0)) optcgSfx.counter()
+    if (state.phase === 'trigger' && before.phase !== 'trigger') optcgSfx.trigger()
+
+    if (myLifeLost > 0 || foeLifeLost > 0) {
+      const mine = myLifeLost > 0
+      optcgSfx.damage(mine ? state[mySide].life.length : state[foeSide].life.length)
+      next.shake = true
+      next.toast = mine
+        ? { text: `You took ${myLifeLost} damage — ${state[mySide].life.length} Life left`, tone: 'hit' }
+        : { text: `Their Leader is down to ${state[foeSide].life.length} Life!`, tone: 'good' }
+    } else if (myKos > 0 || foeKos > 0) {
+      optcgSfx.ko()
+      next.toast = foeKos > 0 ? { text: 'K.O.!', tone: 'ko' } : { text: 'You lost a Character', tone: 'ko' }
+    } else if (before.phase === 'counter' && state.phase === 'main' && !state.over) {
+      // the battle resolved without anything happening: it was held off
+      optcgSfx.hold()
+    }
+
+    if (state[mySide].chars.length > before[mySide].chars.length) optcgSfx.play()
+    if (state.turn !== before.turn && state.turn === mySide && !state.over) {
+      optcgSfx.turn()
+      next.toast = { text: 'Your turn', tone: 'good' }
+    }
+
+    if (state.over && !before.over) {
+      const won = state.winner === mySide
+      if (won) {
+        optcgSfx.win()
+        void confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 }, colors: ['#ffce00', '#d70000', '#fff'] })
+      } else optcgSfx.lose()
+      next.toast = { text: won ? '🏆 You win!' : 'Your Leader is down…', tone: 'end' }
+    }
+
+    setFx((f) => ({ ...f, ...next }))
+  }, [state, mySide])
+
+  // every flash is short — they mark a beat, they do not hold the screen
+  useEffect(() => {
+    if (!fx.shake && !fx.lunge && !fx.toast) return
+    const timers = [
+      window.setTimeout(() => setFx((f) => ({ ...f, shake: false, lunge: '', struck: '' })), 620),
+      window.setTimeout(() => setFx((f) => ({ ...f, toast: null })), 2200),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [fx.shake, fx.lunge, fx.toast])
+
+  return fx
+}
+
 export function OptcgBoard({
   state,
   mySide,
@@ -73,6 +165,7 @@ export function OptcgBoard({
   waiting: boolean
 }) {
   const [prompt, setPrompt] = useState<Prompt>({ kind: 'none' })
+  const fx = useOptcgFx(state, mySide)
 
   const me = state[mySide]
   const foe = state[other(mySide)]
@@ -107,6 +200,7 @@ export function OptcgBoard({
       const c = cardByCode(code)
       const counterEffect = effectsOf(code, 'counter')[0]
       if (counterEffect && c && c.cost <= me.donActive) {
+        optcgSfx.counter()
         // A [Counter] event: pay it, then let it pick who it protects.
         const paid = clone(state)
         const p = paid[mySide]
@@ -123,7 +217,7 @@ export function OptcgBoard({
     }
     if (!myTurn) return
     const c = cardByCode(me.hand[i])
-    if (!c || c.cost > me.donActive) return
+    if (!c || c.cost > me.donActive) { optcgSfx.nope(); return }
     if (c.kind === 'character' && me.chars.length >= 5) { setPrompt({ kind: 'room', handIndex: i }); return }
     const played = playCard(state, mySide, i)
     if (played === state) return
@@ -157,7 +251,7 @@ export function OptcgBoard({
       fire(played[mySide].chars[played[mySide].chars.length - 1]?.uid ?? 'leader', code, e, played)
       return
     }
-    if (prompt.kind === 'don' && side === mySide) { sfx.click(); push(giveDon(state, mySide, ref)); return }
+    if (prompt.kind === 'don' && side === mySide) { optcgSfx.don(); push(giveDon(state, mySide, ref)); return }
     if (state.phase === 'block' && defending && side === mySide && blockers(state).includes(ref)) {
       sfx.click()
       push(block(state, ref))
@@ -212,10 +306,17 @@ export function OptcgBoard({
     const c = card(u.code)
     const power = unitPower(p, u)
     return (
-      <div className={`optcg-slot${lit(side, uid) ? ' optcg-slot--lit' : ''}`}>
+      <div
+        className={`optcg-slot${lit(side, uid) ? ' optcg-slot--lit' : ''}${
+          fx.lunge === uid ? (side === mySide ? ' is-lunging-up' : ' is-lunging-down') : ''
+        }${fx.struck === uid ? ' is-struck' : ''}`}
+      >
         <OptcgCardImg code={u.code} size="sm" rested={u.rested} onClick={() => tapField(side, uid)} />
         <div className="optcg-slot-foot">
-          <span className={power !== c.power ? 'optcg-power optcg-power--up' : 'optcg-power'}>{power}</span>
+          {/* keyed by the number so a change restarts the pop by itself */}
+          <span key={power} className={power !== c.power ? 'optcg-power optcg-power--up' : 'optcg-power'}>
+            {power}
+          </span>
           {u.don > 0 && <span className="optcg-don-chip">🔶{u.don}</span>}
           {u.sick && <span className="optcg-tag">new</span>}
         </div>
@@ -234,13 +335,20 @@ export function OptcgBoard({
   const Leader = ({ side }: { side: OptcgSide }) => {
     const p = state[side]
     return (
-      <div className={`optcg-slot optcg-slot--leader${lit(side, 'leader') ? ' optcg-slot--lit' : ''}`}>
+      <div
+        className={`optcg-slot optcg-slot--leader${lit(side, 'leader') ? ' optcg-slot--lit' : ''}${
+          fx.lunge === 'leader' && side === state.turn ? (side === mySide ? ' is-lunging-up' : ' is-lunging-down') : ''
+        }${fx.struck === 'leader' && side !== state.turn ? ' is-struck' : ''}`}
+      >
         <OptcgCardImg code={p.leader} size="md" rested={p.leaderRested} onClick={() => tapField(side, 'leader')} />
         <div className="optcg-slot-foot">
-          <span className="optcg-power">{leaderPower(p)}</span>
-          <span className="optcg-life" title="Life left">
-            {'❤️'.repeat(Math.min(p.life.length, 6)) || '💀'}
-          </span>
+          <span key={leaderPower(p)} className="optcg-power">{leaderPower(p)}</span>
+        </div>
+        {/* Life as hearts you can count at a glance — the one number that ends the game */}
+        <div className={`optcg-life${p.life.length <= 1 ? ' is-critical' : ''}`} title="Life left">
+          {p.life.length === 0
+            ? '💀'
+            : Array.from({ length: p.life.length }, (_, i) => <span key={i}>❤️</span>)}
         </div>
         {side === mySide &&
           effectsOf(p.leader, 'activate').map((e) =>
@@ -254,6 +362,10 @@ export function OptcgBoard({
     )
   }
 
+  // The two facts that change how you play the turn, said out loud.
+  const lethal = myTurn && foe.life.length === 0
+  const danger = me.life.length <= 1 && !state.over
+
   const battle = state.battle
   const attackerName = battle
     ? battle.attacker === 'leader'
@@ -262,13 +374,14 @@ export function OptcgBoard({
     : ''
 
   return (
-    <div className="optcg-board">
+    <div className={`optcg-board${fx.shake ? ' is-shaking' : ''}`}>
+      {fx.toast && <div className={`optcg-toast optcg-toast--${fx.toast.tone}`}>{fx.toast.text}</div>}
       {/* their side */}
       <div className="optcg-side optcg-side--foe">
         <div className="optcg-tray">
           <span className="chip">✋ {foe.hand.length}</span>
           <span className="chip">🃏 {foe.deck.length}</span>
-          <span className="chip">🔶 {foe.donActive}/{foe.donActive + foe.donRested}</span>
+          <DonRow active={foe.donActive} rested={foe.donRested} />
           <span className="chip">🗑️ {foe.trash.length}</span>
         </div>
         <div className="optcg-row">
@@ -283,9 +396,37 @@ export function OptcgBoard({
       {/* the battle in progress */}
       {battle && (
         <div className="optcg-battle">
-          <b>{attackerName}</b> ({powerOf(state[battle.by], battle.attacker)}) vs{' '}
-          <b>{battle.target === 'leader' ? 'Leader' : card(unit(state[other(battle.by)], battle.target)?.code ?? '').name}</b> (
-          {defenderPower(state)})
+          {/* who is winning, as a bar rather than two numbers to compare in your head */}
+          <div className="optcg-clash">
+            <span className="optcg-clash-side">
+              <b>{attackerName}</b>
+              <span className="optcg-clash-power">{powerOf(state[battle.by], battle.attacker)}</span>
+            </span>
+            <span className="optcg-clash-vs">⚔️</span>
+            <span className="optcg-clash-side optcg-clash-side--right">
+              <b>{battle.target === 'leader' ? 'Leader' : card(unit(state[other(battle.by)], battle.target)?.code ?? '').name}</b>
+              <span className="optcg-clash-power">{defenderPower(state)}</span>
+            </span>
+          </div>
+          <div className="optcg-clash-bar">
+            <span
+              className={powerOf(state[battle.by], battle.attacker) >= defenderPower(state) ? 'is-attacker' : 'is-defender'}
+              style={{
+                width: `${Math.round(
+                  (powerOf(state[battle.by], battle.attacker) /
+                    Math.max(1, powerOf(state[battle.by], battle.attacker) + defenderPower(state))) *
+                    100,
+                )}%`,
+              }}
+            />
+          </div>
+          <p className="optcg-clash-note">
+            {powerOf(state[battle.by], battle.attacker) >= defenderPower(state)
+              ? battle.target === 'leader'
+                ? `This gets through — ${state[other(battle.by)].name} loses a Life card.`
+                : 'This K.O.s the Character as it stands.'
+              : 'Held off as it stands.'}
+          </p>
           {state.phase === 'block' && defending && (
             <div className="optcg-ask">
               {blockers(state).length > 0 ? 'Tap a [Blocker], or ' : 'No blockers — '}
@@ -325,9 +466,8 @@ export function OptcgBoard({
           ))}
         </div>
         <div className="optcg-tray">
-          <span className="chip">🔶 {me.donActive} active</span>
+          <DonRow active={me.donActive} rested={me.donRested} />
           <span className="chip">🃏 {me.deck.length}</span>
-          <span className="chip">❤️ {me.life.length}</span>
           <span className="chip">🗑️ {me.trash.length}</span>
           {myTurn && (
             <>
@@ -363,6 +503,15 @@ export function OptcgBoard({
         </div>
       </div>
 
+      {/* the turn, in one line: whose it is, what is left to spend, what is at stake */}
+      <div className={`optcg-turnbar${myTurn ? ' is-mine' : ''}`}>
+        <span className="optcg-turnbar-who">{myTurn ? '⚔️ Your turn' : `⏳ ${foe.name}`}</span>
+        <span className="chip">Turn {state.turnNo}</span>
+        {myTurn && <span className="chip">🔶 {me.donActive} to spend</span>}
+        {lethal && <span className="optcg-lethal">One more hit wins it!</span>}
+        {danger && <span className="optcg-danger">Your Leader is on the last Life</span>}
+      </div>
+
       {/* what we are being asked, and the running commentary */}
       <div className="optcg-status">
         {state.over ? (
@@ -394,5 +543,23 @@ export function OptcgBoard({
         ))}
       </div>
     </div>
+  )
+}
+
+/**
+ * DON!! as chips rather than a number. Active ones are gold and are what you
+ * can actually spend; rested ones are spent, and stay on the table because a
+ * turn's shape is "how much have I got left" against "how much have I used".
+ */
+function DonRow({ active, rested }: { active: number; rested: number }) {
+  const total = active + rested
+  if (total === 0) return <span className="chip">🔶 0</span>
+  return (
+    <span className="optcg-don-row" title={`${active} active of ${total} DON!!`}>
+      {Array.from({ length: Math.min(total, 10) }, (_, i) => (
+        <span key={i} className={`optcg-don${i < active ? ' is-active' : ' is-rested'}`} />
+      ))}
+      <b>{active}</b>
+    </span>
   )
 }
