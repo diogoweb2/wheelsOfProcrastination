@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useStore } from './store/useStore'
 import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
@@ -16,6 +16,7 @@ import { AlbumScreen } from './screens/AlbumScreen'
 import { DuelScreen } from './screens/DuelScreen'
 import { BoardGameScreen } from './screens/BoardGameScreen'
 import { SeaBattleScreen } from './screens/SeaBattleScreen'
+
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
 import { BankScreen } from './screens/BankScreen'
@@ -32,6 +33,8 @@ import { backgroundUrl } from './logic/backgrounds'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
+
+const OptcgScreen = lazy(() => import('./screens/OptcgScreen').then((m) => ({ default: m.OptcgScreen })))
 
 export default function App() {
   const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, answerChallenge, boardGames, settleBoardGames, answerBoardChallenge, seaBattles, settleSeaBattles, answerSeaChallenge, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
@@ -766,6 +769,15 @@ function AppBodyRouter({
       return <BoardGameScreen kind="checkers" tab={open.tab} />
     case 'seabattle':
       return <SeaBattleScreen tab={open.tab} />
+    case 'optcg':
+      // Lazy on purpose: this screen pulls in the ~2600-card catalog, which is
+      // bigger than the rest of the app put together. Nobody who never opens
+      // the card game should download it.
+      return (
+        <Suspense fallback={<div className="screen"><p className="muted">Shuffling…</p></div>}>
+          <OptcgScreen tab={open.tab} />
+        </Suspense>
+      )
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'essay':

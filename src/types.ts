@@ -4,6 +4,7 @@
 import type { DuelState } from './logic/cardGame'
 import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
 import type { SeaState } from './logic/seaBattle'
+import type { OptcgDeck, OptcgState } from './logic/optcg'
 
 export type { BoardGameKind }
 
@@ -662,6 +663,52 @@ export interface SeaMatch {
   moveSeconds?: number
 }
 
+// --- One Piece TCG (the 🏴‍☠️ app, inside the 🎮 Games folder) ----------------
+
+/** A crewmate's decks and their record in the real card game. */
+export interface OptcgProfileState {
+  /** Decks built in the deckbuilder. The two starter decks are always offered. */
+  decks: OptcgDeck[]
+  /** Deck id taken into the next match — a preset id, or a built deck's id. */
+  activeDeck: string
+  wins: number
+  losses: number
+  /** Live match ids already counted into the record, so a re-sync can't double-count. */
+  settled: string[]
+  /** Day (YYYY-MM-DD) the AI wins below were banked on. */
+  soloDay: string | null
+  /** Wins over the AI on `soloDay` — only the first few pay. */
+  soloWins: number
+}
+
+/**
+ * One head-to-head One Piece TCG game, in the SHARED app/optcgMatches doc.
+ * Same single-writer arrangement as the board games: whoever the position says
+ * must act is the only side that writes, so two phones never hold the pen.
+ *
+ * The document holds both hands, both decks and both Life stacks — the UI
+ * simply never renders the other side's. Exactly the trade Sea Battle and the
+ * card duel make, for the same reason: real hidden information would need the
+ * state split server-side, and this is a two-person family app.
+ */
+export interface OptcgMatch {
+  id: string
+  fromId: string // who challenged — takes the first turn
+  fromName: string
+  fromEmoji: string
+  toId: string
+  toName: string
+  toEmoji: string
+  status: 'pending' | 'active' | 'finished' | 'declined' | 'cancelled'
+  /** Dealt at challenge time: both decks are known, so both sides can be set up. */
+  state: OptcgState
+  createdAt: string
+  resolvedAt?: string
+  winnerId?: string
+  /** Set once each side has banked its own result, so a re-sync can't pay twice. */
+  paidAt?: string
+}
+
 // --- Free freezes from Dad (shared app/freezeRequests doc) ------------------
 
 /**
@@ -1205,6 +1252,8 @@ export interface AppData {
   album: AlbumState
   duel: DuelStats
   games: BoardGamesState
+  /** The One Piece TCG app: this crewmate's built decks and their record. */
+  optcg: OptcgProfileState
   gym: GymState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }

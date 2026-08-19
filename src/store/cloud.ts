@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
@@ -267,6 +267,28 @@ export function subscribeSeaBattles(cb: (matches: SeaMatch[]) => void): () => vo
 export async function saveSeaBattles(matches: SeaMatch[]): Promise<void> {
   await ensureAuth()
   await setDoc(seaBattlesRef(), { matches })
+}
+
+// --- One Piece TCG (its own shared table) -----------------------------------
+//
+// Its own document for the same reason Sea Battle has one: a card game carries
+// two 50-card decks, two hands and two fields, which would crowd out a chess
+// position sharing the doc. Same single-writer rule — only the side the
+// position says must act ever writes.
+
+const optcgRef = () => doc(firestore, 'app', 'optcgMatches')
+
+/** Live-sync the table. Fires on a challenge, an accept, and every move. */
+export function subscribeOptcgMatches(cb: (matches: OptcgMatch[]) => void): () => void {
+  return onSnapshot(optcgRef(), (snap) => {
+    const data = snap.data() as { matches?: OptcgMatch[] } | undefined
+    cb(data?.matches ?? [])
+  })
+}
+
+export async function saveOptcgMatches(matches: OptcgMatch[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(optcgRef(), { matches })
 }
 
 // --- free freezes (shared: the kid's asks + Dad's gifts) -------------------

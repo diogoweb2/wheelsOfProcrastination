@@ -451,6 +451,27 @@ Once the fleet is hidden, each captain is **dealt three special cards** (`logic/
 
 **⏱️ The shot clock** (see §15e), on the board-games dial. Run out and **the gunner fires blind** — a random square not yet tried. You cannot pass in Battleship, so a timeout has to resolve to something, and a blind shot is the version a nine-year-old can state before it happens.
 
+## 15g. ONE PIECE Card Game (the 🏴‍☠️ app, inside the 🎮 Games folder)
+
+**The real, printed card game** — not a house variant, and not the sticker album's Davy Back duel (§15c), which stays exactly as it is at `/duel`. Its own app, its own URL: `/optcg/play`, `/optcg/deck`, `/optcg/rules`.
+
+- **Rules** live in [src/logic/optcg.ts](src/logic/optcg.ts), pure JSON-only functions with no React and no Firestore — the same contract the other games follow, which is why one engine drives a match against the AI held in React state and a live one against Ben through the shared `app/optcgMatches` doc.
+- **What the engine enforces**: the turn (Refresh → Draw → DON!! → Main → End); 10 DON!!, two added a turn and one on the first player's first turn; resting DON!! to pay costs or *giving* one for +1000 power until end of turn; five Characters on the field with the sixth needing one trashed; one Stage; attacks only with an active card, never on the turn it was played unless it has **[Rush]**, and only against the Leader or a **rested** Character; **[Blocker]**, the Counter step, **[Double Attack]**, **[Banish]**; damage taking the top Life card into hand with its **[Trigger]** offered; decking out losing.
+- **Deck legality**: a Leader plus **50 cards**, at most **4 copies** of a card, every card sharing a colour with the Leader, and nothing on the ban list.
+
+**The card catalog is generated, and no art is ever stored here.** [scripts/optcg-scrape.mjs](scripts/optcg-scrape.mjs) harvests the publisher's own card list into `scripts/data/optcg-official.json` (category, Life, attribute, power, cost, counter, colours, types, effect); [scripts/optcg-catalog.mjs](scripts/optcg-catalog.mjs) merges it with the downloaded CSV dump (art variants, ban flags) into `src/logic/optcgCatalog.generated.ts` — **2 665 cards**. `npm run optcg:scrape` then `npm run optcg:cards` rebuilds it.
+
+- **Images are hotlinked from public mirrors.** The publisher's own image host answers with `Cross-Origin-Resource-Policy: same-site`, so a browser refuses to paint its PNGs on our origin: an `<img>` pointed at it fails silently. Two mirrors send no such header, so every card carries a primary and a fallback and `<OptcgCardImg>` swaps on error, falling back to the printed name if both fail. **Nothing lands in `public/`** — this is the one place the image rule in CLAUDE.md is satisfied by not having an asset at all.
+- **The catalog is ~1 MB and must never enter the main bundle.** `logic/optcg.ts` keeps an empty card index that [src/logic/optcgCards.ts](src/logic/optcgCards.ts) fills; only the card game screen imports that module, and the router loads the screen lazily. Anyone who never opens the game downloads none of it.
+
+**Card text is scripted one card at a time.** The engine knows the keywords every card shares and nothing else; what a *particular* card does lives in [src/logic/optcgEffects.ts](src/logic/optcgEffects.ts), keyed by printed code. Today it covers the two starter decks in [src/logic/optcgDecks.ts](src/logic/optcgDecks.ts) — **ST-01 Straw Hat Crew (Red)** and **ST-02 Worst Generation (Green)** — and **this is meant to grow one deck at a time**: a new preset plus its entries is the whole job, with no engine or UI change. **Every other card is still buildable and playable**: the deckbuilder covers all 2 665, the board shows the card's text, and the players honour it — the way a table does with a card whose ruling nobody has memorised. A ⚙️ marks the cards the game plays for you.
+
+**The AI** ([src/logic/optcgAi.ts](src/logic/optcgAi.ts)) is a heuristic player, not a search: this is a hidden-hand game and a shallow search over a hidden deck reads as random. It spends its DON!!, keeps the board wide, takes a free K.O. when one is on offer and swings at the Leader when it is not, blocks only when the blocker survives or the hit is lethal, and counters only to save something worth more than the counter. It plays every move through the engine's own public functions, so it can never do something a player could not.
+
+**Berries.** Head-to-head pays the same **25 🪙** as the other games; a win over the AI pays **8 🪙 for the first 3 wins each day**.
+
+**Live vs the other crewmate** (shared `app/optcgMatches` doc): challenge → they accept with their own deck → the game is dealt. Same single-writer safety as everywhere else — **the position names the side to act, and only that side writes**. One live game at a time, both devices bank their own W/L off the same finished position (`optcg.settled` locally, `paidAt` on the shared doc). **Secrecy is by convention, not by cryptography**, exactly as in §15c and §15f: the document holds both hands and both Life stacks, and the UI simply never renders the other side's.
+
 ## 16. Admin (Diogo) — the "Captain's desk" (🛠️ Captain app, Diogo only)
 
 The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):

@@ -59,6 +59,7 @@ export function defaultData(): AppData {
       seaWins: 0,
       hints: true, // the coaching highlights are the point; you opt OUT of them
     },
+    optcg: { decks: [], activeDeck: 'st01', wins: 0, losses: 0, settled: [], soloDay: null, soloWins: 0 },
     gym: defaultGymState(),
     pushTokens: [],
   }
@@ -94,6 +95,12 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       seabattle: { ...base.games.seabattle, ...parsed.games?.seabattle },
       settled: parsed.games?.settled ?? [],
       seaSettled: parsed.games?.seaSettled ?? [],
+    },
+    optcg: {
+      ...base.optcg,
+      ...parsed.optcg,
+      decks: parsed.optcg?.decks ?? [],
+      settled: parsed.optcg?.settled ?? [],
     },
     gym: {
       ...base.gym,

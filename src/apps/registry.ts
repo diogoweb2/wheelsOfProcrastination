@@ -137,6 +137,21 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // the REAL One Piece Card Game: the printed cards, the printed rules. Its
+    // own app rather than a tab on `duel`, which is the sticker album's own
+    // made-up TCG and stays exactly as it is.
+    id: 'optcg',
+    name: 'One Piece TCG',
+    icon: '🏴‍☠️',
+    tint: ['#c9302c', '#2b0b0b'],
+    folder: 'games',
+    tabs: [
+      { id: 'play', label: 'Play', icon: '⚔️' },
+      { id: 'deck', label: 'Decks', icon: '🃏' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
     // official chess, One Piece paint. Straw Hats vs Marines, head-to-head only.
     id: 'chess',
     name: 'Chess',

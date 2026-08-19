@@ -34,6 +34,7 @@ import type {
   CardDuel,
   BoardMatch,
   SeaMatch,
+  OptcgMatch,
   StickerTrade,
   Task,
 } from '../types'
@@ -79,6 +80,8 @@ import {
   subscribeCardDuels,
   subscribeBoardGames,
   subscribeSeaBattles,
+  subscribeOptcgMatches,
+  saveOptcgMatches,
   subscribeFreezeDesk,
   subscribeFinalTests,
   subscribeMarketData,
@@ -131,6 +134,16 @@ import {
   type SeaSide,
   type SeaState,
 } from '../logic/seaBattle'
+import {
+  OPTCG_REWARD,
+  OPTCG_SOLO_LIMIT,
+  OPTCG_SOLO_REWARD,
+  newMatch as newOptcgMatch,
+  resign as resignOptcg,
+  toAct as optcgToAct,
+  type OptcgDeck,
+  type OptcgState,
+} from '../logic/optcg'
 import {
   ABANDON_PENALTY,
   BACKGROUND_COST,
@@ -298,6 +311,7 @@ interface StoreState {
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
   boardGames: BoardMatch[] // shared Chess/Checkers board (app/boardGames), live-synced
   seaBattles: SeaMatch[] // shared Sea Battle table (app/seaBattles), live-synced
+  optcgMatches: OptcgMatch[] // shared One Piece TCG table (app/optcgMatches), live-synced
   freezeRequests: FreezeRequest[] // the kid's "ask Dad for a freeze" queue (app/freezeRequests), live-synced
   freezeGifts: FreezeGift[] // freezes Dad handed out; the kid's app celebrates the unseen ones
   finalTests: FinalTestAuth[] // remote final-test authorisations + their results (app/finalTests), live-synced
@@ -560,6 +574,27 @@ interface StoreState {
   /** Log a battle against the AI. Returns the Berries it paid (0 past the daily few). */
   recordSeaSolo: (won: boolean) => number
 
+  // --- One Piece TCG (the 🏴‍☠️ app) ---
+  /** Challenge the other crewmate with `deck`. One live game at a time. */
+  challengeOptcg: (deck: OptcgDeck) => 'ok' | 'busy'
+  /** Answer a challenge aimed at me: a deck accepts and deals the game, `null` declines. */
+  answerOptcgChallenge: (matchId: string, deck: OptcgDeck | null) => void
+  /** Write a position I produced. Ignored unless the shared state says I'm the one to act. */
+  playOptcgMove: (matchId: string, state: OptcgState) => void
+  /** Strike the colours: the other side takes the win (and the Berries). */
+  resignOptcgMatch: (matchId: string) => void
+  /** Withdraw a challenge I sent that hasn't been answered yet. */
+  cancelOptcgMatch: (matchId: string) => void
+  /** Bank the record + Berries for any finished game of mine not yet counted. */
+  settleOptcgMatches: () => void
+  /** Log a game against the AI. Returns the Berries it paid (0 past the daily few). */
+  recordOptcgSolo: (won: boolean) => number
+  /** Save a built deck (new or edited) into my world. */
+  saveOptcgDeck: (deck: OptcgDeck) => void
+  deleteOptcgDeck: (deckId: string) => void
+  /** Which deck I take into the next game — a preset id or a built deck's id. */
+  setOptcgDeck: (deckId: string) => void
+
   buyBackground: () => string | 'broke' | 'complete'
   /** Equip an owned background as the app background; null = default solid color. */
   equipBackground: (id: string | null) => void
@@ -818,6 +853,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeBoardGames((boardGames) => set({ boardGames }))
       // shared Sea Battle table — its own doc: four 100-square grids per match
       subscribeSeaBattles((seaBattles) => set({ seaBattles }))
+      // shared One Piece TCG table — its own doc: two 50-card decks per match
+      subscribeOptcgMatches((optcgMatches) => set({ optcgMatches }))
       // the kid's freeze asks + Dad's gifts (empty doc is a valid empty desk)
       subscribeFreezeDesk(({ requests, gifts }) => set({ freezeRequests: requests, freezeGifts: gifts }))
       // remote final tests: Dad's authorisations and the results coming back
@@ -947,6 +984,25 @@ export const useStore = create<StoreState>((set, get) => {
       resolvedAt: new Date().toISOString(),
       winnerId: state.winner === 'w' ? match.fromId : match.toId,
     }
+  }
+
+  /**
+   * Write-through for the One Piece TCG table. Trimmed hardest of all: one game
+   * carries two decks, two hands, two Life stacks and a log, so a couple of
+   * finished games is already a large document.
+   */
+  function saveOptcgList(matches: OptcgMatch[]) {
+    const kept = matches.slice(-3)
+    set({ optcgMatches: kept })
+    fireAndForget(saveOptcgMatches(kept))
+  }
+
+  /** The match fields that follow from a new position. The card game cannot draw. */
+  function optcgSettledFields(match: OptcgMatch, state: OptcgState): Partial<OptcgMatch> {
+    if (!state.over) return { state }
+    const done: Partial<OptcgMatch> = { state, status: 'finished', resolvedAt: new Date().toISOString() }
+    if (state.winner) done.winnerId = state.winner === 'p1' ? match.fromId : match.toId
+    return done
   }
 
   function saveFreezeDeskList(requests: FreezeRequest[], gifts: FreezeGift[]) {
@@ -1138,6 +1194,7 @@ export const useStore = create<StoreState>((set, get) => {
     duels: [],
     boardGames: [],
     seaBattles: [],
+    optcgMatches: [],
     freezeRequests: [],
     finalTests: [],
     freezeGifts: [],
@@ -2920,6 +2977,171 @@ export const useStore = create<StoreState>((set, get) => {
       saveSeaList(
         get().seaBattles.map((m) => (ids.has(m.id) ? { ...m, paidAt: `${m.paidAt ?? ''}|${activeProfileId}` } : m)),
       )
+    },
+
+    // --- One Piece TCG ------------------------------------------------------
+    //
+    // Same single-writer arrangement as the board games: the position names the
+    // side to act, and only that side writes. Both decks are dealt in the same
+    // breath as the accept, so there is never a moment where both phones are
+    // shuffling into one document.
+
+    challengeOptcg(deck) {
+      const { activeProfileId, profiles, optcgMatches } = get()
+      if (!activeProfileId) return 'busy'
+      const me = profiles.find((p) => p.id === activeProfileId)
+      const mate = profiles.find((p) => p.id !== activeProfileId)
+      if (!me || !mate) return 'busy'
+      if (optcgMatches.some((m) => m.status === 'pending' || m.status === 'active')) return 'busy'
+      // The challenger's deck rides along; the accepter's is dealt on the accept,
+      // which is also when the opening hands are drawn.
+      saveOptcgList([
+        ...optcgMatches,
+        {
+          id: `op-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          fromId: me.id,
+          fromName: me.name,
+          fromEmoji: me.emoji,
+          toId: mate.id,
+          toName: mate.name,
+          toEmoji: mate.emoji,
+          status: 'pending',
+          state: newOptcgMatch(deck, deck, me.name, mate.name, 'p1'),
+          createdAt: new Date().toISOString(),
+        },
+      ])
+      return 'ok'
+    },
+
+    answerOptcgChallenge(matchId, deck) {
+      const { optcgMatches, activeProfileId } = get()
+      const match = optcgMatches.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.toId !== activeProfileId) return
+      if (!deck) {
+        saveOptcgList(
+          optcgMatches.map((m) =>
+            m.id === matchId ? { ...m, status: 'declined' as const, resolvedAt: new Date().toISOString() } : m,
+          ),
+        )
+        return
+      }
+      // Re-deal with the real second deck: the challenger's own list is already
+      // in `state`, so only p2 is rebuilt.
+      const dealt = newOptcgMatch(
+        { id: 'p1', name: 'p1', leader: match.state.p1.leader, cards: [...match.state.p1.deck, ...match.state.p1.hand, ...match.state.p1.life] },
+        deck,
+        match.fromName,
+        match.toName,
+        'p1',
+      )
+      saveOptcgList(
+        optcgMatches.map((m) => (m.id === matchId ? { ...m, status: 'active' as const, state: dealt } : m)),
+      )
+    },
+
+    playOptcgMove(matchId, state) {
+      const { optcgMatches, activeProfileId } = get()
+      const match = optcgMatches.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active') return
+      const mySide = match.fromId === activeProfileId ? 'p1' : match.toId === activeProfileId ? 'p2' : null
+      // the position is the referee: only the side it is waiting on may write
+      if (!mySide || optcgToAct(match.state) !== mySide) return
+      saveOptcgList(optcgMatches.map((m) => (m.id === matchId ? { ...m, ...optcgSettledFields(m, state) } : m)))
+    },
+
+    resignOptcgMatch(matchId) {
+      const { optcgMatches, activeProfileId } = get()
+      const match = optcgMatches.find((m) => m.id === matchId)
+      if (!match || match.status !== 'active' || !activeProfileId) return
+      const mySide = match.fromId === activeProfileId ? 'p1' : match.toId === activeProfileId ? 'p2' : null
+      if (!mySide) return
+      const state = resignOptcg(match.state, mySide)
+      saveOptcgList(optcgMatches.map((m) => (m.id === matchId ? { ...m, ...optcgSettledFields(m, state) } : m)))
+    },
+
+    cancelOptcgMatch(matchId) {
+      const { optcgMatches, activeProfileId } = get()
+      const match = optcgMatches.find((m) => m.id === matchId)
+      if (!match || match.status !== 'pending' || match.fromId !== activeProfileId) return
+      saveOptcgList(
+        optcgMatches.map((m) =>
+          m.id === matchId ? { ...m, status: 'cancelled' as const, resolvedAt: new Date().toISOString() } : m,
+        ),
+      )
+    },
+
+    settleOptcgMatches() {
+      const { optcgMatches, activeProfileId, data, dataLoaded } = get()
+      if (!activeProfileId || !dataLoaded) return
+      const counted = new Set(data.optcg.settled)
+      const mine = optcgMatches.filter(
+        (m) =>
+          m.status === 'finished' &&
+          (m.fromId === activeProfileId || m.toId === activeProfileId) &&
+          !counted.has(m.id),
+      )
+      if (mine.length === 0) return
+      commit((d, events) => {
+        for (const match of mine) {
+          d.optcg.settled = [...d.optcg.settled, match.id].slice(-20)
+          if (match.winnerId === activeProfileId) {
+            d.optcg.wins += 1
+            d.economy.gems += OPTCG_REWARD
+            d.economy.totalGemsEarned += OPTCG_REWARD
+            events.push({
+              type: 'goal',
+              title: 'Card game won!',
+              emoji: '🏴‍☠️',
+              description: `You took down ${match.fromId === activeProfileId ? match.toName : match.fromName}’s Leader — +${OPTCG_REWARD} Berries.`,
+            })
+          } else if (match.winnerId) {
+            d.optcg.losses += 1
+          }
+        }
+      })
+      const ids = new Set(mine.map((m) => m.id))
+      saveOptcgList(
+        get().optcgMatches.map((m) => (ids.has(m.id) ? { ...m, paidAt: `${m.paidAt ?? ''}|${activeProfileId}` } : m)),
+      )
+    },
+
+    recordOptcgSolo(won) {
+      const today = dayKey()
+      const { data } = get()
+      const freshDay = data.optcg.soloDay !== today
+      const wonToday = freshDay ? 0 : data.optcg.soloWins
+      const pay = won && wonToday < OPTCG_SOLO_LIMIT ? OPTCG_SOLO_REWARD : 0
+      commit((d) => {
+        d.optcg.soloDay = today
+        d.optcg.soloWins = wonToday + (won ? 1 : 0)
+        if (pay > 0) {
+          d.economy.gems += pay
+          d.economy.totalGemsEarned += pay
+        }
+      })
+      return pay
+    },
+
+    saveOptcgDeck(deck) {
+      commit((d) => {
+        const at = d.optcg.decks.findIndex((x) => x.id === deck.id)
+        if (at >= 0) d.optcg.decks[at] = deck
+        else d.optcg.decks.push(deck)
+        d.optcg.activeDeck = deck.id
+      })
+    },
+
+    deleteOptcgDeck(deckId) {
+      commit((d) => {
+        d.optcg.decks = d.optcg.decks.filter((x) => x.id !== deckId)
+        if (d.optcg.activeDeck === deckId) d.optcg.activeDeck = 'st01'
+      })
+    },
+
+    setOptcgDeck(deckId) {
+      commit((d) => {
+        d.optcg.activeDeck = deckId
+      })
     },
 
     recordSeaSolo(won) {

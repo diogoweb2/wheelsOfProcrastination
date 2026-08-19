@@ -4448,3 +4448,50 @@ input, select { font-family: inherit; }
   .sea-wreck-boom { animation: none; }
   .sea-wreck-toast { animation-duration: 0.01s; }
 }
+
+/* --- One Piece TCG (the 🏴‍☠️ app) ------------------------------------------
+   Card art is hotlinked from a public mirror (see logic/optcg.ts), so every
+   card box has to survive an image that never arrives: the sizes below are set
+   on the BOX, not the image, and .optcg-card--blank fills the same footprint
+   with the card's printed name. */
+.optcg-card { border-radius: 6px; background: #0c2338; object-fit: cover; display: block; box-shadow: 0 1px 4px rgb(0 0 0 / 35%); }
+.optcg-card--xs { width: 46px; height: 64px; }
+.optcg-card--sm { width: 64px; height: 89px; }
+.optcg-card--md { width: 84px; height: 117px; }
+.optcg-card--lg { width: 120px; height: 168px; }
+.optcg-card--rested { transform: rotate(90deg); }
+.optcg-card--live { cursor: pointer; }
+.optcg-card--blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; text-align: center; font-size: 9px; font-weight: 800; color: #fff; border: 1px solid rgb(255 255 255 / 20%); }
+.optcg-card--blank small { font-size: 8px; opacity: 0.7; }
+.optcg-card--back { background: repeating-linear-gradient(45deg, #8c0000, #8c0000 6px, #5d0000 6px, #5d0000 12px); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+.optcg-board { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.optcg-side { display: flex; flex-direction: column; gap: 6px; }
+.optcg-side--foe { opacity: 0.95; }
+.optcg-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; min-height: 96px; }
+.optcg-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 72px; }
+.optcg-slot--leader { width: 92px; }
+.optcg-slot--lit .optcg-card { outline: 2px solid var(--green); outline-offset: 2px; }
+.optcg-slot-foot { display: flex; gap: 3px; align-items: center; font-size: 10px; font-weight: 800; }
+.optcg-power { color: #fff; }
+.optcg-power--up { color: var(--green); }
+.optcg-don-chip, .optcg-cost, .optcg-counter, .optcg-tag, .optcg-count { font-size: 10px; font-weight: 800; border-radius: 4px; padding: 0 3px; background: rgb(255 255 255 / 12%); }
+.optcg-counter { color: var(--green); }
+.optcg-tag { opacity: 0.7; }
+.optcg-act { margin-top: 2px; font-size: 10px; padding: 2px 5px; }
+.optcg-life { letter-spacing: -2px; }
+
+.optcg-tray { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.optcg-hand { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.optcg-handcard { display: flex; flex-direction: column; align-items: center; opacity: 0.65; }
+.optcg-handcard--live { opacity: 1; }
+.optcg-handcard--live .optcg-card { outline: 1px solid var(--green); }
+.optcg-hand-backs { display: flex; gap: 2px; opacity: 0.5; }
+.optcg-battle, .optcg-status { background: rgb(255 255 255 / 8%); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+.optcg-ask { margin-top: 6px; }
+
+.optcg-deckpick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.optcg-deckrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.optcg-pool { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.optcg-poolcard { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.optcg-input { padding: 6px 8px; border-radius: 8px; border: 1px solid rgb(255 255 255 / 20%); background: rgb(12 35 56 / 60%); color: #fff; font-size: 13px; }
