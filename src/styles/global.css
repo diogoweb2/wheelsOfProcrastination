@@ -4534,8 +4534,6 @@ input, select { font-family: inherit; }
    Rides on the sticker album's own classes (.album-grid, .pack-card, .trade-*)
    because it is the same game; only the progress bar and the picker row are
    its own. */
-.binder-bar { height: 8px; border-radius: 99px; background: rgb(255 255 255 / 12%); overflow: hidden; }
-.binder-bar span { display: block; height: 100%; background: linear-gradient(90deg, #d70000, #ffce00); }
 .trade-gems { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; }
 .trade-gems input { width: 90px; }
 

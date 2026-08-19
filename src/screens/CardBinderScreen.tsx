@@ -29,6 +29,7 @@ import {
   type CollectRarity,
 } from '../logic/collections'
 import { dayKey } from '../logic/dates'
+import { AlbumRace } from '../components/AlbumRace'
 import { Sticker, type CardFace } from '../components/Sticker'
 import { StickerDetail } from '../components/StickerDetail'
 import { PackOpening } from '../components/PackOpening'
@@ -67,6 +68,7 @@ function useCardZoom() {
 
 export function CardBinderScreen({ tab }: { tab: string }) {
   const data = useStore((s) => s.data)
+  const mateData = useStore((s) => s.mateData)
   const progress = progressIn(KIT, data.cards)
   return (
     <div className="screen">
@@ -74,11 +76,19 @@ export function CardBinderScreen({ tab }: { tab: string }) {
         🎴 One Piece Album
       </div>
       <p className="muted" style={{ marginBottom: 10 }}>
-        Every card in the ONE PIECE Card Game — {progress.owned} of {progress.total} found ({progress.pct}%).
+        Every card in the ONE PIECE Card Game — collect them all, trade the spares.
       </p>
-      <div className="binder-bar">
-        <span style={{ width: `${progress.pct}%` }} />
-      </div>
+
+      {/* The same head-to-head race the sticker album runs (§15b), over this
+          pile: the question a collector actually asks is not "how far am I?"
+          but "am I ahead?". */}
+      <AlbumRace
+        mine={progress}
+        theirs={mateData ? progressIn(KIT, mateData.cards) : null}
+        noun="card"
+        scope="binder"
+      />
+
       <div style={{ height: 14 }} />
       {tab === 'binder' && <BinderTab zoomKey="binder" />}
       {tab === 'packs' && <PacksTab />}
