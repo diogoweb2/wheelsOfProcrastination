@@ -982,7 +982,7 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 Roblox time is a currency Ben **banks** and then **pays back honestly**. The app holds one number — minutes owed to him — and an append-only log of every movement behind it. Rules live in [src/logic/roblox.ts](src/logic/roblox.ts); the state is `data.roblox` on his own profile, so Dad writes it through `commitFor(KID_ID, …)` like every other grant.
 
 - **Everything is minutes, never "about an hour".** Paying back partially is the entire point: he banks 3h, plays 45 minutes, owes 45 minutes. The balance is shown as `2h 45m`, never as a decimal.
-- **Ben's tabs**: **⏳ Bank** (the balance, how to earn more, and the button that opens Roblox), **🎮 Play** (the pay-back slider), **🧾 Log**. **Dad's tabs**: **🎁 Give time** and the same **🧾 Log** — read against Ben's world, not his own.
+- **Ben's tabs**: **⏳ Bank** (the balance, how to earn more, and the button that opens Roblox — the **installed app**, not a page about it: Android goes through an `intent://` link with the website as Chrome's own fallback, iOS tries `roblox://` and falls back on a timer, everything else opens the site), **🎮 Play** (the pay-back slider), **🧾 Log**. **Dad's tabs**: **🎁 Give time** and the same **🧾 Log** — read against Ben's world, not his own.
 
 ### 20a. Time in — three ways, one log
 

@@ -9,9 +9,9 @@ import { KID_ID, PARENT_ID } from '../store/storage'
 import {
   KIND_ICON,
   PLAY_STEP,
-  ROBLOX_URL,
   formatDelta,
   formatMinutes,
+  openRoblox,
   playedOn,
 } from '../logic/roblox'
 import type { RobloxEntry, RobloxState } from '../types'
@@ -77,16 +77,16 @@ function BankTab({ state }: { state: RobloxState }) {
         </ul>
       </div>
 
-      <a
+      <button
         className="btn btn--red"
-        href={ROBLOX_URL}
-        target="_blank"
-        rel="noreferrer"
-        style={{ display: 'block', textAlign: 'center', marginTop: 12, textDecoration: 'none' }}
-        onClick={() => sfx.click()}
+        style={{ width: '100%', marginTop: 12 }}
+        onClick={() => {
+          sfx.click()
+          openRoblox() // the installed app, with the website as the fallback
+        }}
       >
         🎮 Open Roblox
-      </a>
+      </button>
       <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
         When you stop playing, come back to the <strong>Play</strong> tab and pay the time back. Honest counting
         is the whole deal.

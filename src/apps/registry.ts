@@ -253,6 +253,7 @@ export const APPS: AppDef[] = [
     id: 'roblox',
     name: 'Roblox',
     icon: '🎮',
+    img: '/app-roblox.webp',
     tint: ['#d70000', '#2b2b2b'],
     tabs: [
       { id: 'bank', label: 'Bank', icon: '⏳' },

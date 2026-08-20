@@ -10,8 +10,47 @@
 import type { RobloxEntry, RobloxState } from '../types'
 import { dayKey } from './dates'
 
-/** Where the real thing lives — the "go play" button opens it. */
+/** Where the real thing lives — the fallback when the app isn't installed. */
 export const ROBLOX_URL = 'https://www.roblox.com/home'
+
+/**
+ * Android intent link: opens the INSTALLED Roblox app, and if it isn't there
+ * Chrome follows `browser_fallback_url` to the site on its own. This is the
+ * only way to reach an app from a web page without a dead tab when it's
+ * missing — a bare `roblox://` just fails silently.
+ */
+const ROBLOX_INTENT =
+  'intent://home#Intent;scheme=roblox;package=com.roblox.client;' +
+  `S.browser_fallback_url=${encodeURIComponent(ROBLOX_URL)};end`
+
+/** iOS has no fallback in the scheme, so the app link is tried and the site catches it. */
+const ROBLOX_SCHEME = 'roblox://'
+
+/**
+ * Send him to Roblox itself, not to a page about Roblox.
+ *
+ * Android (his phone) gets the intent link, which Chrome resolves to the app.
+ * iOS gets the custom scheme with a timer behind it: if the app took over, the
+ * page is hidden by the time it fires and we leave it alone; if nothing
+ * happened, the site opens instead. Anything else just gets the site.
+ */
+export function openRoblox(): void {
+  const ua = navigator.userAgent
+  if (/Android/i.test(ua)) {
+    window.location.href = ROBLOX_INTENT
+    return
+  }
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    const t = window.setTimeout(() => {
+      if (!document.hidden) window.location.href = ROBLOX_URL
+    }, 1200)
+    // the app taking over hides the page — that's our "it worked" signal
+    document.addEventListener('visibilitychange', () => window.clearTimeout(t), { once: true })
+    window.location.href = ROBLOX_SCHEME
+    return
+  }
+  window.open(ROBLOX_URL, '_blank', 'noopener')
+}
 
 /** Old rows fall off the log rather than growing the profile doc forever. */
 export const ROBLOX_LOG_CAP = 200
