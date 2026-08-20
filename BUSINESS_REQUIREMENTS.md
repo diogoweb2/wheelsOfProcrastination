@@ -298,6 +298,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **The shelves are data, not code** — one shared doc `app/prizeCatalog`, live-synced, seeded once from `DEFAULT_PRIZES` in `src/logic/quiz.ts` and after that the cloud copy is the source of truth. Diogo **adds, edits and deletes** treasures from the Admin desk → **Prizes** (emoji, label, 🍇 price, limit), per profile. Deleting only takes it off the shelf: every order already placed carries its own label and cost, so the Orders log and the "to settle" list never lose a row.
   - Seed — **Ben**: Roblox $10 (3 🍇), Dollarama candy (2 🍇), Costco Sushi (6 🍇). **Diogo**: LCBO $10 (3 🍇). All seeded at 1 per 30 days.
 - **The limit is per treasure**, counted over a rolling 30 days (`perMonth`, `prizeAllowance`), so candy can be a steady habit while sushi stays an event. **`perMonth: 0` = no limit** — the 🍇 balance is the only thing in the way. Each store card shows its own state ("2 of 3 left this month" / "Sold out — back in 9 days"); a treasure being sold out never blocks the others. Lowering a limit never claws back something already ordered. Unpaid purchases **accumulate** — duplicates of the same item are fine, each is its own row.
+- **A treasure can be screen time instead of a thing** (`minutes`, §20): buying it banks Roblox minutes on the spot and settles itself, so it never lands in the "to settle" list.
 - Buying creates an unpaid purchase on the buyer's data. **Diogo sees persistent banners** at the top of the app for every unsettled purchase (Ben's and his own) with a **Paid** button; they're also listed in the Admin desk under "Prizes to settle".
 
 ## 15b. Sticker album — "Grand Line Log Book" (the 📖 Log Book app)
@@ -975,5 +976,26 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 ### 19i. Notifications
 
 `onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, Ben once (never once per topic) when new topics go up, Diogo when Ben suggests a topic, and Ben when that suggestion is answered either way (§19c-1). Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
+
+## 20. Roblox bank (the 🎮 Roblox app)
+
+Roblox time is a currency Ben **banks** and then **pays back honestly**. The app holds one number — minutes owed to him — and an append-only log of every movement behind it. Rules live in [src/logic/roblox.ts](src/logic/roblox.ts); the state is `data.roblox` on his own profile, so Dad writes it through `commitFor(KID_ID, …)` like every other grant.
+
+- **Everything is minutes, never "about an hour".** Paying back partially is the entire point: he banks 3h, plays 45 minutes, owes 45 minutes. The balance is shown as `2h 45m`, never as a decimal.
+- **Ben's tabs**: **⏳ Bank** (the balance, how to earn more, and the button that opens Roblox), **🎮 Play** (the pay-back slider), **🧾 Log**. **Dad's tabs**: **🎁 Give time** and the same **🧾 Log** — read against Ben's world, not his own.
+
+### 20a. Time in — three ways, one log
+
+1. **Bought in the shop.** A treasure with `minutes` set (§15) banks that time the moment it's bought, and is marked **paid on the spot** — there is nothing for Dad to hand over, so it never joins the "to settle" list. He may buy **as many as he can afford** and sit on them: seeded as *Roblox 1 hour*, 2 🍇, **no monthly limit**. The minutes field is editable per treasure from the Admin desk → Prizes.
+2. **Dad grants it**, with a reason typed in full. The reason is shown to Ben **verbatim** — a grant with no explanation teaches nothing.
+3. **An official Roblox top-up** (the real thing, bought through Roblox itself) is logged the same way, tagged 🔗 so the log stays honest about where the time came from.
+
+### 20b. Time out — the slider
+
+One way only: he says how long he played. The **Play** tab is a slider from 0 to his whole balance in **5-minute steps**, with 15/30/45/60/All shortcuts and a confirm step, because a mis-drag must not cost him an hour. Paying back more than he has is refused rather than pushed negative — **the balance never goes below zero**.
+
+### 20c. He hears about it
+
+A grant arrives from Dad's phone, so Ben's app finds it by looking: any unseen `grant`/`official` row raises the celebration modal once, then marks itself seen. `onRobloxBankWrite` covers the closed app, diffing `roblox.entries` **by id** and pushing only rows Dad put there — a purchase Ben made himself, or time he paid back, is never a notification.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

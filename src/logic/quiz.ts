@@ -304,6 +304,12 @@ export interface Prize {
   cost: number // Devil Fruits 🍇
   perMonth: number // purchases allowed per 30-day window; 0 = as many as he can afford
   logo?: string // /prizes/*.png — spins like the Luffy tab icon; without one the emoji is the logo
+  /**
+   * Roblox screen time this treasure is worth, in minutes (§20). Buying it
+   * banks the minutes instead of leaving a thing for Dad to hand over, so it
+   * never shows up in the "to settle" list.
+   */
+  minutes?: number
 }
 
 /** Every profile's shelf. Lives in Firestore (`app/prizeCatalog`) once seeded; this is the seed. */
@@ -313,6 +319,7 @@ export type PrizeCatalog = Record<string, Prize[]>
 export const DEFAULT_PRIZES: PrizeCatalog = {
   ben: [
     { id: 'roblox10', label: 'Roblox $10', emoji: '🎮', cost: 3, perMonth: 1, logo: '/prizes/roblox.png' },
+    { id: 'roblox-hour', label: 'Roblox 1 hour', emoji: '⏳', cost: 2, perMonth: 0, minutes: 60, logo: '/prizes/roblox.png' },
     { id: 'dollarama-candy', label: 'Dollarama candy', emoji: '🍬', cost: 2, perMonth: 1, logo: '/prizes/dollarama.png' },
     { id: 'costco-sushi', label: 'Costco Sushi', emoji: '🍣', cost: 6, perMonth: 1, logo: '/prizes/costco.png' },
   ],

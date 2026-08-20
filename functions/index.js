@@ -82,6 +82,28 @@ export const onFreezeDeskWrite = onDocumentWritten('app/freezeRequests', async (
   }
 })
 
+/**
+ * Roblox bank (§20): tell Ben when time lands in it from somewhere other than
+ * his own hands. His profile doc is written constantly, so this diffs the
+ * roblox.entries list by id and only pushes rows Dad put there — a purchase he
+ * made himself, or time he paid back, is never worth a notification.
+ */
+export const onRobloxBankWrite = onDocumentWritten(`profiles/${KID_ID}`, async (event) => {
+  const before = event.data?.before?.data()?.roblox?.entries ?? []
+  const after = event.data?.after?.data()?.roblox?.entries ?? []
+  const known = new Set(before.map((e) => e.id))
+  for (const e of after) {
+    if (known.has(e.id) || (e.kind !== 'grant' && e.kind !== 'official')) continue
+    const h = Math.floor(e.minutes / 60)
+    const m = e.minutes % 60
+    const time = h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+    await pushTo(KID_ID, {
+      title: `🎮 +${time} of Roblox time!`,
+      body: e.note ? `${e.by}: "${e.note}"` : 'Open the app to see it.',
+    })
+  }
+})
+
 // --- 9:30pm last call ------------------------------------------------------
 // Mirrors src/logic/wheel.ts (isAvailableOn / isRequiredOn) and src/logic/dates.ts.
 // Kept in sync by hand: these are the only rules the server needs, and pulling

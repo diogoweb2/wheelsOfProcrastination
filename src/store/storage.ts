@@ -8,6 +8,7 @@ import { addDays, dayKey, parseDay } from '../logic/dates'
 import { ACCOUNT_IDS, defaultBankState } from '../logic/bank'
 import { defaultAlbumState } from '../logic/album'
 import { GYM_LOG_CAP, defaultGymState } from '../logic/gym'
+import { ROBLOX_LOG_CAP, defaultRobloxState } from '../logic/roblox'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -62,6 +63,7 @@ export function defaultData(): AppData {
     cards: { counts: {}, packsOpened: 0, lastFreePackDay: null, trades: [], packCredits: 0 },
     optcg: { decks: [], activeDeck: 'st01', wins: 0, losses: 0, settled: [], soloDay: null, soloWins: 0 },
     gym: defaultGymState(),
+    roblox: defaultRobloxState(),
     pushTokens: [],
   }
 }
@@ -80,6 +82,12 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     backgrounds: { ...base.backgrounds, ...parsed.backgrounds },
     quiz: { ...base.quiz, ...parsed.quiz },
     giftcards: parsed.giftcards ?? base.giftcards,
+    roblox: {
+      ...base.roblox,
+      ...parsed.roblox,
+      // capped on load, so an oversized old save trims itself
+      entries: (parsed.roblox?.entries ?? []).slice(-ROBLOX_LOG_CAP),
+    },
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     cards: { ...base.cards, ...parsed.cards, counts: { ...parsed.cards?.counts } },

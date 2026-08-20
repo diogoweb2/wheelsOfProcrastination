@@ -191,6 +191,11 @@ import {
   setSeconds,
   advanceLadder,
 } from '../logic/gym'
+import {
+  applyEntry as applyRobloxEntry,
+  formatMinutes,
+  makeEntry as makeRobloxEntry,
+} from '../logic/roblox'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
 import {
   AUTO_CLOSE_ISSUES,
@@ -464,6 +469,14 @@ interface StoreState {
   buyGiftCard: (itemId: string) => 'ok' | 'broke' | 'cooldown'
   markGiftCardPaid: (targetId: string, purchaseId: string) => void // admin settles a purchase
   savePrizeShelf: (ownerId: string, prizes: Prize[]) => void // admin: add/edit/delete one profile's treasures
+
+  // --- Roblox bank (§20) ---
+  /** Dad (or an official top-up) puts screen time into a crewmate's bank. */
+  grantRobloxTime: (targetId: string, minutes: number, note: string, kind?: 'grant' | 'official') => void
+  /** "I played 45 minutes" — pays the time back off the balance. */
+  logRobloxPlay: (minutes: number) => 'ok' | 'broke'
+  /** The kid's app has shown the banner for one of Dad's grants. */
+  markRobloxSeen: (entryId: string) => void
 
   // --- Grand Line Bank (the bank lives in BEN's world; admin edits reach it via kidData) ---
   /** Move real dollars between Ben's chests. Fully free — College deposits get Dad's match; College withdrawals burn it. */
@@ -2030,10 +2043,48 @@ export const useStore = create<StoreState>((set, get) => {
           cost: item.cost,
           day: dayKey(),
           at: new Date().toISOString(),
-          paidAt: null,
+          // screen time lands in the Roblox bank on the spot — there is nothing
+          // for Dad to hand over, so it is settled the moment it is bought
+          paidAt: item.minutes ? new Date().toISOString() : null,
         })
+        if (item.minutes) {
+          applyRobloxEntry(b.roblox, makeRobloxEntry({ minutes: item.minutes, kind: 'buy', note: item.label, by: 'Shop' }))
+        }
       })
       return 'ok'
+    },
+
+    // --- Roblox bank (§20) ---------------------------------------------------
+
+    grantRobloxTime(targetId, minutes, note, kind = 'grant') {
+      const mins = Math.round(minutes)
+      if (mins <= 0) return
+      const by = get().activeProfile()?.name ?? 'Dad'
+      commitFor(targetId, (d) => {
+        applyRobloxEntry(d.roblox, makeRobloxEntry({ minutes: mins, kind, note: note.trim(), by }))
+      })
+    },
+
+    logRobloxPlay(minutes) {
+      const mins = Math.round(minutes)
+      const d = get().data
+      if (mins <= 0 || d.roblox.minutes < mins) return 'broke'
+      const by = get().activeProfile()?.name ?? 'Ben'
+      commit((b) => {
+        applyRobloxEntry(
+          b.roblox,
+          makeRobloxEntry({ minutes: -mins, kind: 'play', note: `Played ${formatMinutes(mins)}`, by }),
+        )
+      })
+      return 'ok'
+    },
+
+    markRobloxSeen(entryId) {
+      if (!get().data.roblox.entries.some((e) => e.id === entryId && !e.seenAt)) return
+      commit((d) => {
+        const e = d.roblox.entries.find((x) => x.id === entryId)
+        if (e && !e.seenAt) e.seenAt = new Date().toISOString()
+      })
     },
 
     savePrizeShelf(ownerId, prizes) {

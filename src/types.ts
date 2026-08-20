@@ -472,6 +472,32 @@ export interface GiftCardPurchase {
   paidAt: string | null // set when the admin taps "Paid" (duplicates of one item accumulate as separate rows)
 }
 
+// --- Roblox bank (§20) -----------------------------------------------------
+
+/**
+ * One movement of Roblox screen time, in minutes. Positive = time going IN
+ * (bought in the shop, granted by Dad, an official Roblox top-up); negative =
+ * time actually played, paid back off the balance.
+ */
+export interface RobloxEntry {
+  id: string
+  minutes: number // + earned, - played
+  kind: 'buy' | 'grant' | 'official' | 'play'
+  note: string // shown verbatim: "Roblox 1 hour", Dad's reason, "Played 45 min"
+  by: string // who put the row there ("Dad", "Ben")
+  day: string // YYYY-MM-DD
+  at: string // ISO
+  seenAt?: string // set once Ben's app has shown the "Dad added time" banner
+}
+
+/** The whole Roblox bank: a balance in minutes and every movement behind it. */
+export interface RobloxState {
+  /** Minutes banked and not yet played. Never negative. */
+  minutes: number
+  /** Newest last. Capped at ROBLOX_LOG_CAP rows. */
+  entries: RobloxEntry[]
+}
+
 // --- Sticker album (Grand Line Log Book) -----------------------------------
 
 /**
@@ -1262,6 +1288,8 @@ export interface AppData {
   /** The One Piece TCG app: this crewmate's built decks and their record. */
   optcg: OptcgProfileState
   gym: GymState
+  /** Roblox screen-time bank (§20): hours owed to Ben, and what he's played. */
+  roblox: RobloxState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
 

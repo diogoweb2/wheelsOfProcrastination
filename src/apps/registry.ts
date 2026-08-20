@@ -248,6 +248,23 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // 🎮 Roblox bank (§20): the screen time Ben is owed, and paying it back
+    // honestly when he plays. Ben banks and spends; Dad grants and audits.
+    id: 'roblox',
+    name: 'Roblox',
+    icon: '🎮',
+    tint: ['#d70000', '#2b2b2b'],
+    tabs: [
+      { id: 'bank', label: 'Bank', icon: '⏳' },
+      { id: 'play', label: 'Play', icon: '🎮' },
+      { id: 'log', label: 'Log', icon: '🧾' },
+    ],
+    adminTabs: [
+      { id: 'grant', label: 'Give time', icon: '🎁' },
+      { id: 'log', label: 'Log', icon: '🧾' },
+    ],
+  },
+  {
     id: 'gym',
     name: 'Gym',
     icon: '💪',

@@ -24,6 +24,8 @@ import { VoyageScreen } from './screens/VoyageScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { IdeasScreen } from './screens/IdeasScreen'
 import { GymScreen } from './screens/GymScreen'
+import { RobloxScreen } from './screens/RobloxScreen'
+import { formatMinutes, unseenGrants } from './logic/roblox'
 import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
@@ -38,7 +40,7 @@ const CardBinderScreen = lazy(() => import('./screens/CardBinderScreen').then((m
 const OptcgScreen = lazy(() => import('./screens/OptcgScreen').then((m) => ({ default: m.OptcgScreen })))
 
 export default function App() {
-  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, answerChallenge, boardGames, settleBoardGames, answerBoardChallenge, seaBattles, settleSeaBattles, answerSeaChallenge, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics } = useStore()
+  const { data, activeProfileId, ready, cloudError, saveError, dismissSaveError, rollover, kidData, markGiftCardPaid, ackBankPayback, market, trades, duels, settleDuels, answerChallenge, boardGames, settleBoardGames, answerBoardChallenge, seaBattles, settleSeaBattles, answerSeaChallenge, freezeRequests, refreshDailyQuiz, dataLoaded, quizBankLoaded, registerPushDevice, essays, essayTopics, pushEvent, markRobloxSeen } = useStore()
   // the URL we were opened with decides the first screen (see lib/route.ts)
   const [open, setOpen] = useState<OpenApp>(() => pathToRoute(window.location.pathname, null))
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
@@ -95,6 +97,23 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Dad's Roblox grants land in Ben's data from another device, so his app
+  // finds out by looking: one banner per unseen grant, then it's marked seen so
+  // it never fires twice.
+  useEffect(() => {
+    if (!dataLoaded) return
+    for (const e of unseenGrants(data.roblox)) {
+      pushEvent({
+        type: 'goal',
+        emoji: '🎮',
+        title: `+${formatMinutes(e.minutes)} Roblox time!`,
+        description: `${e.by}: “${e.note}”`,
+      })
+      markRobloxSeen(e.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataLoaded, data.roblox.entries.length])
 
   // set up (or catch up) today's Question of the Day once data + question bank are loaded
   useEffect(() => {
@@ -789,6 +808,8 @@ function AppBodyRouter({
       )
     case 'gym':
       return <GymScreen tab={open.tab} />
+    case 'roblox':
+      return <RobloxScreen tab={open.tab} />
     case 'essay':
       return <EssayScreen tab={open.tab} setTab={setTab} />
     case 'ideas':

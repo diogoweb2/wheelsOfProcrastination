@@ -491,6 +491,7 @@ function PrizeShelf({ who, prizes, onSave }: { who: string; prizes: Prize[]; onS
               <div style={{ fontWeight: 800, fontSize: 14 }}>{p.label}</div>
               <div className="muted" style={{ fontSize: 11 }}>
                 🍇{p.cost} · {p.perMonth ? `max ${p.perMonth} per 30 days` : 'no limit'}
+                {p.minutes ? ` · 🎮 ${p.minutes} min` : ''}
               </div>
             </div>
             <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setEditing(p.id) }}>✏️</button>
@@ -524,13 +525,15 @@ function PrizeForm({
   const [emoji, setEmoji] = useState(prize?.emoji ?? '🎁')
   const [cost, setCost] = useState(prize?.cost ?? 3)
   const [perMonth, setPerMonth] = useState(prize?.perMonth ?? 1)
+  // Roblox screen time this treasure is worth (§20): 0 = an ordinary treasure
+  const [minutes, setMinutes] = useState(prize?.minutes ?? 0)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   function submit() {
     const name = label.trim()
     if (!name) return
     const id = prize?.id ?? `${slug(name)}-${crypto.randomUUID().slice(0, 4)}`
-    onSave({ ...prize, id, label: name, emoji: emoji.trim() || '🎁', cost, perMonth })
+    onSave({ ...prize, id, label: name, emoji: emoji.trim() || '🎁', cost, perMonth, minutes })
   }
 
   return (
@@ -554,6 +557,7 @@ function PrizeForm({
         />
       </div>
       <Stepper label="Price 🍇" value={cost} min={1} max={30} onChange={setCost} />
+      <Stepper label="Roblox time (min)" value={minutes} min={0} max={240} step={15} onChange={setMinutes} />
       <Stepper
         label="Per 30 days"
         value={perMonth}
@@ -592,6 +596,7 @@ function Stepper({
   value,
   min,
   max,
+  step = 1,
   format,
   hint,
   onChange,
@@ -600,6 +605,7 @@ function Stepper({
   value: number
   min: number
   max: number
+  step?: number
   format?: (n: number) => string
   hint?: string
   onChange: (n: number) => void
@@ -610,9 +616,9 @@ function Stepper({
         <div style={{ fontWeight: 800, fontSize: 13 }}>{label}</div>
         {hint && <div className="muted" style={{ fontSize: 11 }}>{hint}</div>}
       </div>
-      <button className="btn btn--ghost btn--small" disabled={value <= min} onClick={() => { sfx.click(); onChange(value - 1) }}>−</button>
+      <button className="btn btn--ghost btn--small" disabled={value <= min} onClick={() => { sfx.click(); onChange(Math.max(min, value - step)) }}>−</button>
       <b style={{ minWidth: 26, textAlign: 'center', fontSize: 16 }}>{format ? format(value) : value}</b>
-      <button className="btn btn--ghost btn--small" disabled={value >= max} onClick={() => { sfx.click(); onChange(value + 1) }}>+</button>
+      <button className="btn btn--ghost btn--small" disabled={value >= max} onClick={() => { sfx.click(); onChange(Math.min(max, value + step)) }}>+</button>
     </div>
   )
 }
