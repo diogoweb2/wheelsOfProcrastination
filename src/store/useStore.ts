@@ -487,7 +487,7 @@ interface StoreState {
   bankPayDad: (amount: number, note: string) => 'ok' | 'broke'
   ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback
   setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
-  bankAdjust: (acct: BankAccountId, delta: number, note: string) => void // admin: manual correction / paper-money import
+  bankAdjust: (acct: BankAccountId, delta: number, note: string) => boolean // admin: manual correction / paper-money import; false = Ben's data wasn't loaded, nothing was written
   /** Admin: turn the trip money converter on/off, set the currency, rate and how many days it lives. */
   setBankConverter: (patch: Partial<BankConverterState> & { days?: number }) => void
   // Shock Test:
@@ -935,22 +935,25 @@ export const useStore = create<StoreState>((set, get) => {
    * the admin (Diogo) can also write BEN's world through the kidData
    * subscription (official tests, grants, unlocks, "paid").
    */
-  function commitFor(targetId: string, fn: (data: AppData, events: AppEvent[]) => void) {
+  function commitFor(targetId: string, fn: (data: AppData, events: AppEvent[]) => void): boolean {
     if (get().activeProfileId === targetId) {
       commit(fn)
-      return
+      return true
     }
-    if (targetId !== KID_ID) return // only Ben's world can be edited from another session
+    if (targetId !== KID_ID) return false // only Ben's world can be edited from another session
     const kid = get().kidData
     // Not loaded, or loaded only from the local cache — a cached copy can predate
     // Ben's own device's writes, and writing back from it would undo them.
-    if (!kid || !get().kidDataFresh) return
+    // Callers that confirm something to the user MUST check this `false` —
+    // otherwise the UI cheers a write that never happened.
+    if (!kid || !get().kidDataFresh) return false
     const data: AppData = JSON.parse(JSON.stringify(kid))
     const events: AppEvent[] = []
     fn(data, events)
     set((s) => ({ kidData: data, events: [...s.events, ...events] }))
     fireAndForget(saveDataFields(KID_ID, changedFields(kid, data)))
     auditDiff(targetId, get().activeProfileId ?? 'unknown', kid, data) // actor = the admin acting on Ben's world
+    return true
   }
 
   /**
@@ -2207,8 +2210,8 @@ export const useStore = create<StoreState>((set, get) => {
 
     bankAdjust(acct, delta, note) {
       const amt = round2(delta)
-      if (amt === 0) return
-      commitFor(KID_ID, (d) => {
+      if (amt === 0) return false
+      return commitFor(KID_ID, (d) => {
         const a = d.bank.accounts[acct]
         a.balance = Math.max(0, a.balance + amt)
         if (amt > 0) a.deposited += amt

@@ -1347,7 +1347,17 @@ function AdminAdjust() {
   const n = Number(amount)
   const ok = Number.isFinite(n) && n !== 0
   function apply(sign: 1 | -1) {
-    bankAdjust(acct, sign * Math.abs(n), note)
+    // bankAdjust writes into BEN's world; it refuses (false) until his doc has
+    // arrived from the server. Never cheer a write that didn't happen.
+    if (!bankAdjust(acct, sign * Math.abs(n), note)) {
+      pushEvent({
+        type: 'goal',
+        emoji: '⏳',
+        title: 'Nothing saved yet',
+        description: "Ben's bank hasn't finished loading from the cloud. Wait a moment and tap again.",
+      })
+      return
+    }
     sfx.gem()
     pushEvent({
       type: 'goal',
