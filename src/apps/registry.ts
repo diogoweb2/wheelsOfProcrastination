@@ -266,6 +266,21 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // ⚽ FC Lock (§21): what CazéTV shows, when it starts in Toronto, and how
+    // many days until the games and the finals we care about.
+    id: 'fclock',
+    name: 'FC Lock',
+    icon: '⚽',
+    tint: ['#0a7d3c', '#052d17'],
+    tabs: [
+      { id: 'games', label: 'Games', icon: '📅' },
+      { id: 'watch', label: 'Watchlist', icon: '⭐' },
+      { id: 'news', label: 'News', icon: '📰' },
+      { id: 'cups', label: 'Cups', icon: '⏳' },
+      { id: 'teams', label: 'Teams', icon: '⚽' },
+    ],
+  },
+  {
     id: 'gym',
     name: 'Gym',
     icon: '💪',

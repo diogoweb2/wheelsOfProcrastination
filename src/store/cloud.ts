@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FcLockState, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
@@ -528,4 +528,23 @@ export function subscribeAudit(max: number, cb: (entries: AuditEntry[]) => void)
       }),
     )
   })
+}
+
+// --- FC Lock (shared football schedule: favourites, watchlist, news) --------
+
+const fcLockRef = () => doc(firestore, 'app', 'fcLock')
+
+const EMPTY_FCLOCK: FcLockState = { leagues: [], teams: [], watch: [] }
+
+/** Live-sync FC Lock. An empty doc is a valid empty schedule — nothing to seed. */
+export function subscribeFcLock(cb: (s: FcLockState) => void): () => void {
+  return onSnapshot(fcLockRef(), (snap) => {
+    const data = snap.data() as Partial<FcLockState> | undefined
+    cb({ ...EMPTY_FCLOCK, ...(data ?? {}) })
+  })
+}
+
+export async function saveFcLock(state: FcLockState): Promise<void> {
+  await ensureAuth()
+  await setDoc(fcLockRef(), state)
 }

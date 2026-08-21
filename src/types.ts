@@ -1321,3 +1321,51 @@ export interface AuditEntry {
   at: number // epoch ms (server Timestamp on write, coerced to ms on read)
   expireAt?: unknown // Firestore Timestamp; TTL field — never read in app code
 }
+
+// --- FC Lock (⚽ the football schedule, §21) ---------------------------------
+
+/** A game on the watchlist: a snapshot, so the list renders with no network. */
+export interface FcWatchItem {
+  id: string // TheSportsDB idEvent
+  leagueId: string
+  leagueName: string
+  home: string
+  away: string
+  homeBadge?: string
+  awayBadge?: string
+  kickoff: string // UTC ISO — displayed in Toronto time, always
+  addedAt: string
+  /** Filled in once the game has been played and we've looked the score up. */
+  homeScore?: number
+  awayScore?: number
+  /** The result has been read on the Games tab, so the warning stops shouting. */
+  seenResult?: boolean
+}
+
+export interface FcNewsItem {
+  id: string
+  title: string
+  summary: string
+  team?: string
+  kind: 'transfer' | 'news'
+  source?: string
+  url?: string
+  date?: string
+}
+
+/**
+ * The whole FC Lock world, shared (`app/fcLock`) — one schedule for the house,
+ * not one per profile.
+ */
+export interface FcLockState {
+  /** TheSportsDB league ids we follow (see `LEAGUES` in logic/fclock.ts). */
+  leagues: string[]
+  teams: { id: string; name: string; badge?: string; leagueName?: string }[]
+  watch: FcWatchItem[]
+  news?: {
+    items: FcNewsItem[]
+    fetchedAt: string
+    /** Which teams the batch was fetched for — a changed favourite invalidates it. */
+    forKey: string
+  }
+}

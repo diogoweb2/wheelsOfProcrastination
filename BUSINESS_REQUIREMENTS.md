@@ -1004,4 +1004,35 @@ One way only: he says how long he played. The **Play** tab is a slider from 0 to
 
 A grant arrives from Dad's phone, so Ben's app finds it by looking: any unseen `grant`/`official` row raises the celebration modal once, then marks itself seen. `onRobloxBankWrite` covers the closed app, diffing `roblox.entries` **by id** and pushing only rows Dad put there — a purchase Ben made himself, or time he paid back, is never a notification.
 
+## 21. FC Lock (the ⚽ FC Lock app)
+
+The football schedule for this house: the games worth watching, **in Toronto time**, and how many days until the ones we care about. Fixtures, results and badges come from [TheSportsDB](https://www.thesportsdb.com)'s free API (no key, CORS-open) via [src/logic/fclock.ts](src/logic/fclock.ts); the whole state is one shared Firestore doc, `app/fcLock` — a schedule belongs to the house, not to a profile.
+
+Five tabs, five URLs (§1c): **📅 Games** (`/fclock/games`), **⭐ Watchlist** (`/fclock/watch`), **📰 News** (`/fclock/news`), **⏳ Cups** (`/fclock/cups`), **⚽ Teams** (`/fclock/teams`).
+
+### 21a. Toronto time, always
+
+Kick-offs arrive as UTC and are **only ever displayed in `America/Toronto`**, labelled `ET`. Days are grouped by the Toronto calendar date, and every countdown counts **whole calendar days** — 0 = today, 1 = tomorrow — so a game tonight never reads the same as one tomorrow morning.
+
+### 21b. What we follow
+
+- **Leagues.** A hand-kept roster of competitions (`LEAGUES`), each with its TheSportsDB id. The ones CazéTV usually shows in Brazil carry a **📺 badge** — Champions League, Europa League, Conference League, Brasileirão Série A. CazéTV's rights move season to season and nobody publishes them as data, so **the badge is a hint, never a promise**, and every league can be followed either way.
+- **Clubs.** Searched by name and followed individually. A followed club brings its fixtures in whatever competition it plays, so a cup run shows up without following the cup.
+
+The **Games** tab merges both, dedupes by match id, sorts by kick-off and groups by day. One request per followed thing, in parallel; a competition that is out of season answers with nothing and must never take the whole schedule down. Everything is cached in `localStorage` for **30 minutes** — the free tier is rate-limited and a schedule that changed a minute ago is not news.
+
+### 21c. The watchlist, and the warning
+
+Tapping ☆ on any game puts it on the shared watchlist, stored as a **snapshot** (teams, league, kick-off, badges) so the list renders with no network at all. Each entry shows a **countdown in days**.
+
+**A watched game that has already been played raises a warning at the top of the Games tab, with the score.** A game counts as played ~2½ hours after kick-off; the score is then looked up once per game and written back onto the entry. If the result isn't published yet the warning says so rather than inventing one. **Got it** marks the results seen and the warning stands down.
+
+### 21d. News
+
+There is no free football-news API worth wiring up — the good ones cost money, the RSS ones are blocked by CORS in the browser. So the news desk reuses the OpenRouter key the app already holds (`app/aiConfig`, §18/§19) with a **web-search model**, and asks it to go and read today's press for the clubs we follow: **transfers first**, then club news. Every item carries its **source and link**, the model is told never to invent a transfer, fee, quote or date, and the batch is cached in `app/fcLock` for **6 hours** (a changed set of favourite clubs invalidates it immediately). No key, no news — the tab says so plainly.
+
+### 21e. Cups
+
+Countdowns **in days** to the big European finals and the next national-team tournaments (`TOURNAMENTS`), soonest first, with the three nearest starred games above them. Dates that are announced are exact; a competition whose window is known but whose day isn't is marked `approx` and shown with a **≈** rather than a date we made up.
+
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

@@ -24,6 +24,7 @@ import { VoyageScreen } from './screens/VoyageScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { IdeasScreen } from './screens/IdeasScreen'
 import { GymScreen } from './screens/GymScreen'
+import { FcLockScreen } from './screens/FcLockScreen'
 import { RobloxScreen } from './screens/RobloxScreen'
 import { formatMinutes, unseenGrants } from './logic/roblox'
 import { EssayScreen } from './screens/EssayScreen'
@@ -808,6 +809,8 @@ function AppBodyRouter({
       )
     case 'gym':
       return <GymScreen tab={open.tab} />
+    case 'fclock':
+      return <FcLockScreen tab={open.tab} />
     case 'roblox':
       return <RobloxScreen tab={open.tab} />
     case 'essay':
