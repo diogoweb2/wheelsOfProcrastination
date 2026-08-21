@@ -24,7 +24,6 @@ import type {
   GymCatalog,
   GymSession,
   Idea,
-  FcLockState,
   FcWatchItem,
   LoggedSet,
   MarketData,
@@ -63,7 +62,6 @@ import {
   loadPrizeCatalog,
   savePrizeCatalog,
   saveIdeas,
-  saveFcLock,
   saveQuizBank,
   saveRoster,
   saveStickerTrades,
@@ -79,7 +77,6 @@ import {
   subscribeData,
   subscribeGymCatalog,
   subscribeIdeas,
-  subscribeFcLock,
   subscribeStickerTrades,
   subscribeCardTrades,
   saveCardTrades,
@@ -326,7 +323,6 @@ interface StoreState {
   kidDataFresh: boolean // kidData has arrived from the SERVER (not just the local cache) — guards writes into Ben's world
   market: MarketData | null // shared XGRO/QQQ return series, live-synced; drives realistic daily moves
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
-  fcLock: FcLockState // ⚽ FC Lock: followed leagues/teams, the watchlist and the cached news (app/fcLock), live-synced
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
   cardTrades: StickerTrade[] // shared One Piece Album swaps (app/cardTrades), live-synced
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
@@ -376,7 +372,7 @@ interface StoreState {
   /** FC Lock: the played games' warnings have been read. */
   markFcResultsSeen: (ids: string[]) => void
   /** FC Lock: cache a fetched batch of news. */
-  setFcNews: (news: FcLockState['news']) => void
+  setFcNews: (news: AppData['fcLock']['news']) => void
   toggleIdea: (id: string) => void
   deleteIdea: (id: string) => void
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -901,8 +897,6 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeMarketData((m) => set({ market: m }))
       // shared idea list — no seeding needed, an empty doc is a valid empty list
       subscribeIdeas((ideas) => set({ ideas }))
-      // ⚽ FC Lock's shared schedule: favourites, watchlist, cached news
-      subscribeFcLock((fcLock) => set({ fcLock }))
       // shared sticker swap table (same deal — empty doc is a valid empty list)
       subscribeStickerTrades((trades) => set({ trades }))
       // the One Piece Album's own swap table — same game, its own pile of cards
@@ -1249,12 +1243,6 @@ export const useStore = create<StoreState>((set, get) => {
     })
   }
 
-  /** FC Lock writes the whole doc: it is a handful of favourites, not a feed. */
-  function saveFc(next: FcLockState) {
-    set({ fcLock: next })
-    fireAndForget(saveFcLock(next))
-  }
-
   function saveIdeaList(ideas: Idea[]) {
     set({ ideas })
     fireAndForget(saveIdeas(ideas))
@@ -1282,7 +1270,6 @@ export const useStore = create<StoreState>((set, get) => {
     kidDataFresh: false,
     market: null,
     ideas: [],
-    fcLock: { leagues: [], teams: [], watch: [] },
     trades: [],
     cardTrades: [],
     duels: [],
@@ -1353,51 +1340,59 @@ export const useStore = create<StoreState>((set, get) => {
       saveIdeaList(get().ideas.filter((i) => i.id !== id))
     },
 
-    // --- ⚽ FC Lock (shared: one schedule for the house) ---
+    // --- ⚽ FC Lock (§21) — one schedule per crewmate, on their own profile ---
 
     toggleFcLeague(leagueId) {
-      const fc = get().fcLock
-      saveFc({
-        ...fc,
-        leagues: fc.leagues.includes(leagueId)
-          ? fc.leagues.filter((l) => l !== leagueId)
-          : [...fc.leagues, leagueId],
+      commit((d) => {
+        d.fcLock.leagues = d.fcLock.leagues.includes(leagueId)
+          ? d.fcLock.leagues.filter((l) => l !== leagueId)
+          : [...d.fcLock.leagues, leagueId]
       })
     },
 
     toggleFcTeam(team) {
-      const fc = get().fcLock
-      const has = fc.teams.some((t) => t.id === team.id)
-      // undefined fields are stripped: Firestore rejects them outright
-      const clean = Object.fromEntries(Object.entries(team).filter(([, v]) => v !== undefined)) as typeof team
-      saveFc({ ...fc, teams: has ? fc.teams.filter((t) => t.id !== team.id) : [...fc.teams, clean] })
+      commit((d) => {
+        if (d.fcLock.teams.some((t) => t.id === team.id)) {
+          d.fcLock.teams = d.fcLock.teams.filter((t) => t.id !== team.id)
+          return
+        }
+        // undefined fields are stripped: Firestore rejects them outright
+        const clean = Object.fromEntries(Object.entries(team).filter(([, v]) => v !== undefined)) as typeof team
+        d.fcLock.teams = [...d.fcLock.teams, clean]
+      })
     },
 
     toggleFcWatch(game) {
-      const fc = get().fcLock
-      if (fc.watch.some((w) => w.id === game.id)) {
-        saveFc({ ...fc, watch: fc.watch.filter((w) => w.id !== game.id) })
-        return
-      }
-      const clean = Object.fromEntries(Object.entries(game).filter(([, v]) => v !== undefined)) as typeof game
-      saveFc({ ...fc, watch: [...fc.watch, { ...clean, addedAt: new Date().toISOString() }] })
+      commit((d) => {
+        if (d.fcLock.watch.some((w) => w.id === game.id)) {
+          d.fcLock.watch = d.fcLock.watch.filter((w) => w.id !== game.id)
+          return
+        }
+        const clean = Object.fromEntries(Object.entries(game).filter(([, v]) => v !== undefined)) as typeof game
+        d.fcLock.watch = [...d.fcLock.watch, { ...clean, addedAt: new Date().toISOString() }]
+      })
     },
 
     setFcResult(id, homeScore, awayScore) {
-      const fc = get().fcLock
-      const before = fc.watch.find((w) => w.id === id)
+      const before = get().data.fcLock.watch.find((w) => w.id === id)
+      // no write when the score is already the one we hold: this runs on render
       if (!before || (before.homeScore === homeScore && before.awayScore === awayScore)) return
-      saveFc({ ...fc, watch: fc.watch.map((w) => (w.id === id ? { ...w, homeScore, awayScore } : w)) })
+      commit((d) => {
+        d.fcLock.watch = d.fcLock.watch.map((w) => (w.id === id ? { ...w, homeScore, awayScore } : w))
+      })
     },
 
     markFcResultsSeen(ids) {
-      const fc = get().fcLock
-      if (!ids.some((id) => fc.watch.some((w) => w.id === id && !w.seenResult))) return
-      saveFc({ ...fc, watch: fc.watch.map((w) => (ids.includes(w.id) ? { ...w, seenResult: true } : w)) })
+      if (!ids.some((id) => get().data.fcLock.watch.some((w) => w.id === id && !w.seenResult))) return
+      commit((d) => {
+        d.fcLock.watch = d.fcLock.watch.map((w) => (ids.includes(w.id) ? { ...w, seenResult: true } : w))
+      })
     },
 
     setFcNews(news) {
-      saveFc({ ...get().fcLock, news })
+      commit((d) => {
+        d.fcLock.news = news
+      })
     },
 
     async login(profileId, pin) {

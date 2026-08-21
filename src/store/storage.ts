@@ -64,6 +64,7 @@ export function defaultData(): AppData {
     optcg: { decks: [], activeDeck: 'st01', wins: 0, losses: 0, settled: [], soloDay: null, soloWins: 0 },
     gym: defaultGymState(),
     roblox: defaultRobloxState(),
+    fcLock: { leagues: [], teams: [], watch: [] },
     pushTokens: [],
   }
 }
@@ -88,6 +89,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       // capped on load, so an oversized old save trims itself
       entries: (parsed.roblox?.entries ?? []).slice(-ROBLOX_LOG_CAP),
     },
+    fcLock: { ...base.fcLock, ...parsed.fcLock },
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     cards: { ...base.cards, ...parsed.cards, counts: { ...parsed.cards?.counts } },

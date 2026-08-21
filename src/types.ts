@@ -1297,6 +1297,8 @@ export interface AppData {
   gym: GymState
   /** Roblox screen-time bank (§20): hours owed to Ben, and what he's played. */
   roblox: RobloxState
+  /** FC Lock (§21): this crewmate's own leagues, clubs, watchlist and news. */
+  fcLock: FcLockState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
 
@@ -1354,8 +1356,9 @@ export interface FcNewsItem {
 }
 
 /**
- * The whole FC Lock world, shared (`app/fcLock`) — one schedule for the house,
- * not one per profile.
+ * One crewmate's FC Lock world. It lives on the profile (`AppData.fcLock`), not
+ * in a shared doc: Diogo and Ben follow different clubs and star different
+ * games, so the schedule is personal — same app, two schedules.
  */
 export interface FcLockState {
   /** TheSportsDB league ids we follow (see `LEAGUES` in logic/fclock.ts). */

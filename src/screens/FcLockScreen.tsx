@@ -1,5 +1,9 @@
 // ⚽ FC Lock (§21) — the football schedule, in Toronto time.
 //
+// Personal, not shared: the leagues, clubs, watchlist and news all live on the
+// logged-in crewmate's own profile (`data.fcLock`), so Diogo and Ben each get
+// their own schedule out of the same app.
+//
 // Five tabs: the games that matter to us (Games), the ones we said out loud we
 // would watch (Watchlist), what the press is saying about our clubs (News), how
 // many days until the big finals (Cups), and who "our clubs" are (Teams).
@@ -48,7 +52,8 @@ export function FcLockScreen({ tab }: { tab: string }) {
 
 /** The schedule: our leagues' next fixtures plus our clubs', merged and deduped. */
 function useSchedule() {
-  const { fcLock } = useStore()
+  const { data } = useStore()
+  const fcLock = data.fcLock
   const [games, setGames] = useState<FcMatch[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,7 +95,8 @@ function useSchedule() {
 }
 
 function GamesTab() {
-  const { fcLock } = useStore()
+  const { data } = useStore()
+  const fcLock = data.fcLock
   const { games, loading, error } = useSchedule()
 
   const upcoming = games.filter((m) => Date.parse(m.kickoff) > Date.now() - 150 * 60 * 1000)
@@ -139,7 +145,8 @@ function GamesTab() {
  * played. It carries the score, and tapping it puts the warning to bed.
  */
 function PlayedWarning() {
-  const { fcLock, setFcResult, markFcResultsSeen } = useStore()
+  const { data, setFcResult, markFcResultsSeen } = useStore()
+  const fcLock = data.fcLock
   const played = fcLock.watch.filter((w) => !w.seenResult && isFinished(toMatch(w)))
 
   // fill in scores we don't have yet, one lookup per game, once
@@ -190,7 +197,8 @@ function PlayedWarning() {
 }
 
 function MatchRow({ match }: { match: FcMatch }) {
-  const { fcLock, toggleFcWatch } = useStore()
+  const { data, toggleFcWatch } = useStore()
+  const fcLock = data.fcLock
   const watched = fcLock.watch.some((w) => w.id === match.id)
   const league = leagueById(match.leagueId)
 
@@ -258,7 +266,8 @@ function toMatch(w: FcWatchItem): FcMatch {
 }
 
 function WatchTab() {
-  const { fcLock, toggleFcWatch, setFcResult } = useStore()
+  const { data, toggleFcWatch, setFcResult } = useStore()
+  const fcLock = data.fcLock
   const list = [...fcLock.watch].sort((a, b) => a.kickoff.localeCompare(b.kickoff))
   const ahead = list.filter((w) => !isFinished(toMatch(w)))
   const done = list.filter((w) => isFinished(toMatch(w))).reverse()
@@ -348,7 +357,8 @@ function WatchRow({ item, onDrop }: { item: FcWatchItem; onDrop: () => void }) {
 // --- News --------------------------------------------------------------------
 
 function NewsTab() {
-  const { fcLock, aiConfig, setFcNews } = useStore()
+  const { data, aiConfig, setFcNews } = useStore()
+  const fcLock = data.fcLock
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const teams = useMemo(() => fcLock.teams.map((t) => t.name), [fcLock.teams])
@@ -435,7 +445,8 @@ function NewsCard({ item }: { item: FcNewsItem }) {
 
 function CupsTab() {
   const cups = upcomingTournaments()
-  const { fcLock } = useStore()
+  const { data } = useStore()
+  const fcLock = data.fcLock
   const starred = [...fcLock.watch]
     .filter((w) => !isFinished(toMatch(w)))
     .sort((a, b) => a.kickoff.localeCompare(b.kickoff))
@@ -481,7 +492,8 @@ function Countdown({ emoji, name, what, days, approx }: { emoji: string; name: s
 // --- Teams -------------------------------------------------------------------
 
 function TeamsTab() {
-  const { fcLock, toggleFcLeague, toggleFcTeam } = useStore()
+  const { data, toggleFcLeague, toggleFcTeam } = useStore()
+  const fcLock = data.fcLock
   const [q, setQ] = useState('')
   const [hits, setHits] = useState<{ id: string; name: string; badge?: string; leagueName?: string }[]>([])
   const [searching, setSearching] = useState(false)

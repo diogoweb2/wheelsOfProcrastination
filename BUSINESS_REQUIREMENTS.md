@@ -1006,7 +1006,9 @@ A grant arrives from Dad's phone, so Ben's app finds it by looking: any unseen `
 
 ## 21. FC Lock (the ⚽ FC Lock app)
 
-The football schedule for this house: the games worth watching, **in Toronto time**, and how many days until the ones we care about. Fixtures, results and badges come from [TheSportsDB](https://www.thesportsdb.com)'s free API (no key, CORS-open) via [src/logic/fclock.ts](src/logic/fclock.ts); the whole state is one shared Firestore doc, `app/fcLock` — a schedule belongs to the house, not to a profile.
+The football schedule for this house: the games worth watching, **in Toronto time**, and how many days until the ones we care about. Fixtures, results and badges come from [TheSportsDB](https://www.thesportsdb.com)'s free API (no key, CORS-open) via [src/logic/fclock.ts](src/logic/fclock.ts).
+
+**It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
 Five tabs, five URLs (§1c): **📅 Games** (`/fclock/games`), **⭐ Watchlist** (`/fclock/watch`), **📰 News** (`/fclock/news`), **⏳ Cups** (`/fclock/cups`), **⚽ Teams** (`/fclock/teams`).
 
@@ -1023,13 +1025,13 @@ The **Games** tab merges both, dedupes by match id, sorts by kick-off and groups
 
 ### 21c. The watchlist, and the warning
 
-Tapping ☆ on any game puts it on the shared watchlist, stored as a **snapshot** (teams, league, kick-off, badges) so the list renders with no network at all. Each entry shows a **countdown in days**.
+Tapping ☆ on any game puts it on **your own** watchlist, stored as a **snapshot** (teams, league, kick-off, badges) so the list renders with no network at all. Each entry shows a **countdown in days**.
 
 **A watched game that has already been played raises a warning at the top of the Games tab, with the score.** A game counts as played ~2½ hours after kick-off; the score is then looked up once per game and written back onto the entry. If the result isn't published yet the warning says so rather than inventing one. **Got it** marks the results seen and the warning stands down.
 
 ### 21d. News
 
-There is no free football-news API worth wiring up — the good ones cost money, the RSS ones are blocked by CORS in the browser. So the news desk reuses the OpenRouter key the app already holds (`app/aiConfig`, §18/§19) with a **web-search model**, and asks it to go and read today's press for the clubs we follow: **transfers first**, then club news. Every item carries its **source and link**, the model is told never to invent a transfer, fee, quote or date, and the batch is cached in `app/fcLock` for **6 hours** (a changed set of favourite clubs invalidates it immediately). No key, no news — the tab says so plainly.
+There is no free football-news API worth wiring up — the good ones cost money, the RSS ones are blocked by CORS in the browser. So the news desk reuses the OpenRouter key the app already holds (`app/aiConfig`, §18/§19) with a **web-search model**, and asks it to go and read today's press for the clubs we follow: **transfers first**, then club news. Every item carries its **source and link**, the model is told never to invent a transfer, fee, quote or date, and the batch is cached on your profile for **6 hours** (a changed set of favourite clubs invalidates it immediately). No key, no news — the tab says so plainly.
 
 ### 21e. Cups
 
