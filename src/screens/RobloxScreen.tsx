@@ -1,7 +1,7 @@
 // 🎮 Roblox bank (§20) — the screen time Ben is owed, and what he pays back.
 //
-// Ben's side: how much time is banked, a button that opens Roblox, and a
-// slider to say how long he actually played. Dad's side: give time with a
+// Ben's side: how much time is banked, and a slider to say how long he
+// actually played. Dad's side: give time with a
 // reason, and read the same log.
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
@@ -11,7 +11,6 @@ import {
   PLAY_STEP,
   formatDelta,
   formatMinutes,
-  openRoblox,
   playedOn,
 } from '../logic/roblox'
 import type { RobloxEntry, RobloxState } from '../types'
@@ -77,17 +76,7 @@ function BankTab({ state }: { state: RobloxState }) {
         </ul>
       </div>
 
-      <button
-        className="btn btn--red"
-        style={{ width: '100%', marginTop: 12 }}
-        onClick={() => {
-          sfx.click()
-          openRoblox() // the installed app, with the website as the fallback
-        }}
-      >
-        🎮 Open Roblox
-      </button>
-      <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+      <p className="muted" style={{ fontSize: 12, marginTop: 12 }}>
         When you stop playing, come back to the <strong>Play</strong> tab and pay the time back. Honest counting
         is the whole deal.
       </p>

@@ -74,20 +74,21 @@ Fields when creating a task:
 | Field | Values | Notes |
 |---|---|---|
 | Name | text | e.g. "Read for 10 min", "30 pushups" |
-| Repeats? | one-shot / repeat / repeat until done | **One-shot** tasks disappear forever once completed. **Repeat** ("habits") can be completed once per day and reappear the next day. **Repeat until done** (`untilDone`) keeps coming back like a habit — respecting every other filter (days, seasons, start date, required window, unlock-after) — but the **first tick retires it for good**, and a day it isn't done costs **no Berries**, even as a must-do. For jobs that wait on somebody else ("ask Dad if the form went in"): you can't fail them, you're just not done yet. They don't count towards habit streaks or the training log. |
+| Repeats? | one-shot / repeat / repeat until done | **One-shot** tasks disappear forever once completed. **Repeat** ("habits") can be completed once per day and reappear the next day. **Repeat until done** (`untilDone`) keeps coming back like a habit — respecting every other filter (days, seasons, start date, required window, unlock-after) — but the **first tick retires it for good**, and it can never carry a punishment. For jobs that wait on somebody else ("ask Dad if the form went in"): you can't fail them, you're just not done yet. They don't count towards habit streaks or the training log. |
 | Effort | low / medium / high | Drives gem rewards, wheel filtering, node colors |
 | Priority | urgent+important / not-urgent+important | Nothing unimportant is tracked — if it's not important it doesn't get in. Default: **not-urgent**. |
 | Due date | optional | As the date approaches, the task's effective urgency rises. Overdue or due ≤ 48h ⇒ treated as urgent. |
 | Start date | optional | Task stays **off the wheel** (and off manual/eligible pools) until this local day arrives. Blank ⇒ available immediately. |
 | Days | all / weekdays / weekends / pick days / day of month | Restricts which days the task is live (wheel **and** must-do checklist). Weekdays = Mon–Fri, weekends = Sat/Sun (local). **Pick days** = hand-picked days of the week (e.g. Mon/Wed/Fri → `weekDays: [1,3,5]`, 0 = Sunday). **Day of month** = hand-picked calendar days (e.g. the 11th of every month → `monthDays: [11]`, 1–31); a picked day that a short month doesn't have (the 31st in February) fires on that month's **last day**, so it never skips a month. An empty pick list (either kind) means no restriction. Default: **all**. |
 | Must-do | yes / no | A non-negotiable: leaves the wheel and lives in the daily checklist beside the wheel. |
+| Add punishment? | no (default) / yes + Berries | **Nothing in the app is ever fined by default.** A quest only costs Berries when it was created with a punishment: pick "⚖️ Fine me" and type the amount (`penalty`, 0–999 🪙). Then — and only then — the quest is docked that amount when a must-do day passes unticked, or when a wheel pick is promised and left unfinished at midnight. Off ⇒ missing it costs **nothing**. Not offered for "repeat until done" quests (they can't be failed). |
 | Seasons | winter / spring / summer / fall (multi-select) | Restricts the quest to the seasons you tick (`seasons`), on top of the day scope — so "every day, but only in summer" works. Northern hemisphere, by month: Dec–Feb winter, Mar–May spring, Jun–Aug summer, Sep–Nov fall. None ticked (or all four) = all year round. Default: **all year**. |
 | Also on the wheel | must-dos only | A must-do can opt back **onto** the wheel (`onWheel`): it stays on the checklist AND can be spun/hand-picked, paying the full wheel reward. Off by default. |
 | Unlock after | optional, another task | The task is hidden from **both** the wheel and the must-do checklist until the chosen task has been completed at least once. If the prerequisite is later deleted, the gate is treated as satisfied (a chain never gets stuck). |
 | Split into parts | optional, new one-shot quests only | A big job broken into N sessions ("cut trees" → 6 parts). Creates N quests named `<name> (1/N)`…`(N/N)`, each **locked until the previous part is done** (`afterTaskId` chain), all sharing a `seriesId`. Max 20. |
 | Rest days | optional, plain repeating tasks only (not "until done") | After a completion the task disappears for N days and only comes back on day N after the last time it was done (e.g. "cut the grass" with 15). Blank/0 ⇒ available again the next day. While resting it is off the wheel, off the checklist, and **not** penalised as a missed must-do. |
 
-**Form layout**: the everyday path is short — name (with 🎤 dictation), must-do, repeats, effort, priority. Everything else (locked-until, split into parts, dates, which days) lives behind one **⚙️ Advanced** drawer, which opens itself when the quest being edited already uses any of those fields.
+**Form layout**: the everyday path is short — name (with 🎤 dictation), must-do, repeats, effort, priority, add-punishment. Everything else (locked-until, split into parts, dates, which days) lives behind one **⚙️ Advanced** drawer, which opens itself when the quest being edited already uses any of those fields.
 
 **Finishing a split early**: once any part of a split quest is done, its next remaining part shows a **🏁** button in the quest log. Tapping it deletes every part that hasn't been completed yet (history of the finished parts stays) — "I only needed 4 of the 6 sessions".
 
@@ -115,7 +116,7 @@ Fields when creating a task:
   - Lateness is the earliest day in the **current unbroken run** of missed occurrences, looking back at most 90 days and never before the quest was created. Ticking it off ends the run.
   - A must-do whose schedule says **today** is due, never late — the live occurrence supersedes older ones.
   - A carried item can be ticked off exactly like a live one (and pays the same), and it never shows up in the "do one of the other N today" picker, since it's already on the list.
-  - Carrying is display only: the daily miss penalty at rollover is unchanged.
+  - Carrying is display only: it changes no fine (and most quests have none — see "Add punishment?").
 - **A carried must-do needs a decision — ignoring it is not one.** Every scheduled must-do row (late or due today) carries a **⋯** button opening a decision sheet with exactly three ways out. Study quests are exempt (their 🏫 shortcut ticks them) and so are daily habits, which have nothing to carry.
   - **✓ Done it** — a normal completion, pays the flat must-do reward.
   - **⏳ Delay** — pick 1 / 3 / 7 / 14 days (`delayedUntil` = today + N). The quest leaves the checklist and the late list until that day, and rollover **doesn't fine it while it waits**. When it comes back it is exactly as late as it was — a delay buys time, it doesn't erase the debt. Meanwhile it shows up in the "＋ Do one of the other N today" picker as "⏳ delayed Nd", so it can always be pulled back early. Ticking it off clears the delay.
@@ -123,9 +124,9 @@ Fields when creating a task:
 - **"Do it today anyway"** (`doTodayDay`): under the must-do checklist sits **＋ Do one of the other N today**, listing every must-do that exists but isn't being asked for today — resting out its rest days, waiting for its `requiredFrom`/start date, or scoped to other weekdays — each with the reason it's dormant ("back in 3d", "starts 2026-08-20", "not scheduled today"). Tapping one pins it to **today only**; the row gets a **↩** to take it back off. Rules:
   - It bypasses the required window, the day scope and the rest-day cooldown for that one day, nothing else — a chained quest whose prerequisite is unmet, an archived quest, or one whose `requiredUntil` has already passed never appears in the picker.
   - Skipping a volunteered day costs **nothing**: it was offered, not demanded, so rollover never penalises it.
-  - The same goes for a **repeat-until-done** must-do (`untilDone`): it stays on the checklist every day it's scheduled, its row reads "stays until done" instead of a fine, rollover docks nothing for it, and the first tick pays the flat must-do reward and archives it for good.
+  - The same goes for a **repeat-until-done** must-do (`untilDone`): it stays on the checklist every day it's scheduled, its row reads "stays until done", rollover docks nothing for it, and the first tick pays the flat must-do reward and archives it for good.
   - Ticking it off is a normal completion, so a rest-day quest **restarts its full cooldown from today** — "cut the grass" (15 days) done 3 days early is next due 15 days from now, not 12.
-- **Abandoned-pick penalty**: each task still on the plate at end of day costs gems at rollover — **low −5, medium −10, high −18** (≈ half its base reward, each pick penalized separately). Gems floor at 0. This is separate from streak rules.
+- **Abandoned-pick penalty — opt-in only**: a task still on the plate at end of day costs gems at rollover **only if it carries a `penalty`**, and then exactly that amount (each pick fined separately). A quest with no punishment set costs **nothing** to leave undone. Gems floor at 0. This is separate from streak rules.
 - **Re-spin ("the sloth shrugs")**: if you don't like the result you can pay gems to spin again.
   - First re-spin of the day, before any task is completed that day: **15 gems** (viable ~once/day).
   - Any further re-spin that day: **60 gems** (deliberately painful).
@@ -987,7 +988,7 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 Roblox time is a currency Ben **banks** and then **pays back honestly**. The app holds one number — minutes owed to him — and an append-only log of every movement behind it. Rules live in [src/logic/roblox.ts](src/logic/roblox.ts); the state is `data.roblox` on his own profile, so Dad writes it through `commitFor(KID_ID, …)` like every other grant.
 
 - **Everything is minutes, never "about an hour".** Paying back partially is the entire point: he banks 3h, plays 45 minutes, owes 45 minutes. The balance is shown as `2h 45m`, never as a decimal.
-- **Ben's tabs**: **⏳ Bank** (the balance, how to earn more, and the button that opens Roblox — the **installed app**, not a page about it: Android goes through an `intent://` link with the website as Chrome's own fallback, iOS tries `roblox://` and falls back on a timer, everything else opens the site), **🎮 Play** (the pay-back slider), **🧾 Log**. **Dad's tabs**: **🎁 Give time** and the same **🧾 Log** — read against Ben's world, not his own.
+- **Ben's tabs**: **⏳ Bank** (the balance and how to earn more — the app never launches Roblox itself), **🎮 Play** (the pay-back slider), **🧾 Log**. **Dad's tabs**: **🎁 Give time** and the same **🧾 Log** — read against Ben's world, not his own.
 
 ### 20a. Time in — three ways, one log
 
