@@ -13,13 +13,19 @@ export const STREAK_GOAL_OPTIONS = [7, 14, 30, 50, 100]
 /** Mystery background from the Store. SPECIAL feature — priced like a luxury, not a habit. */
 export const BACKGROUND_COST = 20
 export const MAX_PENDING = 3
-/** Gems lost per pending pick abandoned at end of day (half the base reward, rounded up). */
-export const ABANDON_PENALTY: Record<Effort, number> = { low: 5, medium: 10, high: 18 }
+/**
+ * Berries lost when a task is left undone — a wheel pick abandoned at end of
+ * day, or a must-do day skipped. Nothing is ever fined by default: a quest only
+ * costs Berries if whoever wrote it explicitly gave it a `penalty`.
+ */
+export function abandonPenalty(task: Task): number {
+  return Math.max(0, Math.floor(task.penalty ?? 0))
+}
 
 /**
  * Required (checklist) tasks pay a flat, reduced amount — there's no wheel risk
- * involved, so they can't out-earn a spin. Skipping one costs the SAME amount at
- * rollover, which is what makes them feel non-negotiable.
+ * involved, so they can't out-earn a spin. Skipping one is free unless the quest
+ * carries its own opt-in `penalty`.
  */
 export const REQUIRED_REWARD: Record<Effort, number> = { low: 4, medium: 8, high: 14 }
 /** Warn in the checklist once a dated requirement is this close to its last day. */
@@ -33,13 +39,13 @@ export function requiredReward(task: Task): number {
 }
 
 /**
- * Berries docked at rollover for a required item left undone that day.
- * "Repeat until done" quests are free to miss — they're usually waiting on
- * someone else, so a day without an answer isn't a skipped duty.
+ * Berries docked at rollover for a required item left undone that day. Zero
+ * unless the quest opted into a punishment; "repeat until done" quests are
+ * never fined at all — they're waiting on someone else, not being skipped.
  */
 export function requiredPenalty(task: Task): number {
   if (task.untilDone) return 0
-  return REQUIRED_REWARD[task.effort]
+  return abandonPenalty(task)
 }
 
 /** A task counts as urgent if flagged urgent OR due within 48h / overdue. */

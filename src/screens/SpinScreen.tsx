@@ -10,7 +10,7 @@ import { crewSays } from '../logic/crewLines'
 import { eligibleTasks, isAvailableOn, isStudyTask, studyLockedIds } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
 import { dayKey } from '../logic/dates'
-import { ABANDON_PENALTY, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
+import { abandonPenalty, MAX_PENDING, isEffectivelyUrgent, respinCost, rewardFor } from '../logic/economy'
 
 const FILTERS: { id: Effort; label: string }[] = [
   { id: 'low', label: 'Low' },
@@ -280,7 +280,9 @@ export function SpinScreen({ goTrain }: { goTrain?: (topicId: string) => void } 
               showRespin
             />
             <p className="muted" style={{ fontSize: 12, textAlign: 'center' }}>
-              “Later” keeps it on today’s plate. Unfinished picks cost 🪙{ABANDON_PENALTY[resultTask.effort]} at midnight.
+              {abandonPenalty(resultTask) > 0
+                ? `“Later” keeps it on today’s plate. Leaving it unfinished costs 🪙${abandonPenalty(resultTask)} at midnight.`
+                : '“Later” keeps it on today’s plate. Leaving it unfinished costs nothing.'}
             </p>
           </div>
         </div>

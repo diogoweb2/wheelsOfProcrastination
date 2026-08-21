@@ -567,17 +567,22 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI la
 
 The session in progress lives in `gym.active` and is synced, so a refresh — or a different device — picks the workout back up mid-set.
 
-#### 18c-1. GO → DONE → NEXT
+#### 18c-1. START → DONE → DONE → …
 
-Once you are training there is exactly one button on screen at a time, and the loop never changes:
+**One click for the whole exercise is the default.** You tap **▶️ START** once, on the first set of the session. From there the session drives itself — rest ends by itself, the 15 s setup ends by itself, the next set is live — and the only button you ever *have* to press again is **✓ DONE**, because only you know when the reps are finished.
 
 | Button | What it does |
 |---|---|
-| **▶️ GO** | Starts the set in front of you and starts the clock. Shown on the first set of an exercise you arrived at by hand (start of session, after a skip, after "Next exercise"). |
+| **▶️ START** | Starts the very first set of the session and starts the clock. |
 | **✓ DONE** | "I've finished this set." Logs it with the **measured** time, and the app drops straight into rest on its own. |
-| **▶️ NEXT** | Ends the rest and starts the next set — or the next exercise — immediately. No second GO. |
+| **▶️ GO NOW** | Optional. During the 15 s setup countdown, starts the set early instead of waiting. |
 
-**A set is timed, not typed.** The wall clock runs from GO/NEXT to DONE and that measurement is the only source for the pace grade. What you type is only ever the *result*:
+**Rest ends itself.** When the rest countdown reaches zero the app moves on with no tap: 15 s of setup (§18c-1c), then the set is live. Two escapes, both honest:
+
+- **⏭ Skip rest — start now** ends rest early, and the short rest is what gets learned.
+- **⏸️ Pause** stops the auto-advance for as long as you need. **Paused time counts as rest** — it is added to the rest that gets logged and learned from (§18d), never pretended away — and the countdown resumes where it left off.
+
+**A set is timed, not typed.** The wall clock runs from the moment the set goes live to DONE and that measurement is the only source for the pace grade. What you type is only ever the *result*:
 
 - **Reps** — a stepper pre-filled with what was prescribed, exactly as before. You touch it only when reality differs, and that difference is the signal.
 - **Weight** — the same, for `weight` exercises.
@@ -585,11 +590,11 @@ Once you are training there is exactly one button on screen at a time, and the l
 
 **One limb at a time gets said out loud (`perSide`).** For a single-arm row, a side plank or a side-lying rotation, the prescription is **per side**: "2 × 15" means fifteen left *and* fifteen right. The plan line reads `reps per side`, a ↔️ banner sits on the card while you work, and for a per-side hold the clock's target covers **both** sides before it beeps. You log the set **once, when both sides are done** — the app doubles it behind the scenes for session totals, body-part volume and lifetime reps, while `bestReps` stays per side so it is still comparable with history. `timed` / `cardio` are never doubled: their number is measured across the whole set and already covers both sides. The flag is set by the AI when an exercise is generated, backfilled once over the existing catalog by `npm run gym:per-side`, and **overridable by hand** — Gym → Gear → tap the exercise → ↔️. Anything that alternates *within* the count ("alternating lunges", dead bug) is **not** per-side; there the number is already the total.
 
-**The one button is at the bottom, and it is huge.** GO / DONE / NEXT is pinned above the app's bottom menu, 78 px tall and full width, wherever the card above it has been scrolled to — because mid-set the phone is on the floor and the button gets pressed **with a foot**. Everything else on the runner (skip, next exercise, undo, leave) stays small and out of the way.
+**The one button is at the bottom, and it is huge.** START / DONE / skip-rest is pinned above the app's bottom menu, 78 px tall and full width, wherever the card above it has been scrolled to — because mid-set the phone is on the floor and the button gets pressed **with a foot**. Everything else on the runner (skip, next exercise, undo, leave) stays small and out of the way.
 
-**Not tapping NEXT is how you ask for more rest.** There is no "+30 s" button any more: the rest timer counts past zero and what gets learned (§18d) is the moment you actually tapped NEXT. Rest longer, and the app plans longer rests; get back to work early, and it packs more in.
+**Pausing is how you ask for more rest.** There is no "+30 s" button: skipping early, and pausing, are the two ways the rest you actually took differs from the rest you were given, and that real number is what gets learned (§18d). Rest longer, and the app plans longer rests; get back to work early, and it packs more in.
 
-**Rest is when you go and set the next thing up, so rest shows you what it is.** Beside the countdown ring, the rest screen plays the **animation of what NEXT starts** — the same exercise if there are sets left, otherwise the next one — at 170 px, big enough to recognise the bench from across the room. Under it, the same thing in words with its full prescription, so it is never a blind tap.
+**Rest is when you go and set the next thing up, so rest shows you what it is.** Beside the countdown ring, the rest screen plays the **animation of what comes next** — the same exercise if there are sets left, otherwise the next one — at 170 px, big enough to recognise the bench from across the room. Under it, the same thing in words with its full prescription, so it is never a blind tap.
 
 #### 18c-1b. The session countdown
 

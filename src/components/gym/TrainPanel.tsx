@@ -7,10 +7,15 @@
 //    (coach or offline planner) and why, the runner shows the weight it is
 //    suggesting AND lets you correct it, and every correction is what the app
 //    learns from.
-// 2. THREE BUTTONS, NEVER MORE. Once you are training the whole session is
-//    GO → DONE → (rest) → NEXT → DONE → … A set is never logged by hand: the
-//    app times it from the moment you started to the moment you said you were
-//    done, and that measured time is what the end-of-session grade is built on.
+// 2. ONE CLICK PER SET, AND NOTHING ELSE. You tap START once, at the very
+//    beginning. After that the session drives itself: DONE → rest (ends by
+//    itself) → 15s setup (ends by itself) → the next set is live. The only
+//    button you ever have to press again is DONE, because only you know when
+//    the reps are finished. Rest has a PAUSE for when life interrupts, and the
+//    paused time is logged as extra rest rather than pretended away.
+//    A set is never logged by hand: the app times it from the moment you
+//    started to the moment you said you were done, and that measured time is
+//    what the end-of-session grade is built on.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { ExerciseRating, GearMode, GymSession, Mood, SessionExercise } from '../../types'
@@ -393,9 +398,10 @@ function Preview({ session }: { session: GymSession }) {
 }
 
 // --- runner -----------------------------------------------------------------
-// GO → DONE → rest → NEXT → 15s setup → DONE → … Three buttons and no bookkeeping: the app
-// times every set itself, so "how long did that actually take" is a measurement
-// rather than something you have to remember at the end.
+// START → DONE → rest → 15s setup → DONE → … Everything between two DONEs is
+// automatic, and no bookkeeping: the app times every set itself, so "how long
+// did that actually take" is a measurement rather than something you have to
+// remember at the end.
 
 type Phase = 'ready' | 'working' | 'resting' | 'setup'
 
@@ -455,7 +461,10 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     setPhase('working')
   }
 
-  /** Move on without logging anything more for this exercise. */
+  /**
+   * Move on without logging anything more for this exercise. It lands in setup,
+   * not in 'ready' — jumping ahead shouldn't cost you an extra tap on GO.
+   */
   const moveOn = (skip: boolean) => {
     if (skip) gymSkip(current.exId)
     if (isLast) {
@@ -463,7 +472,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       return
     }
     setIdx(idx + 1)
-    setPhase('ready')
+    setPhase('setup')
   }
 
   /** DONE — measure the set, log it, and drop straight into rest. */
@@ -481,10 +490,11 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   }
 
   /**
-   * NEXT — rest is over (however long it really took). What follows is NOT the
-   * set: it is 15s of setup time, so walking to the rack and loading it isn't
-   * measured as work. The rest that gets learned from is the rest you took, not
-   * the setup on top of it.
+   * Rest is over — either it ran out on its own or you skipped it. Either way
+   * `restedSec` is however long it really took, pauses included. What follows
+   * is NOT the set: it is 15s of setup time, so walking to the rack and loading
+   * it isn't measured as work. The rest that gets learned from is the rest you
+   * took, not the setup on top of it.
    */
   const next = (restedSec: number) => {
     gymLogRest(current.exId, restedSec, current.plan.restSec)
@@ -709,7 +719,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 begin()
               }}
             >
-              {phase === 'setup' ? '▶️ GO NOW' : '▶️ GO'}
+              {phase === 'setup' ? '▶️ GO NOW' : '▶️ START'}
             </button>
           )}
         </div>

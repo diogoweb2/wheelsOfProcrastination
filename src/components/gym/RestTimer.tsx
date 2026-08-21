@@ -1,9 +1,15 @@
-// The rest countdown between sets. One button: NEXT.
+// The rest countdown between sets. It ends itself.
 //
-// There is no "+30s more" any more, because there doesn't need to be — the timer
-// keeps counting past zero and what the app learns is the moment you actually
-// tapped NEXT. Sitting there longer IS asking for more rest, and the next
-// session is planned from it.
+// The default is ONE CLICK FOR THE WHOLE EXERCISE: you tap DONE on a set and
+// the app carries you through rest, through setup, and into the next set
+// without asking. So rest fires NEXT itself the moment it hits zero.
+//
+// Two escapes, both of them honest:
+//
+// - SKIP ends rest early, and the short rest is what gets learned.
+// - PAUSE stops the auto-advance. Paused time is NOT a hole in the session:
+//   it counts as extra rest, exactly as if you had sat there with the timer
+//   running, and the next session is planned from the longer number.
 //
 // Two things make this more than a `setInterval`:
 //
@@ -52,7 +58,11 @@ export function RestTimer({
   nextEmoji?: string
   /** Rides above NEXT in the foot bar — the runner puts the session countdown here. */
   footNote?: ReactNode
-  /** Tapped NEXT. The argument is how long you ACTUALLY rested — the number the app learns from. */
+  /**
+   * Rest is over. The argument is how long you ACTUALLY rested — wall-clock
+   * time including anything spent paused — and it is the number the app learns
+   * from. Fired automatically at zero, or early when you tap SKIP.
+   */
   onNext: (actualSeconds: number) => void
 }) {
   const startedAt = useRef(Date.now())
@@ -60,9 +70,29 @@ export function RestTimer({
   const [now, setNow] = useState(Date.now())
   const warned = useRef(false)
   const rang = useRef(false)
+  const fired = useRef(false)
+
+  // Paused time is still rest. `pausedMs` is the total already banked from
+  // earlier pauses; `pausedAt` is the start of the one in progress. The
+  // countdown runs on time NOT paused, so it waits for you — but `elapsed`,
+  // the number handed back, is plain wall clock and so includes it all.
+  const [pausedMs, setPausedMs] = useState(0)
+  const [pausedAt, setPausedAt] = useState<number | null>(null)
+  const paused = pausedAt !== null
 
   const elapsed = Math.floor((now - startedAt.current) / 1000)
-  const left = target - elapsed
+  const pausedSoFar = pausedMs + (pausedAt === null ? 0 : now - pausedAt)
+  const counted = Math.floor((now - startedAt.current - pausedSoFar) / 1000)
+  const left = target - counted
+
+  // the whole point of the screen: at zero it moves on by itself
+  const onNextRef = useRef(onNext)
+  onNextRef.current = onNext
+  useEffect(() => {
+    if (paused || left > 0 || fired.current) return
+    fired.current = true
+    onNextRef.current(elapsed)
+  }, [left, paused, elapsed])
 
   useEffect(() => {
     holdAudioSession(true)
@@ -74,6 +104,7 @@ export function RestTimer({
   }, [])
 
   useEffect(() => {
+    if (paused) return
     if (left <= WARN_AT && left > 0 && !warned.current) {
       warned.current = true
       gymSfx.warn()
@@ -82,9 +113,9 @@ export function RestTimer({
       rang.current = true
       gymSfx.go()
     }
-  }, [left])
+  }, [left, paused])
 
-  const pct = Math.max(0, Math.min(1, elapsed / target))
+  const pct = Math.max(0, Math.min(1, counted / target))
   const over = left <= 0
   const r = 54
   const circumference = 2 * Math.PI * r
@@ -92,7 +123,9 @@ export function RestTimer({
   return (
     <>
       <div className="card gym-rest">
-        <div className="h2" style={{ margin: '0 0 6px' }}>{over ? '⏱️ Rest is over' : '⏱️ Resting'}</div>
+        <div className="h2" style={{ margin: '0 0 6px' }}>
+          {paused ? '⏸️ Paused' : over ? '⏱️ Rest is over' : '⏱️ Resting'}
+        </div>
 
         {/* the clock and what's coming, side by side — rest is when you walk
             over and load the next thing, so the next thing is on screen */}
@@ -120,10 +153,10 @@ export function RestTimer({
               style={{ transition: 'stroke-dashoffset 0.25s linear' }}
             />
             <text x="65" y="60" textAnchor="middle" fontSize="30" fontWeight="900" fill="var(--text)">
-              {over ? `+${Math.abs(left)}` : left}
+              {Math.max(0, left)}
             </text>
             <text x="65" y="80" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--muted)">
-              {over ? 'SECONDS OVER' : 'SECONDS'}
+              {paused ? 'HELD' : 'SECONDS'}
             </text>
           </svg>
 
@@ -135,28 +168,52 @@ export function RestTimer({
         </div>
 
         <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-          {over
-            ? 'Take longer if you need it — every extra second is being learned.'
-            : `Asked for ${target}s, based on your own history.`}
+          {paused
+            ? `Held for ${Math.round(pausedSoFar / 1000)}s — it all counts as rest. Resume when you're ready.`
+            : `Asked for ${target}s, based on your own history. The next set starts on its own.`}
         </p>
 
         {upNext && <div className="gym-upnext">{upNext}</div>}
+
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ marginTop: 10, width: '100%' }}
+          onClick={() => {
+            gymSfx.logged()
+            if (pausedAt === null) setPausedAt(Date.now())
+            else {
+              setPausedMs(pausedMs + (Date.now() - pausedAt))
+              setPausedAt(null)
+            }
+          }}
+        >
+          {paused ? '▶️ Resume rest' : '⏸️ Pause (counts as rest)'}
+        </button>
       </div>
-      <Foot elapsed={elapsed} footNote={footNote} onNext={onNext} />
+      <Foot
+        elapsed={elapsed}
+        footNote={footNote}
+        onNext={(s) => {
+          if (fired.current) return
+          fired.current = true
+          onNext(s)
+        }}
+      />
     </>
   )
 }
 
 /**
- * NEXT, in the pinned foot bar (§18c-1) — big enough to hit with a foot, and
- * always on screen however far the card above it has been scrolled.
+ * SKIP REST, in the pinned foot bar (§18c-1) — big enough to hit with a foot,
+ * and always on screen however far the card above it has been scrolled. It is
+ * no longer the way forward (rest ends itself); it is the way to go early.
  */
 function Foot({ elapsed, footNote, onNext }: { elapsed: number; footNote?: ReactNode; onNext: (s: number) => void }) {
   return (
     <div className="gym-foot">
       {footNote}
       <button className="btn btn--blue" onClick={() => onNext(elapsed)}>
-        ▶️ NEXT
+        ⏭ Skip rest — start now
       </button>
     </div>
   )

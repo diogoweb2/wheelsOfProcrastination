@@ -599,6 +599,7 @@ function TaskForm(props: {
     weekDays?: number[]
     monthDays?: number[]
     required?: boolean
+    penalty?: number
     onWheel?: boolean
     requiredFrom?: string
     requiredUntil?: string
@@ -630,6 +631,10 @@ function TaskForm(props: {
   const [monthDays, setMonthDays] = useState<number[]>(initial?.monthDays ?? [])
   const [required, setRequired] = useState(initial?.required ?? false)
   const [onWheel, setOnWheel] = useState(initial?.onWheel ?? false)
+  // Punishment is opt-in, per quest: off by default, and nothing is ever docked
+  // for a quest that never asked for it.
+  const [punish, setPunish] = useState((initial?.penalty ?? 0) > 0)
+  const [penalty, setPenalty] = useState(initial?.penalty ? String(initial.penalty) : '')
   const [requiredFrom, setRequiredFrom] = useState(initial?.requiredFrom ?? '')
   const [requiredUntil, setRequiredUntil] = useState(initial?.requiredUntil ?? '')
   const [afterTaskId, setAfterTaskId] = useState(initial?.afterTaskId ?? '')
@@ -703,6 +708,9 @@ function TaskForm(props: {
       setParsedSummary(describeParsed(p))
     },
   })
+
+  // "untilDone" quests can never be fined — the whole point is you can't fail them.
+  const punishCoins = punish && !untilDone ? Math.max(0, Math.min(999, Math.floor(Number(penalty) || 0))) : 0
 
   const preview = rewardFor(
     {
@@ -788,7 +796,7 @@ function TaskForm(props: {
           </div>
           <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
             {required
-              ? `Lives in the must-do checklist beside the wheel. Pays 🪙${REQUIRED_REWARD[effort]} per tick — and costs 🪙${REQUIRED_REWARD[effort]} for every day you skip it.`
+              ? `Lives in the must-do checklist beside the wheel. Pays 🪙${REQUIRED_REWARD[effort]} per tick.`
               : 'Normal quest — the wheel can land on it.'}
           </p>
           {required && (
@@ -843,8 +851,7 @@ function TaskForm(props: {
           </div>
           {untilDone && (
             <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-              Keeps coming back every day until you tick it — then it's gone for good. Missing a day costs nothing (perfect for “ask Dad
-              if the form went in”).
+              Keeps coming back every day until you tick it — then it's gone for good (perfect for “ask Dad if the form went in”).
             </p>
           )}
           {/* Rest days measure the gap AFTER a completion — an "until done" quest
@@ -892,6 +899,39 @@ function TaskForm(props: {
             </button>
           </div>
         </div>
+
+        {!untilDone && (
+          <div className="field">
+            <label>Add punishment? (skipping this quest costs Berries)</label>
+            <div className="seg">
+              <button className={!punish ? 'on' : ''} onClick={() => setPunish(false)}>
+                🕊️ No fine
+              </button>
+              <button className={punish ? 'on' : ''} onClick={() => setPunish(true)}>
+                ⚖️ Fine me
+              </button>
+            </div>
+            {punish && (
+              <input
+                type="number"
+                min={0}
+                max={999}
+                inputMode="numeric"
+                placeholder="Berries lost, e.g. 10"
+                value={penalty}
+                onChange={(e) => setPenalty(e.target.value)}
+                style={{ marginTop: 10 }}
+              />
+            )}
+            <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+              {punishCoins > 0
+                ? required
+                  ? `Every day you skip it costs 🪙${punishCoins}.`
+                  : `Promise it on the wheel and leave it undone: 🪙${punishCoins} at midnight.`
+                : 'No punishment — leaving this one undone costs nothing.'}
+            </p>
+          </div>
+        )}
 
         {/* Everything power-user lives behind one button: chaining, splitting,
             dates and day scope. The everyday path stays name + must-do + effort. */}
@@ -1092,10 +1132,8 @@ function TaskForm(props: {
 
         <p className="muted" style={{ marginBottom: 12 }}>
           {required
-            ? untilDone
-              ? `Pays 🪙${REQUIRED_REWARD[effort]} when you tick it. No fine for the days it isn't done.`
-              : `Pays 🪙${REQUIRED_REWARD[effort]} per tick, −🪙${REQUIRED_REWARD[effort]} per skipped day.`
-            : `Pays 🪙${preview} per completion${priority === 'urgent' ? ' (urgency bonus included)' : ''}.`}
+            ? `Pays 🪙${REQUIRED_REWARD[effort]} per tick${punishCoins > 0 ? `, −🪙${punishCoins} per skipped day` : ''}.`
+            : `Pays 🪙${preview} per completion${priority === 'urgent' ? ' (urgency bonus included)' : ''}${punishCoins > 0 ? `, −🪙${punishCoins} if you abandon it` : ''}.`}
         </p>
 
         <button
@@ -1116,6 +1154,7 @@ function TaskForm(props: {
               monthDays: dayScope === 'monthdays' && monthDays.length ? monthDays : undefined,
               required,
               onWheel: required && onWheel ? true : undefined,
+              penalty: punishCoins > 0 ? punishCoins : undefined,
               // the window only means anything for a requirement
               requiredFrom: required ? requiredFrom || undefined : undefined,
               requiredUntil: required ? requiredUntil || undefined : undefined,

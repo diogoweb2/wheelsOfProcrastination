@@ -50,9 +50,16 @@ export interface Task {
   /**
    * Non-negotiables (floss, brush teeth). A required task leaves the wheel
    * entirely and lives in the daily checklist beside it: one tap = done.
-   * Pays a reduced flat reward; skipping it costs the SAME amount at rollover.
+   * Pays a reduced flat reward; skipping it is free unless `penalty` is set.
    */
   required?: boolean
+  /**
+   * Opt-in fine, in Berries. Absent / 0 = missing this quest costs NOTHING —
+   * that's the default for every quest. Set it per quest ("Add punishment?" in
+   * the form) and the amount is docked at rollover for a must-do day left
+   * undone, or for a wheel pick promised and abandoned.
+   */
+  penalty?: number
   /**
    * Optional window for a required task. `requiredUntil` is the hard deadline:
    * as it nears the checklist warns, and on the last day the app forces a

@@ -155,7 +155,7 @@ import {
   type OptcgState,
 } from '../logic/optcg'
 import {
-  ABANDON_PENALTY,
+  abandonPenalty,
   BACKGROUND_COST,
   FREEZE_COST,
   MAX_FREEZES,
@@ -382,6 +382,8 @@ interface StoreState {
     weekDays?: number[]
     monthDays?: number[]
     required?: boolean
+    /** Opt-in fine for leaving it undone; absent / 0 = no punishment at all. */
+    penalty?: number
     onWheel?: boolean
     requiredFrom?: string
     requiredUntil?: string
@@ -1394,7 +1396,7 @@ export const useStore = create<StoreState>((set, get) => {
             if (t.doTodayDay === cur) continue
             if (!isRequiredOn(t, cur, d.completions, d.tasks) || donePerDay.has(`${cur}|${t.id}`)) continue
             const fine = requiredPenalty(t)
-            if (fine === 0) continue // "until done" quests cost nothing to miss
+            if (fine === 0) continue // no opt-in punishment on this quest — missing it is free
             missedRequired += fine
             if (!missedNames.includes(t.name)) missedNames.push(t.name)
           }
@@ -1434,7 +1436,9 @@ export const useStore = create<StoreState>((set, get) => {
           for (const p of d.daily.pendingPicks) {
             const t = d.tasks.find((x) => x.id === p.taskId)
             if (t && !t.archived) {
-              penalty += ABANDON_PENALTY[t.effort]
+              const fine = abandonPenalty(t)
+              if (fine === 0) continue // no punishment asked for — walking away is free
+              penalty += fine
               names.push(t.name)
             }
           }
@@ -1478,6 +1482,7 @@ export const useStore = create<StoreState>((set, get) => {
             ...(t.dueDate ? { dueDate: t.dueDate } : {}),
             ...(t.startDate ? { startDate: t.startDate } : {}),
             ...(t.required ? { required: true } : {}),
+            ...(t.penalty && t.penalty > 0 ? { penalty: Math.floor(t.penalty) } : {}),
             ...(t.required && t.onWheel ? { onWheel: true } : {}),
             ...(t.dayScope === 'custom' && t.weekDays?.length ? { weekDays: t.weekDays } : {}),
             ...(t.dayScope === 'monthdays' && t.monthDays?.length ? { monthDays: t.monthDays } : {}),

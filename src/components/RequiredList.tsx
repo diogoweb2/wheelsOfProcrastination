@@ -5,7 +5,7 @@ import { sfx } from '../audio'
 import { addDays, dayKey, daysUntil, prettyDay } from '../logic/dates'
 import { carriedRequired, dormantReason, dormantRequired, isEveryDayRequired, isStudyTask, missedSince, requiredToday } from '../logic/wheel'
 import { QUIZ_TASK_PREFIX } from '../logic/quiz'
-import { POSTPONE_OPTIONS, REQUIRED_WARN_DAYS, requiredReward } from '../logic/economy'
+import { POSTPONE_OPTIONS, REQUIRED_WARN_DAYS, requiredPenalty, requiredReward } from '../logic/economy'
 
 /**
  * Today's non-negotiables, sitting beside the wheel. One tap marks an item done —
@@ -338,8 +338,10 @@ function RequiredRow(props: {
           ) : task.untilDone ? (
             // no fine for these — they stay until they're ticked, that's the whole deal
             <span className="muted">+{requiredReward(task)} 🪙 · stays until done</span>
+          ) : requiredPenalty(task) > 0 ? (
+            <span className="muted">+{requiredReward(task)} 🪙 · miss = −{requiredPenalty(task)}</span>
           ) : (
-            <span className="muted">+{requiredReward(task)} 🪙 · miss = −{requiredReward(task)}</span>
+            <span className="muted">+{requiredReward(task)} 🪙</span>
           )}
           {left !== null && (
             <span className={warning ? 'required-deadline required-deadline--warn' : 'required-deadline'}>
