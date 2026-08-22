@@ -1019,7 +1019,7 @@ Kick-offs arrive as UTC and are **only ever displayed in `America/Toronto`**, la
 ### 21b. What we follow
 
 - **Leagues.** A hand-kept roster of competitions (`LEAGUES`), each with its TheSportsDB id. The ones CazéTV usually shows in Brazil carry a **📺 badge** — Champions League, Europa League, Conference League, Brasileirão Série A. CazéTV's rights move season to season and nobody publishes them as data, so **the badge is a hint, never a promise**, and every league can be followed either way.
-- **Clubs.** Searched by name and followed individually. A followed club brings its fixtures in whatever competition it plays, so a cup run shows up without following the cup.
+- **Clubs.** The Teams tab lists **forty clubs, greatest first** (`CLUB_RANKING`) — a hand-kept order read off European Cups, recent titles and the size of the club, each with a one-line reason and a 🥇🥈🥉 for the top three. Tap one to follow it; the badge and id are looked up by name once and remembered, one request at a time so the free API isn't hammered. Anything not on the list is still searchable by name. A followed club brings its fixtures in whatever competition it plays, so a cup run shows up without following the cup.
 
 The **Games** tab merges both, dedupes by match id, sorts by kick-off and groups by day. One request per followed thing, in parallel; a competition that is out of season answers with nothing and must never take the whole schedule down. Everything is cached in `localStorage` for **30 minutes** — the free tier is rate-limited and a schedule that changed a minute ago is not news.
 

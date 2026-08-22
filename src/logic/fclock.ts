@@ -365,3 +365,106 @@ export function ageFrom(born: string | undefined, now: Date = new Date()): numbe
   if (beforeBirthday) age -= 1
   return age >= 0 && age < 120 ? age : null
 }
+
+// --- the club ranking --------------------------------------------------------
+
+const TEAM_KEY = 'fclock:team:v1:'
+
+/** One lookup at a time, 200 ms apart — kind to a free API, invisible to a reader. */
+let chain: Promise<unknown> = Promise.resolve()
+function queued<T>(job: () => Promise<T>): Promise<T> {
+  const run = chain.then(async () => {
+    const out = await job()
+    await new Promise((r) => setTimeout(r, 200))
+    return out
+  })
+  chain = run.catch(() => undefined)
+  return run as Promise<T>
+}
+
+/**
+ * Look a club up by name and remember it — the Teams tab needs a badge and an
+ * id for a club the user hasn't followed yet.
+ */
+export async function teamByName(name: string): Promise<FcTeam | null> {
+  const cached = localStorage.getItem(TEAM_KEY + name)
+  if (cached !== null) {
+    const parsed = JSON.parse(cached) as FcTeam | null
+    return parsed && parsed.id ? parsed : null
+  }
+  let team: FcTeam | null = null
+  try {
+    // forty rows mounting at once would be forty requests at once, and the free
+    // tier answers that with a rate-limit page — so they queue, one at a time
+    const hits = await queued(() => searchTeams(name))
+    team = hits[0] ?? null
+  } catch {
+    return null // offline or rate-limited: try again next time, don't cache a miss
+  }
+  try {
+    localStorage.setItem(TEAM_KEY + name, JSON.stringify(team ?? {}))
+  } catch {
+    // full quota: the badge is not worth failing over
+  }
+  return team
+}
+
+export interface RankedClub {
+  /** Exactly the name TheSportsDB knows them by — this is also the search key. */
+  name: string
+  country: string
+  /** What the ranking is built on, in one line. */
+  note: string
+}
+
+/**
+ * The clubs worth following, **greatest first**.
+ *
+ * This is a hand-kept ranking, not a computed table: it reads the last few
+ * seasons of European and South American football — Champions League depth,
+ * league titles, and the size of the club — and puts them in order. Reasonable
+ * people rank 12 vs 15 differently; the tiers are what matter, and the file is
+ * one edit away from being re-ordered.
+ */
+export const CLUB_RANKING: RankedClub[] = [
+  { name: 'Real Madrid', country: 'Spain', note: 'the most European Cups of anyone, by a distance' },
+  { name: 'Manchester City', country: 'England', note: 'a decade of Premier League titles and a treble' },
+  { name: 'Bayern Munich', country: 'Germany', note: 'the Bundesliga is theirs almost by default' },
+  { name: 'Paris Saint-Germain', country: 'France', note: 'France plus a European Cup at last' },
+  { name: 'Liverpool', country: 'England', note: 'six European Cups and a modern title-winning side' },
+  { name: 'Barcelona', country: 'Spain', note: 'La Masia, La Liga, and five European Cups' },
+  { name: 'Arsenal', country: 'England', note: 'back at the top of England, still chasing Europe' },
+  { name: 'Inter Milan', country: 'Italy', note: "Serie A's most consistent side of the decade" },
+  { name: 'Atlético Madrid', country: 'Spain', note: 'two La Ligas among the Madrid–Barça years' },
+  { name: 'AC Milan', country: 'Italy', note: 'seven European Cups, second only to Madrid' },
+  { name: 'Chelsea', country: 'England', note: 'two European Cups this century, always spending' },
+  { name: 'Juventus', country: 'Italy', note: 'nine Serie A titles in a row, no European Cup since 1996' },
+  { name: 'Borussia Dortmund', country: 'Germany', note: "Germany's loudest second team" },
+  { name: 'Manchester United', country: 'England', note: 'twenty English titles, three European Cups, thin years' },
+  { name: 'Tottenham Hotspur', country: 'England', note: 'a European trophy at last, still no league' },
+  { name: 'Napoli', country: 'Italy', note: 'Scudetti in 2023 and since — no longer a one-off' },
+  { name: 'Benfica', country: 'Portugal', note: 'Portugal’s biggest, and a factory for the rest of Europe' },
+  { name: 'FC Porto', country: 'Portugal', note: 'two European Cups from a league nobody watches' },
+  { name: 'Ajax', country: 'Netherlands', note: 'four European Cups and the best academy in Europe' },
+  { name: 'Bayer Leverkusen', country: 'Germany', note: 'the invincible 2024 season' },
+  { name: 'RB Leipzig', country: 'Germany', note: 'twenty years old and already a fixture in Europe' },
+  { name: 'Newcastle United', country: 'England', note: 'money, noise, and a return to the Champions League' },
+  { name: 'Aston Villa', country: 'England', note: 'European champions in 1982, back in the mix' },
+  { name: 'Sporting CP', country: 'Portugal', note: 'Portugal’s third giant, and Ronaldo’s first club' },
+  { name: 'PSV Eindhoven', country: 'Netherlands', note: 'a European Cup in 1988 and the Dutch title most years' },
+  { name: 'Atalanta', country: 'Italy', note: 'the best small-budget side in Europe' },
+  { name: 'Flamengo', country: 'Brazil', note: 'Brazil’s biggest crowd and recent Libertadores winners' },
+  { name: 'Palmeiras', country: 'Brazil', note: 'back-to-back Libertadores and the Brasileirão’s benchmark' },
+  { name: 'Boca Juniors', country: 'Argentina', note: 'La Bombonera, six Libertadores' },
+  { name: 'River Plate', country: 'Argentina', note: 'Boca’s equal, and the 2018 final' },
+  { name: 'Club Brugge', country: 'Belgium', note: 'Belgium’s standard-bearer in Europe' },
+  { name: 'Celtic', country: 'Scotland', note: 'European champions in 1967, Scotland’s biggest' },
+  { name: 'Galatasaray', country: 'Turkey', note: 'a UEFA Cup and the loudest ground in Europe' },
+  { name: 'Olympique de Marseille', country: 'France', note: 'the only French club with a European Cup' },
+  { name: 'Sao Paulo', country: 'Brazil', note: 'three Libertadores and two Intercontinental Cups' },
+  { name: 'Corinthians', country: 'Brazil', note: 'a Club World Cup and Brazil’s loudest support' },
+  { name: 'West Ham United', country: 'England', note: 'a Conference League, and not much else lately' },
+  { name: 'Everton', country: 'England', note: 'nine English titles, all a long time ago' },
+  { name: 'Wolverhampton Wanderers', country: 'England', note: 'giants of the 1950s, mid-table since' },
+  { name: 'Sunderland', country: 'England', note: 'huge support, long climb back' },
+]

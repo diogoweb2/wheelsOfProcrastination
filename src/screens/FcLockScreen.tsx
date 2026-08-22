@@ -15,6 +15,7 @@ import { useStore } from '../store/useStore'
 import { sfx } from '../audio'
 import type { FcNewsItem, FcWatchItem } from '../types'
 import {
+  CLUB_RANKING,
   LEAGUES,
   countdownLabel,
   daysUntil,
@@ -27,10 +28,13 @@ import {
   ageFrom,
   lookupPlayer,
   searchTeams,
+  teamByName,
   torontoDay,
   torontoTime,
   upcomingTournaments,
   type FcMatch,
+  type FcTeam,
+  type RankedClub,
   type PlayerInfo,
 } from '../logic/fclock'
 import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
@@ -1121,6 +1125,51 @@ function PacksTab() {
 
 // --- Teams -------------------------------------------------------------------
 
+/**
+ * One club in the ranking. The badge and the id are looked up by name the first
+ * time the row is shown and remembered, so following it is one tap.
+ */
+function RankedRow({ club, rank }: { club: RankedClub; rank: number }) {
+  const { data, toggleFcTeam } = useStore()
+  const [team, setTeam] = useState<FcTeam | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    void teamByName(club.name).then((t) => {
+      if (alive) setTeam(t)
+    })
+    return () => {
+      alive = false
+    }
+  }, [club.name])
+
+  const on = team ? data.fcLock.teams.some((t) => t.id === team.id) : false
+  const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null
+
+  return (
+    <button
+      className="btn btn--ghost btn--small"
+      style={{ width: '100%', justifyContent: 'flex-start', gap: 10, padding: '8px 6px', opacity: team ? 1 : 0.6 }}
+      disabled={!team}
+      onClick={() => {
+        sfx.click()
+        if (team) toggleFcTeam(team)
+      }}
+    >
+      <span style={{ width: 26, textAlign: 'center', fontWeight: 900, flexShrink: 0 }}>{medal ?? rank}</span>
+      <Badge src={team?.badge} />
+      <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+        <span style={{ display: 'block', fontWeight: 700 }}>{club.name}</span>
+        <span className="muted" style={{ display: 'block', fontSize: 10, whiteSpace: 'normal', lineHeight: 1.25 }}>
+          {club.country} · {club.note}
+        </span>
+      </span>
+      <span style={{ flexShrink: 0 }}>{on ? '✅' : '➕'}</span>
+    </button>
+  )
+}
+
+
 function TeamsTab() {
   const { data, toggleFcLeague, toggleFcTeam } = useStore()
   const fcLock = data.fcLock
@@ -1168,7 +1217,17 @@ function TeamsTab() {
         })}
       </div>
 
-      <div className="h2">⚽ Clubs</div>
+      <div className="h2">🥇 The clubs, best to worst</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        A hand-kept ranking — European Cups, recent titles, and how big the club is. Tap one to follow it.
+      </p>
+      <div className="card" style={{ marginBottom: 14, padding: 8 }}>
+        {CLUB_RANKING.map((c, i) => (
+          <RankedRow key={c.name} club={c} rank={i + 1} />
+        ))}
+      </div>
+
+      <div className="h2">⚽ Your clubs</div>
       {fcLock.teams.length > 0 && (
         <div className="card" style={{ marginBottom: 10 }}>
           {fcLock.teams.map((t) => (
