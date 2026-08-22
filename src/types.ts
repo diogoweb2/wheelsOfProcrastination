@@ -1365,6 +1365,12 @@ export interface FcLockState {
   leagues: string[]
   teams: { id: string; name: string; badge?: string; leagueName?: string }[]
   watch: FcWatchItem[]
+  /** 📕 The Premier League sticker album (§21g): what this crewmate has stuck in. */
+  album?: {
+    counts: Record<string, number>
+    packsOpened: number
+    lastFreePackDay: string | null
+  }
   news?: {
     items: FcNewsItem[]
     fetchedAt: string

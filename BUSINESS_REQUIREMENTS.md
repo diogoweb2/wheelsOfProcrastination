@@ -1010,7 +1010,7 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Six tabs, six URLs (§1c): **📅 Games** (`/fclock/games`), **⭐ Watchlist** (`/fclock/watch`), **📰 News** (`/fclock/news`), **💸 Transfers** (`/fclock/market`), **⏳ Cups** (`/fclock/cups`), **⚽ Teams** (`/fclock/teams`).
+Six tabs, six URLs (§1c): **📅 Games** (`/fclock/games`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **⚽ Teams** (`/fclock/teams`).
 
 ### 21a. Toronto time, always
 
@@ -1047,5 +1047,17 @@ The **💸 Transfers** tab is the **2026 summer window**: who moved, for how muc
 - **Faces.** Each row carries the player's photo, looked up by name from TheSportsDB and cached forever (a face doesn't change); a 👕 stands in for anyone they've never heard of.
 - **Tap a row for the player.** A sheet opens with the picture at **190 px**, then **age** (worked out from the birthday, so it's right next year too), position, shirt number, nationality, height, weight, preferred foot, birthday, where they were born, the club they're on the books at, and the write-up. Two calls behind one cache entry — the search finds them, the full record carries the height and the biography — and a player the database has never heard of says so plainly rather than showing an empty card.
 - Loans 🔁 and frees 🆓 are marked rather than dressed up as fees, and grades are coloured: A green, B neutral, C/D red.
+
+### 21g. The album (📕) and the packs (🎁)
+
+A Premier League sticker album, built like the real one: **a page per club**, a **shiny foil badge** at the top of it, then the squad. Swipe the page sideways — it slides under the finger and turns when you let go — or use the arrows and the twenty dots.
+
+**Every sticker is a real footballer.** The Topps 2026 checklist runs to 561 stickers; we can't name 450 of those players from a source we trust, and a made-up sticker would make the whole album worthless. So the collection is **20 clubs × (1 badge + 10 players) = 220**, each one a real player pulled from TheSportsDB with their real photo, position and shirt number — the free tier's cap of ten players per club is exactly what sets the page size. The checklist is **frozen in localStorage** once fetched, so a sticker you own never turns into a different player behind your back.
+
+- **Packs are five stickers.** **One free pack a day**, then **50 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
+- **They come out face down.** Tap a card and it **turns over in 3D**; a sticker you don't have yet is stamped **NEW!**, and every sticker **backflips into its slot** when it lands on the page.
+- **Duplicates count.** A spare shows as a red **+n** on the slot.
+- **Tap a sticker you own** and the same player sheet as the transfer list opens (§21f): the big picture, age, position, nationality, height, weight, foot, birthplace — plus its sticker number and how many spares you're sitting on.
+- The album is **per profile**, like everything else in FC Lock: Diogo's stickers are not Ben's.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

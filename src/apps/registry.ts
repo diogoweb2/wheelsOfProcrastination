@@ -274,10 +274,12 @@ export const APPS: AppDef[] = [
     tint: ['#0a7d3c', '#052d17'],
     tabs: [
       { id: 'games', label: 'Games', icon: '📅' },
-      { id: 'watch', label: 'Watchlist', icon: '⭐' },
+      // the watchlist and the big finals are the same question — how many days? —
+      // so they share a tab rather than eating two slots in the bottom menu
+      { id: 'countdown', label: 'Days', icon: '⏳' },
       { id: 'news', label: 'News', icon: '📰' },
-      { id: 'market', label: 'Transfers', icon: '💸' },
-      { id: 'cups', label: 'Cups', icon: '⏳' },
+      { id: 'album', label: 'Album', icon: '📕' },
+      { id: 'packs', label: 'Packs', icon: '🎁' },
       { id: 'teams', label: 'Teams', icon: '⚽' },
     ],
   },

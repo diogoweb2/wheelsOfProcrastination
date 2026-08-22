@@ -10,7 +10,7 @@
 //
 // Fixtures come from TheSportsDB (src/logic/fclock.ts), the news from OpenRouter
 // (src/logic/fcNews.ts). Both are cached, so a tab switch is not a fetch.
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { sfx } from '../audio'
 import type { FcNewsItem, FcWatchItem } from '../types'
@@ -35,6 +35,23 @@ import {
 } from '../logic/fclock'
 import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
 import {
+  PACK_COST,
+  PL_CLUBS,
+  SLOTS_PER_CLUB,
+  TOTAL_STICKERS,
+  buildPage,
+  emptyAlbum,
+  fetchSquad,
+  freePackReady,
+  ownedCount,
+  owns,
+  pageStart,
+  rollPack,
+  spares,
+  type StickerDef,
+} from '../logic/fcAlbum'
+import { dayKey } from '../logic/dates'
+import {
   SOURCE_NAME,
   SOURCE_READ,
   SOURCE_URL,
@@ -51,10 +68,10 @@ export function FcLockScreen({ tab }: { tab: string }) {
         Every kick-off in Toronto time. Star a game and it gets a countdown.
       </p>
       {tab === 'games' && <GamesTab />}
-      {tab === 'watch' && <WatchTab />}
-      {tab === 'news' && <NewsTab />}
-      {tab === 'market' && <TransfersTab />}
-      {tab === 'cups' && <CupsTab />}
+      {tab === 'countdown' && <CountdownTab />}
+      {tab === 'news' && <NewsDesk />}
+      {tab === 'album' && <AlbumTab />}
+      {tab === 'packs' && <PacksTab />}
       {tab === 'teams' && <TeamsTab />}
     </div>
   )
@@ -277,7 +294,16 @@ function toMatch(w: FcWatchItem): FcMatch {
   return { ...w }
 }
 
-function WatchTab() {
+function CountdownTab() {
+  return (
+    <>
+      <WatchList />
+      <CupsList />
+    </>
+  )
+}
+
+function WatchList() {
   const { data, toggleFcWatch, setFcResult } = useStore()
   const fcLock = data.fcLock
   const list = [...fcLock.watch].sort((a, b) => a.kickoff.localeCompare(b.kickoff))
@@ -367,6 +393,32 @@ function WatchRow({ item, onDrop }: { item: FcWatchItem; onDrop: () => void }) {
 }
 
 // --- News --------------------------------------------------------------------
+
+/** The press, in two halves: today's stories and the summer's business. */
+function NewsDesk() {
+  const [half, setHalf] = useState<'news' | 'market'>('news')
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        {(['news', 'market'] as const).map((h) => (
+          <button
+            key={h}
+            className={`btn btn--small ${half === h ? 'btn--blue' : 'btn--ghost'}`}
+            style={{ flex: 1 }}
+            onClick={() => {
+              sfx.click()
+              setHalf(h)
+            }}
+          >
+            {h === 'news' ? '📰 Stories' : '💸 Transfers'}
+          </button>
+        ))}
+      </div>
+      {half === 'news' ? <NewsTab /> : <TransfersTab />}
+    </>
+  )
+}
+
 
 function NewsTab() {
   const { data, aiConfig, setFcNews } = useStore()
@@ -503,7 +555,7 @@ function TransfersTab() {
         </button>
       )}
 
-      {open && <PlayerSheet move={open} onClose={() => setOpen(null)} />}
+      {open && <PlayerSheet name={open.player} move={open} onClose={() => setOpen(null)} />}
     </>
   )
 }
@@ -557,8 +609,20 @@ function PlayerFace({ name, size = 64, src }: { name: string; size?: number; src
  * shirt number, where they're from, and the write-up. Tap the backdrop, the ✕ or
  * press Escape to close.
  */
-function PlayerSheet({ move, onClose }: { move: Transfer; onClose: () => void }) {
-  const info = usePlayer(move.player)
+function PlayerSheet({
+  name,
+  move,
+  sticker,
+  onClose,
+}: {
+  name: string
+  /** Present when the sheet was opened from the transfer list. */
+  move?: Transfer
+  /** Present when it was opened from the album. */
+  sticker?: { clubName: string; number: number; shirt?: string; position?: string; spares: number }
+  onClose: () => void
+}) {
+  const info = usePlayer(name)
   const age = ageFrom(info?.born)
 
   useEffect(() => {
@@ -588,13 +652,27 @@ function PlayerSheet({ move, onClose }: { move: Transfer; onClose: () => void })
         </div>
 
         <div style={{ textAlign: 'center' }}>
-          <PlayerFace name={move.player} size={190} />
-          <div style={{ fontSize: 22, fontWeight: 900, marginTop: 10 }}>{info?.name || move.player}</div>
+          <PlayerFace name={name} size={190} />
+          <div style={{ fontSize: 22, fontWeight: 900, marginTop: 10 }}>{info?.name || name}</div>
           <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-            {[info?.position, info?.nationality].filter(Boolean).join(' · ') || 'Looking them up…'}
+            {[info?.position ?? sticker?.position, info?.nationality].filter(Boolean).join(' · ') || 'Looking them up…'}
           </div>
         </div>
 
+        {sticker && (
+          <div className="card" style={{ marginTop: 14 }}>
+            <div style={{ fontWeight: 700 }}>
+              📕 Sticker #{sticker.number} · {sticker.clubName}
+            </div>
+            <div className="muted" style={{ fontSize: 11, marginTop: 4, fontWeight: 800, letterSpacing: 0.4 }}>
+              {[sticker.shirt ? `SHIRT #${sticker.shirt}` : null, sticker.spares > 0 ? `${sticker.spares} SPARE${sticker.spares > 1 ? 'S' : ''}` : 'NO SPARES']
+                .filter(Boolean)
+                .join(' · ')}
+            </div>
+          </div>
+        )}
+
+        {move && (
         <div className="card" style={{ marginTop: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
             <span>{TRANSFER_ICON[move.kind]}</span>
@@ -606,6 +684,7 @@ function PlayerSheet({ move, onClose }: { move: Transfer; onClose: () => void })
             {[move.fee, `OUT ${move.gradeFrom}`, `IN ${move.gradeTo}`, move.date].join(' · ').toUpperCase()}
           </div>
         </div>
+        )}
 
         {facts.length > 0 && (
           <div className="card" style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -699,26 +778,11 @@ function TransferRow({ item, onOpen }: { item: Transfer; onOpen: () => void }) {
 
 // --- Cups --------------------------------------------------------------------
 
-function CupsTab() {
+function CupsList() {
   const cups = upcomingTournaments()
-  const { data } = useStore()
-  const fcLock = data.fcLock
-  const starred = [...fcLock.watch]
-    .filter((w) => !isFinished(toMatch(w)))
-    .sort((a, b) => a.kickoff.localeCompare(b.kickoff))
-    .slice(0, 3)
-
   return (
     <>
-      {starred.length > 0 && (
-        <>
-          <div className="h2">⭐ Your games</div>
-          {starred.map((w) => (
-            <Countdown key={w.id} emoji="⚽" name={`${w.home} v ${w.away}`} what={w.leagueName} days={daysUntil(w.kickoff)} />
-          ))}
-        </>
-      )}
-      <div className="h2" style={{ marginTop: starred.length ? 16 : 0 }}>🏆 The big ones</div>
+      <div className="h2" style={{ marginTop: 16 }}>🏆 The big ones</div>
       {cups.map((t) => (
         <Countdown key={t.id} emoji={t.emoji} name={t.name} what={t.what} days={daysUntil(`${t.date}T12:00:00Z`)} approx={t.approx} />
       ))}
@@ -742,6 +806,316 @@ function Countdown({ emoji, name, what, days, approx }: { emoji: string; name: s
         <div className="muted" style={{ fontSize: 10 }}>{days === 1 ? 'DAY' : 'DAYS'}</div>
       </div>
     </div>
+  )
+}
+
+// --- Album -------------------------------------------------------------------
+
+/**
+ * The checklist, built once and kept: every club's page, in album order. Squads
+ * are fetched one club at a time (the free API is rate-limited) and frozen in
+ * localStorage, so a sticker never turns into a different player.
+ */
+function useChecklist() {
+  const [pages, setPages] = useState<StickerDef[][]>(() => PL_CLUBS.map(() => []))
+  const [ready, setReady] = useState(0)
+
+  useEffect(() => {
+    let alive = true
+    void (async () => {
+      for (const [i, club] of PL_CLUBS.entries()) {
+        try {
+          const squad = await fetchSquad(club)
+          if (!alive) return
+          setPages((prev) => {
+            const next = [...prev]
+            next[i] = buildPage(i, squad)
+            return next
+          })
+        } catch {
+          // a club that won't load leaves an empty page rather than an empty album
+        }
+        if (!alive) return
+        setReady(i + 1)
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const all = useMemo(() => pages.flat(), [pages])
+  return { pages, all, ready }
+}
+
+/** The album: one club per page, swiped left and right like the real thing. */
+function AlbumTab() {
+  const { data } = useStore()
+  const album = data.fcLock.album ?? emptyAlbum()
+  const { pages, all, ready } = useChecklist()
+  const [page, setPage] = useState(0)
+  const [open, setOpen] = useState<StickerDef | null>(null)
+  const drag = useRef<{ x: number; dx: number } | null>(null)
+  const [dx, setDx] = useState(0)
+
+  const club = PL_CLUBS[page]
+  const list = pages[page] ?? []
+  const have = list.filter((st) => owns(album, st.id)).length
+
+  function go(delta: number) {
+    setPage((p) => Math.min(PL_CLUBS.length - 1, Math.max(0, p + delta)))
+    setDx(0)
+  }
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div style={{ fontWeight: 900 }}>📕 Premier League 2026</div>
+          <div className="muted" style={{ fontSize: 12 }}>
+            {ownedCount(album)} / {all.length || TOTAL_STICKERS}
+          </div>
+        </div>
+        <div className="quiz-bar" style={{ marginTop: 8 }}>
+          <div className="quiz-bar-fill" style={{ width: `${all.length ? (ownedCount(album) / all.length) * 100 : 0}%` }} />
+        </div>
+        {ready < PL_CLUBS.length && (
+          <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
+            Printing the checklist… {ready}/{PL_CLUBS.length} clubs
+          </div>
+        )}
+      </div>
+
+      {/* the page itself — drag it sideways and it turns */}
+      <div
+        className="fc-page"
+        style={{ transform: `translateX(${dx}px)` }}
+        onTouchStart={(e) => {
+          drag.current = { x: e.touches[0].clientX, dx: 0 }
+        }}
+        onTouchMove={(e) => {
+          if (!drag.current) return
+          drag.current.dx = e.touches[0].clientX - drag.current.x
+          setDx(drag.current.dx * 0.5)
+        }}
+        onTouchEnd={() => {
+          const moved = drag.current?.dx ?? 0
+          drag.current = null
+          if (Math.abs(moved) > 60) {
+            sfx.click()
+            go(moved < 0 ? 1 : -1)
+          } else setDx(0)
+        }}
+      >
+        <div className="h2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span>{club.name}</span>
+          <span className="muted" style={{ fontSize: 12 }}>
+            {have}/{list.length || SLOTS_PER_CLUB}
+          </span>
+        </div>
+
+        <div className="fc-grid">
+          {(list.length ? list : Array.from({ length: SLOTS_PER_CLUB })).map((st, i) =>
+            st ? (
+              <StickerSlot
+                key={(st as StickerDef).id}
+                sticker={st as StickerDef}
+                owned={owns(album, (st as StickerDef).id)}
+                spares={spares(album, (st as StickerDef).id)}
+                onOpen={() => setOpen(st as StickerDef)}
+              />
+            ) : (
+              <div key={i} className="fc-slot fc-slot--empty">
+                <span className="muted" style={{ fontSize: 11 }}>#{pageStart(page) + i}</span>
+              </div>
+            ),
+          )}
+        </div>
+      </div>
+
+      <div className="fc-pager">
+        <button className="btn btn--ghost btn--small" disabled={page === 0} onClick={() => { sfx.click(); go(-1) }}>
+          ‹
+        </button>
+        <div className="fc-dots">
+          {PL_CLUBS.map((c, i) => (
+            <button
+              key={c.id}
+              aria-label={c.name}
+              className={`fc-dot ${i === page ? 'is-on' : ''}`}
+              onClick={() => {
+                sfx.click()
+                setPage(i)
+              }}
+            />
+          ))}
+        </div>
+        <button
+          className="btn btn--ghost btn--small"
+          disabled={page === PL_CLUBS.length - 1}
+          onClick={() => { sfx.click(); go(1) }}
+        >
+          ›
+        </button>
+      </div>
+      <p className="muted" style={{ fontSize: 11, textAlign: 'center', marginTop: 6 }}>
+        Swipe the page — {page + 1} of {PL_CLUBS.length}
+      </p>
+
+      {open && (
+        <PlayerSheet
+          name={open.name}
+          sticker={{
+            clubName: open.clubName,
+            number: open.number,
+            shirt: open.shirt,
+            position: open.position,
+            spares: spares(album, open.id),
+          }}
+          onClose={() => setOpen(null)}
+        />
+      )}
+    </>
+  )
+}
+
+/** One slot on the page: the sticker if it's stuck in, its number if it isn't. */
+function StickerSlot({
+  sticker,
+  owned,
+  spares: spare,
+  onOpen,
+}: {
+  sticker: StickerDef
+  owned: boolean
+  spares: number
+  onOpen: () => void
+}) {
+  if (!owned) {
+    return (
+      <div className="fc-slot fc-slot--empty">
+        <span className="muted" style={{ fontSize: 11, fontWeight: 800 }}>#{sticker.number}</span>
+        <span style={{ fontSize: 20, opacity: 0.35 }}>{sticker.kind === 'badge' ? '🛡️' : '👕'}</span>
+      </div>
+    )
+  }
+  return (
+    <button
+      className={`fc-slot ${sticker.kind === 'badge' ? 'fc-slot--shiny' : ''}`}
+      onClick={() => {
+        sfx.click()
+        onOpen()
+      }}
+    >
+      {sticker.image ? (
+        <img src={sticker.image} alt={sticker.name} loading="lazy" />
+      ) : (
+        <span style={{ fontSize: 26 }}>{sticker.kind === 'badge' ? '🛡️' : '👕'}</span>
+      )}
+      <span className="fc-slot-name">{sticker.name}</span>
+      <span className="fc-slot-no">#{sticker.number}</span>
+      {spare > 0 && <span className="fc-slot-spare">+{spare}</span>}
+    </button>
+  )
+}
+
+// --- Packs -------------------------------------------------------------------
+
+/**
+ * Buying and opening. A pack is five stickers: they come out face down, flip
+ * over one at a time when tapped, and a NEW one backflips into the album the
+ * moment it lands there.
+ */
+function PacksTab() {
+  const { data, openFcPack } = useStore()
+  const album = data.fcLock.album ?? emptyAlbum()
+  const { all, ready } = useChecklist()
+  const [drawn, setDrawn] = useState<StickerDef[] | null>(null)
+  const [flipped, setFlipped] = useState<Set<number>>(new Set())
+  const [wasNew, setWasNew] = useState<Set<string>>(new Set())
+  const [error, setError] = useState<string | null>(null)
+
+  const today = dayKey()
+  const freeReady = freePackReady(album, today)
+  const byId = useMemo(() => new Map(all.map((s) => [s.id, s])), [all])
+
+  function buy(kind: 'free' | 'buy') {
+    const ids = rollPack(all, album)
+    const fresh = new Set(ids.filter((id) => !owns(album, id)))
+    const res = openFcPack(kind, ids, PACK_COST)
+    if (res !== true) {
+      setError(
+        res === 'broke'
+          ? `Not enough Berries — a pack is ${PACK_COST} 🫐.`
+          : res === 'used'
+            ? 'Today’s free pack is already open. Come back tomorrow.'
+            : 'The checklist is still printing — give it a second.',
+      )
+      sfx.error()
+      return
+    }
+    setError(null)
+    setWasNew(fresh)
+    setFlipped(new Set())
+    setDrawn(ids.map((id) => byId.get(id)).filter((s): s is StickerDef => !!s))
+    sfx.gem()
+  }
+
+  function flip(i: number) {
+    if (flipped.has(i)) return
+    sfx.click()
+    setFlipped(new Set([...flipped, i]))
+  }
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ fontWeight: 900 }}>🎁 Sticker packs</div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+          Five stickers a pack. One free pack every day, then {PACK_COST} 🫐 each.
+        </p>
+        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <button className="btn btn--blue btn--small" style={{ flex: 1 }} disabled={!freeReady || !all.length} onClick={() => buy('free')}>
+            {freeReady ? '🎁 Free pack' : '✅ Free pack used'}
+          </button>
+          <button className="btn btn--small" style={{ flex: 1 }} disabled={!all.length} onClick={() => buy('buy')}>
+            💰 Buy · {PACK_COST} 🫐
+          </button>
+        </div>
+        <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>
+          {data.economy.gems} 🫐 in the chest · {album.packsOpened} packs opened
+          {ready < PL_CLUBS.length ? ` · checklist ${ready}/${PL_CLUBS.length}` : ''}
+        </div>
+      </div>
+
+      {error && <div className="card" style={{ borderColor: 'var(--red)' }}>{error}</div>}
+
+      {drawn && (
+        <>
+          <div className="h2">
+            {flipped.size < drawn.length ? `Tap to turn them over — ${drawn.length - flipped.size} left` : 'Stuck in the album ✅'}
+          </div>
+          <div className="fc-pack">
+            {drawn.map((st, i) => (
+              <button key={`${st.id}-${i}`} className={`fc-card ${flipped.has(i) ? 'is-flipped' : ''}`} onClick={() => flip(i)}>
+                <span className="fc-card-face fc-card-back">⚽</span>
+                <span className={`fc-card-face fc-card-front ${st.kind === 'badge' ? 'is-shiny' : ''}`}>
+                  {st.image ? <img src={st.image} alt={st.name} /> : <b style={{ fontSize: 26 }}>👕</b>}
+                  <b className="fc-card-name">{st.name}</b>
+                  <span className="fc-card-no">#{st.number} · {st.clubName}</span>
+                  {wasNew.has(st.id) && <span className="fc-card-new">NEW!</span>}
+                </span>
+              </button>
+            ))}
+          </div>
+          {flipped.size === drawn.length && (
+            <p className="muted" style={{ fontSize: 12, textAlign: 'center', marginTop: 10 }}>
+              {wasNew.size ? `${wasNew.size} new in the album.` : 'All spares this time — trade fodder.'}
+            </p>
+          )}
+        </>
+      )}
+    </>
   )
 }
 

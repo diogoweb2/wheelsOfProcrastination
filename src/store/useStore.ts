@@ -371,6 +371,11 @@ interface StoreState {
   setFcResult: (id: string, homeScore: number, awayScore: number) => void
   /** FC Lock: the played games' warnings have been read. */
   markFcResultsSeen: (ids: string[]) => void
+  /**
+   * FC Lock album: open a pack. `free` is the once-a-day one, `buy` costs
+   * Berries. Returns the sticker ids drawn, or why it couldn't.
+   */
+  openFcPack: (kind: 'free' | 'buy', drawn: string[], cost: number) => 'broke' | 'used' | 'empty' | true
   /** FC Lock: cache a fetched batch of news. */
   setFcNews: (news: AppData['fcLock']['news']) => void
   toggleIdea: (id: string) => void
@@ -1387,6 +1392,23 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         d.fcLock.watch = d.fcLock.watch.map((w) => (ids.includes(w.id) ? { ...w, seenResult: true } : w))
       })
+    },
+
+    openFcPack(kind, drawn, cost) {
+      const { data } = get()
+      const album = data.fcLock.album ?? { counts: {}, packsOpened: 0, lastFreePackDay: null }
+      const today = dayKey()
+      if (!drawn.length) return 'empty'
+      if (kind === 'free' && album.lastFreePackDay === today) return 'used'
+      if (kind === 'buy' && data.economy.gems < cost) return 'broke'
+      commit((d) => {
+        const a = d.fcLock.album ?? (d.fcLock.album = { counts: {}, packsOpened: 0, lastFreePackDay: null })
+        if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - cost)
+        else a.lastFreePackDay = today
+        for (const id of drawn) a.counts[id] = (a.counts[id] ?? 0) + 1
+        a.packsOpened += 1
+      })
+      return true
     },
 
     setFcNews(news) {
