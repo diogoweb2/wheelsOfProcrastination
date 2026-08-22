@@ -276,6 +276,7 @@ export const APPS: AppDef[] = [
       { id: 'games', label: 'Games', icon: '📅' },
       { id: 'watch', label: 'Watchlist', icon: '⭐' },
       { id: 'news', label: 'News', icon: '📰' },
+      { id: 'market', label: 'Transfers', icon: '💸' },
       { id: 'cups', label: 'Cups', icon: '⏳' },
       { id: 'teams', label: 'Teams', icon: '⚽' },
     ],

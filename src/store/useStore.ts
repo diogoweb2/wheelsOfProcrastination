@@ -373,6 +373,8 @@ interface StoreState {
   markFcResultsSeen: (ids: string[]) => void
   /** FC Lock: cache a fetched batch of news. */
   setFcNews: (news: AppData['fcLock']['news']) => void
+  /** FC Lock: cache a fetched batch of this year's transfers. */
+  setFcTransfers: (transfers: AppData['fcLock']['transfers']) => void
   toggleIdea: (id: string) => void
   deleteIdea: (id: string) => void
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -1392,6 +1394,12 @@ export const useStore = create<StoreState>((set, get) => {
     setFcNews(news) {
       commit((d) => {
         d.fcLock.news = news
+      })
+    },
+
+    setFcTransfers(transfers) {
+      commit((d) => {
+        d.fcLock.transfers = transfers
       })
     },
 

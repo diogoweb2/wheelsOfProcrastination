@@ -1010,7 +1010,7 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Five tabs, five URLs (§1c): **📅 Games** (`/fclock/games`), **⭐ Watchlist** (`/fclock/watch`), **📰 News** (`/fclock/news`), **⏳ Cups** (`/fclock/cups`), **⚽ Teams** (`/fclock/teams`).
+Six tabs, six URLs (§1c): **📅 Games** (`/fclock/games`), **⭐ Watchlist** (`/fclock/watch`), **📰 News** (`/fclock/news`), **💸 Transfers** (`/fclock/market`), **⏳ Cups** (`/fclock/cups`), **⚽ Teams** (`/fclock/teams`).
 
 ### 21a. Toronto time, always
 
@@ -1036,5 +1036,11 @@ There is no free football-news API worth wiring up — the good ones cost money,
 ### 21e. Cups
 
 Countdowns **in days** to the big European finals and the next national-team tournaments (`TOURNAMENTS`), soonest first, with the three nearest starred games above them. Dates that are announced are exact; a competition whose window is known but whose day isn't is marked `approx` and shown with a **≈** rather than a date we made up.
+
+### 21f. Transfers — the year's market
+
+The **💸 Transfers** tab is this calendar year's market as a record: **your clubs' business first** (every move in and out, marked `ours`), then **the biggest deals in world football**, newest first. Same desk as the news (§21d) and the same rules, tightened: **only done deals** — signed or officially announced, never a rumour, never "in talks" — and **fees exactly as the outlet reported them** (`€60m`, `free`, `loan`, `undisclosed`), never a number the model estimated. Each move carries its outlet and link.
+
+Loans and frees are marked (🔁 / 🆓) rather than dressed up as fees. The batch is cached on your profile for **24 hours** — a market is a record, not a live feed — and a changed set of followed clubs, or a new calendar year, invalidates it at once. Follow no clubs and the tab still works: it shows the year's biggest moves.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

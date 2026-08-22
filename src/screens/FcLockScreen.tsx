@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { sfx } from '../audio'
-import type { FcNewsItem, FcWatchItem } from '../types'
+import type { FcNewsItem, FcTransferItem, FcWatchItem } from '../types'
 import {
   LEAGUES,
   countdownLabel,
@@ -30,7 +30,7 @@ import {
   upcomingTournaments,
   type FcMatch,
 } from '../logic/fclock'
-import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
+import { fetchFcNews, fetchFcTransfers, newsKey, newsStale, transfersStale } from '../logic/fcNews'
 
 export function FcLockScreen({ tab }: { tab: string }) {
   return (
@@ -42,6 +42,7 @@ export function FcLockScreen({ tab }: { tab: string }) {
       {tab === 'games' && <GamesTab />}
       {tab === 'watch' && <WatchTab />}
       {tab === 'news' && <NewsTab />}
+      {tab === 'market' && <TransfersTab />}
       {tab === 'cups' && <CupsTab />}
       {tab === 'teams' && <TeamsTab />}
     </div>
@@ -437,6 +438,114 @@ function NewsCard({ item }: { item: FcNewsItem }) {
           Read it ↗
         </a>
       )}
+    </div>
+  )
+}
+
+// --- Transfers ---------------------------------------------------------------
+
+/**
+ * Every move this calendar year: our clubs' business first, then the biggest
+ * deals in world football. Read once a day and cached on the profile — the
+ * market is a record, not a live feed.
+ */
+function TransfersTab() {
+  const { data, aiConfig, setFcTransfers } = useStore()
+  const fcLock = data.fcLock
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showAll, setShowAll] = useState(false)
+
+  const year = new Date().getFullYear()
+  const teams = useMemo(() => fcLock.teams.map((t) => t.name), [fcLock.teams])
+  const key = newsKey(teams)
+  const cache = fcLock.transfers
+  const stale = transfersStale(cache, key, year)
+
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const items = await fetchFcTransfers(aiConfig, teams, year)
+      setFcTransfers({ items, fetchedAt: new Date().toISOString(), forKey: key, year })
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }, [aiConfig, teams, key, year, setFcTransfers])
+
+  const items = cache?.items ?? []
+  const ours = items.filter((t) => t.ours)
+  const rest = items.filter((t) => !t.ours)
+  const shown = showAll ? rest : rest.slice(0, 10)
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700 }}>💸 Transfers {year}</div>
+          <div className="muted" style={{ fontSize: 11 }}>
+            {cache?.fetchedAt
+              ? `Read ${torontoDay(cache.fetchedAt)}, ${torontoTime(cache.fetchedAt)} ET${stale ? ' · out of date' : ''}`
+              : teams.length
+                ? `Your clubs’ business, plus the biggest moves of ${year}`
+                : `The biggest moves of ${year} — follow a club to see its own business too`}
+          </div>
+        </div>
+        <button className="btn btn--blue btn--small" disabled={loading} onClick={() => { sfx.click(); void refresh() }}>
+          {loading ? 'Reading…' : '🔄 Get moves'}
+        </button>
+      </div>
+
+      {error && <div className="card" style={{ borderColor: 'var(--red)' }}>{error}</div>}
+      {!items.length && !loading && !error && (
+        <div className="card">Nothing loaded yet — tap <b>Get moves</b> and the desk goes and reads the market.</div>
+      )}
+
+      {ours.length > 0 && <div className="h2">⭐ Your clubs — {ours.length}</div>}
+      {ours.map((t) => <TransferRow key={t.id} item={t} />)}
+
+      {rest.length > 0 && <div className="h2" style={{ marginTop: ours.length ? 16 : 0 }}>🌍 Biggest moves of {year}</div>}
+      {shown.map((t) => <TransferRow key={t.id} item={t} />)}
+      {rest.length > shown.length && (
+        <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setShowAll(true) }}>
+          Show all {rest.length}
+        </button>
+      )}
+
+      {items.length > 0 && (
+        <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>
+          Fees are quoted as the outlet reported them. Only done deals are listed — no rumours.
+        </p>
+      )}
+    </>
+  )
+}
+
+const TRANSFER_ICON: Record<FcTransferItem['kind'], string> = { permanent: '💸', loan: '🔁', free: '🆓' }
+
+function TransferRow({ item }: { item: FcTransferItem }) {
+  return (
+    <div className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ fontSize: 20, flexShrink: 0 }}>{TRANSFER_ICON[item.kind]}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700 }}>{item.player}</div>
+        <div style={{ fontSize: 12, marginTop: 2 }}>
+          {item.from} <span className="muted">→</span> <b>{item.to}</b>
+        </div>
+        <div className="muted" style={{ fontSize: 11, marginTop: 4, fontWeight: 800, letterSpacing: 0.4 }}>
+          {[item.fee, item.kind === 'permanent' ? null : item.kind, item.date, item.source]
+            .filter(Boolean)
+            .join(' · ')
+            .toUpperCase()}
+        </div>
+        {item.url && (
+          <a className="btn btn--ghost btn--small" style={{ marginTop: 8 }} href={item.url} target="_blank" rel="noreferrer">
+            Read it ↗
+          </a>
+        )}
+      </div>
     </div>
   )
 }
