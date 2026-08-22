@@ -33,6 +33,8 @@ import {
   sourceForLeague,
   highlightSearch,
   VIDEO_SOURCES,
+  CAZE_LIVE_EMBED,
+  CAZE_UPLOADS_EMBED,
   teamByName,
   torontoDay,
   torontoTime,
@@ -821,6 +823,66 @@ function Countdown({ emoji, name, what, days, approx }: { emoji: string; name: s
 
 // --- Highlights --------------------------------------------------------------
 
+/**
+ * CazéTV, playing here rather than somewhere else. Two embeds, no API key and
+ * no server between us and them: **Live** is the channel's current broadcast,
+ * **Latest** is their uploads playlist, newest first. When they're off air the
+ * live player says so itself — that's YouTube's own message, not a guess of
+ * ours — and the channel is always one tap away underneath.
+ */
+function CazeTv() {
+  const [show, setShow] = useState<'live' | 'latest'>('live')
+  return (
+    <div className="card" style={{ marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 900 }}>📺 CazéTV</div>
+          <div className="muted" style={{ fontSize: 11 }}>
+            {show === 'live' ? 'Whatever they’re broadcasting right now' : 'Their latest videos, newest first'}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, margin: '10px 0' }}>
+        {(['live', 'latest'] as const).map((k) => (
+          <button
+            key={k}
+            className={`btn btn--small ${show === k ? 'btn--blue' : 'btn--ghost'}`}
+            style={{ flex: 1 }}
+            onClick={() => {
+              sfx.click()
+              setShow(k)
+            }}
+          >
+            {k === 'live' ? '🔴 Live' : '🎬 Latest'}
+          </button>
+        ))}
+      </div>
+
+      <div className="fc-video">
+        <iframe
+          key={show}
+          src={show === 'live' ? CAZE_LIVE_EMBED : CAZE_UPLOADS_EMBED}
+          title={show === 'live' ? 'CazéTV live' : 'CazéTV latest videos'}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          loading="lazy"
+        />
+      </div>
+
+      <a
+        className="btn btn--ghost btn--small"
+        style={{ marginTop: 10 }}
+        href="https://www.youtube.com/@CazeTV/streams"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Open the channel ↗
+      </a>
+    </div>
+  )
+}
+
 /** The finished games from what we follow, newest first. */
 function useResults() {
   const { data } = useStore()
@@ -870,15 +932,7 @@ function HighlightsTab() {
 
   return (
     <>
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div style={{ fontWeight: 900 }}>📺 Live on CazéTV</div>
-        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-          Whatever they're showing right now, plus every replay they've put up.
-        </p>
-        <a className="btn btn--blue btn--small" style={{ marginTop: 8 }} href="https://www.youtube.com/@CazeTV/streams" target="_blank" rel="noreferrer">
-          ▶️ Open CazéTV
-        </a>
-      </div>
+      <CazeTv />
 
       <div className="h2">🎬 Watch it back</div>
       {loading && <div className="card">Looking up the results…</div>}

@@ -1074,10 +1074,10 @@ After the fifth, the whole pack is laid out together with how many were new, and
 
 Where to see it, when you missed it.
 
-- **Live on CazéTV** sits at the top: one tap to [their channel](https://www.youtube.com/@CazeTV/streams) — whatever they're showing now, plus every replay.
+- **CazéTV plays in the page.** Two embeds at the top of the tab, switched with 🔴 **Live** / 🎬 **Latest**: the channel's current broadcast, and their uploads playlist newest first. Neither needs an API key or a server of ours — YouTube's `live_stream?channel=…` and the uploads playlist (`UC…` → `UU…`) do it on the channel id alone. Off air, the player says so in YouTube's own words rather than ours, and the channel is still one tap away underneath.
 - **Watch it back.** The finished games from the leagues and clubs you follow, newest first, each with its score, a **▶️ Highlights** button that opens the search that lands on *that* game's highlights, and a link to the competition's own video desk.
 - **The video desks** are listed in full: the [Premier League](https://www.premierleague.com/en/video), [LaLiga](https://www.laliga.com/en-GB/videos?page=1), [Serie A](https://matchhighlights.live/league/serie-a/), [Ligue 1](https://ligue1.com/en/videos) and [Brasileirão on FOX](https://www.foxsports.com/soccer/brazil-serie-a/highlights).
 
-**Why it links out instead of embedding.** None of these sites publish a video list a browser is allowed to read — no CORS headers, no free API, and YouTube's channel feed is the same story. Rather than guess at what's on, or scrape something that will break next week, the tab does the one honest thing: it puts you one tap from the real page, and builds the exact search for the game you just watched a score for.
+**Why the rest link out.** CazéTV embeds because YouTube lets it. None of the other sites publish a video list a browser is allowed to read — no CORS headers, no free API, and YouTube's channel feed is the same story. Rather than guess at what's on, or scrape something that will break next week, the tab does the one honest thing: it puts you one tap from the real page, and builds the exact search for the game you just watched a score for.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

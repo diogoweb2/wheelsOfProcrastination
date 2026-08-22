@@ -487,6 +487,17 @@ export interface VideoSource {
  * takes you straight to the page, and for a specific game it builds the search
  * that finds that game's highlights.
  */
+/**
+ * CazéTV's YouTube channel. The two embeds below need nothing but this id — no
+ * API key, no server: `live_stream` plays whatever the channel is broadcasting
+ * right now, and the uploads playlist (the channel id with `UC` swapped for
+ * `UU`) plays their latest videos newest first.
+ */
+export const CAZE_CHANNEL = 'UCZiYbVptd3PVPf4f6eR6UaQ'
+export const CAZE_UPLOADS = `UU${CAZE_CHANNEL.slice(2)}`
+export const CAZE_LIVE_EMBED = `https://www.youtube.com/embed/live_stream?channel=${CAZE_CHANNEL}&rel=0`
+export const CAZE_UPLOADS_EMBED = `https://www.youtube.com/embed/videoseries?list=${CAZE_UPLOADS}&rel=0`
+
 export const VIDEO_SOURCES: VideoSource[] = [
   {
     id: 'caze',

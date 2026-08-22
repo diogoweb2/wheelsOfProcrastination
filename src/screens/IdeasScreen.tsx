@@ -57,6 +57,26 @@ function NewIdea({ onAdded }: { onAdded: () => void }) {
 
 function IdeaList({ items, title, empty }: { items: Idea[]; title: string; empty: string }) {
   const { toggleIdea, deleteIdea } = useStore()
+  // which idea was just copied — shows a ✅ on its button for a moment
+  const [copied, setCopied] = useState<string | null>(null)
+
+  async function copy(idea: Idea) {
+    try {
+      await navigator.clipboard.writeText(idea.text)
+      sfx.gem()
+    } catch {
+      // older webviews: fall back to a throwaway textarea
+      const ta = document.createElement('textarea')
+      ta.value = idea.text
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      ta.remove()
+      sfx.gem()
+    }
+    setCopied(idea.id)
+    setTimeout(() => setCopied((c) => (c === idea.id ? null : c)), 1200)
+  }
 
   if (items.length === 0) {
     return (
@@ -105,6 +125,14 @@ function IdeaList({ items, title, empty }: { items: Idea[]; title: string; empty
               {idea.authorName} · {new Date(idea.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
           </div>
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ flexShrink: 0 }}
+            onClick={() => copy(idea)}
+            aria-label="Copy idea text"
+          >
+            {copied === idea.id ? '✅' : '📋'}
+          </button>
           <button
             className="btn btn--ghost btn--small"
             style={{ flexShrink: 0, color: 'var(--red)' }}
