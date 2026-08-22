@@ -1054,10 +1054,20 @@ A Premier League sticker album, built like the real one: **a page per club**, a 
 
 **Every sticker is a real footballer.** The Topps 2026 checklist runs to 561 stickers; we can't name 450 of those players from a source we trust, and a made-up sticker would make the whole album worthless. So the collection is **20 clubs × (1 badge + 10 players) = 220**, each one a real player pulled from TheSportsDB with their real photo, position and shirt number — the free tier's cap of ten players per club is exactly what sets the page size. The checklist is **frozen in localStorage** once fetched, so a sticker you own never turns into a different player behind your back.
 
-- **Packs are five stickers.** **One free pack a day**, then **50 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
-- **They come out face down.** Tap a card and it **turns over in 3D**; a sticker you don't have yet is stamped **NEW!**, and every sticker **backflips into its slot** when it lands on the page.
+- **Packs are five stickers.** **One free pack a day**, then **20 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
+- **Opening is a ceremony, not a list** (§21h).
 - **Duplicates count.** A spare shows as a red **+n** on the slot.
 - **Tap a sticker you own** and the same player sheet as the transfer list opens (§21f): the big picture, age, position, nationality, height, weight, foot, birthplace — plus its sticker number and how many spares you're sitting on.
 - The album is **per profile**, like everything else in FC Lock: Diogo's stickers are not Ben's.
+
+### 21h. Opening a pack
+
+Opening takes over the whole screen, black, one thing at a time — the way the football games do it. Stadium beams sweep behind every step, and **every step waits for a tap**, so nothing is missed by looking away.
+
+1. **The sealed pack.** A foil packet floating under a moving shine, `TAP TO OPEN`.
+2. **The club.** For each sticker in turn, the crest lights up the tunnel with the club's name under it — the beat before you know who it is. It moves on by itself after 1.5 s, or on a tap.
+3. **The card.** The player rises onto the podium on a gold card: shirt number and position where the rating sits on a real one, the photo, the name, the club, fireworks either side, and a **NEW!** flash if it's one you didn't have. `TAP TO CONTINUE` walks to the next of the five.
+
+After the fifth, the whole pack is laid out together with how many were new, and everything is already stuck in the album (§21g). A club badge pulled from a pack rides the same ceremony with its foil card.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

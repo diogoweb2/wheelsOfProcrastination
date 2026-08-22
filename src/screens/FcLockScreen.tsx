@@ -1034,14 +1034,19 @@ function PacksTab() {
   const { data, openFcPack } = useStore()
   const album = data.fcLock.album ?? emptyAlbum()
   const { all, ready } = useChecklist()
+  /** The five stickers of the pack being opened, and how far the ceremony has got. */
   const [drawn, setDrawn] = useState<StickerDef[] | null>(null)
-  const [flipped, setFlipped] = useState<Set<number>>(new Set())
   const [wasNew, setWasNew] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
 
   const today = dayKey()
   const freeReady = freePackReady(album, today)
   const byId = useMemo(() => new Map(all.map((s) => [s.id, s])), [all])
+  /** clubId → crest, taken off each club's badge sticker. */
+  const crests = useMemo(
+    () => new Map(all.filter((s) => s.kind === 'badge').map((s) => [s.clubId, s.image])),
+    [all],
+  )
 
   function buy(kind: 'free' | 'buy') {
     const ids = rollPack(all, album)
@@ -1060,15 +1065,8 @@ function PacksTab() {
     }
     setError(null)
     setWasNew(fresh)
-    setFlipped(new Set())
     setDrawn(ids.map((id) => byId.get(id)).filter((s): s is StickerDef => !!s))
     sfx.gem()
-  }
-
-  function flip(i: number) {
-    if (flipped.has(i)) return
-    sfx.click()
-    setFlipped(new Set([...flipped, i]))
   }
 
   return (
@@ -1095,32 +1093,149 @@ function PacksTab() {
       {error && <div className="card" style={{ borderColor: 'var(--red)' }}>{error}</div>}
 
       {drawn && (
-        <>
-          <div className="h2">
-            {flipped.size < drawn.length ? `Tap to turn them over — ${drawn.length - flipped.size} left` : 'Stuck in the album ✅'}
-          </div>
-          <div className="fc-pack">
-            {drawn.map((st, i) => (
-              <button key={`${st.id}-${i}`} className={`fc-card ${flipped.has(i) ? 'is-flipped' : ''}`} onClick={() => flip(i)}>
-                <span className="fc-card-face fc-card-back">⚽</span>
-                <span className={`fc-card-face fc-card-front ${st.kind === 'badge' ? 'is-shiny' : ''}`}>
-                  {st.image ? <img src={st.image} alt={st.name} /> : <b style={{ fontSize: 26 }}>👕</b>}
-                  <b className="fc-card-name">{st.name}</b>
-                  <span className="fc-card-no">#{st.number} · {st.clubName}</span>
-                  {wasNew.has(st.id) && <span className="fc-card-new">NEW!</span>}
-                </span>
-              </button>
-            ))}
-          </div>
-          {flipped.size === drawn.length && (
-            <p className="muted" style={{ fontSize: 12, textAlign: 'center', marginTop: 10 }}>
-              {wasNew.size ? `${wasNew.size} new in the album.` : 'All spares this time — trade fodder.'}
-            </p>
-          )}
-        </>
+        <PackOpening
+          pack={drawn}
+          fresh={wasNew}
+          crests={crests}
+          onDone={() => setDrawn(null)}
+        />
       )}
     </>
   )
+}
+
+/**
+ * The ceremony, the way the football games do it (§21h): the sealed pack, then
+ * for each of the five — the club’s crest lighting up the tunnel, then the card
+ * itself rising on the podium with the fireworks going off. Every step waits for
+ * a tap, so nothing is missed by looking away.
+ */
+function PackOpening({
+  pack,
+  fresh,
+  crests,
+  onDone,
+}: {
+  pack: StickerDef[]
+  fresh: Set<string>
+  crests: Map<string, string | undefined>
+  onDone: () => void
+}) {
+  const [stage, setStage] = useState<'pack' | 'club' | 'card' | 'done'>('pack')
+  const [i, setI] = useState(0)
+  const st = pack[i]
+
+  // the crest flash is a beat, not a screen: it moves on by itself
+  useEffect(() => {
+    if (stage !== 'club') return
+    const t = setTimeout(() => setStage('card'), 1500)
+    return () => clearTimeout(t)
+  }, [stage, i])
+
+  function tap() {
+    sfx.click()
+    if (stage === 'pack') {
+      setStage('club')
+      return
+    }
+    if (stage === 'club') {
+      setStage('card')
+      return
+    }
+    if (stage === 'card') {
+      if (i + 1 < pack.length) {
+        setI(i + 1)
+        setStage('club')
+      } else setStage('done')
+      return
+    }
+    onDone()
+  }
+
+  if (stage === 'done') {
+    return (
+      <div className="fc-open" onClick={onDone}>
+        <div className="fc-open-inner">
+          <div className="h2" style={{ textAlign: 'center' }}>Pack opened</div>
+          <div className="fc-pack">
+            {pack.map((s, n) => (
+              <span key={`${s.id}-${n}`} className={`fc-card-face fc-card-front ${s.kind === 'badge' ? 'is-shiny' : ''}`} style={{ position: 'relative' }}>
+                {s.image ? <img src={s.image} alt={s.name} /> : <b style={{ fontSize: 26 }}>👕</b>}
+                <b className="fc-card-name">{s.name}</b>
+                <span className="fc-card-no">#{s.number}</span>
+                {fresh.has(s.id) && <span className="fc-card-new">NEW!</span>}
+              </span>
+            ))}
+          </div>
+          <p className="muted" style={{ fontSize: 13, textAlign: 'center', marginTop: 12 }}>
+            {fresh.size ? `${fresh.size} new — stuck in the album.` : 'All spares this time — trade fodder.'}
+          </p>
+          <button className="btn btn--blue" style={{ marginTop: 12, width: '100%' }} onClick={onDone}>
+            Back to the packs
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fc-open" onClick={tap} role="button" tabIndex={0}>
+      <div className="fc-open-beams" />
+      {stage === 'pack' && (
+        <div className="fc-open-inner">
+          <div className="fc-sealed">
+            <span className="fc-sealed-shine" />
+            <span className="fc-sealed-crest">⚽</span>
+            <span className="fc-sealed-word">FC LOCK</span>
+            <span className="fc-sealed-sub">5 STICKERS</span>
+          </div>
+          <div className="fc-open-cta">TAP TO OPEN</div>
+        </div>
+      )}
+
+      {stage === 'club' && (
+        <div className="fc-open-inner">
+          <div className="fc-tunnel">
+            {crests.get(st.clubId) ? (
+              <img className="fc-tunnel-crest" src={crests.get(st.clubId)} alt={st.clubName} />
+            ) : (
+              <div className="fc-tunnel-crest fc-tunnel-crest--none">🛡️</div>
+            )}
+          </div>
+          <div className="fc-open-club">{st.clubName}</div>
+          <div className="fc-open-count">{i + 1} of {pack.length}</div>
+        </div>
+      )}
+
+      {stage === 'card' && (
+        <div className="fc-open-inner">
+          <div className={`fc-hero ${st.kind === 'badge' ? 'is-shiny' : ''}`}>
+            <span className="fc-hero-rating">
+              <b>{st.shirt ? `#${st.shirt}` : `#${st.number}`}</b>
+              <small>{shortPos(st.position) ?? (st.kind === 'badge' ? 'CREST' : 'PL')}</small>
+            </span>
+            {st.image ? <img className="fc-hero-img" src={st.image} alt={st.name} /> : <div className="fc-hero-img">👕</div>}
+            <span className="fc-hero-name">{st.name}</span>
+            <span className="fc-hero-club">{st.clubName}</span>
+            {fresh.has(st.id) && <span className="fc-hero-new">NEW!</span>}
+          </div>
+          <div className="fc-flames">
+            {[0, 1, 2, 3].map((n) => (
+              <span key={n} className="fc-flame" style={{ animationDelay: `${n * 0.12}s` }} />
+            ))}
+          </div>
+          <div className="fc-open-cta">{i + 1 < pack.length ? 'TAP TO CONTINUE' : 'TAP TO FINISH'}</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** "Right Winger" → "RW", the way a card prints it. */
+function shortPos(position?: string): string | null {
+  if (!position) return null
+  const words = position.split(/[\s-]+/).filter(Boolean)
+  return words.map((w) => w[0]).join('').slice(0, 3).toUpperCase()
 }
 
 // --- Teams -------------------------------------------------------------------

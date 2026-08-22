@@ -18,7 +18,7 @@ export const PLAYERS_PER_CLUB = 10
 
 export const PACK_SIZE = 5
 /** Berries per pack — the price the shop charges for a bit of luck. */
-export const PACK_COST = 50
+export const PACK_COST = 20
 
 export interface ClubDef {
   id: string // TheSportsDB team id
