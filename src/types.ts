@@ -1365,6 +1365,13 @@ export interface FcLockState {
   leagues: string[]
   teams: { id: string; name: string; badge?: string; leagueName?: string }[]
   watch: FcWatchItem[]
+  /** ⚽ One Piece Soccer League (§21j): your club, and the season so far. */
+  soccer?: {
+    teamId: string
+    /** The position you play. */
+    role: string
+    results: { opp: string; gf: number; ga: number; at: string }[]
+  }
   /** 📕 The Premier League sticker album (§21g): what this crewmate has stuck in. */
   album?: {
     counts: Record<string, number>

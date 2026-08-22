@@ -1010,7 +1010,7 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Seven tabs, seven URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **⚽ Teams** (`/fclock/teams`).
+Seven tabs, seven URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **🏟️ League** (`/fclock/league` — the game you play), **📕 Album** (`/fclock/album` — the collection and the pack shop), **⚽ Teams** (`/fclock/teams`).
 
 ### 21a. Toronto time, always
 
@@ -1054,7 +1054,7 @@ A Premier League sticker album, built like the real one: **a page per club**, a 
 
 **Every sticker is a real footballer.** The Topps 2026 checklist runs to 561 stickers; we can't name 450 of those players from a source we trust, and a made-up sticker would make the whole album worthless. So the collection is **20 clubs × (1 badge + 10 players) = 220**, each one a real player pulled from TheSportsDB with their real photo, position and shirt number — the free tier's cap of ten players per club is exactly what sets the page size. The checklist is **frozen in localStorage** once fetched, so a sticker you own never turns into a different player behind your back.
 
-- **Packs are five stickers.** **One free pack a day**, then **20 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
+- **Packs are five stickers** (the 🎁 half of the Album tab). **One free pack a day**, then **20 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
 - **Opening is a ceremony, not a list** (§21h).
 - **Duplicates count.** A spare shows as a red **+n** on the slot.
 - **Tap a sticker you own** and the same player sheet as the transfer list opens (§21f): the big picture, age, position, nationality, height, weight, foot, birthplace — plus its sticker number and how many spares you're sitting on.
@@ -1079,5 +1079,34 @@ Where to see it, when you missed it.
 - **The video desks** are listed in full: the [Premier League](https://www.premierleague.com/en/video), [LaLiga](https://www.laliga.com/en-GB/videos?page=1), [Serie A](https://matchhighlights.live/league/serie-a/), [Ligue 1](https://ligue1.com/en/videos) and [Brasileirão on FOX](https://www.foxsports.com/soccer/brazil-serie-a/highlights).
 
 **Why the rest link out.** CazéTV embeds because YouTube lets it. None of the other sites publish a video list a browser is allowed to read — no CORS headers, no free API, and YouTube's channel feed is the same story. Rather than guess at what's on, or scrape something that will break next week, the tab does the one honest thing: it puts you one tap from the real page, and builds the exact search for the game you just watched a score for.
+
+### 21j. One Piece Soccer League (🏟️) — the game you play
+
+A top-down **6-a-side arcade football game**, in the spirit of Blue Lock Rivals. Engine in [src/logic/opsoccer.ts](src/logic/opsoccer.ts) (pure state + a fixed step, no game logic in React), drawn on a canvas by [src/components/SoccerMatch.tsx](src/components/SoccerMatch.tsx).
+
+**The squad.** Thirteen clubs — Straw's FC, The Monsters, The Knights, The Champs, The Warriors, The Knifes, The Bucks, The Bears, Tiger FC, Crow FC, The Monks, Man FC, New Castles. **Eight players each: six on the pitch, two on the bench.** The six are one of each position — **GK, CB, CM, CF, LW, RW** — and you pick which one *you* are before kick-off. Everyone else is a bot.
+
+**The controls.** A thumbstick circle for running, and four buttons:
+
+| Button | What it does |
+|---|---|
+| **SHOOT** | strikes at goal, aimed at a random spot inside the frame — not always down the middle |
+| **PASS** | picks the best teammate: furthest forward, least marked, not miles away |
+| **DRIBBLE** | a burst of speed for half a second during which **you cannot be tackled** |
+| **CALL** | the teammate on the ball passes it to you |
+
+Arrow keys drive the stick on a desktop.
+
+**The rules are football's.** Two halves of 90 seconds, kick-off to the side that conceded, goals only between the posts, ball out of play returns to the other team where it left, and a tackle is a coin flip weighted by who is moving faster — a standing player rarely robs a running one.
+
+**Legs go, so the bench matters.** Stamina drains as you run and a tired player is up to a fifth slower. **At half time you may swap** either bench player for any outfield starter; the substitute comes on fresh, in that position.
+
+**The bots think.** With the ball: shoot if the goal is close, pass if pressed, otherwise run at them. Without it: hold the shape, shuffle across with the ball, and the closest player presses. Each club has a **strength** that tunes how sharp those decisions are.
+
+**The league.** Twelve fixtures, one against each of the other clubs, and the table has all thirteen in it — the other twelve play each other in the background, seeded off their strength so the standings are the same every time the screen redraws. Your club, position and results live on **your own profile**, so Diogo and Ben run separate seasons.
+
+**Head-to-head** is **two players on one phone**: tick the box before kick-off, Player 2 takes a position on the other team and gets their own stick and buttons on the far side. (Real-time online football between two phones needs a game server, which this app doesn't have — a shared Firestore doc can't carry sixty frames a second.)
+
+**The players are drawn, not photographed.** The Roblox/Blue Lock artwork can't ship with the app — those are somebody else's assets, and the repo keeps images tight (see CLAUDE.md) — so the figures are canvas-drawn in each club's colours, with the position printed under them.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

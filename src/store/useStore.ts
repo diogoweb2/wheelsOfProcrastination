@@ -376,6 +376,12 @@ interface StoreState {
    * Berries. Returns the sticker ids drawn, or why it couldn't.
    */
   openFcPack: (kind: 'free' | 'buy', drawn: string[], cost: number) => 'broke' | 'used' | 'empty' | true
+  /** FC Lock: pick the club and the position you play in the soccer league. */
+  setFcSquad: (teamId: string, role: string) => void
+  /** FC Lock: file a league result. */
+  addFcResult: (opp: string, gf: number, ga: number) => void
+  /** FC Lock: start the season over. */
+  resetFcSeason: () => void
   /** FC Lock: cache a fetched batch of news. */
   setFcNews: (news: AppData['fcLock']['news']) => void
   toggleIdea: (id: string) => void
@@ -1409,6 +1415,27 @@ export const useStore = create<StoreState>((set, get) => {
         a.packsOpened += 1
       })
       return true
+    },
+
+    setFcSquad(teamId, role) {
+      commit((d) => {
+        d.fcLock.soccer = { teamId, role, results: d.fcLock.soccer?.results ?? [] }
+      })
+    },
+
+    addFcResult(opp, gf, ga) {
+      commit((d) => {
+        const s = d.fcLock.soccer
+        if (!s) return
+        // one fixture against each club a season — replaying doesn't stack rows
+        s.results = [...s.results.filter((r) => r.opp !== opp), { opp, gf, ga, at: new Date().toISOString() }]
+      })
+    },
+
+    resetFcSeason() {
+      commit((d) => {
+        if (d.fcLock.soccer) d.fcLock.soccer.results = []
+      })
     },
 
     setFcNews(news) {

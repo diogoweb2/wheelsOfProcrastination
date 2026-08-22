@@ -62,6 +62,19 @@ import {
   type StickerDef,
 } from '../logic/fcAlbum'
 import { dayKey } from '../logic/dates'
+import { SoccerMatch } from '../components/SoccerMatch'
+import {
+  ROLES,
+  ROLE_NAMES,
+  TEAMS,
+  fixturesLeft,
+  newMatch,
+  standings,
+  teamById,
+  type Match,
+  type Role,
+  type TeamDef,
+} from '../logic/opsoccer'
 import {
   SOURCE_NAME,
   SOURCE_READ,
@@ -82,8 +95,8 @@ export function FcLockScreen({ tab }: { tab: string }) {
       {tab === 'countdown' && <CountdownTab />}
       {tab === 'news' && <NewsDesk />}
       {tab === 'watch' && <HighlightsTab />}
+      {tab === 'league' && <LeagueTab />}
       {tab === 'album' && <AlbumTab />}
-      {tab === 'packs' && <PacksTab />}
       {tab === 'teams' && <TeamsTab />}
     </div>
   )
@@ -994,6 +1007,210 @@ function HighlightsTab() {
   )
 }
 
+// --- One Piece Soccer League -------------------------------------------------
+
+/**
+ * The league (§21j): pick a club and the position you play, then work through
+ * the other twelve. The match itself lives in <SoccerMatch>; this is the desk
+ * around it — the picker, the fixtures and the table.
+ */
+function LeagueTab() {
+  const { data, setFcSquad, addFcResult, resetFcSeason } = useStore()
+  const saved = data.fcLock.soccer
+  const [live, setLive] = useState<Match | null>(null)
+  const [opponent, setOpponent] = useState<TeamDef | null>(null)
+  const [twoPlayer, setTwoPlayer] = useState(false)
+  const [theirRole, setTheirRole] = useState<Role>('CF')
+
+  const myTeam = saved ? teamById(saved.teamId) : undefined
+  const myRole = (saved?.role as Role) ?? 'CF'
+  const results = saved?.results ?? []
+
+  if (live && myTeam) {
+    return (
+      <SoccerMatch
+        match={live}
+        onQuit={() => setLive(null)}
+        onDone={(score) => {
+          if (opponent) addFcResult(opponent.id, score[0], score[1])
+          setLive(null)
+        }}
+      />
+    )
+  }
+
+  if (!saved || !myTeam) return <SquadPicker onPick={setFcSquad} />
+
+  const left = fixturesLeft(myTeam.id, results)
+  const table = standings(myTeam.id, results)
+
+  function kickOff(opp: TeamDef) {
+    if (!myTeam) return
+    sfx.click()
+    setOpponent(opp)
+    setLive(newMatch({ home: myTeam, away: opp, myRole, theirRole: twoPlayer ? theirRole : null }))
+  }
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontSize: 30 }}>{myTeam.emoji}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900 }}>{myTeam.name}</div>
+            <div className="muted" style={{ fontSize: 11 }}>
+              You play {ROLE_NAMES[myRole]} · {results.length}/12 played
+            </div>
+          </div>
+          <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setFcSquad('', '') }}>
+            Change
+          </button>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 12 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+          <input type="checkbox" checked={twoPlayer} onChange={(e) => setTwoPlayer(e.target.checked)} />
+          👥 Two players, one phone
+        </label>
+        {twoPlayer && (
+          <>
+            <p className="muted" style={{ fontSize: 12, margin: '6px 0' }}>
+              Player 2 takes a player on the other team. Hold the phone flat between you — one set of controls each.
+            </p>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {ROLES.map((r) => (
+                <button
+                  key={r}
+                  className={`btn btn--small ${theirRole === r ? 'btn--blue' : 'btn--ghost'}`}
+                  onClick={() => { sfx.click(); setTheirRole(r) }}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="h2">🗓️ Fixtures — {left.length} left</div>
+      {!left.length && (
+        <div className="card" style={{ marginBottom: 10 }}>
+          Season done. <button className="btn btn--small btn--blue" style={{ marginLeft: 8 }} onClick={() => { sfx.click(); resetFcSeason() }}>Start a new one</button>
+        </div>
+      )}
+      {left.map((t) => (
+        <button key={t.id} className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10, width: '100%' }} onClick={() => kickOff(t)}>
+          <span style={{ fontSize: 24 }}>{t.emoji}</span>
+          <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+            <span style={{ display: 'block', fontWeight: 700 }}>{t.name}</span>
+            <span className="muted" style={{ display: 'block', fontSize: 11 }}>
+              {t.strength >= 1.1 ? 'Tough' : t.strength >= 1 ? 'Even' : 'Beatable'}
+            </span>
+          </span>
+          <span className="btn btn--small btn--blue">Kick off</span>
+        </button>
+      ))}
+
+      {results.length > 0 && (
+        <>
+          <div className="h2" style={{ marginTop: 16 }}>✅ Your results</div>
+          {[...results].reverse().map((r) => {
+            const opp = teamById(r.opp)
+            return (
+              <div key={r.opp} className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <b style={{ width: 54, textAlign: 'center' }}>{r.gf} – {r.ga}</b>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  vs {opp?.emoji} {opp?.name}
+                </span>
+                <span className="muted" style={{ fontSize: 11 }}>
+                  {r.gf > r.ga ? 'W' : r.gf === r.ga ? 'D' : 'L'}
+                </span>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      <div className="h2" style={{ marginTop: 16 }}>🏆 One Piece Soccer League</div>
+      <div className="card" style={{ padding: 8, overflowX: 'auto' }}>
+        <table className="ops-table">
+          <thead>
+            <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
+          </thead>
+          <tbody>
+            {table.map((r, i) => (
+              <tr key={r.team.id} className={r.team.id === myTeam.id ? 'is-me' : ''}>
+                <td>{i + 1}</td>
+                <td>{r.team.emoji} {r.team.name}</td>
+                <td>{r.played}</td>
+                <td>{r.won}</td>
+                <td>{r.drawn}</td>
+                <td>{r.lost}</td>
+                <td>{r.gf - r.ga > 0 ? '+' : ''}{r.gf - r.ga}</td>
+                <td><b>{r.points}</b></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+/** Club first, then the shirt you wear. */
+function SquadPicker({ onPick }: { onPick: (teamId: string, role: string) => void }) {
+  const [team, setTeam] = useState<TeamDef | null>(null)
+  const [role, setRole] = useState<Role>('CF')
+
+  return (
+    <>
+      <div className="h2">🏟️ Pick your club</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        Thirteen teams, six on the pitch and two on the bench. You play one of them; the rest are bots.
+      </p>
+      <div className="card" style={{ marginBottom: 12, padding: 8 }}>
+        {TEAMS.map((t) => (
+          <button
+            key={t.id}
+            className="btn btn--ghost btn--small"
+            style={{ width: '100%', justifyContent: 'flex-start', gap: 10, opacity: team?.id === t.id ? 1 : 0.65 }}
+            onClick={() => { sfx.click(); setTeam(t) }}
+          >
+            <span style={{ fontSize: 18 }}>{t.emoji}</span>
+            <span style={{ flex: 1, textAlign: 'left', fontWeight: 700 }}>{t.name}</span>
+            <span style={{ display: 'inline-flex', gap: 3 }}>
+              <i style={{ width: 12, height: 12, borderRadius: 3, background: t.colors[0] }} />
+              <i style={{ width: 12, height: 12, borderRadius: 3, background: t.colors[1] }} />
+            </span>
+            <span>{team?.id === t.id ? '✅' : ''}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="h2">👕 Pick your position</div>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {ROLES.map((r) => (
+            <button
+              key={r}
+              className={`btn btn--small ${role === r ? 'btn--blue' : 'btn--ghost'}`}
+              onClick={() => { sfx.click(); setRole(r) }}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>{ROLE_NAMES[role]} — the other five roles are filled by your bots.</p>
+      </div>
+
+      <button className="btn btn--blue" style={{ width: '100%' }} disabled={!team} onClick={() => { sfx.gem(); if (team) onPick(team.id, role) }}>
+        Sign for {team ? team.name : 'a club'}
+      </button>
+    </>
+  )
+}
+
 // --- Album -------------------------------------------------------------------
 
 /**
@@ -1036,6 +1253,8 @@ function useChecklist() {
 /** The album: one club per page, swiped left and right like the real thing. */
 function AlbumTab() {
   const { data } = useStore()
+  /** The shop lives on the album's own page — one tab, both halves of collecting. */
+  const [shop, setShop] = useState(false)
   const album = data.fcLock.album ?? emptyAlbum()
   const { pages, all, ready } = useChecklist()
   const [page, setPage] = useState(0)
@@ -1054,6 +1273,22 @@ function AlbumTab() {
 
   return (
     <>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        {([false, true] as const).map((k) => (
+          <button
+            key={String(k)}
+            className={`btn btn--small ${shop === k ? 'btn--blue' : 'btn--ghost'}`}
+            style={{ flex: 1 }}
+            onClick={() => { sfx.click(); setShop(k) }}
+          >
+            {k ? '🎁 Packs' : '📕 Album'}
+          </button>
+        ))}
+      </div>
+
+      {shop && <PacksTab />}
+      {shop ? null : (
+      <>
       <div className="card" style={{ marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <div style={{ fontWeight: 900 }}>📕 Premier League 2026</div>
@@ -1146,6 +1381,8 @@ function AlbumTab() {
       <p className="muted" style={{ fontSize: 11, textAlign: 'center', marginTop: 6 }}>
         Swipe the page — {page + 1} of {PL_CLUBS.length}
       </p>
+      </>
+      )}
 
       {open && (
         <PlayerSheet

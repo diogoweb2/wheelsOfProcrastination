@@ -4973,3 +4973,66 @@ input, select { font-family: inherit; }
   border: 2px solid var(--line);
 }
 .fc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* ---------- One Piece Soccer League (§21j) ---------- */
+.ops-wrap { user-select: none; -webkit-user-select: none; touch-action: none; }
+.ops-hud { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; font-weight: 900; }
+.ops-team { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ops-hud .ops-team:last-child { text-align: right; }
+.ops-score { font-size: 22px; }
+.ops-clock { text-align: center; font-size: 11px; font-weight: 800; opacity: 0.65; letter-spacing: 1px; }
+
+.ops-pitch-wrap { position: relative; margin-top: 8px; }
+.ops-pitch { width: 100%; height: auto; border-radius: 10px; border: 2px solid var(--line); display: block; }
+.ops-shout {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 3px 12px rgb(0 0 0 / 80%);
+  animation: fc-pop 0.3s ease-out;
+  pointer-events: none;
+}
+
+.ops-controls { position: relative; display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.ops-controls.is-flipped { flex-direction: row-reverse; }
+.ops-label { position: absolute; top: -12px; left: 0; font-size: 9px; font-weight: 800; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
+.ops-controls.is-flipped .ops-label { left: auto; right: 0; }
+
+.ops-stick {
+  width: 112px;
+  height: 112px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, rgb(255 255 255 / 12%), rgb(0 0 0 / 35%));
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+.ops-knob { width: 46px; height: 46px; border-radius: 50%; background: var(--bg2); border: 2px solid var(--gold, #ffce00); }
+
+.ops-buttons { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ops-btn {
+  padding: 14px 4px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #fff;
+  border: 2px solid rgb(255 255 255 / 20%);
+}
+.ops-btn:active { transform: scale(0.94); }
+.ops-btn--shoot { background: linear-gradient(160deg, #d70000, #6b0000); }
+.ops-btn--pass { background: linear-gradient(160deg, #2e63a4, #0c2338); }
+.ops-btn--dribble { background: linear-gradient(160deg, #ff9600, #8c3d00); }
+.ops-btn--call { background: linear-gradient(160deg, #0a7d3c, #052d17); }
+
+.ops-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.ops-table th { text-align: left; font-size: 9px; letter-spacing: 0.5px; opacity: 0.6; padding: 4px 3px; }
+.ops-table td { padding: 5px 3px; border-top: 1px solid var(--line); white-space: nowrap; }
+.ops-table tr.is-me td { background: rgb(255 206 0 / 12%); font-weight: 800; }
