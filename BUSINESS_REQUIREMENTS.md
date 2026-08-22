@@ -1045,6 +1045,7 @@ The **💸 Transfers** tab is the **2026 summer window**: who moved, for how muc
 - **Only the very good teams.** Every row has an elite side (`ELITE`) — no third-division business.
 - **Your clubs first.** Any move touching a club you follow floats into its own ⭐ section; everything else follows, newest first, twelve at a time behind a **Show all**.
 - **Faces.** Each row carries the player's photo, looked up by name from TheSportsDB and cached forever (a face doesn't change); a 👕 stands in for anyone they've never heard of.
+- **Tap a row for the player.** A sheet opens with the picture at **190 px**, then **age** (worked out from the birthday, so it's right next year too), position, shirt number, nationality, height, weight, preferred foot, birthday, where they were born, the club they're on the books at, and the write-up. Two calls behind one cache entry — the search finds them, the full record carries the height and the biography — and a player the database has never heard of says so plainly rather than showing an empty card.
 - Loans 🔁 and frees 🆓 are marked rather than dressed up as fees, and grades are coloured: A green, B neutral, C/D red.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

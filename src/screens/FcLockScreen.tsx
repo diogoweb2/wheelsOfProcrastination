@@ -24,12 +24,14 @@ import {
   lookupMatch,
   nextForTeam,
   nextInLeague,
-  playerPhoto,
+  ageFrom,
+  lookupPlayer,
   searchTeams,
   torontoDay,
   torontoTime,
   upcomingTournaments,
   type FcMatch,
+  type PlayerInfo,
 } from '../logic/fclock'
 import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
 import {
@@ -462,6 +464,8 @@ function TransfersTab() {
   const { data } = useStore()
   const clubs = data.fcLock.teams.map((t) => t.name)
   const [showAll, setShowAll] = useState(false)
+  /** The row that was tapped — its player's card is open over the list. */
+  const [open, setOpen] = useState<Transfer | null>(null)
 
   const ours = useMemo(() => (clubs.length ? TRANSFERS_2026.filter((t) => involves(t, clubs)) : []), [clubs.join('|')])
   const rest = useMemo(() => {
@@ -485,57 +489,159 @@ function TransfersTab() {
       {ours.length > 0 && (
         <>
           <div className="h2">⭐ Your clubs — {ours.length}</div>
-          {ours.map((t) => <TransferRow key={t.id} item={t} />)}
+          {ours.map((t) => <TransferRow key={t.id} item={t} onOpen={() => setOpen(t)} />)}
         </>
       )}
 
       <div className="h2" style={{ marginTop: ours.length ? 16 : 0 }}>
         {ours.length ? '🌍 Everyone else' : '🌍 The window'}
       </div>
-      {shown.map((t) => <TransferRow key={t.id} item={t} />)}
+      {shown.map((t) => <TransferRow key={t.id} item={t} onOpen={() => setOpen(t)} />)}
       {rest.length > shown.length && (
         <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setShowAll(true) }}>
           Show all {rest.length}
         </button>
       )}
+
+      {open && <PlayerSheet move={open} onClose={() => setOpen(null)} />}
     </>
   )
 }
 
 const TRANSFER_ICON: Record<Transfer['kind'], string> = { permanent: '💸', loan: '🔁', free: '🆓' }
 
-/** The player's face, fetched by name once and remembered; the shirt is the fallback. */
-function PlayerFace({ name }: { name: string }) {
-  const [src, setSrc] = useState('')
+/** Look a player up once per mount; `null` while it's in flight or unknown. */
+function usePlayer(name: string): PlayerInfo | null {
+  const [info, setInfo] = useState<PlayerInfo | null>(null)
   useEffect(() => {
     let alive = true
-    void playerPhoto(name).then((url) => {
-      if (alive) setSrc(url)
+    void lookupPlayer(name).then((p) => {
+      if (alive) setInfo(p)
     })
     return () => {
       alive = false
     }
   }, [name])
+  return info
+}
 
+/** The player's face. The shirt stands in for anyone the database misses. */
+function PlayerFace({ name, size = 64, src }: { name: string; size?: number; src?: string }) {
+  const info = usePlayer(name)
+  const photo = src ?? info?.cutout ?? info?.thumb ?? ''
   return (
     <div
       style={{
-        width: 52,
-        height: 52,
+        width: size,
+        height: size,
         flexShrink: 0,
         borderRadius: '50%',
         overflow: 'hidden',
         background: 'rgba(255,255,255,0.08)',
         display: 'grid',
         placeItems: 'center',
-        fontSize: 22,
+        fontSize: size * 0.42,
       }}
     >
-      {src ? (
-        <img src={`${src}/tiny`} alt="" width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+      {photo ? (
+        <img src={photo} alt="" width={size} height={size} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
       ) : (
         '👕'
       )}
+    </div>
+  )
+}
+
+/**
+ * Everything about the player behind a transfer: the big picture, age, position,
+ * shirt number, where they're from, and the write-up. Tap the backdrop, the ✕ or
+ * press Escape to close.
+ */
+function PlayerSheet({ move, onClose }: { move: Transfer; onClose: () => void }) {
+  const info = usePlayer(move.player)
+  const age = ageFrom(info?.born)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const facts: [string, string][] = [
+    ...(age !== null ? ([['Age', `${age}`]] as [string, string][]) : []),
+    ...(info?.position ? ([['Position', info.position]] as [string, string][]) : []),
+    ...(info?.number ? ([['Shirt', `#${info.number}`]] as [string, string][]) : []),
+    ...(info?.nationality ? ([['Nationality', info.nationality]] as [string, string][]) : []),
+    ...(info?.height ? ([['Height', info.height]] as [string, string][]) : []),
+    ...(info?.weight ? ([['Weight', info.weight]] as [string, string][]) : []),
+    ...(info?.foot ? ([['Foot', info.foot]] as [string, string][]) : []),
+    ...(info?.born ? ([['Born', new Date(`${info.born}T12:00:00Z`).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })]] as [string, string][]) : []),
+  ]
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn btn--ghost btn--small" aria-label="Close" onClick={() => { sfx.click(); onClose() }}>
+            ✕
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <PlayerFace name={move.player} size={190} />
+          <div style={{ fontSize: 22, fontWeight: 900, marginTop: 10 }}>{info?.name || move.player}</div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+            {[info?.position, info?.nationality].filter(Boolean).join(' · ') || 'Looking them up…'}
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+            <span>{TRANSFER_ICON[move.kind]}</span>
+            <span>{move.from}</span>
+            <span className="muted">→</span>
+            <b>{move.to}</b>
+          </div>
+          <div className="muted" style={{ fontSize: 11, marginTop: 6, fontWeight: 800, letterSpacing: 0.4 }}>
+            {[move.fee, `OUT ${move.gradeFrom}`, `IN ${move.gradeTo}`, move.date].join(' · ').toUpperCase()}
+          </div>
+        </div>
+
+        {facts.length > 0 && (
+          <div className="card" style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {facts.map(([label, value]) => (
+              <div key={label}>
+                <div className="muted" style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>{label.toUpperCase()}</div>
+                <div style={{ fontWeight: 700 }}>{value}</div>
+              </div>
+            ))}
+            {info?.birthPlace && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div className="muted" style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>BORN IN</div>
+                <div style={{ fontWeight: 700 }}>{info.birthPlace}</div>
+              </div>
+            )}
+            {info?.team && (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div className="muted" style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5 }}>ON THE BOOKS AT</div>
+                <div style={{ fontWeight: 700 }}>{info.team}</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {info?.description && (
+          <div className="card" style={{ marginTop: 10 }}>
+            <p style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{info.description.slice(0, 1200)}</p>
+          </div>
+        )}
+
+        {info === null && (
+          <p className="muted" style={{ fontSize: 12, marginTop: 10, textAlign: 'center' }}>
+            No profile found for this player yet — the move above is still the real one.
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -550,10 +656,25 @@ function Grade({ club, grade }: { club: string; grade: string }) {
   )
 }
 
-function TransferRow({ item }: { item: Transfer }) {
+function TransferRow({ item, onOpen }: { item: Transfer; onOpen: () => void }) {
   return (
-    <div className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-      <PlayerFace name={item.player} />
+    <div
+      className="card"
+      role="button"
+      tabIndex={0}
+      style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+      onClick={() => {
+        sfx.click()
+        onOpen()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+    >
+      <PlayerFace name={item.player} size={64} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>{TRANSFER_ICON[item.kind]}</span>
@@ -571,6 +692,7 @@ function TransferRow({ item }: { item: Transfer }) {
           </span>
         </div>
       </div>
+      <div className="muted" style={{ flexShrink: 0, fontSize: 18 }}>›</div>
     </div>
   )
 }

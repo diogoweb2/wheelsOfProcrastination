@@ -269,33 +269,99 @@ export function upcomingTournaments(now: Date = new Date()): TournamentDef[] {
   return TOURNAMENTS.filter((t) => daysUntil(`${t.date}T12:00:00Z`, now) >= 0).sort((a, b) => a.date.localeCompare(b.date))
 }
 
-// --- player photos -----------------------------------------------------------
+// --- players -----------------------------------------------------------------
 
-const PHOTO_KEY = 'fclock:photo:v1:'
+const PLAYER_KEY = 'fclock:player:v2:'
+
+/** Everything TheSportsDB knows about a footballer, in the shape the sheet wants. */
+export interface PlayerInfo {
+  id: string
+  name: string
+  team?: string
+  position?: string
+  /** YYYY-MM-DD. */
+  born?: string
+  nationality?: string
+  birthPlace?: string
+  height?: string
+  weight?: string
+  number?: string
+  foot?: string
+  description?: string
+  cutout?: string
+  thumb?: string
+}
 
 /**
- * A player's cutout, looked up by name and remembered forever (a face doesn't
- * change). `''` is cached too — a player TheSportsDB has never heard of must not
- * be searched again on every render.
+ * Look a player up by name and remember them forever — a face and a birthday
+ * don't change. Two calls behind one cache entry: the search finds the id, the
+ * lookup carries the height, the foot and the write-up. `null` is cached too, as
+ * an empty record, so a name they've never heard of isn't searched every render.
  */
-export async function playerPhoto(name: string): Promise<string> {
-  const cached = localStorage.getItem(PHOTO_KEY + name)
-  if (cached !== null) return cached
-  let url = ''
+export async function lookupPlayer(name: string): Promise<PlayerInfo | null> {
+  const cached = localStorage.getItem(PLAYER_KEY + name)
+  if (cached !== null) {
+    const parsed = JSON.parse(cached) as PlayerInfo | null
+    return parsed && parsed.id ? parsed : null
+  }
+  let info: PlayerInfo | null = null
   try {
     const res = await fetch(`${API}/searchplayers.php?p=${encodeURIComponent(name)}`)
     if (res.ok) {
       const body = (await res.json()) as { player: Record<string, string | null>[] | null }
       const hit = (body.player ?? []).find((p) => p.strSport === 'Soccer')
-      url = hit?.strCutout || hit?.strThumb || ''
+      if (hit?.idPlayer) info = await full(hit)
     }
   } catch {
-    return '' // offline: don't poison the cache, try again next time
+    return null // offline: don't poison the cache, try again next time
   }
   try {
-    localStorage.setItem(PHOTO_KEY + name, url)
+    localStorage.setItem(PLAYER_KEY + name, JSON.stringify(info ?? {}))
   } catch {
-    // full quota is not worth failing a face over
+    // a full quota is not worth failing a face over
   }
-  return url
+  return info
+}
+
+/** The search hit, topped up with the fields only the full record carries. */
+async function full(hit: Record<string, string | null>): Promise<PlayerInfo> {
+  let deep: Record<string, string | null> = {}
+  try {
+    const res = await fetch(`${API}/lookupplayer.php?id=${hit.idPlayer}`)
+    if (res.ok) {
+      const body = (await res.json()) as { players: Record<string, string | null>[] | null }
+      deep = body.players?.[0] ?? {}
+    }
+  } catch {
+    // the search hit alone is still a useful card
+  }
+  const pick = (k: string) => (deep[k] || hit[k] || undefined) ?? undefined
+  return {
+    id: hit.idPlayer ?? '',
+    name: pick('strPlayer') ?? '',
+    team: pick('strTeam'),
+    position: pick('strPosition'),
+    born: pick('dateBorn'),
+    nationality: pick('strNationality'),
+    birthPlace: pick('strBirthLocation'),
+    height: pick('strHeight'),
+    weight: pick('strWeight'),
+    number: pick('strNumber'),
+    foot: pick('strSide'),
+    description: pick('strDescriptionEN'),
+    cutout: pick('strCutout'),
+    thumb: pick('strThumb'),
+  }
+}
+
+/** Age today, from a YYYY-MM-DD birthday. */
+export function ageFrom(born: string | undefined, now: Date = new Date()): number | null {
+  if (!born) return null
+  const d = new Date(`${born}T12:00:00Z`)
+  if (Number.isNaN(d.getTime())) return null
+  let age = now.getFullYear() - d.getUTCFullYear()
+  const beforeBirthday =
+    now.getMonth() < d.getUTCMonth() || (now.getMonth() === d.getUTCMonth() && now.getDate() < d.getUTCDate())
+  if (beforeBirthday) age -= 1
+  return age >= 0 && age < 120 ? age : null
 }
