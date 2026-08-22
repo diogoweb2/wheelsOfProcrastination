@@ -468,3 +468,83 @@ export const CLUB_RANKING: RankedClub[] = [
   { name: 'Wolverhampton Wanderers', country: 'England', note: 'giants of the 1950s, mid-table since' },
   { name: 'Sunderland', country: 'England', note: 'huge support, long climb back' },
 ]
+
+// --- highlights (§21i) -------------------------------------------------------
+
+export interface VideoSource {
+  id: string
+  name: string
+  emoji: string
+  url: string
+  what: string
+  /** TheSportsDB league ids this source covers, for matching a result to a site. */
+  leagues: string[]
+}
+
+/**
+ * Where the highlights actually live. None of these publish a feed a browser is
+ * allowed to read (no CORS, no free API), so FC Lock does the honest thing: it
+ * takes you straight to the page, and for a specific game it builds the search
+ * that finds that game's highlights.
+ */
+export const VIDEO_SOURCES: VideoSource[] = [
+  {
+    id: 'caze',
+    name: 'CazéTV',
+    emoji: '📺',
+    url: 'https://www.youtube.com/@CazeTV/streams',
+    what: 'live games and full replays, in Brazil',
+    leagues: ['4480', '4481', '5071', '4351'],
+  },
+  {
+    id: 'pl',
+    name: 'Premier League',
+    emoji: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    url: 'https://www.premierleague.com/en/video',
+    what: 'official match highlights',
+    leagues: ['4328'],
+  },
+  {
+    id: 'laliga',
+    name: 'LaLiga',
+    emoji: '🇪🇸',
+    url: 'https://www.laliga.com/en-GB/videos?page=1',
+    what: 'official video hub',
+    leagues: ['4335'],
+  },
+  {
+    id: 'seriea',
+    name: 'Serie A',
+    emoji: '🇮🇹',
+    url: 'https://matchhighlights.live/league/serie-a/',
+    what: 'match highlights',
+    leagues: ['4332'],
+  },
+  {
+    id: 'ligue1',
+    name: 'Ligue 1',
+    emoji: '🇫🇷',
+    url: 'https://ligue1.com/en/videos',
+    what: 'official videos',
+    leagues: ['4334'],
+  },
+  {
+    id: 'brasileirao',
+    name: 'Brasileirão',
+    emoji: '🇧🇷',
+    url: 'https://www.foxsports.com/soccer/brazil-serie-a/highlights',
+    what: 'highlights on FOX Sports',
+    leagues: ['4351'],
+  },
+]
+
+/** The site that covers this competition, if one of ours does. */
+export function sourceForLeague(leagueId: string): VideoSource | undefined {
+  return VIDEO_SOURCES.find((v) => v.id !== 'caze' && v.leagues.includes(leagueId))
+}
+
+/** A YouTube search that lands on this exact game's highlights. */
+export function highlightSearch(m: FcMatch): string {
+  const q = `${m.home} vs ${m.away} highlights ${m.leagueName}`
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`
+}

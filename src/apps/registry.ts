@@ -278,6 +278,7 @@ export const APPS: AppDef[] = [
       // so they share a tab rather than eating two slots in the bottom menu
       { id: 'countdown', label: 'Days', icon: '⏳' },
       { id: 'news', label: 'News', icon: '📰' },
+      { id: 'watch', label: 'Watch', icon: '▶️' },
       { id: 'album', label: 'Album', icon: '📕' },
       { id: 'packs', label: 'Packs', icon: '🎁' },
       { id: 'teams', label: 'Teams', icon: '⚽' },

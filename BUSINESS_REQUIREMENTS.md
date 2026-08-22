@@ -1010,7 +1010,7 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Six tabs, six URLs (§1c): **📅 Games** (`/fclock/games`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **⚽ Teams** (`/fclock/teams`).
+Seven tabs, seven URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **⚽ Teams** (`/fclock/teams`).
 
 ### 21a. Toronto time, always
 
@@ -1069,5 +1069,15 @@ Opening takes over the whole screen, black, one thing at a time — the way the 
 3. **The card.** The player rises onto the podium on a gold card: shirt number and position where the rating sits on a real one, the photo, the name, the club, fireworks either side, and a **NEW!** flash if it's one you didn't have. `TAP TO CONTINUE` walks to the next of the five.
 
 After the fifth, the whole pack is laid out together with how many were new, and everything is already stuck in the album (§21g). A club badge pulled from a pack rides the same ceremony with its foil card.
+
+### 21i. Watch (▶️) — highlights and the live stream
+
+Where to see it, when you missed it.
+
+- **Live on CazéTV** sits at the top: one tap to [their channel](https://www.youtube.com/@CazeTV/streams) — whatever they're showing now, plus every replay.
+- **Watch it back.** The finished games from the leagues and clubs you follow, newest first, each with its score, a **▶️ Highlights** button that opens the search that lands on *that* game's highlights, and a link to the competition's own video desk.
+- **The video desks** are listed in full: the [Premier League](https://www.premierleague.com/en/video), [LaLiga](https://www.laliga.com/en-GB/videos?page=1), [Serie A](https://matchhighlights.live/league/serie-a/), [Ligue 1](https://ligue1.com/en/videos) and [Brasileirão on FOX](https://www.foxsports.com/soccer/brazil-serie-a/highlights).
+
+**Why it links out instead of embedding.** None of these sites publish a video list a browser is allowed to read — no CORS headers, no free API, and YouTube's channel feed is the same story. Rather than guess at what's on, or scrape something that will break next week, the tab does the one honest thing: it puts you one tap from the real page, and builds the exact search for the game you just watched a score for.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

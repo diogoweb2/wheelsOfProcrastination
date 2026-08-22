@@ -25,9 +25,14 @@ import {
   lookupMatch,
   nextForTeam,
   nextInLeague,
+  pastForTeam,
+  pastInLeague,
   ageFrom,
   lookupPlayer,
   searchTeams,
+  sourceForLeague,
+  highlightSearch,
+  VIDEO_SOURCES,
   teamByName,
   torontoDay,
   torontoTime,
@@ -74,6 +79,7 @@ export function FcLockScreen({ tab }: { tab: string }) {
       {tab === 'games' && <GamesTab />}
       {tab === 'countdown' && <CountdownTab />}
       {tab === 'news' && <NewsDesk />}
+      {tab === 'watch' && <HighlightsTab />}
       {tab === 'album' && <AlbumTab />}
       {tab === 'packs' && <PacksTab />}
       {tab === 'teams' && <TeamsTab />}
@@ -810,6 +816,127 @@ function Countdown({ emoji, name, what, days, approx }: { emoji: string; name: s
         <div className="muted" style={{ fontSize: 10 }}>{days === 1 ? 'DAY' : 'DAYS'}</div>
       </div>
     </div>
+  )
+}
+
+// --- Highlights --------------------------------------------------------------
+
+/** The finished games from what we follow, newest first. */
+function useResults() {
+  const { data } = useStore()
+  const fcLock = data.fcLock
+  const [games, setGames] = useState<FcMatch[]>([])
+  const [loading, setLoading] = useState(false)
+  const leagues = fcLock.leagues.join(',')
+  const teams = fcLock.teams.map((t) => t.id).join(',')
+
+  useEffect(() => {
+    const leagueIds = leagues ? leagues.split(',') : []
+    const teamIds = teams ? teams.split(',') : []
+    if (!leagueIds.length && !teamIds.length) {
+      setGames([])
+      return
+    }
+    let alive = true
+    setLoading(true)
+    void Promise.all([
+      ...leagueIds.map((id) => pastInLeague(id).catch(() => [])),
+      ...teamIds.map((id) => pastForTeam(id).catch(() => [])),
+    ])
+      .then((batches) => {
+        if (!alive) return
+        const byId = new Map<string, FcMatch>()
+        for (const m of batches.flat()) byId.set(m.id, m)
+        setGames([...byId.values()].sort((a, b) => b.kickoff.localeCompare(a.kickoff)))
+      })
+      .finally(() => alive && setLoading(false))
+    return () => {
+      alive = false
+    }
+  }, [leagues, teams])
+
+  return { games, loading }
+}
+
+/**
+ * Where to watch it back (§21i). None of the highlight sites publish a feed a
+ * browser may read — no CORS, no free API — so this tab doesn't pretend to embed
+ * them. It takes you to the page, and for one particular game it builds the
+ * search that lands on that game's highlights.
+ */
+function HighlightsTab() {
+  const { games, loading } = useResults()
+  const recent = games.slice(0, 20)
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ fontWeight: 900 }}>📺 Live on CazéTV</div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+          Whatever they're showing right now, plus every replay they've put up.
+        </p>
+        <a className="btn btn--blue btn--small" style={{ marginTop: 8 }} href="https://www.youtube.com/@CazeTV/streams" target="_blank" rel="noreferrer">
+          ▶️ Open CazéTV
+        </a>
+      </div>
+
+      <div className="h2">🎬 Watch it back</div>
+      {loading && <div className="card">Looking up the results…</div>}
+      {!loading && !recent.length && (
+        <div className="card">
+          Follow a league or a club in <b>Teams</b> and the games you missed show up here.
+        </div>
+      )}
+      {recent.map((m) => {
+        const site = sourceForLeague(m.leagueId)
+        return (
+          <div key={m.id} className="card" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700 }}>
+                  {m.home} {hasScore(m) ? `${m.homeScore} – ${m.awayScore}` : 'v'} {m.away}
+                </div>
+                <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+                  {m.leagueName} · {torontoDay(m.kickoff)}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+              <a className="btn btn--small btn--blue" href={highlightSearch(m)} target="_blank" rel="noreferrer">
+                ▶️ Highlights
+              </a>
+              {site && (
+                <a className="btn btn--small btn--ghost" href={site.url} target="_blank" rel="noreferrer">
+                  {site.emoji} {site.name} ↗
+                </a>
+              )}
+            </div>
+          </div>
+        )
+      })}
+
+      <div className="h2" style={{ marginTop: 16 }}>🏟️ The video desks</div>
+      {VIDEO_SOURCES.map((v) => (
+        <a
+          key={v.id}
+          className="card"
+          href={v.url}
+          target="_blank"
+          rel="noreferrer"
+          style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}
+        >
+          <div style={{ fontSize: 26 }}>{v.emoji}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700 }}>{v.name}</div>
+            <div className="muted" style={{ fontSize: 11 }}>{v.what}</div>
+          </div>
+          <div className="muted">↗</div>
+        </a>
+      ))}
+      <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
+        These sites don't let an app read their video lists, so FC Lock links straight to them instead of guessing what's on.
+      </p>
+    </>
   )
 }
 
