@@ -268,3 +268,34 @@ export const TOURNAMENTS: TournamentDef[] = [
 export function upcomingTournaments(now: Date = new Date()): TournamentDef[] {
   return TOURNAMENTS.filter((t) => daysUntil(`${t.date}T12:00:00Z`, now) >= 0).sort((a, b) => a.date.localeCompare(b.date))
 }
+
+// --- player photos -----------------------------------------------------------
+
+const PHOTO_KEY = 'fclock:photo:v1:'
+
+/**
+ * A player's cutout, looked up by name and remembered forever (a face doesn't
+ * change). `''` is cached too — a player TheSportsDB has never heard of must not
+ * be searched again on every render.
+ */
+export async function playerPhoto(name: string): Promise<string> {
+  const cached = localStorage.getItem(PHOTO_KEY + name)
+  if (cached !== null) return cached
+  let url = ''
+  try {
+    const res = await fetch(`${API}/searchplayers.php?p=${encodeURIComponent(name)}`)
+    if (res.ok) {
+      const body = (await res.json()) as { player: Record<string, string | null>[] | null }
+      const hit = (body.player ?? []).find((p) => p.strSport === 'Soccer')
+      url = hit?.strCutout || hit?.strThumb || ''
+    }
+  } catch {
+    return '' // offline: don't poison the cache, try again next time
+  }
+  try {
+    localStorage.setItem(PHOTO_KEY + name, url)
+  } catch {
+    // full quota is not worth failing a face over
+  }
+  return url
+}

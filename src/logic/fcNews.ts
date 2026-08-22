@@ -9,7 +9,7 @@
 // It is a *summary of sources*, not a wire feed: every item carries where it
 // came from, and the batch is cached in Firestore so opening the tab five times
 // costs one search.
-import type { AiConfig, FcNewsItem, FcTransferItem } from '../types'
+import type { AiConfig, FcNewsItem } from '../types'
 import { askOpenRouter, shortAiError, sliceJson } from './openrouter'
 
 /** Search-augmented: the `:online` suffix is OpenRouter's web plugin. */
@@ -88,84 +88,3 @@ function parse(text: string): FcNewsItem[] {
     }))
 }
 
-// --- the transfer market (§21f) ----------------------------------------------
-
-/** The market is a slow-moving record, not a rumour mill: one read a day is plenty. */
-export const TRANSFERS_TTL_MS = 24 * 60 * 60 * 1000
-
-export function transfersStale(
-  cache: { fetchedAt: string; forKey: string; year: number } | undefined,
-  key: string,
-  year: number,
-): boolean {
-  if (!cache || cache.forKey !== key || cache.year !== year) return true
-  return Date.now() - Date.parse(cache.fetchedAt) > TRANSFERS_TTL_MS
-}
-
-const TRANSFERS_SYSTEM = `You are a football transfer archivist. You search the live web and report only completed or officially announced transfers you actually found.
-Rules:
-- Only moves that are DONE (signed / officially announced). No rumours, no "in talks", no "close to".
-- Fees exactly as reported by the outlet ("€60m", "£45m", "free", "loan", "undisclosed"). Never estimate a fee yourself.
-- Never invent a player, a club, a fee or a date.
-- If you are unsure a move completed, leave it out.`
-
-/**
- * Every transfer this calendar year: the followed clubs first, then the biggest
- * moves in world football. Throws with a reason a human can act on.
- */
-export async function fetchFcTransfers(
-  ai: AiConfig | null,
-  teams: string[],
-  year: number = new Date().getFullYear(),
-): Promise<FcTransferItem[]> {
-  const key = ai?.openrouterKey?.trim()
-  if (!key) throw new Error('No OpenRouter key set — add one in Settings to turn transfers on.')
-
-  const following = teams.length
-    ? `First, EVERY completed transfer in and out of these clubs in ${year}: ${teams.join(', ')}. Mark each of those with "ours": true.
-Then, the 15 biggest completed transfers in world football in ${year} (any club), with "ours": false.`
-    : `The 25 biggest completed transfers in world football in ${year}, with "ours": false.`
-
-  const prompt = `Today is ${new Date().toISOString().slice(0, 10)}. Search the web for the ${year} football transfer market.
-${following}
-Answer with ONLY a JSON array, newest first, each item:
-{"player": "...", "from": "selling club", "to": "buying club", "fee": "as reported", "kind": "permanent" | "loan" | "free", "date": "YYYY-MM-DD", "source": "outlet name", "url": "link", "ours": true | false}`
-
-  let last: unknown
-  for (const model of NEWS_MODELS) {
-    try {
-      const text = await askOpenRouter({
-        key,
-        model,
-        system: TRANSFERS_SYSTEM,
-        prompt,
-        title: TITLE,
-        temperature: 0.1,
-        timeoutMs: TIMEOUT_MS,
-      })
-      return parseTransfers(text)
-    } catch (e) {
-      last = e
-    }
-  }
-  throw new Error(shortAiError(last, TIMEOUT_MS))
-}
-
-function parseTransfers(text: string): FcTransferItem[] {
-  const raw = JSON.parse(sliceJson(text, '[', ']')) as Partial<FcTransferItem>[]
-  return raw
-    .filter((t) => t?.player && t?.to)
-    .slice(0, 60)
-    .map((t, n) => ({
-      id: `tr-${Date.now()}-${n}`,
-      player: String(t.player).slice(0, 80),
-      from: String(t.from ?? '—').slice(0, 60),
-      to: String(t.to).slice(0, 60),
-      fee: String(t.fee ?? 'undisclosed').slice(0, 40),
-      kind: t.kind === 'loan' || t.kind === 'free' ? t.kind : 'permanent',
-      ...(t.ours ? { ours: true } : {}),
-      ...(t.date ? { date: String(t.date).slice(0, 10) } : {}),
-      ...(t.source ? { source: String(t.source).slice(0, 60) } : {}),
-      ...(t.url ? { url: String(t.url).slice(0, 400) } : {}),
-    }))
-}

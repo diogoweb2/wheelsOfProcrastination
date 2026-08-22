@@ -1360,23 +1360,6 @@ export interface FcNewsItem {
  * in a shared doc: Diogo and Ben follow different clubs and star different
  * games, so the schedule is personal — same app, two schedules.
  */
-/** One completed (or agreed) move in this year's transfer market. */
-export interface FcTransferItem {
-  id: string
-  player: string
-  from: string
-  to: string
-  /** As reported — "€60m", "free", "loan", "undisclosed". Never a made-up number. */
-  fee: string
-  kind: 'permanent' | 'loan' | 'free'
-  /** YYYY-MM-DD, the day it was announced. */
-  date?: string
-  source?: string
-  url?: string
-  /** True when one side of the move is a club we follow. */
-  ours?: boolean
-}
-
 export interface FcLockState {
   /** TheSportsDB league ids we follow (see `LEAGUES` in logic/fclock.ts). */
   leagues: string[]
@@ -1387,13 +1370,5 @@ export interface FcLockState {
     fetchedAt: string
     /** Which teams the batch was fetched for — a changed favourite invalidates it. */
     forKey: string
-  }
-  /** This year's transfer market (§21f), fetched the same way as the news. */
-  transfers?: {
-    items: FcTransferItem[]
-    fetchedAt: string
-    forKey: string
-    /** The calendar year the batch covers — a new year invalidates it. */
-    year: number
   }
 }

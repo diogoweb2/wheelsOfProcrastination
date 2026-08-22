@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { sfx } from '../audio'
-import type { FcNewsItem, FcTransferItem, FcWatchItem } from '../types'
+import type { FcNewsItem, FcWatchItem } from '../types'
 import {
   LEAGUES,
   countdownLabel,
@@ -24,13 +24,22 @@ import {
   lookupMatch,
   nextForTeam,
   nextInLeague,
+  playerPhoto,
   searchTeams,
   torontoDay,
   torontoTime,
   upcomingTournaments,
   type FcMatch,
 } from '../logic/fclock'
-import { fetchFcNews, fetchFcTransfers, newsKey, newsStale, transfersStale } from '../logic/fcNews'
+import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
+import {
+  SOURCE_NAME,
+  SOURCE_READ,
+  SOURCE_URL,
+  TRANSFERS_2026,
+  involves,
+  type Transfer,
+} from '../logic/transfers2026'
 
 export function FcLockScreen({ tab }: { tab: string }) {
   return (
@@ -445,106 +454,122 @@ function NewsCard({ item }: { item: FcNewsItem }) {
 // --- Transfers ---------------------------------------------------------------
 
 /**
- * Every move this calendar year: our clubs' business first, then the biggest
- * deals in world football. Read once a day and cached on the profile — the
- * market is a record, not a live feed.
+ * The 2026 summer window, as ESPN graded it (§21f). A hand-copied dataset, not
+ * a feed: every move here actually happened, with the fee ESPN reported and the
+ * grade they gave each club. Your clubs' business floats to the top.
  */
 function TransfersTab() {
-  const { data, aiConfig, setFcTransfers } = useStore()
-  const fcLock = data.fcLock
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { data } = useStore()
+  const clubs = data.fcLock.teams.map((t) => t.name)
   const [showAll, setShowAll] = useState(false)
 
-  const year = new Date().getFullYear()
-  const teams = useMemo(() => fcLock.teams.map((t) => t.name), [fcLock.teams])
-  const key = newsKey(teams)
-  const cache = fcLock.transfers
-  const stale = transfersStale(cache, key, year)
-
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const items = await fetchFcTransfers(aiConfig, teams, year)
-      setFcTransfers({ items, fetchedAt: new Date().toISOString(), forKey: key, year })
-    } catch (e) {
-      setError((e as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }, [aiConfig, teams, key, year, setFcTransfers])
-
-  const items = cache?.items ?? []
-  const ours = items.filter((t) => t.ours)
-  const rest = items.filter((t) => !t.ours)
-  const shown = showAll ? rest : rest.slice(0, 10)
+  const ours = useMemo(() => (clubs.length ? TRANSFERS_2026.filter((t) => involves(t, clubs)) : []), [clubs.join('|')])
+  const rest = useMemo(() => {
+    const mine = new Set(ours.map((t) => t.id))
+    return TRANSFERS_2026.filter((t) => !mine.has(t.id))
+  }, [ours])
+  const shown = showAll ? rest : rest.slice(0, 12)
 
   return (
     <>
-      <div className="card" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700 }}>💸 Transfers {year}</div>
-          <div className="muted" style={{ fontSize: 11 }}>
-            {cache?.fetchedAt
-              ? `Read ${torontoDay(cache.fetchedAt)}, ${torontoTime(cache.fetchedAt)} ET${stale ? ' · out of date' : ''}`
-              : teams.length
-                ? `Your clubs’ business, plus the biggest moves of ${year}`
-                : `The biggest moves of ${year} — follow a club to see its own business too`}
-          </div>
+      <div className="card" style={{ marginBottom: 12 }}>
+        <div style={{ fontWeight: 700 }}>💸 Summer 2026 — {TRANSFERS_2026.length} moves</div>
+        <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+          Only the big clubs. Fees and grades as {SOURCE_NAME} reported them, read {SOURCE_READ}.
         </div>
-        <button className="btn btn--blue btn--small" disabled={loading} onClick={() => { sfx.click(); void refresh() }}>
-          {loading ? 'Reading…' : '🔄 Get moves'}
-        </button>
+        <a className="btn btn--ghost btn--small" style={{ marginTop: 8 }} href={SOURCE_URL} target="_blank" rel="noreferrer">
+          {SOURCE_NAME}’s window grades ↗
+        </a>
       </div>
 
-      {error && <div className="card" style={{ borderColor: 'var(--red)' }}>{error}</div>}
-      {!items.length && !loading && !error && (
-        <div className="card">Nothing loaded yet — tap <b>Get moves</b> and the desk goes and reads the market.</div>
+      {ours.length > 0 && (
+        <>
+          <div className="h2">⭐ Your clubs — {ours.length}</div>
+          {ours.map((t) => <TransferRow key={t.id} item={t} />)}
+        </>
       )}
 
-      {ours.length > 0 && <div className="h2">⭐ Your clubs — {ours.length}</div>}
-      {ours.map((t) => <TransferRow key={t.id} item={t} />)}
-
-      {rest.length > 0 && <div className="h2" style={{ marginTop: ours.length ? 16 : 0 }}>🌍 Biggest moves of {year}</div>}
+      <div className="h2" style={{ marginTop: ours.length ? 16 : 0 }}>
+        {ours.length ? '🌍 Everyone else' : '🌍 The window'}
+      </div>
       {shown.map((t) => <TransferRow key={t.id} item={t} />)}
       {rest.length > shown.length && (
         <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setShowAll(true) }}>
           Show all {rest.length}
         </button>
       )}
-
-      {items.length > 0 && (
-        <p className="muted" style={{ fontSize: 11, marginTop: 10 }}>
-          Fees are quoted as the outlet reported them. Only done deals are listed — no rumours.
-        </p>
-      )}
     </>
   )
 }
 
-const TRANSFER_ICON: Record<FcTransferItem['kind'], string> = { permanent: '💸', loan: '🔁', free: '🆓' }
+const TRANSFER_ICON: Record<Transfer['kind'], string> = { permanent: '💸', loan: '🔁', free: '🆓' }
 
-function TransferRow({ item }: { item: FcTransferItem }) {
+/** The player's face, fetched by name once and remembered; the shirt is the fallback. */
+function PlayerFace({ name }: { name: string }) {
+  const [src, setSrc] = useState('')
+  useEffect(() => {
+    let alive = true
+    void playerPhoto(name).then((url) => {
+      if (alive) setSrc(url)
+    })
+    return () => {
+      alive = false
+    }
+  }, [name])
+
+  return (
+    <div
+      style={{
+        width: 52,
+        height: 52,
+        flexShrink: 0,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        background: 'rgba(255,255,255,0.08)',
+        display: 'grid',
+        placeItems: 'center',
+        fontSize: 22,
+      }}
+    >
+      {src ? (
+        <img src={`${src}/tiny`} alt="" width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+      ) : (
+        '👕'
+      )}
+    </div>
+  )
+}
+
+/** ESPN's letter grade, coloured: A green, B neutral, C/D red. */
+function Grade({ club, grade }: { club: string; grade: string }) {
+  const color = grade.startsWith('A') ? 'var(--green, #35c46b)' : grade.startsWith('B') ? 'inherit' : 'var(--red)'
+  return (
+    <span className="muted" style={{ fontSize: 11 }}>
+      {club} <b style={{ color }}>{grade}</b>
+    </span>
+  )
+}
+
+function TransferRow({ item }: { item: Transfer }) {
   return (
     <div className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{ fontSize: 20, flexShrink: 0 }}>{TRANSFER_ICON[item.kind]}</div>
+      <PlayerFace name={item.player} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 700 }}>{item.player}</div>
+        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>{TRANSFER_ICON[item.kind]}</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.player}</span>
+        </div>
         <div style={{ fontSize: 12, marginTop: 2 }}>
           {item.from} <span className="muted">→</span> <b>{item.to}</b>
         </div>
-        <div className="muted" style={{ fontSize: 11, marginTop: 4, fontWeight: 800, letterSpacing: 0.4 }}>
-          {[item.fee, item.kind === 'permanent' ? null : item.kind, item.date, item.source]
-            .filter(Boolean)
-            .join(' · ')
-            .toUpperCase()}
+        <div style={{ marginTop: 4, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <b style={{ fontSize: 12 }}>{item.fee}</b>
+          <Grade club="out" grade={item.gradeFrom} />
+          <Grade club="in" grade={item.gradeTo} />
+          <span className="muted" style={{ fontSize: 11 }}>
+            {new Date(`${item.date}T12:00:00Z`).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+          </span>
         </div>
-        {item.url && (
-          <a className="btn btn--ghost btn--small" style={{ marginTop: 8 }} href={item.url} target="_blank" rel="noreferrer">
-            Read it ↗
-          </a>
-        )}
       </div>
     </div>
   )

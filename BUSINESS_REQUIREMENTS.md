@@ -1037,10 +1037,14 @@ There is no free football-news API worth wiring up — the good ones cost money,
 
 Countdowns **in days** to the big European finals and the next national-team tournaments (`TOURNAMENTS`), soonest first, with the three nearest starred games above them. Dates that are announced are exact; a competition whose window is known but whose day isn't is marked `approx` and shown with a **≈** rather than a date we made up.
 
-### 21f. Transfers — the year's market
+### 21f. Transfers — the summer window, graded
 
-The **💸 Transfers** tab is this calendar year's market as a record: **your clubs' business first** (every move in and out, marked `ours`), then **the biggest deals in world football**, newest first. Same desk as the news (§21d) and the same rules, tightened: **only done deals** — signed or officially announced, never a rumour, never "in talks" — and **fees exactly as the outlet reported them** (`€60m`, `free`, `loan`, `undisclosed`), never a number the model estimated. Each move carries its outlet and link.
+The **💸 Transfers** tab is the **2026 summer window**: who moved, for how much, and what [ESPN](https://www.espn.com/soccer/story/_/id/48990955/summer-transfer-window-grading-big-signings-mens-soccer) gave each club for the deal.
 
-Loans and frees are marked (🔁 / 🆓) rather than dressed up as fees. The batch is cached on your profile for **24 hours** — a market is a record, not a live feed — and a changed set of followed clubs, or a new calendar year, invalidates it at once. Follow no clubs and the tab still works: it shows the year's biggest moves.
+- **It is a hand-copied dataset, not a feed** ([src/logic/transfers2026.ts](src/logic/transfers2026.ts)). Every row is a move that actually happened, with **the fee exactly as ESPN reported it** (`€125M`, `£75M`, `Free`, `Loan`, `Undisclosed`) and **both letter grades** — the selling club's and the buying club's. A generated transfer would be worse than no tab at all, so nothing here is generated. When the window moves on, the file gets edited and `SOURCE_READ` bumped; the tab links back to the article.
+- **Only the very good teams.** Every row has an elite side (`ELITE`) — no third-division business.
+- **Your clubs first.** Any move touching a club you follow floats into its own ⭐ section; everything else follows, newest first, twelve at a time behind a **Show all**.
+- **Faces.** Each row carries the player's photo, looked up by name from TheSportsDB and cached forever (a face doesn't change); a 👕 stands in for anyone they've never heard of.
+- Loans 🔁 and frees 🆓 are marked rather than dressed up as fees, and grades are coloured: A green, B neutral, C/D red.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.
