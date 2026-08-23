@@ -446,15 +446,20 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const nextSetNo = current ? current.sets.length : 0
   const plannedReps = current?.plan.reps[Math.min(nextSetNo, (current?.plan.reps.length ?? 1) - 1)] ?? 10
 
+  // what you actually lifted last set of THIS exercise beats what was planned:
+  // once you bump the bar up, every set after it starts there
+  const lastLoggedWeight = current?.sets.length ? current.sets[current.sets.length - 1].weight : undefined
+  const armedWeight = lastLoggedWeight ?? current?.plan.weight
+
   const [reps, setReps] = useState(plannedReps)
-  const [weight, setWeight] = useState<number | undefined>(current?.plan.weight)
+  const [weight, setWeight] = useState<number | undefined>(armedWeight)
 
   // a new exercise (or a new set) re-arms the inputs with what was prescribed —
   // you only touch them when reality differs, and that difference is the signal
   useEffect(() => {
     setReps(plannedReps)
-    setWeight(current?.plan.weight)
-  }, [idx, nextSetNo, plannedReps, current?.plan.weight])
+    setWeight(armedWeight)
+  }, [idx, nextSetNo, plannedReps, armedWeight])
 
   // hold the screen on for the whole workout, so a phone on the bench doesn't
   // lock between sets and swallow the rest timer
