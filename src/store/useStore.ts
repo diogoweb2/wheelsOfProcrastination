@@ -198,6 +198,7 @@ import {
   makeEntry as makeRobloxEntry,
 } from '../logic/roblox'
 import { coachPlan, coachSwap } from '../logic/gymCoach'
+import { logError } from '../lib/errorLog'
 import {
   AUTO_CLOSE_ISSUES,
   DEFAULT_MIN_WORDS,
@@ -3467,6 +3468,12 @@ export const useStore = create<StoreState>((set, get) => {
         commit((d) => {
           d.gym.active = session
         })
+      } catch (e) {
+        // coachPlan can't throw, but the offline planner and the write can. This
+        // used to escape as an unhandled rejection: the button simply snapped
+        // back to normal and no session appeared, with nothing said anywhere.
+        logError('gymPlan', e)
+        set({ gymFellBack: `couldn't build a session: ${e instanceof Error ? e.message : String(e)}` })
       } finally {
         set({ gymPlanning: false })
       }

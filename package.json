@@ -21,7 +21,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "optcg:scrape": "node scripts/optcg-scrape.mjs",
-    "optcg:cards": "node scripts/optcg-catalog.mjs"
+    "optcg:cards": "node scripts/optcg-catalog.mjs",
+    "errors": "node scripts/errors.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

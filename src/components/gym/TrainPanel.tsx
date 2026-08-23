@@ -77,6 +77,22 @@ function WallClock() {
 }
 
 /** The exact reason the coach was skipped — verbatim, never rounded off to "something went wrong". */
+/** The plan didn't happen at all. Says so, and says what broke. */
+function PlanFailure({ why }: { why: string }) {
+  return (
+    <div className="card" style={{ borderColor: '#b91c1c', background: 'rgba(185,28,28,0.12)', marginTop: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 800 }}>❌ Couldn’t build a session</div>
+      <p
+        className="muted"
+        style={{ fontSize: 12, marginTop: 6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, monospace' }}
+      >
+        {why}
+      </p>
+      <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>Logged — try again, and tell Diogo if it keeps happening.</p>
+    </div>
+  )
+}
+
 function CoachFailure({ why }: { why: string }) {
   return (
     <div className="card" style={{ borderColor: '#b45309', background: 'rgba(180,83,9,0.12)', marginTop: 10 }}>
@@ -140,7 +156,7 @@ export function TrainPanel() {
 // --- setup ------------------------------------------------------------------
 
 function Setup() {
-  const { data, gymPlan, gymPlanning, aiConfig } = useStore()
+  const { data, gymPlan, gymPlanning, gymFellBack, aiConfig } = useStore()
   const [minutes, setMinutes] = useState(20)
   const [mood, setMood] = useState<Mood>('normal')
   const [gearMode, setGearMode] = useState<GearMode>('mixed')
@@ -216,6 +232,9 @@ function Setup() {
         >
           {gymPlanning ? `🧠 Asking your coach… ${waited}s` : '📋 Build my session'}
         </button>
+        {/* On this screen there is no session, so a reason here means the plan
+            failed outright — not the usual "coach was slow, planned offline". */}
+        {!gymPlanning && gymFellBack && <PlanFailure why={gymFellBack} />}
         {gymPlanning && waited > 20 && (
           <p className="muted" style={{ fontSize: 11, marginTop: 6, textAlign: 'center' }}>
             The model is thinking. It gets up to 3 minutes before we plan offline instead.
