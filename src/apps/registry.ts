@@ -133,6 +133,7 @@ export const APPS: AppDef[] = [
     tint: ['#c9302c', '#3a1a00'],
     tabs: [
       { id: 'binder', label: 'Binder', icon: '🎴' },
+      { id: 'packs', label: 'Packs', icon: '🎁' },
       { id: 'trade', label: 'Trade', icon: '🤝' },
     ],
   },
