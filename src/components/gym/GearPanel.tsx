@@ -17,7 +17,7 @@ import { uploadGymImage } from '../../store/cloud'
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 
 export function GearPanel() {
-  const { data, gymCatalog, gymSaveCatalog } = useStore()
+  const { gymCatalog, gymSaveCatalog } = useStore()
   const [tab, setTab] = useState<'gear' | 'moves'>('gear')
 
   /** Write-through helper: the catalog doc may not exist yet on a fresh install. */
@@ -46,7 +46,7 @@ export function GearPanel() {
         picture can’t show, like “adjustable 5–52 lb”. Then{' '}
         <code>npm run gym:demos</code> finds an animation for each movement. Not every exercise gets one — the free library is a
         subset and is missing some basics; those just keep their emoji. Personal ratings and weights below are yours alone;{' '}
-        {data.gym.brief.kidMode ? 'the equipment list' : 'the equipment and exercise lists'} are shared with the rest of the crew.
+        the equipment and exercise lists are shared with the rest of the crew.
       </p>
     </>
   )
@@ -234,7 +234,7 @@ function EquipmentForm({ onSave, onCancel }: { onSave: (e: Equipment) => void; o
           <span className="muted" style={{ display: 'block', fontSize: 11, marginTop: 5, lineHeight: 1.35 }}>
             {canIdentify
               ? 'It gets named and described. Exercises come later, from the whole room at once.'
-              : 'Saved as this item’s picture. Add an OpenRouter key in Coach to have it identified too.'}
+              : 'Saved as this item’s picture. Add an OpenRouter key in Settings → About to have it identified too.'}
           </span>
         </div>
       </div>
@@ -657,7 +657,6 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
               restSec: rest,
               defaultReps: reps,
               defaultSets: sets,
-              kidSafe: intensity < 3 && kind !== 'weight',
               addedBy: 'manual',
               createdAt: new Date().toISOString(),
             })

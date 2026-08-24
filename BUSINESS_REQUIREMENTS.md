@@ -664,9 +664,10 @@ Free text the coach reads **verbatim** before every session, plus four hard rule
 - **Protect my lower back** — `backRisk` exercises are filtered out entirely.
 - **No warm-up block** — see §18e.
 - **Roman chair first, always** — see §18e. Default ON.
-- **Kid mode** — bodyweight first, nothing heavy; non-`kidSafe` exercises are filtered out.
 
-Seeded per profile on first login (`seedBrief`) and then fully editable — **Diogo**: 43, pickleball is his cardio, core + lower back are the priority, wants a good chest, likes high-rep dynamic sets and rep ladders. **Ben**: 12, kid mode, the goal is enjoying it and building the habit.
+Seeded per profile on first login (`seedBrief`) and then fully editable — **Diogo**: 43, pickleball is his cardio, core + lower back are the priority, wants a good chest, likes high-rep dynamic sets and rep ladders. **Ben**: 12, new to training, the goal is enjoying it and building the habit.
+
+**Kid mode was removed** (2026-08-23). The `kidMode` brief flag and the `kidSafe` per-exercise boolean are gone from the types, the planner, the Gear editor and the generator prompts. It was a hard filter tuned for a second athlete who does not use the app, and it was quietly distorting judgements about the catalog — the semantic audit (§18m) kept rejecting exercises as "questionable for the 12-year-old". Suitability for a particular person belongs in that person's brief, not in a shared catalog row.
 
 ### 18h. Berries
 
@@ -692,7 +693,7 @@ Every chart is deliberately **single-series**: running the dataviz validator ove
 
 **Why exercises are their own pass.** They depend on the WHOLE inventory at once. A bench alone is worth almost nothing; a bench *plus* dumbbells is incline press, chest-supported row and step-ups. A per-item or per-photo pass structurally cannot see those combinations, so step 1 only ever describes gear — it is explicitly told not to list exercises — and step 2 is given the full list, the room notes (§18k below) and **both athletes' briefs**.
 
-That last input is what makes the no-equipment half of the library personal: step 2 adds bodyweight exercises only where it can say *why they belong to Diogo or to Ben*, reading their actual briefs (core/lower-back priority, kid mode) rather than emitting a generic list. It is also told to prefer standard exercise names, because step 3 has to find each one in a demo library and an invented name never matches.
+That last input is what makes the no-equipment half of the library personal: step 2 adds bodyweight exercises only where it can say *why they belong to Diogo or to Ben*, reading their actual briefs (core/lower-back priority) rather than emitting a generic list. It is also told to prefer standard exercise names, because step 3 has to find each one in a demo library and an invented name never matches.
 
 `npm run gym:exercises` is idempotent — existing exercises are never duplicated or overwritten, so re-run it after adding gear and you get only what's new. It reports what it added grouped by single-item / combination / bodyweight, and skips anything referencing gear you don't own. Flags: `--dry-run`, `--no-demos`, `--model=`, `--effort=`.
 

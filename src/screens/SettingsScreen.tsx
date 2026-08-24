@@ -2,6 +2,7 @@
 // the about/reset corner.
 import { useState } from 'react'
 import { useStore } from '../store/useStore'
+import { PARENT_ID } from '../store/storage'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
 import { ensurePermission, scheduleDailyReminder } from '../notifications'
@@ -151,12 +152,76 @@ function SoundTab() {
   )
 }
 
+/**
+ * The OpenRouter key, which is shared by everything in the app that talks to a
+ * model: Essays' proofreader, FC Lock's news summariser and the Gear tab's
+ * equipment camera. It used to live in Gym → Coach; when the AI trainer was
+ * removed that tab went with it, and this is its new home — the Gym was never
+ * the right place for a key three other features depend on.
+ *
+ * Parent-only, because it spends real money.
+ */
+function ApiKeyBox() {
+  const { aiConfig, setAiConfig } = useStore()
+  const [key, setKey] = useState('')
+  const hasKey = !!aiConfig?.openrouterKey?.trim()
+
+  return (
+    <>
+      <div className="h2">🔑 OpenRouter key</div>
+      <div className="card">
+        <div className="field" style={{ marginBottom: 10 }}>
+          <label>API key {hasKey ? '(set)' : ''}</label>
+          <input
+            type="password"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder={hasKey ? '\u2022\u2022\u2022\u2022\u2022\u2022 \u2014 type a new one to replace it' : 'sk-or-v1-\u2026'}
+            autoComplete="off"
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn btn--small"
+            style={{ flex: 1 }}
+            disabled={!key.trim()}
+            onClick={() => {
+              sfx.gem()
+              setAiConfig({ openrouterKey: key.trim() })
+              setKey('')
+            }}
+          >
+            Save key
+          </button>
+          {hasKey && (
+            <button
+              className="btn btn--ghost btn--small"
+              onClick={() => {
+                sfx.click()
+                setAiConfig({ openrouterKey: '' })
+              }}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+        <p className="muted" style={{ fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>
+          Used by the essay proofreader, the football news summary and the Gear tab\u2019s equipment camera. Stored in Firestore,
+          never in the app bundle or the repo, so it can be rotated without a rebuild \u2014 but anyone who can sign into this
+          Firebase project can read it, so put a spend limit on it in the OpenRouter dashboard.
+        </p>
+      </div>
+    </>
+  )
+}
+
 function AboutTab() {
-  const { activeProfile, setSettings } = useStore()
+  const { activeProfile, activeProfileId, setSettings } = useStore()
   const me = activeProfile()
   const [reset, setReset] = useState(false)
   return (
     <>
+      {activeProfileId === PARENT_ID && <ApiKeyBox />}
       <div className="h2">ℹ️ About</div>
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ fontWeight: 900, marginBottom: 4 }}>🏠 Home screen</div>

@@ -32,7 +32,6 @@ import {
   sessionSeconds,
   stepLoad,
 } from '../../logic/gym'
-import { coachReady } from '../../logic/gymCoach'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
@@ -47,17 +46,6 @@ const MOODS: { id: Mood; label: string; emoji: string }[] = [
 
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 
-/** Seconds since `on` became true. A slow model is fine; a frozen button is not. */
-function useElapsed(on: boolean): number {
-  const [secs, setSecs] = useState(0)
-  useEffect(() => {
-    setSecs(0)
-    if (!on) return
-    const t = setInterval(() => setSecs((s) => s + 1), 1000)
-    return () => clearInterval(t)
-  }, [on])
-  return secs
-}
 
 /**
  * The time on the wall. A gym session eats time without you noticing — this is
@@ -78,37 +66,7 @@ function WallClock() {
 
 /** The exact reason the coach was skipped — verbatim, never rounded off to "something went wrong". */
 /** The plan didn't happen at all. Says so, and says what broke. */
-function PlanFailure({ why }: { why: string }) {
-  return (
-    <div className="card" style={{ borderColor: '#b91c1c', background: 'rgba(185,28,28,0.12)', marginTop: 10 }}>
-      <div style={{ fontSize: 13, fontWeight: 800 }}>❌ Couldn’t build a session</div>
-      <p
-        className="muted"
-        style={{ fontSize: 12, marginTop: 6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, monospace' }}
-      >
-        {why}
-      </p>
-      <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>Logged — try again, and tell Diogo if it keeps happening.</p>
-    </div>
-  )
-}
 
-function CoachFailure({ why }: { why: string }) {
-  return (
-    <div className="card" style={{ borderColor: '#b45309', background: 'rgba(180,83,9,0.12)', marginTop: 10 }}>
-      <div style={{ fontSize: 13, fontWeight: 800 }}>⚠️ The AI coach didn’t answer — planned offline instead</div>
-      <p
-        className="muted"
-        style={{ fontSize: 12, marginTop: 6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, monospace' }}
-      >
-        {why}
-      </p>
-      <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-        This is still a real session, built from your own history. “Plan a different one” retries the coach.
-      </p>
-    </div>
-  )
-}
 
 /** Minute buttons offered by the "do more" card — a bonus block is a short one. */
 const MORE_MINUTES = [5, 10, 15, 20] as const
@@ -156,13 +114,11 @@ export function TrainPanel() {
 // --- setup ------------------------------------------------------------------
 
 function Setup() {
-  const { data, gymPlan, gymPlanning, gymFellBack, aiConfig } = useStore()
+  const { data, gymPlan, gymPlanning } = useStore()
   const [minutes, setMinutes] = useState(20)
   const [mood, setMood] = useState<Mood>('normal')
   const [gearMode, setGearMode] = useState<GearMode>('mixed')
   const gym = data.gym
-  const coachOn = gym.aiOn && coachReady(aiConfig)
-  const waited = useElapsed(gymPlanning)
 
   return (
     <>
@@ -230,23 +186,11 @@ function Setup() {
             void gymPlan(minutes, mood, { gearMode })
           }}
         >
-          {gymPlanning ? `🧠 Asking your coach… ${waited}s` : '📋 Build my session'}
+          {gymPlanning ? 'Building…' : '📋 Build my session'}
         </button>
-        {/* On this screen there is no session, so a reason here means the plan
-            failed outright — not the usual "coach was slow, planned offline". */}
-        {!gymPlanning && gymFellBack && <PlanFailure why={gymFellBack} />}
-        {gymPlanning && waited > 20 && (
-          <p className="muted" style={{ fontSize: 11, marginTop: 6, textAlign: 'center' }}>
-            The model is thinking. It gets up to 3 minutes before we plan offline instead.
-          </p>
-        )}
 
         <p className="muted" style={{ fontSize: 11, marginTop: 10, textAlign: 'center' }}>
-          {coachOn
-            ? 'Your AI trainer reads your brief, your history and how you felt last time.'
-            : gym.aiOn
-              ? 'No OpenRouter key yet — planning offline from your own history (Coach → Settings).'
-              : 'AI coach is off. Planning offline from your own history.'}
+          Planned from your brief, your history and how you felt last time. No network, no waiting.
         </p>
       </div>
     </>
@@ -279,7 +223,7 @@ function GearModePicker({ value, onChange }: { value: GearMode; onChange: (m: Ge
 // --- preview ----------------------------------------------------------------
 
 function Preview({ session }: { session: GymSession }) {
-  const { gymStart, gymSwap, gymDrop, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, gymFellBack, data } = useStore()
+  const { gymStart, gymSwap, gymDrop, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, data } = useStore()
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -291,7 +235,7 @@ function Preview({ session }: { session: GymSession }) {
 
       <div className="card">
         <div className="gym-note-head">
-          <span className="chip">{session.source === 'ai' ? '🧠 AI trainer' : '⚙️ Offline plan'}</span>
+          <span className="chip">⚙️ {session.minutes} min plan</span>
           <span className="chip">⏱ ~{estimate} min of {session.minutes}</span>
           <span className="chip">{MOODS.find((m) => m.id === session.mood)?.emoji} {MOODS.find((m) => m.id === session.mood)?.label}</span>
           {session.gearMode && session.gearMode !== 'mixed' && <span className="chip">{GEAR_MODE_LABEL[session.gearMode]}</span>}
@@ -299,8 +243,6 @@ function Preview({ session }: { session: GymSession }) {
         </div>
         {session.note && <p style={{ fontSize: 14, fontWeight: 700, marginTop: 8 }}>“{session.note}”</p>}
       </div>
-
-      {gymFellBack && <CoachFailure why={gymFellBack} />}
 
       {session.exercises.length === 0 && (
         <div className="card" style={{ textAlign: 'center' }}>
@@ -338,7 +280,7 @@ function Preview({ session }: { session: GymSession }) {
                 onClick={async () => {
                   sfx.click()
                   setSwapping(e.exId)
-                  const res = await gymSwap(e.exId, 'not feeling like this one today')
+                  const res = await gymSwap(e.exId)
                   setSwapping(null)
                   if (res === 'none') sfx.error()
                 }}
@@ -902,7 +844,6 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
   const report = sessionReport(session)
   const [more, setMore] = useState(false)
   const [gearMode, setGearMode] = useState<GearMode>(session.gearMode ?? 'mixed')
-  const waited = useElapsed(gymPlanning)
 
   return (
     <>
@@ -1013,7 +954,7 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
               setMore(false)
             }}
           >
-            {gymPlanning ? `🧠 Asking your coach… ${waited}s` : '← Actually, I’m done'}
+            {gymPlanning ? 'Building…' : '← Actually, I’m done'}
           </button>
         </div>
       )}

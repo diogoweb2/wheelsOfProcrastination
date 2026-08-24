@@ -1,20 +1,22 @@
-// 🧠 Coach — who your trainer thinks you are, and whether it's an AI at all.
+// 📋 Plan — what the app knows about you, and how a session gets set up.
 //
-// The brief at the top is read verbatim by the coach before every session, so
-// it is the highest-leverage thing on this screen: age, goals, injuries, what
-// motivates you. The switch at the bottom turns the AI off entirely — the app
-// keeps working, planning from the memory shown in the middle.
+// This replaced the Coach tab when the AI trainer was removed. Nothing on this
+// screen was ever the AI part of it: the brief, the four hard rules, the
+// ratings summary and the session settings are all read by the offline planner
+// (src/logic/gym.ts), which is now the only planner there is.
+//
+// The brief is still the highest-leverage thing here — age, goals, injuries,
+// what motivates you — and the written program (BUSINESS_REQUIREMENTS §18)
+// lands on this tab once `npm run gym:program` exists.
 import { useEffect, useState } from 'react'
 import { useStore } from '../../store/useStore'
-import { PARENT_ID } from '../../store/storage'
 import type { ExerciseRating } from '../../types'
 import { RATING_LABEL, allExercises, romanChairMove, seedBrief } from '../../logic/gym'
-import { DEFAULT_MODEL, MODEL_PRESETS, coachReady } from '../../logic/gymCoach'
 import { wakeLockSupported } from '../../logic/wakeLock'
 import { sfx } from '../../audio'
 
-export function CoachPanel() {
-  const { data, activeProfileId, gymSetBrief, gymSetOptions, gymCatalog, aiConfig } = useStore()
+export function PlanPanel() {
+  const { data, activeProfileId, gymSetBrief, gymSetOptions, gymCatalog } = useStore()
   const gym = data.gym
   const brief = gym.brief
   const [text, setText] = useState(brief.text)
@@ -32,7 +34,6 @@ export function CoachPanel() {
   const known = moves.filter((e) => gym.ex[e.id]?.timesDone).length
   const rated = moves.filter((e) => gym.ex[e.id]?.rating).length
   const readiness = Math.min(100, Math.round((gym.sessions.length / 20) * 50 + (known / Math.max(1, moves.length)) * 50))
-  const coachLive = gym.aiOn && coachReady(aiConfig)
 
   return (
     <>
@@ -116,16 +117,10 @@ export function CoachPanel() {
           label="Roman chair first, always"
           hint={
             romanChair
-              ? `Every session opens with ${romanChair.name} to wake the lower back up. The AI coach is told, and the app puts it there whether or not the coach listened.`
+              ? `Every session opens with ${romanChair.name} to wake the lower back up, before anything else asks the lower back for a favour.`
               : 'On, but there is no roman chair / back-extension bench in the catalog yet — add one in the Gear tab and it will start opening every session.'
           }
           onChange={(v) => gymSetBrief({ romanChairWarmup: v })}
-        />
-        <Toggle
-          on={!!brief.kidMode}
-          label="Kid mode"
-          hint="Bodyweight first, nothing heavy, short and fun. Hard filter, not a suggestion."
-          onChange={(v) => gymSetBrief({ kidMode: v })}
         />
       </div>
 
@@ -169,26 +164,6 @@ export function CoachPanel() {
         />
       </div>
 
-      <div className="h2">🤖 AI trainer</div>
-      <div className="card">
-        <Toggle
-          on={gym.aiOn}
-          label="Use the AI trainer"
-          hint={
-            coachLive
-              ? 'On. One small OpenRouter call per session (and one per swap) — a fraction of a cent each.'
-              : gym.aiOn
-                ? 'On, but there is no API key yet, so sessions are being planned offline.'
-                : 'Off. Sessions are planned entirely from your own history — no network, no credits.'
-          }
-          onChange={(v) => gymSetOptions({ aiOn: v })}
-        />
-        {activeProfileId === PARENT_ID ? <AiConfigForm /> : (
-          <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
-            {coachReady(aiConfig) ? 'The trainer is set up and ready.' : 'Ask Dad to add the API key.'}
-          </p>
-        )}
-      </div>
     </>
   )
 }
@@ -218,83 +193,6 @@ function RatingSummary() {
   )
 }
 
-function AiConfigForm() {
-  const { aiConfig, setAiConfig } = useStore()
-  const [key, setKey] = useState('')
-  const [model, setModel] = useState(aiConfig?.model ?? DEFAULT_MODEL)
-  const hasKey = coachReady(aiConfig)
-
-  return (
-    <div style={{ marginTop: 12, borderTop: '2px solid var(--line)', paddingTop: 12 }}>
-      <div className="field" style={{ marginBottom: 10 }}>
-        <label>OpenRouter API key {hasKey ? '(set)' : ''}</label>
-        <input
-          type="password"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-          placeholder={hasKey ? '•••••••••• — type a new one to replace it' : 'sk-or-v1-…'}
-          autoComplete="off"
-        />
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <button
-          className="btn btn--small"
-          style={{ flex: 1 }}
-          disabled={!key.trim()}
-          onClick={() => {
-            sfx.gem()
-            setAiConfig({ openrouterKey: key.trim() })
-            setKey('')
-          }}
-        >
-          Save key
-        </button>
-        {hasKey && (
-          <button
-            className="btn btn--ghost btn--small"
-            onClick={() => {
-              sfx.click()
-              setAiConfig({ openrouterKey: '' })
-            }}
-          >
-            Remove
-          </button>
-        )}
-      </div>
-
-      <div className="field" style={{ marginBottom: 10 }}>
-        <label>Model</label>
-        <select
-          value={MODEL_PRESETS.some((m) => m.id === model) ? model : 'custom'}
-          onChange={(e) => {
-            const v = e.target.value
-            if (v !== 'custom') {
-              setModel(v)
-              setAiConfig({ model: v })
-            }
-          }}
-        >
-          {MODEL_PRESETS.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.label} — {m.note}
-            </option>
-          ))}
-          <option value="custom">Something else (type it below)</option>
-        </select>
-      </div>
-      <div className="field" style={{ marginBottom: 10 }}>
-        <label>Model id</label>
-        <input type="text" value={model} onChange={(e) => setModel(e.target.value)} onBlur={() => setAiConfig({ model: model.trim() || DEFAULT_MODEL })} />
-      </div>
-
-      <p className="muted" style={{ fontSize: 11, lineHeight: 1.5 }}>
-        The key is stored in the crew’s Firestore database, never in the app bundle or the repo — so it can be rotated without a
-        rebuild. Anyone who can sign into this Firebase project can read it, so put a spend limit on it in the OpenRouter
-        dashboard.
-      </p>
-    </div>
-  )
-}
 
 function Toggle({ on, label, hint, onChange }: { on: boolean; label: string; hint: string; onChange: (v: boolean) => void }) {
   return (

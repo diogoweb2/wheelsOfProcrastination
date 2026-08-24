@@ -15,7 +15,6 @@
     "restSec": 60,
     "defaultReps": 10,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z",
     "ladder": true
@@ -35,7 +34,6 @@
     "restSec": 45,
     "defaultReps": 15,
     "defaultSets": 2,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -54,7 +52,6 @@
     "restSec": 90,
     "defaultReps": 5,
     "defaultSets": 4,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z",
     "ladder": true
@@ -74,7 +71,6 @@
     "restSec": 45,
     "defaultReps": 20,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z",
     "ladder": true
@@ -94,7 +90,6 @@
     "restSec": 50,
     "defaultReps": 16,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -113,7 +108,6 @@
     "restSec": 40,
     "defaultReps": 20,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -131,7 +125,6 @@
     "restSec": 45,
     "defaultReps": 40,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -150,7 +143,6 @@
     "defaultReps": 30,
     "defaultSets": 2,
     "perSide": true,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -168,7 +160,6 @@
     "restSec": 40,
     "defaultReps": 16,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -188,7 +179,6 @@
     "defaultReps": 16,
     "defaultSets": 3,
     "perSide": true,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -207,7 +197,6 @@
     "restSec": 40,
     "defaultReps": 25,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -225,7 +214,6 @@
     "restSec": 50,
     "defaultReps": 25,
     "defaultSets": 3,
-    "kidSafe": true,
     "demo": {
       "anim": "/gym/moves/bw-hollow.webp",
       "poster": "/gym/moves/bw-hollow-poster.webp",
@@ -252,7 +240,6 @@
     "restSec": 45,
     "defaultReps": 30,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -270,7 +257,6 @@
     "restSec": 35,
     "defaultReps": 20,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -288,7 +274,6 @@
     "restSec": 50,
     "defaultReps": 45,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -307,7 +292,6 @@
     "restSec": 55,
     "defaultReps": 12,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -326,7 +310,6 @@
     "restSec": 60,
     "defaultReps": 8,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z",
     "backRisk": false
@@ -345,7 +328,6 @@
     "restSec": 30,
     "defaultReps": 20,
     "defaultSets": 2,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -364,7 +346,6 @@
     "restSec": 30,
     "defaultReps": 30,
     "defaultSets": 2,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -383,7 +364,6 @@
     "restSec": 50,
     "defaultReps": 30,
     "defaultSets": 3,
-    "kidSafe": true,
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   }

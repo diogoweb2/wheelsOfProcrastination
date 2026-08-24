@@ -889,7 +889,6 @@ export interface ExerciseDef {
    * they are so history before and after this flag stays comparable.
    */
   perSide?: boolean
-  kidSafe: boolean // safe for a 12-year-old (no heavy spinal loading, simple form)
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
   demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
@@ -905,7 +904,7 @@ export interface GymCatalog {
   updatedAt?: string
 }
 
-/** OpenRouter credentials for the AI coach (Firestore `app/aiConfig`, admin-only). */
+/** OpenRouter credentials, shared by Essays and FC Lock news (Firestore `app/aiConfig`, admin-only). */
 export interface AiConfig {
   openrouterKey?: string
   model?: string
@@ -1043,7 +1042,6 @@ export interface GymBrief {
    * `!== false`, so profiles saved before this flag existed still get it.
    */
   romanChairWarmup?: boolean
-  kidMode?: boolean // bodyweight-first, nothing heavy, short and fun
   weightUnit?: 'lb' | 'kg'
   updatedAt?: string
 }
@@ -1056,7 +1054,6 @@ export interface GymState {
   active: GymSession | null // the plan on the preview screen, or the workout in progress
   streak: { current: number; best: number; lastDay: string | null }
   totals: { sessions: number; minutes: number; reps: number; coins: number }
-  aiOn: boolean // use the coach, or plan entirely offline
   soundOn: boolean // rest-timer beeps
   keepAwake: boolean // hold a screen Wake Lock during a session
 }

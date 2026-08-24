@@ -18,7 +18,7 @@ export { aiReady as essayAiReady } from './openrouter'
 
 /** Shown on the Topics tab, so the desk is honest about whose key is being spent. */
 export const ESSAY_MODEL_NOTE =
-  'Uses the same OpenRouter key as the Gym coach (Gym → Coach → Settings), but picks its own models — 60 seconds each, then the next one.'
+  'Uses the app\u2019s shared OpenRouter key (Settings → About), but picks its own models — 60 seconds each, then the next one.'
 
 const TITLE = 'Wheels of Procrastination Essays'
 
@@ -141,7 +141,7 @@ Spelling is CANADIAN English (colour, favourite, neighbour, centre, travelled).`
 
 function key(ai: AiConfig | null): string {
   const k = ai?.openrouterKey?.trim()
-  if (!k) throw new Error('No OpenRouter key set yet — add one in Gym → Coach → Settings.')
+  if (!k) throw new Error('No OpenRouter key set yet — add one in Settings → About.')
   return k
 }
 

@@ -1,10 +1,10 @@
 // The Training Deck's brain. Everything here is deterministic and offline —
 // no network, no AI. Keep in sync with BUSINESS_REQUIREMENTS.md §18.
 //
-// This file exists so the AI coach can be switched OFF and nothing breaks. The
-// coach (src/logic/gymCoach.ts) reads the same memory, answers in the same
-// shape, and is validated against the same catalog; when it is off, slow, wrong
-// or out of credits, `planSession` here builds the workout instead.
+// This was written as the AI coach's failure path — the thing that had to work
+// when the model was off, slow, wrong or out of credits. The coach is gone now
+// (BUSINESS_REQUIREMENTS §18) and this is simply the planner: no network, no
+// key, no credits, no fallback state to explain to anyone.
 import type {
   BodyPart,
   Equipment,
@@ -139,7 +139,7 @@ export const GEAR_MODE_LABEL: Record<GearMode, string> = {
 
 // --- the crew's starting briefs ---------------------------------------------
 // Seeded the first time a profile opens the Gym; fully editable afterwards in
-// Coach → Your brief. The coach reads `text` verbatim every single session.
+// Plan → Your brief. The planner reads it before building every session.
 
 const DIOGO_BRIEF: GymBrief = {
   age: 43,
@@ -158,7 +158,6 @@ Keep it moving. If the session drags, I quit.`,
 
 const BEN_BRIEF: GymBrief = {
   age: 12,
-  kidMode: true,
   noWarmup: false,
   weightUnit: 'lb',
   text: `12 years old. Brand new to training — the whole goal right now is to ENJOY it and build the habit, not to get strong fast.
@@ -184,7 +183,6 @@ export function defaultGymState(): GymState {
     active: null,
     streak: { current: 0, best: 0, lastDay: null },
     totals: { sessions: 0, minutes: 0, reps: 0, coins: 0 },
-    aiOn: true,
     soundOn: true,
     keepAwake: true,
   }
@@ -245,7 +243,6 @@ export function usableExercises(
   const pool = allExercises(catalog).filter((e) => {
     if (e.retired) return false
     if (!e.equipmentIds.every((id) => gear.has(id))) return false
-    if (brief.kidMode && !e.kidSafe) return false
     if (brief.avoidBackLoad && e.backRisk) return false
     if (memory[e.id]?.rating === 'hate') return false
     return true
@@ -261,8 +258,8 @@ export function usableExercises(
 // --- the roman-chair opener -------------------------------------------------
 // A back extension before anything else is Diogo's standing instruction: it
 // wakes the lower back up before the session asks anything of it. It is a
-// SETTING (Coach → "Roman chair warm-up", ON by default), enforced by the
-// offline planner AND bolted onto whatever the AI coach answers — the model
+// SETTING (Plan → "Roman chair first, always", ON by default), enforced by the
+// planner as a hard rule rather than a preference — the ordering pass
 // gets told about it, but the app doesn't rely on it obeying.
 
 /** Names that mean "the back-extension bench". Matched against the catalog, id included. */
@@ -550,9 +547,6 @@ function scoreCandidates(input: PlanInput, day: string, partsUsed: BodyPart[]): 
       // mood pushes towards (or away from) the hard stuff
       if (mood === 'motivated') score += e.intensity * 14
       if (mood === 'lazy') score += (4 - e.intensity) * 16
-
-      // a kid's session leans playful and light
-      if (gym.brief.kidMode) score += (4 - e.intensity) * 8
 
       score += (rnd() - 0.5) * 26 // never the exact same workout twice
       return { e, score }

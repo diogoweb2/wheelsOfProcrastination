@@ -294,7 +294,7 @@ export const APPS: AppDef[] = [
       { id: 'train', label: 'Train', icon: '💪' },
       { id: 'stats', label: 'Stats', icon: '📊' },
       { id: 'gear', label: 'Gear', icon: '🏋️' },
-      { id: 'coach', label: 'Coach', icon: '🧠' },
+      { id: 'plan', label: 'Plan', icon: '📋' },
     ],
   },
   {

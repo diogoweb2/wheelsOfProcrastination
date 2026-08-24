@@ -3,7 +3,7 @@
 // The in-app twin of `npm run gym:equipment`. Same job, different place: the
 // script is for cataloguing the whole basement from a laptop; this is for the
 // moment you're standing in front of one machine with your phone. It reuses the
-// OpenRouter key the coach already has (Coach → AI trainer), so there is nothing
+// same OpenRouter key Essays and FC Lock use (Settings → API key), so there is nothing
 // extra to set up.
 //
 // Deliberately narrow: ONE piece of equipment per photo, and it names that piece
@@ -42,7 +42,7 @@ export function visionReady(ai: AiConfig | null): boolean {
  */
 export async function identifyEquipment(ai: AiConfig | null, imageDataUrl: string, hint: string): Promise<IdentifiedEquipment> {
   const key = ai?.openrouterKey?.trim()
-  if (!key) throw new Error('No OpenRouter key yet — add one in Coach → AI trainer.')
+  if (!key) throw new Error('No OpenRouter key set — add one in Settings, or type the details in by hand.')
 
   const prompt = `A photo of ONE piece of home-gym equipment, taken by its owner, who is cataloguing what he owns.
 

@@ -187,6 +187,7 @@ import {
   learnFromExercise,
   loggedReps,
   pickReplacement,
+  planSession,
   seedBrief,
   sessionBonus,
   setSeconds,
@@ -197,7 +198,6 @@ import {
   formatMinutes,
   makeEntry as makeRobloxEntry,
 } from '../logic/roblox'
-import { coachPlan, coachSwap } from '../logic/gymCoach'
 import { logError } from '../lib/errorLog'
 import {
   AUTO_CLOSE_ISSUES,
@@ -358,7 +358,6 @@ interface StoreState {
   essayDeskId: string | null
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
-  gymFellBack: string | null
 
   activeProfile: () => Profile | null
   addIdea: (text: string) => void
@@ -675,7 +674,7 @@ interface StoreState {
    */
   gymPlan: (minutes: number, mood: Mood, opts?: { gearMode?: GearMode; followUp?: GymSession | null }) => Promise<void>
   /** "Not that one today." Swaps one exercise on the preview for something else. */
-  gymSwap: (exId: string, reason?: string) => Promise<'ok' | 'none'>
+  gymSwap: (exId: string) => Promise<'ok' | 'none'>
   /**
    * Take an exercise off the preview and put something sensible in its place,
    * instantly and offline — no coach call, no credits, no waiting. Returns
@@ -711,7 +710,7 @@ interface StoreState {
   /** Change your mind about an exercise later (Gear tab). */
   gymRateExercise: (exId: string, rating: ExerciseRating | null) => void
   gymSetExerciseNote: (exId: string, note: string) => void
-  gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'aiOn' | 'soundOn' | 'keepAwake'>>) => void
+  gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'soundOn' | 'keepAwake'>>) => void
   /** Add / edit / retire gear and exercises in the shared basement. */
   // --- essays (the ✍️ Essay app; every action writes the shared app/essays doc) ---
   /** Ask the AI for a fresh batch of ideas. Nothing is stored yet — the parent decides. */
@@ -849,7 +848,7 @@ export const useStore = create<StoreState>((set, get) => {
           syncQuizTasks(d, id)
           // First login on this profile: drop in the trainer brief written for
           // them (age, goals, injuries). It's a starting point — every word of
-          // it is editable in Gym → Coach, and we never overwrite an edit.
+          // it is editable in Gym → Plan, and we never overwrite an edit.
           if (!d.gym.brief.text.trim() && !d.gym.brief.updatedAt) d.gym.brief = seedBrief(id)
         }
         const probe: AppData = JSON.parse(JSON.stringify(get().data))
@@ -1308,7 +1307,6 @@ export const useStore = create<StoreState>((set, get) => {
     essayCheck: null,
     essayDeskId: null,
     gymPlanning: false,
-    gymFellBack: null,
 
     activeProfile() {
       const { profiles, activeProfileId } = get()
@@ -3445,64 +3443,56 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     // --- gym ----------------------------------------------------------------
-    // The store never talks to OpenRouter directly: it calls coachPlan/coachSwap,
-    // which ALWAYS return something (the offline planner is their failure path).
-    // `gymFellBack` carries the reason so the UI can say so out loud instead of
-    // pretending an offline plan came from the coach.
+    // There is no network in here any more. The AI trainer is gone (see
+    // BUSINESS_REQUIREMENTS §18) and `planSession` — which was always the
+    // coach's failure path — is now simply the planner. No key, no credits, no
+    // "the coach was slow so you got the offline one" state to explain.
 
     async gymPlan(minutes, mood, opts) {
-      const { data, gymCatalog, aiConfig, activeProfile } = get()
-      set({ gymPlanning: true, gymFellBack: null })
+      const { data, gymCatalog } = get()
+      set({ gymPlanning: true })
       try {
-        const { session, fellBackBecause } = await coachPlan({
+        const session = planSession({
           catalog: gymCatalog,
           gym: data.gym,
           minutes,
           mood,
           gearMode: opts?.gearMode,
           followUp: opts?.followUp ?? null,
-          ai: aiConfig,
-          name: activeProfile()?.name ?? 'the athlete',
         })
-        set({ gymFellBack: fellBackBecause })
         commit((d) => {
           d.gym.active = session
         })
       } catch (e) {
-        // coachPlan can't throw, but the offline planner and the write can. This
-        // used to escape as an unhandled rejection: the button simply snapped
-        // back to normal and no session appeared, with nothing said anywhere.
+        // the planner is pure, but the write can still fail. This used to escape
+        // as an unhandled rejection: the button snapped back to normal, no
+        // session appeared, and nothing was said anywhere.
         logError('gymPlan', e)
-        set({ gymFellBack: `couldn't build a session: ${e instanceof Error ? e.message : String(e)}` })
       } finally {
         set({ gymPlanning: false })
       }
     },
 
-    async gymSwap(exId, reason) {
-      const { data, gymCatalog, aiConfig, activeProfile } = get()
+    async gymSwap(exId) {
+      const { data, gymCatalog } = get()
       const active = data.gym.active
       const target = active?.exercises.find((e) => e.exId === exId)
       if (!active || !target) return 'none'
       const keep = active.exercises.filter((e) => e.exId !== exId)
 
-      set({ gymPlanning: true, gymFellBack: null })
+      set({ gymPlanning: true })
       try {
-        const replacement = await coachSwap(
+        const replacement = pickReplacement(
           {
             catalog: gymCatalog,
             gym: data.gym,
             minutes: active.minutes,
             mood: active.mood,
             gearMode: active.gearMode,
-            ai: aiConfig,
-            name: activeProfile()?.name ?? 'the athlete',
             day: active.day,
           },
           target,
           keep,
-          reason ?? '',
-          (why) => set({ gymFellBack: why }),
         )
         if (!replacement) return 'none'
         commit((d) => {
@@ -3571,7 +3561,6 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymDiscard() {
-      set({ gymFellBack: null })
       commit((d) => {
         d.gym.active = null
       })
@@ -3714,7 +3703,6 @@ export const useStore = create<StoreState>((set, get) => {
         d.gym.active = null
       })
 
-      set({ gymFellBack: null })
       return { coins: paid, session: filed }
     },
 
@@ -3724,7 +3712,6 @@ export const useStore = create<StoreState>((set, get) => {
       // walked out having actually lifted something: keep it, pay it, learn from
       // it. Nothing logged at all: throw it away rather than pollute the history.
       if (anyWork) return get().gymFinish(undefined, 'Left early')
-      set({ gymFellBack: null })
       commit((d) => {
         d.gym.active = null
       })

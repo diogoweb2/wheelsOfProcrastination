@@ -42,3 +42,4 @@ scripts/.exercisedb-index*.json
 
 # Gym: downloaded free-exercise-db index (the start/end photo fallback source)
 scripts/.free-exercise-db.json
+.gym-catalog-backup-*.json
