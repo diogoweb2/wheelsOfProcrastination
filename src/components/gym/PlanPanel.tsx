@@ -208,10 +208,11 @@ function BlockCard() {
 
   const pos = blockPosOf(gym)
   const weeks = blockWeeks(block)
-  const age = blockAge(block)
   const done = blockSessionsDone(gym)
+  const age = blockAge(block, done)
   const gaps = missingSlots(block, gymCatalog)
-  const progress = Math.min(100, Math.round((weeks / block.retireWeeks) * 100))
+  // the bar fills with WORK DONE, not with time passing
+  const progress = Math.min(100, Math.round((done / Math.max(1, block.reviewSessions)) * 100))
 
   return (
     <>
@@ -219,9 +220,9 @@ function BlockCard() {
       <div className="card">
         {block.goal && <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>{block.goal}</p>}
         <div className="gym-card-head" style={{ marginBottom: 8 }}>
-          <span>Week {weeks + 1} of {block.reviewWeeks}–{block.retireWeeks}</span>
+          <span>{done} of {block.reviewSessions} sessions · week {weeks + 1}</span>
           <span style={{ fontWeight: 900, color: age === 'fresh' ? 'var(--muted)' : 'var(--orange)' }}>
-            {age === 'fresh' ? `${done} sessions done` : age === 'due' ? 'due a refresh' : 'past its date'}
+            {age === 'fresh' ? 'in progress' : age === 'due' ? 'due a refresh' : 'had its run'}
           </span>
         </div>
         <div className="widget-bar">
@@ -231,15 +232,15 @@ function BlockCard() {
           One ordered rotation, no days of the week: you do the next session whenever you train. Train twice this week and
           you get through two of them; the next week carries on where you stopped.{' '}
           {age === 'fresh'
-            ? `The app will say when it is time for a new block — from week ${block.reviewWeeks}.`
-            : 'Time for a new block: same six-session shape, some movements swapped.'}
+            ? `A block is measured in sessions finished, not weeks owned — this one is written for ${block.reviewSessions}, and the app will say when you get there.`
+            : 'Worth thinking about Block 2 — same shape, 2–4 movements swapped. Still progressing? Keep going.'}
         </p>
         {age !== 'fresh' && (
           <button
             className="btn btn--ghost btn--small"
             style={{ width: '100%', marginTop: 8 }}
             onClick={() => {
-              if (!confirm(`Carry on with these six sessions as a new block? The clock restarts today.`)) return
+              if (!confirm('Carry on with these sessions as a new block? The session counter starts again at zero.')) return
               sfx.click()
               gymRestartBlock()
             }}

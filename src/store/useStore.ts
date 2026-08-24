@@ -93,6 +93,7 @@ import {
   subscribeRoster,
 } from './cloud'
 import type { AuditCategory, AuditEntry, Season, TrainingBlock } from '../types'
+import type { SessionLength } from '../logic/gymBlock'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import {
@@ -193,7 +194,7 @@ import {
   setSeconds,
   advanceLadder,
 } from '../logic/gym'
-import { copyBlock, planBlockSession, seedBlock } from '../logic/gymBlock'
+import { SEED_VERSION, copyBlock, planBlockSession, seedBlock } from '../logic/gymBlock'
 import {
   applyEntry as applyRobloxEntry,
   formatMinutes,
@@ -679,7 +680,7 @@ interface StoreState {
    * it on the preview. This is the normal way a workout starts now — `gymPlan`
    * is the free-session escape hatch. Returns false when there is no block.
    */
-  gymPlanBlock: (opts?: { pos?: number; mood?: Mood }) => boolean
+  gymPlanBlock: (opts?: { pos?: number; mood?: Mood; length?: SessionLength }) => boolean
   /** Move the rotation cursor by hand — "not that one today, give me S4". */
   gymSetBlockPos: (pos: number) => void
   /** Start a fresh block from the rotation you are on: same sessions, clock reset to today. */
@@ -877,6 +878,19 @@ export const useStore = create<StoreState>((set, get) => {
               d.gym.blocks = [block]
               d.gym.activeBlockId = block.id
               d.gym.blockPos = 0
+            }
+          } else {
+            // A seeded block NOBODY HAS TRAINED AGAINST YET is still ours to
+            // correct — the copy in code changed (an exercise dropped, a rep
+            // range fixed) and there is no history to protect. The moment one
+            // session is logged against it, it is the programme you actually
+            // did and the code never touches it again.
+            const fresh = seedBlock(id)
+            const at = fresh ? d.gym.blocks.findIndex((b) => b.id === fresh.id && b.source === 'seed') : -1
+            const stale = at >= 0 && (d.gym.blocks[at].seedVersion ?? 1) < SEED_VERSION
+            if (fresh && stale && !d.gym.sessions.some((x) => x.blockId === fresh.id)) {
+              d.gym.blocks[at] = { ...fresh, startedAt: d.gym.blocks[at].startedAt }
+              if (d.gym.activeBlockId === fresh.id) d.gym.blockPos = 0
             }
           }
         }
@@ -3509,6 +3523,7 @@ export const useStore = create<StoreState>((set, get) => {
         gym: data.gym,
         mood: opts?.mood ?? 'normal',
         pos: opts?.pos,
+        length: opts?.length,
       })
       if (!session) return false
       commit((d) => {

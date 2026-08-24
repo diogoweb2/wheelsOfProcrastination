@@ -186,6 +186,16 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
   // the old key rode in on the spread above; drop it so it doesn't live forever
   // in the saved document as a second, stale copy of the rotation
   delete (merged.gym as { block?: TrainingBlock }).block
+  // gym v2 → v3: a block expires on sessions FINISHED, not weeks owned. Saves
+  // written against the calendar rule are converted at roughly three sessions a
+  // week, which is what those week numbers were quietly assuming.
+  for (const b of merged.gym.blocks) {
+    const legacy = b as unknown as { reviewWeeks?: number; retireWeeks?: number }
+    if (b.reviewSessions == null) b.reviewSessions = Math.max(6, Math.round((legacy.reviewWeeks ?? 8) * 3))
+    if (b.retireSessions == null) b.retireSessions = Math.max(b.reviewSessions + 6, Math.round((legacy.retireWeeks ?? 12) * 3))
+    delete legacy.reviewWeeks
+    delete legacy.retireWeeks
+  }
   return merged
 }
 

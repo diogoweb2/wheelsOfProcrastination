@@ -1111,10 +1111,18 @@ export interface TrainingBlock {
   /** What this block is FOR, in one line. Shown on the Plan tab. */
   goal?: string
   startedAt: string // ISO
-  /** Weeks after which the app starts suggesting a new block (default 8). */
-  reviewWeeks: number
-  /** Weeks after which it says so loudly (default 12). */
-  retireWeeks: number
+  /**
+   * How much REAL TRAINING this block is worth, counted in finished sessions
+   * rather than weeks. Eight weeks means 16 sessions at two a week and 40 at
+   * five, and only one of those is a block's worth of work — the calendar
+   * measures how long you have owned the programme, not how much of it you have
+   * done. `reviewSessions` is where the app starts suggesting a new block,
+   * `retireSessions` where it says so plainly.
+   */
+  reviewSessions: number
+  retireSessions: number
+  /** Which generation of the code's seed this came from — lets an untouched copy be updated. */
+  seedVersion?: number
   sessions: BlockSession[]
 }
 

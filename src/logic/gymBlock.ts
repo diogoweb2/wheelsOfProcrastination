@@ -29,7 +29,7 @@ import type {
   TrainingBlock,
 } from '../types'
 import { dayKey } from './dates'
-import { allExercises, exerciseById, planOne, sessionSeconds } from './gym'
+import { allExercises, exerciseById, exerciseSeconds, planOne, sessionSeconds } from './gym'
 
 // --- block 1 ----------------------------------------------------------------
 //
@@ -47,6 +47,22 @@ const ex = (exId: string, sets: number, repLow: number, repHigh: number, extra?:
   ...extra,
 })
 
+/**
+ * Bumped when the code's copy of block 1 changes. A seeded block nobody has
+ * trained against yet is replaced on the next login; one with sessions logged
+ * against it is left alone forever — that is your training history's programme,
+ * not ours to rewrite.
+ */
+export const SEED_VERSION = 2
+
+/**
+ * Four full rotations before the app suggests a new block, seven before it
+ * pushes. Counted in finished sessions (see `TrainingBlock`), so a fortnight off
+ * costs the block nothing and a heavy month gets you there sooner.
+ */
+const REVIEW_SESSIONS = 24
+const RETIRE_SESSIONS = 42
+
 const BLOCK_1_SESSIONS: BlockSession[] = [
   {
     id: 's1',
@@ -54,7 +70,6 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     emoji: '🦵',
     exercises: [
       ex('mv-dumbbell-bulgarian-split-squat', 3, 8, 12),
-      ex('mv-dumbbell-romanian-deadlift', 3, 8, 12),
       ex('mv-bench-hip-thrust', 3, 10, 15),
       ex('bw-side-plank', 2, 30, 45),
       ex('bw-calf-raise', 3, 15, 20),
@@ -79,7 +94,10 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     exercises: [
       ex('mv-split-squat-jump', 3, 5, 8, { quality: true, note: 'Stop the set the moment height or landing quality drops.' }),
       ex('mv-lateral-shuffle', 4, 15, 20, { quality: true, note: 'Short, sharp efforts. This is not a cardio circuit.' }),
-      ex('mv-kettlebell-swing', 3, 12, 20),
+      ex('mv-kettlebell-swing', 3, 8, 12, {
+        quality: true,
+        note: 'Explosive, not a rep count. Full rest between sets, and stop the moment the hinge gets sloppy.',
+      }),
       ex('mv-copenhagen-plank', 2, 20, 30),
       ex('mv-band-pallof-press', 3, 8, 12),
     ],
@@ -131,10 +149,11 @@ export function seedBlock(profileId: string | null, now: Date = new Date()): Tra
     id: 'block-1',
     name: 'Block 1',
     source: 'seed',
+    seedVersion: SEED_VERSION,
     goal: 'Strength and pickleball durability — lower back and core first.',
     startedAt: now.toISOString(),
-    reviewWeeks: 8,
-    retireWeeks: 12,
+    reviewSessions: REVIEW_SESSIONS,
+    retireSessions: RETIRE_SESSIONS,
     sessions: BLOCK_1_SESSIONS.map((s) => ({ ...s, exercises: s.exercises.map((e) => ({ ...e })) })),
   }
 }
@@ -177,8 +196,8 @@ export function emptyBlock(name = 'New block'): TrainingBlock {
     name,
     source: 'manual',
     startedAt: new Date().toISOString(),
-    reviewWeeks: 8,
-    retireWeeks: 12,
+    reviewSessions: REVIEW_SESSIONS,
+    retireSessions: RETIRE_SESSIONS,
     sessions: [],
   }
 }
@@ -188,6 +207,7 @@ export function copyBlock(block: TrainingBlock, name?: string): TrainingBlock {
   return {
     ...block,
     id: newId('block'),
+    seedVersion: undefined,
     name: name ?? nextBlockName(block.name),
     source: 'manual',
     startedAt: new Date().toISOString(),
@@ -217,15 +237,22 @@ export function blockWeeks(block: TrainingBlock, now: Date = new Date()): number
 }
 
 /**
- * `due` from week 8, `overdue` from week 12. Deliberately time-based, not
- * session-based: at 2–5 sessions a week the same eight weeks is anywhere from
- * 16 to 40 sessions, and it is the staleness of the exercises — which tracks
- * the calendar — that says a block is done.
+ * How worn out a block is, measured in **sessions you actually finished**, not
+ * weeks owned.
+ *
+ * This used to run on the calendar and that was wrong: at two sessions a week,
+ * "eight weeks" is sixteen sessions — barely three trips round a six-session
+ * rotation, and nowhere near enough exposure to have finished progressing on
+ * anything. The calendar measures how long the programme has been sitting
+ * there; the counter measures how much of it you have done. A fortnight off now
+ * costs the block nothing.
+ *
+ * It is a SUGGESTION either way. A block still progressing well is worth
+ * keeping past `retireSessions`, and "🔄 carry on with these" is a real answer.
  */
-export function blockAge(block: TrainingBlock, now: Date = new Date()): BlockAge {
-  const w = blockWeeks(block, now)
-  if (w >= block.retireWeeks) return 'overdue'
-  if (w >= block.reviewWeeks) return 'due'
+export function blockAge(block: TrainingBlock, done: number): BlockAge {
+  if (done >= block.retireSessions) return 'overdue'
+  if (done >= block.reviewSessions) return 'due'
   return 'fresh'
 }
 
@@ -238,6 +265,14 @@ export function blockSessionsDone(gym: GymState, block: TrainingBlock | null = a
 
 // --- turning a block session into a workout ---------------------------------
 
+/**
+ * The three honest answers to "how long have you got?". A block session is
+ * written for 30; the other two are the same session run short or run properly,
+ * never a different session. See `fitToLength`.
+ */
+export const SESSION_LENGTHS = [20, 30, 40] as const
+export type SessionLength = (typeof SESSION_LENGTHS)[number]
+
 export interface BlockPlanInput {
   catalog: GymCatalog | null
   gym: GymState
@@ -245,6 +280,42 @@ export interface BlockPlanInput {
   day?: string
   /** Which session of the rotation. Defaults to wherever the cursor is. */
   pos?: number
+  /** 20 · 30 · 40 minutes. Default 30, which is what the sessions are written for. */
+  length?: SessionLength
+}
+
+/**
+ * Make a session fit the time you have — WITHOUT changing what it is.
+ *
+ * The order of a block session is deliberate: main strength movement, second
+ * major movement, the goal-specific one, then accessories and core. So:
+ *
+ *   20 min — drop from the BACK. The accessories go first, the main lift never.
+ *            A short session is a whole session minus its tail, not five
+ *            exercises squeezed into fewer sets each.
+ *   30 min — as written.
+ *   40 min — a set onto each of the first two movements. NOT more exercises:
+ *            extra time buys more work on what already matters (and longer
+ *            rests, which the runner lets you take anyway). This matters most
+ *            on the power sessions, where more exercises would be actively
+ *            wrong.
+ */
+export function fitToLength(list: SessionExercise[], length: SessionLength): SessionExercise[] {
+  if (length === 30 || list.length === 0) return list
+
+  if (length === 40) {
+    return list.map((e, i) =>
+      i < 2 && !e.quality // a power slot's volume is capped by quality, not by minutes
+        ? { ...e, plan: { ...e.plan, reps: [...e.plan.reps, e.plan.reps[e.plan.reps.length - 1]] } }
+        : e,
+    )
+  }
+
+  // 20: pop the tail until it fits, never below three movements
+  const out = [...list]
+  const budget = 20 * 60 * 1.06
+  while (out.length > 3 && out.reduce((n, e) => n + exerciseSeconds(e), 0) > budget) out.pop()
+  return out
 }
 
 /**
@@ -272,21 +343,24 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
   const day = input.day ?? dayKey()
   const planInput = { catalog, gym, minutes: 30, mood, gearMode: 'mixed' as const, day }
 
-  const exercises: SessionExercise[] = []
+  const built: SessionExercise[] = []
   for (const slot of template.exercises) {
     const def = exerciseById(catalog, slot.exId)
     if (!def || def.retired) continue // shown as a gap on the Plan tab, never silently substituted
     // index 2 = "no ramp-in de-load"; see the note above
-    const built = planOne(def, planInput, 2)
-    exercises.push({
-      ...built,
-      plan: { ...built.plan, reps: Array.from({ length: slot.sets }, () => slot.repLow) },
+    const one = planOne(def, planInput, 2)
+    built.push({
+      ...one,
+      plan: { ...one.plan, reps: Array.from({ length: slot.sets }, () => slot.repLow) },
       repRange: [slot.repLow, slot.repHigh],
       quality: slot.quality,
       why: slot.note,
     })
   }
 
+  const length = input.length ?? 30
+  const exercises = fitToLength(built, length)
+  const trimmed = built.length - exercises.length
   const minutes = Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession) / 60))
   return {
     id: crypto.randomUUID(),
@@ -296,7 +370,7 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
     mood,
     gearMode: 'mixed',
     source: 'local',
-    note: `${template.name}. ${sessionNote(exercises.length, template)}`,
+    note: `${template.name}. ${trimmed > 0 ? `Short on time — the last ${trimmed === 1 ? 'exercise is' : `${trimmed} exercises are`} off, the main work is not.` : sessionNote(exercises.length, template)}`,
     exercises,
     coins: 0,
     blockId: block.id,

@@ -41,9 +41,10 @@ export function BlocksPanel() {
 
       <div className="card">
         <p className="muted" style={{ fontSize: 12, lineHeight: 1.5 }}>
-          A block is a fixed rotation of sessions you repeat for 8–12 weeks — the Train tab just hands you the next one.
-          Everything here is editable: rename a session, change a rep range, add or drop an exercise, reorder the rotation.
-          Edits save as you make them and apply to the next session you start, never to one already running.
+          A block is a fixed rotation of sessions you repeat for a couple of dozen sessions — the Train tab just hands you
+          the next one. Everything here is editable: rename a session, change a rep range, add or drop an exercise, reorder
+          the rotation. Edits save as you make them and apply to the next session you start, never to one already running.
+          When a block is done, change 2–4 movements and keep the patterns: you want progressive exposure, not novelty.
         </p>
       </div>
 
@@ -83,7 +84,7 @@ export function BlocksPanel() {
           <button
             className="btn btn--ghost btn--small"
             style={{ flex: 1 }}
-            title="Same six sessions, new clock — then swap the movements you want to change"
+            title="Same rotation, counter back to zero — then swap the 2–4 movements you want to change"
             onClick={() => {
               sfx.gem()
               const b = copyBlock(active)
@@ -137,8 +138,8 @@ function BlockCard({
   const { data, gymSaveBlock, gymDeleteBlock, gymSetActiveBlock } = useStore()
   const gym = data.gym
   const weeks = blockWeeks(block)
-  const age = blockAge(block)
   const done = blockSessionsDone(gym, block)
+  const age = blockAge(block, done)
   const pos = isActive ? blockPosOf(gym) : -1
   const [adding, setAdding] = useState<string | null>(null)
 
@@ -161,9 +162,9 @@ function BlockCard({
         <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
           <span style={{ display: 'block', fontWeight: 900, fontSize: 15 }}>{block.name}</span>
           <span className="muted" style={{ display: 'block', fontSize: 11 }}>
-            {block.sessions.length} session{block.sessions.length === 1 ? '' : 's'} · week {weeks + 1} · {done} done
+            {block.sessions.length} in the rotation · {done} done · week {weeks + 1}
             {isActive ? ' · being followed' : ''}
-            {age !== 'fresh' ? (age === 'due' ? ' · due a refresh' : ' · past its date') : ''}
+            {age !== 'fresh' ? (age === 'due' ? ' · due a refresh' : ' · had its run') : ''}
           </span>
         </span>
         <span className="muted">{open ? '▾' : '▸'}</span>
@@ -186,19 +187,19 @@ function BlockCard({
           </div>
           <div className="gym-inputs">
             <div className="field">
-              <label>Review after (weeks)</label>
+              <label>Review after (sessions)</label>
               <input
                 type="number"
-                value={block.reviewWeeks}
-                onChange={(e) => patch({ reviewWeeks: Math.max(1, Number(e.target.value) || 8) })}
+                value={block.reviewSessions}
+                onChange={(e) => patch({ reviewSessions: Math.max(1, Number(e.target.value) || 24) })}
               />
             </div>
             <div className="field">
-              <label>Retire after (weeks)</label>
+              <label>Retire after (sessions)</label>
               <input
                 type="number"
-                value={block.retireWeeks}
-                onChange={(e) => patch({ retireWeeks: Math.max(1, Number(e.target.value) || 12) })}
+                value={block.retireSessions}
+                onChange={(e) => patch({ retireSessions: Math.max(1, Number(e.target.value) || 42) })}
               />
             </div>
             <div className="field">
@@ -207,15 +208,18 @@ function BlockCard({
                 type="date"
                 value={block.startedAt.slice(0, 10)}
                 onChange={(e) => {
-                  // the clock the warning runs on — editable because a block you
-                  // actually started three weeks before you typed it in should
-                  // expire three weeks earlier
+                  // display only — the warning runs on sessions finished — but a
+                  // block you started before you typed it in should say so
                   const d = new Date(`${e.target.value}T12:00:00`)
                   if (!Number.isNaN(d.getTime())) patch({ startedAt: d.toISOString() })
                 }}
               />
             </div>
           </div>
+          <p className="muted" style={{ fontSize: 11, marginTop: -4, marginBottom: 8, lineHeight: 1.4 }}>
+            Counted in sessions you FINISH, not weeks owned: eight weeks is 16 sessions at twice a week and 40 at five, and
+            only one of those is a block's worth of training. 24 is four full trips round a six-session rotation.
+          </p>
 
           {block.sessions.map((s, i) => (
             <SessionEditor

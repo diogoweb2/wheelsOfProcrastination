@@ -33,7 +33,9 @@ import {
   stepLoad,
 } from '../../logic/gym'
 import type { BlockAge } from '../../logic/gymBlock'
+import type { SessionLength } from '../../logic/gymBlock'
 import {
+  SESSION_LENGTHS,
   activeBlock,
   blockAge,
   blockPos as blockPosOf,
@@ -247,25 +249,26 @@ function NextSessionCard() {
   const block = activeBlock(gym)
   const [picking, setPicking] = useState(false)
   const [mood, setMood] = useState<Mood>('normal')
+  const [length, setLength] = useState<SessionLength>(30)
   const byId = useMemo(() => new Map(allExercises(gymCatalog).map((e) => [e.id, e])), [gymCatalog])
   if (!block) return null
 
   const pos = blockPosOf(gym)
   const session = nextBlockSession(gym)
   const then = sessionAfter(block, pos)
-  const age = blockAge(block)
   const weeks = blockWeeks(block)
   const done = blockSessionsDone(gym)
+  const age = blockAge(block, done)
 
   return (
     <>
-      {age !== 'fresh' && <BlockWarning age={age} weeks={weeks} />}
+      {age !== 'fresh' && <BlockWarning age={age} done={done} />}
 
       <div className="card">
         <div className="gym-note-head">
           <span className="chip">🧱 {block.name}</span>
+          <span className="chip">{done} of {block.reviewSessions} sessions</span>
           <span className="chip">week {weeks + 1}</span>
-          <span className="chip">{done} session{done === 1 ? '' : 's'} in</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
@@ -290,13 +293,40 @@ function NextSessionCard() {
           })}
         </ul>
 
+        {/* How long you have got — never WHAT you do, only how much of it.
+            20 drops the tail, 40 adds a set to the first two movements. */}
+        <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+          <label>How long have you got?</label>
+          <div className="seg">
+            {SESSION_LENGTHS.map((m) => (
+              <button
+                key={m}
+                className={length === m ? 'on' : ''}
+                onClick={() => {
+                  sfx.click()
+                  setLength(m)
+                }}
+              >
+                {m} min
+              </button>
+            ))}
+          </div>
+          <span className="muted" style={{ fontSize: 11, display: 'block', marginTop: 6, lineHeight: 1.4 }}>
+            {length === 20
+              ? 'The accessories at the end come off. The main work stays.'
+              : length === 40
+                ? 'An extra set on the first two movements — not extra exercises. Take the longer rests too.'
+                : 'The session exactly as written.'}
+          </span>
+        </div>
+
         <button
           className="btn"
           style={{ marginTop: 12 }}
           onClick={() => {
             sfx.fanfare()
             primeGymAudio() // first gesture of the session: unlock the alert clips
-            gymPlanBlock({ mood })
+            gymPlanBlock({ mood, length })
           }}
         >
           ▶️ Do session {pos + 1}
@@ -358,28 +388,30 @@ function NextSessionCard() {
 }
 
 /** "This block has run its course." Says it once it is true, and says what to do about it. */
-function BlockWarning({ age, weeks }: { age: BlockAge; weeks: number }) {
+function BlockWarning({ age, done }: { age: BlockAge; done: number }) {
   const { data, gymRestartBlock } = useStore()
   const block = activeBlock(data.gym)
   if (!block) return null
   return (
     <div className="card gym-block-warn">
       <div style={{ fontWeight: 900, fontSize: 15 }}>
-        {age === 'overdue' ? '🛑 This block is done' : '⏳ Time to think about the next block'}
+        {age === 'overdue' ? '🛑 This block has had its run' : '⏳ Time to think about the next block'}
       </div>
       <p className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.45 }}>
-        {block.name} started {weeks} weeks ago
+        {done} sessions of {block.name} finished
         {age === 'overdue'
-          ? `, past the ${block.retireWeeks} weeks it was written for. The exercises have stopped being new, and progression on them has stopped meaning much.`
-          : `, and it was written to run ${block.reviewWeeks}–${block.retireWeeks}.`}{' '}
-        Block 2 keeps the same six-session shape and swaps some movements — split squat for reverse lunge, flat press for
-        incline, chest-supported row for one-arm.
+          ? `, past the ${block.retireSessions} it was written for.`
+          : `, which is the ${block.reviewSessions} it was written for.`}{' '}
+        <strong>If it is still progressing, keep going</strong> — this is a suggestion, not a rule. When it stops, Block 2
+        changes <strong>2–4 movements and nothing else</strong>: split squat → reverse lunge, flat press → incline,
+        chest-supported row → one-arm, split squat jump → another lateral or vertical power move. Same patterns, progressive
+        exposure, not novelty.
       </p>
       <button
         className="btn btn--ghost btn--small"
         style={{ width: '100%', marginTop: 8 }}
         onClick={() => {
-          if (!confirm(`Carry on with these six sessions as a new block? The ${block.reviewWeeks}-week clock restarts today.`)) return
+          if (!confirm('Carry on with these sessions as a new block? The session counter starts again at zero.')) return
           sfx.click()
           gymRestartBlock()
         }}
