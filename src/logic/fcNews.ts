@@ -11,14 +11,33 @@
 // costs one search.
 import type { AiConfig, FcNewsItem } from '../types'
 import { askOpenRouter, shortAiError, sliceJson } from './openrouter'
+import { torontoDate } from './fclock'
 
 /** Search-augmented: the `:online` suffix is OpenRouter's web plugin. */
 const NEWS_MODELS = ['perplexity/sonar', 'deepseek/deepseek-v4-flash:online']
 const TITLE = 'Wheels — FC Lock news'
 const TIMEOUT_MS = 90_000
 
-/** A fetched batch is good for six hours — transfer rumours don't move faster. */
-export const NEWS_TTL_MS = 6 * 60 * 60 * 1000
+/** A fetched batch is good for a day — transfer rumours don't move faster. */
+export const NEWS_TTL_MS = 24 * 60 * 60 * 1000
+
+/**
+ * ONE SEARCH PER DAY, and it is a hard cap rather than a cache rule.
+ *
+ * A web-search request is the most expensive thing this app does, and the
+ * refresh button used to bypass the cache entirely — so the real spend was
+ * "however many times someone taps it". The cap is keyed on the Toronto
+ * calendar date of the last successful fetch, so it resets at local midnight
+ * rather than 24 hours after whenever you last happened to look.
+ *
+ * Deliberately NOT tied to the cache key: changing which clubs you follow
+ * invalidates the cached batch, but it must not buy another search, or the cap
+ * is one team-toggle away from meaningless.
+ */
+export function newsFetchedToday(fetchedAt: string | undefined, now: Date = new Date()): boolean {
+  if (!fetchedAt) return false
+  return torontoDate(fetchedAt) === torontoDate(now)
+}
 
 export function newsKey(teams: string[]): string {
   return [...teams].sort().join('|')

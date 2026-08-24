@@ -44,7 +44,7 @@ import {
   type RankedClub,
   type PlayerInfo,
 } from '../logic/fclock'
-import { fetchFcNews, newsKey, newsStale } from '../logic/fcNews'
+import { fetchFcNews, newsFetchedToday, newsKey, newsStale } from '../logic/fcNews'
 import {
   PACK_COST,
   PL_CLUBS,
@@ -453,8 +453,14 @@ function NewsTab() {
   const teams = useMemo(() => fcLock.teams.map((t) => t.name), [fcLock.teams])
   const key = newsKey(teams)
   const stale = newsStale(fcLock.news?.fetchedAt, key, fcLock.news?.forKey)
+  // one search a day, hard (§21d). The button is the only way to spend the key
+  // here, so the cap lives on the button rather than on the cache.
+  const usedToday = newsFetchedToday(fcLock.news?.fetchedAt)
 
   const refresh = useCallback(async () => {
+    // belt and braces: the disabled button is the visible cap, this is the one
+    // that survives someone later wiring up an auto-fetch on tab open
+    if (newsFetchedToday(fcLock.news?.fetchedAt)) return
     setLoading(true)
     setError(null)
     try {
@@ -465,7 +471,7 @@ function NewsTab() {
     } finally {
       setLoading(false)
     }
-  }, [aiConfig, teams, key, setFcNews])
+  }, [aiConfig, teams, key, setFcNews, fcLock.news?.fetchedAt])
 
   if (!teams.length) {
     return (
@@ -489,12 +495,18 @@ function NewsTab() {
           <div style={{ fontWeight: 700 }}>{teams.join(' · ')}</div>
           <div className="muted" style={{ fontSize: 11 }}>
             {fcLock.news?.fetchedAt
-              ? `Read ${torontoDay(fcLock.news.fetchedAt)}, ${torontoTime(fcLock.news.fetchedAt)} ET${stale ? ' · out of date' : ''}`
-              : 'Never fetched'}
+              ? `Read ${torontoDay(fcLock.news.fetchedAt)}, ${torontoTime(fcLock.news.fetchedAt)} ET${
+                  usedToday ? ' · next one tomorrow' : stale ? ' · out of date' : ''
+                }`
+              : 'Never fetched · one search a day'}
           </div>
         </div>
-        <button className="btn btn--blue btn--small" disabled={loading} onClick={() => { sfx.click(); void refresh() }}>
-          {loading ? 'Reading…' : '🔄 Get news'}
+        <button
+          className="btn btn--blue btn--small"
+          disabled={loading || usedToday}
+          onClick={() => { sfx.click(); void refresh() }}
+        >
+          {loading ? 'Reading…' : usedToday ? '✅ Read today' : '🔄 Get news'}
         </button>
       </div>
 

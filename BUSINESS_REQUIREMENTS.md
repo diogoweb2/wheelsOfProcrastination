@@ -1032,7 +1032,9 @@ Tapping ☆ on any game puts it on **your own** watchlist, stored as a **snapsho
 
 ### 21d. News
 
-There is no free football-news API worth wiring up — the good ones cost money, the RSS ones are blocked by CORS in the browser. So the news desk reuses the OpenRouter key the app already holds (`app/aiConfig`, §18/§19) with a **web-search model**, and asks it to go and read today's press for the clubs we follow: **transfers first**, then club news. Every item carries its **source and link**, the model is told never to invent a transfer, fee, quote or date, and the batch is cached on your profile for **6 hours** (a changed set of favourite clubs invalidates it immediately). No key, no news — the tab says so plainly.
+There is no free football-news API worth wiring up — the good ones cost money, the RSS ones are blocked by CORS in the browser. So the news desk reuses the OpenRouter key the app already holds (`app/aiConfig`, §18/§19) with a **web-search model**, and asks it to go and read today's press for the clubs we follow: **transfers first**, then club news. Every item carries its **source and link**, the model is told never to invent a transfer, fee, quote or date, and the batch is cached on your profile. No key, no news — the tab says so plainly.
+
+**One search a day, and it is a hard cap rather than a cache rule.** A web-search request is the most expensive thing the app does, and 🔄 Get news used to bypass the cache entirely — so the real spend was however many times the button got tapped. It is now disabled once a fetch has succeeded, keyed on the **Toronto calendar date**, so it resets at local midnight rather than 24 hours after you last looked. The button says **✅ Read today** and the line above it says *next one tomorrow*. Deliberately **not** tied to the cache key: changing which clubs you follow still invalidates the cached batch, but it does not buy another search — otherwise the cap is one team-toggle away from meaningless.
 
 ### 21e. Cups
 
