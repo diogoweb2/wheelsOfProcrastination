@@ -886,7 +886,11 @@ export const useStore = create<StoreState>((set, get) => {
             // session is logged against it, it is the programme you actually
             // did and the code never touches it again.
             const fresh = seedBlock(id)
-            const at = fresh ? d.gym.blocks.findIndex((b) => b.id === fresh.id && b.source === 'seed') : -1
+            // `source !== 'manual'` rather than `=== 'seed'` on purpose: blocks
+            // written before that field existed have no source at all, and they
+            // are ours too. The moment you EDIT a block it is stamped manual
+            // (see gymSaveBlock) and this never looks at it again.
+            const at = fresh ? d.gym.blocks.findIndex((b) => b.id === fresh.id && b.source !== 'manual') : -1
             const stale = at >= 0 && (d.gym.blocks[at].seedVersion ?? 1) < SEED_VERSION
             if (fresh && stale && !d.gym.sessions.some((x) => x.blockId === fresh.id)) {
               d.gym.blocks[at] = { ...fresh, startedAt: d.gym.blocks[at].startedAt }
@@ -3559,6 +3563,10 @@ export const useStore = create<StoreState>((set, get) => {
     gymSaveBlock(block) {
       commit((d) => {
         const at = d.gym.blocks.findIndex((b) => b.id === block.id)
+        // Touching a block makes it YOURS: a seeded block is only ever replaced
+        // by a newer copy from the code while it is still pristine, and one
+        // keystroke in the Blocks tab ends that.
+        block = { ...block, source: 'manual', seedVersion: undefined }
         // Editing the rotation you are standing in can leave the cursor past
         // the end (six sessions became four) — pull it back into range.
         if (at >= 0) d.gym.blocks[at] = block
