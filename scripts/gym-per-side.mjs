@@ -1,6 +1,6 @@
 // One-time backfill: tag every exercise already in the catalog with `perSide`.
 //
-// `npm run gym:exercises` is append-only on purpose — it never rewrites an
+// The old (now deleted) exercise generator was append-only on purpose — it never rewrote an
 // exercise you already have, so a new field like this would only ever reach
 // exercises added AFTER it existed. Everything generated before stays silent
 // about whether "2 × 15" means fifteen reps or thirty.

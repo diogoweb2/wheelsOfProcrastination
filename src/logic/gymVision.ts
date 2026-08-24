@@ -10,8 +10,8 @@
 // and nothing else. It does NOT propose exercises — a photo of a bench cannot
 // show what weight is in the room, so anything it invents from one frame is
 // guesswork ("sit-ups on the bench") that then has to be un-ticked. Exercises are
-// worked out later by `npm run gym:exercises`, which reads the WHOLE catalog at
-// once and so knows the bench has plates next to it.
+// chosen by hand afterwards — Gear → ➕ Add exercise, or the catalog file
+// (BUSINESS_REQUIREMENTS.md §18k).
 //
 // It only ever SUGGESTS: nothing is written until you press Save and every field
 // stays editable, because a vision model reading a dark basement will sometimes

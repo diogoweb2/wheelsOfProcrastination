@@ -1,0 +1,328 @@
+// 🧱 Training blocks — the fixed rotation that replaced "build me something".
+//
+// See BUSINESS_REQUIREMENTS.md §18m. The short version:
+//
+//   Session 1 → 2 → 3 → 4 → 5 → 6 → back to 1, for eight to twelve weeks.
+//
+// You never ask "what should I do today?", you ask "what's next?". Nothing here
+// looks at the day of the week, because the number of sessions in a week is
+// unpredictable (2 to 5) and every calendar programme breaks on that. Train
+// twice this week and you do S1 and S2; the next week picks up at S3.
+//
+// Two things this buys that the old planner structurally could not:
+//   • PROGRESSION. The same exercise comes back under the same conditions, so
+//     "last time you did 3 × 10 at 30 lb" is a fact you can act on.
+//   • A REP RANGE instead of a number. 8–12 means: the low end is what has to
+//     be there for the set to count, the high end is what you chase, and
+//     reaching the top on every set is the signal to add load.
+//
+// The block is per profile (it lives in `AppData.gym`), not in the shared
+// catalog — the catalog is the basement, this is one person's programme.
+import type {
+  BlockExercise,
+  BlockSession,
+  GymCatalog,
+  GymSession,
+  GymState,
+  Mood,
+  SessionExercise,
+  TrainingBlock,
+} from '../types'
+import { dayKey } from './dates'
+import { allExercises, exerciseById, planOne, sessionSeconds } from './gym'
+
+// --- block 1 ----------------------------------------------------------------
+//
+// Six sessions, each about 30 minutes. Written for Diogo: 43, pickleball is the
+// sport, lower back and core are the priority, and the basement is the catalog
+// in scripts/data/gym-catalog.json. Exercise ids come straight from it — a slot
+// pointing at an exercise that no longer exists is shown as a gap rather than
+// silently dropped, so a bad edit is visible instead of quiet.
+
+const ex = (exId: string, sets: number, repLow: number, repHigh: number, extra?: Partial<BlockExercise>): BlockExercise => ({
+  exId,
+  sets,
+  repLow,
+  repHigh,
+  ...extra,
+})
+
+const BLOCK_1_SESSIONS: BlockSession[] = [
+  {
+    id: 's1',
+    name: 'Lower strength + core',
+    emoji: '🦵',
+    exercises: [
+      ex('mv-dumbbell-bulgarian-split-squat', 3, 8, 12),
+      ex('mv-dumbbell-romanian-deadlift', 3, 8, 12),
+      ex('mv-bench-hip-thrust', 3, 10, 15),
+      ex('bw-side-plank', 2, 30, 45),
+      ex('bw-calf-raise', 3, 15, 20),
+    ],
+  },
+  {
+    id: 's2',
+    name: 'Upper push + pull',
+    emoji: '🫸',
+    exercises: [
+      ex('mv-dumbbell-bench-press', 3, 8, 12),
+      ex('mv-chest-supported-dumbbell-row', 3, 8, 12),
+      ex('bw-pullup', 3, 4, 8, { note: 'Chin-ups instead are fine — same slot, easier line of pull.' }),
+      ex('mv-dumbbell-lateral-raise', 2, 15, 20),
+      ex('mv-band-face-pull', 2, 15, 20),
+    ],
+  },
+  {
+    id: 's3',
+    name: 'Pickleball power + stability',
+    emoji: '⚡',
+    exercises: [
+      ex('mv-split-squat-jump', 3, 5, 8, { quality: true, note: 'Stop the set the moment height or landing quality drops.' }),
+      ex('mv-lateral-shuffle', 4, 15, 20, { quality: true, note: 'Short, sharp efforts. This is not a cardio circuit.' }),
+      ex('mv-kettlebell-swing', 3, 12, 20),
+      ex('mv-copenhagen-plank', 2, 20, 30),
+      ex('mv-band-pallof-press', 3, 8, 12),
+    ],
+  },
+  {
+    id: 's4',
+    name: 'Lower unilateral + posterior chain',
+    emoji: '🦿',
+    exercises: [
+      ex('mv-dumbbell-reverse-lunge', 3, 8, 12),
+      ex('mv-goblet-squat', 3, 10, 15),
+      ex('mv-single-leg-glute-bridge', 3, 10, 15),
+      ex('mv-band-leg-curl', 3, 12, 20),
+      ex('mv-single-leg-calf-raise', 3, 15, 20),
+    ],
+  },
+  {
+    id: 's5',
+    name: 'Upper pull + shoulder health',
+    emoji: '🧗',
+    exercises: [
+      ex('bw-pullup', 3, 4, 8, { note: 'Chin-ups instead are fine — same slot.' }),
+      ex('mv-one-arm-dumbbell-row', 3, 8, 12),
+      ex('mv-seated-dumbbell-shoulder-press', 3, 8, 12),
+      ex('mv-band-external-rotation', 2, 12, 20),
+      ex('mv-dumbbell-reverse-wrist-curl', 2, 15, 20),
+      ex('mv-dumbbell-wrist-curl', 2, 15, 20),
+    ],
+  },
+  {
+    id: 's6',
+    name: 'Full body + pickleball',
+    emoji: '🏓',
+    exercises: [
+      ex('mv-dumbbell-step-up', 3, 8, 12),
+      ex('mv-incline-dumbbell-bench-press', 3, 8, 12),
+      ex('mv-band-lat-pulldown', 3, 10, 15),
+      ex('mv-band-rotational-press', 3, 8, 12),
+      ex('mv-farmer-s-walk', 3, 30, 45),
+      ex('mv-medicine-ball-chest-pass', 3, 4, 6, { quality: true, note: 'Explosive throws. Reset between reps.' }),
+    ],
+  },
+]
+
+/** The block a profile starts on. Only Diogo has one written; anyone else trains free. */
+export function seedBlock(profileId: string | null, now: Date = new Date()): TrainingBlock | null {
+  if (profileId !== 'diogo') return null
+  return {
+    id: 'block-1',
+    name: 'Block 1',
+    source: 'seed',
+    goal: 'Strength and pickleball durability — lower back and core first.',
+    startedAt: now.toISOString(),
+    reviewWeeks: 8,
+    retireWeeks: 12,
+    sessions: BLOCK_1_SESSIONS.map((s) => ({ ...s, exercises: s.exercises.map((e) => ({ ...e })) })),
+  }
+}
+
+/** "Block 1" → "Block 2". Anything else just gains a "(again)". */
+export function nextBlockName(name: string): string {
+  const m = /^(.*?)(\d+)\s*$/.exec(name)
+  return m ? `${m[1]}${Number(m[2]) + 1}` : `${name} (again)`
+}
+
+// --- the library, and where you are in it ------------------------------------
+
+/** The block the Train tab is walking through, if any. */
+export function activeBlock(gym: GymState): TrainingBlock | null {
+  if (!gym.activeBlockId) return null
+  return gym.blocks.find((b) => b.id === gym.activeBlockId) ?? null
+}
+
+/** The index of the session you do next, wrapped into range whatever the stored value is. */
+export function blockPos(gym: GymState): number {
+  const n = activeBlock(gym)?.sessions.length ?? 0
+  if (n === 0) return 0
+  return ((gym.blockPos % n) + n) % n
+}
+
+/** The session you do next. */
+export function nextBlockSession(gym: GymState): BlockSession | null {
+  return activeBlock(gym)?.sessions[blockPos(gym)] ?? null
+}
+
+/** A fresh id for a block, session or slot — short, readable in the JSON, unique enough. */
+export function newId(prefix: string): string {
+  return `${prefix}-${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`
+}
+
+/** An empty block to start editing from. */
+export function emptyBlock(name = 'New block'): TrainingBlock {
+  return {
+    id: newId('block'),
+    name,
+    source: 'manual',
+    startedAt: new Date().toISOString(),
+    reviewWeeks: 8,
+    retireWeeks: 12,
+    sessions: [],
+  }
+}
+
+/** A deep copy under a new id — "carry on with these", or "block 2 starts from block 1". */
+export function copyBlock(block: TrainingBlock, name?: string): TrainingBlock {
+  return {
+    ...block,
+    id: newId('block'),
+    name: name ?? nextBlockName(block.name),
+    source: 'manual',
+    startedAt: new Date().toISOString(),
+    sessions: block.sessions.map((s) => ({ ...s, id: newId('s'), exercises: s.exercises.map((e) => ({ ...e })) })),
+  }
+}
+
+/** An empty session to start editing from. */
+export function emptySession(name = 'New session'): BlockSession {
+  return { id: newId('s'), name, emoji: '💪', exercises: [] }
+}
+
+/** The one after a given position — what the "then" line on the card shows. */
+export function sessionAfter(block: TrainingBlock, pos: number): BlockSession | null {
+  if (block.sessions.length === 0) return null
+  return block.sessions[(pos + 1) % block.sessions.length]
+}
+
+// --- age and the "time for a new block" warning ------------------------------
+
+export type BlockAge = 'fresh' | 'due' | 'overdue'
+
+/** Whole weeks since the block started. */
+export function blockWeeks(block: TrainingBlock, now: Date = new Date()): number {
+  const ms = now.getTime() - Date.parse(block.startedAt)
+  return Math.max(0, Math.floor(ms / (7 * 86_400_000)))
+}
+
+/**
+ * `due` from week 8, `overdue` from week 12. Deliberately time-based, not
+ * session-based: at 2–5 sessions a week the same eight weeks is anywhere from
+ * 16 to 40 sessions, and it is the staleness of the exercises — which tracks
+ * the calendar — that says a block is done.
+ */
+export function blockAge(block: TrainingBlock, now: Date = new Date()): BlockAge {
+  const w = blockWeeks(block, now)
+  if (w >= block.retireWeeks) return 'overdue'
+  if (w >= block.reviewWeeks) return 'due'
+  return 'fresh'
+}
+
+/** How many of this block's sessions you have actually finished. */
+export function blockSessionsDone(gym: GymState, block: TrainingBlock | null = activeBlock(gym)): number {
+  const id = block?.id
+  if (!id) return 0
+  return gym.sessions.filter((s) => s.blockId === id).length
+}
+
+// --- turning a block session into a workout ---------------------------------
+
+export interface BlockPlanInput {
+  catalog: GymCatalog | null
+  gym: GymState
+  mood: Mood
+  day?: string
+  /** Which session of the rotation. Defaults to wherever the cursor is. */
+  pos?: number
+}
+
+/**
+ * Build the workout for one session of the block.
+ *
+ * Everything personal — the weight to put in front of you, the rest you
+ * actually take, how long a set of this takes YOU — still comes from the same
+ * per-exercise memory the old planner used (`planOne`). What the block decides
+ * is only WHICH exercises, in WHAT ORDER, for how many sets and reps. That
+ * split is the point: the programme is fixed, the loading is learned.
+ *
+ * No warm-up de-load here. The free planner runs its first two moves light
+ * because it can't know what it just picked; a block session's first exercise
+ * is the main lift of the day and gets its working weight, with the first set
+ * as the ramp-in.
+ */
+export function planBlockSession(input: BlockPlanInput): GymSession | null {
+  const { gym, catalog, mood } = input
+  const block = activeBlock(gym)
+  if (!block || block.sessions.length === 0) return null
+  const pos = input.pos ?? blockPos(gym)
+  const template = block.sessions[((pos % block.sessions.length) + block.sessions.length) % block.sessions.length]
+  if (!template) return null
+
+  const day = input.day ?? dayKey()
+  const planInput = { catalog, gym, minutes: 30, mood, gearMode: 'mixed' as const, day }
+
+  const exercises: SessionExercise[] = []
+  for (const slot of template.exercises) {
+    const def = exerciseById(catalog, slot.exId)
+    if (!def || def.retired) continue // shown as a gap on the Plan tab, never silently substituted
+    // index 2 = "no ramp-in de-load"; see the note above
+    const built = planOne(def, planInput, 2)
+    exercises.push({
+      ...built,
+      plan: { ...built.plan, reps: Array.from({ length: slot.sets }, () => slot.repLow) },
+      repRange: [slot.repLow, slot.repHigh],
+      quality: slot.quality,
+      why: slot.note,
+    })
+  }
+
+  const minutes = Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession) / 60))
+  return {
+    id: crypto.randomUUID(),
+    day,
+    status: 'preview',
+    minutes,
+    mood,
+    gearMode: 'mixed',
+    source: 'local',
+    note: `${template.name}. ${sessionNote(exercises.length, template)}`,
+    exercises,
+    coins: 0,
+    blockId: block.id,
+    blockSessionId: template.id,
+    blockSessionName: template.name,
+  }
+}
+
+function sessionNote(count: number, template: BlockSession): string {
+  if (count === 0) return 'Nothing in this session is in the catalog any more — check Plan.'
+  if (template.exercises.some((e) => e.quality)) return 'Quality first: the fast work stops when the speed goes, not when the count says so.'
+  return 'Same session as last time round — beat the top of a rep range and the weight goes up.'
+}
+
+/** Which slots of a session point at an exercise that is no longer in the catalog. */
+export function missingSlots(block: TrainingBlock, catalog: GymCatalog | null): { session: BlockSession; slot: BlockExercise }[] {
+  const known = new Set(allExercises(catalog).filter((e) => !e.retired).map((e) => e.id))
+  return block.sessions.flatMap((session) =>
+    session.exercises.filter((slot) => !known.has(slot.exId)).map((slot) => ({ session, slot })),
+  )
+}
+
+/** "3 × 8–12", "2 × 30–45s" — the ask, before any of your own numbers are known. */
+export function slotLine(slot: BlockExercise, catalog: GymCatalog | null): string {
+  const def = exerciseById(catalog, slot.exId)
+  const unit = def?.kind === 'timed' ? 's' : def?.kind === 'cardio' ? ' min' : ''
+  const range = slot.repLow === slot.repHigh ? `${slot.repLow}${unit}` : `${slot.repLow}–${slot.repHigh}${unit}`
+  return `${slot.sets} × ${range}${def?.perSide ? ' /side' : ''}`
+}

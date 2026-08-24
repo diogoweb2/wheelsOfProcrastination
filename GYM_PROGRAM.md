@@ -1,5 +1,12 @@
 # Gym — the Structured Program (v3.2 — FROZEN, build from this)
 
+> **Status (2026-08-24): superseded in part.** What actually shipped is the **training block** —
+> a fixed six-session rotation you walk through in order, seeded in `src/logic/gymBlock.ts` and
+> documented in BUSINESS_REQUIREMENTS.md §18m. There is no `gym:program` generator: the block is
+> written by hand, like the catalog. The thinking below on progression, recovery and the
+> pickleball emphasis is what the block is built from and still holds; the parts describing a
+> generator, a `review` queue or `catalogStatus` do not.
+
 **Status: NOT IN THE CODE YET.** This is the spec `npm run gym:program` and §18 of
 BUSINESS_REQUIREMENTS.md get built from.
 
@@ -186,8 +193,9 @@ Promoted into the approved exercise families (§13): **band Pallof press**, **ba
 hold**, **band external rotation**, **band face pull**, **band lateral walk** (glute medius —
 directly relevant to lateral court movement).
 
-**Until they are catalogued**, every band slot names a dumbbell fallback, so the program is
-runnable today. On arrival: `gym:equipment` → `gym:exercises` → `gym:audit` → `gym:program`.
+**The bands arrived on 2026-08-24** and are in the catalog (§18k of BUSINESS_REQUIREMENTS.md):
+15 band movements, including the Pallof press, face pull, external rotation and scaption this
+document kept asking for. The dumbbell fallbacks below are therefore optional now.
 
 ---
 
@@ -911,12 +919,12 @@ now agree the design is done; the next input should be 8–12 weeks of your own 
 
 The audit gates everything, so there is only one legal sequence:
 
-1. **`npm run gym:audit` layer 1** — deterministic validation. Fix what it errors on
-   (`eq-b8a8b13d` resolves here).
-2. **`npm run gym:audit` layer 2** — semantic pass, then clear the `review` queue by hand.
-   §12b says where to look first.
-3. **Bands** → `gym:equipment` → `gym:exercises` → re-audit the new rows.
-4. **`npm run gym:program`** — generate "Court & Core" from §5.
+1. **`npm run gym:audit`** — deterministic validation of the catalog. Fix what it errors on.
+   (The old model-driven layer 2 and its `review` queue were deleted on 2026-08-24: the catalog
+   is 63 hand-written rows now, so the questions that pass was invented to ask are answered
+   before a row exists. See BUSINESS_REQUIREMENTS.md §18k.)
+2. **Bands** — done: in the catalog since 2026-08-24.
+3. **`npm run gym:program`** — generate "Court & Core" from §5.
 5. **App changes** (§10) — Plan tab, progression, recovery dosing, warm-up block, roman-chair
    bonus button, and the AI-coach removal.
 

@@ -92,7 +92,7 @@ import {
   subscribePrizeCatalog,
   subscribeRoster,
 } from './cloud'
-import type { AuditCategory, AuditEntry, Season } from '../types'
+import type { AuditCategory, AuditEntry, Season, TrainingBlock } from '../types'
 import { addDays, dayKey } from '../logic/dates'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import {
@@ -193,6 +193,7 @@ import {
   setSeconds,
   advanceLadder,
 } from '../logic/gym'
+import { copyBlock, planBlockSession, seedBlock } from '../logic/gymBlock'
 import {
   applyEntry as applyRobloxEntry,
   formatMinutes,
@@ -673,6 +674,23 @@ interface StoreState {
    * ended when this is a "do more" block — it is never repeated.
    */
   gymPlan: (minutes: number, mood: Mood, opts?: { gearMode?: GearMode; followUp?: GymSession | null }) => Promise<void>
+  /**
+   * Build the NEXT session of the training block (or the one at `pos`) and park
+   * it on the preview. This is the normal way a workout starts now — `gymPlan`
+   * is the free-session escape hatch. Returns false when there is no block.
+   */
+  gymPlanBlock: (opts?: { pos?: number; mood?: Mood }) => boolean
+  /** Move the rotation cursor by hand — "not that one today, give me S4". */
+  gymSetBlockPos: (pos: number) => void
+  /** Start a fresh block from the rotation you are on: same sessions, clock reset to today. */
+  gymRestartBlock: (name?: string) => void
+  /** Write an edited block back to the library (or add it if it is new). */
+  gymSaveBlock: (block: TrainingBlock) => void
+  /** Put a block in the library without touching which one is active. */
+  gymAddBlock: (block: TrainingBlock) => void
+  gymDeleteBlock: (id: string) => void
+  /** Follow this block from its first session. `null` = train off-programme. */
+  gymSetActiveBlock: (id: string | null) => void
   /** "Not that one today." Swaps one exercise on the preview for something else. */
   gymSwap: (exId: string) => Promise<'ok' | 'none'>
   /**
@@ -850,6 +868,17 @@ export const useStore = create<StoreState>((set, get) => {
           // them (age, goals, injuries). It's a starting point — every word of
           // it is editable in Gym → Plan, and we never overwrite an edit.
           if (!d.gym.brief.text.trim() && !d.gym.brief.updatedAt) d.gym.brief = seedBrief(id)
+          // …and the training block they follow (§18m). Only ever seeded when
+          // there is none: a block you edited, restarted or worked through for
+          // six weeks is never quietly replaced by the code's copy.
+          if (d.gym.blocks.length === 0) {
+            const block = seedBlock(id)
+            if (block) {
+              d.gym.blocks = [block]
+              d.gym.activeBlockId = block.id
+              d.gym.blockPos = 0
+            }
+          }
         }
         const probe: AppData = JSON.parse(JSON.stringify(get().data))
         ensure(probe)
@@ -3473,6 +3502,85 @@ export const useStore = create<StoreState>((set, get) => {
       }
     },
 
+    gymPlanBlock(opts) {
+      const { data, gymCatalog } = get()
+      const session = planBlockSession({
+        catalog: gymCatalog,
+        gym: data.gym,
+        mood: opts?.mood ?? 'normal',
+        pos: opts?.pos,
+      })
+      if (!session) return false
+      commit((d) => {
+        // asking for a specific session moves the cursor to it, so finishing it
+        // advances from THERE — otherwise the rotation would jump backwards
+        if (opts?.pos != null) d.gym.blockPos = opts.pos
+        d.gym.active = session
+      })
+      return true
+    },
+
+    gymSetBlockPos(pos) {
+      commit((d) => {
+        const n = d.gym.blocks.find((b) => b.id === d.gym.activeBlockId)?.sessions.length ?? 0
+        if (n > 0) d.gym.blockPos = ((pos % n) + n) % n
+      })
+    },
+
+    gymRestartBlock(name) {
+      commit((d) => {
+        const current = d.gym.blocks.find((b) => b.id === d.gym.activeBlockId)
+        if (!current) return
+        // The rotation is kept and the clock restarts, as a NEW block — the old
+        // one stays in the library with the sessions logged against it, so
+        // "what was I doing in the spring?" is still answerable.
+        const next = copyBlock(current, name)
+        d.gym.blocks = [...d.gym.blocks, next]
+        d.gym.activeBlockId = next.id
+        d.gym.blockPos = 0
+      })
+    },
+
+    gymSaveBlock(block) {
+      commit((d) => {
+        const at = d.gym.blocks.findIndex((b) => b.id === block.id)
+        // Editing the rotation you are standing in can leave the cursor past
+        // the end (six sessions became four) — pull it back into range.
+        if (at >= 0) d.gym.blocks[at] = block
+        else d.gym.blocks = [...d.gym.blocks, block]
+        if (block.id === d.gym.activeBlockId) {
+          const n = block.sessions.length
+          d.gym.blockPos = n > 0 ? ((d.gym.blockPos % n) + n) % n : 0
+        }
+      })
+    },
+
+    gymAddBlock(block) {
+      commit((d) => {
+        d.gym.blocks = [...d.gym.blocks, block]
+      })
+    },
+
+    gymDeleteBlock(id) {
+      commit((d) => {
+        d.gym.blocks = d.gym.blocks.filter((b) => b.id !== id)
+        if (d.gym.activeBlockId === id) {
+          // deleting the one you were on drops you onto the newest survivor
+          d.gym.activeBlockId = d.gym.blocks[d.gym.blocks.length - 1]?.id ?? null
+          d.gym.blockPos = 0
+        }
+      })
+    },
+
+    gymSetActiveBlock(id) {
+      commit((d) => {
+        if (id !== null && !d.gym.blocks.some((b) => b.id === id)) return
+        if (d.gym.activeBlockId === id) return
+        d.gym.activeBlockId = id
+        d.gym.blockPos = 0 // a different rotation starts at its own session 1
+      })
+    },
+
     async gymSwap(exId) {
       const { data, gymCatalog } = get()
       const active = data.gym.active
@@ -3515,6 +3623,16 @@ export const useStore = create<StoreState>((set, get) => {
       const target = active?.exercises.find((e) => e.exId === exId)
       if (!active || !target) return 'dropped'
       const keep = active.exercises.filter((e) => e.exId !== exId)
+
+      // A block session is a fixed list (§18m). "I haven't got time for this
+      // one" must not quietly become "here's a different exercise" — that is
+      // the behaviour the block replaced. The slot simply closes for today.
+      if (active.blockId) {
+        commit((d) => {
+          if (d.gym.active) d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
+        })
+        return 'dropped'
+      }
 
       const replacement = pickReplacement(
         {
@@ -3683,6 +3801,14 @@ export const useStore = create<StoreState>((set, get) => {
         paid = coins
 
         if (done > 0) {
+          // the rotation only moves for work you actually did — an abandoned
+          // session with nothing logged leaves you on the same session
+          const running = d.gym.blocks.find((b) => b.id === d.gym.activeBlockId)
+          if (s.blockId && running && s.blockId === running.id) {
+            const n = running.sessions.length
+            const at = running.sessions.findIndex((x) => x.id === s.blockSessionId)
+            if (n > 0) d.gym.blockPos = (((at >= 0 ? at : d.gym.blockPos) + 1) % n + n) % n
+          }
           d.gym.streak = bumpStreak(d.gym.streak, day)
           d.gym.totals.sessions += 1
           d.gym.totals.minutes += Math.round((s.activeSec ?? s.minutes * 60) / 60)

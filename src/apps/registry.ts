@@ -292,6 +292,7 @@ export const APPS: AppDef[] = [
     tint: ['#ff9600', '#8c3d00'],
     tabs: [
       { id: 'train', label: 'Train', icon: '💪' },
+      { id: 'blocks', label: 'Blocks', icon: '🧱' },
       { id: 'stats', label: 'Stats', icon: '📊' },
       { id: 'gear', label: 'Gear', icon: '🏋️' },
       { id: 'plan', label: 'Plan', icon: '📋' },

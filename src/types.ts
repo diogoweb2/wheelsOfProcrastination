@@ -824,7 +824,25 @@ export interface FinalTestAuth {
 // That split is the point: once `gym.ex` is full enough, the local planner in
 // src/logic/gym.ts builds good sessions with no AI call at all.
 
-export type BodyPart = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'glutes' | 'core' | 'fullBody' | 'cardio'
+/**
+ * The groups an exercise can be filed under. `forearms` (grip and wrist work)
+ * and `power` (jumps, throws, swings — the pickleball block) are not muscles in
+ * the same sense as the rest, but they are how the catalog is actually
+ * organised, so they get their own slot rather than being hidden inside `arms`
+ * and `legs`.
+ */
+export type BodyPart =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+  | 'forearms'
+  | 'legs'
+  | 'glutes'
+  | 'core'
+  | 'fullBody'
+  | 'power'
+  | 'cardio'
 
 /** How a set is measured — decides what the runner asks you to type. */
 export type ExerciseKind = 'weight' | 'bodyweight' | 'timed' | 'cardio'
@@ -982,6 +1000,20 @@ export interface SessionExercise {
   how?: string
   /** The ask. `reps` is per-set, so a ladder is literally [2,3,2,3,2]. */
   plan: { reps: number[]; weight?: number; restSec: number }
+  /**
+   * The prescribed RANGE for a training-block session — "3 × 8–12". `plan.reps`
+   * holds the low end, because that is the number that has to be there for the
+   * set to count; the top of the range is what you chase, and reaching it on
+   * every set is the signal to add load next time. Absent on a free session,
+   * which prescribes one number.
+   */
+  repRange?: [number, number]
+  /**
+   * Quality-terminated: stop the set the moment height, speed or landing goes,
+   * even if the rep count says there is more. Jumps and throws only — chasing
+   * a rep number on those trains the wrong thing.
+   */
+  quality?: boolean
   sets: LoggedSet[]
   restSec?: number // rest you actually took after it, seconds
   rating?: ExerciseRating // asked the first time you meet an exercise; editable later
@@ -1025,6 +1057,65 @@ export interface GymSession {
   restTargetSec?: number
   /** True when this one was planned as "do more" right after another session. */
   followUp?: boolean
+  /** The training block this came out of, and which session of the rotation it was. */
+  blockId?: string
+  blockSessionId?: string
+  blockSessionName?: string
+}
+
+// --- the training block -----------------------------------------------------
+//
+// The app stopped inventing a workout every day (2026-08-24). A programme is a
+// sequence you repeat and progress on, and a planner that picks something
+// plausible each morning can't progress anything — you never meet the same
+// exercise under the same conditions twice.
+//
+// So: a BLOCK is a fixed, ordered rotation of sessions, and you simply do the
+// next one. Not Monday/Wednesday/Friday — the rotation ignores the calendar,
+// because training 2× one week and 5× the next is normal and a calendar
+// programme silently breaks when it happens. Train twice, you do S1 and S2;
+// next week starts at S3.
+
+/** One exercise slot in a block session. */
+export interface BlockExercise {
+  exId: string
+  sets: number
+  /** Rep range. For a `timed` exercise these are SECONDS, for `cardio`, minutes. */
+  repLow: number
+  repHigh: number
+  /** Stop on quality, not on the count — jumps, throws, sprints. */
+  quality?: boolean
+  /** Shown on the card: "or Chin-up", "stop when height drops". */
+  note?: string
+}
+
+/** One session of the rotation — a name and an ordered list of slots. */
+export interface BlockSession {
+  id: string
+  name: string
+  emoji: string
+  exercises: BlockExercise[]
+}
+
+/**
+ * A block of training: the rotation, plus when it started. It is deliberately
+ * time-boxed rather than session-boxed — at 2–5 sessions a week the same eight
+ * weeks can mean 16 sessions or 40, and both are fine. What matters is that the
+ * exercises stop being novel, which happens on the calendar, not the counter.
+ */
+export interface TrainingBlock {
+  id: string
+  name: string
+  /** Where it came from — `seed` is the copy that ships in code, `manual` is yours. */
+  source?: 'seed' | 'manual'
+  /** What this block is FOR, in one line. Shown on the Plan tab. */
+  goal?: string
+  startedAt: string // ISO
+  /** Weeks after which the app starts suggesting a new block (default 8). */
+  reviewWeeks: number
+  /** Weeks after which it says so loudly (default 12). */
+  retireWeeks: number
+  sessions: BlockSession[]
 }
 
 /**
@@ -1048,6 +1139,16 @@ export interface GymBrief {
 
 export interface GymState {
   brief: GymBrief
+  /**
+   * Every training block this person has — the one being followed, the ones
+   * that came before it, and any drafted for later. A block is never deleted by
+   * finishing it: last block's rotation is the starting point for the next one.
+   */
+  blocks: TrainingBlock[]
+  /** Which of `blocks` the Train tab is walking through. Null = free planner. */
+  activeBlockId: string | null
+  /** Index into the ACTIVE block's sessions of the one you do NEXT. Wraps; advanced on finish. */
+  blockPos: number
   ex: Record<string, ExerciseMemory> // by exercise id — the permanent memory
   ladders: Record<string, LadderState>
   sessions: GymSession[] // finished workouts, newest LAST, capped (see GYM_LOG_CAP)

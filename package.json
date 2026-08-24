@@ -10,7 +10,8 @@
     "quiz:review": "node scripts/quiz-review.mjs",
     "bank:market": "node scripts/bank-market.mjs",
     "gym:equipment": "node scripts/gym-equipment.mjs",
-    "gym:exercises": "node scripts/gym-exercises.mjs",
+    "gym:seed": "node scripts/gym-seed.mjs",
+    "gym:catalog": "node scripts/gym-catalog-md.mjs",
     "gym:demos": "node scripts/gym-demos.mjs",
     "gym:per-side": "node scripts/gym-per-side.mjs",
     "assets": "claude --model opus --allowedTools \"Bash,Read,Write,Edit,Glob,Grep\" -p \"$(cat scripts/optimize-assets.md)\"",
@@ -23,8 +24,7 @@
     "optcg:scrape": "node scripts/optcg-scrape.mjs",
     "optcg:cards": "node scripts/optcg-catalog.mjs",
     "errors": "node scripts/errors.mjs",
-    "gym:audit": "node scripts/gym-audit.mjs",
-    "gym:audit:semantic": "node scripts/gym-audit-semantic.mjs"
+    "gym:audit": "node scripts/gym-audit.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

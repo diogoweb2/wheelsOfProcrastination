@@ -1,0 +1,1967 @@
+{
+  "equipment": [
+    {
+      "name": "Adjustable Weight Bench",
+      "id": "eq-ea11007d",
+      "emoji": "🏋",
+      "createdAt": "2026-08-06T19:25:19.458Z",
+      "addedBy": "ai",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-ea11007d.webp?alt=media&token=ccae4ad2-e697-4aba-88a2-878f05de3f0e",
+      "notes": "CONFIRMED BY THE OWNER: this bench DOES reach a true DECLINE (head below hips), not incline-only. Decline pressing, decline flyes and decline abdominal work are all performable, with the front leg rollers anchoring the legs. Bench1000 PRO FITNESS. Backrest and seat adjust independently through flat, incline and decline. Leg attachment at the front with padded rollers, used for leg extensions/curls and for securing the legs in decline positions."
+    },
+    {
+      "name": "Hyperextension bench",
+      "notes": "A hyperextension bench or Roman chair. The back pad appears adjustable for height, and the foot rollers are fixed. The angle of the main frame seems to be fixed, providing a decline angle.",
+      "id": "eq-6b040b1d",
+      "createdAt": "2026-08-06T19:25:40.525Z",
+      "addedBy": "ai",
+      "emoji": "🏋",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-6b040b1d.webp?alt=media&token=09d52334-1039-4e37-bc2d-6e7e18be0a45"
+    },
+    {
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:26:04.075Z",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-dec18228.webp?alt=media&token=53e135f5-fc06-4284-bdf8-3348b3bf2992",
+      "emoji": "🏋",
+      "notes": "A black flat weight bench with a black upholstered pad. The brand \"CAP\" is visible on the side of the pad. It appears to be in good condition. The bench has a stable H-shaped base.",
+      "id": "eq-dec18228",
+      "name": "Flat weight bench"
+    },
+    {
+      "notes": "A pair of yellow parallel dip bars with black foam grips. They appear to be fixed height and stable, suitable for bodyweight exercises.",
+      "id": "eq-fd35329b",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-fd35329b.webp?alt=media&token=ef241c85-7f51-4b13-afd0-3aa78549192d",
+      "name": "Parallel dip bars",
+      "createdAt": "2026-08-06T19:26:48.117Z",
+      "addedBy": "ai",
+      "emoji": "🏋"
+    },
+    {
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:28:49.361Z",
+      "id": "eq-7e29076d",
+      "emoji": "🏋",
+      "notes": "Pair of adjustable dumbbells, TRULAP, 8.5 lb to 92 lb per hand. TWO HARD LIMITS, confirmed by the owner: (1) the handles are ROUND-BODIED and ROLL under load — they are NOT a stable base for any bodyweight movement, so never prescribe push-ups, planks, renegade rows or any hold that puts bodyweight through them; (2) 8.5 lb is the LOWEST notch, which is too heavy for light prehab work — rotator-cuff external rotation, scaption, W-raises and similar belong on bands, not on these.",
+      "name": "Adjustable dumbbells on stand",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-7e29076d.webp?alt=media&token=98b45cdc-84bd-492e-9247-07f0d161fab9"
+    },
+    {
+      "notes": "37.5lb",
+      "createdAt": "2026-08-20T22:41:01.592Z",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-11c7fb07.webp?alt=media&token=d25bd6f1-58e9-48fa-beaf-6eda5a95c146",
+      "name": "Kettlebell",
+      "emoji": "🏋",
+      "addedBy": "ai",
+      "id": "eq-11c7fb07"
+    },
+    {
+      "emoji": "🏀",
+      "addedBy": "ai",
+      "notes": "10lbs",
+      "name": "Medicine ball",
+      "id": "eq-b600e5ea",
+      "createdAt": "2026-08-20T22:45:19.548Z",
+      "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-b600e5ea.webp?alt=media&token=6d307dd3-035b-4a42-adee-3abe35b4d7d0"
+    },
+    {
+      "createdAt": "2026-08-23T16:53:35.495Z",
+      "name": "Pull-up bar",
+      "id": "eq-9fc3b4f7",
+      "emoji": "🏋️",
+      "addedBy": "manual"
+    },
+    {
+      "id": "eq-bands",
+      "name": "Resistance bands",
+      "emoji": "🎗️",
+      "notes": "A set of resistance bands with handles, plus a door anchor. They can also be looped around the basement post, so the anchor point can sit at ANY height — low, chest or overhead — which is what makes pulldowns, rows, pushdowns, face pulls and Pallof presses possible. Bands are the light-load answer for prehab (cuff, scaption, wrist work) where the 8.5 lb dumbbell floor is far too heavy; dumbbells stay the choice for anything needing predictable load progression.",
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.477Z"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "mv-dumbbell-bench-press",
+      "name": "Dumbbell Bench Press",
+      "emoji": "🏋️",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "chest",
+        "arms",
+        "shoulders"
+      ],
+      "intensity": 3,
+      "how": "Lie flat, dumbbells at chest level, press up until arms are straight over your chest. Keep both feet planted and don't arch the lower back off the bench.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 4,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "SpYC0Kp",
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell bench press",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-bench-press.webp?alt=media&token=00bde728-fffc-45e7-84c6-ce4ec1e248d7",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-bench-press-poster.webp?alt=media&token=9427290f-3c6f-4ad8-9ba7-ea6289bc0002",
+        "match": "exact"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-incline-dumbbell-bench-press",
+      "name": "Incline Dumbbell Bench Press",
+      "emoji": "📈",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "chest",
+        "shoulders",
+        "arms"
+      ],
+      "intensity": 3,
+      "how": "Set the backrest to 30-45 degrees, press the dumbbells from upper-chest level to straight overhead. Shoulder blades stay pinned back against the pad.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 4,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-incline-dumbbell-bench-press.webp?alt=media&token=603e3469-cc64-4dd8-9dcf-397d92e02ca7",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-incline-dumbbell-bench-press-poster.webp?alt=media&token=87645d27-e317-4aa3-a597-85e68e95ffc9",
+        "sourceId": "ns0SIbU",
+        "match": "exact",
+        "sourceName": "dumbbell incline bench press",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-decline-dumbbell-bench-press",
+      "name": "Decline Dumbbell Bench Press",
+      "emoji": "📉",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "chest",
+        "arms"
+      ],
+      "intensity": 3,
+      "how": "Set the bench to decline and hook your legs under the padded rollers, press the dumbbells from lower chest to lockout. Sit up slowly between sets, don't jerk upright.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "match": "exact",
+        "sourceId": "DwhEmmE",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-decline-dumbbell-bench-press.webp?alt=media&token=f401c46e-c641-4868-8e3d-a4dce61bc5c2",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-decline-dumbbell-bench-press-poster.webp?alt=media&token=815b7c8f-40c3-4013-aa4e-056578e95394",
+        "sourceName": "dumbbell decline bench press"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dips",
+      "name": "Dips",
+      "emoji": "🟨",
+      "equipmentIds": [
+        "eq-fd35329b"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "chest",
+        "arms",
+        "shoulders"
+      ],
+      "intensity": 3,
+      "how": "Support yourself on the bars, lower until your upper arms are about parallel to the floor, press back up. Stop at parallel — going deeper strains the shoulder.",
+      "restSec": 90,
+      "defaultReps": 8,
+      "defaultSets": 4,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": true,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dips-poster.webp?alt=media&token=fe5215a0-3c4e-440c-9120-5ca33db21104",
+        "match": "ai",
+        "source": "ExerciseDB",
+        "sourceId": "9WTm7dq",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dips.webp?alt=media&token=6f10166f-9b95-4b4b-9650-a82c0f2c58ba",
+        "sourceName": "chest dip"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "bw-pushup",
+      "name": "Push-ups",
+      "emoji": "🫸",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "chest",
+        "arms",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Hands under the shoulders, body in one straight line, chest to just above the floor.",
+      "restSec": 60,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": true,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup.webp?alt=media&token=bf94aba0-02e7-40ed-b6a1-63e5377d52a7",
+        "source": "ExerciseDB",
+        "sourceId": "I4hDWkc",
+        "match": "exact",
+        "sourceName": "push-up",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-poster.webp?alt=media&token=0d89fc65-45e4-40c0-aaf1-95de493241be"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "bw-pullup",
+      "name": "Pull-ups",
+      "emoji": "🧗",
+      "equipmentIds": [
+        "eq-9fc3b4f7"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 3,
+      "how": "Hang, pull until your chin clears the bar, lower all the way down under control.",
+      "restSec": 90,
+      "defaultReps": 5,
+      "defaultSets": 4,
+      "perSide": false,
+      "ladder": true,
+      "demo": {
+        "sourceName": "pull-up",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pullup.webp?alt=media&token=fedfd87e-71af-4c5b-b79f-310873dc660b",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pullup-poster.webp?alt=media&token=7fc511e2-057d-46e5-b89a-34b27706ab2a",
+        "sourceId": "lBDjFxJ",
+        "match": "exact",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "mv-chin-up",
+      "name": "Chin-up",
+      "emoji": "🆙",
+      "equipmentIds": [
+        "eq-9fc3b4f7"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 3,
+      "how": "Hang with palms facing you, pull until your chin clears the bar. Keep ribs down so you do not arch the lower back.",
+      "restSec": 120,
+      "defaultReps": 6,
+      "defaultSets": 4,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": true,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chin-up-poster.webp?alt=media&token=2bb0447d-486d-4f5d-9490-aab22cd12e21",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chin-up.webp?alt=media&token=20e4d38b-bad7-4106-8955-d466d4c75304",
+        "match": "exact",
+        "sourceId": "T2mxWqc",
+        "sourceName": "chin-up",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "mv-negative-pull-up",
+      "name": "Negative Pull-up",
+      "emoji": "⬇️",
+      "equipmentIds": [
+        "eq-9fc3b4f7"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Step up to the top of the pull-up from a bench or box — do not jump. Lower yourself as slowly as you can, aiming for five seconds down. Progress by slowing the descent, then by graduating to a full pull-up.",
+      "restSec": 90,
+      "defaultReps": 5,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": true,
+      "demo": {
+        "sourceId": "lBDjFxJ",
+        "source": "ExerciseDB",
+        "sourceName": "pull-up",
+        "match": "close",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-negative-pull-up.webp?alt=media&token=7cf7c894-100b-4991-a394-2d91cc637602",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-negative-pull-up-poster.webp?alt=media&token=4130c3e2-e4f5-466a-a397-6baaf12e432c"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "mv-chest-supported-dumbbell-row",
+      "name": "Chest-Supported Dumbbell Row",
+      "emoji": "🛶",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "back",
+        "arms",
+        "shoulders"
+      ],
+      "intensity": 2,
+      "how": "Set the backrest to about 45 degrees and lie face-down on it, row both dumbbells to your ribs. Chest stays glued to the pad the whole set.",
+      "restSec": 75,
+      "defaultReps": 12,
+      "defaultSets": 4,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chest-supported-dumbbell-row.webp?alt=media&token=f2b39c02-22be-4c25-8897-e43a9f4ca781",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chest-supported-dumbbell-row-poster.webp?alt=media&token=376e0341-14ef-4e7f-837e-2dd1785f53b2",
+        "sourceId": "7vG5o25",
+        "match": "ai",
+        "sourceName": "dumbbell incline row",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-one-arm-dumbbell-row",
+      "name": "One-Arm Dumbbell Row",
+      "emoji": "🚣",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "One hand and same-side knee on the bench, row the dumbbell to your hip. Keep the back flat and square — no twisting the torso to lift it.",
+      "restSec": 75,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "match": "ai",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-one-arm-dumbbell-row.webp?alt=media&token=008b0edb-bd2b-4b34-8f35-42ee95c9499b",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-one-arm-dumbbell-row-poster.webp?alt=media&token=1d38d17c-279b-4054-86ed-5d0a983be114",
+        "sourceName": "dumbbell one arm bent-over row",
+        "sourceId": "C0MA9bC"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-seated-dumbbell-shoulder-press",
+      "name": "Dumbbell Shoulder Press",
+      "emoji": "🎪",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders",
+        "arms"
+      ],
+      "intensity": 3,
+      "how": "Backrest fully upright, sit with your back flat against it, press dumbbells from shoulder height to overhead. Keep the back on the pad — no leaning back to push.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-seated-dumbbell-shoulder-press-poster.webp?alt=media&token=5f6588d3-c03c-4698-885c-1ea3787d0c57",
+        "sourceName": "dumbbell seated shoulder press",
+        "sourceId": "znQUdHY",
+        "source": "ExerciseDB",
+        "match": "exact",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-seated-dumbbell-shoulder-press.webp?alt=media&token=78511fb9-aa47-41e7-8c7b-aa66dd133eb0"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-lateral-raise",
+      "name": "Dumbbell Lateral Raise",
+      "emoji": "🕊️",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders"
+      ],
+      "intensity": 1,
+      "how": "Stand tall, light dumbbells at your sides, raise them out to shoulder height with a slight elbow bend. Lead with the elbows, stop at shoulder level, lower slowly.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "match": "exact",
+        "sourceId": "DsgkuIt",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-lateral-raise-poster.webp?alt=media&token=9751de47-5cbf-44d1-874e-b71e5e1a2ca1",
+        "sourceName": "dumbbell lateral raise",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-lateral-raise.webp?alt=media&token=b994b22b-698b-4265-8e92-706d02fabe67"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-chest-supported-dumbbell-reverse-fly",
+      "name": "Chest-Supported Dumbbell Reverse Fly",
+      "emoji": "🕊️",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders",
+        "back"
+      ],
+      "intensity": 1,
+      "how": "Face-down on the incline bench, light dumbbells hanging, sweep the arms out and back like opening wings. Squeeze the shoulder blades, don't shrug.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chest-supported-dumbbell-reverse-fly-poster.webp?alt=media&token=ebc4d4e4-0ffa-44c3-b3bb-71ee716c634a",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-chest-supported-dumbbell-reverse-fly.webp?alt=media&token=c5ee8505-6fe5-487b-aee0-664f09359a39",
+        "sourceName": "dumbbell reverse fly",
+        "sourceId": "EAs3xL9",
+        "source": "ExerciseDB",
+        "match": "close"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-prone-dumbbell-y-raise",
+      "name": "Dumbbell Y-Raise",
+      "emoji": "🅨",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders",
+        "back"
+      ],
+      "intensity": 1,
+      "how": "Face-down on the incline bench with very light dumbbells, raise the arms overhead into a Y shape. Thumbs up, no shrugging, tiny weight only.",
+      "restSec": 45,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "ai",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-prone-dumbbell-y-raise.webp?alt=media&token=c5ab4eec-fd55-4ab4-beb9-e0da99dfad01",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-prone-dumbbell-y-raise-poster.webp?alt=media&token=f4b3a038-6cbe-427a-b56a-4e5c10236f71",
+        "sourceName": "dumbbell incline y-raise",
+        "sourceId": "PbzNu7c"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-biceps-curl",
+      "name": "Dumbbell Biceps Curl",
+      "emoji": "💪",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Stand with dumbbells at your sides, curl up without swinging the elbows forward. Keep elbows pinned to your ribs the whole way.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-biceps-curl.webp?alt=media&token=2f5bde05-73af-4395-9867-706a62a55c12",
+        "match": "exact",
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell alternate biceps curl",
+        "sourceId": "BU15nH4",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-biceps-curl-poster.webp?alt=media&token=b781be82-24d7-4eb6-bd76-603bbb154a8d"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-hammer-curl",
+      "name": "Dumbbell Hammer Curl",
+      "emoji": "🔨",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms",
+        "forearms"
+      ],
+      "intensity": 2,
+      "how": "Curl with palms facing each other, thumbs up, elbows tight to your sides. Don't let the shoulders shrug up at the top.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "exact",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-hammer-curl-poster.webp?alt=media&token=b38079be-e67d-4643-a268-293a1bb37219",
+        "sourceId": "slDvUAU",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-hammer-curl.webp?alt=media&token=026d67ca-de43-4222-9830-efd04410a696",
+        "sourceName": "dumbbell hammer curl",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-incline-dumbbell-curl",
+      "name": "Incline Dumbbell Curl",
+      "emoji": "💪",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Set the backrest around 45 degrees, sit back with arms hanging straight down, curl up. Keep your upper arms behind your torso and shoulders pressed into the pad.",
+      "restSec": 60,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "ae9UoXQ",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-incline-dumbbell-curl.webp?alt=media&token=2153cc59-4e32-4893-aaed-d3c9c3d4049e",
+        "match": "exact",
+        "source": "ExerciseDB",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-incline-dumbbell-curl-poster.webp?alt=media&token=ed7708ac-f61a-43af-a986-92e4abb32458",
+        "sourceName": "dumbbell incline curl"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-lying-dumbbell-triceps-extension",
+      "name": "Lying Dumbbell Triceps Extension",
+      "emoji": "🏋️",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Lie on the bench, dumbbells above your chest, bend at the elbows to lower them beside your head. Keep the upper arms vertical and don't flare the elbows wide.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "exact",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-lying-dumbbell-triceps-extension-poster.webp?alt=media&token=1549c34e-72fc-4e02-a7a7-f1fed837568a",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-lying-dumbbell-triceps-extension.webp?alt=media&token=eda7ed0a-0122-40a2-ba67-6b955901aef0",
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell lying triceps extension",
+        "sourceId": "mpKZGWz"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-seated-overhead-dumbbell-triceps-extensi",
+      "name": "Seated Overhead Dumbbell Triceps Extension",
+      "emoji": "🙆",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-ea11007d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Sit with the backrest upright, hold one dumbbell overhead with both hands, lower it behind your head and press back up. Back stays against the pad, ribs down.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell seated triceps extension",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-seated-overhead-dumbbell-triceps-extensi.webp?alt=media&token=6b4c2e72-8fa5-48ae-9849-ac3ded336380",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-seated-overhead-dumbbell-triceps-extensi-poster.webp?alt=media&token=93b235f8-f570-40b0-93ed-4f26b808d23f",
+        "match": "ai",
+        "sourceId": "kont8Ut"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-bulgarian-split-squat",
+      "name": "Dumbbell Bulgarian Split Squat",
+      "emoji": "🇧🇬",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 3,
+      "how": "Rear foot on the bench, dumbbells at your sides, drop the back knee straight down and drive up through the front heel. Keep the front shin near vertical and the torso tall.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-bulgarian-split-squat.webp?alt=media&token=cc4c5793-e11b-49ec-9d0d-b9c7d6b3001e",
+        "match": "close",
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell single leg split squat",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-bulgarian-split-squat-poster.webp?alt=media&token=1674889b-1582-4a65-98fb-97220ece52da",
+        "sourceId": "qx4fgX7"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-reverse-lunge",
+      "name": "Dumbbell Reverse Lunge",
+      "emoji": "🔙",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Hold dumbbells at your sides, step back and drop the rear knee toward the floor, then drive forward to stand. Stepping backwards keeps the front knee calm.",
+      "restSec": 75,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "ai",
+        "source": "ExerciseDB",
+        "sourceId": "SSsBDwB",
+        "sourceName": "dumbbell rear lunge",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-reverse-lunge.webp?alt=media&token=d5327944-ba94-4f2f-8166-f96d16777c51",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-reverse-lunge-poster.webp?alt=media&token=875e83b5-2551-4886-87ae-ffd6d3dc44dd"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-romanian-deadlift",
+      "name": "Dumbbell Romanian Deadlift",
+      "emoji": "⚠️",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes",
+        "back"
+      ],
+      "intensity": 3,
+      "how": "Dumbbells in front of your thighs, push the hips back and slide the weights down your legs with a flat back, then stand. Stop when the hamstrings tighten, never round the back.",
+      "restSec": 90,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": true,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-romanian-deadlift.webp?alt=media&token=52357b81-926b-419b-a688-e2e185a8a0e5",
+        "match": "exact",
+        "source": "ExerciseDB",
+        "sourceName": "dumbbell romanian deadlift",
+        "sourceId": "rR0LJzx",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-romanian-deadlift-poster.webp?alt=media&token=3dd1113e-6a25-43c9-8087-70b5d02c3772"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-goblet-squat",
+      "name": "Goblet Squat",
+      "emoji": "🏺",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Hold one dumbbell vertically at your chest, squat down between your knees and stand up. Elbows inside the knees, chest up, weight stays close to the body.",
+      "restSec": 75,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceName": "dumbbell goblet squat",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-goblet-squat.webp?alt=media&token=4769eb68-dae6-42d3-a381-c079aeede680",
+        "match": "ai",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-goblet-squat-poster.webp?alt=media&token=a7057276-2a94-468e-a4c6-b9e6e62d885a",
+        "sourceId": "yn8yg1r",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-lateral-lunge",
+      "name": "Dumbbell Lateral Lunge",
+      "emoji": "↔️",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes"
+      ],
+      "intensity": 2,
+      "how": "Hold one dumbbell at your chest, step wide to one side and sit back into that hip while the other leg stays straight. Keep both feet flat and the chest up.",
+      "restSec": 75,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "close",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-lateral-lunge.webp?alt=media&token=e1e4fec9-6c98-42c1-84da-dbb3efcba5cc",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-lateral-lunge-poster.webp?alt=media&token=21bfeaab-cd26-4957-80ff-28976fb8f32e",
+        "sourceId": "py1HSzx",
+        "sourceName": "barbell lateral lunge"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-step-up",
+      "name": "Dumbbell Step-up",
+      "emoji": "🪜",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs",
+        "glutes"
+      ],
+      "intensity": 2,
+      "how": "Dumbbells at your sides, step one foot onto the bench and stand up fully without pushing off the back leg. Lower under control, don't drop down.",
+      "restSec": 75,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceName": "dumbbell step-up",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-step-up.webp?alt=media&token=9bf288fd-9e75-4b5f-a1c4-5ab66dbd7f48",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-step-up-poster.webp?alt=media&token=8f219d75-7856-4c9a-ab15-a57b4aee8f8b",
+        "match": "exact",
+        "sourceId": "aXtJhlg",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "bw-calf-raise",
+      "name": "Calf Raise",
+      "emoji": "🦶",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "legs"
+      ],
+      "intensity": 1,
+      "how": "Up on the toes as high as you can, slow all the way back down.",
+      "restSec": 35,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "demo": {
+        "match": "ai",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-calf-raise.webp?alt=media&token=9ca65e28-31b8-43fa-80ce-fd71e3c30e60",
+        "sourceId": "bJYHBIN",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-calf-raise-poster.webp?alt=media&token=3ad480e7-effa-4dc6-929a-4ea017c7bef7",
+        "sourceName": "bodyweight standing calf raise"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "mv-single-leg-calf-raise",
+      "name": "Single-Leg Calf Raise",
+      "emoji": "🦶",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs"
+      ],
+      "intensity": 1,
+      "how": "Stand on one foot holding a dumbbell, rise onto the ball of the foot and lower slowly. Hold something for balance if needed.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-calf-raise-poster.webp?alt=media&token=dbc5a42a-5f89-4e46-b94c-b352bb5bade5",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-calf-raise.webp?alt=media&token=e754f3ee-e2e1-4726-8e08-266568be86f3",
+        "sourceName": "dumbbell single leg calf raise",
+        "sourceId": "1kB3Wmk",
+        "source": "ExerciseDB",
+        "match": "ai"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "mv-bench-hip-thrust",
+      "name": "Bench Hip Thrust",
+      "emoji": "🍑",
+      "equipmentIds": [
+        "eq-dec18228",
+        "eq-7e29076d"
+      ],
+      "kind": "weight",
+      "parts": [
+        "glutes",
+        "legs",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Upper back on the bench, dumbbell across the hips, drive hips up to a straight line. Tuck the chin and squeeze glutes at the top, no back arch.",
+      "restSec": 90,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "u27Kcdz",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-bench-hip-thrust.webp?alt=media&token=f68417b9-9a5b-4bd9-8163-4d6befb48d3a",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-bench-hip-thrust-poster.webp?alt=media&token=82b2e6bc-fb0f-4274-aeae-f454a64360c5",
+        "sourceName": "bench hip extension",
+        "match": "close"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "bw-glute-bridge",
+      "name": "Glute Bridge",
+      "emoji": "🌉",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "glutes",
+        "core"
+      ],
+      "intensity": 1,
+      "how": "On your back, heels close to the hips, drive through the heels and squeeze at the top.",
+      "restSec": 40,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "sourceName": "low glute bridge on floor",
+        "sourceId": "u0cNiij",
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-glute-bridge-poster.webp?alt=media&token=5b91608a-27bb-4e71-b0ab-92099ba852ec",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-glute-bridge.webp?alt=media&token=62fe10fe-be4e-4abb-9a5d-847726f2214e"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "mv-single-leg-glute-bridge",
+      "name": "Single-Leg Glute Bridge",
+      "emoji": "🦿",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "glutes",
+        "core"
+      ],
+      "intensity": 1,
+      "how": "Lie on your back, one foot planted and the other leg straight up, push the hips up level. Keep the hips square — don't let one side drop.",
+      "restSec": 45,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-glute-bridge-poster.webp?alt=media&token=96e6d16d-bfae-435e-9dcf-22402eb1517d",
+        "sourceId": "rmEukuS",
+        "sourceName": "single leg bridge with outstretched leg",
+        "match": "ai",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-glute-bridge.webp?alt=media&token=bd73df2f-2357-4b32-83b9-94523929846a"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-kettlebell-swing",
+      "name": "Kettlebell Swing",
+      "emoji": "🔔",
+      "equipmentIds": [
+        "eq-11c7fb07"
+      ],
+      "kind": "weight",
+      "parts": [
+        "glutes",
+        "back",
+        "power"
+      ],
+      "intensity": 3,
+      "how": "Hinge and hike the bell back, then snap the hips to float it to chest height. Arms stay relaxed, the hips do the work.",
+      "restSec": 90,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": true,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "sourceId": "UHJlbu3",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-kettlebell-swing-poster.webp?alt=media&token=11c1015b-b43f-44f6-87bf-7f3015639df0",
+        "match": "exact",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-kettlebell-swing.webp?alt=media&token=9d129505-2561-46d1-845a-f670b7982bac",
+        "sourceName": "kettlebell swing"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "bw-bird-dog",
+      "name": "Bird Dog",
+      "emoji": "🐦",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "core",
+        "back"
+      ],
+      "intensity": 1,
+      "how": "On all fours, extend opposite arm and leg, hold a beat, keep the hips level. Gold for the lower back.",
+      "restSec": 40,
+      "defaultReps": 16,
+      "defaultSets": 3,
+      "perSide": true,
+      "demo": {
+        "sourceId": "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXNtNzl4Y3kzbDRtMHB4ZmxkdXgzZDhudGM4MHNvbXE2cWRvZDk0eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/dZ8TmzFGtr1UP9mZWI/giphy.gif",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-bird-dog.webp?alt=media&token=5a6b4b65-3418-4543-976c-cd3388973690",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-bird-dog-poster.webp?alt=media&token=1014a200-996b-4d3c-98f6-f9e70e76cabe",
+        "match": "manual",
+        "sourceName": "Bird dog (chosen by hand)",
+        "source": "media4.giphy.com"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "bw-dead-bug",
+      "name": "Dead Bug",
+      "emoji": "🐞",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 1,
+      "how": "On your back, lower back glued to the floor. Extend opposite arm and leg slowly, then swap.",
+      "restSec": 40,
+      "defaultReps": 16,
+      "defaultSets": 3,
+      "perSide": false,
+      "demo": {
+        "sourceName": "dead bug",
+        "source": "ExerciseDB",
+        "sourceId": "iny3m5y",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-dead-bug.webp?alt=media&token=ac1959f3-32bf-4f6d-bf4c-6d9ba2cdb474",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-dead-bug-poster.webp?alt=media&token=c9bf7ba3-ed7e-404a-8590-096a0f5f06f8",
+        "match": "exact"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "bw-side-plank",
+      "name": "Side Plank",
+      "emoji": "📏",
+      "equipmentIds": [],
+      "kind": "timed",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "On one forearm, hips stacked and lifted, body in a straight line. Both sides.",
+      "restSec": 40,
+      "defaultReps": 30,
+      "defaultSets": 2,
+      "perSide": true,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-side-plank.webp?alt=media&token=a8d5f948-58d5-4889-9476-fc6fd126237b",
+        "sourceName": "bodyweight incline side plank",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-side-plank-poster.webp?alt=media&token=47e1ad01-0cb2-4ad7-a544-6551a58d5cac",
+        "match": "close",
+        "sourceId": "5VXmnV5",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "mv-copenhagen-plank",
+      "name": "Copenhagen Plank",
+      "emoji": "🇩🇰",
+      "equipmentIds": [
+        "eq-dec18228"
+      ],
+      "kind": "timed",
+      "parts": [
+        "core",
+        "legs"
+      ],
+      "intensity": 3,
+      "how": "Side plank on your forearm with the top leg's inner knee or ankle resting on the bench, lift the hips. Start with the knee version; keep the body in one line.",
+      "restSec": 60,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-copenhagen-plank.webp?alt=media&token=368a0fcd-7426-451f-908f-5b92a4b880be",
+        "sourceName": "side plank hip adduction",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-copenhagen-plank-poster.webp?alt=media&token=ab3456b0-885c-462e-a8b1-bc3ba3272ae0",
+        "sourceId": "VO2qeJg",
+        "match": "close"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "bw-plank",
+      "name": "Plank",
+      "emoji": "🧱",
+      "equipmentIds": [],
+      "kind": "timed",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Forearms down, body in one line, ribs pulled down, squeeze everything. Hold.",
+      "restSec": 45,
+      "defaultReps": 40,
+      "defaultSets": 3,
+      "perSide": false,
+      "demo": {
+        "match": "close",
+        "sourceId": "VBAWRPG",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-plank-poster.webp?alt=media&token=15b0e943-45b3-4944-bfad-d7271abdee02",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-plank.webp?alt=media&token=1124d97d-a0b7-4966-9474-72b51392e743",
+        "source": "ExerciseDB",
+        "sourceName": "weighted front plank"
+      },
+      "addedBy": "manual",
+      "createdAt": "2026-08-06T00:00:00.000Z"
+    },
+    {
+      "id": "mv-l-sit-hold",
+      "name": "L-Sit Hold",
+      "emoji": "🇱",
+      "equipmentIds": [
+        "eq-fd35329b"
+      ],
+      "kind": "timed",
+      "parts": [
+        "core",
+        "arms",
+        "shoulders"
+      ],
+      "intensity": 3,
+      "how": "Support on the bars with arms straight, lift both legs out in front until they're level with your hips. Press the shoulders down; bend the knees if you can't hold it straight.",
+      "restSec": 90,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-l-sit-hold-poster.webp?alt=media&token=1e6c5959-6b4a-47c6-8393-25f4292733df",
+        "sourceName": "l-sit on floor",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-l-sit-hold.webp?alt=media&token=0ee7abe6-6dee-460c-a7d1-8db9cf4b2946",
+        "match": "close",
+        "source": "ExerciseDB",
+        "sourceId": "UpWmA5E"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dip-bar-knee-raise",
+      "name": "Dip Bar Knee Raise",
+      "emoji": "🦵",
+      "equipmentIds": [
+        "eq-fd35329b"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Support yourself on the dip bars with straight arms and raise your knees to your chest. Keep shoulders pressed down, no swinging.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceName": "vertical leg raise (on parallel bars)",
+        "source": "ExerciseDB",
+        "sourceId": "ZNgOYQU",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dip-bar-knee-raise.webp?alt=media&token=d2e18cc8-16ba-49f6-9114-28e49e31ca66",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dip-bar-knee-raise-poster.webp?alt=media&token=9cc66760-24f0-42e0-8cbb-1f036cf2f14f",
+        "match": "close"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-kettlebell-farmer-s-hold",
+      "name": "Suitcase Hold",
+      "emoji": "🧤",
+      "equipmentIds": [
+        "eq-11c7fb07"
+      ],
+      "kind": "timed",
+      "parts": [
+        "core",
+        "forearms",
+        "back"
+      ],
+      "intensity": 2,
+      "how": "Hold the kettlebell at one side and stand tall for time. Do not let that shoulder drop or the torso lean.",
+      "restSec": 60,
+      "defaultReps": 30,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "Farmers_Walk",
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-kettlebell-farmer-s-hold-poster.webp?alt=media&token=55cb3041-1762-40ac-8651-991ee1a1d8f3",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-kettlebell-farmer-s-hold.webp?alt=media&token=3e6c2984-d875-4f8c-a551-43f393c54fe7",
+        "sourceName": "Farmer's Walk",
+        "source": "free-exercise-db"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-farmer-s-walk",
+      "name": "Farmer's Carry",
+      "emoji": "🚜",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "timed",
+      "parts": [
+        "core",
+        "forearms",
+        "legs"
+      ],
+      "intensity": 2,
+      "how": "A dumbbell in each hand, walk tall with the shoulders back and short quick steps. Stop when your posture breaks, not when your grip does.",
+      "restSec": 60,
+      "defaultReps": 45,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "source": "ExerciseDB",
+        "match": "ai",
+        "sourceId": "qPEzJjA",
+        "sourceName": "farmers walk",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-farmer-s-walk-poster.webp?alt=media&token=742d2896-6f01-488f-9c5f-b967e3212335",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-farmer-s-walk.webp?alt=media&token=4f727f6f-e8ab-411e-94f2-c7e9fad9675d"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-wrist-curl",
+      "name": "Dumbbell Wrist Curl",
+      "emoji": "🤲",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "forearms"
+      ],
+      "intensity": 1,
+      "how": "Sit, rest forearms on your thighs or the bench with palms up and wrists past the edge. Curl the weight up with the hand only, no forearm movement.",
+      "restSec": 30,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "q8aHNoF",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-wrist-curl.webp?alt=media&token=fcd6381d-20f1-4d2c-8310-3a3764355f46",
+        "source": "ExerciseDB",
+        "match": "ai",
+        "sourceName": "dumbbell one arm wrist curl",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-wrist-curl-poster.webp?alt=media&token=ccb99c12-ff8f-47ee-b19a-f69a1d89b863"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-reverse-wrist-curl",
+      "name": "Dumbbell Reverse Wrist Curl",
+      "emoji": "✋",
+      "equipmentIds": [
+        "eq-7e29076d",
+        "eq-dec18228"
+      ],
+      "kind": "weight",
+      "parts": [
+        "forearms"
+      ],
+      "intensity": 1,
+      "how": "Same seated position but palms down, wrists off the knee or bench edge. Lift the back of the hand up, go light, control the way down.",
+      "restSec": 30,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-reverse-wrist-curl-poster.webp?alt=media&token=f7f26e26-d74e-4c24-af7d-8b0499e3a869",
+        "sourceName": "dumbbell reverse wrist curl",
+        "source": "ExerciseDB",
+        "match": "exact",
+        "sourceId": "BLCvwr2",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-reverse-wrist-curl.webp?alt=media&token=54389508-496a-4de4-a8c9-8fd90ffbc066"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.648Z"
+    },
+    {
+      "id": "mv-dumbbell-farmer-s-carry-hold",
+      "name": "Dumbbell Farmer's Hold",
+      "emoji": "🪣",
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
+      "kind": "timed",
+      "parts": [
+        "forearms",
+        "core",
+        "back"
+      ],
+      "intensity": 1,
+      "how": "Hold a dumbbell in each hand at your sides and stand tall for time. Shoulders back, ribs down.",
+      "restSec": 45,
+      "defaultReps": 40,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "Farmers_Walk",
+        "sourceName": "Farmer's Walk",
+        "source": "free-exercise-db",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-farmer-s-carry-hold.webp?alt=media&token=18a15704-9648-444a-8d8d-e5350b1fc97b",
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-farmer-s-carry-hold-poster.webp?alt=media&token=5c47ca0e-4852-49d9-8f5e-e9f75afb478b"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-split-squat-jump",
+      "name": "Split Squat Jump",
+      "emoji": "✂️",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "power",
+        "legs",
+        "glutes"
+      ],
+      "intensity": 2,
+      "how": "From a split stance, jump and switch legs in the air, landing softly. Three per side. Stop the set the moment jump height, landing control or speed drops — even at two reps. Full rest between sets; never take this near failure.",
+      "restSec": 90,
+      "defaultReps": 6,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-split-squat-jump.webp?alt=media&token=4276429e-20ee-49fb-b878-94608123d9f5",
+        "match": "ai",
+        "source": "free-exercise-db",
+        "sourceName": "Split Jump",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-split-squat-jump-poster.webp?alt=media&token=314d714a-a83d-4dcb-b91d-a52da9da99de",
+        "sourceId": "Split_Jump"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.910Z"
+    },
+    {
+      "id": "mv-squat-jump",
+      "name": "Squat Jump",
+      "emoji": "🦘",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "power",
+        "legs",
+        "glutes"
+      ],
+      "intensity": 2,
+      "how": "Drop into a shallow squat and jump as high as you can, landing soft with bent knees. Absorb every landing — no stiff legs.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-squat-jump-poster.webp?alt=media&token=da9b5b93-d2b6-4f4f-b8d7-638ab5a1b5bb",
+        "match": "exact",
+        "sourceName": "jump squat",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-squat-jump.webp?alt=media&token=31e1067f-e374-47b2-8663-a7190785570e",
+        "sourceId": "LIlE5Tn"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-06T19:35:38.649Z"
+    },
+    {
+      "id": "mv-tuck-jump",
+      "name": "Tuck Jump",
+      "emoji": "🆙",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "power",
+        "legs",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Jump straight up pulling your knees toward your chest, land softly. Bend the knees on landing to absorb it.",
+      "restSec": 60,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "sourceId": "Knee_Tuck_Jump",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-tuck-jump-poster.webp?alt=media&token=91f9e0b2-cc48-4fb6-a605-529bb0ed533e",
+        "sourceName": "Knee Tuck Jump",
+        "source": "free-exercise-db",
+        "match": "ai",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-tuck-jump.webp?alt=media&token=2ddd717b-cf51-406b-90e7-5fde7d63afda"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-lateral-shuffle",
+      "name": "Lateral Shuffle",
+      "emoji": "↔️",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "power",
+        "legs",
+        "cardio"
+      ],
+      "intensity": 2,
+      "how": "Stay low in a half squat and shuffle sideways a few steps each way. Keep the chest up and feet from crossing.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-medicine-ball-chest-pass",
+      "name": "Medicine Ball Chest Pass",
+      "emoji": "🎯",
+      "equipmentIds": [
+        "eq-b600e5ea"
+      ],
+      "kind": "weight",
+      "parts": [
+        "power",
+        "chest",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Stand facing a wall, ball at the chest. Drive it into the wall as hard as you can and catch the rebound. Stop the set the moment the throw slows — even at two reps. Full rest between sets.",
+      "restSec": 90,
+      "defaultReps": 6,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "demo": {
+        "match": "ai",
+        "sourceName": "medicine ball chest pass",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-medicine-ball-chest-pass-poster.webp?alt=media&token=60f9c144-3c80-4a57-a444-9a6a77add63b",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-medicine-ball-chest-pass.webp?alt=media&token=9bba7f88-4c76-44fc-a536-2310760cefe4",
+        "sourceId": "aDoFKrE",
+        "source": "ExerciseDB"
+      },
+      "addedBy": "ai",
+      "createdAt": "2026-08-23T01:20:54.911Z"
+    },
+    {
+      "id": "mv-band-chest-press",
+      "name": "Band Chest Press",
+      "emoji": "🎽",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "chest",
+        "arms",
+        "shoulders"
+      ],
+      "intensity": 2,
+      "how": "Anchor the band at chest height behind you. Split stance, elbows about 45°, press both handles forward until the arms are straight, then return under control. Squeeze the chest at the front, do not let the anchor pull you backwards.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.441Z",
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-chest-press.webp?alt=media&token=d4440d86-423d-43bf-afac-88e3820f6522",
+        "source": "ExerciseDB",
+        "match": "close",
+        "sourceName": "resistance band seated chest press",
+        "sourceId": "4x5Okof",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-chest-press-poster.webp?alt=media&token=00e8e301-3652-43b0-be12-a8ac01a30c81"
+      }
+    },
+    {
+      "id": "mv-band-lat-pulldown",
+      "name": "Band Lat Pulldown",
+      "emoji": "⬇️",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Anchor high — door top or the post above head height. Kneel or sit facing the anchor, arms straight overhead, pull the handles down to the chest leading with the elbows. Let the shoulder blades travel down, then return all the way up.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-lat-pulldown.webp?alt=media&token=63395c7f-f137-4517-8379-98eb0b31849e",
+        "sourceId": "DptumMx",
+        "sourceName": "band close-grip pulldown",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-lat-pulldown-poster.webp?alt=media&token=461787ca-4228-464d-b926-e787b15060ab",
+        "match": "close"
+      }
+    },
+    {
+      "id": "mv-band-row",
+      "name": "Band Row",
+      "emoji": "🚣",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "back",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Anchor at chest height. Sit or stand facing the anchor with slight tension at the start, pull both handles to the ribs with the elbows close to the body, squeeze the shoulder blades, then extend the arms without rounding the back.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "sourceId": "km0sQC0",
+        "sourceName": "band one arm standing low row",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-row.webp?alt=media&token=eb17cdd3-aea0-4f42-92ed-4c464993f03d",
+        "source": "ExerciseDB",
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-row-poster.webp?alt=media&token=944698ed-74cc-4188-9ca2-6d6806868ed7"
+      }
+    },
+    {
+      "id": "mv-band-face-pull",
+      "name": "Band Face Pull",
+      "emoji": "😮",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders",
+        "back"
+      ],
+      "intensity": 1,
+      "how": "Anchor slightly above head height. Pull the band towards your forehead, hands splitting apart and elbows high, ending with the knuckles beside the ears. Pause a beat, return slowly. Rear delts and upper back — keep it light.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-pull.webp?alt=media&token=2ba361a8-bbe7-4f1c-b4bc-55030a9e4ad9",
+        "source": "ExerciseDB",
+        "match": "close",
+        "sourceId": "sTfvVsG",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-pull-poster.webp?alt=media&token=ec8a7100-7651-490a-91cf-ce6328280c68",
+        "sourceName": "band reverse fly"
+      }
+    },
+    {
+      "id": "mv-band-external-rotation",
+      "name": "Band External Rotation",
+      "emoji": "🩹",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders"
+      ],
+      "intensity": 1,
+      "how": "Anchor at elbow height. Stand side-on, working arm nearest the anchor tucked at 90° with the elbow pinned to the ribs, rotate the forearm away from the body, then back with control. Light tension only — this is cuff work.",
+      "restSec": 45,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "match": "exact",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-external-rotation-poster.webp?alt=media&token=98fb9a66-492f-4bee-a029-b5309acea62a",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-external-rotation.webp?alt=media&token=40d2a358-f3a5-4237-a5d0-6dea1ed076db",
+        "sourceId": "External_Rotation_with_Band",
+        "sourceName": "External Rotation with Band",
+        "source": "free-exercise-db"
+      }
+    },
+    {
+      "id": "mv-band-scaption",
+      "name": "Band Scaption",
+      "emoji": "📐",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "shoulders"
+      ],
+      "intensity": 1,
+      "how": "Stand on the band. Thumbs up, raise both arms to shoulder height in the scapular plane — about 30° in front of the shoulders, not straight out to the side. Lower slowly. Light tension: it is prehab, not a lateral raise.",
+      "restSec": 45,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-scaption-poster.webp?alt=media&token=743820f2-7fb4-43a3-b2fa-ef39e04c2853",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-scaption.webp?alt=media&token=62abe4a0-7c6d-48f5-a802-e525ba1d22bc",
+        "sourceId": "aHDy5O5",
+        "sourceName": "band y-raise",
+        "source": "ExerciseDB"
+      }
+    },
+    {
+      "id": "mv-band-biceps-curl",
+      "name": "Band Biceps Curl",
+      "emoji": "💪",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Stand on the middle of the band, elbows pinned at your sides, curl the handles to the shoulders and lower slowly against the pull. Widen your stance for more tension.",
+      "restSec": 60,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-biceps-curl-poster.webp?alt=media&token=924e37c1-8aa0-461b-8d34-554335484cf1",
+        "sourceName": "band alternating biceps curl",
+        "match": "exact",
+        "sourceId": "3omWx6P",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-biceps-curl.webp?alt=media&token=09646fda-772a-4cc5-995c-a9704447821f"
+      }
+    },
+    {
+      "id": "mv-band-triceps-pushdown",
+      "name": "Band Triceps Pushdown",
+      "emoji": "⬇️",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Anchor high. Elbows tight to the ribs, push the handles down until the arms are straight, squeeze the triceps, then let the band lift the hands back to chest height without the elbows drifting forward.",
+      "restSec": 60,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "source": "ExerciseDB",
+        "match": "close",
+        "sourceName": "cable triceps pushdown (v-bar)",
+        "sourceId": "gAwDzB3",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-triceps-pushdown-poster.webp?alt=media&token=ce55e287-708e-4e00-9abe-e251a30e4db6",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-triceps-pushdown.webp?alt=media&token=dfafb325-c46c-4195-85bd-59d6b905a4a4"
+      }
+    },
+    {
+      "id": "mv-band-leg-curl",
+      "name": "Band Leg Curl",
+      "emoji": "🦵",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs"
+      ],
+      "intensity": 2,
+      "how": "Anchor low. Lie face down, loop the band around one ankle, curl the heel towards the glutes against the pull, then lower slowly all the way. Keep the hips flat on the floor.",
+      "restSec": 60,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "sourceId": "Seated_Band_Hamstring_Curl",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-curl.webp?alt=media&token=72b96dd7-26cd-4c8a-9e87-1561162cf185",
+        "source": "free-exercise-db",
+        "match": "close",
+        "sourceName": "Seated Band Hamstring Curl",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-curl-poster.webp?alt=media&token=aa1693fa-35ad-4238-8ee2-df54c30ef78a"
+      }
+    },
+    {
+      "id": "mv-band-leg-extension",
+      "name": "Band Leg Extension",
+      "emoji": "🦿",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "legs"
+      ],
+      "intensity": 2,
+      "how": "Anchor low behind you. Sit on the bench, loop the band around one ankle, straighten the knee against the pull and squeeze the quad at the top, then return under control.",
+      "restSec": 60,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "match": "ai",
+        "source": "ExerciseDB",
+        "sourceId": "Y1MsI1l",
+        "sourceName": "resistance band leg extension",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-extension.webp?alt=media&token=d0e871cd-65df-42e1-a042-fc1015cc07e1",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-extension-poster.webp?alt=media&token=e0773612-bb9e-4d71-a6cc-3db75d69b6f6"
+      }
+    },
+    {
+      "id": "mv-band-glute-kickback",
+      "name": "Band Glute Kickback",
+      "emoji": "🍑",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "glutes"
+      ],
+      "intensity": 2,
+      "how": "Anchor low in front of you. Loop the band around one ankle, hinge slightly at the hips and drive that leg straight back, squeezing the glute at the top. Keep the lower back still — the movement is at the hip.",
+      "restSec": 60,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "sourceName": "Glute Kickback",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-glute-kickback-poster.webp?alt=media&token=29f50be2-dd07-4d7e-a9f5-e48417edd1bb",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-glute-kickback.webp?alt=media&token=b4ec2daa-7760-428f-82a5-3a179dde92d6",
+        "source": "free-exercise-db",
+        "match": "close",
+        "sourceId": "Glute_Kickback"
+      }
+    },
+    {
+      "id": "mv-band-pallof-press",
+      "name": "Band Pallof Press",
+      "emoji": "🛡️",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Anchor at chest height on the post. Stand side-on with the band held at the sternum, press it straight out and hold 2 s while the band tries to rotate you, then bring it back in. Resist the twist — nothing above the hips should move.",
+      "restSec": 45,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-pallof-press-poster.webp?alt=media&token=1c9c3236-c961-41de-9ec7-2020ca7839d4",
+        "match": "ai",
+        "source": "ExerciseDB",
+        "sourceName": "band horizontal pallof press",
+        "sourceId": "9pa4H5m",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-pallof-press.webp?alt=media&token=515de552-6863-4910-a2c4-18c01979206d"
+      }
+    },
+    {
+      "id": "mv-band-wrist-flexion",
+      "name": "Band Wrist Flexion",
+      "emoji": "🤲",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "forearms"
+      ],
+      "intensity": 1,
+      "how": "Stand on the band, forearm resting on the thigh palm up, hand past the knee. Curl the wrist up against the band, then lower slowly. Only the wrist moves.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "match": "ai",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-flexion-poster.webp?alt=media&token=53ccea7f-660c-4f8a-a08b-fbe02d826779",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-flexion.webp?alt=media&token=a97f7df3-1846-4612-b28c-f9c36d470e41",
+        "sourceName": "band wrist curl",
+        "source": "ExerciseDB",
+        "sourceId": "vUTfFHw"
+      }
+    },
+    {
+      "id": "mv-band-wrist-extension",
+      "name": "Band Wrist Extension",
+      "emoji": "✋",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "forearms"
+      ],
+      "intensity": 1,
+      "how": "Same setup palm down: forearm on the thigh, hand past the knee, lift the back of the hand against the band and lower slowly. This is the side that keeps the elbow happy on the court.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-extension-poster.webp?alt=media&token=b87dce99-cf07-4900-abf1-0b5e49ced16a",
+        "sourceName": "band reverse wrist curl",
+        "sourceId": "Ezpnw9d",
+        "match": "ai",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-extension.webp?alt=media&token=38eb1a99-2192-4741-9d69-37be7463f426"
+      }
+    },
+    {
+      "id": "mv-band-rotational-press",
+      "name": "Band Rotational Press",
+      "emoji": "🌀",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "power",
+        "core",
+        "shoulders"
+      ],
+      "intensity": 2,
+      "how": "Anchor at chest height. Stand side-on, band in both hands at the chest, then rotate through the back hip and press away explosively — the pickleball drive. Return under control and reset. Speed, not grind.",
+      "restSec": 60,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": true,
+      "addedBy": "manual",
+      "createdAt": "2026-08-24T02:44:00.476Z",
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-rotational-press.webp?alt=media&token=fc645d1f-822e-485a-a124-2eb8a19de114",
+        "sourceId": "u4bAmKp",
+        "source": "ExerciseDB",
+        "match": "close",
+        "sourceName": "band twisting overhead press",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-rotational-press-poster.webp?alt=media&token=06921442-79da-46d2-8fff-4d7685bd4819"
+      }
+    }
+  ]
+}

@@ -7,8 +7,9 @@
 //      those, not the 4 MB originals;
 //   2. asks Claude (Opus, medium effort) to identify every distinct piece of
 //      equipment and describe it thoroughly (the exercise library is built from
-//      those descriptions later, by `npm run gym:exercises`, which needs to see
-//      the WHOLE inventory at once to find combinations);
+//      those descriptions when you write an exercise by hand, and by the coach
+//      before every session — so the notes carry the limits: lightest notch,
+//      unstable handles, fixed height);
 //   3. writes a 96px webp thumbnail per item into `public/gym/` (see CLAUDE.md —
 //      no un-resized image ever lands in public/);
 //   4. merges the result into Firestore `app/gymCatalog`.
@@ -300,8 +301,8 @@ async function main() {
     idByName.set(key, id)
   }
 
-  // Exercises are NOT written here — `npm run gym:exercises` builds them from the
-  // whole inventory at once. Existing ones are carried through untouched.
+  // Exercises are NOT written here — they are written by hand (Gear, or the
+  // catalog file). Existing ones are carried through untouched.
   const exercises = existing.exercises
 
   console.log(`\n🏋️  Equipment: ${newGear} new, ${equipment.length} total`)
@@ -342,7 +343,7 @@ async function main() {
 
   console.log(`\n✅ Saved to Firestore. Open the Gym app → Gear to review, rename or retire anything.`)
   console.log(`   All that is left on disk: ${kb(thumbBytes)} of ${THUMB_PX}px thumbnails in public/gym/.`)
-  console.log(`\n➡️  Next: npm run gym:exercises — turns this gear into the exercise library, then fetches the animations.`)
+  console.log(`\n➡️  Next: add the exercises it unlocks in Gym → Gear (or scripts/data/gym-catalog.json + npm run gym:seed), then npm run gym:demos.`)
   process.exit(0)
 }
 

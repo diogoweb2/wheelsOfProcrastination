@@ -6,12 +6,22 @@
 // (src/logic/gym.ts), which is now the only planner there is.
 //
 // The brief is still the highest-leverage thing here — age, goals, injuries,
-// what motivates you — and the written program (BUSINESS_REQUIREMENTS §18)
-// lands on this tab once `npm run gym:program` exists.
+// what motivates you — and since 2026-08-24 the TRAINING BLOCK lives here too:
+// the fixed rotation of sessions the Train tab walks you through, how old it is,
+// and the warning when it has run its course (§18m).
 import { useEffect, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { ExerciseRating } from '../../types'
-import { RATING_LABEL, allExercises, romanChairMove, seedBrief } from '../../logic/gym'
+import { RATING_LABEL, allExercises, exerciseById, romanChairMove, seedBrief } from '../../logic/gym'
+import {
+  activeBlock,
+  blockAge,
+  blockPos as blockPosOf,
+  blockSessionsDone,
+  blockWeeks,
+  missingSlots,
+  slotLine,
+} from '../../logic/gymBlock'
 import { wakeLockSupported } from '../../logic/wakeLock'
 import { sfx } from '../../audio'
 
@@ -37,6 +47,8 @@ export function PlanPanel() {
 
   return (
     <>
+      <BlockCard />
+
       <div className="h2">🧠 Your brief</div>
       <div className="card">
         <p className="muted" style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.45 }}>
@@ -164,6 +176,139 @@ export function PlanPanel() {
         />
       </div>
 
+    </>
+  )
+}
+
+/**
+ * The programme, in full. Six sessions you rotate through, and where you are in
+ * them. This is the page that answers "what am I actually doing for the next
+ * two months?" — the Train tab only ever shows the next one.
+ */
+function BlockCard() {
+  const { data, gymCatalog, gymSetBlockPos, gymRestartBlock } = useStore()
+  const gym = data.gym
+  const block = activeBlock(gym)
+  const [open, setOpen] = useState<string | null>(null)
+
+  if (!block || block.sessions.length === 0) {
+    return (
+      <>
+        <div className="h2">🧱 Training block</div>
+        <div className="card">
+          <p className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
+            No block on this profile, so the Train tab builds a session from your history each time. A block is a fixed
+            rotation of sessions you repeat for 8–12 weeks — it is what makes progression mean anything, because the same
+            exercise comes back under the same conditions.
+          </p>
+        </div>
+      </>
+    )
+  }
+
+  const pos = blockPosOf(gym)
+  const weeks = blockWeeks(block)
+  const age = blockAge(block)
+  const done = blockSessionsDone(gym)
+  const gaps = missingSlots(block, gymCatalog)
+  const progress = Math.min(100, Math.round((weeks / block.retireWeeks) * 100))
+
+  return (
+    <>
+      <div className="h2">🧱 {block.name}</div>
+      <div className="card">
+        {block.goal && <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>{block.goal}</p>}
+        <div className="gym-card-head" style={{ marginBottom: 8 }}>
+          <span>Week {weeks + 1} of {block.reviewWeeks}–{block.retireWeeks}</span>
+          <span style={{ fontWeight: 900, color: age === 'fresh' ? 'var(--muted)' : 'var(--orange)' }}>
+            {age === 'fresh' ? `${done} sessions done` : age === 'due' ? 'due a refresh' : 'past its date'}
+          </span>
+        </div>
+        <div className="widget-bar">
+          <span style={{ width: `${progress}%` }} />
+        </div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 8, lineHeight: 1.45 }}>
+          One ordered rotation, no days of the week: you do the next session whenever you train. Train twice this week and
+          you get through two of them; the next week carries on where you stopped.{' '}
+          {age === 'fresh'
+            ? `The app will say when it is time for a new block — from week ${block.reviewWeeks}.`
+            : 'Time for a new block: same six-session shape, some movements swapped.'}
+        </p>
+        {age !== 'fresh' && (
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ width: '100%', marginTop: 8 }}
+            onClick={() => {
+              if (!confirm(`Carry on with these six sessions as a new block? The clock restarts today.`)) return
+              sfx.click()
+              gymRestartBlock()
+            }}
+          >
+            🔄 Carry on with these — restart the clock
+          </button>
+        )}
+      </div>
+
+      {block.sessions.map((s, i) => (
+        <div className={`card gym-block-row ${i === pos ? 'gym-block-row--next' : ''}`} key={s.id}>
+          <button
+            className="gym-block-head"
+            onClick={() => {
+              sfx.click()
+              setOpen(open === s.id ? null : s.id)
+            }}
+          >
+            <span style={{ fontSize: 26 }}>{s.emoji}</span>
+            <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+              <span style={{ display: 'block', fontWeight: 900, fontSize: 14 }}>S{i + 1} · {s.name}</span>
+              <span className="muted" style={{ display: 'block', fontSize: 11 }}>
+                {s.exercises.length} exercises{i === pos ? ' · up next' : ''}
+              </span>
+            </span>
+            <span className="muted">{open === s.id ? '▾' : '▸'}</span>
+          </button>
+          {open === s.id && (
+            <>
+              <ul className="gym-block-list">
+                {s.exercises.map((slot, n) => {
+                  const def = exerciseById(gymCatalog, slot.exId)
+                  return (
+                    <li key={`${slot.exId}-${n}`}>
+                      <span>
+                        {def ? `${def.emoji} ${def.name}` : '❓ not in the catalog'}
+                        {slot.quality && ' ⚡'}
+                      </span>
+                      <span className="muted">{slotLine(slot, gymCatalog)}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+              {i !== pos && (
+                <button
+                  className="btn btn--ghost btn--small"
+                  style={{ width: '100%', marginTop: 8 }}
+                  onClick={() => {
+                    sfx.click()
+                    gymSetBlockPos(i)
+                  }}
+                >
+                  ⏭ Make this the next one
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      ))}
+
+      {gaps.length > 0 && (
+        <div className="card">
+          <div style={{ fontWeight: 900, fontSize: 13 }}>⚠️ {gaps.length} slot{gaps.length === 1 ? '' : 's'} point at an exercise that is gone</div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.45 }}>
+            {gaps.map((g) => `${g.session.name}: ${g.slot.exId}`).join(' · ')}. They are skipped when the session is built —
+            put the exercise back in Gear, or accept the shorter session.
+          </p>
+        </div>
+      )}
     </>
   )
 }

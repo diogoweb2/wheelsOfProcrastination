@@ -3,7 +3,7 @@
 //  - seedProfiles: the initial crew roster
 //  - the active login (which profile is signed in on THIS device) — kept local, per-device
 //  - readers for the previous localStorage data, used once to migrate up into Firestore
-import type { AppData, Profile } from '../types'
+import type { AppData, Profile, TrainingBlock } from '../types'
 import { addDays, dayKey, parseDay } from '../logic/dates'
 import { ACCOUNT_IDS, defaultBankState } from '../logic/bank'
 import { defaultAlbumState } from '../logic/album'
@@ -118,6 +118,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       ...base.gym,
       ...parsed.gym,
       brief: { ...base.gym.brief, ...parsed.gym?.brief },
+      blocks: parsed.gym?.blocks ?? [],
       ex: { ...parsed.gym?.ex },
       ladders: { ...parsed.gym?.ladders },
       // the log is capped here rather than at write time, so an old oversized
@@ -175,6 +176,16 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
   if (!Array.isArray(merged.daily.pendingPicks)) merged.daily.pendingPicks = legacy ? [legacy] : []
   // tasks predating start-date / day-scope default to always-available
   for (const t of merged.tasks) if (!t.dayScope) t.dayScope = 'all'
+  // gym v1 → v2 (§18m): one `block` became a LIBRARY of blocks. A save from the
+  // single-block build keeps its block, its position and its history.
+  const soleBlock = (parsed.gym as { block?: TrainingBlock } | undefined)?.block
+  if (soleBlock && merged.gym.blocks.length === 0) {
+    merged.gym.blocks = [soleBlock]
+    merged.gym.activeBlockId = soleBlock.id
+  }
+  // the old key rode in on the spread above; drop it so it doesn't live forever
+  // in the saved document as a second, stale copy of the rotation
+  delete (merged.gym as { block?: TrainingBlock }).block
   return merged
 }
 

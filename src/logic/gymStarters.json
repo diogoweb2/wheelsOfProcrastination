@@ -15,87 +15,48 @@
     "restSec": 60,
     "defaultReps": 10,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z",
-    "ladder": true
-  },
-  {
-    "id": "bw-incline-pushup",
-    "name": "Incline push-ups",
-    "emoji": "📐",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "chest",
-      "arms"
-    ],
-    "intensity": 1,
-    "how": "Hands on a bench or step. Easier than the floor — perfect as a ramp-in set.",
-    "restSec": 45,
-    "defaultReps": 15,
-    "defaultSets": 2,
+    "perSide": false,
+    "ladder": true,
+    "demo": {
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup.webp?alt=media&token=bf94aba0-02e7-40ed-b6a1-63e5377d52a7",
+      "source": "ExerciseDB",
+      "sourceId": "I4hDWkc",
+      "match": "exact",
+      "sourceName": "push-up",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-poster.webp?alt=media&token=0d89fc65-45e4-40c0-aaf1-95de493241be"
+    },
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
   {
-    "id": "bw-pullup",
-    "name": "Pull-ups",
-    "emoji": "🧗",
+    "id": "bw-calf-raise",
+    "name": "Calf Raise",
+    "emoji": "🦶",
     "equipmentIds": [],
     "kind": "bodyweight",
     "parts": [
-      "back",
-      "arms"
-    ],
-    "intensity": 3,
-    "how": "Hang, pull until your chin clears the bar, lower all the way down under control.",
-    "restSec": 90,
-    "defaultReps": 5,
-    "defaultSets": 4,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z",
-    "ladder": true
-  },
-  {
-    "id": "bw-squat",
-    "name": "Bodyweight squats",
-    "emoji": "🦵",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "legs",
-      "glutes"
+      "legs"
     ],
     "intensity": 1,
-    "how": "Feet shoulder width, sit back and down, knees tracking over the toes, stand tall.",
-    "restSec": 45,
+    "how": "Up on the toes as high as you can, slow all the way back down.",
+    "restSec": 35,
     "defaultReps": 20,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z",
-    "ladder": true
-  },
-  {
-    "id": "bw-lunge",
-    "name": "Alternating lunges",
-    "emoji": "🚶",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "legs",
-      "glutes"
-    ],
-    "intensity": 2,
-    "how": "Step forward, back knee towards the floor, push back to the start. Alternate legs.",
-    "restSec": 50,
-    "defaultReps": 16,
-    "defaultSets": 3,
+    "perSide": false,
+    "demo": {
+      "match": "ai",
+      "source": "ExerciseDB",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-calf-raise.webp?alt=media&token=9ca65e28-31b8-43fa-80ce-fd71e3c30e60",
+      "sourceId": "bJYHBIN",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-calf-raise-poster.webp?alt=media&token=3ad480e7-effa-4dc6-929a-4ea017c7bef7",
+      "sourceName": "bodyweight standing calf raise"
+    },
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
   {
     "id": "bw-glute-bridge",
-    "name": "Glute bridge",
+    "name": "Glute Bridge",
     "emoji": "🌉",
     "equipmentIds": [],
     "kind": "bodyweight",
@@ -108,6 +69,123 @@
     "restSec": 40,
     "defaultReps": 20,
     "defaultSets": 3,
+    "perSide": false,
+    "demo": {
+      "source": "ExerciseDB",
+      "sourceName": "low glute bridge on floor",
+      "sourceId": "u0cNiij",
+      "match": "close",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-glute-bridge-poster.webp?alt=media&token=5b91608a-27bb-4e71-b0ab-92099ba852ec",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-glute-bridge.webp?alt=media&token=62fe10fe-be4e-4abb-9a5d-847726f2214e"
+    },
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "mv-single-leg-glute-bridge",
+    "name": "Single-Leg Glute Bridge",
+    "emoji": "🦿",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "glutes",
+      "core"
+    ],
+    "intensity": 1,
+    "how": "Lie on your back, one foot planted and the other leg straight up, push the hips up level. Keep the hips square — don't let one side drop.",
+    "restSec": 45,
+    "defaultReps": 15,
+    "defaultSets": 3,
+    "perSide": true,
+    "backRisk": false,
+    "ladder": false,
+    "demo": {
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-glute-bridge-poster.webp?alt=media&token=96e6d16d-bfae-435e-9dcf-22402eb1517d",
+      "sourceId": "rmEukuS",
+      "sourceName": "single leg bridge with outstretched leg",
+      "match": "ai",
+      "source": "ExerciseDB",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-single-leg-glute-bridge.webp?alt=media&token=bd73df2f-2357-4b32-83b9-94523929846a"
+    },
+    "addedBy": "ai",
+    "createdAt": "2026-08-06T19:35:38.648Z"
+  },
+  {
+    "id": "bw-bird-dog",
+    "name": "Bird Dog",
+    "emoji": "🐦",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core",
+      "back"
+    ],
+    "intensity": 1,
+    "how": "On all fours, extend opposite arm and leg, hold a beat, keep the hips level. Gold for the lower back.",
+    "restSec": 40,
+    "defaultReps": 16,
+    "defaultSets": 3,
+    "perSide": true,
+    "demo": {
+      "sourceId": "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXNtNzl4Y3kzbDRtMHB4ZmxkdXgzZDhudGM4MHNvbXE2cWRvZDk0eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/dZ8TmzFGtr1UP9mZWI/giphy.gif",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-bird-dog.webp?alt=media&token=5a6b4b65-3418-4543-976c-cd3388973690",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-bird-dog-poster.webp?alt=media&token=1014a200-996b-4d3c-98f6-f9e70e76cabe",
+      "match": "manual",
+      "sourceName": "Bird dog (chosen by hand)",
+      "source": "media4.giphy.com"
+    },
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-dead-bug",
+    "name": "Dead Bug",
+    "emoji": "🐞",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core"
+    ],
+    "intensity": 1,
+    "how": "On your back, lower back glued to the floor. Extend opposite arm and leg slowly, then swap.",
+    "restSec": 40,
+    "defaultReps": 16,
+    "defaultSets": 3,
+    "perSide": false,
+    "demo": {
+      "sourceName": "dead bug",
+      "source": "ExerciseDB",
+      "sourceId": "iny3m5y",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-dead-bug.webp?alt=media&token=ac1959f3-32bf-4f6d-bf4c-6d9ba2cdb474",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-dead-bug-poster.webp?alt=media&token=c9bf7ba3-ed7e-404a-8590-096a0f5f06f8",
+      "match": "exact"
+    },
+    "addedBy": "manual",
+    "createdAt": "2026-08-06T00:00:00.000Z"
+  },
+  {
+    "id": "bw-side-plank",
+    "name": "Side Plank",
+    "emoji": "📏",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "core"
+    ],
+    "intensity": 2,
+    "how": "On one forearm, hips stacked and lifted, body in a straight line. Both sides.",
+    "restSec": 40,
+    "defaultReps": 30,
+    "defaultSets": 2,
+    "perSide": true,
+    "demo": {
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-side-plank.webp?alt=media&token=a8d5f948-58d5-4889-9476-fc6fd126237b",
+      "sourceName": "bodyweight incline side plank",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-side-plank-poster.webp?alt=media&token=47e1ad01-0cb2-4ad7-a544-6551a58d5cac",
+      "match": "close",
+      "sourceId": "5VXmnV5",
+      "source": "ExerciseDB"
+    },
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
@@ -125,246 +203,128 @@
     "restSec": 45,
     "defaultReps": 40,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-side-plank",
-    "name": "Side plank",
-    "emoji": "📏",
-    "equipmentIds": [],
-    "kind": "timed",
-    "parts": [
-      "core"
-    ],
-    "intensity": 2,
-    "how": "On one forearm, hips stacked and lifted, body in a straight line. Both sides.",
-    "restSec": 40,
-    "defaultReps": 30,
-    "defaultSets": 2,
-    "perSide": true,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-dead-bug",
-    "name": "Dead bug",
-    "emoji": "🐞",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "core"
-    ],
-    "intensity": 1,
-    "how": "On your back, lower back glued to the floor. Extend opposite arm and leg slowly, then swap.",
-    "restSec": 40,
-    "defaultReps": 16,
-    "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-bird-dog",
-    "name": "Bird dog",
-    "emoji": "🐦",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "core",
-      "back"
-    ],
-    "intensity": 1,
-    "how": "On all fours, extend opposite arm and leg, hold a beat, keep the hips level. Gold for the lower back.",
-    "restSec": 40,
-    "defaultReps": 16,
-    "defaultSets": 3,
-    "perSide": true,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-superman",
-    "name": "Superman hold",
-    "emoji": "🦸",
-    "equipmentIds": [],
-    "kind": "timed",
-    "parts": [
-      "back",
-      "core"
-    ],
-    "intensity": 1,
-    "how": "Face down, lift chest, arms and legs, look at the floor. Hold and breathe.",
-    "restSec": 40,
-    "defaultReps": 25,
-    "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-hollow",
-    "name": "Hollow hold",
-    "emoji": "🌙",
-    "equipmentIds": [],
-    "kind": "timed",
-    "parts": [
-      "core"
-    ],
-    "intensity": 3,
-    "how": "On your back, lower back pressed down, arms and legs off the floor in a shallow banana shape.",
-    "restSec": 50,
-    "defaultReps": 25,
-    "defaultSets": 3,
+    "perSide": false,
     "demo": {
-      "anim": "/gym/moves/bw-hollow.webp",
-      "poster": "/gym/moves/bw-hollow-poster.webp",
-      "source": "self.com",
-      "sourceId": "638a54f2135a7da3eb58934c",
-      "sourceName": "Hollow hold",
-      "match": "manual"
+      "match": "close",
+      "sourceId": "VBAWRPG",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-plank-poster.webp?alt=media&token=15b0e943-45b3-4944-bfad-d7271abdee02",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-plank.webp?alt=media&token=1124d97d-a0b7-4966-9474-72b51392e743",
+      "source": "ExerciseDB",
+      "sourceName": "weighted front plank"
     },
     "addedBy": "manual",
     "createdAt": "2026-08-06T00:00:00.000Z"
   },
   {
-    "id": "bw-mountain-climber",
-    "name": "Mountain climbers",
-    "emoji": "⛰️",
+    "id": "mv-split-squat-jump",
+    "name": "Split Squat Jump",
+    "emoji": "✂️",
     "equipmentIds": [],
     "kind": "bodyweight",
     "parts": [
-      "core",
-      "cardio"
+      "power",
+      "legs",
+      "glutes"
     ],
     "intensity": 2,
-    "how": "Push-up position, drive the knees to the chest fast without the hips bouncing.",
-    "restSec": 45,
-    "defaultReps": 30,
+    "how": "From a split stance, jump and switch legs in the air, landing softly. Three per side. Stop the set the moment jump height, landing control or speed drops — even at two reps. Full rest between sets; never take this near failure.",
+    "restSec": 90,
+    "defaultReps": 6,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
+    "perSide": false,
+    "backRisk": false,
+    "ladder": false,
+    "demo": {
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-split-squat-jump.webp?alt=media&token=4276429e-20ee-49fb-b878-94608123d9f5",
+      "match": "ai",
+      "source": "free-exercise-db",
+      "sourceName": "Split Jump",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-split-squat-jump-poster.webp?alt=media&token=314d714a-a83d-4dcb-b91d-a52da9da99de",
+      "sourceId": "Split_Jump"
+    },
+    "addedBy": "ai",
+    "createdAt": "2026-08-23T01:20:54.910Z"
   },
   {
-    "id": "bw-calf-raise",
-    "name": "Calf raises",
-    "emoji": "🦶",
+    "id": "mv-squat-jump",
+    "name": "Squat Jump",
+    "emoji": "🦘",
     "equipmentIds": [],
     "kind": "bodyweight",
     "parts": [
-      "legs"
-    ],
-    "intensity": 1,
-    "how": "Up on the toes as high as you can, slow all the way back down.",
-    "restSec": 35,
-    "defaultReps": 20,
-    "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-wall-sit",
-    "name": "Wall sit",
-    "emoji": "🧊",
-    "equipmentIds": [],
-    "kind": "timed",
-    "parts": [
-      "legs"
+      "power",
+      "legs",
+      "glutes"
     ],
     "intensity": 2,
-    "how": "Back flat on the wall, thighs parallel to the floor. Sit there and suffer politely.",
-    "restSec": 50,
-    "defaultReps": 45,
-    "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-dip-chair",
-    "name": "Chair dips",
-    "emoji": "🪑",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "arms",
-      "chest"
-    ],
-    "intensity": 2,
-    "how": "Hands on a chair edge behind you, elbows straight back, lower until the elbows hit 90°.",
-    "restSec": 55,
+    "how": "Drop into a shallow squat and jump as high as you can, landing soft with bent knees. Absorb every landing — no stiff legs.",
+    "restSec": 60,
     "defaultReps": 12,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
+    "perSide": false,
+    "backRisk": false,
+    "ladder": false,
+    "demo": {
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-squat-jump-poster.webp?alt=media&token=da9b5b93-d2b6-4f4f-b8d7-638ab5a1b5bb",
+      "match": "exact",
+      "sourceName": "jump squat",
+      "source": "ExerciseDB",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-squat-jump.webp?alt=media&token=31e1067f-e374-47b2-8663-a7190785570e",
+      "sourceId": "LIlE5Tn"
+    },
+    "addedBy": "ai",
+    "createdAt": "2026-08-06T19:35:38.649Z"
   },
   {
-    "id": "bw-pike-pushup",
-    "name": "Pike push-ups",
-    "emoji": "🔺",
+    "id": "mv-tuck-jump",
+    "name": "Tuck Jump",
+    "emoji": "🆙",
     "equipmentIds": [],
     "kind": "bodyweight",
     "parts": [
-      "shoulders",
-      "arms"
-    ],
-    "intensity": 3,
-    "how": "Hips high in an upside-down V, lower the crown of the head towards the floor.",
-    "restSec": 60,
-    "defaultReps": 8,
-    "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z",
-    "backRisk": false
-  },
-  {
-    "id": "bw-arm-circles",
-    "name": "Arm circles",
-    "emoji": "🌀",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "shoulders"
-    ],
-    "intensity": 1,
-    "how": "Arms out, small fast circles forward then backward. Great as a first move.",
-    "restSec": 30,
-    "defaultReps": 20,
-    "defaultSets": 2,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-jumping-jack",
-    "name": "Jumping jacks",
-    "emoji": "⭐",
-    "equipmentIds": [],
-    "kind": "bodyweight",
-    "parts": [
-      "cardio",
-      "fullBody"
-    ],
-    "intensity": 1,
-    "how": "Classic. Feet out, arms up, keep the rhythm.",
-    "restSec": 30,
-    "defaultReps": 30,
-    "defaultSets": 2,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
-  },
-  {
-    "id": "bw-bear-crawl",
-    "name": "Bear crawl",
-    "emoji": "🐻",
-    "equipmentIds": [],
-    "kind": "timed",
-    "parts": [
-      "fullBody",
+      "power",
+      "legs",
       "core"
     ],
     "intensity": 2,
-    "how": "On hands and toes, knees an inch off the floor, crawl forward and back staying low.",
-    "restSec": 50,
-    "defaultReps": 30,
+    "how": "Jump straight up pulling your knees toward your chest, land softly. Bend the knees on landing to absorb it.",
+    "restSec": 60,
+    "defaultReps": 10,
     "defaultSets": 3,
-    "addedBy": "manual",
-    "createdAt": "2026-08-06T00:00:00.000Z"
+    "perSide": false,
+    "backRisk": false,
+    "ladder": false,
+    "demo": {
+      "sourceId": "Knee_Tuck_Jump",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-tuck-jump-poster.webp?alt=media&token=91f9e0b2-cc48-4fb6-a605-529bb0ed533e",
+      "sourceName": "Knee Tuck Jump",
+      "source": "free-exercise-db",
+      "match": "ai",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-tuck-jump.webp?alt=media&token=2ddd717b-cf51-406b-90e7-5fde7d63afda"
+    },
+    "addedBy": "ai",
+    "createdAt": "2026-08-23T01:20:54.911Z"
+  },
+  {
+    "id": "mv-lateral-shuffle",
+    "name": "Lateral Shuffle",
+    "emoji": "↔️",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "power",
+      "legs",
+      "cardio"
+    ],
+    "intensity": 2,
+    "how": "Stay low in a half squat and shuffle sideways a few steps each way. Keep the chest up and feet from crossing.",
+    "restSec": 45,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "perSide": false,
+    "backRisk": false,
+    "ladder": false,
+    "addedBy": "ai",
+    "createdAt": "2026-08-23T01:20:54.911Z"
   }
 ]

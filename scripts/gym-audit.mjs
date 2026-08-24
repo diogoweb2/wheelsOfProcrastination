@@ -1,25 +1,18 @@
-// Layer 1 of the catalog audit: `npm run gym:audit`. See GYM_PROGRAM.md §12a.
+// Validate the gym catalog: `npm run gym:audit`.
 //
 // The Pallof discovery (two catalog rows describing an exercise that is
 // physically impossible with the equipment they list) proved the point: the
-// catalog cannot be treated as ground truth. And because the new program
-// generator is CONSTRAINED to the catalog, a bad catalog produces a
-// deterministically bad program — which is worse than the old random one,
-// because it is wrong the same way every single time.
+// catalog cannot be treated as ground truth just because something wrote it.
 //
-// So the audit runs in two layers, and THIS FILE IS THE ONE WITHOUT A MODEL.
-// Everything here has a right answer that code can compute: does the id exist,
-// is the equipment owned, is the enum legal, is rest inside its band. A model
-// asked these questions can only add noise and cost. Layer 2 (`--semantic`, a
-// separate pass) is where judgement belongs — "does this exercise mean what its
-// name says?" — and it never sees a row that failed layer 1.
+// Everything checked here has a right answer that code can compute: does the id
+// exist, is the equipment owned, is the enum legal, is rest inside its band. The
+// judgement half — "does this exercise mean what its name says?" — used to be a
+// second, model-driven pass; it is gone, because the catalog is now written by
+// hand (`npm run gym:seed`, then the Gear tab) and a human already answered
+// those questions before the row existed.
 //
 // It WRITES NOTHING. A validator that repairs things is a validator you stop
 // trusting; every finding here is either a code fix or a hand edit in Gear.
-//
-// Layer 2 lives in `scripts/gym-audit-semantic.mjs` (`npm run gym:audit:semantic`)
-// and imports the checks below so it can honour that rule without duplicating
-// them.
 //
 // Flags:
 //   --json        machine-readable findings on stdout, nothing else
@@ -47,54 +40,13 @@ const STRICT = args.includes('--strict')
 
 // --- the legal values -------------------------------------------------------
 //
-// `kind`, `parts`, `intensity` and `addedBy` exist today (src/types.ts). The
-// rest are the fields layer 2 adds (GYM_PROGRAM.md §12) — they are validated
-// WHEN PRESENT and counted when absent, so this same script reports audit
-// progress as layer 2 fills them in.
+// These mirror `ExerciseKind`, `BodyPart` and `addedBy` in src/types.ts. Keep
+// them in step: a value legal there and illegal here fails the audit for no
+// reason, and the reverse lets a bad row into the app.
 
 export const KINDS = ['weight', 'bodyweight', 'timed', 'cardio']
-export const PARTS = ['chest', 'back', 'shoulders', 'arms', 'legs', 'glutes', 'core', 'fullBody', 'cardio']
+export const PARTS = ['chest', 'back', 'shoulders', 'arms', 'forearms', 'legs', 'glutes', 'core', 'fullBody', 'power', 'cardio']
 const ADDED_BY = ['ai', 'manual']
-
-/**
- * Catalog movement patterns. This is the UNION of §12's list and the two extra
- * patterns §8 tracks recovery on (`anti-rotation`, `back-extension`) — without
- * them there is no way to DERIVE a recovery pattern from an exercise's
- * metadata, which is the gap this script found on its first run.
- *
- * `isolation` is the second gap, found by layer 2: a leg extension, a leg curl
- * and a wrist curl are single-joint accessory work that fits NONE of the
- * compound patterns. Forcing a wrist curl to `pull` would charge it against the
- * same recovery budget as chin-ups. The muscle is already in `parts`; this says
- * only that the movement claims no compound slot.
- */
-export const MOVEMENT_PATTERNS = [
-  'push', 'pull', 'squat', 'hinge', 'lunge', 'lateral', 'carry',
-  'core', 'anti-rotation', 'back-extension', 'power', 'mobility', 'shoulder', 'isolation',
-]
-export const PRIMARY_ROLES = ['strength', 'hypertrophy', 'power', 'stability', 'mobility', 'prehab']
-export const LATERALITY = ['bilateral', 'unilateral', 'perSide']
-export const PROGRESSION_MODES = ['load', 'reps', 'duration', 'difficulty', 'quality', 'none']
-export const RISK_LEVELS = ['low', 'moderate', 'high']
-export const RISK_JOINTS = ['back', 'shoulder', 'knee']
-export const CATALOG_STATUS = ['approved', 'review', 'retired']
-export const AUDIT_CONFIDENCE = ['high', 'medium', 'low']
-
-/**
- * WHY a row needs a human, as separate booleans rather than one prose blob.
- * Without this a reviewer sees `review` and cannot tell whether they are being
- * asked to approve the EXERCISE, the EQUIPMENT SETUP, or merely the METADATA.
- *
- * `programFit` is the odd one out, deliberately: it NEVER blocks. The catalog's
- * job is to describe what is POSSIBLE; deciding what is worth doing belongs to
- * the program and the per-profile brief. A row that is real, correctly
- * described and correctly tagged is `approved` even when Court & Core would
- * never pick it — otherwise the catalog slowly becomes safe for everybody and
- * optimised for nobody.
- */
-export const REVIEW_FLAGS = ['physicalSetup', 'movementDefinition', 'metadata', 'loadSuitability', 'programFit']
-/** The flags that actually mean "not usable as data". `programFit` is advisory. */
-export const BLOCKING_FLAGS = REVIEW_FLAGS.filter((f) => f !== 'programFit')
 
 /** Mirrors REST_MIN / REST_MAX in src/logic/gym.ts — rest is clamped to this band. */
 const REST_MIN = 15
@@ -125,9 +77,9 @@ function checkEquipment(equipment) {
     seen.set(e.id, e.name)
     if (!e.name?.trim()) err('equipment.name', e.id, 'no name')
     if (e.addedBy && !ADDED_BY.includes(e.addedBy)) err('equipment.addedBy', e.id, `illegal addedBy "${e.addedBy}"`)
-    // the notes are the ONLY thing the exercise generator ever sees about a
-    // piece of gear (§18k), so an item without them is invisible to it
-    if (!e.notes?.trim()) warn('equipment.notes', e.name || e.id, 'no notes — the generator sees nothing but the name')
+    // the notes are what the coach reads about a piece of gear — its limits
+    // (lightest notch, unstable handles, fixed height) live nowhere else
+    if (!e.notes?.trim()) warn('equipment.notes', e.name || e.id, 'no notes — the coach sees nothing but the name')
   }
   return seen
 }
@@ -146,7 +98,7 @@ function checkExercise(e, i, ownedIds, retiredEquip, allIds) {
   // wrong question to ask of it. Retiring is how §12 preserves a bad exercise
   // instead of deleting it — auditing the corpse would make the audit
   // permanently red for rows we deliberately kept. Structure only, then out.
-  if (e.retired) return { retired: true }
+  if (e.retired) return
 
   if (!e.how?.trim()) warn('exercise.how', where, 'no instructions — the runner shows nothing')
 
@@ -179,65 +131,7 @@ function checkExercise(e, i, ownedIds, retiredEquip, allIds) {
   // ladders are the bodyweight rep game (§18f); a loaded lift progresses by weight
   if (e.ladder && e.kind === 'weight') warn('combo.ladder', where, 'ladder on a `weight` exercise — ladders are for bodyweight staples')
 
-  // --- layer 2 fields: validated when present, counted when absent ---
-  const enumIf = (field, legal) => {
-    if (e[field] == null) return false
-    if (!legal.includes(e[field])) err(`exercise.${field}`, where, `illegal ${field} "${e[field]}"`)
-    return true
-  }
-  const audited = {
-    movementPattern: enumIf('movementPattern', MOVEMENT_PATTERNS),
-    primaryRole: enumIf('primaryRole', PRIMARY_ROLES),
-    laterality: enumIf('laterality', LATERALITY),
-    progressionMode: enumIf('progressionMode', PROGRESSION_MODES),
-    catalogStatus: enumIf('catalogStatus', CATALOG_STATUS),
-    auditConfidence: enumIf('auditConfidence', AUDIT_CONFIDENCE),
-  }
-
-  if (e.reviewFlags != null) {
-    if (typeof e.reviewFlags !== 'object') err('exercise.reviewFlags', where, 'reviewFlags is not an object')
-    else
-      for (const [k, v] of Object.entries(e.reviewFlags)) {
-        if (!REVIEW_FLAGS.includes(k)) err('exercise.reviewFlags', where, `unknown review flag "${k}"`)
-        if (typeof v !== 'boolean') err('exercise.reviewFlags', where, `reviewFlags.${k} must be a boolean`)
-      }
-  }
-
-  if (e.riskProfiles != null) {
-    if (typeof e.riskProfiles !== 'object') err('exercise.riskProfiles', where, 'riskProfiles is not an object')
-    else
-      for (const [joint, level] of Object.entries(e.riskProfiles)) {
-        if (!RISK_JOINTS.includes(joint)) err('exercise.riskProfiles', where, `unknown joint "${joint}"`)
-        if (!RISK_LEVELS.includes(level)) err('exercise.riskProfiles', where, `illegal risk level "${level}" for ${joint}`)
-      }
-  }
-
-  // rep ranges arrive with the program, not the catalog — but if one half is
-  // there the other must be, and they must be the right way round
-  if (e.repLow != null || e.repHigh != null) {
-    if (e.repLow == null || e.repHigh == null) err('exercise.repRange', where, 'repLow/repHigh: one set without the other')
-    else if (!(e.repLow < e.repHigh)) err('exercise.repRange', where, `repLow ${e.repLow} must be < repHigh ${e.repHigh}`)
-  }
-
-  // --- cross-field sanity on the layer 2 metadata ---
-  if (audited.laterality && e.laterality === 'perSide' && e.perSide !== true)
-    warn('combo.laterality', where, 'laterality "perSide" but perSide flag is not true')
-  if (audited.progressionMode) {
-    if (e.progressionMode === 'reps' && (e.kind === 'timed' || e.kind === 'cardio'))
-      err('combo.progressionMode', where, `progressionMode "reps" on a ${e.kind} exercise — it is measured in seconds`)
-    if (e.progressionMode === 'duration' && (e.kind === 'weight' || e.kind === 'bodyweight'))
-      err('combo.progressionMode', where, `progressionMode "duration" on a ${e.kind} exercise — it is measured in reps`)
-    if (e.progressionMode === 'load' && e.kind === 'bodyweight' && gear.length === 0)
-      err('combo.progressionMode', where, 'progressionMode "load" but nothing to load — bodyweight with no equipment')
-  }
-
-  // an alternative pointing at a retired or missing exercise leaves a hole in a swap
-  for (const alt of e.alternatives ?? []) {
-    if (!allIds.has(alt)) err('alternatives.missing', where, `alternative "${alt}" does not exist`)
-    else if (allIds.get(alt).retired) err('alternatives.retired', where, `alternative "${allIds.get(alt).name}" is retired`)
-  }
-
-  return audited
+  return true
 }
 
 // --- report -----------------------------------------------------------------
@@ -258,7 +152,7 @@ function report(list, icon) {
   }
 }
 
-/** Sign in and hand back the catalog doc ref — layer 2 needs the same connection. */
+/** Sign in and hand back the catalog doc ref — `gym:seed` writes through the same one. */
 export async function catalogRef() {
   const app = initializeApp(firebaseConfig)
   await signInAnonymously(getAuth(app))
@@ -266,11 +160,10 @@ export async function catalogRef() {
 }
 
 /**
- * The whole of layer 1, as a function. Returns every finding plus the set of
- * exercise ids that came through clean — that set is what layer 2 is allowed to
- * look at, because a row that fails here is a code problem, not a judgement call.
+ * The whole audit, as a function. Returns every finding plus the rows that came
+ * through clean, so `gym:seed` can validate a file before it writes it.
  */
-export function auditLayer1(data) {
+export function auditCatalog(data) {
   findings = []
   const equipment = Array.isArray(data.equipment) ? data.equipment : []
   const exercises = Array.isArray(data.exercises) ? data.exercises : []
@@ -281,7 +174,6 @@ export function auditLayer1(data) {
 
   const seenIds = new Map()
   const seenNames = new Map()
-  const auditedCount = { movementPattern: 0, primaryRole: 0, laterality: 0, progressionMode: 0, catalogStatus: 0 }
 
   for (const [i, e] of exercises.entries()) {
     if (e?.id) {
@@ -296,14 +188,13 @@ export function auditLayer1(data) {
       if (seenNames.has(n)) warn('exercise.sameName', e.name, `same name as "${seenNames.get(n)}"`)
       seenNames.set(n, e.name)
     }
-    const audited = checkExercise(e, i, ownedIds, retiredEquip, allIds) ?? {}
-    for (const k of Object.keys(auditedCount)) if (audited[k]) auditedCount[k]++
+    checkExercise(e, i, ownedIds, retiredEquip, allIds)
   }
 
   const badIds = new Set(findings.filter((f) => f.level === 'error').map((f) => f.subject))
   const clean = exercises.filter((e) => e?.id && !e.retired && !badIds.has(e.name) && !badIds.has(e.id))
 
-  return { findings: [...findings], equipment, exercises, auditedCount, clean }
+  return { findings: [...findings], equipment, exercises, clean }
 }
 
 async function main() {
@@ -311,10 +202,10 @@ async function main() {
   if (!snap.exists()) throw new Error('app/gymCatalog does not exist')
 
   const data = snap.data() ?? {}
-  const { findings: found, equipment, exercises, auditedCount } = auditLayer1(data)
+  const { findings: found, equipment, exercises } = auditCatalog(data)
   findings = found
 
-  if (!JSON_OUT) console.log(`\n🔍 Layer 1 — deterministic validation\n   ${equipment.length} equipment · ${exercises.length} exercises\n`)
+  if (!JSON_OUT) console.log(`\n🔍 Catalog validation\n   ${equipment.length} equipment · ${exercises.length} exercises\n`)
 
   const errors = findings.filter((f) => f.level === 'error')
   const warns = findings.filter((f) => f.level === 'warn')
@@ -334,18 +225,6 @@ async function main() {
   if (warns.length && !QUIET) {
     console.log(`\n⚠️  ${warns.length} warning${warns.length === 1 ? '' : 's'} — worth a look, not blocking:`)
     report(warns, '·')
-  }
-
-  // layer 2 progress — how much of §12's metadata actually exists yet
-  if (!QUIET) {
-    const live = exercises.filter((e) => !e.retired).length
-    console.log(`\n📋 Layer 2 metadata (${live} live exercises):`)
-    for (const [field, n] of Object.entries(auditedCount)) {
-      const bar = '█'.repeat(Math.round((n / Math.max(live, 1)) * 20)).padEnd(20, '░')
-      console.log(`   ${field.padEnd(16)} ${bar} ${n}/${live}`)
-    }
-    const ready = auditedCount.catalogStatus === live
-    console.log(`\n${ready ? '✅' : '⏳'} gym:program is ${ready ? 'unblocked' : 'BLOCKED until layer 2 has run'}.`)
   }
 
   console.log('')

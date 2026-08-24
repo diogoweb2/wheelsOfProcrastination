@@ -514,7 +514,9 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
 - Prize settlement: "Prizes to settle" list + topbar banners, and the **treasure shelves** themselves — add/edit/delete a prize and set its 30-day limit, per profile (see §15).
 - **Scripts** (both talk to Firestore via the public web config + anonymous auth):
   - `npm run quiz:regen` (claude CLI, opus) — refills every live topic to its target after removals; new questions land `pending`.
-  - `npm run gym:equipment` (claude CLI, **opus**, vision) — turns basement photos into gear + exercises; deletes the photos afterwards (§18k).
+  - `npm run gym:equipment` (claude CLI, **opus**, vision) — turns basement photos into gear rows; deletes the photos afterwards (§18k).
+  - `npm run gym:seed` — replaces `app/gymCatalog` with the hand-written `scripts/data/gym-catalog.json` (§18k).
+  - `npm run gym:audit` — validates the catalog. Writes nothing.
   - `npm run gym:demos` (ExerciseDB + claude CLI for ambiguous matches) — animation + still for each exercise (§18l).
   - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
 
@@ -536,7 +538,7 @@ One review question, per profile, resurfaced when the app opens — a light dail
 
 An AI personal trainer **designed to make itself redundant**. Everything it decides is written down in a form the app can reproduce on its own, so the AI can be switched off later without losing the training.
 
-Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI layer), `src/logic/gymStats.ts` (aggregations), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, script `scripts/gym-equipment.mjs`.
+Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the training block, §18m), `src/logic/gymStats.ts` (aggregations), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, scripts `scripts/gym-equipment.mjs`, `scripts/gym-seed.mjs`, `scripts/gym-demos.mjs`.
 
 ### 18a. The two-layer rule (the whole design)
 
@@ -551,7 +553,7 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI la
 |---|---|
 | `app/gymCatalog` (shared) | `equipment[]` + `exercises[]` — one basement, both crewmates. Written by the photo script and by the Gear tab. |
 | `app/aiConfig` (shared, admin-writes) | OpenRouter `openrouterKey` + `model`. **Never in the repo or the bundle** so it rotates without a rebuild — same arrangement as the Smart Price project. Anyone who can sign into the Firebase project can read it, so it needs a spend cap on the OpenRouter dashboard. |
-| `profiles/{id}.gym` (personal) | `brief`, `ex` (per-exercise memory), `ladders`, `sessions` (capped at 220), `active`, `streak`, `totals`, and the `aiOn` / `soundOn` / `keepAwake` switches. |
+| `profiles/{id}.gym` (personal) | `brief`, `block` + `blockPos` (the training block and where you are in it, §18m), `ex` (per-exercise memory), `ladders`, `sessions` (capped at 220), `active`, `streak`, `totals`, and the `soundOn` / `keepAwake` switches. |
 
 **`gym.ex[exerciseId]` is the memory that replaces the AI** — small, permanent, and exactly what a good trainer would remember: your rating, times done, last/suggested weight, whether you corrected the last suggestion up or down, the rest you *actually* take, best reps, best weight, your own note. The raw session log is capped; this is not.
 
@@ -559,7 +561,7 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymCoach.ts` (the AI la
 
 ### 18c. The session loop
 
-1. **Set up** — how many minutes (5/10/15/20/25/30/45/60), how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal) and **what you want to use** (§18c-2). Mood changes set counts, rep targets and how hard the planner leans.
+1. **Set up** — for a **training block** (§18m, the normal case) there is nothing to set up: the Train tab shows the next session of the rotation and you press **▶️ Do session N**. Off-programme (or on a profile with no block) the old setup stands: how many minutes (5/10/15/20/25/30/45/60), how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal) and **what you want to use** (§18c-2), with mood changing set counts, rep targets and how hard the planner leans.
 2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks the coach for a replacement in the same body area) or **⚡ Offline** (the same thing from the offline planner — instant, free, no network). **Neither ever leaves a hole**: you asked for 30 minutes, so the slot gets refilled from your own history with something that fits what the rest of the session is working, and the card says so ("swapped in offline for X"). It only empties when there is genuinely nothing left to offer. Also **🎲 Plan a different one** and **🗑 Cancel**.
 3. **Train — three buttons, never more** (§18c-1).
 4. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
@@ -667,7 +669,7 @@ Free text the coach reads **verbatim** before every session, plus four hard rule
 
 Seeded per profile on first login (`seedBrief`) and then fully editable — **Diogo**: 43, pickleball is his cardio, core + lower back are the priority, wants a good chest, likes high-rep dynamic sets and rep ladders. **Ben**: 12, new to training, the goal is enjoying it and building the habit.
 
-**Kid mode was removed** (2026-08-23). The `kidMode` brief flag and the `kidSafe` per-exercise boolean are gone from the types, the planner, the Gear editor and the generator prompts. It was a hard filter tuned for a second athlete who does not use the app, and it was quietly distorting judgements about the catalog — the semantic audit (§18m) kept rejecting exercises as "questionable for the 12-year-old". Suitability for a particular person belongs in that person's brief, not in a shared catalog row.
+**Kid mode was removed** (2026-08-23). The `kidMode` brief flag and the `kidSafe` per-exercise boolean are gone from the types, the planner, the Gear editor and the generator prompts. It was a hard filter tuned for a second athlete who does not use the app, and it was quietly distorting judgements about the catalog — the semantic audit (since deleted, §18k) kept rejecting exercises as "questionable for the 12-year-old". Suitability for a particular person belongs in that person's brief, not in a shared catalog row.
 
 ### 18h. Berries
 
@@ -688,14 +690,18 @@ Every chart is deliberately **single-series**: running the dataviz validator ove
 | Step | What | Where |
 |---|---|---|
 | **1. Equipment** | what you own, described well | app camera **or** `npm run gym:equipment` |
-| **2. Exercises** | the library, from the whole inventory | `npm run gym:exercises` |
-| **3. Demos** | animation + still per exercise | run automatically at the end of step 2 (`npm run gym:demos` on its own) |
+| **2. Exercises** | the library — **written by hand** | Gear → ➕ Add exercise, **or** `scripts/data/gym-catalog.json` + `npm run gym:seed` |
+| **3. Demos** | animation + still per exercise | `npm run gym:demos` |
 
-**Why exercises are their own pass.** They depend on the WHOLE inventory at once. A bench alone is worth almost nothing; a bench *plus* dumbbells is incline press, chest-supported row and step-ups. A per-item or per-photo pass structurally cannot see those combinations, so step 1 only ever describes gear — it is explicitly told not to list exercises — and step 2 is given the full list, the room notes (§18k below) and **both athletes' briefs**.
+**The exercise library is not generated any more** (2026-08-24). It used to be: a model saw the whole inventory and proposed everything it could think of, which produced **199 rows nobody had ever read one by one** — a Pallof press with no anchor, a seal row on a bench too low for it, prehab work prescribed at a load 3× heavier than the movement wants. A second, model-driven audit pass then existed only to find those, and a review queue existed only to work through what the audit found. All of it is gone: `gym:exercises`, `gym:audit:semantic` and `gym-apply-review` are deleted, and so is the per-row audit metadata they wrote (`catalogStatus`, `movementPattern`, `primaryRole`, `laterality`, `progressionMode`, `riskProfiles`, `reviewFlags`) — the app never read a single one of those fields.
 
-That last input is what makes the no-equipment half of the library personal: step 2 adds bodyweight exercises only where it can say *why they belong to Diogo or to Ben*, reading their actual briefs (core/lower-back priority) rather than emitting a generic list. It is also told to prefer standard exercise names, because step 3 has to find each one in a demo library and an invented name never matches.
+**The catalog is now 63 exercises chosen by hand**, and the file is the catalog: `scripts/data/gym-catalog.json` holds every row, `npm run gym:seed` REPLACES `app/gymCatalog` with it, and anything in the database that is not in the file is dropped. The seed refuses to write a file that fails `npm run gym:audit`, and it carries over the `demo` of any id that already has one, because animations cost a match run each. Day-to-day edits — a new exercise, a fixed how-to, retiring something — happen in **Gear**, which writes straight to Firestore; the seed is for resetting to the file. `--dry-run` prints the diff first.
 
-`npm run gym:exercises` is idempotent — existing exercises are never duplicated or overwritten, so re-run it after adding gear and you get only what's new. It reports what it added grouped by single-item / combination / bodyweight, and skips anything referencing gear you don't own. Flags: `--dry-run`, `--no-demos`, `--model=`, `--effort=`.
+**Eleven body parts, not nine.** `forearms` and `power` joined `chest / back / shoulders / arms / legs / glutes / core / fullBody / cardio` on 2026-08-24. Neither is a muscle in the way the others are — `power` is jumps, throws and swings, the pickleball block — but they are how the catalog is actually organised, and hiding grip work inside `arms` and plyometrics inside `legs` made both invisible to the stats filter and to recovery spacing (`forearms` recovers in 24 h, `power` wants 48).
+
+**Resistance bands** were added as the ninth piece of gear at the same time. They anchor to the door **or the basement post at any height**, which is what finally makes lat pulldowns, face pulls, pushdowns and a real Pallof press possible, and they are the answer to the 8.5 lb dumbbell floor for cuff, scaption and wrist work. 15 of the 63 exercises are band moves.
+
+`src/logic/gymStarters.json` stays what it always was — the built-in moves an app with no catalog still has — but it is now exactly the **gear-free subset of that same file** (12 rows), so a move deleted from the catalog can't quietly return through the back door.
 
 #### Cataloguing the basement — `npm run gym:equipment`
 
@@ -782,6 +788,42 @@ The floor under all of this: an exercise with no honest demo keeps its emoji, wh
 The 20 built-in bodyweight moves are covered too: they live in **`src/logic/gymStarters.json`**, imported by both `src/logic/gym.ts` and the script, so there is one list and no drift. A built-in that finds a demo is written back to the catalog as an override row — the same mechanism the Gear tab uses to edit one.
 
 Re-runnable and idempotent: exercises that already have a demo are skipped unless `--refresh`. Flags: `--dry-run`, `--refresh`, `--reindex`, `--only=<id>`, `--pin=<ourId>:<theirId>` (force a specific ExerciseDB id), `--to=storage|public`, `--no-ai`, `--no-photos`, `--no-web`, `--gif=<ourId>:<url>`, `--key=`. In the app, **Gear → an exercise** plays its demo, names the library and the entry it came from, and offers a one-tap **"Wrong movement — remove it"**. Attribution is shown wherever demos appear.
+
+
+### 18m. The training block — what replaced "build me a session"
+
+**The app no longer invents a workout** (2026-08-24). It used to: a planner scored the catalog every time and handed you something plausible. That is a *pleasant* app and a *bad* programme, and the reason is structural — you never meet the same exercise under the same conditions twice, so there is nothing to progress. The weight suggestion could learn (§18d), but nothing above it could.
+
+**A block is a fixed, ordered rotation of sessions.** Block 1 is six of them:
+
+| | Session | Focus |
+|---|---|---|
+| S1 | 🦵 Lower strength + core | Bulgarian split squat · RDL · hip thrust · side plank · calf raise |
+| S2 | 🫸 Upper push + pull | DB bench · chest-supported row · pull-ups · lateral raise · band face pull |
+| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · KB swing · Copenhagen plank · band Pallof |
+| S4 | 🦿 Lower unilateral + posterior chain | reverse lunge · goblet squat · single-leg glute bridge · band leg curl · single-leg calf raise |
+| S5 | 🧗 Upper pull + shoulder health | pull-ups · one-arm row · DB shoulder press · band external rotation · wrist curls |
+| S6 | 🏓 Full body + pickleball | step-up · incline DB press · band lat pulldown · band rotational press · farmer's carry · med-ball chest pass |
+
+**You do the next one. That is the entire scheduling rule.** No Monday/Wednesday/Friday, because the number of sessions in a week is 2 to 5 and unpredictable, and every calendar programme silently breaks on that. Train twice this week → S1, S2. Next week starts at S3 and runs on. **The rotation is never restarted by the calendar**, only advanced by finishing a session — and only when something was actually logged, so an abandoned session leaves you where you were.
+
+**Rep ranges, not rep counts.** A slot prescribes `3 × 8–12`. The **low end is what has to be there** for the set to count (it is what `plan.reps` holds, so the pace grade is honest), the **high end is what you chase**, and hitting the top on every set is the signal to add load next time. Timed slots are the same in seconds (`2 × 30–45s`). Power slots are **quality-terminated** (`quality: true`) — split squat jumps, lateral shuffles, med-ball throws stop the moment height, speed or landing goes, whatever the count says. Chasing a rep number on those trains exactly the wrong thing.
+
+**What the app still decides: the loading, not the programme.** Every weight on the card comes from the same per-exercise memory as before (§18d), so the block is fixed and the numbers under it are learned. The Train tab therefore has **no minutes picker and no "build" button** — the session is already known, and the estimate (19–29 min for these six) comes out of your own measured set times.
+
+**Swapping is deliberately gone from a block session.** "🔄 Not this one" and "⚡ Offline" — the free planner's substitution buttons — are hidden; a slot you haven't got time for is **✕ Skip this one today**, and it just closes. Substituting something similar is precisely what the block exists to stop. **↔️ Do a different one** picks another session of the rotation instead, and moves the cursor there (the next one is then the one after it).
+
+**Blocks expire on the calendar, not on a counter.** `reviewWeeks: 8`, `retireWeeks: 12`. From week 8 the Train tab shows *"time to think about the next block"*; from week 12, *"this block is done"*. Time-based on purpose: at 2–5 sessions a week those same eight weeks are anywhere from 16 to 40 sessions, and what actually goes stale — the movements stop being novel and progression stops meaning much — tracks the calendar. The warning can be answered two ways: write Block 2 (same six-session shape, some movements swapped — split squat → reverse lunge, flat press → incline, chest-supported row → one-arm), or **🔄 carry on with these**, which restarts the clock on the same rotation and is a real answer, not a snooze.
+
+**The Plan tab shows the block you are on** (read-only: editing is the Blocks tab): the goal line, week N of 8–12, sessions completed, every session expandable to its slots, "⏭ make this the next one", and a warning listing any slot whose exercise has left the catalog — those are skipped when the session is built, never silently substituted.
+
+**The 🧱 Blocks tab (`/gym/blocks`) is the library, and the only editor.** It lists every block this profile has — the one being followed (🎯), the ones that came before it, anything drafted for later — and opens each one down to the exercise: block name, goal, review/retire weeks and **start date** (editable, because a block you started three weeks before you typed it in should expire three weeks earlier); per session, its name and emoji, reorder ↑↓, delete; per slot, sets, min/max reps (labelled *seconds* on a timed exercise), the **⚡ stop-on-quality** switch, the note that shows on the card, reorder and remove; and **➕ Add an exercise**, which searches the shared catalog by name or body part. Also **➕ New empty block**, **📋 Copy** (the honest way to write Block 2 — take the rotation and swap the movements), **▶️ Follow this block**, **🗑 Delete block** and **🎲 Stop following a block**.
+
+Every edit **saves as you type it** — no Save button. A half-typed rotation nobody pressed Save on is worse than one with a typo in it. Edits apply to the next session you *start*, never to one already built or running, and shortening a rotation you are standing in pulls the cursor back into range instead of pointing past the end.
+
+**Editing lives on its own tab on purpose.** A block is a promise you made yourself eight weeks ago; editing it from inside the Train tab is how a programme quietly becomes "whatever I felt like", which is the thing §18m replaced. It costs a deliberate trip to another tab.
+
+**Data.** `profiles/{id}.gym.blocks` (a `TrainingBlock[]` — the whole library, nothing is deleted by finishing it), `gym.activeBlockId` (which one Train walks through; `null` = off-programme) and `gym.blockPos` (index of the next session in it). Switching blocks starts the new one at its own session 1. **🔄 Carry on with these** copies the rotation into a *new* block rather than mutating the old one, so the sessions logged against the old id stay attributable. Block 1 is seeded on first login from `src/logic/gymBlock.ts` — **only for Diogo**; a profile with no block falls back to the free planner, unchanged and still reachable behind **🎲 Off-programme session**, which never moves the rotation. A library that already has a block is never touched by the code's copy.
 
 
 ## 19. Essays — "the red pen" (the ✍️ Essays app)

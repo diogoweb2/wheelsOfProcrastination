@@ -2710,6 +2710,37 @@ input, select { font-family: inherit; }
   font-size: 11px; font-weight: 800; color: var(--muted);
 }
 
+/* --- the training block (§18f): the rotation, on Train and on Plan --- */
+.gym-block-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.gym-block-list li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 700;
+}
+.gym-block-list li:last-child { border-bottom: none; }
+.gym-block-list li .muted { flex: none; font-size: 12px; font-weight: 800; }
+.gym-block-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.gym-block-pick .btn.on { border-color: var(--gold); color: var(--gold); }
+/* the "this block has run its course" banner — orange, never red: nothing is broken */
+.gym-block-warn { border-color: var(--orange); }
+.gym-block-row { padding-top: 10px; padding-bottom: 10px; }
+.gym-block-row--next { border-color: var(--gold); }
+.gym-block-head {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  background: none; border: none; padding: 0; color: var(--text); font-family: inherit; cursor: pointer;
+}
+
+/* the Blocks tab: block → session → slot, each one a row that opens */
+.gym-block-session {
+  margin-top: 8px; padding: 8px 10px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--bg2);
+}
+.gym-slot {
+  margin-top: 6px; padding: 7px 9px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--bg);
+}
+.gym-pick-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.gym-pick-list .btn { justify-content: flex-start; text-align: left; }
+
 /* --- toggles (Coach tab) --- */
 .gym-toggle {
   display: flex; align-items: flex-start; gap: 10px; width: 100%;

@@ -32,6 +32,17 @@ import {
   sessionSeconds,
   stepLoad,
 } from '../../logic/gym'
+import type { BlockAge } from '../../logic/gymBlock'
+import {
+  activeBlock,
+  blockAge,
+  blockPos as blockPosOf,
+  blockSessionsDone,
+  blockWeeks,
+  nextBlockSession,
+  sessionAfter,
+  slotLine,
+} from '../../logic/gymBlock'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
@@ -118,12 +129,15 @@ function Setup() {
   const [minutes, setMinutes] = useState(20)
   const [mood, setMood] = useState<Mood>('normal')
   const [gearMode, setGearMode] = useState<GearMode>('mixed')
+  const [freeSession, setFreeSession] = useState(false)
   const gym = data.gym
+  const block = activeBlock(gym)
+  const hasBlock = !!block && block.sessions.length > 0
 
   return (
     <>
       <div className="gym-title-row">
-        <div className="h2" style={{ margin: 0 }}>💪 Today’s session</div>
+        <div className="h2" style={{ margin: 0 }}>💪 {hasBlock ? 'What’s next' : 'Today’s session'}</div>
         <WallClock />
       </div>
 
@@ -137,7 +151,28 @@ function Setup() {
         </div>
       )}
 
-      <div className="card">
+      {hasBlock && <NextSessionCard />}
+
+      {hasBlock && !freeSession && (
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ width: '100%', marginTop: 10 }}
+          onClick={() => {
+            sfx.click()
+            setFreeSession(true)
+          }}
+        >
+          🎲 Off-programme session instead
+        </button>
+      )}
+
+      {(!hasBlock || freeSession) && (
+      <div className="card" style={{ marginTop: 10 }}>
+        {hasBlock && (
+          <p className="muted" style={{ fontSize: 12, marginBottom: 12, lineHeight: 1.45 }}>
+            One-off, outside the block. It won’t move the rotation — S{blockPosOf(gym) + 1} is still waiting for you.
+          </p>
+        )}
         <div className="field" style={{ marginBottom: 14 }}>
           <label>How long have you got?</label>
           <div className="gym-min-grid">
@@ -193,7 +228,165 @@ function Setup() {
           Planned from your brief, your history and how you felt last time. No network, no waiting.
         </p>
       </div>
+      )}
     </>
+  )
+}
+
+/**
+ * The whole point of the Train tab now: ONE question, already answered.
+ *
+ * No minutes picker, no mood dial deciding what you get — the session is the
+ * next one in the rotation, the same one it was yesterday and will be tomorrow
+ * until you do it. What the app still owns is the loading: every weight on the
+ * card comes from your own history with that exercise.
+ */
+function NextSessionCard() {
+  const { data, gymCatalog, gymPlanBlock, gymSetBlockPos } = useStore()
+  const gym = data.gym
+  const block = activeBlock(gym)
+  const [picking, setPicking] = useState(false)
+  const [mood, setMood] = useState<Mood>('normal')
+  const byId = useMemo(() => new Map(allExercises(gymCatalog).map((e) => [e.id, e])), [gymCatalog])
+  if (!block) return null
+
+  const pos = blockPosOf(gym)
+  const session = nextBlockSession(gym)
+  const then = sessionAfter(block, pos)
+  const age = blockAge(block)
+  const weeks = blockWeeks(block)
+  const done = blockSessionsDone(gym)
+
+  return (
+    <>
+      {age !== 'fresh' && <BlockWarning age={age} weeks={weeks} />}
+
+      <div className="card">
+        <div className="gym-note-head">
+          <span className="chip">🧱 {block.name}</span>
+          <span className="chip">week {weeks + 1}</span>
+          <span className="chip">{done} session{done === 1 ? '' : 's'} in</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
+          <span style={{ fontSize: 40 }}>{session?.emoji}</span>
+          <div style={{ minWidth: 0 }}>
+            <div className="muted" style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              Session {pos + 1} of {block.sessions.length}
+            </div>
+            <div style={{ fontWeight: 900, fontSize: 18, lineHeight: 1.2 }}>{session?.name}</div>
+          </div>
+        </div>
+
+        <ul className="gym-block-list">
+          {(session?.exercises ?? []).map((slot, i) => {
+            const def = byId.get(slot.exId)
+            return (
+              <li key={`${slot.exId}-${i}`}>
+                <span>{def?.emoji ?? '❓'} {def?.name ?? 'Not in the catalog any more'}</span>
+                <span className="muted">{slotLine(slot, gymCatalog)}</span>
+              </li>
+            )
+          })}
+        </ul>
+
+        <button
+          className="btn"
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            sfx.fanfare()
+            primeGymAudio() // first gesture of the session: unlock the alert clips
+            gymPlanBlock({ mood })
+          }}
+        >
+          ▶️ Do session {pos + 1}
+        </button>
+
+        <div className="seg" style={{ marginTop: 10 }}>
+          {MOODS.map((m) => (
+            <button
+              key={m.id}
+              className={mood === m.id ? 'on' : ''}
+              onClick={() => {
+                sfx.click()
+                setMood(m.id)
+              }}
+            >
+              {m.emoji} {m.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="muted" style={{ fontSize: 11, marginTop: 10, textAlign: 'center' }}>
+          {then ? `Then: ${then.emoji} ${then.name}.` : ''} The rotation only moves when you finish a session.
+        </p>
+
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ width: '100%', marginTop: 8 }}
+          onClick={() => {
+            sfx.click()
+            setPicking((v) => !v)
+          }}
+        >
+          {picking ? '✕ Never mind' : '↔️ Do a different one'}
+        </button>
+
+        {picking && (
+          <div className="gym-block-pick">
+            {block.sessions.map((s, i) => (
+              <button
+                key={s.id}
+                className={`btn btn--ghost btn--small ${i === pos ? 'on' : ''}`}
+                onClick={() => {
+                  sfx.click()
+                  gymSetBlockPos(i)
+                  setPicking(false)
+                }}
+              >
+                S{i + 1} · {s.emoji} {s.name}
+              </button>
+            ))}
+            <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+              Jumping the queue moves the rotation here — the next session is the one after whatever you pick.
+            </p>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+/** "This block has run its course." Says it once it is true, and says what to do about it. */
+function BlockWarning({ age, weeks }: { age: BlockAge; weeks: number }) {
+  const { data, gymRestartBlock } = useStore()
+  const block = activeBlock(data.gym)
+  if (!block) return null
+  return (
+    <div className="card gym-block-warn">
+      <div style={{ fontWeight: 900, fontSize: 15 }}>
+        {age === 'overdue' ? '🛑 This block is done' : '⏳ Time to think about the next block'}
+      </div>
+      <p className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.45 }}>
+        {block.name} started {weeks} weeks ago
+        {age === 'overdue'
+          ? `, past the ${block.retireWeeks} weeks it was written for. The exercises have stopped being new, and progression on them has stopped meaning much.`
+          : `, and it was written to run ${block.reviewWeeks}–${block.retireWeeks}.`}{' '}
+        Block 2 keeps the same six-session shape and swaps some movements — split squat for reverse lunge, flat press for
+        incline, chest-supported row for one-arm.
+      </p>
+      <button
+        className="btn btn--ghost btn--small"
+        style={{ width: '100%', marginTop: 8 }}
+        onClick={() => {
+          if (!confirm(`Carry on with these six sessions as a new block? The ${block.reviewWeeks}-week clock restarts today.`)) return
+          sfx.click()
+          gymRestartBlock()
+        }}
+      >
+        🔄 Carry on with these — restart the clock
+      </button>
+    </div>
   )
 }
 
@@ -235,8 +428,12 @@ function Preview({ session }: { session: GymSession }) {
 
       <div className="card">
         <div className="gym-note-head">
-          <span className="chip">⚙️ {session.minutes} min plan</span>
-          <span className="chip">⏱ ~{estimate} min of {session.minutes}</span>
+          {session.blockSessionName ? (
+            <span className="chip chip--test">🧱 {session.blockSessionName}</span>
+          ) : (
+            <span className="chip">⚙️ {session.minutes} min plan</span>
+          )}
+          <span className="chip">⏱ ~{estimate} min</span>
           <span className="chip">{MOODS.find((m) => m.id === session.mood)?.emoji} {MOODS.find((m) => m.id === session.mood)?.label}</span>
           {session.gearMode && session.gearMode !== 'mixed' && <span className="chip">{GEAR_MODE_LABEL[session.gearMode]}</span>}
           {session.followUp && <span className="chip chip--test">➕ Bonus block</span>}
@@ -270,51 +467,70 @@ function Preview({ session }: { session: GymSession }) {
               ))}
               {e.ladderTest && <span className="chip chip--test">🏁 Max test</span>}
               {e.ladder && !e.ladderTest && <span className="chip">🪜 Ladder</span>}
+              {e.quality && <span className="chip chip--urgent">⚡ Quality — stop when it drops</span>}
             </div>
             {e.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {e.why}</p>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            {/* On a block session the exercise list is the programme — swapping
+                one out for "something similar" is exactly what the block exists
+                to stop. Short on time? Drop it; the slot just closes. */}
+            {session.blockId ? (
               <button
                 className="btn btn--ghost btn--small"
-                style={{ flex: 1 }}
-                disabled={gymPlanning}
-                onClick={async () => {
-                  sfx.click()
-                  setSwapping(e.exId)
-                  const res = await gymSwap(e.exId)
-                  setSwapping(null)
-                  if (res === 'none') sfx.error()
-                }}
-              >
-                {swapping === e.exId ? '…' : '🔄 Not this one'}
-              </button>
-              <button
-                className="btn btn--ghost btn--small"
-                // Same idea, no coach: the offline planner fills the slot from
-                // your own history, instantly and for free. It only ever leaves
-                // a hole when there is genuinely nothing left to offer.
-                title="Swap it offline, instantly"
+                style={{ marginTop: 10, width: '100%' }}
                 onClick={() => {
                   sfx.click()
-                  if (gymDrop(e.exId) === 'dropped') sfx.error()
+                  gymDrop(e.exId)
                 }}
               >
-                ⚡ Offline
+                ✕ Skip this one today
               </button>
-            </div>
-            <button
-              className="btn btn--ghost btn--small"
-              style={{ marginTop: 8, width: '100%' }}
-              onClick={() => {
-                // "✕" only drops it from today. This removes it from the shared
-                // catalog, so no planner — AI or offline — can ever offer it again.
-                if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
-                  return
-                sfx.click()
-                gymDeleteExercise(e.exId)
-              }}
-            >
-              🗑 Never show this
-            </button>
+            ) : (
+              <>
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <button
+                    className="btn btn--ghost btn--small"
+                    style={{ flex: 1 }}
+                    disabled={gymPlanning}
+                    onClick={async () => {
+                      sfx.click()
+                      setSwapping(e.exId)
+                      const res = await gymSwap(e.exId)
+                      setSwapping(null)
+                      if (res === 'none') sfx.error()
+                    }}
+                  >
+                    {swapping === e.exId ? '…' : '🔄 Not this one'}
+                  </button>
+                  <button
+                    className="btn btn--ghost btn--small"
+                    // Same idea, no coach: the offline planner fills the slot from
+                    // your own history, instantly and for free. It only ever leaves
+                    // a hole when there is genuinely nothing left to offer.
+                    title="Swap it offline, instantly"
+                    onClick={() => {
+                      sfx.click()
+                      if (gymDrop(e.exId) === 'dropped') sfx.error()
+                    }}
+                  >
+                    ⚡ Offline
+                  </button>
+                </div>
+                <button
+                  className="btn btn--ghost btn--small"
+                  style={{ marginTop: 8, width: '100%' }}
+                  onClick={() => {
+                    // "✕" only drops it from today. This removes it from the shared
+                    // catalog, so no planner — AI or offline — can ever offer it again.
+                    if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
+                      return
+                    sfx.click()
+                    gymDeleteExercise(e.exId)
+                  }}
+                >
+                  🗑 Never show this
+                </button>
+              </>
+            )}
           </div>
         </div>
       ))}
@@ -331,17 +547,19 @@ function Preview({ session }: { session: GymSession }) {
         ▶️ GO
       </button>
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button
-          className="btn btn--ghost btn--small"
-          style={{ flex: 1 }}
-          disabled={gymPlanning}
-          onClick={() => {
-            sfx.click()
-            void gymPlan(session.minutes, session.mood, { gearMode: session.gearMode })
-          }}
-        >
-          🎲 Plan a different one
-        </button>
+        {!session.blockId && (
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ flex: 1 }}
+            disabled={gymPlanning}
+            onClick={() => {
+              sfx.click()
+              void gymPlan(session.minutes, session.mood, { gearMode: session.gearMode })
+            }}
+          >
+            🎲 Plan a different one
+          </button>
+        )}
         <button
           className="btn btn--ghost btn--small"
           style={{ flex: 1 }}
@@ -546,6 +764,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           )}
 
           {current.how && <p className="muted" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.4 }}>{current.how}</p>}
+          {/* the rep box shows the LOW end of the range — the number that has to
+              be there. The range itself is the thing you are aiming at, and it
+              belongs on screen while you are deciding whether to stop. */}
+          {current.repRange && (
+            <p style={{ fontSize: 13, marginTop: 6, fontWeight: 800 }}>
+              🎯 Aim for {current.repRange[0]}–{current.repRange[1]} {repLabel(current)}
+              {current.quality ? ' — and stop the moment quality drops.' : `. All sets at ${current.repRange[1]}? Add weight next time.`}
+            </p>
+          )}
+          {current.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {current.why}</p>}
           <DemoCaption demo={demos.get(current.exId)} />
 
           <div className="gym-set-row">
@@ -1066,6 +1294,9 @@ function repLabel(e: SessionExercise): string {
 function planLine(e: SessionExercise, unit: string): string {
   const bits: string[] = []
   if (e.ladderTest) bits.push('1 all-out set')
+  // a block session prescribes a RANGE: the low end has to be there, the top is
+  // what you chase, and hitting it everywhere is what buys you more weight
+  else if (e.repRange) bits.push(`${e.plan.reps.length} × ${e.repRange[0]}–${e.repRange[1]} ${repLabel(e)}`)
   else if (new Set(e.plan.reps).size === 1) bits.push(`${e.plan.reps.length} × ${e.plan.reps[0]} ${repLabel(e)}`)
   else bits.push(`${e.plan.reps.join(' · ')} ${repLabel(e)}`)
   if (e.plan.weight) bits.push(`${e.plan.weight} ${unit}`)

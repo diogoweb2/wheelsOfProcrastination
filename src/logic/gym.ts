@@ -81,10 +81,12 @@ const RECOVERY_HOURS: Record<BodyPart, number> = {
   back: 48,
   shoulders: 40,
   arms: 40,
+  forearms: 24,
   legs: 48,
   glutes: 48,
   core: 24,
   fullBody: 40,
+  power: 48,
   cardio: 12,
 }
 
@@ -104,10 +106,12 @@ export const PART_LABEL: Record<BodyPart, string> = {
   back: 'Back',
   shoulders: 'Shoulders',
   arms: 'Arms',
+  forearms: 'Forearms',
   legs: 'Legs',
   glutes: 'Glutes',
   core: 'Core',
   fullBody: 'Full body',
+  power: 'Power',
   cardio: 'Cardio',
 }
 
@@ -116,14 +120,18 @@ export const PART_EMOJI: Record<BodyPart, string> = {
   back: '🔙',
   shoulders: '🎯',
   arms: '💪',
+  forearms: '🤝',
   legs: '🦵',
   glutes: '🍑',
   core: '🧱',
   fullBody: '🌀',
+  power: '⚡',
   cardio: '🏃',
 }
 
-export const ALL_PARTS: BodyPart[] = ['chest', 'back', 'shoulders', 'arms', 'legs', 'glutes', 'core', 'fullBody', 'cardio']
+export const ALL_PARTS: BodyPart[] = [
+  'chest', 'back', 'shoulders', 'arms', 'forearms', 'legs', 'glutes', 'core', 'fullBody', 'power', 'cardio',
+]
 
 export const GEAR_MODES: { id: GearMode; label: string; emoji: string }[] = [
   { id: 'mixed', label: 'Mixed', emoji: '🔀' },
@@ -177,6 +185,9 @@ export function seedBrief(profileId: string | null): GymBrief {
 export function defaultGymState(): GymState {
   return {
     brief: { text: '', weightUnit: 'lb' },
+    blocks: [],
+    activeBlockId: null,
+    blockPos: 0,
     ex: {},
     ladders: {},
     sessions: [],

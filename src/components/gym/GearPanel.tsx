@@ -91,7 +91,7 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
             className="btn btn--ghost btn--small"
             onClick={() => {
               // exercises that needed this piece go with it — they can't be done
-              // any more, and `npm run gym:exercises` rebuilds them if it returns
+              // any more, and they are re-addable by hand if the gear comes back
               const orphans = (gymCatalog?.exercises ?? []).filter((x) => x.equipmentIds.includes(eq.id))
               const tail = orphans.length ? ` and ${orphans.length} exercise${orphans.length > 1 ? 's' : ''} that need it` : ''
               if (!confirm(`Delete ${eq.name}${tail}?`)) return
@@ -132,8 +132,9 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
  * The camera is the fast path and it is the in-app twin of
  * `npm run gym:equipment`: shoot it and the model names and describes it.
  * Equipment only — no exercises. What one machine makes possible depends on
- * everything else in the room (a bench with plates is not the same bench), so
- * that job belongs to `npm run gym:exercises`, which sees the whole catalog.
+ * everything else in the room (a bench with plates is not the same bench), and
+ * on what you actually want to train, so exercises are written by hand: ➕ Add
+ * exercise here, or the catalog file (BUSINESS_REQUIREMENTS.md §18k).
  * Nothing is written until Save, and every field stays editable, because a
  * vision model looking at a dim basement will sometimes be wrong.
  *
