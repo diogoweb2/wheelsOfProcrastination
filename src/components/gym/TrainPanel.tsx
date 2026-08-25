@@ -18,7 +18,7 @@
 //    what the end-of-session grade is built on.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
-import type { ExerciseRating, GearMode, GymSession, Mood, SessionExercise } from '../../types'
+import type { ExerciseRating, GearMode, GymSession, LoggedSet, Mood, SessionExercise } from '../../types'
 import {
   GEAR_MODES,
   GEAR_MODE_LABEL,
@@ -626,6 +626,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   })
   const [phase, setPhase] = useState<Phase>('ready')
   const [startedAt, setStartedAt] = useState(0)
+  /**
+   * A clocked per-side hold is two clocks, not one. `sideSec` holds the seconds
+   * already banked on the sides you have finished; `startedAt` is always the
+   * clock of the side you are on RIGHT NOW. The set is logged when the last side
+   * is done, with the total in `reps` and the split in `sides`.
+   */
+  const [sideSec, setSideSec] = useState<number[]>([])
   const [finishing, setFinishing] = useState(false)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -671,10 +678,30 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   if (finishing) return <FinishCard session={session} onBanked={onBanked} onBack={() => setFinishing(false)} />
   if (!current) return null
 
-  /** Start (or restart) the clock on the set in front of you. */
+  /** Start (or restart) the clock on the set in front of you — side one, if there are sides. */
   const begin = () => {
+    setSideSec([])
     setStartedAt(Date.now())
     setPhase('working')
+  }
+
+  /**
+   * A clocked per-side move is done one side at a time, and the button says so.
+   * The target for the FIRST side is what was prescribed; the target for the
+   * second is whatever you actually did on the first — hold a 40 s plank for 70
+   * and the other side is asked for 70, because the point of a per-side hold is
+   * that the two sides match. What you managed on both is what the next session
+   * is planned from.
+   */
+  const twoSided = isClocked(current) && !!current.perSide
+  const sideTarget = sideSec.length === 0 ? plannedReps : Math.max(plannedReps, ...sideSec)
+
+  /** "Ready on the other side." Bank this side and start the next one's clock. */
+  const switchSides = () => {
+    const sec = Math.max(1, (Date.now() - startedAt) / 1000)
+    gymSfx.go()
+    setSideSec([...sideSec, sec])
+    setStartedAt(Date.now())
   }
 
   /**
@@ -693,13 +720,17 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
   /** DONE — measure the set, log it, and drop straight into rest. */
   const done = () => {
-    const sec = Math.max(1, (Date.now() - startedAt) / 1000)
+    const thisSide = Math.max(1, (Date.now() - startedAt) / 1000)
+    // every side of the set, the one just finished included — for anything that
+    // isn't per-side that is simply the one clock
+    const sides = [...sideSec, thisSide]
+    const sec = sides.reduce((n, x) => n + x, 0)
     // a timed hold or a run is measured, never typed: hold a 30s plank for a
     // minute and the minute is what gets logged
     const logged =
       current.kind === 'timed' ? Math.round(sec) : current.kind === 'cardio' ? Math.max(1, Math.round(sec / 60)) : reps
     gymSfx.logged()
-    gymLogSet(current.exId, logged, weight, sec)
+    gymLogSet(current.exId, logged, weight, sec, twoSided ? sides : undefined)
     const moreHere = current.sets.length + 1 < current.plan.reps.length
     if (moreHere || !isLast) setPhase('resting')
     else setFinishing(true)
@@ -757,6 +788,10 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           nextDemo={demos.get(nextUpEx?.exId ?? '')}
           nextEmoji={nextUpEx?.emoji}
           footNote={<SessionCountdown session={session} />}
+          // the words for the thing you are about to walk over to. Only for a
+          // NEW exercise — re-reading the brief for the set you have just done
+          // twice is noise, and it would push the clock off a phone screen.
+          nextBrief={setsLeft === 0 && upNext ? <ExerciseBrief ex={upNext} setNo={upNext.sets.length} /> : undefined}
           upNext={
             setsLeft > 0 ? (
               <>
@@ -782,30 +817,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             </div>
           </div>
 
-          {current.perSide && (
-            <div className="gym-banner">
-              ↔️ <strong>Both sides.</strong> Every set is {plannedReps} {current.kind === 'timed' ? 'seconds' : 'reps'} on the
-              left <em>and</em> {plannedReps} on the right. Log it once, when both are done.
-            </div>
-          )}
-
-          {current.ladderTest && (
-            <div className="gym-banner">
-              🏁 <strong>Max test.</strong> One all-out set — as many as you can. Your whole ladder is rebuilt from this number.
-            </div>
-          )}
-
-          {current.how && <p className="muted" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.4 }}>{current.how}</p>}
-          {/* the rep box shows the LOW end of the range — the number that has to
-              be there. The range itself is the thing you are aiming at, and it
-              belongs on screen while you are deciding whether to stop. */}
-          {current.repRange && (
-            <p style={{ fontSize: 13, marginTop: 6, fontWeight: 800 }}>
-              🎯 Aim for {current.repRange[0]}–{current.repRange[1]} {repLabel(current)}
-              {current.quality ? ' — and stop the moment quality drops.' : `. All sets at ${current.repRange[1]}? Add weight next time.`}
-            </p>
-          )}
-          {current.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {current.why}</p>}
+          <ExerciseBrief ex={current} setNo={nextSetNo} />
           <DemoCaption demo={demos.get(current.exId)} />
 
           <div className="gym-set-row">
@@ -813,7 +825,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               const logged = current.sets[i]
               return (
                 <span key={i} className={`gym-set ${logged ? 'done' : i === nextSetNo ? 'now' : ''}`}>
-                  {logged ? logged.reps : r}
+                  {logged ? setChip(logged) : r}
                   {logged?.weight ? <em>{logged.weight}</em> : null}
                 </span>
               )
@@ -821,7 +833,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             {current.sets.length > current.plan.reps.length &&
               current.sets.slice(current.plan.reps.length).map((s, i) => (
                 <span key={`extra-${i}`} className="gym-set done">
-                  {s.reps}
+                  {setChip(s)}
                   {s.weight ? <em>{s.weight}</em> : null}
                 </span>
               ))}
@@ -830,9 +842,18 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           {phase === 'setup' && <SetupCountdown onDone={begin} />}
 
           {phase === 'working' && isClocked(current) ? (
-            // a plank or a run: no numbers to type, just a clock that keeps going
-            // a per-side hold has to cover both sides before the bell makes sense
-            <WorkClock startedAt={startedAt} target={current.perSide ? plannedReps * 2 : plannedReps} kind={current.kind} />
+            // a plank or a run: no numbers to type, just a clock that keeps going.
+            // a per-side hold runs one clock PER SIDE, and the second side's
+            // target is whatever the first one actually managed
+            <WorkClock
+              // a fresh clock per side, so the target bell rings again on the second
+              key={startedAt}
+              startedAt={startedAt}
+              target={twoSided ? sideTarget : plannedReps}
+              kind={current.kind}
+              side={twoSided ? (sideSec.length === 0 ? 'first' : 'second') : undefined}
+              banked={sideSec[0]}
+            />
           ) : phase === 'working' ? (
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
@@ -933,7 +954,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       {phase !== 'resting' && (
         <div className="gym-foot">
           <SessionCountdown session={session} />
-          {phase === 'working' ? (
+          {phase === 'working' && twoSided && sideSec.length === 0 ? (
+            // the honest end of side one: you press it when you are set up on the
+            // OTHER side, so the seconds up to the press are side one's
+            <button className="btn" onClick={switchSides}>
+              ↔️ OTHER SIDE
+            </button>
+          ) : phase === 'working' ? (
             <button className="btn" onClick={done}>
               ✓ DONE
             </button>
@@ -979,17 +1006,95 @@ function SessionCountdown({ session }: { session: GymSession }) {
   )
 }
 
+/**
+ * Everything the exercise ASKS OF YOU, in words: how to do it, both-sides rules,
+ * the rep range you are chasing, and why it is in the session at all.
+ *
+ * It renders in two places on purpose. On the exercise card it is the brief for
+ * the set you are about to do; on the rest screen it is the brief for the one
+ * coming NEXT, because rest is the only part of a session where you actually
+ * have the hands and the attention to read it (§18c). Same words in both, so
+ * reading it early is never reading a different thing.
+ */
+function ExerciseBrief({ ex, setNo }: { ex: SessionExercise; setNo: number }) {
+  const plannedReps = ex.plan.reps[Math.min(setNo, ex.plan.reps.length - 1)] ?? 10
+  const twoSided = isClocked(ex) && !!ex.perSide
+  return (
+    <>
+      {ex.perSide && (
+        <div className="gym-banner">
+          {twoSided ? (
+            <>
+              ↔️ <strong>One side at a time.</strong> Hold the first side, then press{' '}
+              <strong>↔️ OTHER SIDE</strong> when you are set up on the second — and hold that one just as long.
+              Press <strong>✓ DONE</strong> at the end of it.
+            </>
+          ) : (
+            <>
+              ↔️ <strong>Both sides.</strong> Every set is {plannedReps} reps on the left <em>and</em> {plannedReps} on
+              the right. Log it once, when both are done.
+            </>
+          )}
+        </div>
+      )}
+
+      {ex.ladderTest && (
+        <div className="gym-banner">
+          🏁 <strong>Max test.</strong> One all-out set — as many as you can. Your whole ladder is rebuilt from this number.
+        </div>
+      )}
+
+      {ex.how && <p className="muted" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.4 }}>{ex.how}</p>}
+      {/* the rep box shows the LOW end of the range — the number that has to
+          be there. The range itself is the thing you are aiming at, and it
+          belongs on screen while you are deciding whether to stop. */}
+      {ex.repRange && (
+        <p style={{ fontSize: 13, marginTop: 6, fontWeight: 800 }}>
+          🎯 Aim for {ex.repRange[0]}–{ex.repRange[1]} {repLabel(ex)}
+          {ex.quality
+            ? ' — and stop the moment quality drops.'
+            : isClocked(ex)
+              ? `. Hold ${ex.repRange[1]} on every set (both sides) and the whole range moves up next time.`
+              : `. All sets at ${ex.repRange[1]}? Add weight next time.`}
+        </p>
+      )}
+      {ex.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {ex.why}</p>}
+    </>
+  )
+}
+
 /** Reps you count vs. time the app counts. Planks and runs are clocked. */
 function isClocked(e: SessionExercise): boolean {
   return e.kind === 'timed' || e.kind === 'cardio'
+}
+
+/** What a logged set shows on its chip — a per-side hold shows both sides. */
+function setChip(set: LoggedSet): string {
+  return set.sides && set.sides.length > 1 ? set.sides.join('/') : String(set.reps)
 }
 
 /**
  * The clock for a hold or a run. It counts UP and never stops at the target:
  * asked for 30 seconds of plank and held it for a minute? The minute is what
  * gets logged, and what the next session is planned from.
+ *
+ * On a per-side move it is the clock for ONE side, and `side` says which — the
+ * second side's target is the first side's real time, so the line under the bar
+ * is telling you the number to match rather than the number you were prescribed.
  */
-function WorkClock({ startedAt, target, kind }: { startedAt: number; target: number; kind: SessionExercise['kind'] }) {
+function WorkClock({
+  startedAt,
+  target,
+  kind,
+  side,
+  banked,
+}: {
+  startedAt: number
+  target: number
+  kind: SessionExercise['kind']
+  side?: 'first' | 'second'
+  banked?: number
+}) {
   const targetSec = kind === 'cardio' ? target * 60 : target
   const [now, setNow] = useState(Date.now())
   const rang = useRef(false)
@@ -1012,12 +1117,23 @@ function WorkClock({ startedAt, target, kind }: { startedAt: number; target: num
 
   return (
     <div className="gym-clock">
+      {side && (
+        <div className="muted" style={{ fontSize: 12, fontWeight: 900, letterSpacing: 0.4 }}>
+          ↔️ {side === 'first' ? 'FIRST SIDE' : 'SECOND SIDE'}
+        </div>
+      )}
       <div className={`gym-clock-time ${hit ? 'over' : ''}`}>{mmss(elapsed)}</div>
       <div className="gym-clock-bar">
         <span style={{ width: `${pct * 100}%` }} />
       </div>
       <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-        {hit ? `past the ${mmss(targetSec)} asked for — every extra second counts` : `target ${mmss(targetSec)}`}
+        {side === 'second' && banked != null
+          ? hit
+            ? `matched the ${mmss(banked)} you did on the first side`
+            : `match the first side — ${mmss(targetSec)}`
+          : hit
+            ? `past the ${mmss(targetSec)} asked for — every extra second counts`
+            : `target ${mmss(targetSec)}`}
       </div>
     </div>
   )

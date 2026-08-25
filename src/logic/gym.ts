@@ -18,6 +18,7 @@ import type {
   GymSession,
   GymState,
   LadderState,
+  LoggedSet,
   Mood,
   SessionExercise,
 } from '../types'
@@ -396,6 +397,54 @@ export function loggedReps(se: Pick<SessionExercise, 'kind' | 'perSide' | 'sets'
 }
 
 /**
+ * What ONE SIDE of a clocked set was worth. A per-side hold is logged as the
+ * total of both sides, so the honest per-side number is the weaker of the two
+ * when the runner recorded them and half the total when it didn't (old sets,
+ * before the switch-sides button existed).
+ */
+export function sideValue(se: Pick<SessionExercise, 'perSide'>, set: LoggedSet): number {
+  if (!se.perSide) return set.reps
+  if (set.sides && set.sides.length > 0) return Math.min(...set.sides)
+  return set.reps / 2
+}
+
+/**
+ * What to ask for on a hold or a run, per side. The twin of `weightFor`: the
+ * default from the catalog until you have done it, then whatever you actually
+ * sustained. It only ever asks for something you have already proved you can do.
+ */
+export function holdFor(e: Pick<ExerciseDef, 'kind' | 'defaultReps'>, mem: ExerciseMemory | undefined): number {
+  if (e.kind !== 'timed' && e.kind !== 'cardio') return e.defaultReps
+  return Math.max(e.defaultReps, mem?.suggestedHold ?? 0)
+}
+
+/** Holds round to 5 s, runs to the whole minute — nobody chases 43 seconds. */
+function roundHold(kind: ExerciseKind, value: number): number {
+  return kind === 'timed' ? Math.max(5, Math.round(value / 5) * 5) : Math.max(1, Math.round(value))
+}
+
+/**
+ * The new hold suggestion after a session, or the old one if nothing changed.
+ *
+ * The rule is the rep-range rule applied to a clock: the number that counts is
+ * the one you managed on EVERY set (and on both sides), because a single heroic
+ * first set isn't a prescription. Beat what was asked and the ask becomes what
+ * you did. Fall a long way short of it and the ask comes back down, so a bad
+ * guess can never sit there being unreachable forever.
+ */
+function holdSuggestion(base: ExerciseMemory, se: SessionExercise): number | undefined {
+  if (se.kind !== 'timed' && se.kind !== 'cardio') return base.suggestedHold
+  const held = Math.min(...se.sets.map((set) => sideValue(se, set)))
+  if (!Number.isFinite(held) || held <= 0) return base.suggestedHold
+  // the top of a block's range is the thing you are chasing; a free session
+  // prescribes one number, and that number is the bar
+  const asked = se.repRange ? se.repRange[1] : se.plan.reps[0]
+  if (held >= asked) return Math.max(base.suggestedHold ?? 0, roundHold(se.kind, held))
+  if (held < asked * 0.7) return roundHold(se.kind, held)
+  return base.suggestedHold
+}
+
+/**
  * How long ONE set of `reps` really takes YOU, from the sets the app has clocked.
  * Null until there is enough evidence — three measured sets — to beat the formula.
  *
@@ -633,7 +682,8 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
   } else {
     const sets = clamp(e.defaultSets + (mood === 'motivated' ? 1 : mood === 'lazy' ? -1 : 0), 1, 5)
     const repMult = mood === 'lazy' ? 0.8 : mood === 'motivated' ? 1.1 : 1
-    const target = Math.max(1, Math.round(e.defaultReps * repMult))
+    // a hold asks for what you last sustained, not what the catalog guessed
+    const target = Math.max(1, Math.round(holdFor(e, mem) * repMult))
     reps = Array.from({ length: sets }, () => target)
   }
 
@@ -946,6 +996,7 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
     suggestedWeight: suggested,
     lastAdjust,
     restLearned,
+    suggestedHold: holdSuggestion(base, se),
     bestReps,
     bestWeight: lastWeight != null ? Math.max(base.bestWeight ?? 0, lastWeight) : base.bestWeight,
   }

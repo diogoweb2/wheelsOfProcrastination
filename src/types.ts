@@ -960,6 +960,14 @@ export interface ExerciseMemory {
   /** How many measured sets those two averages are built from. Under ~3 they are still noisy. */
   timedSets?: number
   bestReps?: number // best single set ever (seconds for 'timed')
+  /**
+   * What to ask for next time on a hold or a run — PER SIDE, in that exercise's
+   * own unit (seconds for 'timed', minutes for 'cardio'). The exact twin of
+   * `suggestedWeight`: hold longer than you were asked on every set and the next
+   * prescription is what you actually held, so a 40 s plank you hold for 70 comes
+   * back asking for 70. Absent until a clocked exercise has been done once.
+   */
+  suggestedHold?: number
   bestWeight?: number
   notes?: string // your own note; the coach reads it
 }
@@ -982,6 +990,15 @@ export interface LoggedSet {
   weight?: number
   /** Wall-clock seconds between GO/NEXT and DONE — what the end-of-session pace is graded on. */
   sec?: number
+  /**
+   * A clocked per-side set, split by side, in the order you did them — `[70, 68]`
+   * is seventy seconds on the first side and sixty-eight on the second. `reps`
+   * stays the TOTAL of the two, so every total in the app reads the same as it
+   * always did; this is the extra detail progression needs, because what you can
+   * hold is a per-side number and the weaker side is the one that sets it.
+   * Absent on old sets and on anything that isn't a clocked per-side move.
+   */
+  sides?: number[]
 }
 
 /** One exercise inside a session: what was asked for (`plan`) and what happened (`sets`). */

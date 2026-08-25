@@ -35,6 +35,9 @@ import { ExerciseDemo } from './ExerciseDemo'
 /** Seconds left when the "get ready" double blip fires. */
 const WARN_AT = 10
 
+/** What one tap of +TIME buys — long enough to finish reading a brief. */
+const ADD_SEC = 30
+
 /**
  * The next movement, drawn big. Rest is exactly when you should be walking over
  * and loading the thing, and a sentence can't tell you which bench that is —
@@ -45,6 +48,7 @@ const NEXT_ART = 170
 export function RestTimer({
   seconds,
   upNext,
+  nextBrief,
   nextDemo,
   nextEmoji,
   footNote,
@@ -53,6 +57,14 @@ export function RestTimer({
   seconds: number
   /** What NEXT will start — shown so you never tap it blind. */
   upNext?: ReactNode
+  /**
+   * The brief for the movement that is coming: how to do it, the rep range, why
+   * it's there. Rest is the only stretch of a session where you have the hands
+   * and the attention to read it, so it is here rather than only on the card
+   * that appears once rest is already over. If it runs long, +TIME buys you
+   * more of it — and the extra seconds are real rest, not a fudge.
+   */
+  nextBrief?: ReactNode
   /** The animation for what's coming, played big while you rest. */
   nextDemo?: Demo
   nextEmoji?: string
@@ -66,7 +78,14 @@ export function RestTimer({
   onNext: (actualSeconds: number) => void
 }) {
   const startedAt = useRef(Date.now())
-  const target = Math.max(REST_MIN, seconds)
+  /**
+   * Seconds added by hand with +TIME, usually because the brief for the next
+   * movement is still being read. It moves the target, so the countdown really
+   * does wait — and since the number handed back is wall clock, the longer rest
+   * is what the next session is planned from. Nothing is pretended away.
+   */
+  const [addedSec, setAddedSec] = useState(0)
+  const target = Math.max(REST_MIN, seconds) + addedSec
   const [now, setNow] = useState(Date.now())
   const warned = useRef(false)
   const rang = useRef(false)
@@ -170,25 +189,44 @@ export function RestTimer({
         <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
           {paused
             ? `Held for ${Math.round(pausedSoFar / 1000)}s — it all counts as rest. Resume when you're ready.`
-            : `Asked for ${target}s, based on your own history. The next set starts on its own.`}
+            : addedSec > 0
+              ? `${target}s — the ${target - addedSec}s asked for plus ${addedSec}s you added. It all counts as rest.`
+              : `Asked for ${target}s, based on your own history. The next set starts on its own.`}
         </p>
 
         {upNext && <div className="gym-upnext">{upNext}</div>}
 
-        <button
-          className="btn btn--ghost btn--small"
-          style={{ marginTop: 10, width: '100%' }}
-          onClick={() => {
-            gymSfx.logged()
-            if (pausedAt === null) setPausedAt(Date.now())
-            else {
-              setPausedMs(pausedMs + (Date.now() - pausedAt))
-              setPausedAt(null)
-            }
-          }}
-        >
-          {paused ? '▶️ Resume rest' : '⏸️ Pause (counts as rest)'}
-        </button>
+        {/* left-aligned on purpose: the card above is centred numbers, this is
+            prose, and centred prose is unreadable at a glance */}
+        {nextBrief && <div className="gym-rest-brief">{nextBrief}</div>}
+
+        <div className="gym-rest-actions">
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              gymSfx.logged()
+              if (pausedAt === null) setPausedAt(Date.now())
+              else {
+                setPausedMs(pausedMs + (Date.now() - pausedAt))
+                setPausedAt(null)
+              }
+            }}
+          >
+            {paused ? '▶️ Resume rest' : '⏸️ Pause (counts as rest)'}
+          </button>
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              gymSfx.logged()
+              // the bells belong to the new zero, not the old one
+              warned.current = false
+              rang.current = false
+              setAddedSec((n) => n + ADD_SEC)
+            }}
+          >
+            +{ADD_SEC}s to read
+          </button>
+        </div>
       </div>
       <Foot
         elapsed={elapsed}

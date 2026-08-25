@@ -711,7 +711,11 @@ interface StoreState {
    * training signal. `sec` is how long the set really took (GO/NEXT → DONE) and
    * feeds the end-of-session pace grade.
    */
-  gymLogSet: (exId: string, reps: number, weight?: number, sec?: number) => void
+  /**
+   * Log one set. `sides` is the per-side split of a clocked per-side hold
+   * (`[70, 68]`); `reps` is still the total, so nothing downstream changes.
+   */
+  gymLogSet: (exId: string, reps: number, weight?: number, sec?: number, sides?: number[]) => void
   gymUndoSet: (exId: string) => void
   /** Record the rest you actually took after a set, and what was offered, in seconds. */
   gymLogRest: (exId: string, seconds: number, targetSec?: number) => void
@@ -3715,7 +3719,7 @@ export const useStore = create<StoreState>((set, get) => {
       })
     },
 
-    gymLogSet(exId, reps, weight, sec) {
+    gymLogSet(exId, reps, weight, sec, sides) {
       commit((d) => {
         const s = d.gym.active
         const se = s?.exercises.find((e) => e.exId === exId)
@@ -3726,6 +3730,7 @@ export const useStore = create<StoreState>((set, get) => {
         const base: LoggedSet = { reps }
         if (weight != null && weight > 0) base.weight = weight
         if (sec != null && sec > 0) base.sec = Math.round(sec)
+        if (sides && sides.length > 1) base.sides = sides.map((n) => Math.round(n))
         se.sets.push(base)
         se.skipped = false
         if (base.sec != null) {

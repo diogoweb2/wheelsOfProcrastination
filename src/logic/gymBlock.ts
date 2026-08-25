@@ -21,6 +21,7 @@
 import type {
   BlockExercise,
   BlockSession,
+  ExerciseDef,
   GymCatalog,
   GymSession,
   GymState,
@@ -29,7 +30,7 @@ import type {
   TrainingBlock,
 } from '../types'
 import { dayKey } from './dates'
-import { allExercises, exerciseById, exerciseSeconds, planOne, sessionSeconds } from './gym'
+import { allExercises, exerciseById, exerciseSeconds, holdFor, planOne, sessionSeconds } from './gym'
 
 // --- block 1 ----------------------------------------------------------------
 //
@@ -349,10 +350,15 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
     if (!def || def.retired) continue // shown as a gap on the Plan tab, never silently substituted
     // index 2 = "no ramp-in de-load"; see the note above
     const one = planOne(def, planInput, 2)
+    // A hold progresses in seconds the way a lift progresses in pounds: hold the
+    // top of the range on every set and the whole range slides up, keeping its
+    // width, and stays there. Written slots are the floor, never the ceiling —
+    // the block says what the movement is, your own history says how long.
+    const [low, high] = holdRange(slot, def, gym)
     built.push({
       ...one,
-      plan: { ...one.plan, reps: Array.from({ length: slot.sets }, () => slot.repLow) },
-      repRange: [slot.repLow, slot.repHigh],
+      plan: { ...one.plan, reps: Array.from({ length: slot.sets }, () => low) },
+      repRange: [low, high],
       quality: slot.quality,
       why: slot.note,
     })
@@ -377,6 +383,14 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
     blockSessionId: template.id,
     blockSessionName: template.name,
   }
+}
+
+/** The slot's range, moved up by whatever you have already proved on a hold. */
+function holdRange(slot: BlockExercise, def: ExerciseDef, gym: GymState): [number, number] {
+  if (def.kind !== 'timed' && def.kind !== 'cardio') return [slot.repLow, slot.repHigh]
+  const learned = holdFor({ kind: def.kind, defaultReps: 0 }, gym.ex[def.id])
+  const low = Math.max(slot.repLow, learned)
+  return [low, low + (slot.repHigh - slot.repLow)]
 }
 
 function sessionNote(count: number, template: BlockSession): string {
