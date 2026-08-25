@@ -20,6 +20,7 @@ import {
 import { lessonsForTopic } from '../quiz/lessons'
 import { QuizSession, type QuizMode } from '../components/QuizSession'
 import { LessonView } from '../components/Lesson'
+import { QuestionManager } from '../components/QuestionManager'
 import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
@@ -38,6 +39,7 @@ export function QuizScreen({
   const { data, activeProfileId, quizBank, quizBankLoaded } = useStore()
   const [session, setSession] = useState<{ mode: QuizMode; topicId: string } | null>(null)
   const [study, setStudy] = useState<string | null>(null) // topicId whose reading list is open
+  const [manage, setManage] = useState<string | null>(null) // admin: topicId whose question bank is open
 
   useEffect(() => {
     if (!trainTopicId) return
@@ -64,6 +66,11 @@ export function QuizScreen({
 
   if (study) {
     return <StudyList topicId={study} bank={quizBank} onClose={() => setStudy(null)} />
+  }
+
+  // Admin only: the whole bank for one topic, with the 🗑 that drops a bad question.
+  if (manage) {
+    return <QuestionManager topicId={manage} onClose={() => setManage(null)} />
   }
 
   // topics grouped into their tracks, with anything untracked falling through last
@@ -108,6 +115,7 @@ export function QuizScreen({
                 selfOfficial={isAdmin}
                 onStart={(mode) => setSession({ mode, topicId: t.id })}
                 onStudy={() => setStudy(t.id)}
+                onManage={isAdmin ? () => setManage(t.id) : undefined}
               />
             ))}
           </div>
@@ -286,6 +294,7 @@ function TopicCard({
   selfOfficial,
   onStart,
   onStudy,
+  onManage,
 }: {
   topic: QuizTopic
   data: AppData
@@ -293,6 +302,7 @@ function TopicCard({
   selfOfficial: boolean // admin may run his own official final test
   onStart: (mode: QuizMode) => void
   onStudy: () => void
+  onManage?: () => void // admin only: open the topic's question bank to review/remove
 }) {
   const passed = data.quiz.passedTopics.includes(topic.id)
   // A conquered topic drops off the wheel, but stays open in the Quiz app: every
@@ -350,6 +360,11 @@ function TopicCard({
                 📖 Study the lessons
               </button>
             )}
+            {onManage && (
+              <button className="btn btn--ghost btn--small" style={{ flexBasis: '100%' }} onClick={() => { sfx.click(); onManage() }}>
+                📋 Review the {pool.length} questions
+              </button>
+            )}
             {selfOfficial && !passed && (
               <button
                 className="btn btn--small"
@@ -364,9 +379,16 @@ function TopicCard({
         </>
       )}
       {unlocked && pool.length === 0 && (
-        <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-          🚧 Unlocked, but the crew is still writing the questions!
-        </div>
+        <>
+          <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+            🚧 Unlocked, but the crew is still writing the questions!
+          </div>
+          {onManage && (
+            <button className="btn btn--ghost btn--small" style={{ width: '100%', marginTop: 8 }} onClick={() => { sfx.click(); onManage() }}>
+              📋 Open the question bank
+            </button>
+          )}
+        </>
       )}
       {!unlocked && (
         <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>

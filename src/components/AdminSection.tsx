@@ -10,6 +10,7 @@ import { activeQuestions, correctAnswerText, lastOfficialAttempt, prizesFor, top
 import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
+import { QuestionManager } from './QuestionManager'
 import { dayKey } from '../logic/dates'
 import { sfx } from '../audio'
 
@@ -864,64 +865,3 @@ function RemoteTestDesk({ topic, targetId, disabled }: { topic: QuizTopic; targe
   )
 }
 
-function QuestionManager({ topicId, onClose }: { topicId: string; onClose: () => void }) {
-  const { quizBank, removeQuizQuestion, approveQuizQuestion } = useStore()
-  const topic = topicsFor(KID_ID).concat(topicsFor(PARENT_ID)).find((t) => t.id === topicId)
-  const visible = quizBank.filter((q) => q.topicId === topicId && q.status !== 'removed')
-  const removed = quizBank.filter((q) => q.topicId === topicId && q.status === 'removed')
-
-  return (
-    <div className="quiz-full">
-      <div className="quiz-full-head">
-        <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>{topic?.emoji} {topic?.title} — question bank</div>
-        <button className="btn btn--ghost btn--small" onClick={onClose}>✕ Close</button>
-      </div>
-      <div className="quiz-full-body">
-        <p className="muted" style={{ marginBottom: 12 }}>
-          {visible.length} in play · {removed.length} removed. Removing flags the question in the DB so the AI won’t regenerate it.
-        </p>
-        {visible.length === 0 && removed.length === 0 && (
-          <p className="muted">No questions for this topic yet — they’ll appear here once generated.</p>
-        )}
-        {visible.map((q) => (
-          <div key={q.id} className="card" style={{ marginBottom: 8, borderColor: q.status === 'pending' ? 'var(--orange)' : 'var(--line)' }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 14 }}>
-                  {q.emoji} {q.prompt} {q.status === 'pending' && <span className="chip chip--urgent">pending</span>}
-                </div>
-                <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-                  {q.type} · weight {q.weight} · 🪙{q.points} — <b>{correctAnswerText(q)}</b>
-                </div>
-              </div>
-              <button className="btn btn--ghost btn--small" style={{ color: 'var(--red)', alignSelf: 'center' }} onClick={() => { sfx.click(); removeQuizQuestion(q.id) }}>
-                🗑
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {removed.length > 0 && (
-          <>
-            <div className="h2">🗑 Removed ({removed.length}) — the AI won’t recreate these</div>
-            {removed.map((q) => (
-              <div key={q.id} className="card" style={{ marginBottom: 8, opacity: 0.6 }}>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: 14 }}>{q.emoji} {q.prompt}</div>
-                    <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-                      {q.type} · weight {q.weight} — <b>{correctAnswerText(q)}</b>
-                    </div>
-                  </div>
-                  <button className="btn btn--ghost btn--small" style={{ alignSelf: 'center' }} onClick={() => { sfx.click(); approveQuizQuestion(q.id) }}>
-                    ↩ Restore
-                  </button>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
