@@ -289,6 +289,26 @@ export async function saveCardTrades(trades: StickerTrade[]): Promise<void> {
   await setDoc(cardTradesRef(), { trades })
 }
 
+// --- FC Lock album swaps (its own shared table) ------------------------------
+//
+// Third collection, third doc, for the same reason as the second: the piles are
+// separate, and one swap list holding stickers, TCG cards and footballers would
+// be unreadable.
+
+const fcTradesRef = () => doc(firestore, 'app', 'fcTrades')
+
+export function subscribeFcTrades(cb: (trades: StickerTrade[]) => void): () => void {
+  return onSnapshot(fcTradesRef(), (snap) => {
+    const data = snap.data() as { trades?: StickerTrade[] } | undefined
+    cb(data?.trades ?? [])
+  })
+}
+
+export async function saveFcTrades(trades: StickerTrade[]): Promise<void> {
+  await ensureAuth()
+  await setDoc(fcTradesRef(), { trades })
+}
+
 // --- One Piece TCG (its own shared table) -----------------------------------
 //
 // Its own document for the same reason Sea Battle has one: a card game carries

@@ -9,6 +9,20 @@
 //
 // The checklist is resolved once per club and then frozen in localStorage, so a
 // sticker you own never turns into a different player behind your back.
+//
+// **The rules are not written here.** This is the third `CollectionKit` (§15b-2):
+// packs, the forced duplicates, the daily free pack, the sealed traded pack,
+// the 1-rare-is-worth-2-commons swap and the haggle all live in
+// logic/collections.ts, and this file is only the album's own pile and its own
+// numbers. The one thing it does differently from the other two is that its
+// pile is *fetched*, so the kit is built at runtime from the checklist.
+import {
+  type CollectionKit,
+  type CollectItem,
+  type CollectRarity,
+  isBalancedIn,
+  offerValueIn,
+} from './collections'
 
 const API = 'https://www.thesportsdb.com/api/v1/json/3'
 const SQUAD_KEY = 'fclock:squad:v1:'
@@ -19,6 +33,21 @@ export const PLAYERS_PER_CLUB = 10
 export const PACK_SIZE = 5
 /** Berries per pack — the price the shop charges for a bit of luck. */
 export const PACK_COST = 20
+/**
+ * Chance a slot rolls off the shiny shelf. The badges are 20 of 220 slots (~9%),
+ * so 6% keeps a foil crest an event rather than every other pack.
+ */
+export const SPECIAL_CHANCE = 0.06
+/**
+ * Minimum share of a pack that is deliberately a duplicate of something already
+ * owned. Trading is the point of an album, so both crewmates need spares early
+ * rather than only once the album is nearly full.
+ */
+export const REPEAT_FLOOR = 0.4
+/** What one point of swap value is roughly worth in Berries. Only ever a hint. */
+export const GEMS_PER_POINT = 12
+/** What a free pack thrown into a swap is worth on the same scale. */
+export const PACK_HINT_VALUE = PACK_COST
 
 export interface ClubDef {
   id: string // TheSportsDB team id
@@ -174,38 +203,62 @@ export function buildPage(clubIndex: number, squad: Squad | undefined): StickerD
 }
 
 // --- owning and opening ------------------------------------------------------
-
-export interface FcAlbumState {
-  counts: Record<string, number>
-  packsOpened: number
-  lastFreePackDay: string | null
-}
-
-export const emptyAlbum = (): FcAlbumState => ({ counts: {}, packsOpened: 0, lastFreePackDay: null })
-
-export const owns = (a: FcAlbumState, id: string) => (a.counts[id] ?? 0) > 0
-export const spares = (a: FcAlbumState, id: string) => Math.max(0, (a.counts[id] ?? 0) - 1)
-export const ownedCount = (a: FcAlbumState) => Object.values(a.counts).filter((n) => n > 0).length
-export const freePackReady = (a: FcAlbumState, today: string) => a.lastFreePackDay !== today
+//
+// The album's state is an `AlbumState`, exactly like the other two collections'
+// (`data.fcAlbum`): same counts, same daily free pack, same sealed pack credits
+// won in a swap. That is what lets the store's pack and trade actions serve all
+// three without knowing which pile they are moving.
 
 /**
- * A pack: five stickers drawn at random from the collection, badges rarer than
- * players (they're the shiny ones). Weighted a little towards what you're
- * missing, because an album that never fills is an album nobody opens.
+ * A sticker's rarity, read straight off its id — the club badges are the shiny
+ * ones. Deliberately catalog-free: the store has to weigh a swap without ever
+ * fetching a squad, and the checklist only exists once the album screen is open.
  */
-export function rollPack(pool: StickerDef[], album: FcAlbumState, size = PACK_SIZE): string[] {
-  if (!pool.length) return []
-  const missing = pool.filter((s) => !owns(album, s.id))
-  const out: string[] = []
-  for (let i = 0; i < size; i++) {
-    // 70% of a pack comes from what's still missing, while anything is missing
-    const from = missing.length && Math.random() < 0.7 ? missing : pool
-    const weighted = from.filter((s) => s.kind !== 'badge' || Math.random() < 0.25)
-    const list = weighted.length ? weighted : from
-    const pick = list[Math.floor(Math.random() * list.length)]
-    out.push(pick.id)
-    const at = missing.findIndex((s) => s.id === pick.id)
-    if (at >= 0) missing.splice(at, 1) // no pack hands you the same new sticker twice
+export const fcRarity = (id: string): CollectRarity => (id.endsWith('-badge') ? 'special' : 'common')
+
+/** One album slot as a generic collectible, the shape every shared screen takes. */
+export const asItem = (s: StickerDef): CollectItem => ({
+  id: s.id,
+  name: s.name,
+  rarity: fcRarity(s.id),
+  group: s.clubId,
+  // '' rather than a made-up path: a sticker whose photo the database never had
+  // draws its name instead of a broken image.
+  img: s.image ?? '',
+})
+
+/**
+ * The kit for whatever of the checklist has loaded. Built at runtime rather
+ * than at import time, because this pile is fetched: until the squads land the
+ * kit is simply a smaller album, and every rule still holds over it.
+ */
+export function fcKit(all: StickerDef[]): CollectionKit {
+  return {
+    id: 'fc',
+    slice: 'fcAlbum',
+    name: 'Premier League Album',
+    emoji: '📕',
+    items: all.map(asItem),
+    groups: PL_CLUBS.map((c) => ({ id: c.id, name: c.name, emoji: '🛡️' })),
+    packCost: PACK_COST,
+    packSize: PACK_SIZE,
+    specialChance: SPECIAL_CHANCE,
+    repeatFloor: REPEAT_FLOOR,
+    gemsPerPoint: GEMS_PER_POINT,
   }
-  return out
 }
+
+/** Total swap value of one side of a trade (a badge = 2, a player = 1). */
+export const offerValueFc = (ids: string[]): number => offerValueIn(fcRarity, ids)
+
+/** A sticker-for-sticker trade is fair when both sides carry the same value. */
+export const isBalancedFc = (give: string[], want: string[]) => isBalancedIn(fcRarity, give, want)
+
+/** A ballpark Berry price for what is being asked for — a hint, never a gate. */
+export const gemHintFc = (wantIds: string[]) => offerValueFc(wantIds) * GEMS_PER_POINT
+
+/** What the proposer's side is worth on the Berry scale, for the ⚖️ verdict. */
+export const offerWorthFc = (t: { give: string[]; giveGems?: number; givePack?: boolean }) =>
+  offerValueFc(t.give) * GEMS_PER_POINT +
+  Math.max(0, Math.round(t.giveGems ?? 0)) +
+  (t.givePack ? PACK_HINT_VALUE : 0)

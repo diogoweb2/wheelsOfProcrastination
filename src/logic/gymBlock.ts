@@ -89,7 +89,7 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
       ex('bw-pullup', 3, 4, 8, { note: 'Chin-ups instead are fine — same slot, easier line of pull.' }),
       ex('mv-dips', 3, 6, 10, { note: 'Stop at parallel. Deeper than that is the shoulder paying for the rep.' }),
       ex('mv-dumbbell-lateral-raise', 2, 15, 20),
-      ex('mv-band-face-pull', 2, 15, 20),
+      ex('mv-chest-supported-dumbbell-reverse-fly', 2, 15, 20),
     ],
   },
   {
@@ -139,7 +139,7 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     exercises: [
       ex('mv-dumbbell-step-up', 3, 8, 12),
       ex('mv-incline-dumbbell-bench-press', 3, 8, 12),
-      ex('mv-band-lat-pulldown', 3, 10, 15),
+      ex('mv-chin-up', 3, 5, 10),
       ex('mv-band-rotational-press', 3, 8, 12),
       ex('mv-farmer-s-walk', 3, 30, 45),
       ex('mv-medicine-ball-chest-pass', 3, 4, 6, { quality: true, note: 'Explosive throws. Reset between reps.' }),

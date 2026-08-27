@@ -80,6 +80,8 @@ import {
   subscribeStickerTrades,
   subscribeCardTrades,
   saveCardTrades,
+  subscribeFcTrades,
+  saveFcTrades,
   subscribeCardDuels,
   subscribeBoardGames,
   subscribeSeaBattles,
@@ -109,9 +111,10 @@ import {
 } from '../logic/album'
 import { isBalancedIn, type CollectRarity } from '../logic/collections'
 import { CARD_SPECIAL_SET } from '../logic/cardBinderIndex.generated'
+import { isBalancedFc } from '../logic/fcAlbum'
 
-/** Which of the two collections (§14, §14b) an album action is about. */
-export type CollectionSlice = 'album' | 'cards'
+/** Which of the three collections (§14, §14b, §21g) an album action is about. */
+export type CollectionSlice = 'album' | 'cards' | 'fcAlbum'
 
 const cardRarity = (id: string): CollectRarity => (CARD_SPECIAL_SET.has(id) ? 'special' : 'common')
 const isBalancedCards = (give: string[], want: string[]) => isBalancedIn(cardRarity, give, want)
@@ -329,6 +332,7 @@ interface StoreState {
   ideas: Idea[] // shared wishlist (app/ideas), live-synced — both crewmates read and write it
   trades: StickerTrade[] // shared sticker swaps (app/stickerTrades), live-synced
   cardTrades: StickerTrade[] // shared One Piece Album swaps (app/cardTrades), live-synced
+  fcTrades: StickerTrade[] // shared FC Lock album swaps (app/fcTrades), live-synced
   duels: CardDuel[] // shared card-duel board (app/cardDuels), live-synced — challenges and live matches
   boardGames: BoardMatch[] // shared Chess/Checkers board (app/boardGames), live-synced
   seaBattles: SeaMatch[] // shared Sea Battle table (app/seaBattles), live-synced
@@ -374,11 +378,6 @@ interface StoreState {
   setFcResult: (id: string, homeScore: number, awayScore: number) => void
   /** FC Lock: the played games' warnings have been read. */
   markFcResultsSeen: (ids: string[]) => void
-  /**
-   * FC Lock album: open a pack. `free` is the once-a-day one, `buy` costs
-   * Berries. Returns the sticker ids drawn, or why it couldn't.
-   */
-  openFcPack: (kind: 'free' | 'buy', drawn: string[], cost: number) => 'broke' | 'used' | 'empty' | true
   /** FC Lock: pick the club and the position you play in the soccer league. */
   setFcSquad: (teamId: string, role: string) => void
   /** FC Lock: file a league result. */
@@ -971,6 +970,8 @@ export const useStore = create<StoreState>((set, get) => {
       subscribeStickerTrades((trades) => set({ trades }))
       // the One Piece Album's own swap table — same game, its own pile of cards
       subscribeCardTrades((cardTrades) => set({ cardTrades }))
+      // and FC Lock's album swap table — same game again, over footballers
+      subscribeFcTrades((fcTrades) => set({ fcTrades }))
       // shared duel board: challenges, and every move the other phone plays
       subscribeCardDuels((duels) => set({ duels }))
       // shared Chess/Checkers board — same deal, one doc for both games
@@ -1048,13 +1049,18 @@ export const useStore = create<StoreState>((set, get) => {
    * the ONE PIECE TCG binder.
    */
   function tradesIn(col: CollectionSlice): StickerTrade[] {
-    return col === 'cards' ? get().cardTrades : get().trades
+    return col === 'cards' ? get().cardTrades : col === 'fcAlbum' ? get().fcTrades : get().trades
   }
 
   function saveTradeList(trades: StickerTrade[], col: CollectionSlice = 'album') {
     if (col === 'cards') {
       set({ cardTrades: trades })
       fireAndForget(saveCardTrades(trades))
+      return
+    }
+    if (col === 'fcAlbum') {
+      set({ fcTrades: trades })
+      fireAndForget(saveFcTrades(trades))
       return
     }
     set({ trades })
@@ -1067,7 +1073,11 @@ export const useStore = create<StoreState>((set, get) => {
    * the ~1 MB card catalog.
    */
   const balancedIn = (col: CollectionSlice, give: string[], want: string[]) =>
-    col === 'cards' ? isBalancedCards(give, want) : isBalanced(give, want)
+    col === 'cards'
+      ? isBalancedCards(give, want)
+      : col === 'fcAlbum'
+        ? isBalancedFc(give, want)
+        : isBalanced(give, want)
 
   /**
    * The duel fields that follow from a new position: the board itself, plus the
@@ -1342,6 +1352,7 @@ export const useStore = create<StoreState>((set, get) => {
     ideas: [],
     trades: [],
     cardTrades: [],
+    fcTrades: [],
     duels: [],
     boardGames: [],
     seaBattles: [],
@@ -1456,23 +1467,6 @@ export const useStore = create<StoreState>((set, get) => {
       commit((d) => {
         d.fcLock.watch = d.fcLock.watch.map((w) => (ids.includes(w.id) ? { ...w, seenResult: true } : w))
       })
-    },
-
-    openFcPack(kind, drawn, cost) {
-      const { data } = get()
-      const album = data.fcLock.album ?? { counts: {}, packsOpened: 0, lastFreePackDay: null }
-      const today = dayKey()
-      if (!drawn.length) return 'empty'
-      if (kind === 'free' && album.lastFreePackDay === today) return 'used'
-      if (kind === 'buy' && data.economy.gems < cost) return 'broke'
-      commit((d) => {
-        const a = d.fcLock.album ?? (d.fcLock.album = { counts: {}, packsOpened: 0, lastFreePackDay: null })
-        if (kind === 'buy') d.economy.gems = Math.max(0, d.economy.gems - cost)
-        else a.lastFreePackDay = today
-        for (const id of drawn) a.counts[id] = (a.counts[id] ?? 0) + 1
-        a.packsOpened += 1
-      })
-      return true
     },
 
     setFcSquad(teamId, role) {
@@ -2761,7 +2755,14 @@ export const useStore = create<StoreState>((set, get) => {
       set({ mateData: theirs, mateAlbum: theirs.album })
       // Berries move too now, so the swap writes their economy alongside the album
       fireAndForget(
-        saveDataFields(mateId, col === 'cards' ? { cards: theirs.cards, economy: theirs.economy } : { album: theirs.album, economy: theirs.economy }),
+        saveDataFields(
+          mateId,
+          col === 'cards'
+            ? { cards: theirs.cards, economy: theirs.economy }
+            : col === 'fcAlbum'
+              ? { fcAlbum: theirs.fcAlbum, economy: theirs.economy }
+              : { album: theirs.album, economy: theirs.economy },
+        ),
       )
       auditDiff(mateId, get().activeProfileId ?? 'unknown', mateData, theirs) // log the counterpart's change
 

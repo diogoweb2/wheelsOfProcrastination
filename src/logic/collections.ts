@@ -1,8 +1,9 @@
 // Collecting, once — the rules both albums play by.
 //
-// There are two collections in this app: the Grand Line Sticker Album (§14,
-// album art out of assets/) and the One Piece Album (§14b, every card in the One
-// Piece TCG, hotlinked). They are the SAME GAME — packs, duplicates, the daily
+// There are three collections in this app: the Grand Line Sticker Album (§14,
+// album art out of assets/), the One Piece Album (§14b, every card in the One
+// Piece TCG, hotlinked) and FC Lock's Premier League album (§21g, real
+// footballers off TheSportsDB). They are the SAME GAME — packs, duplicates, the daily
 // free pack, the 1-red-is-worth-2-whites swap, the race against the other
 // crewmate — over a different pile of cards. So the rules live here once, and a
 // `CollectionKit` is what tells them which pile.
@@ -36,9 +37,9 @@ export interface CollectGroup {
 }
 
 export interface CollectionKit {
-  id: 'stickers' | 'cards'
+  id: 'stickers' | 'cards' | 'fc'
   /** Which slice of the profile's data holds this collection's counts. */
-  slice: 'album' | 'cards'
+  slice: 'album' | 'cards' | 'fcAlbum'
   name: string
   emoji: string
   items: CollectItem[]

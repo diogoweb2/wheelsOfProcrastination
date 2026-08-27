@@ -350,34 +350,45 @@ export const onEssaysWrite = onDocumentWritten('app/essays', async (event) => {
   }
 })
 
-/** Sticker trades: ping whoever has to answer a newly-offered swap. */
-export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', async (event) => {
-  const before = event.data?.before?.data() ?? {}
-  const after = event.data?.after?.data() ?? {}
+/**
+ * Swap tables: ping whoever has to answer a newly-offered swap. All three
+ * collections (§14 stickers, §14b One Piece Album, §21g FC Lock) trade by the
+ * identical rules over their own doc, so they share one handler and only differ
+ * in which tab to send you to.
+ */
+function tradeWatcher(where) {
+  return async (event) => {
+    const before = event.data?.before?.data() ?? {}
+    const after = event.data?.after?.data() ?? {}
 
-  // Keyed by id AND haggle round: a counter-offer rewrites the same trade, and
-  // the person it bounced back to has to hear about it just like the first offer.
-  const seen = new Map((before.trades ?? []).map((t) => [t.id, t.round ?? 0]))
-  for (const t of after.trades ?? []) {
-    if (t.status !== 'pending') continue
-    const round = t.round ?? 0
-    if (seen.has(t.id) && seen.get(t.id) === round) continue
-    // whoever's court it's in now — the addressee, or the proposer after a counter
-    const target = (t.turn ?? 'to') === 'to' ? t.toId : t.fromId
-    const gems = Math.max(0, Math.round(t.giveGems ?? 0))
-    const puts = [
-      t.give.length > 0 ? `${t.give.length} card${t.give.length === 1 ? '' : 's'}` : null,
-      gems > 0 ? `${gems} Berries` : null,
-      t.givePack ? 'a free pack' : null,
-    ]
-      .filter(Boolean)
-      .join(' + ')
-    await pushTo(target, {
-      title: round > 0 ? '💰 A counter-offer!' : '🤝 A trade offer!',
-      body:
-        round > 0
-          ? `The deal is now ${puts} for ${t.want.length}. Your call — open the Album tab.`
-          : `${t.fromName} offers ${puts} for ${t.want.length}. Open the Album tab.`,
-    })
+    // Keyed by id AND haggle round: a counter-offer rewrites the same trade, and
+    // the person it bounced back to has to hear about it just like the first offer.
+    const seen = new Map((before.trades ?? []).map((t) => [t.id, t.round ?? 0]))
+    for (const t of after.trades ?? []) {
+      if (t.status !== 'pending') continue
+      const round = t.round ?? 0
+      if (seen.has(t.id) && seen.get(t.id) === round) continue
+      // whoever's court it's in now — the addressee, or the proposer after a counter
+      const target = (t.turn ?? 'to') === 'to' ? t.toId : t.fromId
+      const gems = Math.max(0, Math.round(t.giveGems ?? 0))
+      const puts = [
+        t.give.length > 0 ? `${t.give.length} card${t.give.length === 1 ? '' : 's'}` : null,
+        gems > 0 ? `${gems} Berries` : null,
+        t.givePack ? 'a free pack' : null,
+      ]
+        .filter(Boolean)
+        .join(' + ')
+      await pushTo(target, {
+        title: round > 0 ? '💰 A counter-offer!' : '🤝 A trade offer!',
+        body:
+          round > 0
+            ? `The deal is now ${puts} for ${t.want.length}. Your call — open ${where}.`
+            : `${t.fromName} offers ${puts} for ${t.want.length}. Open ${where}.`,
+      })
+    }
   }
-})
+}
+
+export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', tradeWatcher('the Album tab'))
+export const onCardTradeWrite = onDocumentWritten('app/cardTrades', tradeWatcher('the One Piece Album'))
+export const onFcTradeWrite = onDocumentWritten('app/fcTrades', tradeWatcher('FC Lock → Trade'))

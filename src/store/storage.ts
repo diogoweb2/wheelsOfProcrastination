@@ -61,6 +61,7 @@ export function defaultData(): AppData {
       hints: true, // the coaching highlights are the point; you opt OUT of them
     },
     cards: { counts: {}, packsOpened: 0, lastFreePackDay: null, trades: [], packCredits: 0 },
+    fcAlbum: defaultAlbumState(),
     optcg: { decks: [], activeDeck: 'st01', wins: 0, losses: 0, settled: [], soloDay: null, soloWins: 0 },
     gym: defaultGymState(),
     roblox: defaultRobloxState(),
@@ -93,6 +94,12 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     cards: { ...base.cards, ...parsed.cards, counts: { ...parsed.cards?.counts } },
+    // FC Lock's album moved out of `fcLock` when it became a collection of its
+    // own; a save written before that still keeps its stickers in there.
+    fcAlbum: (() => {
+      const stored = parsed.fcAlbum ?? parsed.fcLock?.album
+      return { ...base.fcAlbum, ...stored, counts: { ...stored?.counts } }
+    })(),
     duel: {
       ...base.duel,
       ...parsed.duel,

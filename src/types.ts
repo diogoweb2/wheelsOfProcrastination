@@ -1415,6 +1415,12 @@ export interface AppData {
    * serve both.
    */
   cards: AlbumState
+  /**
+   * FC Lock's Premier League album (§21g) — the third collection, and the same
+   * shape again. It sits here rather than inside `fcLock` precisely so the
+   * store's pack and trade actions can reach it by slice name like the others.
+   */
+  fcAlbum: AlbumState
   /** The One Piece TCG app: this crewmate's built decks and their record. */
   optcg: OptcgProfileState
   gym: GymState
@@ -1495,7 +1501,12 @@ export interface FcLockState {
     role: string
     results: { opp: string; gf: number; ga: number; at: string }[]
   }
-  /** 📕 The Premier League sticker album (§21g): what this crewmate has stuck in. */
+  /**
+   * LEGACY — the album used to live in here, before it became a collection kit
+   * of its own. Read once on load and folded into `AppData.fcAlbum`
+   * (`mergeData`), then never written again. Kept so an old save doesn't lose
+   * its stickers.
+   */
   album?: {
     counts: Record<string, number>
     packsOpened: number

@@ -282,6 +282,8 @@ export const APPS: AppDef[] = [
       { id: 'league', label: 'League', icon: '🏟️' },
       { id: 'album', label: 'Album', icon: '📕' },
       { id: 'packs', label: 'Packs', icon: '🎁' },
+      // the swap table is its own URL, like both other collections' (§1c)
+      { id: 'trade', label: 'Trade', icon: '🤝' },
       { id: 'teams', label: 'Teams', icon: '⚽' },
     ],
   },

@@ -51,6 +51,8 @@ function newCardPop() {
 /**
  * The pack ceremony:
  *   sealed  — a pack you shake and tear open
+ *   intro   — optional: the shelf the next card comes from, lit up on its own
+ *             (FC Lock's club crest in the tunnel). Moves on by itself, or on a tap.
  *   cards   — each card rises face-down, wobbles with suspense (longer + brighter
  *             the rarer it is), then flips. Rares get a gold aura, a rising
  *             "something big is coming" glow, and a full confetti blast.
@@ -64,6 +66,9 @@ export function PackOpening({
   onDone,
   lookup = stickerById,
   note,
+  emblem = '☠️',
+  packTitle = 'STICKER PACK',
+  intro,
 }: {
   drawn: string[]
   ownedBefore: Set<string> // album contents BEFORE the pack — decides new vs. repeat
@@ -80,8 +85,18 @@ export function PackOpening({
    * text box, so this is the only place that text can come from.
    */
   note?: (id: string) => string
+  /** The badge on the sealed packet and on every face-down card. */
+  emblem?: string
+  /** What the sealed packet calls itself. */
+  packTitle?: string
+  /**
+   * The beat before each reveal: the shelf the card comes from, lit up on its
+   * own. FC Lock passes the club crest and name (§21h) — the pause before you
+   * know *who* it is. Return null to go straight to the flip.
+   */
+  intro?: (id: string) => { label: string; img?: string } | null
 }) {
-  const [phase, setPhase] = useState<'sealed' | 'tearing' | 'cards' | 'newbies' | 'summary'>('sealed')
+  const [phase, setPhase] = useState<'sealed' | 'tearing' | 'intro' | 'cards' | 'newbies' | 'summary'>('sealed')
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [charging, setCharging] = useState(false) // suspense wobble before a flip
@@ -97,6 +112,8 @@ export function PackOpening({
     return isNew
   })
 
+  const introFor = (i: number) => (intro ? intro(drawn[i]) : null)
+  const shelf = phase === 'intro' ? introFor(index) : null
   const current = lookup(drawn[index])
   const stackCard = lookup(drawn[stack])
   const isNew = marks[index]
@@ -116,6 +133,13 @@ export function PackOpening({
   const after = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms))
 
   useEffect(() => clearTimers, [])
+
+  // The shelf flash is a beat, not a screen: it moves on by itself.
+  useEffect(() => {
+    if (phase !== 'intro') return
+    const t = window.setTimeout(() => setPhase('cards'), 1400)
+    return () => window.clearTimeout(t)
+  }, [phase, index])
 
   // Suspense then reveal. Rares linger noticeably longer — the wait IS the thrill.
   useEffect(() => {
@@ -167,7 +191,12 @@ export function PackOpening({
     if (phase === 'sealed') {
       sfx.click()
       setPhase('tearing')
-      after(760, () => setPhase('cards'))
+      after(760, () => setPhase(introFor(0) ? 'intro' : 'cards'))
+      return
+    }
+    if (phase === 'intro') {
+      sfx.click()
+      setPhase('cards')
       return
     }
     if (phase !== 'cards') return
@@ -187,8 +216,10 @@ export function PackOpening({
       }
       return
     }
-    if (index + 1 < drawn.length) setIndex(index + 1)
-    else {
+    if (index + 1 < drawn.length) {
+      setIndex(index + 1)
+      if (introFor(index + 1)) setPhase('intro')
+    } else {
       sfx.gem()
       setPhase(newIds.length > 0 ? 'newbies' : 'summary')
     }
@@ -207,12 +238,28 @@ export function PackOpening({
         <div className="pack-stage pack-stage--sealed">
           <div className={`pack-wrap ${phase === 'tearing' ? 'is-tearing' : ''}`}>
             <div className="pack-shine" />
-            <div className="pack-jolly">☠️</div>
-            <div className="pack-title">STICKER PACK</div>
+            <div className="pack-jolly">{emblem}</div>
+            <div className="pack-title">{packTitle}</div>
             <div className="pack-sub">{drawn.length} cards inside</div>
             {phase === 'tearing' && <div className="pack-burst" />}
           </div>
           <div className="pack-hint">{phase === 'sealed' ? 'Tap to tear it open!' : 'Here we go…'}</div>
+        </div>
+      )}
+
+      {phase === 'intro' && shelf && (
+        <div className="pack-stage">
+          <div className="pack-intro">
+            {shelf.img ? (
+              <img className="pack-intro-crest" src={shelf.img} alt={shelf.label} />
+            ) : (
+              <div className="pack-intro-crest pack-intro-crest--none">{emblem}</div>
+            )}
+          </div>
+          <div className="pack-intro-label">{shelf.label}</div>
+          <div className="pack-counter">
+            {index + 1} / {drawn.length}
+          </div>
         </div>
       )}
 
@@ -235,7 +282,7 @@ export function PackOpening({
             >
               <div className="pack-flip-inner">
                 <div className="pack-face pack-face--back">
-                  <div className="pack-jolly">☠️</div>
+                  <div className="pack-jolly">{emblem}</div>
                 </div>
                 <div className="pack-face pack-face--front">
                   <Sticker sticker={current} state="reveal" size="lg" badge={isNew ? 'NEW!' : 'SPARE'} />

@@ -327,7 +327,7 @@ A Panini-style collection both crewmates fill and trade from. Rules live in `src
 
 **The same collecting game as §15b, over every card printed for the ONE PIECE Card Game** — 2 665 of them against the album's few dozen. Its own app, its own URL (`/binder/binder`, `/binder/packs`, `/binder/trade`), its own progress and its own swap table, so neither collection can disturb the other.
 
-**The rules are not written twice.** Packs, the forced duplicates, the daily free pack, the sealed traded pack, the 1-rare-is-worth-2-commons swap, the haggle and the pack ceremony all live in [src/logic/collections.ts](src/logic/collections.ts) as a `CollectionKit` — a pile of cards plus its numbers. The sticker album is one kit ([src/logic/album.ts](src/logic/album.ts)), the binder is another ([src/logic/cardBinder.ts](src/logic/cardBinder.ts)), and the store's pack/trade actions, `<Sticker>`, `<StickerDetail>`, `<PackOpening>` and `<TradeOffer>` all take whichever kit they are handed. **A third collection would be one kit and one screen.**
+**The rules are not written twice.** Packs, the forced duplicates, the daily free pack, the sealed traded pack, the 1-rare-is-worth-2-commons swap, the haggle and the pack ceremony all live in [src/logic/collections.ts](src/logic/collections.ts) as a `CollectionKit` — a pile of cards plus its numbers. The sticker album is one kit ([src/logic/album.ts](src/logic/album.ts)), the binder is another ([src/logic/cardBinder.ts](src/logic/cardBinder.ts)), and the store's pack/trade actions, `<Sticker>`, `<StickerDetail>`, `<PackOpening>` and `<TradeOffer>` all take whichever kit they are handed. **The third collection — FC Lock's Premier League album (§21g) — is exactly that: one kit ([src/logic/fcAlbum.ts](src/logic/fcAlbum.ts)) and one screen.**
 
 - **Nothing is stored on our server.** Card pictures are the same hotlinked public mirrors the card game uses (§15g), primary plus fallback, falling back to the card's name if both fail.
 - **Rarity is the printed rarity.** The rare shelf is **SR, SEC, SP CARD, TR and every Leader** — 473 cards. A slot rolls off it at **4%**, lower than the album's 6%, because the rare tiers are ~18% of this catalog and the album's are a handful: the same odds would make rares routine.
@@ -1089,7 +1089,7 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Seven tabs, seven URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **🏟️ League** (`/fclock/league` — the game you play), **📕 Album** (`/fclock/album` — the collection and the pack shop), **⚽ Teams** (`/fclock/teams`).
+Nine tabs, nine URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **🏟️ League** (`/fclock/league` — the game you play), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **🤝 Trade** (`/fclock/trade`), **⚽ Teams** (`/fclock/teams`).
 
 ### 21a. Toronto time, always
 
@@ -1129,27 +1129,32 @@ The **💸 Transfers** tab is the **2026 summer window**: who moved, for how muc
 - **Tap a row for the player.** A sheet opens with the picture at **190 px**, then **age** (worked out from the birthday, so it's right next year too), position, shirt number, nationality, height, weight, preferred foot, birthday, where they were born, the club they're on the books at, and the write-up. Two calls behind one cache entry — the search finds them, the full record carries the height and the biography — and a player the database has never heard of says so plainly rather than showing an empty card.
 - Loans 🔁 and frees 🆓 are marked rather than dressed up as fees, and grades are coloured: A green, B neutral, C/D red.
 
-### 21g. The album (📕) and the packs (🎁)
+### 21g. The album (📕), the packs (🎁) and the swaps (🤝)
 
-A Premier League sticker album, built like the real one: **a page per club**, a **shiny foil badge** at the top of it, then the squad. Swipe the page sideways — it slides under the finger and turns when you let go — or use the arrows and the twenty dots.
+A Premier League sticker album, built like the real one: **a page per club**, a **shiny foil badge** at the top of it, then the squad. Swipe the page sideways — it slides under the finger and turns when you let go — or use the arrows and the twenty dots. Three URLs: `/fclock/album`, `/fclock/packs`, `/fclock/trade`.
 
 **Every sticker is a real footballer.** The Topps 2026 checklist runs to 561 stickers; we can't name 450 of those players from a source we trust, and a made-up sticker would make the whole album worthless. So the collection is **20 clubs × (1 badge + 10 players) = 220**, each one a real player pulled from TheSportsDB with their real photo, position and shirt number — the free tier's cap of ten players per club is exactly what sets the page size. The checklist is **frozen in localStorage** once fetched, so a sticker you own never turns into a different player behind your back.
 
-- **Packs are five stickers** (the 🎁 half of the Album tab). **One free pack a day**, then **20 🫐** each. 70% of a pack is drawn from what you're still missing (an album that never fills is an album nobody opens), a pack never hands you the same *new* sticker twice, and badges are the rare pull.
+**It is the third `CollectionKit` (§15b-2), not a second implementation.** Packs, the forced duplicates, the daily free pack, the sealed pack won in a swap, the 1-foil-is-worth-2-players trade, the haggle, the pack ceremony and the head-to-head race all come out of [src/logic/collections.ts](src/logic/collections.ts) and the shared components. [src/logic/fcAlbum.ts](src/logic/fcAlbum.ts) is only this album's pile and its numbers — and the one thing it does differently from the other two is that **its pile is fetched**, so the kit is built at runtime over whatever of the checklist has landed. The stickers live in `AppData.fcAlbum` (they used to sit inside `fcLock`; an old save is folded across on load).
+
+- **Packs are five stickers** for **20 🫐**, plus **one free pack a day**, plus any **sealed pack won in a swap**. **40% of every pack is deliberately a double** — trading is the point of an album, so both crewmates need spares early rather than only once the album is nearly full — and a **foil crest** rolls at 6%.
 - **Opening is a ceremony, not a list** (§21h).
-- **Duplicates count.** A spare shows as a red **+n** on the slot.
-- **Tap a sticker you own** and the same player sheet as the transfer list opens (§21f): the big picture, age, position, nationality, height, weight, foot, birthplace — plus its sticker number and how many spares you're sitting on.
+- **The race is to all 220**, run against the other crewmate on the album page with the same 🏁 lanes, crown and victory party the other two collections use (§15b) — and it is always run to the full album, never to however much of the checklist has loaded.
+- **Duplicates count.** A spare shows as a red **+n** on the slot, and **🔁 My spares** lists every double on one page with a 🎯 on the ones the other crewmate is still missing.
+- **The album knows what the other album holds.** A slot you're missing that they can spare wears a 🤝; the player sheet says so in words. There is also a **missing-only** filter, and a page with every sticker in it reads **★ COMPLETE**.
+- **Tap a sticker** and the same player sheet as the transfer list opens (§21f): the big picture, age, position, nationality, height, weight, foot, birthplace — plus its sticker number, how many spares you're sitting on, and the swap signal.
+- **Swaps are the full haggle** (§15b), in their own shared doc `app/fcTrades`: spares for spares (a foil counts as two players), or **Berries and today's unopened free pack** on top when neither of you holds what the other needs — offer → **💰 ask more** → shake on it or walk away, every round printed on the offer card, each bounce firing its own push. A pack won this way lands **sealed** on the Packs tab. `GEMS_PER_POINT` is **12** here rather than the album's 25: a pack is 20 🫐 for five stickers, so a named sticker you actually need is worth about a dozen.
 - The album is **per profile**, like everything else in FC Lock: Diogo's stickers are not Ben's.
 
 ### 21h. Opening a pack
 
-Opening takes over the whole screen, black, one thing at a time — the way the football games do it. Stadium beams sweep behind every step, and **every step waits for a tap**, so nothing is missed by looking away.
+Opening takes over the whole screen, black, one thing at a time — the way the football games do it. It is the **shared ceremony** (`<PackOpening>`), handed FC Lock's own packet art (⚽ `FC LOCK PACK`) and its own club beat, so every collection's pack opens the same way and improving one improves all three.
 
-1. **The sealed pack.** A foil packet floating under a moving shine, `TAP TO OPEN`.
-2. **The club.** For each sticker in turn, the crest lights up the tunnel with the club's name under it — the beat before you know who it is. It moves on by itself after 1.5 s, or on a tap.
-3. **The card.** The player rises onto the podium on a gold card: shirt number and position where the rating sits on a real one, the photo, the name, the club, fireworks either side, and a **NEW!** flash if it's one you didn't have. `TAP TO CONTINUE` walks to the next of the five.
-
-After the fifth, the whole pack is laid out together with how many were new, and everything is already stuck in the album (§21g). A club badge pulled from a pack rides the same ceremony with its foil card.
+1. **The sealed pack.** A foil packet floating under a moving shine, `Tap to tear it open!`.
+2. **The club.** For each sticker in turn, the crest lights up the tunnel with the club's name under it — the beat before you know who it is. It moves on by itself after 1.4 s, or on a tap.
+3. **The card.** The sticker rises face-down and **wobbles with suspense** — longer and brighter for a foil crest, with a rising *something rare is coming…* aura — then flips. A brand-new foil gets the gold blast from both corners and **★ LEGENDARY! ★**; an ordinary new one a pop and *New for the album!*; a double reads *Repeat — trade bait 🤝*. An impatient tap skips the wait but still pays off the reveal.
+4. **The new ones, together.** Everything brand new, big, all on one screen. Skipped when the pack was all doubles.
+5. **The haul.** Walked one full-size sticker at a time with **← Prev / Next →** and a dot pager — club, sticker number, shirt and position printed underneath — then the new/to-trade tally and *Into the album →*.
 
 ### 21i. Watch (▶️) — highlights and the live stream
 

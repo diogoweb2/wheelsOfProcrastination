@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { sfx } from '../audio'
-import type { FcNewsItem, FcWatchItem } from '../types'
+import type { AlbumState, FcNewsItem, FcWatchItem, StickerTrade } from '../types'
 import {
   CLUB_RANKING,
   LEAGUES,
@@ -47,20 +47,37 @@ import {
 import { fetchFcNews, newsFetchedToday, newsKey, newsStale } from '../logic/fcNews'
 import {
   PACK_COST,
+  PACK_SIZE,
   PL_CLUBS,
   SLOTS_PER_CLUB,
   TOTAL_STICKERS,
+  asItem,
   buildPage,
-  emptyAlbum,
+  fcKit,
   fetchSquad,
-  freePackReady,
-  ownedCount,
-  owns,
+  gemHintFc,
+  offerValueFc,
+  offerWorthFc,
   pageStart,
-  rollPack,
-  spares,
   type StickerDef,
 } from '../logic/fcAlbum'
+// The album's rules are the shared ones — FC Lock is the third collection
+// (§15b-2), so packs, spares, the swap value and the race all come from here.
+import {
+  ownedIdsIn,
+  ownsIn,
+  rollPackIn,
+  spareCountIn,
+  tradeableIn,
+} from '../logic/collections'
+// The state helpers work on any of the three collections — same slice shape.
+import { awaitsAnswer, freePackReady, packCredits, tradeGems } from '../logic/album'
+import { AlbumRace, type RaceProgress } from '../components/AlbumRace'
+import { Sticker, type CardFace } from '../components/Sticker'
+import { StickerDetail } from '../components/StickerDetail'
+import { PackOpening } from '../components/PackOpening'
+import { GemStepper, TradeOffer } from '../components/TradeOffer'
+import { BerryCoin } from '../components/BerryCoin'
 import { dayKey } from '../logic/dates'
 import { SoccerMatch } from '../components/SoccerMatch'
 import {
@@ -97,6 +114,8 @@ export function FcLockScreen({ tab }: { tab: string }) {
       {tab === 'watch' && <HighlightsTab />}
       {tab === 'league' && <LeagueTab />}
       {tab === 'album' && <AlbumTab />}
+      {tab === 'packs' && <PacksTab />}
+      {tab === 'trade' && <TradeTab />}
       {tab === 'teams' && <TeamsTab />}
     </div>
   )
@@ -656,7 +675,17 @@ function PlayerSheet({
   /** Present when the sheet was opened from the transfer list. */
   move?: Transfer
   /** Present when it was opened from the album. */
-  sticker?: { clubName: string; number: number; shirt?: string; position?: string; spares: number }
+  sticker?: {
+    clubName: string
+    number: number
+    shirt?: string
+    position?: string
+    spares: number
+    /** The swap signal: what the other crewmate's album says about this one. */
+    mateName: string
+    mateSpare: number
+    mateNeeds: boolean
+  }
   onClose: () => void
 }) {
   const info = usePlayer(name)
@@ -706,6 +735,17 @@ function PlayerSheet({
                 .filter(Boolean)
                 .join(' · ')}
             </div>
+            {/* the whole point of a second album: who has it and who wants it */}
+            {sticker.mateSpare > 0 && sticker.spares === 0 && (
+              <div style={{ fontSize: 12, marginTop: 6 }}>
+                🤝 <b>{sticker.mateName} has a spare</b> — ask for it on the Trade tab.
+              </div>
+            )}
+            {sticker.mateNeeds && sticker.spares > 0 && (
+              <div style={{ fontSize: 12, marginTop: 6 }}>
+                🎯 <b>{sticker.mateName} is missing this one</b> — your double is worth something.
+              </div>
+            )}
           </div>
         )}
 
@@ -1223,12 +1263,24 @@ function SquadPicker({ onPick }: { onPick: (teamId: string, role: string) => voi
   )
 }
 
-// --- Album -------------------------------------------------------------------
+// --- Album, packs and swaps --------------------------------------------------
+//
+// FC Lock's Premier League album is the THIRD collection (§21g), and it plays
+// the identical game the sticker album (§15b) and the One Piece Album (§15b-2)
+// play: forced duplicates in every pack, a daily free pack, a sealed pack you
+// can win in a swap, the 1-shiny-is-worth-2-commons trade, the haggle, the
+// pack ceremony and the head-to-head race. **None of that is written here** —
+// it comes out of logic/collections.ts through the kit in logic/fcAlbum.ts and
+// the shared components. What IS here is the album's own presentation: a page
+// per club that turns under the finger.
 
 /**
  * The checklist, built once and kept: every club's page, in album order. Squads
  * are fetched one club at a time (the free API is rate-limited) and frozen in
  * localStorage, so a sticker never turns into a different player.
+ *
+ * It also hands back the collection kit built over whatever has loaded, plus
+ * the two lookups every screen below needs: id → sticker, club → crest.
  */
 function useChecklist() {
   const [pages, setPages] = useState<StickerDef[][]>(() => PL_CLUBS.map(() => []))
@@ -1259,24 +1311,68 @@ function useChecklist() {
   }, [])
 
   const all = useMemo(() => pages.flat(), [pages])
-  return { pages, all, ready }
+  const kit = useMemo(() => fcKit(all), [all])
+  const byId = useMemo(() => new Map(all.map((s) => [s.id, s])), [all])
+  /** clubId → crest, taken off each club's badge sticker. */
+  const crests = useMemo(
+    () => new Map(all.filter((s) => s.kind === 'badge').map((s) => [s.clubId, s.image])),
+    [all],
+  )
+  return { pages, all, ready, kit, byId, crests }
+}
+
+/** One drawn id as a card face, for the shared ceremony and the swap table. */
+const faceOf = (byId: Map<string, StickerDef>, id: string): CardFace | undefined => {
+  const s = byId.get(id)
+  return s ? asItem(s) : undefined
+}
+
+/** The line printed under a sticker in the end-of-pack stack. */
+const stickerNote = (byId: Map<string, StickerDef>, id: string): string => {
+  const s = byId.get(id)
+  if (!s) return ''
+  return [s.clubName, `Sticker #${s.number}`, s.shirt ? `Shirt #${s.shirt}` : null, s.position]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+/** The race is always run to the FULL album, not to however much has loaded. */
+const fcProgress = (a: AlbumState): RaceProgress => {
+  const owned = ownedIdsIn(a).length
+  return { owned, total: TOTAL_STICKERS, pct: Math.round((owned / TOTAL_STICKERS) * 100) }
+}
+
+/** The other crewmate's album — the one you're racing and trading with. */
+function useMate() {
+  const mateData = useStore((s) => s.mateData)
+  const profiles = useStore((s) => s.profiles)
+  const activeProfileId = useStore((s) => s.activeProfileId)
+  const mate = profiles.find((p) => p.id !== activeProfileId)
+  return { theirs: mateData?.fcAlbum ?? null, mateName: mate?.name ?? 'your crewmate', mateData }
 }
 
 /** The album: one club per page, swiped left and right like the real thing. */
 function AlbumTab() {
   const { data } = useStore()
-  /** The shop lives on the album's own page — one tab, both halves of collecting. */
-  const [shop, setShop] = useState(false)
-  const album = data.fcLock.album ?? emptyAlbum()
+  const album = data.fcAlbum
+  const { theirs, mateName } = useMate()
   const { pages, all, ready } = useChecklist()
   const [page, setPage] = useState(0)
   const [open, setOpen] = useState<StickerDef | null>(null)
+  const [missingOnly, setMissingOnly] = useState(false)
+  /** `clubs` walks the album page by page; `spares` is the trade fodder pile. */
+  const [view, setView] = useState<'clubs' | 'spares'>('clubs')
   const drag = useRef<{ x: number; dx: number } | null>(null)
   const [dx, setDx] = useState(0)
 
   const club = PL_CLUBS[page]
   const list = pages[page] ?? []
-  const have = list.filter((st) => owns(album, st.id)).length
+  const have = list.filter((st) => ownsIn(album, st.id)).length
+  const shown = missingOnly ? list.filter((st) => !ownsIn(album, st.id)) : list
+  const spareList = useMemo(
+    () => all.filter((st) => spareCountIn(album, st.id) > 0),
+    [all, album],
+  )
 
   function go(delta: number) {
     setPage((p) => Math.min(PL_CLUBS.length - 1, Math.max(0, p + delta)))
@@ -1285,31 +1381,25 @@ function AlbumTab() {
 
   return (
     <>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        {([false, true] as const).map((k) => (
-          <button
-            key={String(k)}
-            className={`btn btn--small ${shop === k ? 'btn--blue' : 'btn--ghost'}`}
-            style={{ flex: 1 }}
-            onClick={() => { sfx.click(); setShop(k) }}
-          >
-            {k ? '🎁 Packs' : '📕 Album'}
-          </button>
-        ))}
-      </div>
+      {/* the same head-to-head race both other collections run (§15b): the
+          question a collector actually asks is not "how far am I?" but "am I
+          ahead?" */}
+      <AlbumRace
+        mine={fcProgress(album)}
+        theirs={theirs ? fcProgress(theirs) : null}
+        noun="sticker"
+        scope="fcalbum"
+      />
 
-      {shop && <PacksTab />}
-      {shop ? null : (
-      <>
-      <div className="card" style={{ marginBottom: 12 }}>
+      <div className="card" style={{ margin: '14px 0 12px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <div style={{ fontWeight: 900 }}>📕 Premier League 2026</div>
           <div className="muted" style={{ fontSize: 12 }}>
-            {ownedCount(album)} / {all.length || TOTAL_STICKERS}
+            {ownedIdsIn(album).length} / {TOTAL_STICKERS}
           </div>
         </div>
         <div className="quiz-bar" style={{ marginTop: 8 }}>
-          <div className="quiz-bar-fill" style={{ width: `${all.length ? (ownedCount(album) / all.length) * 100 : 0}%` }} />
+          <div className="quiz-bar-fill" style={{ width: `${(ownedIdsIn(album).length / TOTAL_STICKERS) * 100}%` }} />
         </div>
         {ready < PL_CLUBS.length && (
           <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
@@ -1318,82 +1408,139 @@ function AlbumTab() {
         )}
       </div>
 
-      {/* the page itself — drag it sideways and it turns */}
-      <div
-        className="fc-page"
-        style={{ transform: `translateX(${dx}px)` }}
-        onTouchStart={(e) => {
-          drag.current = { x: e.touches[0].clientX, dx: 0 }
-        }}
-        onTouchMove={(e) => {
-          if (!drag.current) return
-          drag.current.dx = e.touches[0].clientX - drag.current.x
-          setDx(drag.current.dx * 0.5)
-        }}
-        onTouchEnd={() => {
-          const moved = drag.current?.dx ?? 0
-          drag.current = null
-          if (Math.abs(moved) > 60) {
-            sfx.click()
-            go(moved < 0 ? 1 : -1)
-          } else setDx(0)
-        }}
-      >
-        <div className="h2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <span>{club.name}</span>
-          <span className="muted" style={{ fontSize: 12 }}>
-            {have}/{list.length || SLOTS_PER_CLUB}
-          </span>
-        </div>
+      <div className="board-tools">
+        <button
+          className={`chip${view === 'clubs' ? ' chip--on' : ''}`}
+          onClick={() => { sfx.click(); setView('clubs') }}
+        >
+          📕 By club
+        </button>
+        <button
+          className={`chip${view === 'spares' ? ' chip--on' : ''}`}
+          onClick={() => { sfx.click(); setView('spares') }}
+        >
+          🔁 My spares ({spareList.length})
+        </button>
+        {view === 'clubs' && (
+          <button
+            className={`chip${missingOnly ? ' chip--on' : ''}`}
+            onClick={() => { sfx.click(); setMissingOnly(!missingOnly) }}
+          >
+            {missingOnly ? '👀 Missing only' : 'Show all'}
+          </button>
+        )}
+      </div>
 
-        <div className="fc-grid">
-          {(list.length ? list : Array.from({ length: SLOTS_PER_CLUB })).map((st, i) =>
-            st ? (
-              <StickerSlot
-                key={(st as StickerDef).id}
-                sticker={st as StickerDef}
-                owned={owns(album, (st as StickerDef).id)}
-                spares={spares(album, (st as StickerDef).id)}
-                onOpen={() => setOpen(st as StickerDef)}
-              />
-            ) : (
-              <div key={i} className="fc-slot fc-slot--empty">
-                <span className="muted" style={{ fontSize: 11 }}>#{pageStart(page) + i}</span>
-              </div>
-            ),
+      {view === 'spares' ? (
+        <div style={{ marginTop: 10 }}>
+          {spareList.length === 0 ? (
+            <p className="muted">
+              No doubles yet — every pack is built to hand you a few, so open another one. 🎁
+            </p>
+          ) : (
+            <div className="fc-grid">
+              {spareList.map((st) => (
+                <StickerSlot
+                  key={st.id}
+                  sticker={st}
+                  owned
+                  spares={spareCountIn(album, st.id)}
+                  badge={theirs && !ownsIn(theirs, st.id) ? '🎯' : undefined}
+                  onOpen={() => setOpen(st)}
+                />
+              ))}
+            </div>
+          )}
+          {spareList.length > 0 && (
+            <p className="muted" style={{ fontSize: 11, marginTop: 8, textAlign: 'center' }}>
+              🎯 = {mateName} is missing it — worth putting on the swap table.
+            </p>
           )}
         </div>
-      </div>
-
-      <div className="fc-pager">
-        <button className="btn btn--ghost btn--small" disabled={page === 0} onClick={() => { sfx.click(); go(-1) }}>
-          ‹
-        </button>
-        <div className="fc-dots">
-          {PL_CLUBS.map((c, i) => (
-            <button
-              key={c.id}
-              aria-label={c.name}
-              className={`fc-dot ${i === page ? 'is-on' : ''}`}
-              onClick={() => {
+      ) : (
+        <>
+          {/* the page itself — drag it sideways and it turns */}
+          <div
+            className="fc-page"
+            style={{ transform: `translateX(${dx}px)` }}
+            onTouchStart={(e) => {
+              drag.current = { x: e.touches[0].clientX, dx: 0 }
+            }}
+            onTouchMove={(e) => {
+              if (!drag.current) return
+              drag.current.dx = e.touches[0].clientX - drag.current.x
+              setDx(drag.current.dx * 0.5)
+            }}
+            onTouchEnd={() => {
+              const moved = drag.current?.dx ?? 0
+              drag.current = null
+              if (Math.abs(moved) > 60) {
                 sfx.click()
-                setPage(i)
-              }}
-            />
-          ))}
-        </div>
-        <button
-          className="btn btn--ghost btn--small"
-          disabled={page === PL_CLUBS.length - 1}
-          onClick={() => { sfx.click(); go(1) }}
-        >
-          ›
-        </button>
-      </div>
-      <p className="muted" style={{ fontSize: 11, textAlign: 'center', marginTop: 6 }}>
-        Swipe the page — {page + 1} of {PL_CLUBS.length}
-      </p>
-      </>
+                go(moved < 0 ? 1 : -1)
+              } else setDx(0)
+            }}
+          >
+            <div className="h2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span>{club.name}</span>
+              <span className={`album-crew-count ${list.length > 0 && have === list.length ? 'is-done' : ''}`}>
+                {list.length > 0 && have === list.length ? '★ COMPLETE' : `${have}/${list.length || SLOTS_PER_CLUB}`}
+              </span>
+            </div>
+
+            <div className="fc-grid">
+              {/* before the squad lands the page is still printed, as numbered gaps */}
+              {(list.length ? shown : Array.from<StickerDef | undefined>({ length: SLOTS_PER_CLUB })).map(
+                (st, i) =>
+                  st ? (
+                    <StickerSlot
+                      key={st.id}
+                      sticker={st}
+                      owned={ownsIn(album, st.id)}
+                      spares={spareCountIn(album, st.id)}
+                      badge={theirs && !ownsIn(album, st.id) && spareCountIn(theirs, st.id) > 0 ? '🤝' : undefined}
+                      onOpen={() => setOpen(st)}
+                    />
+                  ) : (
+                    <div key={i} className="fc-slot fc-slot--empty">
+                      <span className="muted" style={{ fontSize: 11 }}>#{pageStart(page) + i}</span>
+                    </div>
+                  ),
+              )}
+            </div>
+            {list.length > 0 && shown.length === 0 && (
+              <p className="muted" style={{ marginTop: 8 }}>Nothing missing here — the page is done. 🏆</p>
+            )}
+          </div>
+
+          <div className="fc-pager">
+            <button className="btn btn--ghost btn--small" disabled={page === 0} onClick={() => { sfx.click(); go(-1) }}>
+              ‹
+            </button>
+            <div className="fc-dots">
+              {PL_CLUBS.map((c, i) => (
+                <button
+                  key={c.id}
+                  aria-label={c.name}
+                  className={`fc-dot ${i === page ? 'is-on' : ''}`}
+                  onClick={() => {
+                    sfx.click()
+                    setPage(i)
+                  }}
+                />
+              ))}
+            </div>
+            <button
+              className="btn btn--ghost btn--small"
+              disabled={page === PL_CLUBS.length - 1}
+              onClick={() => { sfx.click(); go(1) }}
+            >
+              ›
+            </button>
+          </div>
+          <p className="muted" style={{ fontSize: 11, textAlign: 'center', marginTop: 6 }}>
+            Swipe the page — {page + 1} of {PL_CLUBS.length} · 🤝 = {mateName} has a spare
+          </p>
+        </>
       )}
 
       {open && (
@@ -1404,7 +1551,10 @@ function AlbumTab() {
             number: open.number,
             shirt: open.shirt,
             position: open.position,
-            spares: spares(album, open.id),
+            spares: spareCountIn(album, open.id),
+            mateName,
+            mateSpare: theirs ? spareCountIn(theirs, open.id) : 0,
+            mateNeeds: theirs ? !ownsIn(theirs, open.id) : false,
           }}
           onClose={() => setOpen(null)}
         />
@@ -1418,19 +1568,26 @@ function StickerSlot({
   sticker,
   owned,
   spares: spare,
+  badge,
   onOpen,
 }: {
   sticker: StickerDef
   owned: boolean
   spares: number
+  /** Corner flag — 🤝 they can spare it, 🎯 they need it. */
+  badge?: string
   onOpen: () => void
 }) {
   if (!owned) {
     return (
-      <div className="fc-slot fc-slot--empty">
+      <button
+        className="fc-slot fc-slot--empty"
+        onClick={() => { sfx.click(); onOpen() }}
+      >
         <span className="muted" style={{ fontSize: 11, fontWeight: 800 }}>#{sticker.number}</span>
         <span style={{ fontSize: 20, opacity: 0.35 }}>{sticker.kind === 'badge' ? '🛡️' : '👕'}</span>
-      </div>
+        {badge && <span className="fc-slot-flag">{badge}</span>}
+      </button>
     )
   }
   return (
@@ -1449,6 +1606,7 @@ function StickerSlot({
       <span className="fc-slot-name">{sticker.name}</span>
       <span className="fc-slot-no">#{sticker.number}</span>
       {spare > 0 && <span className="fc-slot-spare">+{spare}</span>}
+      {badge && <span className="fc-slot-flag">{badge}</span>}
     </button>
   )
 }
@@ -1456,216 +1614,399 @@ function StickerSlot({
 // --- Packs -------------------------------------------------------------------
 
 /**
- * Buying and opening. A pack is five stickers: they come out face down, flip
- * over one at a time when tapped, and a NEW one backflips into the album the
- * moment it lands there.
+ * Buying and opening. Three ways in — the free daily one, a sealed pack won in
+ * a swap, and one bought with Berries — and the ceremony itself is the shared
+ * one (§21h), handed FC Lock's own packet art and the club-crest beat.
  */
 function PacksTab() {
-  const { data, openFcPack } = useStore()
-  const album = data.fcLock.album ?? emptyAlbum()
-  const { all, ready } = useChecklist()
-  /** The five stickers of the pack being opened, and how far the ceremony has got. */
-  const [drawn, setDrawn] = useState<StickerDef[] | null>(null)
-  const [wasNew, setWasNew] = useState<Set<string>>(new Set())
-  const [error, setError] = useState<string | null>(null)
+  const data = useStore((s) => s.data)
+  const openPack = useStore((s) => s.openPack)
+  const { all, ready, kit, byId, crests } = useChecklist()
+  const [drawn, setDrawn] = useState<string[] | null>(null)
+  const [ownedBefore, setOwnedBefore] = useState<Set<string>>(new Set())
+  const [msg, setMsg] = useState<string | null>(null)
 
+  const album = data.fcAlbum
   const today = dayKey()
   const freeReady = freePackReady(album, today)
-  const byId = useMemo(() => new Map(all.map((s) => [s.id, s])), [all])
-  /** clubId → crest, taken off each club's badge sticker. */
-  const crests = useMemo(
-    () => new Map(all.filter((s) => s.kind === 'badge').map((s) => [s.clubId, s.image])),
-    [all],
-  )
+  const canBuy = data.economy.gems >= PACK_COST
+  const traded = packCredits(album)
+  const complete = ownedIdsIn(album).length >= TOTAL_STICKERS
 
-  function buy(kind: 'free' | 'buy') {
-    const ids = rollPack(all, album)
-    const fresh = new Set(ids.filter((id) => !owns(album, id)))
-    const res = openFcPack(kind, ids, PACK_COST)
-    if (res !== true) {
-      setError(
-        res === 'broke'
-          ? `Not enough Berries — a pack is ${PACK_COST} 🫐.`
-          : res === 'used'
-            ? 'Today’s free pack is already open. Come back tomorrow.'
-            : 'The checklist is still printing — give it a second.',
-      )
+  function open(kind: 'free' | 'buy' | 'credit') {
+    if (!all.length) {
       sfx.error()
+      setMsg('The checklist is still printing — give it a second.')
       return
     }
-    setError(null)
-    setWasNew(fresh)
-    setDrawn(ids.map((id) => byId.get(id)).filter((s): s is StickerDef => !!s))
-    sfx.gem()
+    setOwnedBefore(new Set(ownedIdsIn(album)))
+    // The screen rolls the pack because it is the side holding the checklist;
+    // the store checks the price and applies the draw. See `openPack`.
+    const result = openPack(kind, 'fcAlbum', (a) => rollPackIn(kit, a), PACK_COST)
+    if (result === 'broke') {
+      sfx.error()
+      setMsg(`Not enough Berries. A pack runs ${PACK_COST} 🫐.`)
+    } else if (result === 'used') {
+      sfx.error()
+      setMsg('Today’s free pack is already open. Come back tomorrow!')
+    } else {
+      setMsg(null)
+      setDrawn(result)
+    }
   }
 
   return (
     <>
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div style={{ fontWeight: 900 }}>🎁 Sticker packs</div>
-        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-          Five stickers a pack. One free pack every day, then {PACK_COST} 🫐 each.
-        </p>
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <button className="btn btn--blue btn--small" style={{ flex: 1 }} disabled={!freeReady || !all.length} onClick={() => buy('free')}>
-            {freeReady ? '🎁 Free pack' : '✅ Free pack used'}
-          </button>
-          <button className="btn btn--small" style={{ flex: 1 }} disabled={!all.length} onClick={() => buy('buy')}>
-            💰 Buy · {PACK_COST} 🫐
-          </button>
-        </div>
-        <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>
-          {data.economy.gems} 🫐 in the chest · {album.packsOpened} packs opened
-          {ready < PL_CLUBS.length ? ` · checklist ${ready}/${PL_CLUBS.length}` : ''}
-        </div>
-      </div>
-
-      {error && <div className="card" style={{ borderColor: 'var(--red)' }}>{error}</div>}
-
       {drawn && (
         <PackOpening
-          pack={drawn}
-          fresh={wasNew}
-          crests={crests}
+          drawn={drawn}
+          ownedBefore={ownedBefore}
+          lookup={(id) => faceOf(byId, id)}
+          note={(id) => stickerNote(byId, id)}
+          emblem="⚽"
+          packTitle="FC LOCK PACK"
+          intro={(id) => {
+            const s = byId.get(id)
+            return s ? { label: s.clubName, img: crests.get(s.clubId) } : null
+          }}
           onDone={() => setDrawn(null)}
         />
       )}
+
+      <div className="pack-shop">
+        <div className={`pack-card ${freeReady ? 'is-ready' : 'is-spent'}`}>
+          <div className="pack-card-art">🎁</div>
+          <div className="pack-card-body">
+            <div className="pack-card-title">Today’s free pack</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              {freeReady ? 'One on the house, every day.' : 'Already claimed. New pack tomorrow!'}
+            </div>
+          </div>
+          <button className="btn btn--small" disabled={!freeReady} onClick={() => { sfx.click(); open('free') }}>
+            {freeReady ? 'Open' : '✓'}
+          </button>
+        </div>
+
+        {traded > 0 && (
+          <div className="pack-card is-ready">
+            <div className="pack-card-art">🤝</div>
+            <div className="pack-card-body">
+              <div className="pack-card-title">Traded pack{traded > 1 ? ` ×${traded}` : ''}</div>
+              <div className="muted" style={{ fontSize: 12 }}>Won in a swap — still sealed.</div>
+            </div>
+            <button className="btn btn--small" onClick={() => { sfx.click(); open('credit') }}>Open</button>
+          </div>
+        )}
+
+        <div className="pack-card is-ready">
+          <div className="pack-card-art">📦</div>
+          <div className="pack-card-body">
+            <div className="pack-card-title">Sticker pack</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              {PACK_SIZE} stickers · doubles guaranteed to trade · a foil crest ~1 in 4 packs
+            </div>
+          </div>
+          <button className="btn btn--small" disabled={!canBuy} onClick={() => { sfx.click(); open('buy') }}>
+            <BerryCoin size={14} /> {PACK_COST}
+          </button>
+        </div>
+      </div>
+
+      {msg && <p className="muted" style={{ marginTop: 12, textAlign: 'center' }}>{msg}</p>}
+      {complete && (
+        <p style={{ marginTop: 14, textAlign: 'center', fontWeight: 900 }}>
+          🏆 All {TOTAL_STICKERS} stickers — the album is full.
+        </p>
+      )}
+      <p className="muted" style={{ marginTop: 16, fontSize: 12, textAlign: 'center' }}>
+        {data.economy.gems} 🫐 in the chest · packs opened: {album.packsOpened}
+        {ready < PL_CLUBS.length ? ` · checklist ${ready}/${PL_CLUBS.length}` : ''}
+      </p>
     </>
   )
 }
 
+// --- Swaps -------------------------------------------------------------------
+
 /**
- * The ceremony, the way the football games do it (§21h): the sealed pack, then
- * for each of the five — the club’s crest lighting up the tunnel, then the card
- * itself rising on the podium with the fireworks going off. Every step waits for
- * a tap, so nothing is missed by looking away.
+ * The swap table (§15b): spares for spares, and — when neither of you holds
+ * what the other needs — Berries and today's unopened free pack on top, haggled
+ * until somebody shakes on it. Its own shared doc, `app/fcTrades`.
  */
-function PackOpening({
-  pack,
-  fresh,
-  crests,
-  onDone,
-}: {
-  pack: StickerDef[]
-  fresh: Set<string>
-  crests: Map<string, string | undefined>
-  onDone: () => void
-}) {
-  const [stage, setStage] = useState<'pack' | 'club' | 'card' | 'done'>('pack')
-  const [i, setI] = useState(0)
-  const st = pack[i]
+function TradeTab() {
+  const data = useStore((s) => s.data)
+  const mateData = useStore((s) => s.mateData)
+  const fcTrades = useStore((s) => s.fcTrades)
+  const activeProfileId = useStore((s) => s.activeProfileId)
+  const proposeTrade = useStore((s) => s.proposeTrade)
+  const answerTrade = useStore((s) => s.answerTrade)
+  const counterTrade = useStore((s) => s.counterTrade)
+  const cancelTrade = useStore((s) => s.cancelTrade)
+  const { kit, byId } = useChecklist()
+  const { theirs, mateName } = useMate()
 
-  // the crest flash is a beat, not a screen: it moves on by itself
-  useEffect(() => {
-    if (stage !== 'club') return
-    const t = setTimeout(() => setStage('card'), 1500)
-    return () => clearTimeout(t)
-  }, [stage, i])
+  const [give, setGive] = useState<string[]>([])
+  const [want, setWant] = useState<string[]>([])
+  const [gems, setGems] = useState(0)
+  const [pack, setPack] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [zoom, setZoom] = useState<{ card: CardFace; origin: DOMRect | null } | null>(null)
 
-  function tap() {
+  const mine = data.fcAlbum
+  const purse = data.economy.gems
+  const freeReady = freePackReady(mine, dayKey())
+
+  const iCanHelp = theirs ? tradeableIn(kit, mine, theirs) : []
+  const theyCanHelp = theirs ? tradeableIn(kit, theirs, mine) : []
+
+  const myTurn = fcTrades.filter((t) => awaitsAnswer(t, activeProfileId))
+  const theirTurn = fcTrades.filter(
+    (t) =>
+      t.status === 'pending' &&
+      !awaitsAnswer(t, activeProfileId) &&
+      (t.fromId === activeProfileId || t.toId === activeProfileId),
+  )
+  const outgoing = fcTrades.filter((t) => t.status === 'pending' && t.fromId === activeProfileId)
+  const recent = useMemo(() => fcTrades.filter((t) => t.status !== 'pending').slice(-4).reverse(), [fcTrades])
+
+  const giveVal = offerValueFc(give)
+  const wantVal = offerValueFc(want)
+  const sweetened = gems > 0 || pack
+  const balanced = give.length > 0 && want.length > 0 && giveVal === wantVal
+  const canSend = want.length > 0 && (give.length > 0 || sweetened) && (sweetened || balanced)
+  const hint = gemHintFc(want)
+  const worth = offerWorthFc({ give, giveGems: gems, givePack: pack })
+  const verdict = worth >= hint * 1.15 ? '😍 generous' : worth >= hint * 0.85 ? '👍 about right' : '🤏 a bit light'
+
+  const peek = (card: CardFace, e: React.MouseEvent<HTMLElement>) => {
     sfx.click()
-    if (stage === 'pack') {
-      setStage('club')
-      return
-    }
-    if (stage === 'club') {
-      setStage('card')
-      return
-    }
-    if (stage === 'card') {
-      if (i + 1 < pack.length) {
-        setI(i + 1)
-        setStage('club')
-      } else setStage('done')
-      return
-    }
-    onDone()
+    setZoom({ card, origin: e.currentTarget.getBoundingClientRect() })
   }
 
-  if (stage === 'done') {
-    return (
-      <div className="fc-open" onClick={onDone}>
-        <div className="fc-open-inner">
-          <div className="h2" style={{ textAlign: 'center' }}>Pack opened</div>
-          <div className="fc-pack">
-            {pack.map((s, n) => (
-              <span key={`${s.id}-${n}`} className={`fc-card-face fc-card-front ${s.kind === 'badge' ? 'is-shiny' : ''}`} style={{ position: 'relative' }}>
-                {s.image ? <img src={s.image} alt={s.name} /> : <b style={{ fontSize: 26 }}>👕</b>}
-                <b className="fc-card-name">{s.name}</b>
-                <span className="fc-card-no">#{s.number}</span>
-                {fresh.has(s.id) && <span className="fc-card-new">NEW!</span>}
-              </span>
-            ))}
-          </div>
-          <p className="muted" style={{ fontSize: 13, textAlign: 'center', marginTop: 12 }}>
-            {fresh.size ? `${fresh.size} new — stuck in the album.` : 'All spares this time — trade fodder.'}
-          </p>
-          <button className="btn btn--blue" style={{ marginTop: 12, width: '100%' }} onClick={onDone}>
-            Back to the packs
-          </button>
-        </div>
-      </div>
+  const toggle = (list: string[], setList: (v: string[]) => void, id: string) => {
+    sfx.click()
+    setList(list.includes(id) ? list.filter((x) => x !== id) : [...list, id])
+  }
+
+  function send() {
+    const result = proposeTrade(give, want, { gems, pack, col: 'fcAlbum' })
+    if (result === 'ok') {
+      sfx.fanfare()
+      setGive([])
+      setWant([])
+      setGems(0)
+      setPack(false)
+      setMsg(`Offer sent to ${mateName}! 🕊️`)
+      return
+    }
+    sfx.error()
+    setMsg(
+      result === 'unbalanced'
+        ? 'Sticker for sticker, both sides must weigh the same — a foil crest counts as two players. Or throw in Berries instead.'
+        : result === 'empty'
+          ? 'Pick what you want, and put something up for it.'
+          : result === 'broke'
+            ? 'You don’t have that many Berries.'
+            : result === 'nopack'
+              ? 'Today’s free pack is already open — nothing left to hand over.'
+              : 'You already have an offer on the table. Withdraw it first.',
     )
   }
 
+  if (!theirs) {
+    return <p className="muted" style={{ textAlign: 'center', marginTop: 20 }}>Finding {mateName}’s album…</p>
+  }
+
+  const offerCard = (t: StickerTrade, answerable: boolean) => (
+    <TradeOffer
+      key={t.id}
+      trade={t}
+      viewerId={activeProfileId}
+      myPurse={purse}
+      matePurse={mateData?.economy.gems ?? null}
+      payerPackReady={t.fromId === activeProfileId ? freeReady : freePackReady(theirs, dayKey())}
+      lookup={(id) => faceOf(byId, id)}
+      onAccept={answerable ? () => { sfx.bigWin(); answerTrade(t.id, true, 'fcAlbum') } : undefined}
+      onDecline={answerable ? () => { sfx.sad(); answerTrade(t.id, false, 'fcAlbum') } : undefined}
+      onCounter={
+        answerable
+          ? (amount) => {
+              const r = counterTrade(t.id, amount, 'fcAlbum')
+              if (r === 'ok') { sfx.gem(); setMsg('Counter sent — the ball’s in their court. 💰') }
+              else sfx.error()
+              return r
+            }
+          : undefined
+      }
+      onCancel={t.fromId === activeProfileId ? () => { sfx.click(); cancelTrade(t.id, 'fcAlbum') } : undefined}
+      onPeek={peek}
+    />
+  )
+
   return (
-    <div className="fc-open" onClick={tap} role="button" tabIndex={0}>
-      <div className="fc-open-beams" />
-      {stage === 'pack' && (
-        <div className="fc-open-inner">
-          <div className="fc-sealed">
-            <span className="fc-sealed-shine" />
-            <span className="fc-sealed-crest">⚽</span>
-            <span className="fc-sealed-word">FC LOCK</span>
-            <span className="fc-sealed-sub">5 STICKERS</span>
-          </div>
-          <div className="fc-open-cta">TAP TO OPEN</div>
-        </div>
+    <>
+      {zoom && (
+        <StickerDetail
+          sticker={zoom.card}
+          album={mine}
+          mateAlbum={theirs}
+          mateName={mateName}
+          shelf={byId.get(zoom.card.id)?.clubName}
+          note={stickerNote(byId, zoom.card.id)}
+          origin={zoom.origin}
+          onClose={() => setZoom(null)}
+        />
       )}
 
-      {stage === 'club' && (
-        <div className="fc-open-inner">
-          <div className="fc-tunnel">
-            {crests.get(st.clubId) ? (
-              <img className="fc-tunnel-crest" src={crests.get(st.clubId)} alt={st.clubName} />
-            ) : (
-              <div className="fc-tunnel-crest fc-tunnel-crest--none">🛡️</div>
-            )}
-          </div>
-          <div className="fc-open-club">{st.clubName}</div>
-          <div className="fc-open-count">{i + 1} of {pack.length}</div>
+      {myTurn.map((t) => offerCard(t, true))}
+      {theirTurn.map((t) => offerCard(t, false))}
+
+      <div className="trade-radar">
+        <div className="trade-radar-item">
+          <span className="trade-radar-num">{theyCanHelp.length}</span>
+          <span>sticker{theyCanHelp.length === 1 ? '' : 's'} {mateName} can spare that <b>you need</b></span>
         </div>
+        <div className="trade-radar-item">
+          <span className="trade-radar-num">{iCanHelp.length}</span>
+          <span>of your spares that <b>{mateName} needs</b></span>
+        </div>
+      </div>
+
+      {theyCanHelp.length === 0 && iCanHelp.length === 0 && (
+        <p className="muted" style={{ textAlign: 'center', margin: '16px 0' }}>
+          Nothing to swap right now — neither of you holds a double the other is missing. Open more packs! 📦
+        </p>
       )}
 
-      {stage === 'card' && (
-        <div className="fc-open-inner">
-          <div className={`fc-hero ${st.kind === 'badge' ? 'is-shiny' : ''}`}>
-            <span className="fc-hero-rating">
-              <b>{st.shirt ? `#${st.shirt}` : `#${st.number}`}</b>
-              <small>{shortPos(st.position) ?? (st.kind === 'badge' ? 'CREST' : 'PL')}</small>
-            </span>
-            {st.image ? <img className="fc-hero-img" src={st.image} alt={st.name} /> : <div className="fc-hero-img">👕</div>}
-            <span className="fc-hero-name">{st.name}</span>
-            <span className="fc-hero-club">{st.clubName}</span>
-            {fresh.has(st.id) && <span className="fc-hero-new">NEW!</span>}
-          </div>
-          <div className="fc-flames">
-            {[0, 1, 2, 3].map((n) => (
-              <span key={n} className="fc-flame" style={{ animationDelay: `${n * 0.12}s` }} />
+      {outgoing.length === 0 && theyCanHelp.length > 0 && (
+        <>
+          <div className="trade-head">🎯 You want from {mateName}</div>
+          <div className="album-grid">
+            {theyCanHelp.slice(0, 60).map((s) => (
+              <Sticker
+                key={s.id}
+                sticker={s}
+                size="sm"
+                selected={want.includes(s.id)}
+                onClick={() => toggle(want, setWant, s.id)}
+                onLongPress={(e) => peek(s, e)}
+              />
             ))}
           </div>
-          <div className="fc-open-cta">{i + 1 < pack.length ? 'TAP TO CONTINUE' : 'TAP TO FINISH'}</div>
-        </div>
-      )}
-    </div>
-  )
-}
 
-/** "Right Winger" → "RW", the way a card prints it. */
-function shortPos(position?: string): string | null {
-  if (!position) return null
-  const words = position.split(/[\s-]+/).filter(Boolean)
-  return words.map((w) => w[0]).join('').slice(0, 3).toUpperCase()
+          <div className="trade-head">
+            🎁 You give from your spares
+            {iCanHelp.length > 0 && <span className="trade-head-note">{iCanHelp.length} {mateName} needs</span>}
+          </div>
+          {iCanHelp.length === 0 ? (
+            <p className="muted" style={{ fontSize: 12 }}>
+              None of your doubles are ones {mateName} needs right now — pay in Berries instead. 👇
+            </p>
+          ) : (
+            <div className="album-grid">
+              {iCanHelp.slice(0, 60).map((s) => (
+                <Sticker
+                  key={s.id}
+                  sticker={s}
+                  size="sm"
+                  count={spareCountIn(mine, s.id) + 1}
+                  selected={give.includes(s.id)}
+                  wanted
+                  onClick={() => toggle(give, setGive, s.id)}
+                  onLongPress={(e) => peek(s, e)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Nothing they need? Pay instead. No fixed price — that's what the
+              counter-offers are for. */}
+          <div className="trade-head">💰 Sweeten it</div>
+          <div className="trade-sweeten">
+            <div className="trade-sweeten-row">
+              <GemStepper value={gems} max={purse} onChange={setGems} />
+              <button
+                className="btn btn--ghost btn--small"
+                disabled={want.length === 0 || hint > purse}
+                onClick={() => { sfx.click(); setGems(Math.min(purse, hint)) }}
+              >
+                fair ≈ {hint}
+              </button>
+            </div>
+            <button
+              className={`trade-pack-toss ${pack ? 'is-on' : ''}`}
+              disabled={!freeReady}
+              onClick={() => { sfx.click(); setPack(!pack) }}
+            >
+              <span>{pack ? '☑' : '☐'}</span>
+              <span>
+                🎁 …and today’s free pack
+                {!freeReady && <span className="muted"> — already opened</span>}
+              </span>
+            </button>
+            <div className="trade-purse">
+              you hold <BerryCoin size={13} /> {purse}
+            </div>
+          </div>
+
+          <div className="trade-scale">
+            {sweetened ? (
+              <>
+                <span className="is-ok">
+                  You put up ≈ <BerryCoin size={13} /> {worth}
+                </span>
+                <span className="trade-scale-mid">⚖️ {verdict}</span>
+                <span className="is-ok">
+                  asking ≈ <BerryCoin size={13} /> {hint}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className={balanced ? 'is-ok' : ''}>You give {giveVal}</span>
+                <span className="trade-scale-mid">{balanced ? '⚖️ fair deal' : '⚖️'}</span>
+                <span className={balanced ? 'is-ok' : ''}>You get {wantVal}</span>
+              </>
+            )}
+          </div>
+          <p className="muted" style={{ fontSize: 11, textAlign: 'center' }}>
+            {sweetened
+              ? 'Berries have no fixed price — offer what you like, they can ask for more.'
+              : '🛡️ foil crest = 2 · player = 1 · hold a sticker to see it big'}
+          </p>
+
+          <button className="btn" style={{ width: '100%', marginTop: 10 }} disabled={!canSend} onClick={send}>
+            🕊️ Send offer to {mateName}
+          </button>
+        </>
+      )}
+
+      {msg && <p className="muted" style={{ marginTop: 10, textAlign: 'center' }}>{msg}</p>}
+
+      {recent.length > 0 && (
+        <>
+          <div className="trade-head">📜 Recent swaps</div>
+          {recent.map((t) => (
+            <div key={t.id} className="trade-log">
+              <span>
+                {t.fromName} → {t.toName} ·{' '}
+                {[
+                  t.give.length > 0 ? `${t.give.length} sticker${t.give.length === 1 ? '' : 's'}` : null,
+                  tradeGems(t) > 0 ? `${tradeGems(t)} 🫐` : null,
+                  t.givePack ? 'a pack 🎁' : null,
+                ]
+                  .filter(Boolean)
+                  .join(' + ')}{' '}
+                for {t.want.length}
+              </span>
+              <span className={`trade-log-status is-${t.status}`}>
+                {t.status === 'accepted' ? '✓ done' : t.status === 'declined' ? '✕ passed' : '— off'}
+              </span>
+            </div>
+          ))}
+        </>
+      )}
+    </>
+  )
 }
 
 // --- Teams -------------------------------------------------------------------
