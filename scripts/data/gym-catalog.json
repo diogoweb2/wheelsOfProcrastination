@@ -7,7 +7,7 @@
       "createdAt": "2026-08-06T19:25:19.458Z",
       "addedBy": "ai",
       "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-ea11007d.webp?alt=media&token=ccae4ad2-e697-4aba-88a2-878f05de3f0e",
-      "notes": "CONFIRMED BY THE OWNER: this bench DOES reach a true DECLINE (head below hips), not incline-only. Decline pressing, decline flyes and decline abdominal work are all performable, with the front leg rollers anchoring the legs. Bench1000 PRO FITNESS. Backrest and seat adjust independently through flat, incline and decline. Leg attachment at the front with padded rollers, used for leg extensions/curls and for securing the legs in decline positions."
+      "notes": "CONFIRMED BY THE OWNER: this bench DOES reach a true DECLINE (head below hips), not incline-only. Decline pressing, decline flyes and decline abdominal work are all performable, with the front leg rollers anchoring the legs. Bench1000 PRO FITNESS. Backrest and seat adjust independently through flat, incline and decline. The front leg attachment is FIXED — the rollers do not pivot or lever, so this bench CANNOT do leg extensions or leg curls. The rollers exist only to anchor the legs in decline positions. Knee isolation stays on bands."
     },
     {
       "name": "Hyperextension bench",
@@ -74,7 +74,7 @@
       "id": "eq-bands",
       "name": "Resistance bands",
       "emoji": "🎗️",
-      "notes": "A set of resistance bands with handles, plus a door anchor. They can also be looped around the basement post, so the anchor point can sit at ANY height — low, chest or overhead — which is what makes pulldowns, rows, pushdowns, face pulls and Pallof presses possible. Bands are the light-load answer for prehab (cuff, scaption, wrist work) where the 8.5 lb dumbbell floor is far too heavy; dumbbells stay the choice for anything needing predictable load progression.",
+      "notes": "TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour.",
       "addedBy": "manual",
       "createdAt": "2026-08-24T02:44:00.477Z"
     }
@@ -1546,119 +1546,6 @@
       "createdAt": "2026-08-23T01:20:54.911Z"
     },
     {
-      "id": "mv-band-chest-press",
-      "name": "Band Chest Press",
-      "emoji": "🎽",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "chest",
-        "arms",
-        "shoulders"
-      ],
-      "intensity": 2,
-      "how": "Anchor the band at chest height behind you. Split stance, elbows about 45°, press both handles forward until the arms are straight, then return under control. Squeeze the chest at the front, do not let the anchor pull you backwards.",
-      "restSec": 60,
-      "defaultReps": 12,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.441Z",
-      "demo": {
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-chest-press.webp?alt=media&token=d4440d86-423d-43bf-afac-88e3820f6522",
-        "source": "ExerciseDB",
-        "match": "close",
-        "sourceName": "resistance band seated chest press",
-        "sourceId": "4x5Okof",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-chest-press-poster.webp?alt=media&token=00e8e301-3652-43b0-be12-a8ac01a30c81"
-      }
-    },
-    {
-      "id": "mv-band-lat-pulldown",
-      "name": "Band Lat Pulldown",
-      "emoji": "⬇️",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "back",
-        "arms"
-      ],
-      "intensity": 2,
-      "how": "Anchor high — door top or the post above head height. Kneel or sit facing the anchor, arms straight overhead, pull the handles down to the chest leading with the elbows. Let the shoulder blades travel down, then return all the way up.",
-      "restSec": 60,
-      "defaultReps": 12,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "source": "ExerciseDB",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-lat-pulldown.webp?alt=media&token=63395c7f-f137-4517-8379-98eb0b31849e",
-        "sourceId": "DptumMx",
-        "sourceName": "band close-grip pulldown",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-lat-pulldown-poster.webp?alt=media&token=461787ca-4228-464d-b926-e787b15060ab",
-        "match": "close"
-      }
-    },
-    {
-      "id": "mv-band-row",
-      "name": "Band Row",
-      "emoji": "🚣",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "back",
-        "arms"
-      ],
-      "intensity": 2,
-      "how": "Anchor at chest height. Sit or stand facing the anchor with slight tension at the start, pull both handles to the ribs with the elbows close to the body, squeeze the shoulder blades, then extend the arms without rounding the back.",
-      "restSec": 60,
-      "defaultReps": 12,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "sourceId": "km0sQC0",
-        "sourceName": "band one arm standing low row",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-row.webp?alt=media&token=eb17cdd3-aea0-4f42-92ed-4c464993f03d",
-        "source": "ExerciseDB",
-        "match": "close",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-row-poster.webp?alt=media&token=944698ed-74cc-4188-9ca2-6d6806868ed7"
-      }
-    },
-    {
-      "id": "mv-band-face-pull",
-      "name": "Band Face Pull",
-      "emoji": "😮",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "shoulders",
-        "back"
-      ],
-      "intensity": 1,
-      "how": "Anchor slightly above head height. Pull the band towards your forehead, hands splitting apart and elbows high, ending with the knuckles beside the ears. Pause a beat, return slowly. Rear delts and upper back — keep it light.",
-      "restSec": 45,
-      "defaultReps": 20,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-pull.webp?alt=media&token=2ba361a8-bbe7-4f1c-b4bc-55030a9e4ad9",
-        "source": "ExerciseDB",
-        "match": "close",
-        "sourceId": "sTfvVsG",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-pull-poster.webp?alt=media&token=ec8a7100-7651-490a-91cf-ce6328280c68",
-        "sourceName": "band reverse fly"
-      }
-    },
-    {
       "id": "mv-band-external-rotation",
       "name": "Band External Rotation",
       "emoji": "🩹",
@@ -1670,7 +1557,7 @@
         "shoulders"
       ],
       "intensity": 1,
-      "how": "Anchor at elbow height. Stand side-on, working arm nearest the anchor tucked at 90° with the elbow pinned to the ribs, rotate the forearm away from the body, then back with control. Light tension only — this is cuff work.",
+      "how": "BAND: YELLOW (lightest, 20 lb label). Anchor at elbow height. Stand side-on, working arm nearest the anchor tucked at 90° with the elbow pinned to the ribs, rotate the forearm away from the body, then back with control. Light tension only — this is cuff work.",
       "restSec": 45,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1698,7 +1585,7 @@
         "shoulders"
       ],
       "intensity": 1,
-      "how": "Stand on the band. Thumbs up, raise both arms to shoulder height in the scapular plane — about 30° in front of the shoulders, not straight out to the side. Lower slowly. Light tension: it is prehab, not a lateral raise.",
+      "how": "BAND: YELLOW (lightest, 20 lb label). Stand on the band. Thumbs up, raise both arms to shoulder height in the scapular plane — about 30° in front of the shoulders, not straight out to the side. Lower slowly. Light tension: it is prehab, not a lateral raise.",
       "restSec": 45,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1714,60 +1601,6 @@
       }
     },
     {
-      "id": "mv-band-biceps-curl",
-      "name": "Band Biceps Curl",
-      "emoji": "💪",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "arms"
-      ],
-      "intensity": 2,
-      "how": "Stand on the middle of the band, elbows pinned at your sides, curl the handles to the shoulders and lower slowly against the pull. Widen your stance for more tension.",
-      "restSec": 60,
-      "defaultReps": 15,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-biceps-curl-poster.webp?alt=media&token=924e37c1-8aa0-461b-8d34-554335484cf1",
-        "sourceName": "band alternating biceps curl",
-        "match": "exact",
-        "sourceId": "3omWx6P",
-        "source": "ExerciseDB",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-biceps-curl.webp?alt=media&token=09646fda-772a-4cc5-995c-a9704447821f"
-      }
-    },
-    {
-      "id": "mv-band-triceps-pushdown",
-      "name": "Band Triceps Pushdown",
-      "emoji": "⬇️",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "arms"
-      ],
-      "intensity": 2,
-      "how": "Anchor high. Elbows tight to the ribs, push the handles down until the arms are straight, squeeze the triceps, then let the band lift the hands back to chest height without the elbows drifting forward.",
-      "restSec": 60,
-      "defaultReps": 15,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "source": "ExerciseDB",
-        "match": "close",
-        "sourceName": "cable triceps pushdown (v-bar)",
-        "sourceId": "gAwDzB3",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-triceps-pushdown-poster.webp?alt=media&token=ce55e287-708e-4e00-9abe-e251a30e4db6",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-triceps-pushdown.webp?alt=media&token=dfafb325-c46c-4195-85bd-59d6b905a4a4"
-      }
-    },
-    {
       "id": "mv-band-leg-curl",
       "name": "Band Leg Curl",
       "emoji": "🦵",
@@ -1779,7 +1612,7 @@
         "legs"
       ],
       "intensity": 2,
-      "how": "Anchor low. Lie face down, loop the band around one ankle, curl the heel towards the glutes against the pull, then lower slowly all the way. Keep the hips flat on the floor.",
+      "how": "BAND: BLACK (65 lb label) — PURPLE if you do both legs at once. Anchor low in front of the bench. Lie face down and loop the band around ONE ankle. Curl the heel towards the glutes against the pull, then lower slowly all the way. Keep the hips flat and do not let them rise. Both ankles at once also works when you want the set over faster — it needs roughly twice the tension, so move further from the anchor. To progress, increase the anchor distance; do not buy a heavier band.",
       "restSec": 60,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1807,7 +1640,7 @@
         "legs"
       ],
       "intensity": 2,
-      "how": "Anchor low behind you. Sit on the bench, loop the band around one ankle, straighten the knee against the pull and squeeze the quad at the top, then return under control.",
+      "how": "BAND: PURPLE (85 lb label) — drop to BLACK if you cannot finish the set. Anchor low behind you. Sit on the bench and loop the band around ONE ankle, across the front. Straighten the knee against the pull, squeeze the quad at the top, then return under control. Both ankles at once also works and halves the time, at roughly twice the tension. To progress, move the bench further from the anchor; do not buy a heavier band.",
       "restSec": 60,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1824,34 +1657,6 @@
       }
     },
     {
-      "id": "mv-band-glute-kickback",
-      "name": "Band Glute Kickback",
-      "emoji": "🍑",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "glutes"
-      ],
-      "intensity": 2,
-      "how": "Anchor low in front of you. Loop the band around one ankle, hinge slightly at the hips and drive that leg straight back, squeezing the glute at the top. Keep the lower back still — the movement is at the hip.",
-      "restSec": 60,
-      "defaultReps": 15,
-      "defaultSets": 3,
-      "perSide": true,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "sourceName": "Glute Kickback",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-glute-kickback-poster.webp?alt=media&token=29f50be2-dd07-4d7e-a9f5-e48417edd1bb",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-glute-kickback.webp?alt=media&token=b4ec2daa-7760-428f-82a5-3a179dde92d6",
-        "source": "free-exercise-db",
-        "match": "close",
-        "sourceId": "Glute_Kickback"
-      }
-    },
-    {
       "id": "mv-band-pallof-press",
       "name": "Band Pallof Press",
       "emoji": "🛡️",
@@ -1863,7 +1668,7 @@
         "core"
       ],
       "intensity": 2,
-      "how": "Anchor at chest height on the post. Stand side-on with the band held at the sternum, press it straight out and hold 2 s while the band tries to rotate you, then bring it back in. Resist the twist — nothing above the hips should move.",
+      "how": "BAND: RED (35 lb label) — move up to BLACK when 12 reps feel easy. Anchor at chest height on the post. Stand side-on with the band held at the sternum, press it straight out and hold 2 s while the band tries to rotate you, then bring it back in. Resist the twist — nothing above the hips should move.",
       "restSec": 45,
       "defaultReps": 12,
       "defaultSets": 3,
@@ -1880,60 +1685,6 @@
       }
     },
     {
-      "id": "mv-band-wrist-flexion",
-      "name": "Band Wrist Flexion",
-      "emoji": "🤲",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "forearms"
-      ],
-      "intensity": 1,
-      "how": "Stand on the band, forearm resting on the thigh palm up, hand past the knee. Curl the wrist up against the band, then lower slowly. Only the wrist moves.",
-      "restSec": 45,
-      "defaultReps": 20,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "match": "ai",
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-flexion-poster.webp?alt=media&token=53ccea7f-660c-4f8a-a08b-fbe02d826779",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-flexion.webp?alt=media&token=a97f7df3-1846-4612-b28c-f9c36d470e41",
-        "sourceName": "band wrist curl",
-        "source": "ExerciseDB",
-        "sourceId": "vUTfFHw"
-      }
-    },
-    {
-      "id": "mv-band-wrist-extension",
-      "name": "Band Wrist Extension",
-      "emoji": "✋",
-      "equipmentIds": [
-        "eq-bands"
-      ],
-      "kind": "weight",
-      "parts": [
-        "forearms"
-      ],
-      "intensity": 1,
-      "how": "Same setup palm down: forearm on the thigh, hand past the knee, lift the back of the hand against the band and lower slowly. This is the side that keeps the elbow happy on the court.",
-      "restSec": 45,
-      "defaultReps": 20,
-      "defaultSets": 3,
-      "addedBy": "manual",
-      "createdAt": "2026-08-24T02:44:00.476Z",
-      "demo": {
-        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-extension-poster.webp?alt=media&token=b87dce99-cf07-4900-abf1-0b5e49ced16a",
-        "sourceName": "band reverse wrist curl",
-        "sourceId": "Ezpnw9d",
-        "match": "ai",
-        "source": "ExerciseDB",
-        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-wrist-extension.webp?alt=media&token=38eb1a99-2192-4741-9d69-37be7463f426"
-      }
-    },
-    {
       "id": "mv-band-rotational-press",
       "name": "Band Rotational Press",
       "emoji": "🌀",
@@ -1947,7 +1698,7 @@
         "shoulders"
       ],
       "intensity": 2,
-      "how": "Anchor at chest height. Stand side-on, band in both hands at the chest, then rotate through the back hip and press away explosively — the pickleball drive. Return under control and reset. Speed, not grind.",
+      "how": "BAND: RED (35 lb label) — move up to BLACK when the throw stops feeling fast. Anchor at chest height. Stand side-on, band in both hands at the chest, then rotate through the back hip and press away explosively — the pickleball drive. Return under control and reset. Speed, not grind.",
       "restSec": 60,
       "defaultReps": 10,
       "defaultSets": 3,
