@@ -10,8 +10,8 @@ Then **Block 2 changes 2–4 movements and nothing else** — split squat → re
 
 | | Session | What it is |
 |---|---|---|
-| **S1** | 🦵 Lower strength + core | Dumbbell Bulgarian Split Squat · Bench Hip Thrust · Side Plank · Calf Raise |
-| **S2** | 🫸 Upper push + pull | Dumbbell Bench Press · Chest-Supported Dumbbell Row · Pull-ups · Dumbbell Lateral Raise · Band Face Pull |
+| **S1** | 🦵 Lower strength + core | Dumbbell Bulgarian Split Squat · Bench Hip Thrust · Side Plank · Calf Raise · Back Extension |
+| **S2** | 🫸 Upper push + pull | Dumbbell Bench Press · Chest-Supported Dumbbell Row · Pull-ups · Dips · Dumbbell Lateral Raise · Band Face Pull |
 | **S3** | ⚡ Pickleball power + stability | Split Squat Jump · Lateral Shuffle · Kettlebell Swing · Copenhagen Plank · Band Pallof Press |
 | **S4** | 🦿 Lower unilateral + posterior chain | Dumbbell Reverse Lunge · Goblet Squat · Single-Leg Glute Bridge · Band Leg Curl · Single-Leg Calf Raise |
 | **S5** | 🧗 Upper pull + shoulder health | Pull-ups · One-Arm Dumbbell Row · Dumbbell Shoulder Press · Band External Rotation · Dumbbell Reverse Wrist Curl · Dumbbell Wrist Curl |
@@ -35,7 +35,7 @@ The tables below are the **30-minute** session — what each one is written for.
 | **30 min** | exactly as written below | — |
 | **40 min** | one extra set on each of the first two movements, and take the longer rests | more time buys more of what already matters, not more exercises. A ⚡ slot never gains a set, so S3 at 40 is the same as S3 at 30 — which is correct for a power session |
 
-The order within a session is the priority order: main strength movement (3 sets) → second major movement (3) → the goal-specific one (2–3) → accessories and core (2). Five exercises is not a target; S1 is four and is finished.
+The order within a session is the priority order: main strength movement (3 sets) → second major movement (3) → the goal-specific one (2–3) → accessories and core (2). Five exercises is not a target; the sessions run four to six.
 
 ---
 
@@ -47,6 +47,7 @@ The order within a session is the priority order: main strength movement (3 sets
 | 2 | 🍑 **Bench Hip Thrust** | 3 × 10–15 | Flat weight bench + Adjustable dumbbells on stand |
 | 3 | 📏 **Side Plank** | 2 × 30–45s /side | Bodyweight |
 | 4 | 🦶 **Calf Raise** | 3 × 15–20 | Bodyweight |
+| 5 | 🐍 **Back Extension** | 2 × 10–15 | Hyperextension bench |
 
 <details><summary>How to do them</summary>
 
@@ -58,6 +59,8 @@ The order within a session is the priority order: main strength movement (3 sets
 
 **🦶 Calf Raise** — Up on the toes as high as you can, slow all the way back down.
 
+**🐍 Back Extension** — Hips on the pad, ankles under the rollers, arms crossed on the chest. Hinge down until you feel the hamstrings, then squeeze the glutes to come back to one straight line — stop level, never arch past it. Slow both ways; this is endurance work, not a lift.
+
 </details>
 
 ## S2 · 🫸 Upper push + pull
@@ -67,10 +70,12 @@ The order within a session is the priority order: main strength movement (3 sets
 | 1 | 🏋️ **Dumbbell Bench Press** | 3 × 8–12 | Adjustable dumbbells on stand + Flat weight bench |
 | 2 | 🛶 **Chest-Supported Dumbbell Row** | 3 × 8–12 | Adjustable dumbbells on stand + Adjustable Weight Bench |
 | 3 | 🧗 **Pull-ups** | 3 × 4–8 | Pull-up bar |
-| 4 | 🕊️ **Dumbbell Lateral Raise** | 2 × 15–20 | Adjustable dumbbells on stand |
-| 5 | 😮 **Band Face Pull** | 2 × 15–20 | Resistance bands |
+| 4 | 🟨 **Dips** | 3 × 6–10 | Parallel dip bars |
+| 5 | 🕊️ **Dumbbell Lateral Raise** | 2 × 15–20 | Adjustable dumbbells on stand |
+| 6 | 😮 **Band Face Pull** | 2 × 15–20 | Resistance bands |
 
 - **Pull-ups** — Chin-ups instead are fine — same slot, easier line of pull.
+- **Dips** — Stop at parallel. Deeper than that is the shoulder paying for the rep.
 
 <details><summary>How to do them</summary>
 
@@ -79,6 +84,8 @@ The order within a session is the priority order: main strength movement (3 sets
 **🛶 Chest-Supported Dumbbell Row** — Set the backrest to about 45 degrees and lie face-down on it, row both dumbbells to your ribs. Chest stays glued to the pad the whole set.
 
 **🧗 Pull-ups** — Hang, pull until your chin clears the bar, lower all the way down under control.
+
+**🟨 Dips** — Support yourself on the bars, lower until your upper arms are about parallel to the floor, press back up. Stop at parallel — going deeper strains the shoulder.
 
 **🕊️ Dumbbell Lateral Raise** — Stand tall, light dumbbells at your sides, raise them out to shoulder height with a slight elbow bend. Lead with the elbows, stop at shoulder level, lower slowly.
 

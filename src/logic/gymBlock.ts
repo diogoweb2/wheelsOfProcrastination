@@ -54,7 +54,7 @@ const ex = (exId: string, sets: number, repLow: number, repHigh: number, extra?:
  * against it is left alone forever — that is your training history's programme,
  * not ours to rewrite.
  */
-export const SEED_VERSION = 2
+export const SEED_VERSION = 3
 
 /**
  * Four full rotations before the app suggests a new block, seven before it
@@ -74,6 +74,9 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
       ex('mv-bench-hip-thrust', 3, 10, 15),
       ex('bw-side-plank', 2, 30, 45),
       ex('bw-calf-raise', 3, 15, 20),
+      ex('mv-back-extension', 2, 10, 15, {
+        note: 'Finisher, not a lift. Stop level with the body — never arch past straight.',
+      }),
     ],
   },
   {
@@ -84,6 +87,7 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
       ex('mv-dumbbell-bench-press', 3, 8, 12),
       ex('mv-chest-supported-dumbbell-row', 3, 8, 12),
       ex('bw-pullup', 3, 4, 8, { note: 'Chin-ups instead are fine — same slot, easier line of pull.' }),
+      ex('mv-dips', 3, 6, 10, { note: 'Stop at parallel. Deeper than that is the shoulder paying for the rep.' }),
       ex('mv-dumbbell-lateral-raise', 2, 15, 20),
       ex('mv-band-face-pull', 2, 15, 20),
     ],

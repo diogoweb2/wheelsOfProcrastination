@@ -31,6 +31,7 @@ import {
   sessionReport,
   sessionSeconds,
   stepLoad,
+  romanChairMove,
 } from '../../logic/gym'
 import type { BlockAge } from '../../logic/gymBlock'
 import type { SessionLength } from '../../logic/gymBlock'
@@ -1215,11 +1216,22 @@ function FinishCard({ session, onBanked, onBack }: { session: GymSession; onBank
 // --- the report -------------------------------------------------------------
 
 function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }) {
-  const { gymPlan, gymPlanning } = useStore()
+  const { gymPlan, gymPlanning, gymPlanSolo, gymCatalog, data } = useStore()
   const { session, coins } = banked
   const report = sessionReport(session)
   const [more, setMore] = useState(false)
   const [gearMode, setGearMode] = useState<GearMode>(session.gearMode ?? 'mixed')
+  // The one-tap finisher. The roman chair is the standing exception to "the
+  // block decides what you do" (§18e): it is the one thing worth doing on its
+  // own, so it gets its own button instead of hiding behind "do more" and a
+  // minute picker. `romanChairWarmup: true` is forced because the SETTING is
+  // about opening a session with it — turning that off shouldn't take away the
+  // finisher you deliberately asked for. Undefined = no such bench catalogued,
+  // and then there is no button at all rather than a dead one.
+  const finisher = useMemo(
+    () => romanChairMove(gymCatalog, { ...data.gym.brief, romanChairWarmup: true }, data.gym.ex),
+    [gymCatalog, data.gym.brief, data.gym.ex],
+  )
 
   return (
     <>
@@ -1284,6 +1296,19 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
 
       {!more ? (
         <>
+          {finisher && (
+            <button
+              className="btn btn--blue"
+              style={{ marginBottom: 8 }}
+              onClick={() => {
+                sfx.click()
+                primeGymAudio()
+                gymPlanSolo(finisher.id, session)
+              }}
+            >
+              {finisher.emoji} Do some {finisher.name.toLowerCase()}
+            </button>
+          )}
           <button
             className="btn btn--blue"
             onClick={() => {

@@ -558,6 +558,32 @@ export function planOne(e: ExerciseDef, input: PlanInput, index = 0): SessionExe
   return buildSessionExercise(e, input, index)
 }
 
+/**
+ * A one-move session — the ➕ bonus you tap for on the way out ("do some back
+ * extension"). Same reps, load, rest and pace logic as any other slot; it is
+ * only the picking that is skipped, because you already said what you want.
+ *
+ * Built at index 2 on purpose: the first two slots of a planned session run
+ * light as the ramp-in, and this is a finisher on a body that is already warm.
+ */
+export function planSolo(e: ExerciseDef, input: PlanInput): GymSession {
+  const day = input.day ?? dayKey()
+  const se = buildSessionExercise(e, input, 2)
+  return {
+    id: crypto.randomUUID(),
+    day,
+    status: 'preview',
+    minutes: Math.max(1, Math.round(exerciseSeconds(se) / 60)),
+    mood: input.mood,
+    gearMode: input.gearMode ?? 'mixed',
+    source: 'local',
+    note: `${e.name}, and nothing else.`,
+    exercises: [se],
+    coins: 0,
+    followUp: input.followUp ? true : undefined,
+  }
+}
+
 /** Pick ONE replacement for an exercise you don't feel like doing today. */
 export function pickReplacement(input: PlanInput, replacing: SessionExercise, keep: SessionExercise[]): SessionExercise | null {
   const day = input.day ?? dayKey()

@@ -189,6 +189,7 @@ import {
   loggedReps,
   pickReplacement,
   planSession,
+  planSolo,
   seedBrief,
   sessionBonus,
   setSeconds,
@@ -675,6 +676,13 @@ interface StoreState {
    * ended when this is a "do more" block — it is never repeated.
    */
   gymPlan: (minutes: number, mood: Mood, opts?: { gearMode?: GearMode; followUp?: GymSession | null }) => Promise<void>
+  /**
+   * Park a ONE-MOVE session on the preview — the ➕ finisher you tap for on the
+   * way out of a workout. Returns false when the catalog has no such exercise
+   * (the gear was retired, the row was deleted), so the caller can hide the
+   * button rather than offer a dead one.
+   */
+  gymPlanSolo: (exId: string, followUp?: GymSession | null) => boolean
   /**
    * Build the NEXT session of the training block (or the one at `pos`) and park
    * it on the preview. This is the normal way a workout starts now — `gymPlan`
@@ -3522,6 +3530,24 @@ export const useStore = create<StoreState>((set, get) => {
       } finally {
         set({ gymPlanning: false })
       }
+    },
+
+    gymPlanSolo(exId, followUp) {
+      const { data, gymCatalog } = get()
+      const e = exerciseById(gymCatalog, exId)
+      if (!e) return false
+      const session = planSolo(e, {
+        catalog: gymCatalog,
+        gym: data.gym,
+        minutes: 5,
+        mood: followUp?.mood ?? 'normal',
+        gearMode: 'mixed',
+        followUp: followUp ?? null,
+      })
+      commit((d) => {
+        d.gym.active = session
+      })
+      return true
     },
 
     gymPlanBlock(opts) {

@@ -1962,6 +1962,30 @@
         "sourceName": "band twisting overhead press",
         "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-rotational-press-poster.webp?alt=media&token=06921442-79da-46d2-8fff-4d7685bd4819"
       }
+    },
+    {
+      "id": "mv-back-extension",
+      "name": "Back Extension",
+      "emoji": "🐍",
+      "equipmentIds": [
+        "eq-6b040b1d"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "back",
+        "glutes",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Hips on the pad, ankles under the rollers, arms crossed on the chest. Hinge down until you feel the hamstrings, then squeeze the glutes to come back to ONE straight line — stop level, never arch past it. Slow both ways; this is endurance work, not a lift.",
+      "restSec": 60,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-27T00:00:00.000Z"
     }
   ]
 }
