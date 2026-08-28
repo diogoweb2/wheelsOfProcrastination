@@ -1200,17 +1200,18 @@ A top-down **3v3 arcade football game**, built to feel like **Blue Lock Rivals**
 
 Four tabs, four URLs (§1c): **⚽ Play** (`/rivals/play` — the format, the opponent picker, the fixtures and the match itself), **👕 Squad** (`/rivals/squad` — your club, position and Style), **🏆 Table** (`/rivals/table` — the standings and your results), **📜 How to** (`/rivals/rules`).
 
-**Pick the format: 3v3, 4v4 or 5v5.** Chosen on **Play**, before each match — it isn't saved with your club, so you can play a quick 3v3 and then a 5v5 with the same squad. There is **no bench and no substitutions** in any of them. Thirteen clubs — Straw's FC, The Monsters, The Knights, The Champs, The Warriors, The Knifes, The Bucks, The Bears, Tiger FC, Crow FC, The Monks, Man FC, New Castles.
+**Pick the format: 2v2, 3v3, 4v4 or 5v5.** Chosen on **Play**, before each match — it isn't saved with your club, so you can play a quick 3v3 and then a 5v5 with the same squad. There is **no bench and no substitutions** in any of them. Thirteen clubs — Straw's FC, The Monsters, The Knights, The Champs, The Warriors, The Knifes, The Bucks, The Bears, Tiger FC, Crow FC, The Monks, Man FC, New Castles.
 
 | Format | Shirts | Pitch | Goal | First to | Feel |
 |---|---|---|---|---|---|
+| **2v2** | GK · FW | 58 × 38 | 12 | 3 | you and a keeper, pure end to end |
 | **3v3** | GK · MF · FW | 72 × 44 | 14 | 4 | quick and end-to-end |
 | **4v4** | GK · DF · MF · FW | 84 × 50 | 16 | 5 | a defender to beat |
 | **5v5** | GK · DF · MF · WG · FW | 96 × 56 | 18 | 5 | wingers, and room to run |
 
 The pitch, the goal, the penalty boxes and the score limit all grow with the format — five a side on the 3v3 arena is a scrum, three a side on the 5v5 one is a hike. You play **one shirt**; the rest of your side are bots.
 
-**Your shirt folds onto the format.** You pick a position once, on **Squad**, out of all five. A format that hasn't got it folds it onto the nearest one it has: **no winger in a 3v3 or 4v4** (you play striker), **no dedicated defender in a 3v3** (you play midfielder). The Play tab says so when it happens. Legacy six-a-side saves fold first: CB→DF, CM→MF, CF→FW, LW/RW→WG.
+**Your shirt folds onto the format.** You pick a position once, on **Squad**, out of all five. A format that hasn't got it folds it onto the nearest one it has: **no winger in a 3v3 or 4v4** (you play striker), **no dedicated defender in a 3v3** (you play midfielder), and a **2v2 is a keeper and a striker** — every outfield shirt plays striker there. The Play tab says so when it happens. Legacy six-a-side saves fold first: CB→DF, CM→MF, CF→FW, LW/RW→WG.
 
 **One period, and a score limit.** 180 seconds in every format. **Reach the format's score limit and it ends there and then**, otherwise whoever leads when the clock runs out. Kick-off goes to the side that conceded; a ball out of play returns to the other team where it left.
 
@@ -1264,6 +1265,18 @@ Both action blocks are laid out in the same 3×2 shape as the buttons on screen.
 **Legs still go.** Stamina drains as you run and faster while dashing, and a tired player is up to 40% slower. It refills when you stand still, and freezes entirely during Flow State and Metavision. With no bench, pacing yourself *is* the substitution.
 
 **The league.** Twelve fixtures, one against each of the other clubs, and the table has all thirteen in it — the other twelve play each other in the background, seeded off their strength so the standings are the same every time the screen redraws. Your club, position, Style and results live on **your own profile**, so Diogo and Ben run separate seasons. (The save still sits at `AppData.fcLock.soccer`, where it was written when this was an FC Lock tab — moving the tile is not a reason to migrate a season out from under a save.) Changing your club, position or Style on **Squad** keeps the season; only **Start a new season** on Table clears the results.
+
+**The match takes the whole screen.** Kick off and the pitch becomes the page: a fixed, full-bleed canvas with **nothing around it** — no app chrome, no scroll. It asks the browser for true fullscreen and a **landscape lock** on the way in and releases both on the way out; where that is refused (iOS) the full-bleed overlay stands on its own. The canvas takes whatever size the screen gives it and the drawing **works out its own scale**, so the arena is centred with at least three and a half units of stand on its tightest axis and a 2v2 on a phone looks like a 5v5 on a tablet.
+
+**The controls float on the pitch, the way Blue Lock Rivals does it.** Everything is translucent and blurred over the game rather than sitting in a strip below it:
+
+- the **stick** under the left thumb — a glass ring with a white knob;
+- the **six buttons fanned under the right thumb**, biggest and nearest the corner first: **SHOOT** in the corner, **TACKLE** above it, **PASS** inboard of it, then **DASH**, **ABILITY** and **FLOW** further out. Charge fills the SHOOT button itself, from the middle out;
+- the **EGO and LEGS meters** between the two thumbs, along the bottom;
+- the **scoreboard** hanging off the top edge over a fade, with a **✕** in the corner to leave;
+- printed keyboard caps on every button — **hidden on a touch screen**, where they are noise.
+
+Two on one phone puts the second player's whole deck along the **top edge**.
 
 **The look is drawn, not downloaded.** Blue Lock Rivals' art belongs to somebody else and the repo keeps `public/` tight (see CLAUDE.md), so **the entire scene is canvas- and CSS-drawn** — nothing is fetched and no image ships. What it draws is that game's look:
 

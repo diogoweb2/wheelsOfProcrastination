@@ -136,7 +136,7 @@ function PlayTab({ setTab }: { setTab: (tab: string) => void }) {
 
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="h3" style={{ marginBottom: 6 }}>🔢 How many a side?</div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {TEAM_SIZES.map((n) => (
             <button
               key={n}
@@ -181,7 +181,8 @@ function PlayTab({ setTab }: { setTab: (tab: string) => void }) {
         {mode === 'ai' ? (
           <>
             <p className="muted" style={{ fontSize: 12, margin: '8px 0 6px' }}>
-              All three of theirs are bots. How hard should they play?
+              {fmt.size === 2 ? 'Their other one is a bot' : `All ${fmt.size - 1} of theirs are bots`}. How hard should
+              they play?
             </p>
             <div style={{ display: 'flex', gap: 6 }}>
               {(Object.keys(DIFFICULTY) as Difficulty[]).map((d) => (
@@ -397,8 +398,9 @@ function RulesTab() {
       <div className="card" style={{ marginBottom: 12 }}>
         <p style={{ fontSize: 13, margin: 0 }}>
           Top-down small-sided football in the spirit of Blue Lock Rivals. <b>No subs</b> — you play one shirt and the
-          rest of your side are bots. Pick <b>3v3</b>, <b>4v4</b> or <b>5v5</b> on the Play tab before each match; the
-          pitch, the goal and the score limit all grow with it.
+          rest of your side are bots. Pick <b>2v2</b>, <b>3v3</b>, <b>4v4</b> or <b>5v5</b> on the Play tab before each
+          match; the pitch, the goal and the score limit all grow with it. The match takes over the whole screen, with
+          the stick and the six buttons floating on the pitch.
         </p>
         <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
           {MATCH_SECONDS / 60} minutes, one period. <b>Reach the score limit and it's over on the spot</b>, otherwise
@@ -501,8 +503,8 @@ function SquadPicker({ onPick }: { onPick: (teamId: string, role: string, style?
     <>
       <div className="h2">🏟️ Pick your club</div>
       <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
-        Thirteen teams, <b>no subs</b>. Play 3v3, 4v4 or 5v5 — you pick that on <b>Play</b>, before each match. You play
-        one shirt; the rest are bots.
+        Thirteen teams, <b>no subs</b>. Play 2v2, 3v3, 4v4 or 5v5 — you pick that on <b>Play</b>, before each match. You
+        play one shirt; the rest are bots.
       </p>
       <div className="card" style={{ marginBottom: 12, padding: 8 }}>
         {TEAMS.map((t) => (
@@ -538,7 +540,8 @@ function SquadPicker({ onPick }: { onPick: (teamId: string, role: string, style?
         </div>
         <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
           {ROLE_NAMES[role]} — your bots fill the rest. A shirt a smaller format doesn't have folds onto the nearest one
-          it does: no winger in a 3v3 or 4v4, no dedicated defender in a 3v3.
+          it does: no winger in a 3v3 or 4v4, no dedicated defender in a 3v3, and a 2v2 is a keeper and a striker —
+          everyone outfield plays striker there.
         </p>
       </div>
 

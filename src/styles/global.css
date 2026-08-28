@@ -5086,70 +5086,85 @@ input, select { font-family: inherit; }
 /* The look is Blue Lock Rivals': a night arena, hard shadows, and everything
    that matters announced in light. All of it is CSS and canvas — none of that
    game's art ships here. */
-.ops-wrap { user-select: none; -webkit-user-select: none; touch-action: none; }
-
-/* the scoreboard: two kit chips either side of a big score and a clock */
-.ops-board {
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, #101a33, #060a16);
-  border: 1px solid rgb(120 170 255 / 25%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
-}
-.ops-side {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.ops-side.is-away { justify-content: flex-end; }
-.ops-side i { width: 6px; align-self: stretch; border-radius: 3px; border: 1px solid; flex-shrink: 0; }
-.ops-side b {
-  min-width: 0;
+/* ⚽ Rivals — the match takes the whole screen (§21j).
+   The pitch is the page: a fixed, full-bleed canvas with the scoreboard and the
+   controls floating ON it, translucent and blurred, the way Blue Lock Rivals
+   lays a phone out. Nothing steals room from the game. */
+.ops-full {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #05070f;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.3px;
-  color: #eaf1ff;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  overscroll-behavior: none;
 }
-.ops-score {
+.ops-canvas { width: 100%; height: 100%; display: block; }
+
+/* the scoreboard, hanging off the top edge */
+.ops-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  font-size: 26px;
+  justify-content: center;
+  gap: 10px;
+  padding: max(6px, env(safe-area-inset-top)) 52px 10px;
+  background: linear-gradient(180deg, rgb(4 8 18 / 78%), rgb(4 8 18 / 0%));
+  pointer-events: none;
+}
+.ops-hud-side { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.ops-hud-side.is-away { justify-content: flex-end; }
+.ops-hud-side i { width: 5px; height: 20px; border-radius: 3px; border: 1px solid; flex-shrink: 0; }
+.ops-hud-side b {
+  font-size: clamp(10px, 2.4vmin, 14px);
   font-weight: 900;
   font-style: italic;
-  line-height: 1;
-  color: #fff;
-  text-shadow: 0 0 14px rgb(90 160 255 / 70%);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 6px rgb(0 0 0 / 90%);
 }
-.ops-score em { font-style: normal; opacity: 0.5; margin: 0 3px; }
-.ops-score i {
-  font-style: normal;
-  font-size: 10px;
-  font-weight: 800;
+.ops-hud-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: clamp(20px, 5vmin, 34px);
+  font-weight: 900;
+  font-style: italic;
   letter-spacing: 1px;
+  text-shadow: 0 0 16px rgb(70 150 255 / 70%), 0 3px 8px rgb(0 0 0 / 90%);
+}
+.ops-hud-score em { font-style: normal; opacity: 0.5; }
+.ops-hud-score i {
+  font-style: normal;
+  font-size: clamp(10px, 2.2vmin, 13px);
+  font-weight: 800;
   opacity: 0.7;
-  text-shadow: none;
-  margin-top: 2px;
+  letter-spacing: 0;
 }
-.ops-clock { text-align: center; font-size: 10px; font-weight: 800; opacity: 0.5; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+.ops-x {
+  position: absolute;
+  top: max(6px, env(safe-area-inset-top));
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgb(255 255 255 / 20%);
+  background: rgb(10 16 32 / 55%);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
 
-.ops-pitch-wrap { position: relative; margin-top: 6px; }
-.ops-pitch {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 14px;
-  border: 1px solid rgb(120 170 255 / 25%);
-  box-shadow: 0 8px 26px rgb(0 0 0 / 55%);
-}
 /* The shout: Rivals announces everything in big slanted capitals, and it SLAMS
    in — overshooting, skewed, then settling. It sits HIGH on the pitch and hugs
    its own text: a band across the middle covered the players it was about. */
@@ -5158,7 +5173,7 @@ input, select { font-family: inherit; }
   inset: 0;
   display: grid;
   place-items: start center;
-  padding-top: 6%;
+  padding-top: 11%;
   text-align: center;
   pointer-events: none;
 }
@@ -5168,7 +5183,7 @@ input, select { font-family: inherit; }
   padding: 5px 18px;
   border-radius: 8px;
   background: linear-gradient(90deg, rgb(24 46 100 / 0%), rgb(30 60 130 / 88%) 14%, rgb(30 60 130 / 88%) 86%, rgb(24 46 100 / 0%));
-  font-size: 22px;
+  font-size: clamp(16px, 4vmin, 26px);
   font-weight: 900;
   font-style: italic;
   letter-spacing: 1px;
@@ -5180,7 +5195,7 @@ input, select { font-family: inherit; }
 }
 /* a goal is the loudest thing that happens: bigger, gold, and it keeps pulsing */
 .ops-shout.is-goal span {
-  font-size: 30px;
+  font-size: clamp(22px, 6vmin, 38px);
   color: #ffe066;
   background: linear-gradient(90deg, rgb(120 60 0 / 0%), rgb(190 90 0 / 88%) 14%, rgb(190 90 0 / 88%) 86%, rgb(120 60 0 / 0%));
   text-shadow: 0 0 22px rgb(255 170 0 / 95%), 0 4px 10px rgb(0 0 0 / 95%);
@@ -5197,21 +5212,52 @@ input, select { font-family: inherit; }
   to { transform: scale(1.06) skewX(-8deg); }
 }
 
-/* one human's half of the phone: label, meters, stick + buttons */
-.ops-pad { position: relative; margin-top: 18px; }
-.ops-label { position: absolute; top: -13px; left: 0; font-size: 9px; font-weight: 800; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
-.ops-pad.is-flipped .ops-label { left: auto; right: 0; }
-.ops-pad.is-flipped .ops-controls { flex-direction: row-reverse; }
+/* --- the control deck: stick left, six buttons right, meters between ------- */
+.ops-deck {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 max(10px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+  pointer-events: none;
+}
+.ops-deck > * { pointer-events: auto; }
+/* the second player on a shared phone gets the top edge */
+.ops-deck.is-top { top: 0; bottom: auto; align-items: flex-start; padding-top: max(46px, env(safe-area-inset-top)); }
 
-.ops-meters { display: flex; gap: 6px; }
+.ops-gauges {
+  position: relative;
+  flex: 0 1 min(240px, 30vw);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+  pointer-events: none;
+}
+.ops-deck-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  text-shadow: 0 2px 5px rgb(0 0 0 / 90%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .ops-bar {
   position: relative;
   flex: 1;
-  height: 14px;
-  border-radius: 7px;
+  height: 15px;
+  border-radius: 8px;
   overflow: hidden;
-  background: rgb(0 0 0 / 45%);
-  border: 1px solid rgb(120 170 255 / 22%);
+  background: rgb(4 8 18 / 65%);
+  border: 1px solid rgb(255 255 255 / 16%);
+  backdrop-filter: blur(4px);
 }
 .ops-bar i { display: block; height: 100%; transition: width 0.1s linear; }
 .ops-bar b {
@@ -5222,8 +5268,7 @@ input, select { font-family: inherit; }
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1px;
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 90%);
 }
 .ops-bar--ego i { background: linear-gradient(90deg, #2f6bff, #7b2ff7); }
 .ops-bar--ego.is-full i { background: linear-gradient(90deg, #ffce00, #ff6a00); }
@@ -5231,88 +5276,127 @@ input, select { font-family: inherit; }
 .ops-bar--ego.is-flowing i { background: linear-gradient(90deg, #fff, #ffce00); }
 .ops-bar--stam i { background: linear-gradient(90deg, #0a7d3c, #6fe08f); }
 
-.ops-controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-
-/* the stick, with the keys that do the same job printed under it */
+/* the stick: a glass ring under the left thumb */
 .ops-stickwrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .ops-keys {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1px;
-  opacity: 0.55;
-  white-space: nowrap;
+  opacity: 0.5;
+  text-shadow: 0 2px 5px rgb(0 0 0 / 90%);
 }
-
 .ops-stick {
-  width: 112px;
-  height: 112px;
+  position: relative;
+  width: clamp(104px, 28vmin, 168px);
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 35%, rgb(140 190 255 / 18%), rgb(4 8 18 / 75%));
-  border: 2px solid rgb(120 170 255 / 30%);
-  box-shadow: inset 0 0 22px rgb(0 0 0 / 70%);
-  display: grid;
-  place-items: center;
+  background: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 10%), rgb(8 14 30 / 45%));
+  border: 2px solid rgb(255 255 255 / 22%);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 45%);
   touch-action: none;
 }
 .ops-knob {
-  width: 48px;
-  height: 48px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42%;
+  aspect-ratio: 1;
+  margin: -21% 0 0 -21%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, #f4f8ff, #7f93b8);
-  border: 2px solid rgb(255 255 255 / 65%);
-  box-shadow: 0 3px 10px rgb(0 0 0 / 60%);
+  background: radial-gradient(circle at 35% 30%, #fff, #9fb4d8);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 55%), inset 0 -3px 6px rgb(0 0 0 / 25%);
+  pointer-events: none;
 }
 
-.ops-buttons { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.ops-btn {
+/* the fan of six, biggest and nearest the corner under the right thumb */
+.ops-cluster {
   position: relative;
-  overflow: hidden;
-  padding: 16px 2px;
-  border-radius: 14px;
-  font-size: 10px;
+  flex-shrink: 0;
+  width: clamp(172px, 44vmin, 260px);
+  aspect-ratio: 1;
+}
+.ops-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgb(255 255 255 / 28%);
+  color: #fff;
+  font-size: clamp(8px, 1.9vmin, 11px);
   font-weight: 900;
   font-style: italic;
   letter-spacing: 0.5px;
-  color: #fff;
-  border: 1px solid rgb(255 255 255 / 28%);
-  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
-  box-shadow: 0 3px 0 rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 30%);
+  text-transform: uppercase;
+  text-shadow: 0 2px 5px rgb(0 0 0 / 85%);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 5px 16px rgb(0 0 0 / 45%), inset 0 2px 0 rgb(255 255 255 / 22%);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.06s ease-out, filter 0.12s;
 }
-.ops-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 20%); }
-.ops-btn.is-cold { opacity: 0.35; }
-.ops-btn em { position: absolute; right: 5px; top: 3px; font-size: 9px; font-style: normal; }
-/* the key that does the same thing, in the corner of the button */
+.ops-btn:active { transform: scale(0.92); filter: brightness(1.5); }
+.ops-btn.is-cold { opacity: 0.4; }
+.ops-btn em { position: absolute; top: 12%; right: 16%; font-size: 10px; font-style: normal; font-weight: 900; }
 .ops-btn kbd {
   position: absolute;
-  left: 4px;
-  top: 3px;
-  min-width: 13px;
-  padding: 0 2px;
-  border-radius: 4px;
-  background: rgb(0 0 0 / 45%);
-  border: 1px solid rgb(255 255 255 / 30%);
-  font-family: inherit;
+  bottom: 9%;
   font-size: 8px;
-  font-style: normal;
   font-weight: 900;
-  line-height: 13px;
-  text-align: center;
-  opacity: 0.85;
+  opacity: 0.55;
+  background: none;
+  border: 0;
+  padding: 0;
 }
-/* the charge that grows under SHOOT while it's held */
-.ops-charge { position: absolute; left: 0; bottom: 0; height: 4px; background: #ffce00; box-shadow: 0 0 8px #ffce00; transition: width 0.05s linear; }
-.ops-btn--shoot { background: linear-gradient(160deg, #ff2d3d, #7a0011); }
-.ops-btn--pass { background: linear-gradient(160deg, #2f6bff, #0a1a3d); }
-.ops-btn--tackle { background: linear-gradient(160deg, #12a35a, #04331b); }
-.ops-btn--dash { background: linear-gradient(160deg, #ffa300, #7a3a00); }
-.ops-btn--ability { background: linear-gradient(160deg, #a24bff, #2a0a4a); }
-.ops-btn--flow { background: linear-gradient(160deg, #ffe066, #b57f00); color: #2a1a00; text-shadow: none; }
-.ops-btn--flow.is-ready { animation: ops-flow 0.8s ease-in-out infinite alternate; }
+/* where each one sits: SHOOT in the corner, the rest fanned up and left */
+.ops-btn--shoot { right: 2%; bottom: 2%; width: 40%; aspect-ratio: 1; font-size: clamp(9px, 2.2vmin, 13px); }
+.ops-btn--tackle { right: 6%; bottom: 46%; width: 29%; aspect-ratio: 1; }
+.ops-btn--pass { right: 45%; bottom: 8%; width: 29%; aspect-ratio: 1; }
+.ops-btn--dash { right: 40%; bottom: 42%; width: 26%; aspect-ratio: 1; }
+.ops-btn--ability { right: 10%; bottom: 74%; width: 26%; aspect-ratio: 1; }
+.ops-btn--flow { right: 72%; bottom: 12%; width: 26%; aspect-ratio: 1; }
+
+.ops-btn--shoot { background: linear-gradient(160deg, rgb(255 45 61 / 78%), rgb(122 0 17 / 78%)); }
+.ops-btn--pass { background: linear-gradient(160deg, rgb(47 107 255 / 78%), rgb(10 26 61 / 78%)); }
+.ops-btn--tackle { background: linear-gradient(160deg, rgb(18 163 90 / 78%), rgb(4 51 27 / 78%)); }
+.ops-btn--dash { background: linear-gradient(160deg, rgb(255 163 0 / 78%), rgb(122 58 0 / 78%)); }
+.ops-btn--ability { background: linear-gradient(160deg, rgb(162 75 255 / 78%), rgb(42 10 74 / 78%)); }
+.ops-btn--flow { background: linear-gradient(160deg, rgb(255 224 102 / 82%), rgb(181 127 0 / 82%)); color: #2a1a00; text-shadow: none; }
+.ops-btn--flow.is-ready { opacity: 1; animation: ops-flow 0.8s ease-in-out infinite alternate; }
+/* the charge fills the SHOOT button from the middle out */
+.ops-charge {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 240 150 / 85%), rgb(255 160 0 / 35%));
+  transform: scale(0);
+  transform-origin: center;
+  pointer-events: none;
+}
 
 @keyframes ops-flow {
-  from { box-shadow: 0 3px 0 rgb(0 0 0 / 45%), 0 0 6px rgb(255 206 0 / 50%); }
-  to { box-shadow: 0 3px 0 rgb(0 0 0 / 45%), 0 0 20px rgb(255 206 0 / 95%); }
+  from { box-shadow: 0 5px 16px rgb(0 0 0 / 45%), 0 0 0 rgb(255 206 0 / 0%); }
+  to { box-shadow: 0 5px 16px rgb(0 0 0 / 45%), 0 0 22px rgb(255 206 0 / 90%); }
 }
+
+/* on a touch screen the printed keys are noise */
+@media (hover: none) {
+  .ops-btn kbd, .ops-keys { display: none; }
+}
+
+/* full time, over the pitch */
+.ops-over { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(4 8 18 / 72%); backdrop-filter: blur(4px); }
+.ops-over-card {
+  width: min(320px, 82vw);
+  padding: 18px;
+  border-radius: 16px;
+  text-align: center;
+  background: rgb(12 20 40 / 92%);
+  border: 1px solid rgb(120 170 255 / 30%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 60%);
+}
+.ops-over-score { font-size: 30px; font-weight: 900; font-style: italic; }
 
 .ops-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .ops-table th { text-align: left; font-size: 9px; letter-spacing: 0.5px; opacity: 0.6; padding: 4px 3px; }

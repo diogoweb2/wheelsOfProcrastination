@@ -33,7 +33,7 @@ export interface Vec {
 }
 
 /** How many a side, and everything that follows from it. */
-export type TeamSize = 3 | 4 | 5
+export type TeamSize = 2 | 3 | 4 | 5
 
 /** A width and a height, in pitch units. */
 export interface Size {
@@ -64,6 +64,15 @@ export interface FormatDef {
  * enough to read on a phone.
  */
 export const FORMATS: Record<TeamSize, FormatDef> = {
+  2: {
+    size: 2,
+    label: '2v2',
+    what: 'you and a keeper, pure end to end',
+    roles: ['GK', 'FW'],
+    pitch: { w: 58, h: 38 },
+    goal: 12,
+    limit: 3,
+  },
   3: {
     size: 3,
     label: '3v3',
@@ -93,7 +102,7 @@ export const FORMATS: Record<TeamSize, FormatDef> = {
   },
 }
 
-export const TEAM_SIZES: TeamSize[] = [3, 4, 5]
+export const TEAM_SIZES: TeamSize[] = [2, 3, 4, 5]
 
 /** Every shirt that exists, biggest format first — what the Squad picker offers. */
 export const ALL_ROLES: Role[] = ['GK', 'DF', 'MF', 'WG', 'FW']
@@ -108,10 +117,10 @@ export function normalizeRole(r: string | undefined | null, size: TeamSize = 5):
   if (!ROLE_NAMES[role]) role = 'FW'
   const roles = FORMATS[size].roles
   if (roles.includes(role)) return role
-  // no winger in a small format, and no dedicated defender in a 3v3
-  if (role === 'WG') return roles.includes('FW') ? 'FW' : 'MF'
-  if (role === 'DF') return 'MF'
-  return 'FW'
+  // Fold onto the nearest shirt this format HAS: no winger in a 3v3 or 4v4, no
+  // dedicated defender in a 3v3, and nothing but a keeper and a striker in a 2v2.
+  const fold: Role[] = role === 'WG' ? ['FW', 'MF'] : role === 'DF' ? ['MF', 'FW'] : role === 'MF' ? ['FW', 'DF'] : ['FW', 'MF']
+  return fold.find((f) => roles.includes(f)) ?? 'FW'
 }
 
 // --- styles ------------------------------------------------------------------

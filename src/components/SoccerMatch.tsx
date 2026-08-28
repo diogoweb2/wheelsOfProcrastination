@@ -62,6 +62,7 @@ export function SoccerMatch({
   onQuit: () => void
 }) {
   const canvas = useRef<HTMLCanvasElement>(null)
+  const shell = useRef<HTMLDivElement>(null)
   const game = useRef<Match>(match)
   const inputs = useRef<[Input, Input]>([noInput(), noInput()])
   const [hud, setHud] = useState({
@@ -142,6 +143,44 @@ export function SoccerMatch({
     }
   }, [duo])
 
+  /**
+   * The pitch is the screen. The canvas takes whatever the viewport gives it —
+   * the drawing works out its own scale from that — and we ask the browser for
+   * true fullscreen and a landscape lock on the way in. Both are best-effort:
+   * iOS grants neither, and the fixed overlay is already full-bleed without them.
+   */
+  useEffect(() => {
+    const cv = canvas.current
+    const el = shell.current
+    if (!cv || !el) return
+
+    const fit = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      const w = Math.max(1, Math.round(cv.clientWidth * dpr))
+      const h = Math.max(1, Math.round(cv.clientHeight * dpr))
+      if (cv.width !== w || cv.height !== h) {
+        cv.width = w
+        cv.height = h
+      }
+    }
+    fit()
+
+    const ro = new ResizeObserver(fit)
+    ro.observe(cv)
+    window.addEventListener('orientationchange', fit)
+
+    void el.requestFullscreen?.().catch(() => {})
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (to: string) => Promise<void> }
+    void orientation?.lock?.('landscape').catch(() => {})
+
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('orientationchange', fit)
+      orientation?.unlock?.()
+      if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {})
+    }
+  }, [])
+
   // the loop: one rAF for the whole match
   useEffect(() => {
     let raf = 0
@@ -177,71 +216,72 @@ export function SoccerMatch({
   }, [])
 
   return (
-    <div className="ops-wrap">
-      <div className="ops-board">
-        <span className="ops-side" style={{ ['--kit' as string]: match.home.colors[0] }}>
+    <div className="ops-full" ref={shell}>
+      <canvas ref={canvas} className="ops-canvas" />
+
+      {/* the scoreboard floats over the pitch — nothing takes room from the game */}
+      <div className="ops-hud">
+        <span className="ops-hud-side">
           <i style={{ background: match.home.colors[0], borderColor: match.home.colors[1] }} />
           <b>{match.home.emoji} {match.home.name}</b>
         </span>
-        <span className="ops-score">
+        <span className="ops-hud-score">
           {hud.score[0]}<em>:</em>{hud.score[1]}
           <i>{Math.floor(Math.max(0, hud.clock) / 60)}:{String(Math.floor(Math.max(0, hud.clock) % 60)).padStart(2, '0')}</i>
         </span>
-        <span className="ops-side is-away" style={{ ['--kit' as string]: match.away.colors[0] }}>
+        <span className="ops-hud-side is-away">
           <b>{match.away.name} {match.away.emoji}</b>
           <i style={{ background: match.away.colors[0], borderColor: match.away.colors[1] }} />
         </span>
       </div>
-      <div className="ops-clock">{match.size}v{match.size} · first to {match.limit} goals</div>
+      <button className="ops-x" onClick={onQuit} aria-label="Leave the match">✕</button>
 
-      <div className="ops-pitch-wrap">
-        <canvas ref={canvas} className="ops-pitch" width={canvasW(match)} height={canvasH(match)} />
-        {hud.event && (
-          <div className={`ops-shout ${hud.event.startsWith('GOAL') ? 'is-goal' : ''}`}>
-            <span>{hud.event}</span>
-          </div>
-        )}
-      </div>
-
-      {hud.over ? (
-        <div className="card" style={{ marginTop: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 900 }}>
-            {hud.score[0]} – {hud.score[1]}
-          </div>
-          <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-            {hud.score[0] > hud.score[1]
-              ? `${match.home.name} win it.`
-              : hud.score[0] < hud.score[1]
-                ? `${match.away.name} take it.`
-                : 'Honours even.'}
-          </p>
-          <button className="btn btn--blue" style={{ marginTop: 10, width: '100%' }} onClick={() => onDone(hud.score)}>
-            Save the result
-          </button>
+      {hud.event && (
+        <div className={`ops-shout ${hud.event.startsWith('GOAL') ? 'is-goal' : ''}`}>
+          <span>{hud.event}</span>
         </div>
-      ) : (
+      )}
+
+      {!hud.over && (
         <>
-          <Pad
-            label={hud.mine ? `You · ${ROLE_NAMES[hud.mine.role]} · ${hud.mine.style}` : 'You'}
+          <Deck
+            label={hud.mine ? `${ROLE_NAMES[hud.mine.role]} · ${hud.mine.style}` : 'You'}
             meter={hud.mine}
             input={inputs.current[0]}
             keys={keysFor(0, duo)}
             keyKnob={keyKnob[0]}
           />
           {duo && hud.theirs && (
-            <Pad
-              label={`Diogo · ${ROLE_NAMES[hud.theirs.role]} · ${hud.theirs.style}`}
+            <Deck
+              label={`Diogo · ${ROLE_NAMES[hud.theirs.role]}`}
               meter={hud.theirs}
               input={inputs.current[1]}
               keys={keysFor(1, duo)}
               keyKnob={keyKnob[1]}
-              flip
+              top
             />
           )}
-          <button className="btn btn--ghost btn--small" style={{ marginTop: 10 }} onClick={onQuit}>
-            Leave the match
-          </button>
         </>
+      )}
+
+      {hud.over && (
+        <div className="ops-over">
+          <div className="ops-over-card">
+            <div className="ops-over-score">
+              {hud.score[0]} – {hud.score[1]}
+            </div>
+            <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+              {hud.score[0] > hud.score[1]
+                ? `${match.home.name} win it.`
+                : hud.score[0] < hud.score[1]
+                  ? `${match.away.name} take it.`
+                  : 'Honours even.'}
+            </p>
+            <button className="btn btn--blue" style={{ marginTop: 12, width: '100%' }} onClick={() => onDone(hud.score)}>
+              Save the result
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -312,28 +352,38 @@ function keysFor(seat: 0 | 1, duo: boolean): Keys {
   }
 }
 
-/** One player's half of the phone: the meters, the stick, and the six buttons. */
-function Pad({
+/**
+ * One player's controls, floating OVER the pitch the way Blue Lock Rivals lays
+ * them out on a phone: the stick under the left thumb, a fan of six buttons
+ * under the right with SHOOT biggest and nearest the corner, and the meters
+ * between them. Everything is translucent and blurred, so the game is never
+ * hidden by the thing you play it with.
+ *
+ * Two on one phone puts the second player's deck along the top edge.
+ */
+function Deck({
   label,
   meter,
   input,
   keys,
   keyKnob,
-  flip,
+  top,
 }: {
   label: string
   meter: Meter | null
   input: Input
   keys: Keys
   keyKnob: Vec2
-  flip?: boolean
+  top?: boolean
 }) {
   const flowing = (meter?.flow ?? 0) > 0
   const ready = (meter?.ego ?? 0) >= 1
   return (
-    <div className={`ops-pad ${flip ? 'is-flipped' : ''}`}>
-      <span className="ops-label">{label}</span>
-      <div className="ops-meters">
+    <div className={`ops-deck ${top ? 'is-top' : ''}`}>
+      <Stick onMove={(v) => (input.move = v)} hint={keys.stick} keyKnob={keyKnob} />
+
+      <div className="ops-gauges">
+        <span className="ops-deck-label">{label}</span>
         <span className={`ops-bar ops-bar--ego ${ready ? 'is-full' : ''} ${flowing ? 'is-flowing' : ''}`}>
           <i style={{ width: `${flowing ? (meter!.flow / 10) * 100 : (meter?.ego ?? 0) * 100}%` }} />
           <b>{flowing ? 'FLOW' : ready ? 'EGO FULL' : 'EGO'}</b>
@@ -343,48 +393,46 @@ function Pad({
           <b>LEGS</b>
         </span>
       </div>
-      <div className="ops-controls">
-        <Stick onMove={(v) => (input.move = v)} hint={keys.stick} keyKnob={keyKnob} />
-        <div className="ops-buttons">
-          <button
-            className="ops-btn ops-btn--shoot"
-            onPointerDown={() => (input.shoot = true)}
-            onPointerUp={() => (input.shoot = false)}
-            onPointerLeave={() => (input.shoot = false)}
-            onPointerCancel={() => (input.shoot = false)}
-          >
-            SHOOT
-            <kbd>{keys.cap.shoot}</kbd>
-            <i className="ops-charge" style={{ width: `${(meter?.charge ?? 0) * 100}%` }} />
-          </button>
-          <button className="ops-btn ops-btn--pass" onPointerDown={() => (input.pass = true)}>
-            PASS
-            <kbd>{keys.cap.pass}</kbd>
-          </button>
-          <button className="ops-btn ops-btn--tackle" onPointerDown={() => (input.tackle = true)}>
-            TACKLE
-            <kbd>{keys.cap.tackle}</kbd>
-          </button>
-          <button className="ops-btn ops-btn--dash" onPointerDown={() => (input.dash = true)}>
-            DASH
-            <kbd>{keys.cap.dash}</kbd>
-          </button>
-          <button
-            className={`ops-btn ops-btn--ability ${(meter?.abilityCd ?? 0) > 0 ? 'is-cold' : ''}`}
-            onPointerDown={() => (input.ability = true)}
-          >
-            {meter?.move ?? 'MOVE'}
-            <kbd>{keys.cap.ability}</kbd>
-            {(meter?.abilityCd ?? 0) > 0 && <em>{Math.ceil(meter!.abilityCd)}</em>}
-          </button>
-          <button
-            className={`ops-btn ops-btn--flow ${ready && !flowing ? 'is-ready' : 'is-cold'}`}
-            onPointerDown={() => (input.flow = true)}
-          >
-            FLOW
-            <kbd>{keys.cap.flow}</kbd>
-          </button>
-        </div>
+
+      <div className="ops-cluster">
+        <button
+          className="ops-btn ops-btn--shoot"
+          onPointerDown={() => (input.shoot = true)}
+          onPointerUp={() => (input.shoot = false)}
+          onPointerLeave={() => (input.shoot = false)}
+          onPointerCancel={() => (input.shoot = false)}
+        >
+          SHOOT
+          <kbd>{keys.cap.shoot}</kbd>
+          <i className="ops-charge" style={{ transform: `scale(${meter?.charge ?? 0})` }} />
+        </button>
+        <button className="ops-btn ops-btn--pass" onPointerDown={() => (input.pass = true)}>
+          PASS
+          <kbd>{keys.cap.pass}</kbd>
+        </button>
+        <button className="ops-btn ops-btn--tackle" onPointerDown={() => (input.tackle = true)}>
+          TACKLE
+          <kbd>{keys.cap.tackle}</kbd>
+        </button>
+        <button className="ops-btn ops-btn--dash" onPointerDown={() => (input.dash = true)}>
+          DASH
+          <kbd>{keys.cap.dash}</kbd>
+        </button>
+        <button
+          className={`ops-btn ops-btn--ability ${(meter?.abilityCd ?? 0) > 0 ? 'is-cold' : ''}`}
+          onPointerDown={() => (input.ability = true)}
+        >
+          {meter?.move ?? 'MOVE'}
+          <kbd>{keys.cap.ability}</kbd>
+          {(meter?.abilityCd ?? 0) > 0 && <em>{Math.ceil(meter!.abilityCd)}</em>}
+        </button>
+        <button
+          className={`ops-btn ops-btn--flow ${ready && !flowing ? 'is-ready' : 'is-cold'}`}
+          onPointerDown={() => (input.flow = true)}
+        >
+          FLOW
+          <kbd>{keys.cap.flow}</kbd>
+        </button>
       </div>
     </div>
   )
@@ -467,12 +515,21 @@ function Stick({
 //   · and a bang for every `Fx` the engine reports — sparks, dust, shockwaves,
 //     screen shake and a white flash when the net goes.
 
-const S = 16 // canvas pixels per pitch unit
-const PAD = 3.5 // units of stand around the pitch
-const OX = PAD * S
-/** The canvas the arena needs — it grows with the format. */
-const canvasW = (m: Match) => (m.pitch.w + PAD * 2) * S
-const canvasH = (m: Match) => (m.pitch.h + PAD * 2) * S
+// The canvas is whatever size the screen gave it, so none of this is fixed: the
+// scale, the margins and the size of a figure are all worked out per frame from
+// the canvas the browser handed us, and a 2v2 on a phone and a 5v5 on a tablet
+// both come out looking like the same game.
+
+/** Canvas pixels per pitch unit, worked out in `fitView`. */
+let S = 16
+/** Units of stand around the pitch — the least there can be, not the most. */
+const PAD = 3.5
+/** Where the pitch's top-left corner sits on the canvas. */
+let OXX = PAD * 16
+let OXY = PAD * 16
+/** The canvas we are drawing into this frame. */
+let CWv = 0
+let CHv = 0
 
 /** Pitch units → canvas pixels. */
 const px = (u: number) => u * S
@@ -483,7 +540,25 @@ const px = (u: number) => u * S
  * isn't a line gets exaggerated — the arcade tradition, and the only way three
  * a side reads at arm's length.
  */
-const FIG = 2.6
+let FIG = 2.6
+/** Everything measured in pixels scales with the screen; this is that factor. */
+let K = 1
+
+/**
+ * Fit the arena to the canvas. The pitch is centred and as big as it can be with
+ * `PAD` units of stand still showing on its tightest axis, so a tall phone gets
+ * wide stands and a wide one gets deep ones — the game itself never changes
+ * shape.
+ */
+function fitView(cv: HTMLCanvasElement, m: Match): void {
+  CWv = cv.width
+  CHv = cv.height
+  S = Math.min(CWv / (m.pitch.w + PAD * 2), CHv / (m.pitch.h + PAD * 2))
+  OXX = (CWv - px(m.pitch.w)) / 2
+  OXY = (CHv - px(m.pitch.h)) / 2
+  K = S / 16
+  FIG = 2.6 * K
+}
 
 /** A stable pseudo-random, so the crowd doesn't shimmer every frame. */
 function rnd(i: number): number {
@@ -558,6 +633,7 @@ function resetPaint(): void {
 // --- the bangs ---------------------------------------------------------------
 
 function spark(x: number, y: number, n: number, spread: number, dir: Vec2, speed: number, color: string): void {
+  speed *= K
   for (let i = 0; i < n; i++) {
     const a = Math.atan2(dir.y, dir.x) + (Math.random() - 0.5) * spread
     const v = speed * (0.4 + Math.random() * 0.8)
@@ -569,7 +645,7 @@ function spark(x: number, y: number, n: number, spread: number, dir: Vec2, speed
       vy: Math.sin(a) * v,
       life: 0.24 + Math.random() * 0.22,
       max: 0.46,
-      size: 1.6 + Math.random() * 2.4,
+      size: (1.6 + Math.random() * 2.4) * K,
       color,
       grow: 0,
       spin: 0,
@@ -580,7 +656,7 @@ function spark(x: number, y: number, n: number, spread: number, dir: Vec2, speed
 function dust(x: number, y: number, n: number): void {
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2
-    const v = 25 + Math.random() * 60
+    const v = (25 + Math.random() * 60) * K
     bits.push({
       kind: 'dust',
       x,
@@ -589,7 +665,7 @@ function dust(x: number, y: number, n: number): void {
       vy: Math.sin(a) * v * 0.6,
       life: 0.3 + Math.random() * 0.3,
       max: 0.6,
-      size: 3 + Math.random() * 6,
+      size: (3 + Math.random() * 6) * K,
       color: 'rgba(226,255,214,',
       grow: 0,
       spin: 0,
@@ -598,13 +674,13 @@ function dust(x: number, y: number, n: number): void {
 }
 
 function ring(x: number, y: number, color: string, grow: number, life = 0.4): void {
-  bits.push({ kind: 'ring', x, y, vx: 0, vy: 0, life, max: life, size: 4, color, grow, spin: 0 })
+  bits.push({ kind: 'ring', x, y, vx: 0, vy: 0, life, max: life, size: 4 * K, color, grow: grow * K, spin: 0 })
 }
 
 function confetti(x: number, y: number, n: number, colors: [string, string]): void {
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2
-    const v = 60 + Math.random() * 260
+    const v = (60 + Math.random() * 260) * K
     bits.push({
       kind: 'confetti',
       x,
@@ -613,7 +689,7 @@ function confetti(x: number, y: number, n: number, colors: [string, string]): vo
       vy: Math.sin(a) * v,
       life: 0.7 + Math.random() * 0.7,
       max: 1.4,
-      size: 3 + Math.random() * 4,
+      size: (3 + Math.random() * 4) * K,
       color: [colors[0], colors[1], '#fff', '#ffce00'][i % 4],
       grow: 0,
       spin: Math.random() * 12 - 6,
@@ -627,6 +703,7 @@ function confetti(x: number, y: number, n: number, colors: [string, string]): vo
  */
 function feel(m: Match): void {
   for (const f of m.fx) {
+    // everything below is in canvas pixels, and the canvas is the screen
     const x = px(f.at.x)
     const y = px(f.at.y)
     const kit = (f.side === 0 ? m.home : m.away).colors
@@ -637,13 +714,13 @@ function feel(m: Match): void {
         if (f.power > 0.34) rivalsSfx.kick(f.power)
         break
       case 'shot':
-        cam.shake = Math.max(cam.shake, 5 + 11 * f.power)
+        cam.shake = Math.max(cam.shake, (5 + 11 * f.power) * K)
         spark(x, y, 14, 1.1, f.dir, 420 * f.power, '#fff3c4')
         ring(x, y, 'rgba(255,240,190,', 900 * f.power)
         rivalsSfx.shot(f.power)
         break
       case 'tackle':
-        cam.shake = Math.max(cam.shake, 12)
+        cam.shake = Math.max(cam.shake, 12 * K)
         spark(x, y, 16, Math.PI, { x: 1, y: 0 }, 300, '#ffffff')
         dust(x, y, 10)
         ring(x, y, 'rgba(255,255,255,', 620)
@@ -659,26 +736,26 @@ function feel(m: Match): void {
         rivalsSfx.dash()
         break
       case 'ability':
-        cam.shake = Math.max(cam.shake, 8)
+        cam.shake = Math.max(cam.shake, 8 * K)
         ring(x, y, 'rgba(170,120,255,', 1100, 0.5)
         spark(x, y, 18, Math.PI, { x: 1, y: 0 }, 260, '#c9a6ff')
         rivalsSfx.ability()
         break
       case 'flow':
-        cam.shake = Math.max(cam.shake, 10)
+        cam.shake = Math.max(cam.shake, 10 * K)
         ring(x, y, 'rgba(255,206,0,', 1300, 0.6)
         ring(x, y, 'rgba(255,255,255,', 800, 0.45)
         confetti(x, y, 14, ['#ffce00', '#ff8a00'])
         rivalsSfx.flow()
         break
       case 'catch':
-        cam.shake = Math.max(cam.shake, 6)
+        cam.shake = Math.max(cam.shake, 6 * K)
         ring(x, y, 'rgba(180,225,255,', 700, 0.4)
         dust(x, y, 6)
         rivalsSfx.save()
         break
       case 'goal':
-        cam.shake = Math.max(cam.shake, 22)
+        cam.shake = Math.max(cam.shake, 22 * K)
         cam.flash = 1
         cam.glow = 1
         cam.glowSide = f.side
@@ -770,9 +847,7 @@ function drawBits(ctx: CanvasRenderingContext2D, ground: boolean): void {
  * whole — nobody ever loses their own player off the edge.
  */
 function moveCam(m: Match, dt: number): void {
-  const CW = canvasW(m)
-  const CH = canvasH(m)
-  const zMax = Math.min(CW / px(m.pitch.w), CH / px(m.pitch.h)) * 0.995
+  const zMax = Math.min(CWv / px(m.pitch.w), CHv / px(m.pitch.h)) * 0.995
 
   const speed = Math.hypot(m.ball.vel.x, m.ball.vel.y)
   const toGoal = Math.min(
@@ -786,8 +861,8 @@ function moveCam(m: Match, dt: number): void {
 
   // where it looks: the ball, led a little, pulled back toward the middle
   const lead = 0.12
-  const fx = px(m.ball.pos.x + m.ball.vel.x * lead) + OX
-  const fy = px(m.ball.pos.y + m.ball.vel.y * lead) + OX
+  const fx = px(m.ball.pos.x + m.ball.vel.x * lead) + OXX
+  const fy = px(m.ball.pos.y + m.ball.vel.y * lead) + OXY
   const tz = 1 + (zMax - 1) * cam.hot
   if (!cam.ready) {
     cam.x = fx
@@ -800,20 +875,20 @@ function moveCam(m: Match, dt: number): void {
   cam.y += (fy - cam.y) * k
   cam.z += (tz - cam.z) * (1 - Math.exp(-dt * 3))
 
-  cam.shake = Math.max(0, cam.shake - cam.shake * (1 - Math.exp(-dt * 9)) - 6 * dt)
+  cam.shake = Math.max(0, cam.shake - cam.shake * (1 - Math.exp(-dt * 9)) - 6 * K * dt)
   cam.flash = Math.max(0, cam.flash - dt * 2.2)
   cam.glow = Math.max(0, cam.glow - dt * 0.7)
 }
 
 /** The pan the camera actually gets, with the pitch pinned inside the frame. */
 function camShift(m: Match): { tx: number; ty: number } {
-  const CW = canvasW(m)
-  const CH = canvasH(m)
+  const CW = CWv
+  const CH = CHv
   const z = cam.z
   const tx = CW / 2 - cam.x * z
   const ty = CH / 2 - cam.y * z
-  const lo = { x: CW - (OX + px(m.pitch.w)) * z, y: CH - (OX + px(m.pitch.h)) * z }
-  const hi = { x: -OX * z, y: -OX * z }
+  const lo = { x: CW - (OXX + px(m.pitch.w)) * z, y: CH - (OXY + px(m.pitch.h)) * z }
+  const hi = { x: -OXX * z, y: -OXY * z }
   return {
     tx: Math.min(Math.max(tx, Math.min(lo.x, hi.x)), Math.max(lo.x, hi.x)),
     ty: Math.min(Math.max(ty, Math.min(lo.y, hi.y)), Math.max(lo.y, hi.y)),
@@ -826,8 +901,9 @@ function draw(cv: HTMLCanvasElement | null, m: Match, t: number, dt: number): vo
   const ctx = cv?.getContext('2d')
   if (!cv || !ctx) return
 
-  const CW = canvasW(m)
-  const CH = canvasH(m)
+  fitView(cv, m)
+  const CW = CWv
+  const CH = CHv
   feel(m)
   m.fx.length = 0
   stepBits(dt)
@@ -842,7 +918,7 @@ function draw(cv: HTMLCanvasElement | null, m: Match, t: number, dt: number): vo
   const { tx, ty } = camShift(m)
   ctx.translate(tx, ty)
   ctx.scale(cam.z, cam.z)
-  ctx.translate(OX, OX)
+  ctx.translate(OXX, OXY)
 
   pitch(ctx, m)
   nets(ctx, m)
@@ -938,7 +1014,7 @@ function pitch(ctx: CanvasRenderingContext2D, m: Match): void {
   ctx.fillRect(0, 0, w, h)
 
   ctx.strokeStyle = 'rgba(255,255,255,0.85)'
-  ctx.lineWidth = 2.5
+  ctx.lineWidth = 2.5 * K
   ctx.strokeRect(3, 3, w - 6, h - 6)
   ctx.beginPath()
   ctx.moveTo(w / 2, 3)
@@ -1004,7 +1080,7 @@ function nets(ctx: CanvasRenderingContext2D, m: Match): void {
     }
     // the posts themselves, lit
     ctx.strokeStyle = '#fff'
-    ctx.lineWidth = 4
+    ctx.lineWidth = 4 * K
     ctx.beginPath()
     ctx.moveTo(side === 0 ? 2 : w - 2, gy)
     ctx.lineTo(side === 0 ? 2 : w - 2, gy + gw)
