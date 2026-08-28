@@ -518,6 +518,7 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
   - `npm run gym:seed` — replaces `app/gymCatalog` with the hand-written `scripts/data/gym-catalog.json` (§18k).
   - `npm run gym:audit` — validates the catalog. Writes nothing.
   - `npm run gym:demos` (ExerciseDB + claude CLI for ambiguous matches) — animation + still for each exercise (§18l).
+  - `npm run gym:videos` (YouTube search + claude CLI for ambiguous picks) — one short demonstration video per exercise (§18n).
   - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
 
 ## 17. Question of the Day
@@ -538,7 +539,7 @@ One review question, per profile, resurfaced when the app opens — a light dail
 
 An AI personal trainer **designed to make itself redundant**. Everything it decides is written down in a form the app can reproduce on its own, so the AI can be switched off later without losing the training.
 
-Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the training block, §18m), `src/logic/gymStats.ts` (aggregations), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, scripts `scripts/gym-equipment.mjs`, `scripts/gym-seed.mjs`, `scripts/gym-demos.mjs`.
+Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the training block, §18m), `src/logic/gymStats.ts` (aggregations), `src/logic/gymVideo.ts` (the YouTube link rules, §18n), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, scripts `scripts/gym-equipment.mjs`, `scripts/gym-seed.mjs`, `scripts/gym-demos.mjs`, `scripts/gym-videos.mjs`.
 
 ### 18a. The two-layer rule (the whole design)
 
@@ -862,6 +863,31 @@ Every edit **saves as you type it** — no Save button. A half-typed rotation no
 **Data.** `profiles/{id}.gym.blocks` (a `TrainingBlock[]` — the whole library, nothing is deleted by finishing it), `gym.activeBlockId` (which one Train walks through; `null` = off-programme) and `gym.blockPos` (index of the next session in it). Switching blocks starts the new one at its own session 1. **🔄 Carry on with these** copies the rotation into a *new* block rather than mutating the old one, so the sessions logged against the old id stay attributable. Block 1 is seeded on first login from `src/logic/gymBlock.ts` — **only for Diogo**. The seed carries a `seedVersion`: when the code's copy changes, a seeded block **with no sessions logged against it** is replaced on the next login (keeping its start date), and one you have actually trained against is never touched again — that is the programme you did, not ours to rewrite. a profile with no block falls back to the free planner, unchanged and still reachable behind **🎲 Off-programme session**, which never moves the rotation. A library that already has a block is never touched by the code's copy.
 
 
+### 18n. Exercise videos — `npm run gym:videos`
+
+Every exercise can also carry **one short YouTube demonstration**, and the **▶ button sits on every row that names an exercise** — the Gear list, the plan before you start, the card you are working from, the rest screen's "up next", the block editor's slots and the Plan tab's session list. The moment you need to be shown a movement is the moment you are standing in front of the machine, not the moment you happen to be in a settings tab.
+
+**It is the one piece of gym media the app does not own.** The animation (§18l) is 21 KB we re-host and cache forever; this is an **embed**, played from `youtube-nocookie.com`, and the player is created only when you tap. A list of exercises therefore costs nothing, and a video needs a signal — the right trade for the one thing that can *talk*: an animation shows the shape of a movement and cannot say "elbows tucked".
+
+**Short is the whole specification.** Only clips at or under **90 seconds** are accepted (`--max`), and the score prefers shorter still — a 25-second clip that is merely good beats a two-minute one that is perfect, because you are holding a phone between sets.
+
+**How one is chosen.** No API key: YouTube's search page is server-rendered, so one request per exercise returns ten results (title, channel, length, views) from inside its own **"under 4 minutes"** filter. Their ranking optimises for watch time, which is the opposite of what is wanted here — the top hit for "push up" is a 40-million-view essay on the perfect push-up. So the titles are scored here: word overlap with the movement (de-pluralised on both sides, so *Push-ups* matches *Push-Up*), a bonus for *how to / proper / form / technique*, a heavy penalty for *challenge / every day / mistakes / workout*, and a bonus for being short. **Only a clear winner is taken automatically**; anything close goes to the claude CLI with a shortlist of six, and **"none" is a perfectly good answer** — a wrong video teaches bad form, and an exercise without one still has its animation and its written steps. `--no-ai` skips the model and keeps only the unambiguous picks.
+
+**Embeddability is verified before anything is written.** An uploader can forbid embedding and the app cannot tell — the player just shows a black box the size of a phone. So every pick is confirmed against the watch page (`playableInEmbed`, which is also where the exact length comes from) and a video that fails hands over to the runner-up. The sheet still shows **"open on YouTube ↗"** at all times, because that is the only way out of an embed that breaks later.
+
+**Your pick always wins, and it wins for the whole crew.** Paste a link — `youtu.be/…`, a `/shorts/…`, a full watch URL with a `t=` offset, or a bare id — into the sheet from wherever you found the video wrong, and it is stored as `source: "manual"` on the **shared catalog row**, exactly like an animation. The script **never overwrites a manual pick**, not even with `--refresh`; only naming it with `--only` or `--pin` does. 🚫 removes a bad one in a tap, and an exercise with no video yet shows a **hollow ▶** that opens the same sheet — pasting a link is how the first video gets there, so the feature works before the script has ever run.
+
+**🤖 Find a better one — the button, not the laptop.** The script cannot run from a phone, and the browser cannot scrape YouTube's search page (no CORS header on it). So the sheet has an AI button that uses the **OpenRouter key the app already holds** (`app/aiConfig`, §18b/§21) with a **web-search model** — `perplexity/sonar`, falling back to `deepseek/deepseek-v4-flash:online` — and asks for short demonstrations of that exact movement, given **our own description of it** so it can't drift to a neighbouring exercise. Press it again and the ids you have already turned down are named in the prompt *and* filtered out of the answer, so "another one" is really another one.
+
+**A model asked for a YouTube id will invent eleven plausible characters**, so every suggestion is checked before it is stored: YouTube's **oEmbed endpoint is the one YouTube service that sends CORS headers**, and it answers 200 with the real title and channel for a video that exists and can be embedded. An invented, private or embedding-blocked id fails there and the next candidate is tried; the title kept is oEmbed's, never the model's. Length is the one thing oEmbed does not report, so an **AI pick is stored with no duration rather than a made-up one** — the prompt asks for under 60 s, and what you can verify is what gets shown.
+
+**A new exercise fetches its own video.** Adding one in Gear → ➕ kicks off that same hunt the moment it is saved ("📺 Finding a short video for …"), because an exercise added on a phone in a basement would otherwise wait for someone to sit down at a laptop. Failure is quiet and honest: the row simply has no video, and the reason is printed under the list. `npm run gym:equipment` and `npm run gym:seed` still add exercises in bulk from a laptop — they end by telling you to run `npm run gym:videos`.
+
+**Data.** `ExerciseDef.video` — `{ id, title?, channel?, sec?, start?, source: 'search' | 'ai' | 'manual' }` (`search` = the script, `ai` = the button, `manual` = your paste; only `manual` is safe from `--refresh`). Only the id and the start offset decide what plays; the title, channel and length are there so you can tell at a glance what a pick actually is. The sheet also shows **our own written description of the movement above the player**, so a video that is quietly demonstrating something else is caught in one screen.
+
+**Flags:** `--dry-run`, `--refresh`, `--only=<exerciseId>`, `--pin=<exerciseId>:<url>`, `--max=<seconds>`, `--no-ai`, `--verbose` (prints the whole scored shortlist).
+
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.
@@ -1089,7 +1115,9 @@ The football schedule for this house: the games worth watching, **in Toronto tim
 
 **It is personal, not shared.** Leagues, clubs, watchlist and cached news all live on the logged-in crewmate's own profile (`AppData.fcLock`), written through `commit` like every other profile field. Diogo follows his clubs, Ben follows his, and neither one's ⭐ turns up on the other's phone.
 
-Nine tabs, nine URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **🏟️ League** (`/fclock/league` — the game you play), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **🤝 Trade** (`/fclock/trade`), **⚽ Teams** (`/fclock/teams`).
+Eight tabs, eight URLs (§1c): **📅 Games** (`/fclock/games`), **▶️ Watch** (`/fclock/watch`), **⏳ Days** (`/fclock/countdown` — the watchlist and the big finals, both counted in days), **📰 News** (`/fclock/news` — stories and transfers, two halves of one desk), **📕 Album** (`/fclock/album`), **🎁 Packs** (`/fclock/packs`), **🤝 Trade** (`/fclock/trade`), **⚽ Teams** (`/fclock/teams`).
+
+The 3v3 game you *play* is **not** here: it moved out to its own app, **⚽ Rivals** in the Games folder (§21j). FC Lock is about real football on television; Rivals is a video game, and they belong on different tiles.
 
 ### 21a. Toronto time, always
 
@@ -1166,33 +1194,84 @@ Where to see it, when you missed it.
 
 **Why the rest link out.** CazéTV embeds because YouTube lets it. None of the other sites publish a video list a browser is allowed to read — no CORS headers, no free API, and YouTube's channel feed is the same story. Rather than guess at what's on, or scrape something that will break next week, the tab does the one honest thing: it puts you one tap from the real page, and builds the exact search for the game you just watched a score for.
 
-### 21j. One Piece Soccer League (🏟️) — the game you play
+### 21j. Rivals (⚽) — the 3v3 game, its own app
 
-A top-down **6-a-side arcade football game**, in the spirit of Blue Lock Rivals. Engine in [src/logic/opsoccer.ts](src/logic/opsoccer.ts) (pure state + a fixed step, no game logic in React), drawn on a canvas by [src/components/SoccerMatch.tsx](src/components/SoccerMatch.tsx).
+A top-down **3v3 arcade football game**, built to feel like **Blue Lock Rivals** (Roblox). It is **its own app**, in the **Games** folder next to Chess and Sea Battle — not a tab of FC Lock. Engine in [src/logic/opsoccer.ts](src/logic/opsoccer.ts) (pure state + a fixed step, no game logic in React), drawn on a canvas by [src/components/SoccerMatch.tsx](src/components/SoccerMatch.tsx), with the desk around it in [src/screens/RivalsScreen.tsx](src/screens/RivalsScreen.tsx).
 
-**The squad.** Thirteen clubs — Straw's FC, The Monsters, The Knights, The Champs, The Warriors, The Knifes, The Bucks, The Bears, Tiger FC, Crow FC, The Monks, Man FC, New Castles. **Eight players each: six on the pitch, two on the bench.** The six are one of each position — **GK, CB, CM, CF, LW, RW** — and you pick which one *you* are before kick-off. Everyone else is a bot.
+Four tabs, four URLs (§1c): **⚽ Play** (`/rivals/play` — the format, the opponent picker, the fixtures and the match itself), **👕 Squad** (`/rivals/squad` — your club, position and Style), **🏆 Table** (`/rivals/table` — the standings and your results), **📜 How to** (`/rivals/rules`).
 
-**The controls.** A thumbstick circle for running, and four buttons:
+**Pick the format: 3v3, 4v4 or 5v5.** Chosen on **Play**, before each match — it isn't saved with your club, so you can play a quick 3v3 and then a 5v5 with the same squad. There is **no bench and no substitutions** in any of them. Thirteen clubs — Straw's FC, The Monsters, The Knights, The Champs, The Warriors, The Knifes, The Bucks, The Bears, Tiger FC, Crow FC, The Monks, Man FC, New Castles.
+
+| Format | Shirts | Pitch | Goal | First to | Feel |
+|---|---|---|---|---|---|
+| **3v3** | GK · MF · FW | 72 × 44 | 14 | 4 | quick and end-to-end |
+| **4v4** | GK · DF · MF · FW | 84 × 50 | 16 | 5 | a defender to beat |
+| **5v5** | GK · DF · MF · WG · FW | 96 × 56 | 18 | 5 | wingers, and room to run |
+
+The pitch, the goal, the penalty boxes and the score limit all grow with the format — five a side on the 3v3 arena is a scrum, three a side on the 5v5 one is a hike. You play **one shirt**; the rest of your side are bots.
+
+**Your shirt folds onto the format.** You pick a position once, on **Squad**, out of all five. A format that hasn't got it folds it onto the nearest one it has: **no winger in a 3v3 or 4v4** (you play striker), **no dedicated defender in a 3v3** (you play midfielder). The Play tab says so when it happens. Legacy six-a-side saves fold first: CB→DF, CM→MF, CF→FW, LW/RW→WG.
+
+**One period, and a score limit.** 180 seconds in every format. **Reach the format's score limit and it ends there and then**, otherwise whoever leads when the clock runs out. Kick-off goes to the side that conceded; a ball out of play returns to the other team where it left.
+
+**The pace is Rivals' pace — fast.** Flat out, a player crosses the whole pitch in about **three and a half seconds**, a sprint arrives about a quarter of a second after the stick moves, and a struck ball **cracks** across the grass rather than rolling over. Legs still **accelerate** rather than snapping to full speed, so turning has weight and a dash is a real commitment — but the top end is arcade, not Sunday league. A full charge takes 0.7s. Because the ball can outrun a stride between frames, a foot is tested against the **line the ball travelled**, not where it landed, so nothing tunnels through anybody. Every bot decision is a chance **per second**, not per frame, so a 120 Hz phone plays exactly the game a 60 Hz one does.
+
+**Everything that happens, hits.** The engine reports each moment worth reacting to — a pass, a strike, a landed tackle, a slide at thin air, a dash, a signature move, Flow, a keeper's catch, a goal — and the screen turns it into **screen shake, sparks, dust, shockwave rings, confetti and a synthesised noise** (nothing is downloaded; the sounds are oscillators). A goal whites the screen out, washes the scorer's colour behind their net, bulges the net and slams **GOAL** across the pitch in gold.
+
+**The camera is alive.** It leans toward the ball, leads it slightly, and **pushes in when the moment is dangerous** — a fast ball, or a ball near either net — easing back out when it calms down. The push is capped by the stand padding, so at maximum zoom the stands are gone and **the whole pitch is still on screen**: nobody ever loses their player off the edge.
+
+**Styles.** Before your first match you pick a **Style** — who you are on the pitch. A Style sets your speed, your shot power and how hard you are to rob, and gives you one signature move on the ABILITY button:
+
+| Style | Move | What it does |
+|---|---|---|
+| ⚡ **Striker** | DIRECT | Direct Shot — a full-power strike with no wind-up at all |
+| 💨 **Speedster** | BLAST | Accelerate — a long dash straight through anyone in the way |
+| 🧲 **Trapper** | TRAP | Trap — drags any loose ball nearby onto your foot, first touch perfect |
+| 👑 **Emperor** | IMPACT | Impact — a rocket that scores from anywhere on the pitch |
+| 👁️ **Vision** | META | Metavision — six seconds where every pass finds a runner and your legs never tire |
+
+**The ego meter and Flow State.** Passing, shooting on target, beating a tackle and scoring all fill an **EGO** bar. Full, and the FLOW button lights up: **Flow State** is ten seconds of +30% speed, +35% shot power, legs that don't tire and a signature move that cools twice as fast. Bots have an ego meter too and spend it near your goal.
+
+**The controls.** A thumbstick circle for running, and six buttons:
 
 | Button | What it does |
 |---|---|
-| **SHOOT** | strikes at goal, aimed at a random spot inside the frame — not always down the middle |
-| **PASS** | picks the best teammate: furthest forward, least marked, not miles away |
-| **DRIBBLE** | a burst of speed for half a second during which **you cannot be tackled** |
-| **CALL** | the teammate on the ball passes it to you |
+| **SHOOT** | **held, not tapped** — the longer it's down the harder the shot, and it goes on release |
+| **PASS** | picks a runner: furthest forward, least marked, and led onto where they're going |
+| **TACKLE** | a slide you have to aim. Land it and the ball is yours; miss it and you're on the floor for a second and a half |
+| **DASH** | a burst of speed during which **you cannot be tackled** |
+| **ABILITY** | your Style's signature move, on a cooldown |
+| **FLOW** | Flow State, once the ego bar is full |
 
-Arrow keys drive the stick on a desktop.
+**On a keyboard.** The whole game plays without touching the screen, and **every key is printed in the corner of the button it presses** so nobody has to be told twice. Keys are matched on the *physical* key, so a French or Portuguese layout gets the same ones.
 
-**The rules are football's.** Two halves of 90 seconds, kick-off to the side that conceded, goals only between the posts, ball out of play returns to the other team where it left, and a tackle is a coin flip weighted by who is moving faster — a standing player rarely robs a running one.
+| | Run | Shoot · Pass · Tackle | Dash · Move · Flow |
+|---|---|---|---|
+| **You** | `W A S D` (and the arrow keys, when you're playing the bots) | `U` `I` `O` | `J` `K` `L` |
+| **Diogo** | arrow keys | Numpad `7` `8` `9` | Numpad `4` `5` `6` |
 
-**Legs go, so the bench matters.** Stamina drains as you run and a tired player is up to a fifth slower. **At half time you may swap** either bench player for any outfield starter; the substitute comes on fresh, in that position.
+Both action blocks are laid out in the same 3×2 shape as the buttons on screen. **SHOOT is held on the keyboard too** — hold it to charge, let go to strike. The on-screen stick's knob moves with the keys, so the pad still shows what's being asked for.
 
-**The bots think.** With the ball: shoot if the goal is close, pass if pressed, otherwise run at them. Without it: hold the shape, shuffle across with the ball, and the closest player presses. Each club has a **strength** that tunes how sharp those decisions are.
+**Possession only changes on a tackle.** A loose ball goes to whoever reaches it first, and the player a pass is aimed at gets a generous first touch. But a ball someone is *carrying* can only be taken by a slide tackle that lands — nobody is robbed just by standing next to them. That single rule, plus three a side instead of six, is what stopped the game being a scrum.
 
-**The league.** Twelve fixtures, one against each of the other clubs, and the table has all thirteen in it — the other twelve play each other in the background, seeded off their strength so the standings are the same every time the screen redraws. Your club, position and results live on **your own profile**, so Diogo and Ben run separate seasons.
+**The bots think, one at a time.** Only the **closest** outfielder on each side goes for the ball, whether that side is three strong or five; the others hold the shape, screen the goal, or make runs into space — **each role has its own lane**, so a five-a-side team spreads out instead of queueing. On the ball they shoot when the goal is close, pass when pressed, dash out of trouble, and fire their move near the box. Keepers stay on their line and punt it back out after a second. Each club has a **strength**, multiplied by the difficulty you chose.
 
-**Head-to-head** is **two players on one phone**: tick the box before kick-off, Player 2 takes a position on the other team and gets their own stick and buttons on the far side. (Real-time online football between two phones needs a game server, which this app doesn't have — a shared Firestore doc can't carry sixty frames a second.)
+**Two ways to play.** Before kick-off you choose:
 
-**The players are drawn, not photographed.** The Roblox/Blue Lock artwork can't ship with the app — those are somebody else's assets, and the repo keeps images tight (see CLAUDE.md) — so the figures are canvas-drawn in each club's colours, with the position printed under them.
+- **🤖 vs AI** — the other three are bots, at **Rookie**, **Rival** or **Blue Lock** difficulty.
+- **👨 vs Diogo** — **two players on one phone**. Diogo takes a position *and a Style* on the other team and gets their own stick and buttons on the far side. (Real-time online football between two phones needs a game server, which this app doesn't have — a shared Firestore doc can't carry sixty frames a second.)
+
+**Legs still go.** Stamina drains as you run and faster while dashing, and a tired player is up to 40% slower. It refills when you stand still, and freezes entirely during Flow State and Metavision. With no bench, pacing yourself *is* the substitution.
+
+**The league.** Twelve fixtures, one against each of the other clubs, and the table has all thirteen in it — the other twelve play each other in the background, seeded off their strength so the standings are the same every time the screen redraws. Your club, position, Style and results live on **your own profile**, so Diogo and Ben run separate seasons. (The save still sits at `AppData.fcLock.soccer`, where it was written when this was an FC Lock tab — moving the tile is not a reason to migrate a season out from under a save.) Changing your club, position or Style on **Squad** keeps the season; only **Start a new season** on Table clears the results.
+
+**The look is drawn, not downloaded.** Blue Lock Rivals' art belongs to somebody else and the repo keeps `public/` tight (see CLAUDE.md), so **the entire scene is canvas- and CSS-drawn** — nothing is fetched and no image ships. What it draws is that game's look:
+
+- a **night arena**: navy stands, a still crowd of ~900 dots with a few phone-lights twinkling, and four floodlights washing in from the corners;
+- a **mown pitch** in twelve stripes, with the full set of markings — halfway line, centre circle and spot, penalty and six-yard boxes, penalty spots, corner arcs — and **goals with nets** drawn as a hatch behind lit posts;
+- **blocky Roblox-ish figures** drawn at roughly 2.6× life size — a correctly-scaled player would be six pixels across on a phone — seen from above: shoulders, two swinging arms, **legs that pump through a stride cycle driven by how fast they are actually travelling**, a shirt in the club's colours with the trim as a stripe, and a head of **dyed hair whose colour comes from your Style**. They lean into a run, bob with each stride, turn smoothly toward wherever they're running, **smear into afterimages at a sprint**, and go flat on the floor mid-slide;
+- a **ball that reads as fast**: it spins as it rolls, stretches along its flight, drags a comet trail, glows when it has been smashed, and its shadow drops away underneath it;
+- state announced in light — a **pulsing gold glow with rising chevrons** in Flow State, a dashed cyan ring while untouchable, colour streaks and manga speed-lines behind a dash, a ring under whoever is on the ball, a **closing ring and an aim line while a shot charges**, and a bobbing chevron over the player each human is driving;
+- a **slanted-capitals scoreboard** with kit chips, a glowing score and a mm:ss clock, EGO and LEGS bars, and chunky pressed-in buttons.
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

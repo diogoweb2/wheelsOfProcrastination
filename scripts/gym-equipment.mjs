@@ -343,7 +343,7 @@ async function main() {
 
   console.log(`\n✅ Saved to Firestore. Open the Gym app → Gear to review, rename or retire anything.`)
   console.log(`   All that is left on disk: ${kb(thumbBytes)} of ${THUMB_PX}px thumbnails in public/gym/.`)
-  console.log(`\n➡️  Next: add the exercises it unlocks in Gym → Gear (or scripts/data/gym-catalog.json + npm run gym:seed), then npm run gym:demos.`)
+  console.log(`\n➡️  Next: add the exercises it unlocks in Gym → Gear (or scripts/data/gym-catalog.json + npm run gym:seed), then npm run gym:demos and npm run gym:videos.`)
   process.exit(0)
 }
 

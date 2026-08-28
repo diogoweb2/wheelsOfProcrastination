@@ -17,6 +17,7 @@ import type {
   EssayWordTest,
   ExerciseDef,
   ExerciseRating,
+  ExerciseVideo,
   FinalTestAuth,
   FreezeGift,
   FreezeRequest,
@@ -199,6 +200,7 @@ import {
   advanceLadder,
 } from '../logic/gym'
 import { SEED_VERSION, copyBlock, planBlockSession, seedBlock } from '../logic/gymBlock'
+import { findExerciseVideo } from '../logic/gymVideoAi'
 import {
   applyEntry as applyRobloxEntry,
   formatMinutes,
@@ -379,7 +381,7 @@ interface StoreState {
   /** FC Lock: the played games' warnings have been read. */
   markFcResultsSeen: (ids: string[]) => void
   /** FC Lock: pick the club and the position you play in the soccer league. */
-  setFcSquad: (teamId: string, role: string) => void
+  setFcSquad: (teamId: string, role: string, style?: string) => void
   /** FC Lock: file a league result. */
   addFcResult: (opp: string, gf: number, ga: number) => void
   /** FC Lock: start the season over. */
@@ -740,6 +742,20 @@ interface StoreState {
   /** Change your mind about an exercise later (Gear tab). */
   gymRateExercise: (exId: string, rating: ExerciseRating | null) => void
   gymSetExerciseNote: (exId: string, note: string) => void
+  /**
+   * Pin (or clear) the YouTube demonstration for an exercise — §18n. Shared, not
+   * personal: a better video is better for the whole crew, so it lands on the
+   * catalog row exactly like the animation does, and a built-in move becomes a
+   * stored override the same way editing one does.
+   */
+  gymSetExerciseVideo: (exId: string, video: ExerciseVideo | null) => void
+  /**
+   * Go and find a video for this exercise with the OpenRouter key (§18n), and
+   * put it on the catalog row. `avoid` names the ids already rejected, which is
+   * what makes "find another one" move on instead of offering the same clip.
+   * Throws with a reason worth showing — the caller decides how loudly.
+   */
+  gymFindExerciseVideo: (exId: string, avoid?: string[]) => Promise<ExerciseVideo>
   gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'soundOn' | 'keepAwake'>>) => void
   /** Add / edit / retire gear and exercises in the shared basement. */
   // --- essays (the ✍️ Essay app; every action writes the shared app/essays doc) ---
@@ -1469,9 +1485,9 @@ export const useStore = create<StoreState>((set, get) => {
       })
     },
 
-    setFcSquad(teamId, role) {
+    setFcSquad(teamId, role, style) {
       commit((d) => {
-        d.fcLock.soccer = { teamId, role, results: d.fcLock.soccer?.results ?? [] }
+        d.fcLock.soccer = { teamId, role, style, results: d.fcLock.soccer?.results ?? [] }
       })
     },
 
@@ -3925,6 +3941,27 @@ export const useStore = create<StoreState>((set, get) => {
         mem.notes = note.trim() || undefined
         d.gym.ex[exId] = mem
       })
+    },
+
+    gymSetExerciseVideo(exId, video) {
+      const c: GymCatalog = get().gymCatalog ?? { equipment: [], exercises: [] }
+      const def = exerciseById(c, exId)
+      if (!def) return
+      const next = { ...def, video: video ?? undefined }
+      get().gymSaveCatalog({
+        ...c,
+        exercises: c.exercises.some((x) => x.id === exId)
+          ? c.exercises.map((x) => (x.id === exId ? next : x))
+          : [...c.exercises, next],
+      })
+    },
+
+    async gymFindExerciseVideo(exId, avoid = []) {
+      const def = exerciseById(get().gymCatalog, exId)
+      if (!def) throw new Error('That exercise is no longer in the catalog.')
+      const video = await findExerciseVideo({ ai: get().aiConfig, ex: def, avoid })
+      get().gymSetExerciseVideo(exId, video)
+      return video
     },
 
     gymSetOptions(patch) {

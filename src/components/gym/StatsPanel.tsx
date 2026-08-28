@@ -7,6 +7,7 @@ import { ALL_PARTS, PART_EMOJI, PART_LABEL, daysSince } from '../../logic/gym'
 import { activityDots, exerciseProgress, partSplit, records, summarise, trainedExercises, weeklyVolume } from '../../logic/gymStats'
 import { ActivityDots, ProgressLine, SplitBars, WeekBars } from './GymCharts'
 import { sfx } from '../../audio'
+import { VideoButton } from './ExerciseVideo'
 
 export function StatsPanel() {
   const { data } = useStore()
@@ -140,6 +141,7 @@ export function StatsPanel() {
                 <span style={{ fontWeight: 900, color: 'var(--gold)' }}>
                   {r.weight ? `${r.weight} ${unit}` : `${r.reps} reps`}
                 </span>
+                <VideoButton exId={r.exId} name={r.name} />
               </div>
             ))}
           </div>

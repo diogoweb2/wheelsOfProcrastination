@@ -210,6 +210,22 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // ⚽ Rivals League (§21j): top-down 3v3 football in the spirit of Blue Lock
+    // Rivals. It used to be a tab inside FC Lock — wrong home. FC Lock is about
+    // real football on TV; this is a game you play, so it sits with the games.
+    id: 'rivals',
+    name: 'Rivals',
+    icon: '⚽',
+    tint: ['#2f6bff', '#0a1226'],
+    folder: 'games',
+    tabs: [
+      { id: 'play', label: 'Play', icon: '⚽' },
+      { id: 'squad', label: 'Squad', icon: '👕' },
+      { id: 'table', label: 'Table', icon: '🏆' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
     // official 8×8 English draughts — the checkers board everyone in Canada owns
     id: 'checkers',
     name: 'Checkers',
@@ -279,7 +295,6 @@ export const APPS: AppDef[] = [
       { id: 'countdown', label: 'Days', icon: '⏳' },
       { id: 'news', label: 'News', icon: '📰' },
       { id: 'watch', label: 'Watch', icon: '▶️' },
-      { id: 'league', label: 'League', icon: '🏟️' },
       { id: 'album', label: 'Album', icon: '📕' },
       { id: 'packs', label: 'Packs', icon: '🎁' },
       // the swap table is its own URL, like both other collections' (§1c)

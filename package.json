@@ -13,6 +13,7 @@
     "gym:seed": "node scripts/gym-seed.mjs",
     "gym:catalog": "node scripts/gym-catalog-md.mjs",
     "gym:demos": "node scripts/gym-demos.mjs",
+    "gym:videos": "node scripts/gym-videos.mjs",
     "gym:per-side": "node scripts/gym-per-side.mjs",
     "assets": "claude --model opus --allowedTools \"Bash,Read,Write,Edit,Glob,Grep\" -p \"$(cat scripts/optimize-assets.md)\"",
     "predev": "npm run backgrounds && npm run stickers",

@@ -24,6 +24,7 @@ import {
 } from '../../logic/gymBlock'
 import { wakeLockSupported } from '../../logic/wakeLock'
 import { sfx } from '../../audio'
+import { VideoButton } from './ExerciseVideo'
 
 export function PlanPanel() {
   const { data, activeProfileId, gymSetBrief, gymSetOptions, gymCatalog } = useStore()
@@ -280,6 +281,7 @@ function BlockCard() {
                         {slot.quality && ' ⚡'}
                       </span>
                       <span className="muted">{slotLine(slot, gymCatalog)}</span>
+                      {def && <VideoButton exId={def.id} name={def.name} />}
                     </li>
                   )
                 })}

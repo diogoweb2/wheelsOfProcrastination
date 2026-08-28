@@ -887,6 +887,29 @@ export interface ExerciseDemo {
   match: 'exact' | 'ai' | 'close' | 'manual'
 }
 
+/**
+ * A short YouTube demonstration of one movement, found by `npm run gym:videos`
+ * and overridable by hand from anywhere the exercise is shown (§18n).
+ *
+ * Only the id is stored: the app builds the embed URL itself, so a pasted
+ * `youtu.be/…`, a `/shorts/…` and a full watch link all end up as the same row.
+ * Nothing is re-hosted — this is an embed of someone else's video, which is why
+ * it is the one piece of gym media that needs a signal.
+ */
+export interface ExerciseVideo {
+  id: string // the 11-character YouTube video id
+  title?: string // as YouTube titles it — what you check when a pick looks wrong
+  channel?: string
+  sec?: number // length, when known — the picker prefers short ones (§18n)
+  start?: number // seconds to skip; a pasted link's `t=` lands here
+  /**
+   * `search` = `npm run gym:videos` picked it, `ai` = the app's "find me a
+   * better one" button did (a web-search model, checked against oEmbed),
+   * `manual` = you pasted it. Only `manual` is safe from the script.
+   */
+  source: 'search' | 'ai' | 'manual'
+}
+
 /** One exercise the crew can be asked to do. `equipmentIds: []` = needs nothing but you. */
 export interface ExerciseDef {
   id: string
@@ -910,6 +933,7 @@ export interface ExerciseDef {
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
   demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
+  video?: ExerciseVideo // a short YouTube demonstration, once `npm run gym:videos` has found one
   addedBy: 'ai' | 'manual'
   createdAt: string
   retired?: boolean
@@ -1494,11 +1518,13 @@ export interface FcLockState {
   leagues: string[]
   teams: { id: string; name: string; badge?: string; leagueName?: string }[]
   watch: FcWatchItem[]
-  /** ⚽ One Piece Soccer League (§21j): your club, and the season so far. */
+  /** ⚽ Rivals League (§21j): your club, your Style, and the season so far. */
   soccer?: {
     teamId: string
-    /** The position you play. */
+    /** The position you play — GK, MF or FW (old six-a-side saves may hold CB/CM/LW/RW). */
     role: string
+    /** The Style you play as (see `STYLES` in logic/opsoccer.ts). Missing on old saves. */
+    style?: string
     results: { opp: string; gf: number; ga: number; at: string }[]
   }
   /**

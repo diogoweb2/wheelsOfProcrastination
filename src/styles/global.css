@@ -2794,6 +2794,42 @@ input, select { font-family: inherit; }
   font-size: 9px; font-weight: 900; line-height: 15px; text-align: center;
 }
 
+/* --- exercise videos (a short YouTube demonstration, see §18n) --- */
+/* a row whose whole surface is already a button gets the ▶ as a SIBLING, so the
+   video never folds the row and the markup stays valid */
+.gym-move-top { display: flex; align-items: center; gap: 6px; }
+.gym-move-top > .gym-move-head, .gym-move-top > .gym-block-head { flex: 1; min-width: 0; }
+.gym-move-top .gym-yt { margin-right: 12px; }
+.gym-block-list li .gym-yt { align-self: center; }
+.gym-ex-title { display: flex; align-items: center; gap: 8px; }
+.gym-ex-title > div { flex: 1; min-width: 0; }
+.gym-next-art .gym-yt { align-self: center; margin-left: 10px; }
+.gym-yt {
+  flex: none; width: 30px; height: 22px; padding: 0; border: none; cursor: pointer;
+  border-radius: 6px; background: var(--red); color: #fff;
+  font-size: 11px; line-height: 22px; text-align: center;
+  box-shadow: 0 2px 0 var(--red-dark);
+}
+.gym-yt:active { transform: translateY(2px); box-shadow: none; }
+/* nothing picked yet — still tappable, because pasting a link IS the feature */
+.gym-yt--empty { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 2px var(--line); }
+/* our own words for the movement, above the stranger's video of it */
+.gym-yt-how {
+  border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px;
+  background: var(--bg); font-size: 13px; line-height: 1.45; font-weight: 700;
+}
+.gym-yt-how-label {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+}
+.gym-yt-frame {
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  border-radius: 14px; overflow: hidden; background: #000; border: 2px solid var(--line);
+}
+.gym-yt-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.gym-yt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.gym-yt-actions .btn { width: auto; flex: 1 1 auto; text-decoration: none; }
+
 /* --- add-equipment camera (Gear tab) --- */
 .gym-shoot { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .gym-shoot-img { border-radius: 12px; object-fit: cover; border: 2px solid var(--blue); flex: none; }
@@ -5046,63 +5082,238 @@ input, select { font-family: inherit; }
 }
 .fc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
-/* ---------- One Piece Soccer League (§21j) ---------- */
+/* ---------- Rivals League (§21j) ---------- */
+/* The look is Blue Lock Rivals': a night arena, hard shadows, and everything
+   that matters announced in light. All of it is CSS and canvas — none of that
+   game's art ships here. */
 .ops-wrap { user-select: none; -webkit-user-select: none; touch-action: none; }
-.ops-hud { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; font-weight: 900; }
-.ops-team { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ops-hud .ops-team:last-child { text-align: right; }
-.ops-score { font-size: 22px; }
-.ops-clock { text-align: center; font-size: 11px; font-weight: 800; opacity: 0.65; letter-spacing: 1px; }
 
-.ops-pitch-wrap { position: relative; margin-top: 8px; }
-.ops-pitch { width: 100%; height: auto; border-radius: 10px; border: 2px solid var(--line); display: block; }
+/* the scoreboard: two kit chips either side of a big score and a clock */
+.ops-board {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #101a33, #060a16);
+  border: 1px solid rgb(120 170 255 / 25%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+.ops-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ops-side.is-away { justify-content: flex-end; }
+.ops-side i { width: 6px; align-self: stretch; border-radius: 3px; border: 1px solid; flex-shrink: 0; }
+.ops-side b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  color: #eaf1ff;
+}
+.ops-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 26px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 14px rgb(90 160 255 / 70%);
+}
+.ops-score em { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.ops-score i {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  text-shadow: none;
+  margin-top: 2px;
+}
+.ops-clock { text-align: center; font-size: 10px; font-weight: 800; opacity: 0.5; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+.ops-pitch-wrap { position: relative; margin-top: 6px; }
+.ops-pitch {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgb(120 170 255 / 25%);
+  box-shadow: 0 8px 26px rgb(0 0 0 / 55%);
+}
+/* The shout: Rivals announces everything in big slanted capitals, and it SLAMS
+   in — overshooting, skewed, then settling. It sits HIGH on the pitch and hugs
+   its own text: a band across the middle covered the players it was about. */
 .ops-shout {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
+  place-items: start center;
+  padding-top: 6%;
+  text-align: center;
+  pointer-events: none;
+}
+.ops-shout span {
+  display: inline-block;
+  max-width: 86%;
+  padding: 5px 18px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgb(24 46 100 / 0%), rgb(30 60 130 / 88%) 14%, rgb(30 60 130 / 88%) 86%, rgb(24 46 100 / 0%));
   font-size: 22px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 1px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 16px rgb(70 150 255 / 90%), 0 3px 8px rgb(0 0 0 / 90%);
+  animation: ops-slam 0.42s cubic-bezier(0.12, 1.5, 0.4, 1) both;
+}
+/* a goal is the loudest thing that happens: bigger, gold, and it keeps pulsing */
+.ops-shout.is-goal span {
+  font-size: 30px;
+  color: #ffe066;
+  background: linear-gradient(90deg, rgb(120 60 0 / 0%), rgb(190 90 0 / 88%) 14%, rgb(190 90 0 / 88%) 86%, rgb(120 60 0 / 0%));
+  text-shadow: 0 0 22px rgb(255 170 0 / 95%), 0 4px 10px rgb(0 0 0 / 95%);
+  animation: ops-slam 0.42s cubic-bezier(0.12, 1.5, 0.4, 1) both, ops-throb 0.55s 0.42s ease-in-out infinite alternate;
+}
+
+@keyframes ops-slam {
+  0% { opacity: 0; transform: scale(1.9) skewX(-16deg); filter: blur(5px); }
+  55% { opacity: 1; transform: scale(0.94) skewX(-8deg); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) skewX(-8deg); filter: blur(0); }
+}
+@keyframes ops-throb {
+  from { transform: scale(1) skewX(-8deg); }
+  to { transform: scale(1.06) skewX(-8deg); }
+}
+}
+
+/* one human's half of the phone: label, meters, stick + buttons */
+.ops-pad { position: relative; margin-top: 18px; }
+.ops-label { position: absolute; top: -13px; left: 0; font-size: 9px; font-weight: 800; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
+.ops-pad.is-flipped .ops-label { left: auto; right: 0; }
+.ops-pad.is-flipped .ops-controls { flex-direction: row-reverse; }
+
+.ops-meters { display: flex; gap: 6px; }
+.ops-bar {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgb(0 0 0 / 45%);
+  border: 1px solid rgb(120 170 255 / 22%);
+}
+.ops-bar i { display: block; height: 100%; transition: width 0.1s linear; }
+.ops-bar b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
   font-weight: 900;
   letter-spacing: 1px;
   color: #fff;
-  text-shadow: 0 3px 12px rgb(0 0 0 / 80%);
-  animation: fc-pop 0.3s ease-out;
-  pointer-events: none;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 80%);
 }
+.ops-bar--ego i { background: linear-gradient(90deg, #2f6bff, #7b2ff7); }
+.ops-bar--ego.is-full i { background: linear-gradient(90deg, #ffce00, #ff6a00); }
+.ops-bar--ego.is-flowing { border-color: #ffce00; box-shadow: 0 0 12px rgb(255 206 0 / 65%); }
+.ops-bar--ego.is-flowing i { background: linear-gradient(90deg, #fff, #ffce00); }
+.ops-bar--stam i { background: linear-gradient(90deg, #0a7d3c, #6fe08f); }
 
-.ops-controls { position: relative; display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-.ops-controls.is-flipped { flex-direction: row-reverse; }
-.ops-label { position: absolute; top: -12px; left: 0; font-size: 9px; font-weight: 800; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; }
-.ops-controls.is-flipped .ops-label { left: auto; right: 0; }
+.ops-controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+
+/* the stick, with the keys that do the same job printed under it */
+.ops-stickwrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ops-keys {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  opacity: 0.55;
+  white-space: nowrap;
+}
 
 .ops-stick {
   width: 112px;
   height: 112px;
-  flex-shrink: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 40%, rgb(255 255 255 / 12%), rgb(0 0 0 / 35%));
-  border: 2px solid var(--line);
+  background: radial-gradient(circle at 50% 35%, rgb(140 190 255 / 18%), rgb(4 8 18 / 75%));
+  border: 2px solid rgb(120 170 255 / 30%);
+  box-shadow: inset 0 0 22px rgb(0 0 0 / 70%);
   display: grid;
   place-items: center;
   touch-action: none;
 }
-.ops-knob { width: 46px; height: 46px; border-radius: 50%; background: var(--bg2); border: 2px solid var(--gold, #ffce00); }
-
-.ops-buttons { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ops-btn {
-  padding: 14px 4px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #fff;
-  border: 2px solid rgb(255 255 255 / 20%);
+.ops-knob {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #f4f8ff, #7f93b8);
+  border: 2px solid rgb(255 255 255 / 65%);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 60%);
 }
-.ops-btn:active { transform: scale(0.94); }
-.ops-btn--shoot { background: linear-gradient(160deg, #d70000, #6b0000); }
-.ops-btn--pass { background: linear-gradient(160deg, #2e63a4, #0c2338); }
-.ops-btn--dribble { background: linear-gradient(160deg, #ff9600, #8c3d00); }
-.ops-btn--call { background: linear-gradient(160deg, #0a7d3c, #052d17); }
+
+.ops-buttons { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ops-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 16px 2px;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 28%);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 70%);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 30%);
+}
+.ops-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgb(0 0 0 / 45%), inset 0 1px 0 rgb(255 255 255 / 20%); }
+.ops-btn.is-cold { opacity: 0.35; }
+.ops-btn em { position: absolute; right: 5px; top: 3px; font-size: 9px; font-style: normal; }
+/* the key that does the same thing, in the corner of the button */
+.ops-btn kbd {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  min-width: 13px;
+  padding: 0 2px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 45%);
+  border: 1px solid rgb(255 255 255 / 30%);
+  font-family: inherit;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 13px;
+  text-align: center;
+  opacity: 0.85;
+}
+/* the charge that grows under SHOOT while it's held */
+.ops-charge { position: absolute; left: 0; bottom: 0; height: 4px; background: #ffce00; box-shadow: 0 0 8px #ffce00; transition: width 0.05s linear; }
+.ops-btn--shoot { background: linear-gradient(160deg, #ff2d3d, #7a0011); }
+.ops-btn--pass { background: linear-gradient(160deg, #2f6bff, #0a1a3d); }
+.ops-btn--tackle { background: linear-gradient(160deg, #12a35a, #04331b); }
+.ops-btn--dash { background: linear-gradient(160deg, #ffa300, #7a3a00); }
+.ops-btn--ability { background: linear-gradient(160deg, #a24bff, #2a0a4a); }
+.ops-btn--flow { background: linear-gradient(160deg, #ffe066, #b57f00); color: #2a1a00; text-shadow: none; }
+.ops-btn--flow.is-ready { animation: ops-flow 0.8s ease-in-out infinite alternate; }
+
+@keyframes ops-flow {
+  from { box-shadow: 0 3px 0 rgb(0 0 0 / 45%), 0 0 6px rgb(255 206 0 / 50%); }
+  to { box-shadow: 0 3px 0 rgb(0 0 0 / 45%), 0 0 20px rgb(255 206 0 / 95%); }
+}
 
 .ops-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .ops-table th { text-align: left; font-size: 9px; letter-spacing: 0.5px; opacity: 0.6; padding: 4px 3px; }

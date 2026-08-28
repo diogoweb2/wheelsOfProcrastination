@@ -51,6 +51,7 @@ import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
 import { SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
+import { VideoButton } from './ExerciseVideo'
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
   { id: 'lazy', label: 'Lazy', emoji: '🥱' },
@@ -289,6 +290,7 @@ function NextSessionCard() {
               <li key={`${slot.exId}-${i}`}>
                 <span>{def?.emoji ?? '❓'} {def?.name ?? 'Not in the catalog any more'}</span>
                 <span className="muted">{slotLine(slot, gymCatalog)}</span>
+                {def && <VideoButton exId={def.id} name={def.name} />}
               </li>
             )
           })}
@@ -490,8 +492,11 @@ function Preview({ session }: { session: GymSession }) {
         <div className="card gym-ex-card gym-ex-split" key={e.exId}>
           <ExerciseDemo demo={demos.get(e.exId)} emoji={e.emoji} size={DEMO_SIZE} className="gym-ex-demo--big" />
           <div className="gym-ex-body">
-            <div style={{ fontWeight: 900, fontSize: 15 }}>
-              {i + 1}. {e.name}
+            <div className="gym-ex-title">
+              <div style={{ fontWeight: 900, fontSize: 15 }}>
+                {i + 1}. {e.name}
+              </div>
+              <VideoButton exId={e.exId} name={e.name} />
             </div>
             <div className="muted" style={{ fontSize: 12 }}>{planLine(e, unit)}</div>
             <div className="gym-chip-row gym-chip-row--wrap">
@@ -788,6 +793,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           seconds={current.plan.restSec}
           nextDemo={demos.get(nextUpEx?.exId ?? '')}
           nextEmoji={nextUpEx?.emoji}
+          nextExId={nextUpEx?.exId}
+          nextName={nextUpEx?.name}
           footNote={<SessionCountdown session={session} />}
           // the words for the thing you are about to walk over to. Only for a
           // NEW exercise — re-reading the brief for the set you have just done
@@ -816,6 +823,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               <div style={{ fontWeight: 900, fontSize: 19 }}>{current.name}</div>
               <div className="muted" style={{ fontSize: 12 }}>{planLine(current, unit)}</div>
             </div>
+            <VideoButton exId={current.exId} name={current.name} />
           </div>
 
           <ExerciseBrief ex={current} setNo={nextSetNo} />

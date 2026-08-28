@@ -543,3 +543,51 @@ export const optcgSfx = {
     tone(196, 0.5, 'sawtooth', 0.1, 0.3, 90)
   },
 }
+
+// ⚽ Rivals League — the match. Short, dry, percussive noises: a game that is
+// end-to-end has to CRACK when the ball is struck, or the pace doesn't land.
+// Everything is synthesised, so nothing here costs a byte of `public/`.
+export const rivalsSfx = {
+  /** A pass or a touch. `power` is 0…1. */
+  kick(power = 0.4) {
+    tone(200 + 300 * power, 0.05, 'square', 0.05 + 0.05 * power, 0, 90)
+  },
+  /** A struck shot: a thump you feel, with a whip on top. */
+  shot(power = 1) {
+    tone(150, 0.16, 'sawtooth', 0.1 + 0.08 * power, 0, 55)
+    tone(1100, 0.05, 'square', 0.05 * power, 0.01, 380)
+  },
+  /** Studs in — the ball changes hands. */
+  tackle() {
+    tone(110, 0.16, 'square', 0.13, 0, 55)
+    tone(380, 0.07, 'sawtooth', 0.07, 0.01, 140)
+  },
+  /** A slide at thin air. */
+  miss() {
+    tone(260, 0.14, 'sine', 0.05, 0, 120)
+  },
+  /** The burst. */
+  dash() {
+    tone(520, 0.14, 'sine', 0.05, 0, 1700)
+  },
+  /** A style move goes off. */
+  ability() {
+    tone(300, 0.12, 'square', 0.07, 0, 900)
+    tone(900, 0.14, 'triangle', 0.07, 0.05, 1500)
+  },
+  /** Flow State: the meter is spent and everything gets louder. */
+  flow() {
+    const notes = [523, 784, 1047, 1568]
+    notes.forEach((f, i) => tone(f, 0.16, 'triangle', 0.14, i * 0.06))
+  },
+  /** The keeper gets a hand to it. */
+  save() {
+    tone(480, 0.09, 'triangle', 0.09, 0, 240)
+  },
+  /** It's in. */
+  goal() {
+    const notes = [659, 880, 1047, 1319]
+    notes.forEach((f, i) => tone(f, 0.2, 'square', 0.13, i * 0.07))
+    tone(120, 0.5, 'sine', 0.16, 0, 60)
+  },
+}

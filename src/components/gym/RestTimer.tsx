@@ -31,6 +31,7 @@ import type { ExerciseDemo as Demo } from '../../types'
 import { REST_MIN } from '../../logic/gym'
 import { gymSfx, holdAudioSession } from '../../audio'
 import { ExerciseDemo } from './ExerciseDemo'
+import { VideoButton } from './ExerciseVideo'
 
 /** Seconds left when the "get ready" double blip fires. */
 const WARN_AT = 10
@@ -51,6 +52,8 @@ export function RestTimer({
   nextBrief,
   nextDemo,
   nextEmoji,
+  nextExId,
+  nextName,
   footNote,
   onNext,
 }: {
@@ -68,6 +71,12 @@ export function RestTimer({
   /** The animation for what's coming, played big while you rest. */
   nextDemo?: Demo
   nextEmoji?: string
+  /**
+   * Who the animation is of, so rest can also be where you watch someone say it
+   * out loud (§18n). Rest is the only stretch of a session with the hands free.
+   */
+  nextExId?: string
+  nextName?: string
   /** Rides above NEXT in the foot bar — the runner puts the session countdown here. */
   footNote?: ReactNode
   /**
@@ -182,6 +191,7 @@ export function RestTimer({
           {nextEmoji && (
             <div className="gym-next-art">
               <ExerciseDemo demo={nextDemo} emoji={nextEmoji} size={NEXT_ART} autoPlay />
+              {nextExId && nextName && <VideoButton exId={nextExId} name={nextName} className="gym-next-yt" />}
             </div>
           )}
         </div>

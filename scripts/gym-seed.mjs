@@ -9,11 +9,12 @@
 // gone, which is the point: the file is the catalog, not a suggestion merged
 // into whatever was there before.
 //
-// The ONE thing it carries over from the live document is `demo` — the animation
-// and poster that `npm run gym:demos` found. Those are expensive to match and
-// are keyed by exercise id, so an id already in the database keeps its demo
-// unless the file names a different one. Add an exercise here, run gym:demos,
-// and the file stays the source of truth for everything except its animation.
+// The two things it carries over from the live document are `demo` and `video` —
+// the animation and poster `npm run gym:demos` found, and the YouTube pick
+// `npm run gym:videos` (or your own paste) put there. Both are expensive and
+// both are keyed by exercise id, so an id already in the database keeps them
+// unless the file names something different. Add an exercise here, run the two
+// media scripts, and the file stays the source of truth for everything else.
 //
 // Day-to-day edits (a new exercise, a tweaked how-to, retiring something) belong
 // in the app's Gear tab — that writes straight to Firestore and does not need
@@ -59,25 +60,37 @@ async function main() {
   const live = (await getDoc(ref)).data() ?? {}
   const liveEx = new Map((live.exercises ?? []).map((e) => [e.id, e]))
 
-  // keep the animations: they cost a match run each, and the file doesn't carry
-  // one until you copy it in
-  let kept = 0
+  // Keep the media: an animation costs a match run and a video costs a search
+  // plus a model call, both keyed by exercise id, and the file doesn't carry
+  // either until you copy it in. A `manual` video is a link you pasted by hand
+  // in the app — gym:videos refuses to overwrite one, so a seed that dropped it
+  // would be the only thing in the codebase that could, and it did.
+  let keptDemo = 0
+  let keptVideo = 0
   const merged = exercises.map((e) => {
-    if (!e.demo && liveEx.get(e.id)?.demo) {
-      kept++
-      return { ...e, demo: liveEx.get(e.id).demo }
+    const was = liveEx.get(e.id)
+    let out = e
+    if (!out.demo && was?.demo) {
+      keptDemo++
+      out = { ...out, demo: was.demo }
     }
-    return e
+    if (!out.video && was?.video) {
+      keptVideo++
+      out = { ...out, video: was.video }
+    }
+    return out
   })
 
   const added = merged.filter((e) => !liveEx.has(e.id))
   const removed = (live.exercises ?? []).filter((e) => !merged.some((m) => m.id === e.id))
   const withDemo = merged.filter((e) => e.demo).length
+  const withVideo = merged.filter((e) => e.video).length
 
   console.log(`\n📖 ${FILE}`)
-  console.log(`   ${plural(equipment.length, 'equipment item')} · ${plural(merged.length, 'exercise')} (${withDemo} with an animation)`)
+  console.log(`   ${plural(equipment.length, 'equipment item')} · ${plural(merged.length, 'exercise')} (${withDemo} with an animation, ${withVideo} with a video)`)
   console.log(`   live now: ${plural((live.exercises ?? []).length, 'exercise')}`)
-  if (kept) console.log(`   ♻️  ${plural(kept, 'animation')} carried over from the live catalog`)
+  if (keptDemo) console.log(`   ♻️  ${plural(keptDemo, 'animation')} carried over from the live catalog`)
+  if (keptVideo) console.log(`   ♻️  ${plural(keptVideo, 'video')} carried over from the live catalog`)
   if (added.length) console.log(`\n   ➕ new (${added.length}): ${added.map((e) => e.name).join(', ')}`)
   if (removed.length) console.log(`\n   ➖ dropped (${removed.length}): ${removed.map((e) => e.name).join(', ')}`)
 
@@ -90,6 +103,8 @@ async function main() {
   console.log(`\n✅ app/gymCatalog replaced.`)
   const missing = merged.filter((e) => !e.demo)
   if (missing.length) console.log(`➡️  Next: npm run gym:demos — ${plural(missing.length, 'exercise')} still has no animation.`)
+  const noVideo = merged.filter((e) => !e.video)
+  if (noVideo.length) console.log(`➡️  Next: npm run gym:videos — ${plural(noVideo.length, 'exercise')} still has no video.`)
   console.log('')
   process.exit(0)
 }

@@ -74,9 +74,25 @@
       "id": "eq-bands",
       "name": "Resistance bands",
       "emoji": "🎗️",
-      "notes": "TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour.",
+      "notes": "TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour. ONE MORE JOB, added with the Nordic pad: a band can ASSIST a movement instead of resisting it (looped over the pull-up bar and under the chest to take weight off a Nordic curl). That is not covered by the \"never where a dumbbell would do\" rule above — nothing else here can unload a bodyweight eccentric — and it progresses BACKWARDS: thickest band first, lighter as you get stronger.",
       "addedBy": "manual",
       "createdAt": "2026-08-24T02:44:00.477Z"
+    },
+    {
+      "id": "eq-flexbar",
+      "name": "Flexible resistance bar",
+      "emoji": "〰️",
+      "notes": "FitBeast flexible resistance bar — a solid rubber bar you BEND and TWIST (the TheraBand FlexBar pattern), not a band and not a weight. THREE bars, colour-coded: RED = 10 lb, GREEN = 15 lb, BLUE = 25 lb. The number is roughly the force needed to bend the bar into a full C, not a load you lift, and the bars carry no printed figure — ALWAYS name the COLOUR when prescribing, the way band colour is named. DELIBERATELY NARROW ROLE, same rule as the bands: dumbbells win wherever they can do the job, so this is NOT a curl, a press or a general forearm tool — wrist curls, reverse wrist curls and every carry stay on the dumbbells and the kettlebell. It is kept for the three things nothing else in the basement can do: (a) ECCENTRIC wrist-extensor loading (Tyler twist) and wrist-flexor loading (reverse Tyler twist) — the standard, well-evidenced work for tennis and golfer's elbow, which is the racquet-sport injury this gym has no other answer to; (b) resisted forearm SUPINATION / PRONATION, the rotation a pickleball stroke actually does and a dumbbell cannot load through range; (c) all of it seated, in no floor space, with no anchor. Start every twist on RED and only move to GREEN when red is easy through the full range with a slow 4-second release; BLUE is a grip bar, not a starting point. Ninety seconds of this is prehab, not a workout — never the main movement of a session.",
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:32:12.374Z"
+    },
+    {
+      "id": "eq-nordic-pad",
+      "name": "Nordic curl pad",
+      "emoji": "🦵",
+      "notes": "A portable Nordic hamstring curl device — a padded knee board with a foot roller that pins the ankles. Sets up on the floor in seconds, no rack, no partner holding your heels. It does exactly ONE movement and there is no substitute for it in this basement: a knee-flexion ECCENTRIC with the hips locked, which is the single best-evidenced hamstring injury-prevention exercise there is, and it loads the hamstrings HARD with ZERO spinal load — the reason it matters here, where the other two hamstring options (Romanian deadlift, kettlebell swing) are both flagged backRisk. OWNER STATUS, confirmed: an unassisted Nordic is currently IMPOSSIBLE — he cannot control the descent at all. That is normal and it is not a reason to skip the movement; it is a reason to prescribe an ASSISTED version. The ladder is band-assisted → hands-catch negatives → unassisted, and it is walked in that order over months, never rushed. Never prescribe the unassisted Nordic until the assisted one is easy for 3 × 6 with a slow descent. Hips STAY EXTENDED throughout on every version — the moment the movement becomes a hip hinge it stops being a hamstring exercise and starts being a lower back one.",
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:48:29.171Z"
     }
   ],
   "exercises": [
@@ -1402,6 +1418,75 @@
       "createdAt": "2026-08-23T01:20:54.911Z"
     },
     {
+      "equipmentIds": [
+        "eq-flexbar"
+      ],
+      "kind": "weight",
+      "intensity": 1,
+      "restSec": 45,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:32:12.374Z",
+      "id": "mv-flexbar-tyler-twist",
+      "name": "Flexbar Tyler Twist",
+      "emoji": "〰️",
+      "parts": [
+        "forearms",
+        "arms"
+      ],
+      "how": "BAR: RED (10 lb) — start here, green only when red is easy through full range. Hold the bar upright in the WORKING hand with the wrist bent back (knuckles toward you), grab the top with the other hand palm-out. Twist the TOP hand to wind the bar up, then bring both arms out in front of you so the bar is horizontal. Now release the wound-up bar SLOWLY — four full seconds — letting the working wrist un-bend against it. The slow release is the entire exercise; winding it up is just setup. Elbow-tendon work: light, controlled, no speed.",
+      "defaultReps": 15
+    },
+    {
+      "equipmentIds": [
+        "eq-flexbar"
+      ],
+      "kind": "weight",
+      "intensity": 1,
+      "restSec": 45,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:32:12.374Z",
+      "id": "mv-flexbar-reverse-tyler-twist",
+      "name": "Flexbar Reverse Tyler Twist",
+      "emoji": "〰️",
+      "parts": [
+        "forearms",
+        "arms"
+      ],
+      "how": "BAR: RED (10 lb). The mirror of the Tyler twist, for the INSIDE of the elbow. Hold the bar upright in the working hand with the wrist bent FORWARD (palm curling in), grab the top with the other hand and wind the bar up the opposite way. Arms out in front, bar horizontal, then let it unwind over four slow seconds through the working wrist. Same rule: the release is the work.",
+      "defaultReps": 15
+    },
+    {
+      "equipmentIds": [
+        "eq-flexbar"
+      ],
+      "kind": "weight",
+      "intensity": 1,
+      "restSec": 40,
+      "defaultSets": 3,
+      "perSide": true,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:32:12.374Z",
+      "id": "mv-flexbar-supination",
+      "name": "Flexbar Supination",
+      "emoji": "🌀",
+      "parts": [
+        "forearms",
+        "arms"
+      ],
+      "how": "BAR: RED or GREEN. Sit with the working forearm resting on your thigh, palm down, hand past the knee. Hold the bar upright, pin the far end with the other hand, and rotate the working palm UP against the bar's twist, then let it wind back slowly. Rotation only — the elbow stays on the leg and the shoulder does not move. This is the forearm rotation a racquet stroke lives on, and it is the one thing the dumbbells cannot load through range.",
+      "defaultReps": 12
+    },
+    {
       "id": "mv-split-squat-jump",
       "name": "Split Squat Jump",
       "emoji": "✂️",
@@ -1627,6 +1712,79 @@
         "sourceName": "Seated Band Hamstring Curl",
         "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-curl-poster.webp?alt=media&token=aa1693fa-35ad-4238-8ee2-df54c30ef78a"
       }
+    },
+    {
+      "kind": "bodyweight",
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:48:29.171Z",
+      "id": "mv-nordic-curl-band-assisted",
+      "name": "Band-Assisted Nordic Curl",
+      "emoji": "🦵",
+      "equipmentIds": [
+        "eq-nordic-pad",
+        "eq-bands"
+      ],
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "BAND: PURPLE (the thickest, most help) to start — the band here is ASSISTANCE, not resistance, so you go LIGHTER as you get stronger, the opposite of every other band exercise. Loop it over the pull-up bar or high on the post so it hangs in front of you, and pass it under your armpits across the chest. Kneel on the pad, ankles under the roller, hips locked straight so knee to shoulder is one line. Lower yourself forward as SLOWLY as you can, letting the band take whatever you cannot hold, then pull back up. Stop the set the moment the descent turns into a drop — an uncontrolled fall trains nothing. Progress by moving to a lighter band (purple → black → red), never by adding reps first.",
+      "restSec": 90,
+      "defaultReps": 6,
+      "defaultSets": 3
+    },
+    {
+      "kind": "bodyweight",
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:48:29.171Z",
+      "id": "mv-nordic-curl-negative",
+      "name": "Nordic Curl Negative",
+      "emoji": "🦵",
+      "equipmentIds": [
+        "eq-nordic-pad"
+      ],
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 3,
+      "how": "The step AFTER band-assisted, not a starting point. Kneel on the pad, ankles under the roller, hips locked straight, hands ready in front of you. Lower under control for as long as you can hold it, then CATCH yourself on your hands and push back to the top with the arms — the hamstrings only do the way down. Every session the catch should happen a little lower. Hips never hinge.",
+      "restSec": 120,
+      "defaultReps": 5,
+      "defaultSets": 3
+    },
+    {
+      "kind": "bodyweight",
+      "perSide": false,
+      "backRisk": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-08-28T15:48:29.171Z",
+      "id": "mv-nordic-curl",
+      "name": "Nordic Curl",
+      "emoji": "🦵",
+      "equipmentIds": [
+        "eq-nordic-pad"
+      ],
+      "parts": [
+        "legs",
+        "glutes",
+        "core"
+      ],
+      "intensity": 3,
+      "how": "The full movement, and the top of the ladder — do not prescribe this until band-assisted is easy for 3 × 6 with a slow descent. Kneel on the pad, ankles under the roller, hips locked so knee to shoulder is one straight line. Lower all the way to the floor under hamstring control, touch down lightly with the hands, and pull yourself back up with the hamstrings. Low reps forever: this is a very high-tension movement and five good ones beat ten scrappy ones.",
+      "restSec": 120,
+      "defaultReps": 5,
+      "defaultSets": 3
     },
     {
       "id": "mv-band-leg-extension",

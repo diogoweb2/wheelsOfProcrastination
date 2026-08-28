@@ -26,6 +26,7 @@ import {
   slotLine,
 } from '../../logic/gymBlock'
 import { sfx } from '../../audio'
+import { VideoButton } from './ExerciseVideo'
 
 export function BlocksPanel() {
   const { data, gymAddBlock, gymSetActiveBlock } = useStore()
@@ -431,25 +432,30 @@ function SlotEditor({
 
   return (
     <div className="gym-slot">
-      <button
-        className="gym-block-head"
-        onClick={() => {
-          sfx.click()
-          setOpen(!open)
-        }}
-      >
-        <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-          <span style={{ display: 'block', fontWeight: 800, fontSize: 13 }}>
-            {def ? `${def.emoji} ${def.name}` : '❓ not in the catalog'}
-            {slot.quality ? ' ⚡' : ''}
+      <div className="gym-move-top">
+        <button
+          className="gym-block-head"
+          onClick={() => {
+            sfx.click()
+            setOpen(!open)
+          }}
+        >
+          <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+            <span style={{ display: 'block', fontWeight: 800, fontSize: 13 }}>
+              {def ? `${def.emoji} ${def.name}` : '❓ not in the catalog'}
+              {slot.quality ? ' ⚡' : ''}
+            </span>
+            <span className="muted" style={{ display: 'block', fontSize: 11 }}>
+              {slotLine(slot, gymCatalog)}
+              {def ? ` · ${def.parts.map((p) => PART_LABEL[p]).slice(0, 2).join(', ')}` : ' · fix or remove this slot'}
+            </span>
           </span>
-          <span className="muted" style={{ display: 'block', fontSize: 11 }}>
-            {slotLine(slot, gymCatalog)}
-            {def ? ` · ${def.parts.map((p) => PART_LABEL[p]).slice(0, 2).join(', ')}` : ' · fix or remove this slot'}
-          </span>
-        </span>
-        <span className="muted">{open ? '▾' : '▸'}</span>
-      </button>
+          <span className="muted">{open ? '▾' : '▸'}</span>
+        </button>
+        {/* a slot names a movement, so it offers the movement's video too — a
+            button inside the row's button would be invalid HTML, hence the wrap */}
+        {def && <VideoButton exId={def.id} name={def.name} />}
+      </div>
 
       {open && (
         <>

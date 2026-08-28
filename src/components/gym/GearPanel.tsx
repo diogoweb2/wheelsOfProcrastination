@@ -10,6 +10,7 @@ import type { BodyPart, Equipment, ExerciseDef, ExerciseRating, GymCatalog } fro
 import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince } from '../../logic/gym'
 import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
+import { VideoButton } from './ExerciseVideo'
 import { shrinkPhoto, type ShrunkPhoto } from '../../logic/photo'
 import { identifyEquipment, visionReady } from '../../logic/gymVision'
 import { uploadGymImage } from '../../store/cloud'
@@ -44,8 +45,10 @@ export function GearPanel() {
         <code>npm run gym:equipment</code>. It identifies each machine and writes every exercise it enables — and it reads your
         comments, so caption a photo in the Photos app (or describe it in <code>gym-photos/notes.txt</code>) to tell it what a
         picture can’t show, like “adjustable 5–52 lb”. Then{' '}
-        <code>npm run gym:demos</code> finds an animation for each movement. Not every exercise gets one — the free library is a
-        subset and is missing some basics; those just keep their emoji. Personal ratings and weights below are yours alone;{' '}
+        <code>npm run gym:demos</code> finds an animation for each movement, and <code>npm run gym:videos</code> finds a short
+        YouTube demonstration (the ▶ on every row — paste a better link there and yours is kept for everyone). Not every exercise
+        gets an animation — the free library is a subset and is missing some basics; those just keep their emoji. Personal ratings
+        and weights below are yours alone;{' '}
         the equipment and exercise lists are shared with the rest of the crew.
       </p>
     </>
@@ -316,11 +319,13 @@ function convertAmount(n: number, from: ExerciseDef['kind'], to: ExerciseDef['ki
 }
 
 function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => void }) {
-  const { data, gymCatalog, gymRateExercise, gymSetExerciseNote } = useStore()
+  const { data, gymCatalog, gymRateExercise, gymSetExerciseNote, gymFindExerciseVideo } = useStore()
   const [filter, setFilter] = useState<BodyPart | 'all'>('all')
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  /** What the video hunt for a just-added exercise is doing, if anything. */
+  const [hunting, setHunting] = useState<{ name: string; error?: string } | null>(null)
   const unit = data.gym.brief.weightUnit ?? 'lb'
 
   const list = useMemo(() => allExercises(gymCatalog), [gymCatalog])
@@ -369,19 +374,24 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
         const isOpen = open === e.id
         return (
           <div className="card gym-move-row" key={e.id}>
-            <button className="gym-move-head" onClick={() => { sfx.click(); setOpen(isOpen ? null : e.id) }}>
-              <ExerciseDemo demo={e.demo} emoji={e.emoji} size={40} />
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                <div style={{ fontWeight: 900, fontSize: 14 }}>{e.name}</div>
-                <div className="muted" style={{ fontSize: 11 }}>
-                  {e.parts.map((p) => PART_LABEL[p]).join(' · ')}
-                  {mem?.timesDone ? ` · done ${mem.timesDone}×` : ' · never done'}
-                  {mem?.suggestedWeight ? ` · ${mem.suggestedWeight} ${unit}` : ''}
+            {/* the video button is a sibling of the row, not inside it: a button
+                inside a button is invalid, and tapping ▶ must not fold the row */}
+            <div className="gym-move-top">
+              <button className="gym-move-head" onClick={() => { sfx.click(); setOpen(isOpen ? null : e.id) }}>
+                <ExerciseDemo demo={e.demo} emoji={e.emoji} size={40} />
+                <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                  <div style={{ fontWeight: 900, fontSize: 14 }}>{e.name}</div>
+                  <div className="muted" style={{ fontSize: 11 }}>
+                    {e.parts.map((p) => PART_LABEL[p]).join(' · ')}
+                    {mem?.timesDone ? ` · done ${mem.timesDone}×` : ' · never done'}
+                    {mem?.suggestedWeight ? ` · ${mem.suggestedWeight} ${unit}` : ''}
+                  </div>
                 </div>
-              </div>
-              {mem?.rating && <span className="chip">{RATING_LABEL[mem.rating].split(' ')[0]}</span>}
-              <span className="muted">{isOpen ? '▾' : '▸'}</span>
-            </button>
+                {mem?.rating && <span className="chip">{RATING_LABEL[mem.rating].split(' ')[0]}</span>}
+                <span className="muted">{isOpen ? '▾' : '▸'}</span>
+              </button>
+              <VideoButton exId={e.id} name={e.name} className="gym-move-yt" />
+            </div>
 
             {isOpen && (
               <div className="gym-move-body">
@@ -530,12 +540,27 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
           onSave={(def) => {
             save((c) => ({ ...c, exercises: [...c.exercises, def] }))
             setAdding(false)
+            // A new exercise arrives with no animation and no video. The
+            // animation needs a script and a laptop; the video does not, so it
+            // is fetched here and now rather than waiting for the next run.
+            setHunting({ name: def.name })
+            gymFindExerciseVideo(def.id)
+              .then(() => setHunting(null))
+              .catch((e) => setHunting({ name: def.name, error: e instanceof Error ? e.message : String(e) }))
           }}
         />
       ) : (
         <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => { sfx.click(); setAdding(true) }}>
           ➕ Add an exercise
         </button>
+      )}
+
+      {hunting && (
+        <p className="muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
+          {hunting.error
+            ? `📺 No video for ${hunting.name} yet — ${hunting.error} Open it and paste one, or try the 🤖 button.`
+            : `📺 Finding a short video for ${hunting.name}…`}
+        </p>
       )}
 
       {shown.some((e) => e.demo) && <DemoCredit />}
