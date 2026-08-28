@@ -5196,7 +5196,6 @@ input, select { font-family: inherit; }
   from { transform: scale(1) skewX(-8deg); }
   to { transform: scale(1.06) skewX(-8deg); }
 }
-}
 
 /* one human's half of the phone: label, meters, stick + buttons */
 .ops-pad { position: relative; margin-top: 18px; }
