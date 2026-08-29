@@ -622,6 +622,10 @@ function resetPaint(): void {
   punch.clear()
   trail.length = 0
   bits.length = 0
+  shouts.length = 0
+  crowdFor = ''
+  chantCd = 0.5
+  hype = 0.4
   roll = 0
   cam.hot = 0
   cam.shake = 0
@@ -714,6 +718,7 @@ function feel(m: Match): void {
         if (f.power > 0.34) rivalsSfx.kick(f.power)
         break
       case 'shot':
+        hype = Math.max(hype, 0.55 + 0.4 * f.power)
         cam.shake = Math.max(cam.shake, (5 + 11 * f.power) * K)
         spark(x, y, 14, 1.1, f.dir, 420 * f.power, '#fff3c4')
         ring(x, y, 'rgba(255,240,190,', 900 * f.power)
@@ -742,6 +747,7 @@ function feel(m: Match): void {
         rivalsSfx.ability()
         break
       case 'flow':
+        hype = Math.max(hype, 0.9)
         cam.shake = Math.max(cam.shake, 10 * K)
         ring(x, y, 'rgba(255,206,0,', 1300, 0.6)
         ring(x, y, 'rgba(255,255,255,', 800, 0.45)
@@ -749,6 +755,7 @@ function feel(m: Match): void {
         rivalsSfx.flow()
         break
       case 'catch':
+        hype = Math.max(hype, 0.75)
         cam.shake = Math.max(cam.shake, 6 * K)
         ring(x, y, 'rgba(180,225,255,', 700, 0.4)
         dust(x, y, 6)
@@ -763,6 +770,7 @@ function feel(m: Match): void {
         confetti(x, y, 46, kit)
         ring(x, y, 'rgba(255,255,255,', 1500, 0.7)
         ring(x, y, `${hexA(kit[0])}`, 1000, 0.9)
+        goalChant(m, f.side, CWv, CHv)
         rivalsSfx.goal()
         break
     }
@@ -910,7 +918,8 @@ function draw(cv: HTMLCanvasElement | null, m: Match, t: number, dt: number): vo
   moveCam(m, dt)
 
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  stadium(ctx, t, CW, CH)
+  crowdTick(m, dt, CW, CH)
+  stadium(ctx, m, t, CW, CH)
 
   ctx.save()
   const sh = cam.shake
@@ -957,30 +966,302 @@ function draw(cv: HTMLCanvasElement | null, m: Match, t: number, dt: number): vo
   vig.addColorStop(1, `rgba(0,0,0,${(0.25 + cam.hot * 0.2).toFixed(3)})`)
   ctx.fillStyle = vig
   ctx.fillRect(0, 0, CW, CH)
+
+  drawShouts(ctx)
+}
+
+
+// --- the crowd ---------------------------------------------------------------
+
+/**
+ * The stands, and they are the loudest thing in the building. Every fan is a
+ * little figure — head, shirt in their team's colours, arms up — and they leave
+ * the floor, all match, harder the closer the game gets. One in nine has a
+ * scarf over their head.
+ *
+ * They live in SCREEN space, drawn before the camera transform and across the
+ * WHOLE canvas: the camera pans, and a crowd that only lived in the padding
+ * around the pitch would slide off and leave a bald strip. The grass is opaque,
+ * so the middle of them is never seen.
+ *
+ * Cost: each fan is built once and then only bounces, and the whole stand goes
+ * down in ten batched paths — one per colour — so a couple of thousand of them
+ * cost about what nine hundred still dots used to.
+ */
+interface Fan {
+  x: number
+  y: number
+  /** Whose end they're in: 0 home, 1 away. */
+  side: 0 | 1
+  /** Shirt: the kit's second colour rather than its first. */
+  alt: boolean
+  /** Where in the jump they are, so the stand ripples instead of pulsing as one lump. */
+  phase: number
+  /** How fast they bounce. */
+  rate: number
+  /** Nobody is the same size as the person next to them. */
+  size: number
+  skin: number
+  /** A scarf held overhead, waved. One in nine. */
+  scarf: boolean
+  /** This frame's jump, in canvas pixels. Filled by `crowd`, read by everything after. */
+  dy: number
+}
+
+const fans: Fan[] = []
+/**
+ * The same crowd, pre-sorted into the paths that draw it: four shirt buckets
+ * (two sides × two kit colours), four skin buckets, two scarf buckets. Sorting
+ * once at build time is what keeps the per-frame cost to two passes over the
+ * stand instead of ten.
+ */
+let shirtBuckets: Fan[][] = []
+let skinBuckets: Fan[][] = []
+let scarfBuckets: Fan[][] = []
+/** The canvas the crowd was laid out for, so it's rebuilt only when that changes. */
+let crowdFor = ''
+/** How loud they are, 0…1. Follows the camera's excitement, and pinned to 1 by a goal. */
+let hype = 0.4
+
+const SKIN = ['#efc6a0', '#c98f5f', '#8b5a34', '#5d3a22']
+
+/**
+ * Lay out the terraces. Two things make this a stand rather than a spray of
+ * dots: the fans sit in ROWS, offset every other one like real seating; and
+ * nobody is generated in the middle of the canvas, because `camShift` pins the
+ * pitch inside the frame, so the rectangle inset by twice the margin is grass
+ * in every camera position there is. Skipping it buys the visible terraces
+ * three times the density for the same cost.
+ */
+function buildCrowd(CW: number, CH: number): void {
+  fans.length = 0
+  // seat pitch — packed, but never tighter than a fan is wide
+  const gap = Math.max(10 * K, Math.sqrt((CW * CH) / 4200))
+  const inX = [OXX * 2, CW - OXX * 2]
+  const inY = [OXY * 2, CH - OXY * 2]
+  const cols = Math.ceil(CW / gap) + 1
+  const rows = Math.ceil(CH / gap) + 1
+  let i = 0
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      i++
+      const x = c * gap + (r % 2 ? gap * 0.5 : 0) + (rnd(i) - 0.5) * gap * 0.6
+      const y = r * gap + (rnd(i + 5000) - 0.5) * gap * 0.4
+      if (x > inX[0] && x < inX[1] && y > inY[0] && y < inY[1]) continue // always grass
+      fans.push({
+        x,
+        y,
+        side: x < CW / 2 ? 0 : 1,
+        alt: rnd(i + 900) > 0.62,
+        phase: rnd(i + 1700) * Math.PI * 2,
+        rate: 5.5 + rnd(i + 2600) * 3.5,
+        size: 0.75 + rnd(i + 3300) * 0.6,
+        skin: Math.floor(rnd(i + 3900) * SKIN.length),
+        scarf: rnd(i + 4100) > 0.88,
+        dy: 0,
+      })
+    }
+  }
+  shirtBuckets = [[], [], [], []]
+  skinBuckets = SKIN.map(() => [])
+  scarfBuckets = [[], []]
+  for (const f of fans) {
+    shirtBuckets[f.side * 2 + (f.alt ? 1 : 0)].push(f)
+    skinBuckets[f.skin].push(f)
+    if (f.scarf) scarfBuckets[f.side].push(f)
+  }
+}
+
+/** The stand, jumping. Ten paths, and not one of them per fan. */
+function crowd(ctx: CanvasRenderingContext2D, m: Match, t: number, CW: number, CH: number): void {
+  const key = `${CW}x${CH}x${m.pitch.w}`
+  if (crowdFor !== key) {
+    buildCrowd(CW, CH)
+    crowdFor = key
+  }
+
+  // how high they get off the floor: always a little, a lot when it's on
+  const air = (1.8 + 10 * hype) * K
+  for (const f of fans) f.dy = Math.abs(Math.sin(t * f.rate + f.phase)) * air * f.size
+
+  // shirts — and, once they're really up, the arms with them
+  const arms = hype > 0.45
+  for (const [b, bucket] of shirtBuckets.entries()) {
+    ctx.fillStyle = (b < 2 ? m.home : m.away).colors[b % 2]
+    ctx.globalAlpha = 0.94
+    ctx.beginPath()
+    for (const f of bucket) {
+      const w = 4 * K * f.size
+      const y = f.y - f.dy
+      ctx.rect(f.x - w / 2, y, w, 5.4 * K * f.size)
+      if (arms) ctx.rect(f.x - w * 1.45, y - 1.8 * K * f.size, w * 2.9, 1.6 * K * f.size)
+    }
+    ctx.fill()
+  }
+
+  // heads
+  ctx.globalAlpha = 0.96
+  for (const [i, tone] of SKIN.entries()) {
+    ctx.fillStyle = tone
+    ctx.beginPath()
+    for (const f of skinBuckets[i]) {
+      const h = 3.2 * K * f.size
+      ctx.rect(f.x - h / 2, f.y - f.dy - h * 1.05, h, h)
+    }
+    ctx.fill()
+  }
+
+  // scarves, held up and waved — the tell that a stand is singing
+  ctx.globalAlpha = 0.88
+  for (const side of [0, 1] as const) {
+    ctx.fillStyle = (side === 0 ? m.home : m.away).colors[1]
+    ctx.beginPath()
+    for (const f of scarfBuckets[side]) {
+      const w = 9.5 * K * f.size
+      const wave = Math.sin(t * f.rate * 0.7 + f.phase) * 2.4 * K
+      ctx.rect(f.x - w / 2, f.y - f.dy - 7.5 * K * f.size + wave, w, 1.9 * K * f.size)
+    }
+    ctx.fill()
+  }
+  ctx.globalAlpha = 1
+}
+
+// --- the chant ---------------------------------------------------------------
+
+/** One shout, going up out of the stand and fading. */
+interface Shout {
+  text: string
+  x: number
+  y: number
+  life: number
+  max: number
+  color: string
+  size: number
+  drift: number
+  tilt: number
+}
+
+const shouts: Shout[] = []
+/** Seconds until the stand goes again. */
+let chantCd = 0.5
+/** So the same words don't come round twice in a row. */
+let chantN = 0
+
+/** What a stand shouts. Mostly the one thing, because that is what a stand does. */
+function chantText(name: string, i: number): string {
+  const N = name.toUpperCase()
+  return [`LET'S GO ${N}!`, `LET'S GO ${N}!`, `LET'S GO ${N}!`, `LET'S GO ${N}!`, `${N}! ${N}!`, `COME ON ${N}!`][
+    i % 6
+  ]
+}
+
+/**
+ * Put a shout up over the stand this side sits in — the end behind their goal,
+ * or the touchline in their half. Never the middle: the game is there.
+ */
+function fireChant(m: Match, side: 0 | 1, CW: number, CH: number, big = false): void {
+  if (shouts.length > 16) return
+  const team = side === 0 ? m.home : m.away
+  // The stands are the bands the pitch can never reach: twice the margin at each
+  // edge (see buildCrowd). Shouts are placed in those, so the words land on
+  // people rather than over the game — and if a screen is shaped such that one
+  // band is too thin to read in, the shout goes to the other one.
+  const endBand = OXX * 2
+  const sideBand = OXY * 2
+  const end = endBand > 150 * K && (sideBand < 90 * K || Math.random() < 0.55)
+  const roll = 0.12 + Math.random() * 0.76
+  const x = end
+    ? (side === 0 ? endBand * roll : CW - endBand * roll)
+    : CW * (side === 0 ? 0.05 + Math.random() * 0.38 : 0.57 + Math.random() * 0.38)
+  const y = end
+    ? CH * (0.1 + Math.random() * 0.8)
+    : Math.random() < 0.5
+      ? sideBand * (0.15 + Math.random() * 0.7)
+      : CH - sideBand * (0.15 + Math.random() * 0.7)
+  shouts.push({
+    text: chantText(team.name, chantN++),
+    x,
+    y,
+    life: big ? 2.2 : 1.7,
+    max: big ? 2.2 : 1.7,
+    color: team.colors[0],
+    size: (big ? 26 : 15 + Math.random() * 5) * K,
+    // they rise out of the stand — except the bottom touchline, where rising
+    // would carry the words straight over the pitch, so those sink instead
+    drift: (26 + Math.random() * 26) * K * (end || y < CH / 2 ? 1 : -1),
+    tilt: (Math.random() - 0.5) * 0.16,
+  })
+}
+
+/** The whole stand, at once: a goal, or full time. */
+function goalChant(m: Match, side: 0 | 1, CW: number, CH: number): void {
+  hype = 1
+  for (let i = 0; i < 9; i++) fireChant(m, side, CW, CH, i % 2 === 0)
+}
+
+/** Hype, and the timer that keeps the singing going all match. */
+function crowdTick(m: Match, dt: number, CW: number, CH: number): void {
+  const want = 0.32 + 0.68 * cam.hot
+  hype += (want - hype) * (1 - Math.exp(-dt * (want > hype ? 6 : 1.2)))
+
+  for (let i = shouts.length - 1; i >= 0; i--) {
+    const sh = shouts[i]
+    sh.life -= dt
+    sh.y -= sh.drift * dt
+    if (sh.life <= 0) shouts.splice(i, 1)
+  }
+
+  if (m.phase === 'over') return
+  chantCd -= dt
+  if (chantCd > 0) return
+  // whoever has it gets the louder end, but the other lot never go quiet
+  const owner = m.players.find((p) => p.id === m.ball.owner)
+  const side: 0 | 1 = Math.random() < 0.62 ? ((owner?.side ?? 0) as 0 | 1) : Math.random() < 0.5 ? 0 : 1
+  fireChant(m, side, CW, CH)
+  if (Math.random() < 0.7) fireChant(m, side, CW, CH)
+  if (hype > 0.6) fireChant(m, side === 0 ? 1 : 0, CW, CH)
+  rivalsSfx.chant()
+  chantCd = 1.1 + Math.random() * 0.9
+}
+
+/** The shouts themselves, on top of everything — a stand is not behind the vignette. */
+function drawShouts(ctx: CanvasRenderingContext2D): void {
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.lineJoin = 'round'
+  for (const sh of shouts) {
+    const k = sh.life / sh.max
+    // pops in over the first tenth, holds, then fades out over the last third
+    const pop = k > 0.9 ? 0.6 + 0.4 * ((1 - k) / 0.1) : 1
+    const alpha = k < 0.34 ? k / 0.34 : 1
+    ctx.save()
+    ctx.translate(sh.x, sh.y)
+    ctx.rotate(sh.tilt)
+    ctx.scale(pop, pop)
+    ctx.globalAlpha = alpha
+    ctx.font = `900 ${Math.round(sh.size)}px system-ui, sans-serif`
+    ctx.lineWidth = Math.max(2, sh.size * 0.28)
+    ctx.strokeStyle = 'rgba(6,10,20,0.85)'
+    ctx.strokeText(sh.text, 0, 0)
+    ctx.lineWidth = Math.max(1, sh.size * 0.14)
+    ctx.strokeStyle = sh.color
+    ctx.strokeText(sh.text, 0, 0)
+    ctx.fillStyle = '#fff'
+    ctx.fillText(sh.text, 0, 0)
+    ctx.restore()
+  }
+  ctx.globalAlpha = 1
 }
 
 /** Night stands, a crowd of dots, and four floodlights washing in from the corners. */
-function stadium(ctx: CanvasRenderingContext2D, t: number, CW: number, CH: number): void {
+function stadium(ctx: CanvasRenderingContext2D, m: Match, t: number, CW: number, CH: number): void {
   const bg = ctx.createLinearGradient(0, 0, 0, CH)
   bg.addColorStop(0, '#0b1020')
   bg.addColorStop(1, '#05070f')
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, CW, CH)
 
-  // The crowd: nine hundred dots that never move, flickering only very slightly.
-  // They cover the WHOLE canvas, not just the band around the pitch — the camera
-  // pans, and a crowd that only lived in the padding would slide off and leave a
-  // bald strip. The pitch is opaque, so the middle of them is never seen.
-  for (let i = 0; i < 900; i++) {
-    const x = rnd(i) * CW
-    const y = rnd(i + 5000) * CH
-    const warm = rnd(i + 900)
-    ctx.fillStyle = warm > 0.86 ? 'rgba(120,180,255,0.75)' : warm > 0.7 ? 'rgba(255,255,255,0.28)' : 'rgba(150,170,210,0.16)'
-    // the whole crowd is up when the moment is hot
-    const twinkle = warm > 0.86 ? 1 + 0.4 * Math.sin(t * 2 + i) : 1
-    const jump = cam.hot > 0.5 ? 1 + Math.sin(t * 9 + i * 2.3) * 0.8 * (cam.hot - 0.5) : 0
-    ctx.fillRect(x, y + jump, 2 * twinkle, 2 * twinkle)
-  }
+  crowd(ctx, m, t, CW, CH)
 
   for (const [fx, fy] of [
     [0, 0],

@@ -49,6 +49,45 @@ function tone(freq: number, dur: number, type: OscillatorType, vol: number, when
   osc.stop(t0 + dur + 0.05)
 }
 
+/** Two seconds of white noise, made once and re-used — the seed of every crowd. */
+let noiseBuf: AudioBuffer | null = null
+function noise(a: AudioContext): AudioBuffer {
+  if (!noiseBuf || noiseBuf.sampleRate !== a.sampleRate) {
+    noiseBuf = a.createBuffer(1, Math.floor(a.sampleRate * 2), a.sampleRate)
+    const d = noiseBuf.getChannelData(0)
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+  }
+  return noiseBuf
+}
+
+/**
+ * A swell of filtered noise — a crowd. `from`/`to` sweep the band, which is
+ * what turns the same hiss into a distant murmur (low, narrow) or a stand on
+ * its feet (higher, wide open).
+ */
+function roar(dur: number, vol: number, when = 0, from = 420, to = 900, q = 1.1) {
+  if (muted) return
+  const a = ac()
+  const t0 = a.currentTime + when
+  const src = a.createBufferSource()
+  src.buffer = noise(a)
+  src.loop = true
+  src.playbackRate.value = 0.7 + Math.random() * 0.6
+  const band = a.createBiquadFilter()
+  band.type = 'bandpass'
+  band.Q.value = q
+  band.frequency.setValueAtTime(from, t0)
+  band.frequency.exponentialRampToValueAtTime(to, t0 + dur * 0.45)
+  band.frequency.exponentialRampToValueAtTime(from * 0.8, t0 + dur)
+  const gain = a.createGain()
+  gain.gain.setValueAtTime(0.0001, t0)
+  gain.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.25, dur * 0.3))
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur)
+  src.connect(band).connect(gain).connect(a.destination)
+  src.start(t0)
+  src.stop(t0 + dur + 0.05)
+}
+
 export const sfx = {
   /** wheel pointer click while spinning */
   tick() {
@@ -589,5 +628,25 @@ export const rivalsSfx = {
     const notes = [659, 880, 1047, 1319]
     notes.forEach((f, i) => tone(f, 0.2, 'square', 0.13, i * 0.07))
     tone(120, 0.5, 'sine', 0.16, 0, 60)
+    rivalsSfx.roar()
+  },
+  /**
+   * A stand chanting the name: LET'S — GO — and the name, two claps and a
+   * swell under it. Deliberately quiet; it fires every couple of seconds all
+   * match long and must sit UNDER the game rather than on top of it.
+   */
+  chant() {
+    roar(0.5, 0.035, 0, 380, 620, 1.4)
+    roar(0.06, 0.05, 0.0, 1500, 2600, 0.7)
+    roar(0.06, 0.05, 0.22, 1500, 2600, 0.7)
+    tone(190, 0.1, 'sawtooth', 0.025, 0.42, 150)
+  },
+  /** The whole ground up on its feet. The goal noise, and nothing else, uses this. */
+  roar() {
+    roar(2.4, 0.16, 0, 300, 1500, 0.6)
+    roar(0.9, 0.09, 0.05, 900, 2400, 0.5)
+    roar(0.08, 0.07, 0.1, 1800, 3000, 0.6)
+    roar(0.08, 0.07, 0.3, 1800, 3000, 0.6)
+    roar(0.08, 0.07, 0.5, 1800, 3000, 0.6)
   },
 }
