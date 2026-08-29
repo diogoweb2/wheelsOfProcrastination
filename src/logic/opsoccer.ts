@@ -250,10 +250,45 @@ export const teamById = (id: string) => TEAMS.find((t) => t.id === id)
 
 /** How hard the bots play. The chaos complaint was mostly this. */
 export type Difficulty = 'easy' | 'normal' | 'hard'
-export const DIFFICULTY: Record<Difficulty, { label: string; skill: number; what: string }> = {
-  easy: { label: 'Rookie', skill: 0.72, what: 'they give you room' },
-  normal: { label: 'Rival', skill: 1, what: 'a fair game' },
-  hard: { label: 'Blue Lock', skill: 1.3, what: 'they hunt the ball' },
+
+/**
+ * Every knob a difficulty turns, and it turns them on the OPPOSITION only —
+ * your own keeper and teammates always play their best game, whatever you
+ * picked. `skill` is how often a rival bot decides to do something; the rest
+ * are how good it is when it does. Rookie used to slow their thinking and
+ * nothing else, which still left them sprinting you down, robbing you at will
+ * and saving everything.
+ */
+export interface DifficultyTune {
+  label: string
+  what: string
+  /** Rival decision rate — shots, slides, signature moves. */
+  skill: number
+  /** Rival legs, as a share of yours. Running, dashing and sliding. */
+  legs: number
+  /** Their keeper: reach, and how far along the line they track the ball. */
+  gk: number
+  /** How often a rival slide actually takes the ball off you — and, inverted, how easily you rob them. */
+  grit: number
+  /** Rival shot power. Under 1 their strikes are softer, and scattered wider. */
+  aim: number
+  /** Seconds a rival waits after a slide before it may try another. */
+  rest: number
+}
+
+export const DIFFICULTY: Record<Difficulty, DifficultyTune> = {
+  easy: {
+    label: 'Rookie',
+    skill: 0.45,
+    legs: 0.76,
+    gk: 0.5,
+    grit: 0.35,
+    aim: 0.76,
+    rest: 3.4,
+    what: 'slow legs, soft hands — you can run straight at them',
+  },
+  normal: { label: 'Rival', skill: 1, legs: 1, gk: 1, grit: 1, aim: 1, rest: 1.8, what: 'a fair game' },
+  hard: { label: 'Blue Lock', skill: 1.3, legs: 1, gk: 1, grit: 1, aim: 1, rest: 1.38, what: 'they hunt the ball' },
 }
 
 // --- state -------------------------------------------------------------------
@@ -364,8 +399,8 @@ export interface Match {
   event: string | null
   /** 'ai' — the other three are bots. 'duo' — Diogo takes one of them, same phone. */
   mode: 'ai' | 'duo'
-  /** Bot sharpness, from the difficulty picker. */
-  aiSkill: number
+  /** How the opposition plays, from the difficulty picker. */
+  ai: DifficultyTune
   /** Seconds the keeper has been holding on to it. */
   gkHold: number
   /** This frame's bangs, for the renderer. Drained by whoever draws them. */
@@ -507,7 +542,7 @@ export function newMatch(opts: {
     restartFor: 0,
     event: 'Kick off!',
     mode: duo ? 'duo' : 'ai',
-    aiSkill: DIFFICULTY[opts.difficulty ?? 'normal'].skill,
+    ai: DIFFICULTY[opts.difficulty ?? 'normal'],
     gkHold: 0,
     fx: [],
   }
@@ -576,6 +611,18 @@ const CHARGE_TIME = 0.7 // seconds to a full-power shot
 const FLOW_TIME = 10
 const EGO = { pass: 0.09, shot: 0.11, steal: 0.13, goal: 0.4, beat: 0.07 }
 
+/**
+ * A rival: a bot on the side nobody is playing for. The difficulty knobs only
+ * ever touch these, so Rookie never hands you a worse keeper of your own — and
+ * in a duo match, where both sides have a human, it touches nobody.
+ */
+function isRival(m: Match, p: Player): boolean {
+  return p.human === null && !m.players.some((x) => x.side === p.side && x.human !== null)
+}
+
+/** How fast a rival's legs turn over compared with yours. 1 for everyone else. */
+const legsOf = (m: Match, p: Player): number => (isRival(m, p) ? m.ai.legs : 1)
+
 /** A per-SECOND chance, so bots decide at the same rate on a 60 Hz phone and a 120 Hz one. */
 const chance = (perSecond: number, dt: number) => Math.random() < perSecond * dt
 
@@ -585,10 +632,10 @@ function reward(p: Player, amount: number): void {
 }
 
 /** Everything that multiplies a player's legs right now. */
-function speedOf(p: Player): number {
+function speedOf(m: Match, p: Player): number {
   const st = styleById(p.style)
   const base = p.role === 'GK' ? SPEED * 1.04 : SPEED
-  return base * st.speed * p.stamina * (p.flow > 0 ? 1.3 : 1) * (p.charge > 0 ? 0.55 : 1)
+  return base * st.speed * legsOf(m, p) * p.stamina * (p.flow > 0 ? 1.3 : 1) * (p.charge > 0 ? 0.55 : 1)
 }
 
 function powerOf(p: Player, charge: number): number {
@@ -644,7 +691,8 @@ export function step(m: Match, inputs: [Input, Input], dt: number): Match {
     const drain = frozen ? -0.05 : len(wish) > 0.1 ? (p.dash > 0 ? 0.05 : 0.016) : -0.08
     p.stamina = clamp(p.stamina - drain * dt, 0.6, 1)
 
-    const speed = p.sliding > 0 ? SLIDE_SPEED : p.dash > 0 ? DASH_SPEED : speedOf(p)
+    const legs = legsOf(m, p)
+    const speed = p.sliding > 0 ? SLIDE_SPEED * legs : p.dash > 0 ? DASH_SPEED * legs : speedOf(m, p)
     // legs have weight: steer the velocity toward what the stick asked for
     // rather than teleporting onto it. This alone is most of the calmer feel.
     const want: Vec = { x: wish.x * speed, y: wish.y * speed }
@@ -815,7 +863,9 @@ function slide(m: Match, p: Player): void {
   }
   // weighted by the carrier's control and by who is actually moving
   const resist = styleById(carrier.style).control
-  const win = clamp(0.62 / resist + (len(p.vel) - len(carrier.vel)) / 260, 0.2, 0.9)
+  // Rookie cuts both ways: a rival's slide rarely comes off, and yours nearly always does
+  const edge = isRival(m, p) ? m.ai.grit : isRival(m, carrier) ? 1 / m.ai.grit : 1
+  const win = clamp((0.62 / resist + (len(p.vel) - len(carrier.vel)) / 260) * edge, 0.2, 0.95)
   if (Math.random() > win) {
     p.touchCd = 1.4
     reward(carrier, EGO.beat)
@@ -859,7 +909,10 @@ function presser(m: Match, side: 0 | 1): Player | null {
 function botWish(m: Match, p: Player, owner: Player | null): Vec {
   if (p.role === 'GK') {
     const line = p.side === 0 ? 4.5 : m.pitch.w - 4.5
-    const y = clamp(m.ball.pos.y, m.pitch.h / 2 - m.goalW / 2 + 1, m.pitch.h / 2 + m.goalW / 2 - 1)
+    // a Rookie keeper only half-follows the ball, so the corners are open
+    const track = isRival(m, p) ? clamp(m.ai.gk, 0.35, 1) : 1
+    const follow = m.pitch.h / 2 + (m.ball.pos.y - m.pitch.h / 2) * track
+    const y = clamp(follow, m.pitch.h / 2 - m.goalW / 2 + 1, m.pitch.h / 2 + m.goalW / 2 - 1)
     return steer(p, { x: line, y })
   }
 
@@ -921,7 +974,7 @@ function nearestOpponent(m: Match, p: Player): Player | null {
 /** What a bot presses. Rate-limited on purpose: a bot that tackles every frame is a wall. */
 function botActions(m: Match, p: Player, owner: Player | null, dt: number): void {
   if (p.role === 'GK') return
-  const skill = ((p.side === 0 ? m.home : m.away).strength * (p.human === null ? m.aiSkill : 1))
+  const skill = (p.side === 0 ? m.home : m.away).strength * (isRival(m, p) ? m.ai.skill : 1)
 
   // spend Flow near the goal, the way a striker would
   if (p.ego >= 1 && p.flow <= 0 && dist(p.pos, targetGoal(p.side, m.pitch)) < 34) {
@@ -960,7 +1013,7 @@ function botActions(m: Match, p: Player, owner: Player | null, dt: number): void
   // defending: one aimed slide at a time, and only when it's actually on
   if (owner && owner.side !== p.side && p.botTackleCd <= 0 && p.sliding <= 0 && p.touchCd <= 0) {
     if (dist(p.pos, owner.pos) < 4.5 && chance(2.2 * skill, dt)) {
-      p.botTackleCd = 1.8 / skill
+      p.botTackleCd = isRival(m, p) ? m.ai.rest : 1.8 / skill
       slide(m, p)
     }
   }
@@ -998,9 +1051,12 @@ function shoot(m: Match, p: Player, power: number, curve = 0): void {
   const keeperY = m.players.find((k) => k.side !== p.side && k.role === 'GK')?.pos.y ?? goal.y
   // aim away from the keeper, with a little scatter so it isn't always the same corner
   const away = keeperY > goal.y ? -1 : 1
-  const spread = (m.goalW / 2 - 1.5) * (curve ? 0.95 : 0.75)
+  // a Rookie rival hits it softer and sprays it wider — some of them go past the post
+  const rival = isRival(m, p)
+  const scatter = rival ? 1 + (1 - m.ai.aim) * 2.4 : 1
+  const spread = (m.goalW / 2 - 1.5) * (curve ? 0.95 : 0.75) * scatter
   const aim: Vec = { x: goal.x, y: goal.y + away * spread * (0.45 + Math.random() * 0.55) }
-  kick(m, p, norm(sub(aim, p.pos)), power)
+  kick(m, p, norm(sub(aim, p.pos)), power * (rival ? m.ai.aim : 1))
   if (dist(p.pos, goal) < 34) reward(p, EGO.shot)
   m.ball.target = null
 }
@@ -1029,7 +1085,8 @@ function possession(m: Match, from: Vec): void {
   for (const p of m.players) {
     if (p.touchCd > 0) continue
     // the man a pass is aimed at gets a generous first touch; a keeper has hands
-    const reach = p.id === m.ball.target ? 4.2 : p.role === 'GK' ? 4.8 : 2.6
+    const reach =
+      p.id === m.ball.target ? 4.2 : p.role === 'GK' ? 4.8 * (isRival(m, p) ? m.ai.gk : 1) : 2.6
     const d = swept(p.pos, from, m.ball.pos)
     if (d > reach || d >= bd) continue
     bd = d
