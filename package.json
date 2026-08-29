@@ -25,7 +25,8 @@
     "optcg:scrape": "node scripts/optcg-scrape.mjs",
     "optcg:cards": "node scripts/optcg-catalog.mjs",
     "errors": "node scripts/errors.mjs",
-    "gym:audit": "node scripts/gym-audit.mjs"
+    "gym:audit": "node scripts/gym-audit.mjs",
+    "frontier:audit": "node scripts/frontier-audit.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

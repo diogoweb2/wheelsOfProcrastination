@@ -17,6 +17,7 @@ import { DuelScreen } from './screens/DuelScreen'
 import { BoardGameScreen } from './screens/BoardGameScreen'
 import { SeaBattleScreen } from './screens/SeaBattleScreen'
 import { RivalsScreen } from './screens/RivalsScreen'
+import { FrontierScreen } from './screens/FrontierScreen'
 
 import { TasksScreen } from './screens/TasksScreen'
 import { QuizScreen } from './screens/QuizScreen'
@@ -793,6 +794,8 @@ function AppBodyRouter({
       return <SeaBattleScreen tab={open.tab} />
     case 'rivals':
       return <RivalsScreen tab={open.tab} setTab={setTab} />
+    case 'frontier':
+      return <FrontierScreen tab={open.tab} setTab={setTab} />
     case 'binder':
       // Lazy for the same reason as the card game: the binder is drawn from the
       // same ~2 600-card catalog.

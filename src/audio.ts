@@ -650,3 +650,95 @@ export const rivalsSfx = {
     roar(0.08, 0.07, 0.5, 1800, 3000, 0.6)
   },
 }
+
+// 🐦 Shangri-La Frontier (§22) — the boss rush. A harder, colder bench than the
+// football one: the noises here have to say *danger* a beat before the hit
+// lands, because the whole game is read-then-react.
+export const slfSfx = {
+  /** A blade through air. `heavy` is the wind-up you felt coming. */
+  swing(heavy = false) {
+    roar(heavy ? 0.2 : 0.11, heavy ? 0.07 : 0.045, 0, heavy ? 700 : 1400, heavy ? 2600 : 3400, 0.9)
+  },
+  /** It bit. */
+  hit(power = 0.6) {
+    tone(150, 0.1, 'square', 0.07 + 0.05 * power, 0, 70)
+    roar(0.07, 0.05 * power, 0, 900, 1800, 0.8)
+  },
+  /** A critical: the same thud with a bell on top. */
+  crit() {
+    tone(140, 0.12, 'square', 0.1, 0, 60)
+    tone(1320, 0.14, 'triangle', 0.09, 0.01)
+    tone(1980, 0.16, 'triangle', 0.07, 0.04)
+  },
+  /** A roll. */
+  dodge() {
+    roar(0.16, 0.045, 0, 500, 1500, 1.2)
+  },
+  /**
+   * The frame-perfect dodge. It is the best thing that can happen to you in
+   * this game, so it gets the only truly pretty sound on the bench: the world
+   * drops a fifth and a four-note figure climbs out of it.
+   */
+  perfect() {
+    tone(90, 0.5, 'sine', 0.11, 0, 55)
+    const notes = [784, 1047, 1319, 1760]
+    notes.forEach((f, i) => tone(f, 0.18, 'triangle', 0.1, i * 0.05))
+  },
+  /** A telegraph opening. Deliberately unmusical — it is a warning, not a note. */
+  tell() {
+    tone(320, 0.07, 'square', 0.035, 0, 260)
+  },
+  /** A monster's attack going off. */
+  boom(power = 0.7) {
+    tone(80, 0.28, 'sawtooth', 0.1 * power, 0, 42)
+    roar(0.22, 0.07 * power, 0, 260, 700, 0.7)
+  },
+  /** A phase change. Something enormous has just decided to try harder. */
+  roarBig() {
+    roar(1.5, 0.16, 0, 90, 420, 0.5)
+    tone(70, 1.1, 'sawtooth', 0.12, 0, 45)
+    tone(210, 0.5, 'square', 0.06, 0.1, 120)
+  },
+  /** The blade snaps. */
+  breakIt() {
+    tone(2400, 0.06, 'square', 0.09, 0, 400)
+    tone(700, 0.2, 'sawtooth', 0.1, 0.03, 90)
+    roar(0.3, 0.07, 0.02, 1800, 400, 1.6)
+  },
+  /** A flask. */
+  heal() {
+    const notes = [523, 659, 880]
+    notes.forEach((f, i) => tone(f, 0.2, 'sine', 0.09, i * 0.07))
+  },
+  /** Something dies. */
+  die() {
+    tone(300, 0.5, 'sawtooth', 0.1, 0, 60)
+    roar(0.5, 0.08, 0, 500, 120, 0.8)
+  },
+  /** The Night-Slaying Fang leaves its mark. Nothing else in the app sounds like this. */
+  curse() {
+    tone(110, 1.2, 'sawtooth', 0.11, 0, 82)
+    tone(116, 1.2, 'sawtooth', 0.11, 0, 87) // a beating semitone — deliberately wrong
+    tone(1500, 0.3, 'square', 0.05, 0.1, 300)
+  },
+  /** A ley-vent going up. */
+  vent() {
+    roar(0.55, 0.13, 0, 200, 2200, 0.5)
+    tone(60, 0.4, 'sine', 0.12, 0, 40)
+  },
+  /** Psyger-0 arrives. */
+  assist() {
+    const notes = [523, 784, 1047, 1568, 2093]
+    notes.forEach((f, i) => tone(f, 0.16, 'square', 0.1, i * 0.05))
+    tone(110, 0.6, 'sawtooth', 0.12, 0, 60)
+  },
+  /** The Tombguard's countdown, once a second under thirty. */
+  tick() {
+    tone(1500, 0.04, 'square', 0.05)
+  },
+  /** The clock reaches zero. */
+  seal() {
+    tone(60, 2, 'sawtooth', 0.16, 0, 38)
+    roar(2, 0.14, 0, 700, 90, 0.6)
+  },
+}

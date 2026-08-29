@@ -226,6 +226,22 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // 🐦 Shangri-La Frontier (§22): a single-player boss rush in the spirit of
+    // the show — read the telegraph, roll through it, and hope the wolf doesn't
+    // leave a mark. Its own app in the Games folder, its own four URLs.
+    id: 'frontier',
+    name: 'Frontier',
+    icon: '🐦',
+    tint: ['#7b2ff7', '#0a0a1a'],
+    folder: 'games',
+    tabs: [
+      { id: 'hunt', label: 'Hunt', icon: '⚔️' },
+      { id: 'gear', label: 'Gear', icon: '🎒' },
+      { id: 'codex', label: 'Codex', icon: '📖' },
+      { id: 'rules', label: 'How to', icon: '📜' },
+    ],
+  },
+  {
     // official 8×8 English draughts — the checkers board everyone in Canada owns
     id: 'checkers',
     name: 'Checkers',

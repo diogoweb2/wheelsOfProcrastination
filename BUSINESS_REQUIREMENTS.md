@@ -1287,4 +1287,49 @@ Two on one phone puts the second player's whole deck along the **top edge**.
 - state announced in light — a **pulsing gold glow with rising chevrons** in Flow State, a dashed cyan ring while untouchable, colour streaks and manga speed-lines behind a dash, a ring under whoever is on the ball, a **closing ring and an aim line while a shot charges**, and a bobbing chevron over the player each human is driving;
 - a **slanted-capitals scoreboard** with kit chips, a glowing score and a mm:ss clock, EGO and LEGS bars, and chunky pressed-in buttons.
 
+## 22. Shangri-La Frontier (the 🐦 Frontier app, inside the 🎮 Games folder)
+
+**A single-player action RPG boss rush**, in the spirit of the show. Its own app, its own four URLs (§1c): `/frontier/hunt`, `/frontier/gear`, `/frontier/codex`, `/frontier/rules`. The rules live in [src/logic/frontier.ts](src/logic/frontier.ts) as pure state plus a fixed step — no React, no Firestore — the same contract every other game here follows, which is what lets the whole thing be exercised headlessly.
+
+### The one pillar
+
+**Spacing and reflexes beat numbers.** Every design decision below follows from that sentence, and any change that makes a stat sheet more important than a read is wrong.
+
+- **No lock-on.** The sword goes where the stick was pointing. A swing thrown at nothing is a swing thrown at nothing, and this is deliberate: it is the show's whole combat identity.
+- **Every attack is painted on the floor before it lands**, and the shape *fills up over exactly the length of the wind-up*. Solid white means it is already happening. A death in this game is a telegraph the player did not read, never a number they did not have.
+- **Stamina on everything.** Swings and rolls both spend it, it only comes back once you have stopped spending it, and **emptying the bar leaves you standing there gasping for a second** — more runs end here than to any single attack.
+- **The perfect dodge is the point.** Roll so that a hitbox catches you while the roll's invincibility is still up and the world drops into slow motion, your stamina comes back, and you get **Overclock**: three seconds of more damage, faster swings and quicker legs. Running away is survival; rolling *through* it is how you win. Post-hit invulnerability is tracked **separately** (`Hero.hurt` vs `Hero.iframes`) precisely so that eating hit one of a combo cannot dress hit two up as a read.
+- **They adapt.** Land the same *kind* of attack over and over and its damage falls away; it recovers when you stop, so mixing the two attacks is worth about a third more damage than leaning on one. The show's monsters do not lose to the same trick twice.
+- **Hidden parameters are hidden.** 🍀 **Luck** (crit rate and rare drops — it goes *up* as your armour comes off), 🩸 **Curse resistance** (bought with armour, and nothing else) and 👁️ **Aggro** (live: high and the monster comes at *you*, low and it starts throwing the arena around instead) run the fight and are never printed until the **Codex works them out by playing**. Luck after a few hunts; curse resistance the first time something scars you; aggro after your first big kill.
+
+### The build — armour is a tax
+
+Four body parts and five weapons, and the whole gear screen is one trade said out loud: **a piece of armour buys a few points of damage reduction and sells you the thing this game is actually about**, which is being somewhere else. Weight slows your legs and makes the roll cost more. **Fighting in nothing is a real build** — it is the fastest, it has the most luck, and it is the one that gets permanently scarred. The 🔪 **Twin Fangs** are that build in one object: almost no reach, almost no damage, twice the swings and a crit rate nothing else touches.
+
+**Weapons break.** Durability comes down when the blade actually bites something, it is **carried in and out of every hunt on the save** (a blade with five swings left snaps five swings in), and at zero you hit for a third of what you did **for the rest of the fight**. One 🦷 Hound Fang repairs it on the Gear page; nothing else does. A **reforge** (+1 → +3, paid in boss materials) is +14% damage and +30% life in the blade each step, and it comes back whole.
+
+### The three hunts, in order
+
+They unlock in sequence, because each one teaches the next.
+
+1. 🐕 **The Rabbit-Eaters** (C-list field boss, Rabituza) — five of them, and **they learn**. Every one you kill with the blade makes the survivors faster and measurably harder to cut, and it does not wear off. The **ley-vents** in the floor erupt on a cycle, kill a hound outright, and **teach the pack nothing at all**. That is not a hint; it is the solution, and it is the introductory fight precisely because the arena is the answer.
+2. 🐺 **Lycaon the Nightslayer** (unique monster) — three phases. Below two thirds it **pulls the night in**, so you can only see as far as it lets you, and it calls two shadow pups. Below a quarter comes the **Night-Slaying Fang**: a long, named, purple telegraph that **scars whatever it lands on**. A scarred part **never wears armour again**, on that save, and **no screen anywhere in this app undoes it** — a screen that offered to would make the fight meaningless. Its pelt forges the best blade before the Tombguard.
+3. 🗿 **Wezaemon the Tombguard** (unique monster) — an ancient machine samurai on a **countdown**. Sheathed it draws faster than the telegraph looks; drawn it starts marking the floor; **broken**, below a third, the plate comes off and the exposed core takes **2.3×** — and the clock starts running at **double speed**. Run it out and Wezaemon performs the **Grave Seal**, which is not an attack: it ends the run there and then, mid-fight, with health to spare.
+
+### The failure states, and they are named
+
+A player who cannot tell two mistakes apart cannot fix either, so the end card says which one happened by name: **You died** · **Grave Seal** (the countdown) · **It slips away / They melt away** (the other two clocks) · **Out of breath** (mid-fight) · **Your weapon breaks** (mid-fight) · **Scarred** (permanent). **The end card has one button and it always files the result** — a "leave without saving" there would be a way to lose a fight and keep the blade.
+
+### Difficulty, and Casual means casual
+
+Three grades, and the knob that matters is **`tell`**: Casual is not a monster that hits softer, it is a monster that **gives you time to read it**, which is the skill the game is teaching. 🎚️ **Casual** · **Frontier** (the game as shipped) · **Unique Scenario**. Covered by a headless harness that plays every boss at every grade with a bare starter build, a bare crit build and the endgame build, asserting that **no fight ever fails to terminate**, that both clock failures actually fire, and that the ladder still reads as a ladder.
+
+### The people
+
+🐦 **Sunraku** is you — the trash-game expert in a bird mask and almost nothing else, who does not out-stat anything and simply does not get hit. 🐰 **Emul** follows you in, calls the phase changes and shouts the thing you needed half a second before you needed it, keyed to what actually just happened rather than to a script. 🛡️ **Psyger-0** is the top-ranked player; put the Tombguard down and you have done what they have done, and they will answer **one call for covering fire per hunt**.
+
+**Berries.** A boss's bounty (**18 / 40 / 60**) is paid **once**, the first time it goes down. After that a clear pays **6**, **3 a day**, exactly like the other games' solo modes — a boss rush you can farm is a Berry printer and not a game.
+
+**Drawn, not downloaded.** The show's art belongs to somebody else and the repo keeps `public/` tight (CLAUDE.md), so the arena, the monsters, the telegraphs and the bird mask are all canvas primitives, and every sound is synthesized ([src/audio.ts](src/audio.ts) `slfSfx`). The hunt reuses the football game's control chrome (`.ops-full` / `.ops-stick` / `.ops-btn` / `.ops-bar`) on purpose: one set of thumb controls, learned once.
+
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

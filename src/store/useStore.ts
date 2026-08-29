@@ -21,6 +21,7 @@ import type {
   FinalTestAuth,
   FreezeGift,
   FreezeRequest,
+  FrontierState,
   GearMode,
   GymCatalog,
   GymSession,
@@ -150,6 +151,20 @@ import {
   type SeaSide,
   type SeaState,
 } from '../logic/seaBattle'
+import {
+  ARMOUR,
+  MAX_PLUS,
+  REPAIR_COST,
+  SLF_SOLO_LIMIT,
+  SLF_SOLO_REWARD,
+  WEAPONS,
+  bossById,
+  canPay,
+  nextUpgrade,
+  plusDurability,
+  weaponById,
+  type FightResult,
+} from '../logic/frontier'
 import {
   OPTCG_REWARD,
   OPTCG_SOLO_LIMIT,
@@ -388,6 +403,21 @@ interface StoreState {
   resetFcSeason: () => void
   /** FC Lock: cache a fetched batch of news. */
   setFcNews: (news: AppData['fcLock']['news']) => void
+
+  /** 🐦 Frontier: equip a blade, or hang a piece of armour on a body part. */
+  slfEquip: (weapon: string, worn: FrontierState['worn']) => void
+  /** 🐦 Frontier: remember the difficulty. */
+  slfGrade: (grade: string) => void
+  /** 🐦 Frontier: a hunt has begun. Counts toward finding the hidden parameters. */
+  slfStart: () => void
+  /** 🐦 Frontier: file a finished hunt — drops, wear, scars, kills and Berries. Returns what it paid. */
+  slfFinish: (r: FightResult) => number
+  /** 🐦 Frontier: the smith takes the blade one step further. */
+  slfUpgrade: () => boolean
+  /** 🐦 Frontier: forge a weapon or a piece of armour out of what the bosses dropped. */
+  slfForge: (id: string, kind: 'weapon' | 'armour') => boolean
+  /** 🐦 Frontier: one Hound Fang, and the blade is whole again. */
+  slfRepair: () => boolean
   toggleIdea: (id: string) => void
   deleteIdea: (id: string) => void
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -3476,6 +3506,135 @@ export const useStore = create<StoreState>((set, get) => {
         }
       })
       return pay
+    },
+
+    // --- 🐦 Shangri-La Frontier (§22) ---------------------------------------
+
+    slfEquip(weapon, worn) {
+      commit((d) => {
+        const changed = d.frontier.weapon !== weapon
+        d.frontier.weapon = weapon
+        // a different blade is a different blade: it comes with its own life in
+        // it, and swapping is not a way to dodge the durability rule
+        if (changed) d.frontier.dur = Math.round(weaponById(weapon).dur * plusDurability(d.frontier.plus))
+        // a scarred part can never be covered, and this is the one gate that
+        // enforces it — the screens only ever hide the option
+        const clean: FrontierState['worn'] = {}
+        for (const [part, id] of Object.entries(worn)) {
+          if (d.frontier.scars.includes(part)) continue
+          if (id) clean[part as keyof FrontierState['worn']] = id
+        }
+        d.frontier.worn = clean
+      })
+    },
+
+    slfGrade(grade) {
+      commit((d) => {
+        d.frontier.grade = grade
+      })
+    },
+
+    slfStart() {
+      commit((d) => {
+        d.frontier.runs += 1
+        // Luck is FOUND, not granted: three hunts in and you have seen enough
+        // rolls go your way to work out there is a number behind them.
+        if (d.frontier.runs >= 3 && !d.frontier.found.includes('luck')) d.frontier.found.push('luck')
+      })
+    },
+
+    slfFinish(r) {
+      const today = dayKey()
+      const { data } = get()
+      const boss = bossById(r.bossId)
+      const first = r.won && boss && !data.frontier.paid.includes(r.bossId)
+      const freshDay = data.frontier.day !== today
+      const wonToday = freshDay ? 0 : data.frontier.wins
+      // the one-off bounty, or the small daily practice rate — never both
+      const pay = first ? (boss?.bounty ?? 0) : r.won && wonToday < SLF_SOLO_LIMIT ? SLF_SOLO_REWARD : 0
+
+      commit((d) => {
+        const f = d.frontier
+        f.dur = Math.max(0, f.dur - r.wear)
+        for (const id of r.drops) f.mats[id] = (f.mats[id] ?? 0) + 1
+        // **A scar is permanent.** Nothing anywhere else in this app removes
+        // one; the armour on that part comes off here and never goes back.
+        if (r.scar && !f.scars.includes(r.scar)) {
+          f.scars.push(r.scar)
+          delete f.worn[r.scar]
+          if (!f.found.includes('curse')) f.found.push('curse')
+        }
+        f.day = today
+        f.wins = wonToday + (r.won ? 1 : 0)
+        if (r.won) {
+          const was = f.kills[r.bossId]
+          f.kills[r.bossId] = {
+            at: new Date().toISOString(),
+            best: was ? Math.min(was.best, r.seconds) : r.seconds,
+            runs: (was?.runs ?? 0) + 1,
+            grade: f.grade,
+          }
+          if (!f.found.includes('aggro')) f.found.push('aggro')
+          // Psyger-0 turns up once you have done what they have done
+          if (r.bossId === 'wezaemon') f.assist = true
+        }
+        if (pay > 0) {
+          if (first) f.paid.push(r.bossId)
+          d.economy.gems += pay
+          d.economy.totalGemsEarned += pay
+        }
+      })
+
+      if (first && boss) {
+        get().pushEvent({
+          type: 'goal',
+          title: `${boss.name} is down!`,
+          emoji: boss.emoji,
+          description: `A unique monster off the board — +${boss.bounty} Berries.`,
+        })
+      }
+      return pay
+    },
+
+    slfUpgrade() {
+      const { data } = get()
+      const cost = nextUpgrade(data.frontier.plus)
+      if (!cost || !canPay(data.frontier.mats, cost)) return false
+      commit((d) => {
+        for (const [id, n] of Object.entries(cost)) d.frontier.mats[id] = (d.frontier.mats[id] ?? 0) - (n ?? 0)
+        d.frontier.plus = Math.min(MAX_PLUS, d.frontier.plus + 1)
+        // a reforge comes back sharp AND whole; that is what a smith is for
+        d.frontier.dur = Math.round(weaponById(d.frontier.weapon).dur * plusDurability(d.frontier.plus))
+      })
+      return true
+    },
+
+    slfForge(id, kind) {
+      const { data } = get()
+      const f = data.frontier
+      const item = kind === 'weapon' ? WEAPONS.find((w) => w.id === id) : ARMOUR.find((a) => a.id === id)
+      if (!item?.cost) return false
+      if (item.needs && !f.kills[item.needs]) return false
+      if (kind === 'weapon' ? f.forged.includes(id) : f.owned.includes(id)) return false
+      if (!canPay(f.mats, item.cost)) return false
+      commit((d) => {
+        for (const [mid, n] of Object.entries(item.cost ?? {})) d.frontier.mats[mid] = (d.frontier.mats[mid] ?? 0) - (n ?? 0)
+        if (kind === 'weapon') d.frontier.forged.push(id)
+        else d.frontier.owned.push(id)
+      })
+      return true
+    },
+
+    slfRepair() {
+      const { data } = get()
+      const full = Math.round(weaponById(data.frontier.weapon).dur * plusDurability(data.frontier.plus))
+      if (data.frontier.dur >= full) return false
+      if (!canPay(data.frontier.mats, REPAIR_COST)) return false
+      commit((d) => {
+        for (const [id, n] of Object.entries(REPAIR_COST)) d.frontier.mats[id] = (d.frontier.mats[id] ?? 0) - (n ?? 0)
+        d.frontier.dur = full
+      })
+      return true
     },
 
     buyBackground() {

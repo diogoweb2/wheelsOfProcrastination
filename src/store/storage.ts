@@ -9,6 +9,7 @@ import { ACCOUNT_IDS, defaultBankState } from '../logic/bank'
 import { defaultAlbumState } from '../logic/album'
 import { GYM_LOG_CAP, defaultGymState } from '../logic/gym'
 import { ROBLOX_LOG_CAP, defaultRobloxState } from '../logic/roblox'
+import { defaultFrontierState } from '../logic/frontier'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -66,6 +67,7 @@ export function defaultData(): AppData {
     gym: defaultGymState(),
     roblox: defaultRobloxState(),
     fcLock: { leagues: [], teams: [], watch: [] },
+    frontier: defaultFrontierState(),
     pushTokens: [],
   }
 }
@@ -91,6 +93,21 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       entries: (parsed.roblox?.entries ?? []).slice(-ROBLOX_LOG_CAP),
     },
     fcLock: { ...base.fcLock, ...parsed.fcLock },
+    // the bag and the kill list are objects, so they merge a level deeper —
+    // and `scars` is spread from the save rather than the defaults, because
+    // losing one to a merge would quietly undo a curse
+    frontier: {
+      ...base.frontier,
+      ...parsed.frontier,
+      worn: { ...parsed.frontier?.worn },
+      mats: { ...parsed.frontier?.mats },
+      kills: { ...parsed.frontier?.kills },
+      scars: parsed.frontier?.scars ?? [],
+      forged: parsed.frontier?.forged ?? [],
+      owned: parsed.frontier?.owned ?? [],
+      found: parsed.frontier?.found ?? [],
+      paid: parsed.frontier?.paid ?? [],
+    },
     pushTokens: parsed.pushTokens ?? base.pushTokens,
     album: { ...base.album, ...parsed.album, counts: { ...parsed.album?.counts } },
     cards: { ...base.cards, ...parsed.cards, counts: { ...parsed.cards?.counts } },

@@ -1452,6 +1452,8 @@ export interface AppData {
   roblox: RobloxState
   /** FC Lock (§21): this crewmate's own leagues, clubs, watchlist and news. */
   fcLock: FcLockState
+  /** 🐦 Shangri-La Frontier (§22): the blade, the bag, the scars and the kills. */
+  frontier: FrontierState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
 
@@ -1475,6 +1477,51 @@ export interface AuditEntry {
   delta?: number
   at: number // epoch ms (server Timestamp on write, coerced to ms on read)
   expireAt?: unknown // Firestore Timestamp; TTL field — never read in app code
+}
+
+// --- Shangri-La Frontier (🐦 the boss rush, §22) -----------------------------
+
+/**
+ * One hunter's frontier. It lives on the profile, like everything else here, so
+ * Diogo and Ben carry their own blades, their own bag and — the one that matters
+ * — their own scars.
+ */
+export interface FrontierState {
+  /** The blade you carry (see `WEAPONS` in logic/frontier.ts). */
+  weapon: string
+  /** How far the smith has taken it, 0…3. */
+  plus: number
+  /** Durability left in the blade. It does NOT come back on its own. */
+  dur: number
+  /** What is worn on each body part — an id, or null for nothing at all. */
+  worn: Partial<Record<'head' | 'body' | 'arms' | 'legs', string | null>>
+  /**
+   * Parts the Night-Slaying Fang has scarred. **Nothing in this app ever
+   * removes one**: that is the whole weight of the curse, and a screen that
+   * offers to undo it would be a screen that makes the fight meaningless.
+   */
+  scars: string[]
+  /** Materials in the bag, by id. */
+  mats: Record<string, number>
+  /** Weapons the smith has actually forged. */
+  forged: string[]
+  /** Armour crafted out of boss materials. The starting kit is always available. */
+  owned: string[]
+  /** Every boss beaten, with the best clear on it. */
+  kills: Record<string, { at: string; best: number; runs: number; grade: string }>
+  /** Which hidden parameters the codex has worked out. They start invisible. */
+  found: string[]
+  /** Psyger-0 turns up once the Tombguard is down, and can be called after that. */
+  assist: boolean
+  /** The difficulty last picked. */
+  grade: string
+  /** Hunts started — the codex counts them, because luck is found by playing. */
+  runs: number
+  /** Bosses whose one-off bounty has already been paid. */
+  paid: string[]
+  /** The daily practice cap, exactly like the other games' solo modes. */
+  day: string | null
+  wins: number
 }
 
 // --- FC Lock (⚽ the football schedule, §21) ---------------------------------
