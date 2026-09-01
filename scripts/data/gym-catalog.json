@@ -1278,6 +1278,7 @@
       "defaultReps": 30,
       "defaultSets": 3,
       "perSide": true,
+      "loaded": true,
       "backRisk": false,
       "ladder": false,
       "demo": {
@@ -1310,6 +1311,7 @@
       "defaultReps": 45,
       "defaultSets": 3,
       "perSide": false,
+      "loaded": true,
       "backRisk": false,
       "ladder": false,
       "demo": {
@@ -1404,6 +1406,7 @@
       "defaultReps": 40,
       "defaultSets": 3,
       "perSide": false,
+      "loaded": true,
       "backRisk": false,
       "ladder": false,
       "demo": {

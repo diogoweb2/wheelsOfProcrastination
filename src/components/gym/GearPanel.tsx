@@ -475,7 +475,13 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                           if (k === e.kind) return
                           // the unit changes what the number MEANS, so carry the
                           // typical amount over as a sane default for the new unit
-                          patch(e, { kind: k, defaultReps: convertAmount(e.defaultReps, e.kind, k) })
+                          // `weight` is loaded by definition — the separate flag
+                          // would then be saying the same thing twice
+                          patch(e, {
+                            kind: k,
+                            defaultReps: convertAmount(e.defaultReps, e.kind, k),
+                            ...(k === 'weight' && e.loaded ? { loaded: false } : {}),
+                          })
                         }}
                       >
                         {KIND_LABEL[k]}
@@ -512,6 +518,21 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                 >
                   {e.perSide ? '↔️ Reps are per side' : '↔️ Same reps both sides at once'}
                 </button>
+
+                {e.kind !== 'weight' && (
+                  <button
+                    className={`btn btn--small ${e.loaded ? '' : 'btn--ghost'}`}
+                    style={{ marginBottom: 8 }}
+                    onClick={() => {
+                      sfx.click()
+                      // measured in seconds AND carried with weight — a farmer's
+                      // carry, a weighted plank. The two axes are independent.
+                      patch(e, { loaded: !e.loaded })
+                    }}
+                  >
+                    {e.loaded ? '🏋️ Also carries weight' : '🏋️ No weight, just you'}
+                  </button>
+                )}
 
                 <button
                   className="btn btn--ghost btn--small"
@@ -593,6 +614,7 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
   const [sets, setSets] = useState(3)
   const [rest, setRest] = useState(60)
   const [intensity, setIntensity] = useState<1 | 2 | 3>(2)
+  const [loaded, setLoaded] = useState(false)
   const gear = (gymCatalog?.equipment ?? []).filter((e) => !e.retired)
 
   const toggle = <T,>(list: T[], v: T): T[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
@@ -626,6 +648,14 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
           ))}
         </div>
       </div>
+      {kind !== 'weight' && (
+        <div className="field">
+          <label>Do you carry weight on it?</label>
+          <button className={`btn btn--small ${loaded ? '' : 'btn--ghost'}`} onClick={() => { sfx.click(); setLoaded(!loaded) }}>
+            {loaded ? '🏋️ Yes — it asks for the weight too' : '🏋️ No weight, just you'}
+          </button>
+        </div>
+      )}
       <div className="field">
         <label>Body parts (first one is the main target)</label>
         <div className="cat-picker">
@@ -683,6 +713,7 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
               restSec: rest,
               defaultReps: reps,
               defaultSets: sets,
+              loaded: kind !== 'weight' && loaded,
               addedBy: 'manual',
               createdAt: new Date().toISOString(),
             })

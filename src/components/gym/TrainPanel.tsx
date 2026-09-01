@@ -26,6 +26,7 @@ import {
   RATING_LABEL,
   SESSION_MINUTES,
   allExercises,
+  isLoaded,
   loadSteps,
   mmss,
   sessionReport,
@@ -850,6 +851,22 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
           {phase === 'setup' && <SetupCountdown onDone={begin} />}
 
+          {/* A loaded hold — a farmer's carry, a weighted plank — is clocked AND
+              weighted, so the weight is asked for BEFORE the clock starts: once
+              the set is live your hands are full of dumbbells and the phone is
+              on the floor. A counted lift keeps its stepper next to the reps,
+              where it has always been. */}
+          {isClocked(current) && isLoaded(current) && phase !== 'working' && (
+            <div className="gym-inputs">
+              <WeightStepper
+                unit={unit}
+                value={weight}
+                planned={current.plan.weight}
+                onChange={setWeight}
+              />
+            </div>
+          )}
+
           {phase === 'working' && isClocked(current) ? (
             // a plank or a run: no numbers to type, just a clock that keeps going.
             // a per-side hold runs one clock PER SIDE, and the second side's
@@ -866,17 +883,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           ) : phase === 'working' ? (
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
-              {current.kind === 'weight' && (
-                <Stepper
-                  label={`weight (${unit})`}
-                  value={weight ?? 0}
-                  step={2.5}
-                  min={0}
-                  // + and − walk the dumbbell's real notches, not arithmetic
-                  notches={loadSteps(unit)}
-                  onChange={setWeight}
-                  hint={current.plan.weight != null ? `asked for ${current.plan.weight}` : 'first time — set it'}
-                />
+              {isLoaded(current) && (
+                <WeightStepper unit={unit} value={weight} planned={current.plan.weight} onChange={setWeight} />
               )}
             </div>
           ) : null}
@@ -1462,6 +1470,37 @@ function Stepper({
       </div>
       {hint && <span className="gym-stepper-hint">{hint}</span>}
     </div>
+  )
+}
+
+/**
+ * The load. Split out of the reps row because a loaded HOLD needs the same
+ * control in a different place — before the clock rather than beside a rep
+ * count — and the two must stay the same control: the same notches, the same
+ * "asked for" hint, the same first-time prompt.
+ */
+function WeightStepper({
+  unit,
+  value,
+  planned,
+  onChange,
+}: {
+  unit: 'lb' | 'kg'
+  value: number | undefined
+  planned: number | undefined
+  onChange: (n: number) => void
+}) {
+  return (
+    <Stepper
+      label={`weight (${unit})`}
+      value={value ?? 0}
+      step={2.5}
+      min={0}
+      // + and − walk the dumbbell's real notches, not arithmetic
+      notches={loadSteps(unit)}
+      onChange={onChange}
+      hint={planned != null ? `asked for ${planned}` : 'first time — set it'}
+    />
   )
 }
 

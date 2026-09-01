@@ -130,6 +130,11 @@ function checkExercise(e, i, ownedIds, retiredEquip, allIds) {
   if (e.perSide && e.kind === 'cardio') err('combo.perSide', where, 'perSide on a cardio exercise')
   // ladders are the bodyweight rep game (§18f); a loaded lift progresses by weight
   if (e.ladder && e.kind === 'weight') warn('combo.ladder', where, 'ladder on a `weight` exercise — ladders are for bodyweight staples')
+  // `weight` is loaded by definition — the flag would be saying it twice
+  if (e.loaded && e.kind === 'weight') warn('combo.loaded', where, '`loaded` on a `weight` exercise — redundant, weight is loaded by definition')
+  // nothing to load means nothing to type: a bodyweight plank with `loaded` on
+  // would ask for a weight the room hasn't got
+  if (e.loaded && gear.length === 0) warn('combo.loaded', where, '`loaded` but needs no equipment — what are you carrying?')
 
   return true
 }

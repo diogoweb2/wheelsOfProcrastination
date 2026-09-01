@@ -260,8 +260,9 @@ export function usableExercises(
     return true
   })
   if (gearMode === 'mixed') return pool
-  // `weight` is the only kind you load — a pull-up on a bar is still bodyweight.
-  const wanted = pool.filter((e) => (gearMode === 'weights' ? e.kind === 'weight' : e.kind !== 'weight'))
+  // The split is by LOAD, not by gear: a pull-up on a bar is still bodyweight,
+  // and a farmer's carry is weights work even though it is measured by a clock.
+  const wanted = pool.filter((e) => (gearMode === 'weights' ? isLoaded(e) : !isLoaded(e)))
   // Asking for weights-only in a basement with no gear catalogued yet would
   // leave nothing to prescribe. A real session beats an empty one, so fall back.
   return wanted.length >= 3 ? wanted : pool
@@ -303,6 +304,15 @@ export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number
 }
 
 /**
+ * Is there iron in your hands? `kind: 'weight'` is loaded by definition; anything
+ * else needs the `loaded` flag saying so explicitly — which is how a farmer's
+ * carry gets to be clocked *and* weighted at the same time (§18c-2).
+ */
+export function isLoaded(e: Pick<ExerciseDef, 'kind' | 'loaded'> | Pick<SessionExercise, 'kind' | 'loaded'>): boolean {
+  return e.kind === 'weight' || !!e.loaded
+}
+
+/**
  * The weight to put in front of you. Starts from what you lifted last time and
  * moves with how you corrected the last suggestion: you loaded MORE than asked
  * (it was too easy) → nudge up; you loaded LESS (too hard) → nudge down.
@@ -311,7 +321,7 @@ export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number
  * so "nudge up" means the next hole, not an arithmetic 5%.
  */
 export function weightFor(e: ExerciseDef, mem: ExerciseMemory | undefined, unit: 'lb' | 'kg' = 'lb'): number | undefined {
-  if (e.kind !== 'weight') return undefined
+  if (!isLoaded(e)) return undefined
   const last = mem?.suggestedWeight ?? mem?.lastWeight
   if (!last) return undefined
   if (mem?.lastAdjust === 'up') return stepLoad(last, 1, unit)
@@ -731,6 +741,7 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     sets: [],
     paceSec: learnedSetSeconds(mem, e.kind, reps[0]) ?? undefined,
     perSide: e.perSide,
+    loaded: e.loaded,
     ladder: !!ladder,
     ladderTest: isTest,
     coins: 0,
@@ -1036,6 +1047,12 @@ export function isPersonalRecord(mem: ExerciseMemory | undefined, se: SessionExe
   const bestWeight = Math.max(0, ...weights)
   if (bestWeight > 0 && bestWeight > (mem?.bestWeight ?? 0)) return true
   if (bestWeight === 0 && bestReps > (mem?.bestReps ?? 0)) return true
+  // A loaded hold has two records and either one counts: heavier is caught
+  // above, and longer counts too — as long as you didn't buy the seconds by
+  // putting the dumbbells down a notch.
+  if (isLoaded(se) && (se.kind === 'timed' || se.kind === 'cardio')) {
+    return bestReps > (mem?.bestReps ?? 0) && bestWeight >= (mem?.bestWeight ?? 0)
+  }
   return false
 }
 

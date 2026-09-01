@@ -8,7 +8,7 @@
 // from the body-part filter and from direct labels on the marks.
 import type { BodyPart, GymSession, GymState } from '../types'
 import { addDays, dayKey, parseDay } from './dates'
-import { ALL_PARTS, daysSince, loggedReps } from './gym'
+import { ALL_PARTS, daysSince, isLoaded, loggedReps } from './gym'
 
 /** One completed exercise flattened out of the log — the row every aggregate is built from. */
 export interface StatRow {
@@ -20,7 +20,13 @@ export interface StatRow {
   reps: number
   topWeight: number
   topReps: number
-  /** reps × weight, the honest "how much work" number (reps alone when bodyweight). */
+  /**
+   * reps × weight, the honest "how much work" number (reps alone when bodyweight).
+   * A LOADED hold or carry is seconds × weight, and seconds are converted to
+   * rep-equivalents first (6 s ≈ a rep, a cardio minute ≈ 8 — the same exchange
+   * rate the session grade uses), because otherwise one 45 s farmer's carry at
+   * 50 lb would outweigh an entire upper-body session on the chart.
+   */
   volume: number
 }
 
@@ -35,7 +41,10 @@ export function flatten(sessions: GymSession[], part: BodyPart | 'all' = 'all'):
       const topReps = Math.max(...e.sets.map((x) => x.reps))
       // volume follows the same both-sides rule as `reps`, so keep it in step with loggedReps
       const sideMult = reps / Math.max(1, e.sets.reduce((n, x) => n + x.reps, 0))
-      const volume = e.sets.reduce((n, x) => n + x.reps * (x.weight && x.weight > 0 ? x.weight : 1), 0) * sideMult
+      // an unloaded hold keeps counting a second as a unit, exactly as it always has
+      const perUnit = isLoaded(e) ? (e.kind === 'timed' ? 1 / 6 : e.kind === 'cardio' ? 8 : 1) : 1
+      const volume =
+        e.sets.reduce((n, x) => n + x.reps * perUnit * (x.weight && x.weight > 0 ? x.weight : 1), 0) * sideMult
       rows.push({ day: s.day, exId: e.exId, name: e.name, parts: e.parts, sets: e.sets.length, reps, topWeight, topReps, volume })
     }
   }

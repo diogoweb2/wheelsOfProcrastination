@@ -86,7 +86,8 @@ export function StatsPanel() {
           unit="volume"
         />
         <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
-          Volume = reps × weight (reps alone for bodyweight moves). It’s the honest “how much work did I do” number.
+          Volume = reps × weight (reps alone for bodyweight moves; a loaded carry counts 6 s as a rep). It’s the
+          honest “how much work did I do” number.
         </p>
       </div>
 

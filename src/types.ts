@@ -844,7 +844,12 @@ export type BodyPart =
   | 'power'
   | 'cardio'
 
-/** How a set is measured — decides what the runner asks you to type. */
+/**
+ * How a set is MEASURED — decides what the runner asks you to type. It is one
+ * axis only: whether the exercise is also LOADED is the separate `loaded` flag,
+ * because a farmer's carry is measured by the clock *and* progressed by the
+ * dumbbells, and neither half of that is optional.
+ */
 export type ExerciseKind = 'weight' | 'bodyweight' | 'timed' | 'cardio'
 
 /** One machine / bar / band in the basement. Written by `npm run gym:equipment`, editable by hand. */
@@ -930,6 +935,16 @@ export interface ExerciseDef {
    * they are so history before and after this flag stays comparable.
    */
   perSide?: boolean
+  /**
+   * You carry external weight on this one even though it isn't measured in reps
+   * — a farmer's carry, a weighted plank, a loaded step-up hold. `kind` says how
+   * the set is counted, `loaded` says whether there is iron in your hands, and
+   * the two are independent: a `timed` + `loaded` move is clocked by the app AND
+   * asks for the weight, remembers it, suggests it next time, and counts as
+   * weights work for the gear filter. Redundant on `kind: 'weight'`, which is
+   * loaded by definition.
+   */
+  loaded?: boolean
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
   demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
@@ -1060,6 +1075,7 @@ export interface SessionExercise {
   rating?: ExerciseRating // asked the first time you meet an exercise; editable later
   skipped?: boolean
   perSide?: boolean // reps are per side; denormalised like `name` so old sessions read right
+  loaded?: boolean // carries weight as well as its own unit; denormalised like `perSide`
   ladder?: boolean
   ladderTest?: boolean // this one is a max-rep test — do as many as you can
   why?: string // the coach's reason, shown on the preview card
