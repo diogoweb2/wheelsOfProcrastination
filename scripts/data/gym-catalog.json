@@ -1645,7 +1645,7 @@
         "shoulders"
       ],
       "intensity": 1,
-      "how": "BAND: YELLOW (lightest, 20 lb label). Anchor at elbow height. Stand side-on, working arm nearest the anchor tucked at 90° with the elbow pinned to the ribs, rotate the forearm away from the body, then back with control. Light tension only — this is cuff work.",
+      "how": "BAND: YELLOW (lightest, 20 lb label). Anchor at elbow height and stand side-on with the WORKING ARM ON THE OUTSIDE — the one furthest from the anchor — so the band crosses your belly. Pin that elbow to your ribs like you are holding a newspaper under your arm, and keep it there: the elbow is a hinge bolted to the wall, only the forearm moves. From across the belly, swing the forearm outwards like a gate opening, then let it close slowly. A small movement on light tension. This is cuff work, not a lift.",
       "restSec": 45,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1673,7 +1673,7 @@
         "shoulders"
       ],
       "intensity": 1,
-      "how": "BAND: YELLOW (lightest, 20 lb label). Stand on the band. Thumbs up, raise both arms to shoulder height in the scapular plane — about 30° in front of the shoulders, not straight out to the side. Lower slowly. Light tension: it is prehab, not a lateral raise.",
+      "how": "BAND: YELLOW (lightest, 20 lb label). Stand on the middle of the band with one end in each hand, thumbs pointing up like you are hitchhiking. Raise both arms to shoulder height — but out at an angle, halfway between straight ahead and straight out to the side. You are drawing a Y, not a T. Lower them as slowly as you raised them. If your shoulders creep up towards your ears, the tension is too high. This is prehab, not a lateral raise.",
       "restSec": 45,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1700,7 +1700,7 @@
         "legs"
       ],
       "intensity": 2,
-      "how": "BAND: BLACK (65 lb label) — PURPLE if you do both legs at once. Anchor low in front of the bench. Lie face down and loop the band around ONE ankle. Curl the heel towards the glutes against the pull, then lower slowly all the way. Keep the hips flat and do not let them rise. Both ankles at once also works when you want the set over faster — it needs roughly twice the tension, so move further from the anchor. To progress, increase the anchor distance; do not buy a heavier band.",
+      "how": "BAND: BLACK (65 lb label) — PURPLE if you do both legs at once. Anchor the band LOW in front of the bench, lie face down, and loop it round ONE ankle. Now kick yourself in the backside: drive the heel up towards the glutes against the pull, then let the band draw the foot back down slowly, like a door on a closer — never let it snap straight. Your hips stay glued to the bench; if they lift, the band has won and the hamstring has stopped working. Both ankles at once gets the set over faster at roughly twice the tension. To make it harder, walk the bench further from the anchor — do not buy a thicker band.",
       "restSec": 60,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1736,7 +1736,7 @@
         "core"
       ],
       "intensity": 2,
-      "how": "BAND: PURPLE (the thickest, most help) to start — the band here is ASSISTANCE, not resistance, so you go LIGHTER as you get stronger, the opposite of every other band exercise. Loop it over the pull-up bar or high on the post so it hangs in front of you, and pass it under your armpits across the chest. Kneel on the pad, ankles under the roller, hips locked straight so knee to shoulder is one line. Lower yourself forward as SLOWLY as you can, letting the band take whatever you cannot hold, then pull back up. Stop the set the moment the descent turns into a drop — an uncontrolled fall trains nothing. Progress by moving to a lighter band (purple → black → red), never by adding reps first.",
+      "how": "BAND: PURPLE (the thickest, so the most help) to start. The band here is a SPOTTER, not resistance — you go LIGHTER as you get stronger, backwards from every other band move. Loop it over the pull-up bar so it hangs in front of you and pass it under your armpits across the chest: it is a pair of hands holding you up. Kneel on the pad with your ankles under the roller and squeeze the glutes so knee-to-shoulder is one straight line — you are a drawbridge hinged at the knees, and nothing bends at the hip. Lower that drawbridge as slowly as you can and let the band take whatever the hamstrings cannot hold. Push the floor away to come back up. The moment the descent stops being a drawbridge and becomes a falling tree, the set is over — a drop trains nothing. Progress purple → black → red, never by adding reps first.",
       "restSec": 90,
       "defaultReps": 6,
       "defaultSets": 3
@@ -1801,7 +1801,7 @@
         "legs"
       ],
       "intensity": 2,
-      "how": "BAND: PURPLE (85 lb label) — drop to BLACK if you cannot finish the set. Anchor low behind you. Sit on the bench and loop the band around ONE ankle, across the front. Straighten the knee against the pull, squeeze the quad at the top, then return under control. Both ankles at once also works and halves the time, at roughly twice the tension. To progress, move the bench further from the anchor; do not buy a heavier band.",
+      "how": "BAND: PURPLE (85 lb label) — drop to BLACK if you cannot finish the set. Anchor the band LOW BEHIND you, sit on the bench, and loop it round ONE ankle from the front. Kick a football in slow motion: straighten the knee against the pull until the leg is level, hold the squeeze in the quad for a beat, then let the band fold it back down under control. Only the shin moves — the thigh stays parked on the bench. Both ankles at once halves the time at roughly twice the tension. To make it harder, walk the bench further from the anchor — do not buy a thicker band.",
       "restSec": 60,
       "defaultReps": 15,
       "defaultSets": 3,
@@ -1829,7 +1829,7 @@
         "core"
       ],
       "intensity": 2,
-      "how": "BAND: RED (35 lb label) — move up to BLACK when 12 reps feel easy. Anchor at chest height on the post. Stand side-on with the band held at the sternum, press it straight out and hold 2 s while the band tries to rotate you, then bring it back in. Resist the twist — nothing above the hips should move.",
+      "how": "BAND: RED (35 lb label) — move up to BLACK when 12 reps feel easy. Anchor at chest height on the post and stand side-on, band held in both hands against your sternum. Press it straight out in front of you and hold for 2 seconds. The band is now trying to turn you like a key in a lock, and your whole job is to refuse: chest square to the wall in front of you, hips square, nothing above the belt rotating a single degree. Bring it back to the sternum and go again. The rep you can see is tiny — all the work is in what does NOT move.",
       "restSec": 45,
       "defaultReps": 12,
       "defaultSets": 3,
@@ -1859,7 +1859,7 @@
         "shoulders"
       ],
       "intensity": 2,
-      "how": "BAND: RED (35 lb label) — move up to BLACK when the throw stops feeling fast. Anchor at chest height. Stand side-on, band in both hands at the chest, then rotate through the back hip and press away explosively — the pickleball drive. Return under control and reset. Speed, not grind.",
+      "how": "BAND: RED (35 lb label) — move up to BLACK when the throw stops feeling fast. Anchor at chest height, stand side-on, band in both hands at the chest. Now hit a forehand drive: screw the back foot into the floor like you are putting out a cigarette, let the hip turn first, and let the arms only deliver what the hip already started. Punch it away fast, then reel it back in slowly and reset your stance. Every rep is a fresh swing. This is speed, not a grind — if it starts to feel like a slow press, the band is too heavy.",
       "restSec": 60,
       "defaultReps": 10,
       "defaultSets": 3,
