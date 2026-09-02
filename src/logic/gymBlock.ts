@@ -147,6 +147,53 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
   },
 ]
 
+// --- moves that left the basement -------------------------------------------
+
+/**
+ * Exercises DELETED from the catalog, and the slot that replaced them in the
+ * code's copy of block 1.
+ *
+ * A block you have trained against is never rewritten (see the login seeding in
+ * the store) — that is your training history's programme. But a slot pointing at
+ * a move that no longer exists is not history, it is a hole: the Train card
+ * shows "❓", the runner skips it, and the session is quietly one exercise
+ * shorter every single round. So exactly these swaps are applied to any stored
+ * block, seeded or edited, and nothing else about it is touched.
+ *
+ * Both of these went when the loop bands turned out to have nothing to anchor
+ * to down there (755fb42). The replacement carries its own sets and reps — a
+ * chin-up is not asked for ten to fifteen times just because a pulldown was.
+ */
+const RETIRED_MOVES: Record<string, BlockExercise> = {
+  'mv-band-face-pull': ex('mv-chest-supported-dumbbell-reverse-fly', 2, 15, 20),
+  'mv-band-lat-pulldown': ex('mv-chin-up', 3, 5, 10),
+}
+
+/**
+ * Swap every dead slot in a block for the move that replaced it. Returns the
+ * repaired copy, or `null` when there was nothing to fix — the caller only
+ * writes to Firestore when something actually changed.
+ *
+ * A dead slot with no known replacement is left exactly as it is: that is the
+ * visible gap the Plan tab warns about, and guessing a substitute is worse.
+ */
+export function repairBlock(block: TrainingBlock, catalog: GymCatalog | null): TrainingBlock | null {
+  if (!catalog) return null // basement not loaded yet — nothing is "missing" until it is
+  const live = new Set(allExercises(catalog).filter((e) => !e.retired).map((e) => e.id))
+  let changed = false
+  const sessions = block.sessions.map((s) => ({
+    ...s,
+    exercises: s.exercises.map((slot) => {
+      if (live.has(slot.exId)) return slot
+      const swap = RETIRED_MOVES[slot.exId]
+      if (!swap || !live.has(swap.exId)) return slot
+      changed = true
+      return { ...swap }
+    }),
+  }))
+  return changed ? { ...block, sessions } : null
+}
+
 /** The block a profile starts on. Only Diogo has one written; anyone else trains free. */
 export function seedBlock(profileId: string | null, now: Date = new Date()): TrainingBlock | null {
   if (profileId !== 'diogo') return null

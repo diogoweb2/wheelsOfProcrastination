@@ -214,7 +214,7 @@ import {
   setSeconds,
   advanceLadder,
 } from '../logic/gym'
-import { SEED_VERSION, copyBlock, planBlockSession, seedBlock } from '../logic/gymBlock'
+import { SEED_VERSION, copyBlock, planBlockSession, repairBlock, seedBlock } from '../logic/gymBlock'
 import { findExerciseVideo } from '../logic/gymVideoAi'
 import {
   applyEntry as applyRobloxEntry,
@@ -958,6 +958,10 @@ export const useStore = create<StoreState>((set, get) => {
         const probe: AppData = JSON.parse(JSON.stringify(get().data))
         ensure(probe)
         if (JSON.stringify(probe) !== JSON.stringify(get().data)) commit(ensure)
+        // …and heal any slot pointing at a move that has since left the basement.
+        // No-op if the catalog has not arrived yet; the subscription below runs
+        // the same repair the moment it does, so either order works.
+        repairBlocks()
       }
     })
     unsubKid?.()
@@ -1035,7 +1039,10 @@ export const useStore = create<StoreState>((set, get) => {
         set({ essayTopics: topics, essays, essayWords: words, essayWordTests: wordTests }),
       )
       // the shared basement (gear + exercises) and the coach's OpenRouter config
-      subscribeGymCatalog((c) => set({ gymCatalog: c }))
+      subscribeGymCatalog((c) => {
+        set({ gymCatalog: c })
+        repairBlocks()
+      })
       subscribeAiConfig((c) => set({ aiConfig: c }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
@@ -1060,6 +1067,21 @@ export const useStore = create<StoreState>((set, get) => {
     auditDiff(id, id, prev, data) // append audit rows for any audited change (actor == the active login)
     // ANY Berry gain, wherever it came from (tasks, streak goals, quiz…), gets the same fly-to-topbar animation
     if (data.economy.gems > before) flyBerries(null, data.economy.gems - before)
+  }
+
+  /**
+   * Swap any block slot whose exercise has been deleted from the shared basement
+   * for the move that replaced it (`RETIRED_MOVES`). Runs on login and whenever
+   * the catalog syncs; writes only when a slot actually changes, so it costs
+   * nothing on every other launch.
+   */
+  function repairBlocks() {
+    const catalog = get().gymCatalog
+    if (!catalog || !get().dataLoaded) return
+    if (!get().data.gym.blocks.some((b) => repairBlock(b, catalog))) return
+    commit((d) => {
+      d.gym.blocks = d.gym.blocks.map((b) => repairBlock(b, catalog) ?? b)
+    })
   }
 
   /**
