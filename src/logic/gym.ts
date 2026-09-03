@@ -606,11 +606,11 @@ function repProgression(base: ExerciseMemory, se: SessionExercise): RepPlan | un
   /** Phase 1's ceiling: every set at the top of the written range. */
   const ceiling = sets * high
   // A set you never logged is a set you did not do — it cannot count as met.
-  // `reps` is read raw on purpose: on a COUNTED per-side move (a single-leg
-  // glute bridge) both the prescription and the logged number are already per
-  // side, so halving it the way a clocked hold does would make every set look
-  // like a failure and walk the ladder back down to the floor forever.
-  const done = asked.map((_, i) => (se.sets[i] ? se.sets[i].reps : null))
+  // `achieved` is what keeps a COUNTED per-side move (a single-leg glute
+  // bridge) honest: its ask and its log are both already per side, and halving
+  // one of them the way a clocked hold does would make every set look like a
+  // failure and walk the ladder back to the floor forever.
+  const done = asked.map((_, i) => (se.sets[i] ? achieved(se, se.sets[i]) : null))
 
   if (!done.every((d, i) => d != null && d >= asked[i])) {
     // A set you fell WELL short on says the ask itself is wrong, so it comes
@@ -1161,42 +1161,55 @@ export function mmss(seconds: number): string {
 // --- learning ---------------------------------------------------------------
 
 /**
- * Did the TOP SET earn a heavier dumbbell?
+ * The honest number to compare one logged set against its ask. A CLOCKED
+ * per-side set is logged as both sides added together, so it is halved; a
+ * COUNTED per-side set is logged once, already per side, so it is not.
+ */
+function achieved(se: SessionExercise, set: LoggedSet): number {
+  return se.kind === 'timed' || se.kind === 'cardio' ? sideValue(se, set) : set.reps
+}
+
+/**
+ * The sets that count as WORK, paired with what they asked for.
+ *
+ * On a ramp (§18e) the opening sets are warm-up by construction — they are
+ * *prescribed* light and long — so they are not evidence about the load either
+ * way. Everywhere else every set is a working set.
+ */
+function workingSets(se: SessionExercise): { asked: number; got: number }[] {
+  const top = se.plan.weight
+  const out: { asked: number; got: number }[] = []
+  for (let i = 0; i < se.sets.length; i++) {
+    const prescribed = plannedWeight(se, i)
+    if (top != null && prescribed != null && prescribed < top - 0.4) continue // a ramp-in set
+    out.push({ asked: se.plan.reps[Math.min(i, se.plan.reps.length - 1)] ?? 0, got: achieved(se, se.sets[i]) })
+  }
+  return out
+}
+
+/**
+ * Did the working sets reach the TOP of the rep range?
  *
  * This is the other half of double progression, and until now it was only a
  * message on the card: the reps and the seconds climbed by themselves while the
- * weight sat there waiting to be told. Finish the **last** set — the working
- * set, the one a ramp climbs to — at the **top of the rep range**, at the weight
- * you were asked for, having done every set, and that is the same evidence as
- * loading more than you were asked. It is read as `'up'`, so the next session
- * asks for one notch more.
+ * weight sat there waiting to be told. Reach the top of the range on every
+ * working set and the next session asks for one notch more than you lifted.
  *
- * Only the top set counts: a ramp's opening set is *prescribed* at the top of
- * the range on a lighter dumbbell (see `rampToTop`), and reading that as proof
- * would ratchet the weight up on a warm-up.
+ * Warm-up sets are excluded on purpose: a ramp's opening set is *prescribed* at
+ * the top of the range on a lighter dumbbell, and reading that as proof would
+ * ratchet the weight up on work that was never hard.
  *
- * This is the one place the app asks for something you have not already done.
- * It is reversible in one session — load less than asked and the next ask is a
- * notch below what you actually lifted — which is why it is allowed to.
+ * A loaded hold is excluded too — it progresses on the clock (`suggestedHold`),
+ * and a movement on two ladders at once has neither of them honest.
  */
-function toppedTheRange(se: SessionExercise): boolean {
+function toppedTheRange(se: SessionExercise, work: { asked: number; got: number }[]): boolean {
   if (!se.repRange || se.quality || !isLoaded(se)) return false
-  if (se.kind === 'timed' || se.kind === 'cardio') return false // a loaded hold progresses on the clock
-  if (se.sets.length < se.plan.reps.length) return false // walked away before the end: nothing is proved
-  const last = se.plan.reps.length - 1
-  const top = se.sets[last]
-  const asked = plannedWeight(se, last)
-  if (!top || asked == null || (top.weight ?? 0) < asked - 0.4) return false
-  return top.reps >= se.repRange[1]
+  if (se.kind === 'timed' || se.kind === 'cardio') return false
+  return work.length > 0 && work.every((w) => w.got >= se.repRange![1])
 }
 
 /** Fold one finished exercise back into the permanent memory. */
-export function learnFromExercise(
-  mem: ExerciseMemory | undefined,
-  se: SessionExercise,
-  day: string,
-  unit: 'lb' | 'kg' = 'lb',
-): ExerciseMemory {
+export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionExercise, day: string): ExerciseMemory {
   const base: ExerciseMemory = mem ?? { timesDone: 0, totalReps: 0 }
   if (se.skipped || se.sets.length === 0) {
     return se.rating ? { ...base, rating: se.rating, ratedAt: new Date().toISOString() } : base
@@ -1208,30 +1221,35 @@ export function learnFromExercise(
   const weights = se.sets.map((x) => x.weight ?? 0).filter((w) => w > 0)
   const lastWeight = weights.length > 0 ? Math.max(...weights) : base.lastWeight
 
-  // did you correct the suggestion? that is the honest signal about the load
+  // What the load did for you is read off the REPS, not off the weight you
+  // picked. "Loaded less than asked" is not the same thing as "that was too
+  // heavy": choosing 48.5 over 52 and completing every set means 48.5 was the
+  // right weight, and the app should keep it rather than drop below a weight
+  // you just finished. Three outcomes, and the sets say which:
+  //
+  //   • didn't finish the exercise → learn nothing, it was a life interruption
+  //   • completed the work         → that weight is right (or light, if you
+  //                                  loaded more than asked or topped the range)
+  //   • couldn't do the work       → too heavy, but only when you fell WELL
+  //                                  short; a rep or two down is a day, not a
+  //                                  verdict, and the same weight comes back
+  //
+  // 70 % is the same "that ask was wrong" line the rep and hold ladders use.
   let lastAdjust = base.lastAdjust
   let suggested = base.suggestedWeight
-  // ...but the light sets of a RAMP (§18e) are not a correction, they are the
-  // warm-up. Walk away before the top set and the working weight stays where it
-  // was: an interrupted session must not be read as "that was too heavy".
-  const rampCutShort = isRamped(se) && se.sets.length < se.plan.reps.length
-  if (rampCutShort) {
+  const work = workingSets(se)
+  const finished = se.sets.length >= se.plan.reps.length
+  if (isLoaded(se) && !finished) {
     // nothing learned about the load today
   } else if (se.plan.weight != null && lastWeight != null) {
-    if (lastWeight > se.plan.weight + 0.4) lastAdjust = 'up'
-    // ONE notch under the ask is not "too heavy", it is the notch you settled
-    // on: the ask comes back as exactly that, rather than dropping below a
-    // weight you just completed. Two notches down and it really was too much.
-    // Without this the auto-bump below oscillates — top out at 45.5, get asked
-    // 48.5, settle back at 45.5, get asked 42.
-    else if (lastWeight < stepLoad(se.plan.weight, -1, unit) - 0.4) lastAdjust = 'down'
-    else lastAdjust = 'same'
     suggested = lastWeight
+    if (work.some((w) => w.got < w.asked * 0.7)) lastAdjust = 'down'
+    else if (!work.every((w) => w.got >= w.asked)) lastAdjust = 'same'
+    else if (lastWeight > se.plan.weight + 0.4 || toppedTheRange(se, work)) lastAdjust = 'up'
+    else lastAdjust = 'same'
   } else if (lastWeight != null) {
     suggested = lastWeight
   }
-  // the top of the rep range, on the top set, buys the next notch by itself
-  if (lastAdjust !== 'down' && toppedTheRange(se)) lastAdjust = 'up'
 
   // rest is a rolling average of what you ACTUALLY took, not what we offered
   const restLearned =

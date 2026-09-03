@@ -4036,7 +4036,7 @@ export const useStore = create<StoreState>((set, get) => {
             if (pr) prs += 1
           }
           // the permanent memory — this is what makes unplugging the coach possible
-          d.gym.ex[se.exId] = learnFromExercise(mem, se, day, d.gym.brief.weightUnit ?? 'lb')
+          d.gym.ex[se.exId] = learnFromExercise(mem, se, day)
 
           // rep ladders: seeded from your first honest set, then climbed; a max
           // test reseeds the whole thing from the new number.

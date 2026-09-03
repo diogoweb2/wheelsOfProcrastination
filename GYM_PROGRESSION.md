@@ -127,16 +127,23 @@ least 2.5.
 The signal is **what you actually loaded**, compared against what was asked
 (`learnFromExercise`):
 
-| You loaded | Recorded as | Next session asks for |
-|---|---|---|
-| More than asked | `lastAdjust: 'up'` | **one notch above** what you lifted |
-| The ask, or one notch under it | `'same'` | what you lifted |
-| Two notches or more under the ask | `'down'` | **one notch below** what you lifted |
-| The ask, **and the top set at the top of the rep range** | `'up'` | **one notch above** what you lifted |
+**The reps say what the weight did, not the dumbbell you picked up.** "Loaded less than
+asked" and "that was too heavy" are different statements, and only the second one should move
+the number down. Three outcomes:
 
-One notch under the ask counts as settling, not failing. Dropping *below* a weight you just
-completed is how a suggestion oscillates instead of converging — top out at 45.5, get asked
-48.5, settle back at 45.5, get asked 42.
+| What the sets say | Recorded as | Next session asks for |
+|---|---|---|
+| You didn't finish the exercise | — | unchanged: nothing is learned about the load |
+| You did the work | `'same'` | **what you lifted** — whatever you chose, it was right |
+| You did the work **and** loaded more than asked | `'up'` | **one notch above** what you lifted |
+| You did the work **and** topped the rep range on every working set | `'up'` | **one notch above** what you lifted |
+| A working set fell **below 70 %** of its ask | `'down'` | **one notch below** what you lifted |
+| Short of the ask, but not by 70 % | `'same'` | the same weight, again |
+
+So choosing 48.5 over an asked 52 and completing every set keeps 48.5 — it does not drop to
+45.5 on the theory that you failed. A rep or two down is a day, not a verdict. And 70 % is
+the same "that ask was wrong" line the rep and hold ladders use, so all three axes fall back
+for the same reason at the same point.
 
 `suggestedWeight` is always set to what you really lifted; `weightFor` then applies the
 one-notch extrapolation above. So a single deliberate bump has momentum for exactly one
@@ -157,26 +164,29 @@ Until this change the weight was the only axis that would not move on its own: r
 seconds climbed by themselves while the card printed *"add weight next time"* and waited to
 be obeyed. Now **the top of the rep range buys the next notch**.
 
-The bump fires only when all four hold:
+The bump fires only when all three hold:
 
 1. The exercise is **loaded** and counted (a loaded hold progresses on the clock instead).
 2. **Every set was logged** — walking away early proves nothing.
-3. The **last** set was done at the weight asked for, or heavier.
-4. That last set reached the **top of the rep range**.
+3. **Every working set** reached the **top of the rep range**.
 
-Only the *last* set counts, because a ramp's opening set is prescribed at the top of the
-range on a lighter dumbbell (§3) — reading that as proof would ratchet the weight up on a
-warm-up. The whole ramp moves with the working weight, so `42 → 45.5 → 48.5` becomes
-`45.5 → 48.5 → 52`.
+"Working set" is doing real work in that last clause. A ramp's opening sets are *prescribed*
+at the top of the range on a lighter dumbbell (§3), so counting them would ratchet the weight
+up on a warm-up — and requiring them would let a skimped warm-up veto a top set you earned.
+Only the sets at the working weight are read: all three of a plain `3 × 8–12`, and just the
+last of a ramped one. The whole ramp then moves with the working weight, so
+`42 → 45.5 → 48.5` becomes `45.5 → 48.5 → 52`.
 
 **This is the one place in the system where the app asks for something you have not already
 done.** Everything else only ever prescribes what you have proved. It is allowed to because
 the reversal is one session deep and lands somewhere sane:
 
 ```
-48.5 × 12 on the top set   →  next asks 52
-52, you manage 48.5        →  next asks 48.5      (settles — one notch under the ask)
-52, you manage 42          →  next asks 38.5      (that really was too much)
+12·12·12 at 48.5           →  next asks 52        (topped the range)
+52 asked, you do 8·8·8 at 48.5  →  next asks 48.5 (you did the work; that weight is right)
+52 asked, you do 8·7·7 at 52    →  next asks 52   (short, but not by 70 %)
+52 asked, you do 5·4·4 at 52    →  next asks 48.5 (that really was too much)
+52 asked, two sets done         →  next asks 52   (nothing learned)
 ```
 
 ---
@@ -372,34 +382,39 @@ record, so the next reviewer argues with decisions rather than re-deriving them.
 
 ### Settled — implemented
 
-1. **Double progression is now closed** (§2.3). Topping the range on the top set bumps the
-   weight one notch. The reviewer asked for a soft guard and two consecutive top-outs; we
-   took the guard (all sets logged, top set at the asked weight) and **declined the two
+1. **Double progression is now closed** (§2.3). Topping the range on every working set bumps
+   the weight one notch. The reviewer asked for a soft guard and two consecutive top-outs; we
+   took the guard (every set logged, every working set at the top) and **declined the two
    consecutive top-outs** — an exercise recurs once per six-session rotation, so at 2–5
-   sessions a week that is 3–6 weeks per notch. Instead the reversal was tightened: one
-   notch under the ask now settles there rather than dropping below it, which is what stops
-   bump-and-fall oscillation.
-2. **The bodyweight ladder tops out at `sets × (repHigh − 2)`** (§4.3) and says "ready for
+   sessions a week that is 3–6 weeks per notch.
+2. **What the load did for you is read off the reps** (§2.2), after a second review round.
+   The first attempt at stopping bump-and-fall oscillation was notch arithmetic — one notch
+   under the ask counts as settling. The second reviewer pointed out that this conflates
+   *"completed at a lighter weight"* with *"could not complete the prescribed work"*, and the
+   app already has the sets to tell them apart. It now does: finish the work and the weight
+   you chose is kept, fall below 70 % and it steps down, don't finish the exercise and
+   nothing is learned.
+3. **The bodyweight ladder tops out at `sets × (repHigh − 2)`** (§4.3) and says "ready for
    load or a harder variation" instead of climbing to forty pull-ups.
-3. **Block sessions no longer feed the free-planner ladder** (§7).
+4. **Block sessions no longer feed the free-planner ladder** (§7).
 
 ### Settled — deliberately unchanged
 
-4. **Ramp inside the set count** (§3), not an added warm-up set. A 20–40 minute session
+5. **Ramp inside the set count** (§3), not an added warm-up set. A 20–40 minute session
    cannot afford an extra set on every compound, and the 40-minute option already adds one
    to the first two movements when there is time for it.
-5. **+1 total rep per session** (§4.1), not +1 per set. Conservative suits variable recovery
+6. **+1 total rep per session** (§4.1), not +1 per set. Conservative suits variable recovery
    and short sessions; the 70 % floor already handles bad days. RPE/RIR was ruled out — it
    would add an input to a system whose whole premise is that you only correct what is wrong.
-6. **Notch-based ramp steps with a 55 % floor** (§3), no per-step percentage minimum. The
+7. **Notch-based ramp steps with a 55 % floor** (§3), no per-step percentage minimum. The
    hardware is discrete; forcing textbook 20 % jumps would invent weights that do not exist.
-7. **Per-side work stays one logged number** (§4.4). Splitting left/right costs UI and a
+8. **Per-side work stays one logged number** (§4.4). Splitting left/right costs UI and a
    decision every set; the weak side already limits what gets logged. Revisit only if a real
    left/right disparity shows up.
 
 ### Still open
 
-8. **Nothing ever deloads.** There are no planned light weeks; the only ways down are missing
+9. **Nothing ever deloads.** There are no planned light weeks; the only ways down are missing
    the ask (weight) or falling below 70 % (reps and time), plus whatever rest an irregular
    2–5×/week schedule happens to provide. The reviewer's proposal — and the current plan — is
    *not* an automatic deload but a **voluntary lighter pass offered at the 24-session review
@@ -407,8 +422,9 @@ record, so the next reviewer argues with decisions rather than re-deriving them.
    for one trip round the block, then resume. Open sub-questions: is it offered or defaulted
    on? One rotation or two? And should it reuse the `lazy` mood the Train card already has
    (block sessions currently ignore mood entirely) rather than becoming a new mode?
-9. **New, from closing the loop.** The weight bump is the only rule that prescribes an
+10. **New, from closing the loop.** The weight bump is the only rule that prescribes an
    unproven load. It is guarded and reversible in one session — but it has never been run
    against a real training block, only simulated. Worth watching for a month: does it climb
-   too fast on accessories (lateral raises top out easily at 15–20 reps), and does it climb
-   too slowly on the main lifts, where the top set is one set of three?
+   too slowly on the main lifts, where the range's top has to be reached on the one working
+   set a ramp leaves? Both reviewers agreed the next useful input is real sessions, not more
+   theory.
