@@ -280,7 +280,7 @@ function BlockCard() {
                         {def ? `${def.emoji} ${def.name}` : '❓ not in the catalog'}
                         {slot.quality && ' ⚡'}
                       </span>
-                      <span className="muted">{slotLine(slot, gymCatalog)}</span>
+                      <span className="muted">{slotLine(slot, gymCatalog, gym)}</span>
                       {def && <VideoButton exId={def.id} name={def.name} />}
                     </li>
                   )

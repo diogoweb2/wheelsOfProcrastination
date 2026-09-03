@@ -21,6 +21,7 @@
 import type {
   BlockExercise,
   BlockSession,
+  BodyPart,
   ExerciseDef,
   GymCatalog,
   GymSession,
@@ -30,7 +31,20 @@ import type {
   TrainingBlock,
 } from '../types'
 import { dayKey } from './dates'
-import { allExercises, exerciseById, exerciseSeconds, holdFor, planOne, sessionSeconds } from './gym'
+import {
+  REP_PHASE2_REST,
+  allExercises,
+  exerciseById,
+  exerciseSeconds,
+  holdFor,
+  isLoaded,
+  planOne,
+  progressesOnReps,
+  rampToTop,
+  repPlanFor,
+  repShape,
+  sessionSeconds,
+} from './gym'
 
 // --- block 1 ----------------------------------------------------------------
 //
@@ -396,20 +410,62 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
   const planInput = { catalog, gym, minutes: 30, mood, gearMode: 'mixed' as const, day }
 
   const built: SessionExercise[] = []
+  const unit = gym.brief.weightUnit ?? 'lb'
+  /** Body parts already worked earlier in this session — they don't need warming twice. */
+  const warm = new Set<BodyPart>()
   for (const slot of template.exercises) {
     const def = exerciseById(catalog, slot.exId)
     if (!def || def.retired) continue // shown as a gap on the Plan tab, never silently substituted
-    // index 2 = "no ramp-in de-load"; see the note above
+    // index 2 = "no whole-exercise de-load"; a block ramps WITHIN the exercise instead
     const one = planOne(def, planInput, 2)
     // A hold progresses in seconds the way a lift progresses in pounds: hold the
     // top of the range on every set and the whole range slides up, keeping its
     // width, and stays there. Written slots are the floor, never the ceiling —
     // the block says what the movement is, your own history says how long.
     const [low, high] = holdRange(slot, def, gym)
+    // A counted bodyweight movement has no weight to add, so the REPS are the
+    // progression: the ask climbs a rep a session inside the written range and
+    // then spreads over more sets (§18d). Everything else gets the low end of
+    // the range on every set — the number that has to be there — and progresses
+    // on the dumbbells or on the clock.
+    const ladder = !slot.quality && progressesOnReps(def) ? repPlanFor(slot, gym.ex[def.id]) : null
+
+    // THE RAMP (§18e). The first loaded movement for a body part that has not
+    // worked yet in this session climbs to its working weight instead of
+    // opening on it — set one of the day used to be the heaviest thing you
+    // would touch, cold. A part already warmed by an earlier movement is not
+    // warmed again, and a two-set accessory keeps both of its working sets: a
+    // ramp there would cost half the work it exists to do.
+    const primary = def.parts[0]
+    const cold = primary != null && !warm.has(primary)
+    if (primary != null) warm.add(primary)
+    const ramp =
+      cold && slot.sets >= 3 && !slot.quality && isLoaded(def) && one.plan.weight != null
+        ? rampToTop(one.plan.weight, slot.sets, low, high, unit)
+        : null
+
+    let reps: number[]
+    if (ramp) {
+      // a clocked carry ramps on the dumbbells only — 30 s and 31 s are the same hold
+      reps = def.kind === 'timed' || def.kind === 'cardio' ? Array.from({ length: slot.sets }, () => low) : ramp.reps
+    } else if (ladder) {
+      reps = repShape(ladder.sets, ladder.total)
+    } else {
+      reps = Array.from({ length: slot.sets }, () => low)
+    }
+    const restSec =
+      ladder?.phase === 2
+        ? Math.min(REP_PHASE2_REST[1], Math.max(REP_PHASE2_REST[0], one.plan.restSec))
+        : one.plan.restSec
     built.push({
       ...one,
-      plan: { ...one.plan, reps: Array.from({ length: slot.sets }, () => low) },
+      plan: { ...one.plan, reps, weights: ramp?.weights, restSec },
       repRange: [low, high],
+      // the rep-ladder GAME (2 2 2 2 2 → 2 3 2 3 2, and its max test) belongs to
+      // the free planner: inside a block the slot is the prescription, and a
+      // "🏁 max test" banner over an ask for 5 · 5 · 4 is just a lie
+      ladder: undefined,
+      ladderTest: undefined,
       quality: slot.quality,
       why: slot.note,
     })
@@ -458,10 +514,23 @@ export function missingSlots(block: TrainingBlock, catalog: GymCatalog | null): 
   )
 }
 
-/** "3 × 8–12", "2 × 30–45s" — the ask, before any of your own numbers are known. */
-export function slotLine(slot: BlockExercise, catalog: GymCatalog | null): string {
+/**
+ * "3 × 8–12", "2 × 30–45s" — the written ask. Pass `gym` and a slot that
+ * progresses on reps (§18d) says what it will ACTUALLY ask for today as well:
+ * "5 · 5 · 4 of 4–8", because a rotation that reads "3 × 4–8" for eight weeks
+ * while the card climbs is the exact confusion the ladder exists to end.
+ */
+export function slotLine(slot: BlockExercise, catalog: GymCatalog | null, gym?: GymState): string {
   const def = exerciseById(catalog, slot.exId)
   const unit = def?.kind === 'timed' ? 's' : def?.kind === 'cardio' ? ' min' : ''
   const range = slot.repLow === slot.repHigh ? `${slot.repLow}${unit}` : `${slot.repLow}–${slot.repHigh}${unit}`
-  return `${slot.sets} × ${range}${def?.perSide ? ' /side' : ''}`
+  const side = def?.perSide ? ' /side' : ''
+  if (gym && def && !slot.quality && progressesOnReps(def)) {
+    const plan = repPlanFor(slot, gym.ex[def.id])
+    const reps = repShape(plan.sets, plan.total)
+    const ask = new Set(reps).size === 1 ? `${reps.length} × ${reps[0]}` : reps.join(' · ')
+    // phase 3 is the end of the rep road, and the Plan tab should say so
+    return `${ask} of ${range}${side}${plan.phase === 3 ? ' · ready for load' : ''}`
+  }
+  return `${slot.sets} × ${range}${side}`
 }

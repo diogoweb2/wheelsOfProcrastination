@@ -6,6 +6,7 @@
 // (BUSINESS_REQUIREMENTS §18) and this is simply the planner: no network, no
 // key, no credits, no fallback state to explain to anyone.
 import type {
+  BlockExercise,
   BodyPart,
   Equipment,
   ExerciseDef,
@@ -20,6 +21,7 @@ import type {
   LadderState,
   LoggedSet,
   Mood,
+  RepPlan,
   SessionExercise,
 } from '../types'
 import { dayKey, parseDay } from './dates'
@@ -452,6 +454,192 @@ function holdSuggestion(base: ExerciseMemory, se: SessionExercise): number | und
   if (held >= asked) return Math.max(base.suggestedHold ?? 0, roundHold(se.kind, held))
   if (held < asked * 0.7) return roundHold(se.kind, held)
   return base.suggestedHold
+}
+
+// --- the ramp-in ------------------------------------------------------------
+//
+// There is no warm-up block (§18e) — the ramp IS the warm-up, and it is made of
+// the real movement. What was wrong until now is that a block session opened on
+// the working weight: set one of the day was the heaviest thing you would
+// touch, cold. Now the sets climb to it, so the top set lands on a nervous
+// system that has already done the movement twice.
+
+/**
+ * The ramp for a loaded slot. The TOP set is the last one and it is the working
+ * weight; every set before it steps one notch down the rack (§18d — the
+ * dumbbell has holes, not a dial) and one rep up, because a lighter bar is
+ * where you groove the path rather than where you spend yourself.
+ *
+ * `50 lb, 3 sets of 8–12` becomes `42 × 10 · 45.5 × 9 · 48.5 × 8`. Nothing
+ * drops below 55 % of the working weight, however many sets there are.
+ */
+export function rampToTop(
+  top: number,
+  sets: number,
+  low: number,
+  high: number,
+  unit: 'lb' | 'kg' = 'lb',
+): { weights: number[]; reps: number[] } {
+  const floor = Math.min(top, snapLoad(Math.max(2.5, top * 0.55), unit))
+  const weights: number[] = []
+  const reps: number[] = []
+  for (let i = 0; i < sets; i++) {
+    const down = sets - 1 - i
+    let w = top
+    for (let n = 0; n < down; n++) w = stepLoad(w, -1, unit)
+    weights.push(Math.max(floor, w))
+    reps.push(Math.min(high, low + down))
+  }
+  return { weights, reps }
+}
+
+/**
+ * The load prescribed for ONE set. A ramp gives every set its own; everything
+ * else asks for the same number all the way down.
+ */
+export function plannedWeight(e: Pick<SessionExercise, 'plan'>, setNo: number): number | undefined {
+  const list = e.plan.weights
+  if (!list || list.length === 0) return e.plan.weight
+  return list[Math.min(Math.max(0, setNo), list.length - 1)] ?? e.plan.weight
+}
+
+/** Does this exercise's prescription climb? (Only a ramped one has per-set loads.) */
+export function isRamped(e: Pick<SessionExercise, 'plan'>): boolean {
+  const list = e.plan.weights
+  return !!list && new Set(list).size > 1
+}
+
+// --- the rep ladder for bodyweight work -------------------------------------
+//
+// A press adds weight, a plank adds seconds, and a pull-up has neither: the bar
+// is the bar and you are you. So the reps ARE the progression (§18d). One rep
+// per session onto the total, spread across the sets, until the whole range is
+// yours; then the sets multiply and the reps come back down.
+
+/** Phase 2 never spreads the work wider than this many sets. */
+export const REP_PHASE2_SETS = 5
+
+/** Strict rest once you are in phase 2 — the sets are heavy, not a rhythm. */
+export const REP_PHASE2_REST: [number, number] = [120, 180]
+
+/**
+ * The per-set shape of a rep total. Spare reps go on the EARLIEST sets, because
+ * that is the order you have them in: 14 over three sets is 5 · 5 · 4, never
+ * 4 · 5 · 5.
+ */
+export function repShape(sets: number, total: number): number[] {
+  const n = Math.max(1, Math.round(sets))
+  const base = Math.floor(total / n)
+  const extra = total - base * n
+  return Array.from({ length: n }, (_, i) => Math.max(0, base + (i < extra ? 1 : 0)))
+}
+
+/**
+ * Does this movement progress on REPS? Only a counted bodyweight one. Anything
+ * loaded progresses on the weight (§18d) and anything clocked on the seconds,
+ * and giving a movement two ladders at once means neither of them is honest.
+ */
+export function progressesOnReps(e: Pick<SessionExercise, 'kind' | 'loaded'>): boolean {
+  return e.kind === 'bodyweight' && !isLoaded(e)
+}
+
+/**
+ * What to ask for on a counted bodyweight slot: the block's own `sets × repLow`
+ * until you have earned more, then whatever the ladder has climbed to. The
+ * written slot is the FLOOR and the top of its range is the ceiling — edit the
+ * slot up and the ladder is pulled up with it, edit it down and the ask comes
+ * down, so the block still says what the movement is.
+ */
+export function repPlanFor(slot: Pick<BlockExercise, 'sets' | 'repLow' | 'repHigh'>, mem: ExerciseMemory | undefined): RepPlan {
+  const earned = mem?.repPlan
+  if (!earned || earned.phase === 1) {
+    const floor = slot.sets * slot.repLow
+    return { phase: 1, sets: slot.sets, total: clamp(perSetTotal(earned, slot.sets), floor, slot.sets * slot.repHigh) }
+  }
+  const sets = clamp(earned.sets, Math.min(slot.sets, REP_PHASE2_SETS), REP_PHASE2_SETS)
+  const cap = Math.max(densityCap(sets, slot.repLow, slot.repHigh), earned.total)
+  return { phase: earned.phase, sets, total: clamp(perSetTotal(earned, sets), sets * slot.repLow, cap) }
+}
+
+/**
+ * Where the density phase stops: every set two reps under the top of the range,
+ * over as many sets as it has spread to. `3 × 4–8` pull-ups end at **5 × 6**,
+ * and that is the end of the road for reps — forty pull-ups in a session is not
+ * strength any more. What comes after it is load or a harder variation, and the
+ * card says so rather than counting higher.
+ */
+function densityCap(sets: number, low: number, high: number): number {
+  return sets * Math.max(low, high - 2)
+}
+
+/**
+ * What the ladder is worth over a DIFFERENT number of sets. A 40-minute session
+ * puts an extra set on the first two movements (§18m) and that set is logged
+ * like any other, so without this a single long Tuesday would come back as a
+ * permanently harder prescription. The reps per set are what was earned; the
+ * number of sets is the block's to say.
+ */
+function perSetTotal(earned: RepPlan | undefined, sets: number): number {
+  if (!earned) return 0
+  return Math.round(earned.total * (sets / Math.max(1, earned.sets)))
+}
+
+/**
+ * The ladder after a session — the rep twin of `holdSuggestion`.
+ *
+ * Hit the number on EVERY set and the ask goes up by one rep next time. Miss on
+ * any of them and the same ask comes back, unchanged, for as many sessions as
+ * it takes; fall below 70 % of it on a set and the ask drops to what you really
+ * did, so a bad number can never sit there being unreachable. Top the range out
+ * on every set and phase 2 takes over: the work spreads over more sets at fewer
+ * reps each and the climb starts again.
+ */
+function repProgression(base: ExerciseMemory, se: SessionExercise): RepPlan | undefined {
+  // a range is a block thing, and quality slots are terminated by how they look
+  if (!se.repRange || se.quality || !progressesOnReps(se) || se.sets.length === 0) return base.repPlan
+  const [low, high] = se.repRange
+  const asked = se.plan.reps
+  const sets = Math.max(1, asked.length)
+  const phase = base.repPlan?.phase ?? 1
+  const askedTotal = asked.reduce((n, r) => n + r, 0)
+  const floor = sets * low
+  /** Phase 1's ceiling: every set at the top of the written range. */
+  const ceiling = sets * high
+  // A set you never logged is a set you did not do — it cannot count as met.
+  // `reps` is read raw on purpose: on a COUNTED per-side move (a single-leg
+  // glute bridge) both the prescription and the logged number are already per
+  // side, so halving it the way a clocked hold does would make every set look
+  // like a failure and walk the ladder back down to the floor forever.
+  const done = asked.map((_, i) => (se.sets[i] ? se.sets[i].reps : null))
+
+  if (!done.every((d, i) => d != null && d >= asked[i])) {
+    // A set you fell WELL short on says the ask itself is wrong, so it comes
+    // down to what you can really do. A set you never got to says nothing at
+    // all — life interrupts a session, and that must never cost you six weeks
+    // of ladder — so the same ask simply comes back next time.
+    const real = done.filter((d): d is number => d != null)
+    if (real.length > 0 && done.some((d, i) => d != null && d < asked[i] * 0.7)) {
+      return { phase, sets, total: clamp(sets * Math.min(...real), floor, askedTotal) }
+    }
+    return { phase, sets, total: clamp(askedTotal, floor, ceiling) }
+  }
+
+  if (phase === 1) {
+    if (askedTotal < ceiling) return { phase: 1, sets, total: askedTotal + 1 }
+    // the whole range is yours on every set: same work, more sets, fewer reps
+    // each — 3 × 8 (24) becomes 5 × 5 (25)
+    const wide = Math.min(REP_PHASE2_SETS, sets + 2)
+    const spread = wide > sets ? wide : sets
+    const total = wide > sets ? wide * Math.ceil(askedTotal / wide) : askedTotal
+    return { phase: total >= densityCap(spread, low, high) ? 3 : 2, sets: spread, total }
+  }
+  if (phase === 2) {
+    const cap = densityCap(sets, low, high)
+    const total = Math.max(askedTotal, Math.min(askedTotal + 1, cap))
+    return { phase: total >= cap ? 3 : 2, sets, total }
+  }
+  // phase 3: the reps have nothing left to give. The movement has to change.
+  return { phase: 3, sets, total: askedTotal }
 }
 
 /**
@@ -972,8 +1160,43 @@ export function mmss(seconds: number): string {
 
 // --- learning ---------------------------------------------------------------
 
+/**
+ * Did the TOP SET earn a heavier dumbbell?
+ *
+ * This is the other half of double progression, and until now it was only a
+ * message on the card: the reps and the seconds climbed by themselves while the
+ * weight sat there waiting to be told. Finish the **last** set — the working
+ * set, the one a ramp climbs to — at the **top of the rep range**, at the weight
+ * you were asked for, having done every set, and that is the same evidence as
+ * loading more than you were asked. It is read as `'up'`, so the next session
+ * asks for one notch more.
+ *
+ * Only the top set counts: a ramp's opening set is *prescribed* at the top of
+ * the range on a lighter dumbbell (see `rampToTop`), and reading that as proof
+ * would ratchet the weight up on a warm-up.
+ *
+ * This is the one place the app asks for something you have not already done.
+ * It is reversible in one session — load less than asked and the next ask is a
+ * notch below what you actually lifted — which is why it is allowed to.
+ */
+function toppedTheRange(se: SessionExercise): boolean {
+  if (!se.repRange || se.quality || !isLoaded(se)) return false
+  if (se.kind === 'timed' || se.kind === 'cardio') return false // a loaded hold progresses on the clock
+  if (se.sets.length < se.plan.reps.length) return false // walked away before the end: nothing is proved
+  const last = se.plan.reps.length - 1
+  const top = se.sets[last]
+  const asked = plannedWeight(se, last)
+  if (!top || asked == null || (top.weight ?? 0) < asked - 0.4) return false
+  return top.reps >= se.repRange[1]
+}
+
 /** Fold one finished exercise back into the permanent memory. */
-export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionExercise, day: string): ExerciseMemory {
+export function learnFromExercise(
+  mem: ExerciseMemory | undefined,
+  se: SessionExercise,
+  day: string,
+  unit: 'lb' | 'kg' = 'lb',
+): ExerciseMemory {
   const base: ExerciseMemory = mem ?? { timesDone: 0, totalReps: 0 }
   if (se.skipped || se.sets.length === 0) {
     return se.rating ? { ...base, rating: se.rating, ratedAt: new Date().toISOString() } : base
@@ -988,14 +1211,27 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
   // did you correct the suggestion? that is the honest signal about the load
   let lastAdjust = base.lastAdjust
   let suggested = base.suggestedWeight
-  if (se.plan.weight != null && lastWeight != null) {
+  // ...but the light sets of a RAMP (§18e) are not a correction, they are the
+  // warm-up. Walk away before the top set and the working weight stays where it
+  // was: an interrupted session must not be read as "that was too heavy".
+  const rampCutShort = isRamped(se) && se.sets.length < se.plan.reps.length
+  if (rampCutShort) {
+    // nothing learned about the load today
+  } else if (se.plan.weight != null && lastWeight != null) {
     if (lastWeight > se.plan.weight + 0.4) lastAdjust = 'up'
-    else if (lastWeight < se.plan.weight - 0.4) lastAdjust = 'down'
+    // ONE notch under the ask is not "too heavy", it is the notch you settled
+    // on: the ask comes back as exactly that, rather than dropping below a
+    // weight you just completed. Two notches down and it really was too much.
+    // Without this the auto-bump below oscillates — top out at 45.5, get asked
+    // 48.5, settle back at 45.5, get asked 42.
+    else if (lastWeight < stepLoad(se.plan.weight, -1, unit) - 0.4) lastAdjust = 'down'
     else lastAdjust = 'same'
     suggested = lastWeight
   } else if (lastWeight != null) {
     suggested = lastWeight
   }
+  // the top of the rep range, on the top set, buys the next notch by itself
+  if (lastAdjust !== 'down' && toppedTheRange(se)) lastAdjust = 'up'
 
   // rest is a rolling average of what you ACTUALLY took, not what we offered
   const restLearned =
@@ -1034,6 +1270,7 @@ export function learnFromExercise(mem: ExerciseMemory | undefined, se: SessionEx
     lastAdjust,
     restLearned,
     suggestedHold: holdSuggestion(base, se),
+    repPlan: repProgression(base, se),
     bestReps,
     bestWeight: lastWeight != null ? Math.max(base.bestWeight ?? 0, lastWeight) : base.bestWeight,
   }

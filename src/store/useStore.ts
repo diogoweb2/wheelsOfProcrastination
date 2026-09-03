@@ -4036,12 +4036,17 @@ export const useStore = create<StoreState>((set, get) => {
             if (pr) prs += 1
           }
           // the permanent memory — this is what makes unplugging the coach possible
-          d.gym.ex[se.exId] = learnFromExercise(mem, se, day)
+          d.gym.ex[se.exId] = learnFromExercise(mem, se, day, d.gym.brief.weightUnit ?? 'lb')
 
           // rep ladders: seeded from your first honest set, then climbed; a max
-          // test reseeds the whole thing from the new number
+          // test reseeds the whole thing from the new number.
+          //
+          // Only OFF-PROGRAMME sessions feed it. A block session's pull-ups are
+          // done under the block's own prescription (§18d's rep ladder), and
+          // letting them advance this one means a later free session starts from
+          // a rung that was never earned under these rules.
           const def = exerciseById(catalog, se.exId)
-          if (def?.ladder && !se.skipped && se.sets.length > 0) {
+          if (def?.ladder && !s.blockId && !se.skipped && se.sets.length > 0) {
             const best = Math.max(...se.sets.map((x) => x.reps))
             const cur = d.gym.ladders[se.exId]
             d.gym.ladders[se.exId] = cur ? advanceLadder(cur, se.ladderTest ? best : null, day) : defaultLadder(best)

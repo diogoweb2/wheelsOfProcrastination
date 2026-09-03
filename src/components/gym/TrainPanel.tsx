@@ -27,8 +27,11 @@ import {
   SESSION_MINUTES,
   allExercises,
   isLoaded,
+  isRamped,
   loadSteps,
   mmss,
+  plannedWeight,
+  progressesOnReps,
   sessionReport,
   sessionSeconds,
   stepLoad,
@@ -290,7 +293,7 @@ function NextSessionCard() {
             return (
               <li key={`${slot.exId}-${i}`}>
                 <span>{def?.emoji ?? '❓'} {def?.name ?? 'Not in the catalog any more'}</span>
-                <span className="muted">{slotLine(slot, gymCatalog)}</span>
+                <span className="muted">{slotLine(slot, gymCatalog, gym)}</span>
                 {def && <VideoButton exId={def.id} name={def.name} />}
               </li>
             )
@@ -653,9 +656,12 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const plannedReps = current?.plan.reps[Math.min(nextSetNo, (current?.plan.reps.length ?? 1) - 1)] ?? 10
 
   // what you actually lifted last set of THIS exercise beats what was planned:
-  // once you bump the bar up, every set after it starts there
+  // once you bump the bar up, every set after it starts there. A RAMP (§18e) is
+  // the exception — it prescribes a weight per set on purpose, and carrying the
+  // light one forward would flatten the climb it exists to make.
+  const plannedLoad = current ? plannedWeight(current, nextSetNo) : undefined
   const lastLoggedWeight = current?.sets.length ? current.sets[current.sets.length - 1].weight : undefined
-  const armedWeight = lastLoggedWeight ?? current?.plan.weight
+  const armedWeight = current && isRamped(current) ? plannedLoad : (lastLoggedWeight ?? plannedLoad)
 
   const [reps, setReps] = useState(plannedReps)
   const [weight, setWeight] = useState<number | undefined>(armedWeight)
@@ -827,7 +833,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             <VideoButton exId={current.exId} name={current.name} />
           </div>
 
-          <ExerciseBrief ex={current} setNo={nextSetNo} />
+          <ExerciseBrief ex={current} setNo={nextSetNo} topped={memory?.repPlan?.phase === 3} />
           <DemoCaption demo={demos.get(current.exId)} />
 
           <div className="gym-set-row">
@@ -861,7 +867,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               <WeightStepper
                 unit={unit}
                 value={weight}
-                planned={current.plan.weight}
+                planned={plannedLoad}
                 onChange={setWeight}
               />
             </div>
@@ -884,7 +890,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
               {isLoaded(current) && (
-                <WeightStepper unit={unit} value={weight} planned={current.plan.weight} onChange={setWeight} />
+                <WeightStepper unit={unit} value={weight} planned={plannedLoad} onChange={setWeight} />
               )}
             </div>
           ) : null}
@@ -1033,7 +1039,7 @@ function SessionCountdown({ session }: { session: GymSession }) {
  * have the hands and the attention to read it (§18c). Same words in both, so
  * reading it early is never reading a different thing.
  */
-function ExerciseBrief({ ex, setNo }: { ex: SessionExercise; setNo: number }) {
+function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: number; topped?: boolean }) {
   const plannedReps = ex.plan.reps[Math.min(setNo, ex.plan.reps.length - 1)] ?? 10
   const twoSided = isClocked(ex) && !!ex.perSide
   return (
@@ -1072,7 +1078,26 @@ function ExerciseBrief({ ex, setNo }: { ex: SessionExercise; setNo: number }) {
             ? ' — and stop the moment quality drops.'
             : isClocked(ex)
               ? `. Hold ${ex.repRange[1]} on every set (both sides) and the whole range moves up next time.`
-              : `. All sets at ${ex.repRange[1]}? Add weight next time.`}
+              : progressesOnReps(ex)
+                ? '. Hit the number on every set and next session asks for one rep more.'
+                : `. Finish the last set at ${ex.repRange[1]} and next session is a notch heavier${
+                    isRamped(ex) ? ' — the whole ramp moves with it' : ''
+                  }.`}
+        </p>
+      )}
+      {topped && (
+        <div className="gym-banner">
+          🎓 <strong>Topped out on reps.</strong> This is as far as the rep ladder goes for this movement — the next
+          step is load (a vest, a belt, a dumbbell between the feet) or a harder variation.
+        </div>
+      )}
+
+      {/* the ramp is the warm-up (§18e), so it has to be legible while you are
+          standing at the rack deciding what to pick up */}
+      {isRamped(ex) && ex.plan.weights && (
+        <p style={{ fontSize: 13, marginTop: 6, fontWeight: 800 }}>
+          🪜 Ramp: {ex.plan.weights.join(' → ')} — set {ex.plan.weights.length} is the working set, the ones before it
+          are the warm-up.
         </p>
       )}
       {ex.why && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>💬 {ex.why}</p>}
@@ -1511,15 +1536,29 @@ function repLabel(e: SessionExercise): string {
   return e.perSide ? `${unit} per side` : unit
 }
 
+/** "3 × 5" when every set is the same, "5 · 5 · 4" when they are not. */
+function repAsk(e: SessionExercise): string {
+  return new Set(e.plan.reps).size === 1 ? `${e.plan.reps.length} × ${e.plan.reps[0]}` : e.plan.reps.join(' · ')
+}
+
 function planLine(e: SessionExercise, unit: string): string {
   const bits: string[] = []
   if (e.ladderTest) bits.push('1 all-out set')
-  // a block session prescribes a RANGE: the low end has to be there, the top is
-  // what you chase, and hitting it everywhere is what buys you more weight
-  else if (e.repRange) bits.push(`${e.plan.reps.length} × ${e.repRange[0]}–${e.repRange[1]} ${repLabel(e)}`)
-  else if (new Set(e.plan.reps).size === 1) bits.push(`${e.plan.reps.length} × ${e.plan.reps[0]} ${repLabel(e)}`)
-  else bits.push(`${e.plan.reps.join(' · ')} ${repLabel(e)}`)
-  if (e.plan.weight) bits.push(`${e.plan.weight} ${unit}`)
+  else if (e.repRange) {
+    // a block session prescribes a RANGE: the low end has to be there, the top
+    // is what you chase, and hitting it everywhere is what buys you more weight
+    // — or, on a rep ladder (§18d), one more rep. Once the ladder has climbed
+    // off the floor the ASK is the news: "5 · 5 · 4", not "3 × 4–8".
+    const [lo, hi] = e.repRange
+    bits.push(
+      e.plan.reps.some((r) => r > lo)
+        ? `${repAsk(e)} ${repLabel(e)} (range ${lo}–${hi})`
+        : `${e.plan.reps.length} × ${lo}–${hi} ${repLabel(e)}`,
+    )
+  } else bits.push(`${repAsk(e)} ${repLabel(e)}`)
+  // a ramp is two numbers: where it starts and where it ends up
+  if (isRamped(e) && e.plan.weights) bits.push(`${e.plan.weights[0]} → ${e.plan.weight} ${unit}`)
+  else if (e.plan.weight) bits.push(`${e.plan.weight} ${unit}`)
   bits.push(`rest ${e.plan.restSec}s`)
   return bits.join(' · ')
 }

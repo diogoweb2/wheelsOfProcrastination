@@ -1007,8 +1007,43 @@ export interface ExerciseMemory {
    * back asking for 70. Absent until a clocked exercise has been done once.
    */
   suggestedHold?: number
+  /**
+   * Where a COUNTED BODYWEIGHT movement is on its rep ladder — pull-ups,
+   * push-ups, dips. It is the twin of `suggestedWeight` for the one family of
+   * exercises that has no weight to add: the reps themselves are the
+   * progression. Absent until the exercise has been done once in a block
+   * session; see §18d and `repPlanFor`.
+   */
+  repPlan?: RepPlan
   bestWeight?: number
   notes?: string // your own note; the coach reads it
+}
+
+/**
+ * One counted bodyweight movement's own progression (§18d).
+ *
+ * Phase 1 — VOLUME. `total` is the reps asked for across `sets`, and the shape
+ * is derived rather than stored: the spare reps land on the earliest sets, so
+ * 14 over three sets is 5 · 5 · 4. Meet every set and the total goes up by one
+ * next session (5 5 4 → 5 5 5 → 6 5 5), until every set sits at the top of the
+ * block's range.
+ *
+ * Phase 2 — DENSITY. Once the top of the range is yours on every set there is
+ * nowhere left to climb, so the work spreads out instead: more sets, fewer reps
+ * each, and a strict 120–180 s rest. 3 × 8 becomes 5 × 5, and the one-rep-a-
+ * session climb starts again from there.
+ *
+ * Phase 3 — TOPPED OUT. Density stops at `sets × (repHigh − 2)`, because forty
+ * pull-ups in a session is not strength any more, it is a hobby. The ladder
+ * freezes there and the card says the honest next step out loud: add load, or
+ * move to a harder variation of the movement.
+ */
+export interface RepPlan {
+  /** How many sets the prescription has grown to — the block's own count until phase 2 adds to it. */
+  sets: number
+  /** Reps across all of those sets. Never below the slot's floor, never above its ceiling. */
+  total: number
+  phase: 1 | 2 | 3
 }
 
 /**
@@ -1054,8 +1089,16 @@ export interface SessionExercise {
    */
   intensity?: 1 | 2 | 3
   how?: string
-  /** The ask. `reps` is per-set, so a ladder is literally [2,3,2,3,2]. */
-  plan: { reps: number[]; weight?: number; restSec: number }
+  /**
+   * The ask. `reps` is per-set, so a ladder is literally [2,3,2,3,2].
+   *
+   * `weight` is the WORKING weight — the number the session is really about,
+   * and the one the learning, the records and the grade all read. `weights` is
+   * per set and only present on a **ramp** (§18e): the sets climb to the
+   * working weight instead of opening on it, so [42, 45.5, 48.5] ends where
+   * `weight` says. Anything reading one number keeps reading `weight`.
+   */
+  plan: { reps: number[]; weight?: number; weights?: number[]; restSec: number }
   /**
    * The prescribed RANGE for a training-block session — "3 × 8–12". `plan.reps`
    * holds the low end, because that is the number that has to be there for the
