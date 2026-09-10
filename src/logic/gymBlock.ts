@@ -38,6 +38,7 @@ import {
   exerciseSeconds,
   holdFor,
   isLoaded,
+  loadKindOf,
   planOne,
   progressesOnReps,
   rampToTop,
@@ -439,8 +440,13 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
     const primary = def.parts[0]
     const cold = primary != null && !warm.has(primary)
     if (primary != null) warm.add(primary)
+    // Bands never ramp. The ladder is four colours wide and the two below the
+    // working one are 55 % of it, so a "ramp" there is two identical rungs and
+    // a colour change; and the band's role in this basement — prehab under the
+    // 8.5 lb dumbbell floor, plus the horizontal work — is not the cold heavy
+    // lift a ramp exists to protect. You move further from the anchor instead.
     const ramp =
-      cold && slot.sets >= 3 && !slot.quality && isLoaded(def) && one.plan.weight != null
+      cold && slot.sets >= 3 && !slot.quality && isLoaded(def) && loadKindOf(def) !== 'band' && one.plan.weight != null
         ? rampToTop(one.plan.weight, slot.sets, low, high, unit)
         : null
 

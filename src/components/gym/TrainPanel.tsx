@@ -17,17 +17,21 @@
 //    started to the moment you said you were done, and that measured time is
 //    what the end-of-session grade is built on.
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useStore } from '../../store/useStore'
-import type { ExerciseRating, GearMode, GymSession, LoggedSet, Mood, SessionExercise } from '../../types'
+import type { ExerciseRating, GearMode, GymSession, LoadKind, LoggedSet, Mood, SessionExercise } from '../../types'
 import {
   GEAR_MODES,
   GEAR_MODE_LABEL,
+  BANDS,
   PART_LABEL,
   RATING_LABEL,
   SESSION_MINUTES,
   allExercises,
+  bandFor,
   isLoaded,
   isRamped,
+  loadLabel,
   loadSteps,
   mmss,
   plannedWeight,
@@ -842,7 +846,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               return (
                 <span key={i} className={`gym-set ${logged ? 'done' : i === nextSetNo ? 'now' : ''}`}>
                   {logged ? setChip(logged) : r}
-                  {logged?.weight ? <em>{logged.weight}</em> : null}
+                  {logged?.weight ? <em>{loadChip(logged.weight, unit, current.loadKind)}</em> : null}
                 </span>
               )
             })}
@@ -850,7 +854,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               current.sets.slice(current.plan.reps.length).map((s, i) => (
                 <span key={`extra-${i}`} className="gym-set done">
                   {setChip(s)}
-                  {s.weight ? <em>{s.weight}</em> : null}
+                  {s.weight ? <em>{loadChip(s.weight, unit, current.loadKind)}</em> : null}
                 </span>
               ))}
           </div>
@@ -869,6 +873,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 value={weight}
                 planned={plannedLoad}
                 onChange={setWeight}
+                loadKind={current.loadKind}
               />
             </div>
           )}
@@ -890,7 +895,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
               {isLoaded(current) && (
-                <WeightStepper unit={unit} value={weight} planned={plannedLoad} onChange={setWeight} />
+                <WeightStepper
+                  unit={unit}
+                  value={weight}
+                  planned={plannedLoad}
+                  onChange={setWeight}
+                  loadKind={current.loadKind}
+                />
               )}
             </div>
           ) : null}
@@ -1080,9 +1091,11 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
               ? `. Hold ${ex.repRange[1]} on every set (both sides) and the whole range moves up next time.`
               : progressesOnReps(ex)
                 ? '. Hit the number on every set and next session asks for one rep more.'
-                : `. Finish the last set at ${ex.repRange[1]} and next session is a notch heavier${
-                    isRamped(ex) ? ' — the whole ramp moves with it' : ''
-                  }.`}
+                : ex.loadKind === 'band'
+                  ? `. Finish the last set at ${ex.repRange[1]} and next session asks for the next band up.`
+                  : `. Finish the last set at ${ex.repRange[1]} and next session is a notch heavier${
+                      isRamped(ex) ? ' — the whole ramp moves with it' : ''
+                    }.`}
         </p>
       )}
       {topped && (
@@ -1509,12 +1522,16 @@ function WeightStepper({
   value,
   planned,
   onChange,
+  loadKind,
 }: {
   unit: 'lb' | 'kg'
   value: number | undefined
   planned: number | undefined
   onChange: (n: number) => void
+  loadKind?: LoadKind
 }) {
+  // a band is not a number you dial, it is one of four things on the hook
+  if (loadKind === 'band') return <BandPicker unit={unit} value={value} planned={planned} onChange={onChange} />
   return (
     <Stepper
       label={`weight (${unit})`}
@@ -1529,6 +1546,67 @@ function WeightStepper({
   )
 }
 
+/**
+ * The bands, as four colours you tap.
+ *
+ * A stepper is the wrong control for them: nothing is printed on the rubber,
+ * the pounds on the packet are the vendor's maximum, and all four are 3 mm
+ * rather than the usual 4.5 — so "35 lb" is a fiction and "the red one" is the
+ * truth. You pick the colour, the pounds ride underneath for scale, and when
+ * the one you were given is too light or too heavy you tap the next one along.
+ * What gets logged is still the number, so every ladder, record and grade in
+ * the app keeps reading exactly what it read before.
+ */
+function BandPicker({
+  unit,
+  value,
+  planned,
+  onChange,
+}: {
+  unit: 'lb' | 'kg'
+  value: number | undefined
+  planned: number | undefined
+  onChange: (n: number) => void
+}) {
+  const chosen = bandFor(value, unit)
+  const asked = bandFor(planned, unit)
+  return (
+    <div className="gym-stepper" style={{ flex: '1 0 100%' }}>
+      <label>band</label>
+      <div className="gym-band-row">
+        {BANDS.map((b) => {
+          const load = unit === 'kg' ? b.kg : b.lb
+          return (
+            <button
+              key={b.color}
+              className={`gym-band ${chosen?.color === b.color ? 'on' : ''}`}
+              style={{ '--band': b.css } as CSSProperties}
+              onClick={() => {
+                sfx.click()
+                onChange(load)
+              }}
+            >
+              <span className="gym-band-dot" />
+              <span className="gym-band-name">{b.color}</span>
+              <span className="gym-band-lb">
+                {load} {unit}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <span className="gym-stepper-hint">
+        {asked ? `asked for the ${asked.color.toLowerCase()} one` : 'first time — pick one'}
+      </span>
+    </div>
+  )
+}
+
+/** What a logged load says on a 44px pill: the colour for a band, the number otherwise. */
+function loadChip(w: number, unit: 'lb' | 'kg', loadKind: LoadKind | undefined): string {
+  return (loadKind === 'band' ? bandFor(w, unit)?.color.toLowerCase() : undefined) ?? String(w)
+}
+
 function repLabel(e: SessionExercise): string {
   const unit = e.kind === 'timed' ? 'seconds' : e.kind === 'cardio' ? 'minutes' : 'reps'
   // one limb at a time: the number is what each side gets, so say so — otherwise
@@ -1541,7 +1619,7 @@ function repAsk(e: SessionExercise): string {
   return new Set(e.plan.reps).size === 1 ? `${e.plan.reps.length} × ${e.plan.reps[0]}` : e.plan.reps.join(' · ')
 }
 
-function planLine(e: SessionExercise, unit: string): string {
+function planLine(e: SessionExercise, unit: 'lb' | 'kg'): string {
   const bits: string[] = []
   if (e.ladderTest) bits.push('1 all-out set')
   else if (e.repRange) {
@@ -1558,7 +1636,7 @@ function planLine(e: SessionExercise, unit: string): string {
   } else bits.push(`${repAsk(e)} ${repLabel(e)}`)
   // a ramp is two numbers: where it starts and where it ends up
   if (isRamped(e) && e.plan.weights) bits.push(`${e.plan.weights[0]} → ${e.plan.weight} ${unit}`)
-  else if (e.plan.weight) bits.push(`${e.plan.weight} ${unit}`)
+  else if (e.plan.weight) bits.push(loadLabel(e.plan.weight, unit, e.loadKind))
   bits.push(`rest ${e.plan.restSec}s`)
   return bits.join(' · ')
 }

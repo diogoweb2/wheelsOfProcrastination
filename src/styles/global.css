@@ -2564,7 +2564,7 @@ input, select { font-family: inherit; }
 .gym-set.now { border-color: var(--gold); color: var(--text); }
 
 /* --- steppers --- */
-.gym-inputs { display: flex; gap: 10px; margin-top: 14px; }
+.gym-inputs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .gym-stepper { flex: 1; min-width: 0; }
 .gym-stepper > label { display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
 .gym-stepper-row { display: flex; align-items: stretch; gap: 6px; }
@@ -2582,6 +2582,24 @@ input, select { font-family: inherit; }
 .gym-stepper-row input::-webkit-outer-spin-button,
 .gym-stepper-row input::-webkit-inner-spin-button { appearance: none; margin: 0; }
 .gym-stepper-hint { display: block; margin-top: 4px; font-size: 10px; font-weight: 800; color: var(--muted); text-align: center; }
+
+/* --- the bands: four colours you tap, not a number you dial --- */
+.gym-band-row { display: flex; gap: 6px; }
+.gym-band {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 2px 7px; border-radius: 12px;
+  border: 2px solid var(--line); background: var(--bg2); color: var(--muted);
+  font-family: inherit; cursor: pointer;
+}
+.gym-band-dot {
+  width: 20px; height: 20px; border-radius: 999px; background: var(--band);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+.gym-band-name { font-size: 11px; font-weight: 900; letter-spacing: 0.2px; }
+.gym-band-lb { font-size: 9px; font-weight: 800; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.gym-band.on { border-color: var(--band); background: var(--card2); color: var(--text); }
+.gym-band.on .gym-band-dot { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3), 0 0 0 3px color-mix(in srgb, var(--band) 45%, transparent); }
+.gym-band:active { transform: scale(0.94); }
 
 /* --- ratings --- */
 .gym-rate-row { display: flex; flex-wrap: wrap; gap: 6px; }

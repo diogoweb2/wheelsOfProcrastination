@@ -19,6 +19,7 @@ import type {
   GymSession,
   GymState,
   LadderState,
+  LoadKind,
   LoggedSet,
   Mood,
   RepPlan,
@@ -52,27 +53,85 @@ export const DUMBBELL_LB = [
   88.5, 92,
 ] as const
 
+/**
+ * The four loop bands in the basement, lightest first — the dumbbell's ladder
+ * for everything the dumbbell is too heavy for, and for the horizontal pulls
+ * gravity cannot supply.
+ *
+ * The COLOUR is the unit here, not the pounds. Nothing is printed on the
+ * rubber; the number on the packet is the vendor's *maximum* pull, and all
+ * four are 3 mm rather than the usual 4.5, so every one of them runs lighter
+ * than its label. The app still stores the pounds — one number is what every
+ * ladder, record and grade reads — but it never says them without the colour
+ * in front, and the runner asks you to pick a colour rather than type a load.
+ */
+export const BANDS = [
+  { color: 'Yellow', lb: 20, kg: 9, css: '#e0b400' },
+  { color: 'Red', lb: 35, kg: 16, css: '#e03131' },
+  { color: 'Black', lb: 65, kg: 30, css: '#4a4a4a' },
+  { color: 'Purple', lb: 85, kg: 40, css: '#8b3fd1' },
+] as const
+
+const BAND_LB = BANDS.map((b) => b.lb)
+const BAND_KG = BANDS.map((b) => b.kg)
+
+/** The gear whose "weight" is a colour. */
+const BAND_EQUIPMENT = 'eq-bands'
+
+/**
+ * Which rack this movement loads off — read straight off its gear, so an
+ * exercise added on the Gear tab with the bands ticked gets colours for free
+ * and no catalog field can drift out of step with the equipment list.
+ */
+export function loadKindOf(e: Pick<ExerciseDef, 'equipmentIds'> | undefined): LoadKind {
+  return e?.equipmentIds?.includes(BAND_EQUIPMENT) ? 'band' : 'dumbbell'
+}
+
 /** The notches available for a given unit — empty when there is no ladder to follow. */
-export function loadSteps(unit: 'lb' | 'kg' | undefined): readonly number[] {
+export function loadSteps(unit: 'lb' | 'kg' | undefined, kind: LoadKind = 'dumbbell'): readonly number[] {
+  // the bands have a ladder in either unit: four of them is four of them
+  if (kind === 'band') return (unit ?? 'lb') === 'kg' ? BAND_KG : BAND_LB
   return (unit ?? 'lb') === 'lb' ? DUMBBELL_LB : []
 }
 
 /** The closest notch to `w`. Values outside the ladder clamp to its ends. */
-export function snapLoad(w: number, unit: 'lb' | 'kg' | undefined = 'lb'): number {
-  const steps = loadSteps(unit)
+export function snapLoad(w: number, unit: 'lb' | 'kg' | undefined = 'lb', kind: LoadKind = 'dumbbell'): number {
+  const steps = loadSteps(unit, kind)
   if (steps.length === 0 || !Number.isFinite(w)) return round(w)
   return steps.reduce((best, s) => (Math.abs(s - w) < Math.abs(best - w) ? s : best), steps[0])
 }
 
 /** One notch up (`dir` 1) or down (−1) from `w`. Off a ladder, a 5% step of at least 2.5. */
-export function stepLoad(w: number, dir: 1 | -1, unit: 'lb' | 'kg' | undefined = 'lb'): number {
-  const steps = loadSteps(unit)
+export function stepLoad(
+  w: number,
+  dir: 1 | -1,
+  unit: 'lb' | 'kg' | undefined = 'lb',
+  kind: LoadKind = 'dumbbell',
+): number {
+  const steps = loadSteps(unit, kind)
   if (steps.length === 0) {
     const step = Math.max(2.5, Math.round(w * 0.05))
     return round(Math.max(step, w + dir * step))
   }
-  const i = steps.indexOf(snapLoad(w, unit))
+  const i = steps.indexOf(snapLoad(w, unit, kind))
   return steps[clamp(i + dir, 0, steps.length - 1)]
+}
+
+/** Which band a stored number actually is — the colour behind "65". */
+export function bandFor(w: number | undefined, unit: 'lb' | 'kg' = 'lb'): (typeof BANDS)[number] | undefined {
+  if (w == null || !Number.isFinite(w) || w <= 0) return undefined
+  const key = unit === 'kg' ? 'kg' : 'lb'
+  return BANDS.reduce((best, b) => (Math.abs(b[key] - w) < Math.abs(best[key] - w) ? b : best), BANDS[0])
+}
+
+/**
+ * How a load READS on screen: "65 lb" off the rack, "Black band (65 lb)" off
+ * the bands — the colour is what you go and pick up, the pounds ride along as
+ * a sense of scale.
+ */
+export function loadLabel(w: number, unit: 'lb' | 'kg' = 'lb', kind: LoadKind | undefined = 'dumbbell'): string {
+  const band = kind === 'band' ? bandFor(w, unit) : undefined
+  return band ? `${band.color} band (${w} ${unit})` : `${w} ${unit}`
 }
 
 /** Max exercises in a session, by minute budget. */
@@ -319,16 +378,18 @@ export function isLoaded(e: Pick<ExerciseDef, 'kind' | 'loaded'> | Pick<SessionE
  * moves with how you corrected the last suggestion: you loaded MORE than asked
  * (it was too easy) → nudge up; you loaded LESS (too hard) → nudge down.
  *
- * The answer always lands on a real notch of the dumbbell (see `DUMBBELL_LB`),
- * so "nudge up" means the next hole, not an arithmetic 5%.
+ * The answer always lands on a real rung of whatever this movement loads off
+ * (see `DUMBBELL_LB`, `BANDS`), so "nudge up" means the next hole in the
+ * dumbbell — or the next band colour — not an arithmetic 5%.
  */
 export function weightFor(e: ExerciseDef, mem: ExerciseMemory | undefined, unit: 'lb' | 'kg' = 'lb'): number | undefined {
   if (!isLoaded(e)) return undefined
+  const kind = loadKindOf(e)
   const last = mem?.suggestedWeight ?? mem?.lastWeight
   if (!last) return undefined
-  if (mem?.lastAdjust === 'up') return stepLoad(last, 1, unit)
-  if (mem?.lastAdjust === 'down') return stepLoad(last, -1, unit)
-  return snapLoad(last, unit)
+  if (mem?.lastAdjust === 'up') return stepLoad(last, 1, unit, kind)
+  if (mem?.lastAdjust === 'down') return stepLoad(last, -1, unit, kind)
+  return snapLoad(last, unit, kind)
 }
 
 function round(n: number): number {
@@ -912,10 +973,14 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
   }
 
   // the ramp-in: the first two moves of the session run light, so no separate
-  // warm-up block is ever needed (see the "I don't like to warm up" brief)
+  // warm-up block is ever needed (see the "I don't like to warm up" brief).
+  // Bands sit this out: the ladder is four colours wide and its whole job is
+  // prehab and anti-rotation, so half of yellow is not a warm-up, it is nothing.
   const unit = gym.brief.weightUnit ?? 'lb'
+  const load = loadKindOf(e)
   let weight = weightFor(e, mem, unit)
-  if (weight != null && index < 2) weight = snapLoad(Math.max(2.5, weight * (index === 0 ? 0.5 : 0.75)), unit)
+  if (weight != null && index < 2 && load !== 'band')
+    weight = snapLoad(Math.max(2.5, weight * (index === 0 ? 0.5 : 0.75)), unit)
 
   return {
     exId: e.id,
@@ -930,6 +995,9 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     paceSec: learnedSetSeconds(mem, e.kind, reps[0]) ?? undefined,
     perSide: e.perSide,
     loaded: e.loaded,
+    // denormalised like `perSide`: a session logged in colours still reads in
+    // colours after the catalog moves the exercise onto different gear
+    loadKind: load === 'band' ? 'band' : undefined,
     ladder: !!ladder,
     ladderTest: isTest,
     coins: 0,

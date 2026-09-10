@@ -411,26 +411,25 @@ export interface BankPending {
 }
 
 /**
- * The Shock Test — a scripted QQQ "Market Correction" (−20% overnight).
- * First crash auto-arms ~1 month after the first QQQ deposit; after that,
- * only dad's manual crash button fires new ones. Ben must choose:
- * PANIC SELL (loss locked in forever) or HOLD THE LINE (bounces back higher).
+ * The Shock Test — a QQQ "Market Correction" (−20% overnight), fired only by
+ * dad's manual crash lever. Ben must choose: PANIC SELL (loss locked in
+ * forever) or HOLD THE LINE (bounces back higher).
  */
 export interface BankShockState {
-  scheduledDay: string | null // auto first-crash date; fires on the first day ≥ this with real QQQ money
   crashedDay: string | null // a crash happened and Ben hasn't decided yet (drives his alert modal)
   crashAmount: number // dollars wiped by the pending crash (for the alert copy)
   decision: 'hold' | 'panic' | null // last decision; 'hold' keeps recoverDay armed
   recoverDay: string | null // when the held position finishes bouncing back
   recoverTo: number // target QQQ balance on recoverDay (~6% above pre-crash) — 0 when not recovering
   bounce: { day: string; gain: number } | null // one-shot flag: recovery landed, celebrate on Ben's next visit
-  crashCount: number // ≥1 unlocks dad's manual crash button
+  crashCount: number // how many crashes Ben has weathered
   lastCrashDay: string | null // drives the "days without a crash" counter
 }
 
 /**
- * Live market returns fetched monthly by `npm run bank:market` (Claude reads the
- * last 30 days of real XGRO/QQQ daily % moves). The sim replays them for the
+ * Live market returns fetched monthly by `npm run bank:market` (Yahoo Finance's
+ * public chart endpoint, last 30 days of real XGRO/QQQ daily % moves, adjusted
+ * close so distributions count). The sim replays them for the
  * next 30 days, looping if the next month's fetch hasn't landed. Shared across
  * the app (Firestore app/marketData), NOT per-kid. `status`/`lastError` drive
  * the admin failure banner.
@@ -852,6 +851,17 @@ export type BodyPart =
  */
 export type ExerciseKind = 'weight' | 'bodyweight' | 'timed' | 'cardio'
 
+/**
+ * Which rack the load comes off. `'dumbbell'` (the default, and what an absent
+ * value means) is the adjustable pair, whose unit is pounds. `'band'` is the
+ * four loop bands, whose unit is a COLOUR: nothing is printed on the rubber,
+ * the pounds on the packet are the vendor's maximum, and all four are 3 mm
+ * rather than the usual 4.5 — so "35 lb" is a fiction and "the red one" is the
+ * truth. The app still stores the pounds (every ladder, record and grade reads
+ * one number), it just never says them without the colour in front.
+ */
+export type LoadKind = 'dumbbell' | 'band'
+
 /** One machine / bar / band in the basement. Written by `npm run gym:equipment`, editable by hand. */
 export interface Equipment {
   id: string
@@ -1119,6 +1129,7 @@ export interface SessionExercise {
   skipped?: boolean
   perSide?: boolean // reps are per side; denormalised like `name` so old sessions read right
   loaded?: boolean // carries weight as well as its own unit; denormalised like `perSide`
+  loadKind?: LoadKind // 'band' = the load is a colour, not a number; denormalised like `perSide`
   ladder?: boolean
   ladderTest?: boolean // this one is a max-rep test — do as many as you can
   why?: string // the coach's reason, shown on the preview card

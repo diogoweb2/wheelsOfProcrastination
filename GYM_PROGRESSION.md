@@ -1,6 +1,6 @@
 # Gym — how progression works, per exercise type
 
-> **Status: current as of 2026-09-02.** This describes what the code actually does, not what
+> **Status: current as of 2026-09-03.** This describes what the code actually does, not what
 > we would like it to do. Canonical rules live in BUSINESS_REQUIREMENTS.md §18d (what it
 > learns), §18e (the warm-up / ramp) and §18m (the training block). Code: `src/logic/gym.ts`
 > and `src/logic/gymBlock.ts`.
@@ -189,6 +189,42 @@ the reversal is one session deep and lands somewhere sane:
 52 asked, two sets done         →  next asks 52   (nothing learned)
 ```
 
+### 2.4 The bands are a colour, not a number (2026-09-03)
+
+Four loop bands hang in the basement, and nothing is printed on any of them:
+
+| | Band | Label | Real |
+|---|---|---|---|
+| 🟡 | Yellow | 20 lb / 9 kg | lighter |
+| 🔴 | Red | 35 lb / 16 kg | lighter |
+| ⚫ | Black | 65 lb / 30 kg | lighter |
+| 🟣 | Purple | 85 lb / 40 kg | lighter |
+
+The number on the packet is the vendor's **maximum** pull, and these are 3 mm rather than the
+usual 4.5, so every one of them runs under its label. `35 lb` is a fiction; *the red one* is
+the truth. So a band exercise gets its own four-rung ladder in place of `DUMBBELL_LB`, and
+the runner asks for a **colour**:
+
+- The load control is **four chips you tap**, not a −/+ stepper. Each carries its colour and
+  its pounds underneath, for scale. Too light or too heavy → tap the next one along.
+- The card reads `Black band (65 lb)`, the hint reads `asked for the red one`, and a logged
+  set's pill says `black`, not `65`.
+- **What is stored is still the pounds.** One number is what §2.2's learning, the records,
+  the grade and the charts all read, and none of them changed: "one notch up" is simply the
+  next colour.
+- Which ladder an exercise walks is **read off its gear** (`eq-bands`), never a second
+  catalog field that could drift out of step with the equipment list. Add a band exercise on
+  the Gear tab and it gets colours for free.
+- Unlike the dumbbell, **the bands have a ladder in kg too** — four of them is four of them
+  in either unit.
+
+**Bands never ramp** (§3). Two of a four-rung ladder's lower steps land on the 55 % floor, so
+a ramp there is one colour change and two identical rungs — and the band's job here is prehab
+under the 8.5 lb dumbbell floor plus the horizontal work gravity can't supply, which is not
+the cold heavy lift a ramp exists to protect. The free planner's "first two moves run light"
+skips them for the same reason. Within a session you make a band harder by standing further
+from the anchor, which is not a number the app tracks.
+
 ---
 
 ## 3. The ramp-in — how a loaded exercise opens (2026-09-02)
@@ -366,6 +402,7 @@ matters long-term and is never capped.
 | Concern | Where |
 |---|---|
 | Weight suggestion, notches | `gym.ts` → `weightFor`, `snapLoad`, `stepLoad`, `DUMBBELL_LB` |
+| The band ladder | `gym.ts` → `BANDS`, `loadKindOf`, `bandFor`, `loadLabel`; `TrainPanel.tsx` → `BandPicker` |
 | Ramp-in | `gym.ts` → `rampToTop`, `plannedWeight`, `isRamped`; applied in `gymBlock.ts` → `planBlockSession` |
 | Rep ladder | `gym.ts` → `repPlanFor`, `repShape`, `repProgression`, `progressesOnReps` |
 | Hold ladder | `gym.ts` → `holdFor`, `holdSuggestion`; `gymBlock.ts` → `holdRange` |

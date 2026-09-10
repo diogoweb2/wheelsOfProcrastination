@@ -85,7 +85,6 @@ export function defaultBankState(): BankState {
 
 export function defaultShockState(): BankState['shock'] {
   return {
-    scheduledDay: null,
     crashedDay: null,
     crashAmount: 0,
     decision: null,
@@ -195,7 +194,6 @@ export function applyCrash(bank: BankState, day: string): number {
   a.growth -= loss
   a.returnFactor *= 1 - CRASH_PCT / 100
   const s = bank.shock
-  s.scheduledDay = null
   s.crashedDay = day
   s.crashAmount = loss
   s.decision = null

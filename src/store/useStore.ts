@@ -2495,8 +2495,8 @@ export const useStore = create<StoreState>((set, get) => {
       const kid = get().kidData
       if (!kid) return false
       const s = kid.bank.shock
-      // unlocked only after the scripted first crash; never stack crashes on a pending decision or an armed recovery
-      if (s.crashCount < 1 || s.crashedDay || s.recoverDay || !crashWorthwhile(kid.bank)) return false
+      // never stack crashes on a pending decision or an armed recovery
+      if (s.crashedDay || s.recoverDay || !crashWorthwhile(kid.bank)) return false
       commitFor(KID_ID, (d) => {
         applyCrash(d.bank, dayKey())
       })
