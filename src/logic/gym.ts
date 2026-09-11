@@ -26,6 +26,10 @@ import type {
   SessionExercise,
 } from '../types'
 import { dayKey, parseDay } from './dates'
+// The effort model (§18t) is a leaf module — it reads nothing back from here,
+// which is what lets the planner, the Body map and the Stats split all score
+// recovery off the same numbers.
+import { doseFactor, effortMix, effortRows, loggedReps } from './gymEffort'
 import starters from './gymStarters.json'
 
 // --- constants --------------------------------------------------------------
@@ -463,11 +467,7 @@ export function setSeconds(kind: ExerciseKind, reps: number): number {
  * (plank, run) is measured by the app across the whole set — left and right
  * together — so its logged number already covers both sides.
  */
-export function loggedReps(se: Pick<SessionExercise, 'kind' | 'perSide' | 'sets'>): number {
-  const raw = se.sets.reduce((n, x) => n + x.reps, 0)
-  const clocked = se.kind === 'timed' || se.kind === 'cardio'
-  return se.perSide && !clocked ? raw * 2 : raw
-}
+export { loggedReps } from './gymEffort'
 
 /**
  * What ONE SIDE of a clocked set was worth. A per-side hold is logged as the
@@ -740,31 +740,49 @@ export function sessionSeconds(s: GymSession): number {
 
 // --- recovery ---------------------------------------------------------------
 
-/** Hours since each body part was last trained, from the session log. `Infinity` = never / long ago. */
-export function partFatigue(sessions: GymSession[], now = Date.now()): Record<string, number> {
+/**
+ * How fatigued each body part is RIGHT NOW: 0 = fully recovered, 1 = worked
+ * minutes ago. Not hours any more — hours alone said a push-up and a plank cost
+ * the core the same day off, which was never true (§18t).
+ *
+ * Each session hands every part a DOSE in effort units, and the recovery window
+ * for that hit is the part's full window scaled by how big the dose was. Three
+ * hard sets of side plank buy the core its whole 24 hours; the 0.15 share a set
+ * of push-ups drops on it buys a couple. A part is as fatigued as its worst
+ * outstanding hit.
+ */
+export function partFatigue(sessions: GymSession[], now = Date.now(), live?: GymSession | null): Record<string, number> {
+  // Doses land per SESSION, not per exercise: two movements that each brush the
+  // core in the same workout add up to one real dose rather than two light ones.
+  const perSession = new Map<number, Partial<Record<BodyPart, number>>>()
+  for (const r of effortRows(sessions, { live, now })) {
+    const bucket = perSession.get(r.at) ?? {}
+    for (const [part, units] of Object.entries(r.mix)) bucket[part as BodyPart] = (bucket[part as BodyPart] ?? 0) + units
+    perSession.set(r.at, bucket)
+  }
+
   const out: Record<string, number> = {}
-  for (const s of sessions) {
-    const at = s.finishedAt ? Date.parse(s.finishedAt) : parseDay(s.day).getTime()
-    if (!Number.isFinite(at)) continue
-    const hours = (now - at) / 3_600_000
-    for (const e of s.exercises) {
-      if (e.skipped || e.sets.length === 0) continue
-      for (const p of e.parts) out[p] = Math.min(out[p] ?? Infinity, hours)
+  for (const [at, bucket] of perSession) {
+    const hours = Math.max(0, (now - at) / 3_600_000)
+    for (const [part, dose] of Object.entries(bucket)) {
+      const need = (RECOVERY_HOURS[part as BodyPart] ?? 40) * doseFactor(dose)
+      if (need <= 0) continue
+      out[part] = Math.max(out[part] ?? 0, clamp(1 - hours / need, 0, 1))
     }
   }
   return out
 }
 
-/** 0 = fully recovered, 1 = trained minutes ago. */
-function fatigueFactor(parts: BodyPart[], fatigue: Record<string, number>): number {
-  let worst = 0
-  for (const p of parts) {
-    const hours = fatigue[p]
-    if (hours == null || !Number.isFinite(hours)) continue
-    const need = RECOVERY_HOURS[p] ?? 40
-    worst = Math.max(worst, clamp(1 - hours / need, 0, 1))
-  }
-  return worst
+/**
+ * How tired the muscles THIS exercise would actually use are — weighted by how
+ * much of it each one does. A fried core should barely discourage a push-up
+ * (15 % core) and should rule out a side plank (100 %), and only the mix knows
+ * the difference.
+ */
+function fatigueFactor(e: Pick<ExerciseDef, 'id' | 'parts'>, fatigue: Record<string, number>): number {
+  let score = 0
+  for (const [part, share] of Object.entries(effortMix(e))) score += (fatigue[part] ?? 0) * share
+  return clamp(score, 0, 1)
 }
 
 // --- the planner ------------------------------------------------------------
@@ -863,7 +881,7 @@ interface Scored {
 function scoreCandidates(input: PlanInput, day: string, partsUsed: BodyPart[]): Scored[] {
   const { gym, mood } = input
   const pool = usableExercises(input.catalog, gym.brief, gym.ex, input.gearMode)
-  const fatigue = partFatigue(gym.sessions)
+  const fatigue = partFatigue(gym.sessions, Date.now(), gym.active)
   // a "do more" block never repeats what you just did — the memory's lastDay
   // covers it once the session is filed, this covers it even if it isn't
   const excluded = new Set([...(input.exclude ?? []), ...(input.followUp?.exercises ?? []).map((e) => e.exId)])
@@ -883,7 +901,7 @@ function scoreCandidates(input: PlanInput, day: string, partsUsed: BodyPart[]): 
       score += Math.min(daysSince(mem?.lastDay, day), 21) * 3
 
       // recovery: a part trained a few hours ago is heavily discouraged
-      score -= fatigueFactor(e.parts, fatigue) * 140
+      score -= fatigueFactor(e, fatigue) * 140
 
       // balance within THIS session
       const overlap = e.parts.filter((p) => partsUsed.includes(p)).length

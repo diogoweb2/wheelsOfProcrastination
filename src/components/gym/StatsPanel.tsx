@@ -97,9 +97,20 @@ export function StatsPanel() {
           <span className="muted" style={{ fontSize: 11 }}>last 28 days</span>
         </div>
         <SplitBars
-          items={split.map((s) => ({ label: PART_LABEL[s.part], emoji: PART_EMOJI[s.part], value: s.sets, pct: s.pct }))}
-          unit="sets"
+          items={split.map((s) => ({
+            label: PART_LABEL[s.part],
+            emoji: PART_EMOJI[s.part],
+            value: s.effort,
+            pct: s.pct,
+            caption: `${s.sets} set${s.sets === 1 ? '' : 's'} touched it`,
+          }))}
+          unit="effort"
         />
+        <p className="muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
+          Ranked by <strong>effort</strong>, not by sets. Every exercise splits its work across the muscles by how much
+          each one actually does — a push-up gives your core 15 % of the set and a side plank gives it all of it — and a
+          set above your usual weight counts for more than one at it.
+        </p>
       </div>
 
       {trained.length > 0 && (

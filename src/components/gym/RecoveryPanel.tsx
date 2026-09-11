@@ -8,6 +8,7 @@ import { useStore } from '../../store/useStore'
 import type { BodyPart } from '../../types'
 import { PART_EMOJI, PART_LABEL } from '../../logic/gym'
 import { TONE_COLOR, TONE_LABEL, partRecovery, readyIn, toneFor, type Tone } from '../../logic/gymBody'
+import { FULL_DOSE } from '../../logic/gymEffort'
 import { BodyMap, OFF_BODY } from './BodyMap'
 import { sfx } from '../../audio'
 
@@ -27,7 +28,7 @@ export function RecoveryPanel() {
 
   const recovery = useMemo(() => partRecovery(gym, now), [gym, now])
   const onBody = recovery.filter((r) => !OFF_BODY.includes(r.part))
-  const effort = recovery.filter((r) => OFF_BODY.includes(r.part))
+  const offBody = recovery.filter((r) => OFF_BODY.includes(r.part))
   const sore = onBody.filter((r) => r.pct < 1)
   const pick = selected ? recovery.find((r) => r.part === selected) : null
 
@@ -50,9 +51,10 @@ export function RecoveryPanel() {
           </p>
         )}
         <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-          Measured in hours since you last worked it, against what that muscle wants. It is the same number the planner
-          scores on, so the map and your next session can never disagree. Volume isn't counted: one set and ten count the
-          same here.
+          Hours since you worked it, against what that muscle wants <em>after the work it actually got</em>. Every
+          exercise splits its effort across the muscles by how much each one really does, so the core takes a full day
+          off after side planks and a couple of hours after push-ups. It is the same number the planner scores on, so
+          the map and your next session can never disagree.
         </p>
       </div>
 
@@ -89,8 +91,15 @@ export function RecoveryPanel() {
               ? `Never trained — fully rested, and the planner would love to give it to you.`
               : pick.pct >= 1
                 ? `Last worked ${readyIn(pick.since)} ago. Fully recovered.`
-                : `Last worked ${readyIn(pick.since)} ago. It wants ${pick.need}h, so it is yours again in ${readyIn(pick.left)}.`}
+                : `Last worked ${readyIn(pick.since)} ago. It wants ${Math.round(pick.need)}h after that much work, so it is yours again in ${readyIn(pick.left)}.`}
           </p>
+          {pick.dose > 0 && (
+            <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+              That session dropped <strong>{pick.dose.toFixed(1)}</strong> effort units here — {pick.dose >= FULL_DOSE
+                ? `a full dose, so it gets the whole ${pick.fullNeed}h window.`
+                : `a ${Math.round((pick.need / pick.fullNeed) * 100)}% dose, so it needs a fraction of the full ${pick.fullNeed}h.`}
+            </p>
+          )}
         </div>
       )}
 
@@ -107,7 +116,7 @@ export function RecoveryPanel() {
           Full-body, power and cardio work everything a bit. They have no place on the drawing, but the planner still
           rests them.
         </p>
-        {effort.map((r) => (
+        {offBody.map((r) => (
           <PartRow key={r.part} r={r} onPick={() => {}} selected={false} />
         ))}
       </div>

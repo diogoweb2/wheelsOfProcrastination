@@ -9,6 +9,14 @@
 import type { BodyPart, GymSession, GymState } from '../types'
 import { addDays, dayKey, parseDay } from './dates'
 import { ALL_PARTS, daysSince, isLoaded, loggedReps } from './gym'
+import { effortMix, effortRows } from './gymEffort'
+
+/**
+ * The smallest share of an exercise's effort that counts as "this trains that".
+ * Below it the muscle is along for the ride, and listing the movement under it
+ * is how the old parts-list filter told you push-ups were core training.
+ */
+const FILTER_SHARE = 0.1
 
 /** One completed exercise flattened out of the log — the row every aggregate is built from. */
 export interface StatRow {
@@ -35,7 +43,11 @@ export function flatten(sessions: GymSession[], part: BodyPart | 'all' = 'all'):
   for (const s of sessions) {
     for (const e of s.exercises) {
       if (e.skipped || e.sets.length === 0) continue
-      if (part !== 'all' && !e.parts.includes(part)) continue
+      // "show me chest work" means work that actually LANDS on the chest, so the
+      // filter reads the effort mix (§18t) rather than the parts list: a pull-up
+      // is forearm work even though the catalog files it under back and arms,
+      // and a push-up is not core work just because the core is listed.
+      if (part !== 'all' && (effortMix(e)[part] ?? 0) < FILTER_SHARE) continue
       const reps = loggedReps(e)
       const topWeight = Math.max(0, ...e.sets.map((x) => x.weight ?? 0))
       const topReps = Math.max(...e.sets.map((x) => x.reps))
@@ -99,36 +111,64 @@ function shortDate(day: string): string {
 
 export interface PartSlice {
   part: BodyPart
+  /** Effort units (§18t) — what the bar is drawn from and what the list is sorted by. */
+  effort: number
+  /** Sets that touched this part at all. Kept as context; it is NOT the ranking. */
   sets: number
   reps: number
   pct: number
 }
 
-/** How the work has been spread across the body over the last `days`. Sorted heaviest first. */
+/**
+ * Where the work went over the last `days` — ranked by EFFORT, not by sets.
+ *
+ * Sets were the old ranking and they were wrong (§18t): a set of push-ups
+ * counted for the core exactly as hard as a set of planks, so a month of
+ * pressing came out looking like core training. Every set is now split by the
+ * exercise's effort mix, so the core gets the 0.15 of a push-up it actually
+ * does and the 1.0 of a side plank it actually does.
+ */
 export function partSplit(sessions: GymSession[], days = 28, today = dayKey()): PartSlice[] {
   const cutoff = addDays(today, -days)
-  const tally = new Map<BodyPart, { sets: number; reps: number }>()
-  for (const s of sessions) {
-    if (s.day < cutoff) continue
+  const recent = sessions.filter((s) => s.day >= cutoff)
+  const tally = new Map<BodyPart, { effort: number; sets: number; reps: number }>()
+
+  for (const r of effortRows(recent)) {
+    for (const [part, units] of Object.entries(r.mix)) {
+      const p = part as BodyPart
+      const cur = tally.get(p) ?? { effort: 0, sets: 0, reps: 0 }
+      cur.effort += units
+      tally.set(p, cur)
+    }
+  }
+  // sets and reps stay whole-exercise counts — "this many sets touched your
+  // core" is a true and useful sentence, it just isn't the ranking any more
+  for (const s of recent) {
     for (const e of s.exercises) {
       if (e.skipped || e.sets.length === 0) continue
       const reps = loggedReps(e)
-      // a set counts once for the primary part; the rest get credit at half
-      e.parts.forEach((p, i) => {
-        const cur = tally.get(p) ?? { sets: 0, reps: 0 }
-        cur.sets += i === 0 ? e.sets.length : e.sets.length / 2
-        cur.reps += i === 0 ? reps : reps / 2
-        tally.set(p, cur)
-      })
+      for (const part of Object.keys(effortMix(e)) as BodyPart[]) {
+        const cur = tally.get(part)
+        if (!cur) continue
+        cur.sets += e.sets.length
+        cur.reps += reps
+      }
     }
   }
-  const total = [...tally.values()].reduce((n, v) => n + v.sets, 0) || 1
-  return ALL_PARTS.filter((p) => tally.has(p))
+
+  const total = [...tally.values()].reduce((n, v) => n + v.effort, 0) || 1
+  return ALL_PARTS.filter((p) => (tally.get(p)?.effort ?? 0) > 0)
     .map((p) => {
       const v = tally.get(p)!
-      return { part: p, sets: Math.round(v.sets), reps: Math.round(v.reps), pct: (v.sets / total) * 100 }
+      return {
+        part: p,
+        effort: Math.round(v.effort * 10) / 10,
+        sets: Math.round(v.sets),
+        reps: Math.round(v.reps),
+        pct: (v.effort / total) * 100,
+      }
     })
-    .sort((a, b) => b.sets - a.sets)
+    .sort((a, b) => b.effort - a.effort)
 }
 
 export interface ProgressPoint {

@@ -177,7 +177,7 @@ export function SplitBars({ items, unit }: { items: SplitItem[]; unit: string })
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 800, marginBottom: 3 }}>
             <span>{it.emoji} {it.label}</span>
             <span className="muted">
-              {fmt(it.value)} {unit} · {Math.round(it.pct)}%
+              {it.caption ? `${it.caption} · ` : ''}{fmt(it.value)} {unit} · {Math.round(it.pct)}%
             </span>
           </div>
           <div style={{ height: 10, background: 'var(--bg2)', borderRadius: 999, overflow: 'hidden' }}>

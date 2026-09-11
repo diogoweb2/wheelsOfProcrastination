@@ -18,6 +18,8 @@
 //   --json        machine-readable findings on stdout, nothing else
 //   --quiet       errors only, skip the warnings and the summary tables
 //   --strict      treat warnings as failures too (exit 1)
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously } from 'firebase/auth'
@@ -168,6 +170,26 @@ export async function catalogRef() {
  * The whole audit, as a function. Returns every finding plus the rows that came
  * through clean, so `gym:seed` can validate a file before it writes it.
  */
+/**
+ * Every live exercise should have a hand-written effort mix (§18t). One without
+ * falls back to guessing from the order of `parts`, which is the very thing the
+ * mix exists to replace — so it is a warning with the fix attached, not silence.
+ */
+function checkEffortMixes(exercises) {
+  let src
+  try {
+    src = readFileSync(resolve('src/logic/gymEffort.ts'), 'utf8')
+  } catch {
+    return // running somewhere without the source tree: not this script's problem
+  }
+  const body = src.slice(src.indexOf('const MIX'), src.indexOf('const POSITIONAL'))
+  const written = new Set([...body.matchAll(/^ {2}'([^']+)':/gm)].map((m) => m[1]))
+  const missing = exercises.filter((e) => e?.id && !e.retired && !written.has(e.id))
+  for (const e of missing) {
+    warn('exercise.effortMix', e.name ?? e.id, 'no effort mix — run `npm run gym:effort` (it is guessing from the order of parts until you do)')
+  }
+}
+
 export function auditCatalog(data) {
   findings = []
   const equipment = Array.isArray(data.equipment) ? data.equipment : []
@@ -195,6 +217,8 @@ export function auditCatalog(data) {
     }
     checkExercise(e, i, ownedIds, retiredEquip, allIds)
   }
+
+  checkEffortMixes(exercises)
 
   const badIds = new Set(findings.filter((f) => f.level === 'error').map((f) => f.subject))
   const clean = exercises.filter((e) => e?.id && !e.retired && !badIds.has(e.name) && !badIds.has(e.id))

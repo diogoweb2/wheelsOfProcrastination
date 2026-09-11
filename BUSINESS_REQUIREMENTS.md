@@ -969,11 +969,53 @@ The drawing is **SVG, drawn in the app** (`src/components/gym/BodyMap.tsx`), not
 | 🟡 yellow | 75–99 % | Nearly there |
 | 🟢 green | 100 % | Ready to train |
 
-**The model is hours-based, and the page says so out loud.** Hours since a part was last worked, against `RECOVERY_HOURS` for that part (chest/back/legs/glutes 48, shoulders/arms/full-body/power 40, forearms/core 24, cardio 12). **Volume is not counted** — one set of curls and ten are the same hit. It is exactly what the planner scores on, so the map and your next session can never disagree; a different, better model would have to change both.
+**The model is hours AND dose, and the page says so out loud.** Hours since a part was last worked, against `RECOVERY_HOURS` for that part (chest/back/legs/glutes 48, shoulders/arms/full-body/power 40, forearms/core 24, cardio 12) — **scaled by how much work that part actually got** (§18t). It was hours alone until 2026-09-10, which meant one set of curls and ten were the same hit and a push-up put the core in the red for a day; the dose is what fixed that. It is exactly what the planner scores on, so the map and your next session can never disagree; a different, better model would have to change both, and when this one changed, both changed.
 
 **A session still in progress counts from right now**, not from when you press Finish — the map goes red while you are still on the bench. A part never trained comes back fully rested and green, which is also how new gear talks the planner into using it.
 
 Under the figures: a legend, a tap-any-muscle detail card ("last worked 14h ago, wants 48h, yours again in 34h"), and every area as a bar sorted worst-first. **Full body, power and cardio have no place on a drawing** — they are efforts, not muscles — so they are listed separately underneath. The page re-renders every minute, so leaving it open really does show the bars moving.
+
+### 18t. Effort — how much of a set actually landed on each muscle
+
+**`ExerciseDef.parts` says WHICH muscles a movement uses. It has never said HOW MUCH, and the app read it as if it did.** A push-up was `chest · arms · core`, the first part scored at full and the rest at half, so thirty push-ups made the core look as trained as thirty planks. The Body map went red on a muscle that had barely been asked for anything, "where the work went" answered *core* when the honest answer was *chest*, and the planner steered away from exercises it had no reason to avoid. Fixed 2026-09-10.
+
+**Every exercise now carries a MIX**: a share of its work per body part, summing to 1, written by hand in `src/logic/gymEffort.ts`.
+
+| | Mix |
+|---|---|
+| Plank | `core 0.88 · shoulders 0.12` |
+| Push-up | `chest 0.55 · arms 0.30 · core 0.15` |
+| Side plank | `core 1.00` |
+| Pull-up | `back 0.60 · arms 0.28 · forearms 0.12` |
+
+Same three parts on the push-up as before; **a fifth of the core credit**. A mix may also name a part the catalog's `parts` list doesn't — a pull-up is graded on the forearms it quietly destroys — because `parts` is about what the movement is *for* and the mix is about where the work *goes*. They are different questions and the app now stores both.
+
+**Effort units.** One exercise in one session is worth `sets × repCost × intensity × overload`, which comes out to roughly "hard working sets": three normal sets of ten is about 3. `repCost` is deliberately flat (`√(reps/10)`, clamped to 0.65–1.5) — a set of twenty is more work than a set of five and nowhere near four times more, and treating it linearly is how a rep-ladder session drowns out a heavy one. Holds and cardio convert to rep-equivalents at the same rate the session grade uses (6 s ≈ a rep, a cardio minute ≈ 8). Those units are then split by the mix.
+
+**Overload — lifting more than your own normal counts for more.** Your normal is **the heaviest top set of your last three sessions** on that exercise. Go above it and the effort is scaled by how far above, capped at **×1.5**. Do it again and that weight *is* the normal, so the bonus is gone:
+
+| Session | Top set | Your normal | Effort |
+|---|---|---|---|
+| 1 | 30 lb | — (first time) | ×1.00 |
+| 2 | 30 lb | 30 | ×1.00 |
+| 3 | **40 lb** | 30 | **×1.33** |
+| 4 | 40 lb | 40 | ×1.00 |
+
+That is the honest reading: the second time at 40 lb is not the achievement the first time was. **Bodyweight work gets the same treatment on reps** rather than pounds — there are no dumbbells to add, so the rep ladder (§18d) is the axis, and the top set is the number compared. A first-ever attempt is never an overload; it is a baseline.
+
+**Recovery is time AND dose, not time alone.** Each session hands every part a dose in effort units, and the recovery window for that hit is the part's full `RECOVERY_HOURS` window **scaled by how big the dose was** (`dose / 3`, floored at 0.3 — a brush is a touch, not nothing). Doses land per *session*, not per exercise, so a split squat and a side plank in the same workout add up to one real dose on the core rather than two light ones. A part is as tired as its **worst outstanding hit**, so a heavy session three days ago and a brush this morning are both weighed and whichever is really holding you back is the one that shows.
+
+| Core, after… | Dose | Window |
+|---|---|---|
+| 3 sets of push-ups | 0.55 | ~7 h |
+| 3 sets of plank | 2.85 | ~23 h |
+| a whole core session | 5.0 | the full 24 h |
+
+**One model, three consumers.** The Body map (§18q), the planner's candidate scoring and the Stats split all read the same `effortRows`, so they cannot disagree — which was already the rule for the hours-based model and is still the rule. The planner also weights fatigue **by the mix of the exercise it is considering**: a fried core barely discourages a push-up (15 % core) and rules out a side plank (100 %).
+
+**"Where the work went" is ranked by effort, not sets** (`partSplit`), and the set count survives as a caption — *"12 sets touched it"* is a true and useful sentence, it just isn't the ranking. The Stats body-part filter reads the mix too, with a **0.1 floor**: a movement is "chest work" when at least a tenth of it lands there.
+
+**A new exercise gets its mix from Claude — `npm run gym:effort`.** Exercises get added from Claude Code or the Gear tab, and one without a written mix falls back to a positional guess (`0.55 / 0.25 / 0.12 / …` down the `parts` list) — the exact thing this replaces. So the script reads the live catalog, finds every id the map has never heard of, asks the claude CLI for a ratio, **validates it** (real part names, at most five, each share in 0–1, and the total within 0.02 of 1 — a mix that doesn't add up is rejected rather than quietly normalised, because a model that returns 0.8 has not answered the question) and writes the accepted entries into `src/logic/gymEffort.ts`. The result is a code change you review and commit: ratios are part of the app, not per-profile data. `--dry-run`, `--all` (re-ask for everything) and `--only=id,id` are there. **Nothing is ever deleted** — an id that has left the catalog keeps its ratio so old sessions in the log still score correctly. `npm run gym:audit` warns about any live exercise still missing one.
 
 ### 18s. 🏓 Why you are doing this — the pickleball card on the rest screen
 
