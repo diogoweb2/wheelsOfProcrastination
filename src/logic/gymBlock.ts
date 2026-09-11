@@ -540,3 +540,80 @@ export function slotLine(slot: BlockExercise, catalog: GymCatalog | null, gym?: 
   }
   return `${slot.sets} × ${range}${side}`
 }
+
+// --- "what will this actually change?" ---------------------------------------
+// The length and mood buttons on the Train card rewrite today's work before you
+// have seen it. Rather than describe the rules in prose that can drift from the
+// code, the modal BUILDS the session both ways and compares the two — so what
+// it promises is, by construction, what `planBlockSession` will hand you.
+
+export interface PlanChange {
+  exId: string
+  emoji: string
+  name: string
+  kind: 'dropped' | 'added' | 'changed'
+  /** The ask as it stands now, and as it would be. Absent on a drop/add. */
+  from?: string
+  to?: string
+  /** Plain words for what moved — "one more set", "shorter rest". */
+  note: string
+}
+
+export interface PlanDiff {
+  changes: PlanChange[]
+  /** Estimated minutes, before → after. */
+  fromMin: number
+  toMin: number
+}
+
+/** "3 × 8", "5 · 5 · 4", "2 × 30s" — the ask, as the card will read it. */
+function askLine(e: SessionExercise): string {
+  const unit = e.kind === 'timed' ? 's' : ''
+  const reps = e.plan.reps
+  const body = new Set(reps).size === 1 ? `${reps.length} × ${reps[0]}${unit}` : reps.map((r) => `${r}${unit}`).join(' · ')
+  return e.perSide ? `${body} /side` : body
+}
+
+function setsNote(delta: number): string {
+  if (delta > 0) return delta === 1 ? 'one more set' : `${delta} more sets`
+  if (delta < 0) return delta === -1 ? 'one set fewer' : `${-delta} sets fewer`
+  return 'a different ask'
+}
+
+/**
+ * Compare two builds of the same block session. Order follows the session, so
+ * the list reads top-to-bottom the way the workout does.
+ */
+export function diffBlockPlans(before: GymSession, after: GymSession): PlanDiff {
+  const changes: PlanChange[] = []
+  const then = new Map(after.exercises.map((e) => [e.exId, e]))
+
+  for (const b of before.exercises) {
+    const a = then.get(b.exId)
+    const head = { exId: b.exId, emoji: b.emoji, name: b.name }
+    if (!a) {
+      changes.push({ ...head, kind: 'dropped', from: askLine(b), note: 'comes off the end' })
+      continue
+    }
+    const from = askLine(b)
+    const to = askLine(a)
+    if (from !== to) {
+      changes.push({ ...head, kind: 'changed', from, to, note: setsNote(a.plan.reps.length - b.plan.reps.length) })
+    } else if (a.plan.restSec !== b.plan.restSec) {
+      changes.push({
+        ...head,
+        kind: 'changed',
+        from: `rest ${b.plan.restSec}s`,
+        to: `rest ${a.plan.restSec}s`,
+        note: a.plan.restSec > b.plan.restSec ? 'longer rest' : 'shorter rest',
+      })
+    }
+  }
+
+  const had = new Set(before.exercises.map((e) => e.exId))
+  for (const a of after.exercises) {
+    if (!had.has(a.exId)) changes.push({ exId: a.exId, emoji: a.emoji, name: a.name, kind: 'added', to: askLine(a), note: 'back on — there is time for it' })
+  }
+
+  return { changes, fromMin: before.minutes, toMin: after.minutes }
+}

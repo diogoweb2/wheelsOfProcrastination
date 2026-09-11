@@ -54,6 +54,7 @@ import {
   blockSessionsDone,
   blockWeeks,
   nextBlockSession,
+  planBlockSession,
   sessionAfter,
   slotLine,
 } from '../../logic/gymBlock'
@@ -65,6 +66,7 @@ import { SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
+import { PlanChangeModal } from './PlanChangeModal'
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
   { id: 'lazy', label: 'Lazy', emoji: '🥱' },
@@ -251,6 +253,31 @@ function Setup() {
 }
 
 /**
+ * A length or mood button you have tapped but not yet agreed to: the session as
+ * it stands, the session as that button would leave it, and the words for when
+ * the two come out identical. See `PlanChangeModal`.
+ */
+interface PendingChange {
+  mood: Mood
+  length: SessionLength
+  label: string
+  emptyNote: string
+  before: GymSession
+  after: GymSession
+}
+
+/** Why a length button sometimes moves nothing — always a real reason, never a shrug. */
+const LENGTH_NO_CHANGE: Record<SessionLength, string> = {
+  20: 'This session already fits inside 20 minutes. Nothing has to come off — the tail you would cut isn’t there.',
+  30: 'Today’s session comes out the same as written either way.',
+  40: 'Nothing here can take the extra set: the first two movements are ⚡ quality slots, and those stop when the speed goes, not when the count says so. Take the longer rests instead — that part is yours.',
+}
+
+/** Mood is a diary entry on a block session, not an input. Say so plainly. */
+const MOOD_NO_CHANGE =
+  'Your block decides the work, not how you feel — that is the whole reason it is a block. The mood is still filed with the session, so a 🥱 day and a 🔥 day can be told apart later. If you need less today, that is the 20 min button.'
+
+/**
  * The whole point of the Train tab now: ONE question, already answered.
  *
  * No minutes picker, no mood dial deciding what you get — the session is the
@@ -265,10 +292,29 @@ function NextSessionCard() {
   const [picking, setPicking] = useState(false)
   const [mood, setMood] = useState<Mood>('normal')
   const [length, setLength] = useState<SessionLength>(30)
+  // A length or mood tap is held here until you have seen what it does.
+  const [pending, setPending] = useState<PendingChange | null>(null)
   const byId = useMemo(() => new Map(allExercises(gymCatalog).map((e) => [e.id, e])), [gymCatalog])
   if (!block) return null
 
   const pos = blockPosOf(gym)
+
+  /**
+   * Build today's session as it stands and as the tapped setting would make it,
+   * and put the two in front of you. Nothing is applied until you say so — and
+   * if the session can't be built at all, the setting just changes, silently:
+   * a modal with nothing in it is worse than no modal.
+   */
+  const propose = (next: { mood: Mood; length: SessionLength }, label: string, emptyNote: string) => {
+    const before = planBlockSession({ catalog: gymCatalog, gym, mood, length, pos })
+    const after = planBlockSession({ catalog: gymCatalog, gym, mood: next.mood, length: next.length, pos })
+    if (!before || !after) {
+      setMood(next.mood)
+      setLength(next.length)
+      return
+    }
+    setPending({ ...next, label, emptyNote, before, after })
+  }
   const session = nextBlockSession(gym)
   const then = sessionAfter(block, pos)
   const weeks = blockWeeks(block)
@@ -320,7 +366,8 @@ function NextSessionCard() {
                 className={length === m ? 'on' : ''}
                 onClick={() => {
                   sfx.click()
-                  setLength(m)
+                  if (m === length) return
+                  propose({ mood, length: m }, `⏱ ${m} min`, LENGTH_NO_CHANGE[m])
                 }}
               >
                 {m} min
@@ -355,7 +402,8 @@ function NextSessionCard() {
               className={mood === m.id ? 'on' : ''}
               onClick={() => {
                 sfx.click()
-                setMood(m.id)
+                if (m.id === mood) return
+                propose({ mood: m.id, length }, `${m.emoji} ${m.label}`, MOOD_NO_CHANGE)
               }}
             >
               {m.emoji} {m.label}
@@ -399,6 +447,21 @@ function NextSessionCard() {
           </div>
         )}
       </div>
+
+      {pending && (
+        <PlanChangeModal
+          label={pending.label}
+          before={pending.before}
+          after={pending.after}
+          emptyNote={pending.emptyNote}
+          onConfirm={() => {
+            setMood(pending.mood)
+            setLength(pending.length)
+            setPending(null)
+          }}
+          onCancel={() => setPending(null)}
+        />
+      )}
     </>
   )
 }

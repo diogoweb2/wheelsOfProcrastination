@@ -2751,6 +2751,20 @@ input, select { font-family: inherit; }
 }
 .gym-block-list li:last-child { border-bottom: none; }
 .gym-block-list li .muted { flex: none; font-size: 12px; font-weight: 800; }
+/* "what 40 min does to today" — one row per thing that moves, in session order */
+.gym-diff { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.gym-diff li {
+  padding: 8px 0; border-bottom: 1px solid var(--line);
+}
+.gym-diff li:last-child { border-bottom: none; }
+.gym-diff-name { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.gym-diff-move { font-size: 12px; font-weight: 800; margin-top: 3px; padding-left: 26px; }
+.gym-diff-move s { color: var(--muted); text-decoration-thickness: 1px; }
+.gym-diff-move b { color: var(--gold); }
+.gym-diff-dropped .gym-diff-name { opacity: 0.6; }
+.gym-diff-dropped .gym-diff-name b { text-decoration: line-through; }
+.gym-diff-added .gym-diff-name b { color: var(--gold); }
+
 .gym-block-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .gym-block-pick .btn.on { border-color: var(--gold); color: var(--gold); }
 /* the "this block has run its course" banner — orange, never red: nothing is broken */
