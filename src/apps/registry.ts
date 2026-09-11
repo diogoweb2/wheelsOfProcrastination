@@ -326,6 +326,7 @@ export const APPS: AppDef[] = [
     tabs: [
       { id: 'train', label: 'Train', icon: '💪' },
       { id: 'blocks', label: 'Blocks', icon: '🧱' },
+      { id: 'body', label: 'Body', icon: '🩹' },
       { id: 'stats', label: 'Stats', icon: '📊' },
       { id: 'gear', label: 'Gear', icon: '🏋️' },
       { id: 'plan', label: 'Plan', icon: '📋' },

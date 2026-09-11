@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useStore } from '../../store/useStore'
 import type { ExerciseRating, GearMode, GymSession, LoadKind, LoggedSet, Mood, SessionExercise } from '../../types'
+import type { SetRecord } from '../../logic/gym'
 import {
   GEAR_MODES,
   GEAR_MODE_LABEL,
@@ -29,6 +30,7 @@ import {
   SESSION_MINUTES,
   allExercises,
   bandFor,
+  bestsFor,
   isLoaded,
   isRamped,
   loadLabel,
@@ -36,6 +38,7 @@ import {
   mmss,
   plannedWeight,
   progressesOnReps,
+  recordForSet,
   sessionReport,
   sessionSeconds,
   stepLoad,
@@ -55,6 +58,7 @@ import {
   slotLine,
 } from '../../logic/gymBlock'
 import { keepScreenAwake } from '../../logic/wakeLock'
+import confetti from 'canvas-confetti'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
 import { SetupCountdown } from './SetupCountdown'
@@ -493,7 +497,7 @@ function MoveButtons({ onMove, first, last }: { onMove: (dir: -1 | 1) => void; f
 }
 
 function Preview({ session }: { session: GymSession }) {
-  const { gymStart, gymSwap, gymDrop, gymReorder, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, data } = useStore()
+  const { gymStart, gymSwap, gymDrop, gymReorder, gymReplace, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, data } = useStore()
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -553,7 +557,7 @@ function Preview({ session }: { session: GymSession }) {
             {/* On a block session the exercise list is the programme — swapping
                 one out for "something similar" is exactly what the block exists
                 to stop. Short on time? Drop it; the slot just closes. */}
-            {session.blockId ? (
+            {session.blockId && (
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <MoveButtons
                   onMove={(dir) => gymReorder(e.exId, dir)}
@@ -571,7 +575,23 @@ function Preview({ session }: { session: GymSession }) {
                   ✕ Skip this one today
                 </button>
               </div>
-            ) : (
+            )}
+            {session.blockId && (
+              <button
+                className="btn btn--ghost btn--small"
+                style={{ marginTop: 8, width: '100%' }}
+                // The slot keeps its sets; only the movement changes. A rack in
+                // use, a shoulder that doesn't like today's angle — the block's
+                // work still gets done, by something that does the same job.
+                onClick={() => {
+                  sfx.click()
+                  if (gymReplace(e.exId) === 'none') sfx.error()
+                }}
+              >
+                🔄 Swap for something similar
+              </button>
+            )}
+            {!session.blockId && (
               <>
                 <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                   <button
@@ -696,6 +716,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    */
   const [sideSec, setSideSec] = useState<number[]>([])
   const [finishing, setFinishing] = useState(false)
+  /** The record the set you just logged beat, if it beat one. Cleared on a tap or on its own. */
+  const [pr, setPr] = useState<(SetRecord & { exName: string }) | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
 
@@ -742,6 +764,15 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
   if (finishing) return <FinishCard session={session} onBanked={onBanked} onBack={() => setFinishing(false)} />
   if (!current) return null
+
+  // What the NEXT set of this exercise wants on the bar, against what you just
+  // put on it. A ramp climbs on purpose (§18e), so this is the screen that says
+  // so while you still have time to walk over and change the plates.
+  const lastLoad = current.sets.length ? current.sets[current.sets.length - 1].weight : undefined
+  const loadNote =
+    setsLeft > 0 && isLoaded(current) && armedWeight != null && lastLoad != null ? (
+      <LoadChange from={lastLoad} to={armedWeight} unit={unit} loadKind={current.loadKind} />
+    ) : null
 
   /** Start (or restart) the clock on the set in front of you — side one, if there are sides. */
   const begin = () => {
@@ -794,8 +825,19 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     // minute and the minute is what gets logged
     const logged =
       current.kind === 'timed' ? Math.round(sec) : current.kind === 'cardio' ? Math.max(1, Math.round(sec / 60)) : reps
+    // Did that beat anything? Checked BEFORE the set is logged, against every
+    // set this exercise has ever done — the permanent memory for the all-time
+    // bests, the log for "how many reps at that exact load", and the sets
+    // already done today so your own first set counts as something to beat.
+    const beat = recordForSet(
+      bestsFor(memory, data.gym.sessions, current.exId, current.sets),
+      { reps: logged, weight },
+      current,
+      (n) => loadLabel(n, unit, current.loadKind),
+    )
     gymSfx.logged()
     gymLogSet(current.exId, logged, weight, sec, twoSided ? sides : undefined)
+    if (beat) celebrate(() => setPr({ ...beat, exName: current.name }))
     const moreHere = current.sets.length + 1 < current.plan.reps.length
     if (moreHere || !isLast) setPhase('resting')
     else setFinishing(true)
@@ -854,6 +896,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           nextEmoji={nextUpEx?.emoji}
           nextExId={nextUpEx?.exId}
           nextName={nextUpEx?.name}
+          loadNote={loadNote}
           footNote={<SessionCountdown session={session} />}
           // the words for the thing you are about to walk over to. Only for a
           // NEW exercise — re-reading the brief for the set you have just done
@@ -908,6 +951,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           </div>
 
           {phase === 'setup' && <SetupCountdown onDone={begin} />}
+          {phase === 'setup' && loadNote}
 
           {/* A loaded hold — a farmer's carry, a weighted plank — is clocked AND
               weighted, so the weight is asked for BEFORE the clock starts: once
@@ -1032,6 +1076,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       {/* One action, pinned to the bottom and 78px tall — you are meant to be
           able to hit it with a foot without picking the phone up. The rest
           screen brings its own foot bar, because NEXT lives there. */}
+      {pr && <RecordBanner record={pr} onClose={() => setPr(null)} />}
+
       <div className="gym-foot-gap" />
       {phase !== 'resting' && (
         <div className="gym-foot">
@@ -1060,6 +1106,61 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
         </div>
       )}
     </>
+  )
+}
+
+/**
+ * The load for the next set, against the load you just used. It exists because
+ * a ramp is silent otherwise: you finish set 2 at 18.5, walk back, and only
+ * find out it wanted 25 when the set is already live and your hands are full.
+ * It says "same" out loud too — "did it change?" deserves an answer either way.
+ */
+function LoadChange({ from, to, unit, loadKind }: { from: number; to: number; unit: 'lb' | 'kg'; loadKind?: LoadKind }) {
+  const say = (n: number) => loadLabel(n, unit, loadKind)
+  if (to === from)
+    return <div className="gym-load-change is-same">⚖️ Same load next set — {say(to)}</div>
+  const up = to > from
+  return (
+    <div className={`gym-load-change ${up ? '' : 'is-down'}`}>
+      {up ? '⬆️ HEAVIER NEXT SET' : '⬇️ Lighter next set'} · <em>{say(from)}</em> → {say(to)}
+    </div>
+  )
+}
+
+/** Gold everywhere, a noise, and a medal. A record you don't notice isn't motivation. */
+function celebrate(show: () => void) {
+  show()
+  gymSfx.win()
+  const colors = ['#ffce00', '#ff9600', '#60bff5', '#eaf4ff']
+  void confetti({ particleCount: 90, spread: 75, origin: { y: 0.55 }, colors, scalar: 1.1 })
+  window.setTimeout(() => void confetti({ particleCount: 60, spread: 110, origin: { y: 0.45 }, colors }), 220)
+}
+
+/**
+ * The record itself, said out loud and with the REASON attached (§18p). "Same
+ * load, more work" is the one that needs explaining — the number on the bar
+ * didn't move, so without the sentence it reads as the app being confused.
+ * It clears itself; a tap clears it sooner, because rest is already running.
+ */
+function RecordBanner({ record, onClose }: { record: SetRecord & { exName: string }; onClose: () => void }) {
+  // the timer belongs to THIS record, not to the parent's render — a re-render
+  // underneath must not quietly hand the banner another 3.4 seconds
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const id = window.setTimeout(() => close.current(), 3400)
+    return () => window.clearTimeout(id)
+  }, [record])
+  const medal = record.kind === 'weight' ? '🏋️' : record.kind === 'hold' ? '⏱️' : '🏅'
+  return (
+    <div className="gym-pr" onClick={onClose} role="status">
+      <div className="gym-pr-card">
+        <span className="gym-pr-medal">{medal}</span>
+        <div className="gym-pr-title">{record.title}</div>
+        <div className="gym-pr-sub">{record.why}</div>
+        <div className="gym-pr-ex">{record.exName}</div>
+      </div>
+    </div>
   )
 }
 

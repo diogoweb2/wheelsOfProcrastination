@@ -741,6 +741,13 @@ interface StoreState {
   gymDrop: (exId: string) => 'swapped' | 'dropped'
   /** Move one previewed exercise up (-1) or down (+1) the running order. */
   gymReorder: (exId: string, dir: -1 | 1) => void
+  /**
+   * "Not this movement — give me an equivalent." Picks the closest thing the
+   * offline planner can find (same body area first) and puts it in the slot.
+   * Unlike `gymDrop` it NEVER leaves a hole: with nothing to offer it returns
+   * 'none' and the exercise stays exactly where it was.
+   */
+  gymReplace: (exId: string) => 'swapped' | 'none'
   /** Kill an exercise for good: out of the shared catalog and never planned again. */
   gymDeleteExercise: (exId: string) => void
   /** Throw away the previewed session. */
@@ -3925,6 +3932,53 @@ export const useStore = create<StoreState>((set, get) => {
         if (i < 0 || to < 0 || to >= list.length) return
         ;[list[i], list[to]] = [list[to], list[i]]
       })
+    },
+
+    gymReplace(exId) {
+      const { data, gymCatalog } = get()
+      const active = data.gym.active
+      const target = active?.exercises.find((e) => e.exId === exId)
+      if (!active || !target) return 'none'
+      const keep = active.exercises.filter((e) => e.exId !== exId)
+
+      const replacement = pickReplacement(
+        {
+          catalog: gymCatalog,
+          gym: data.gym,
+          minutes: active.minutes,
+          mood: active.mood,
+          gearMode: active.gearMode,
+          day: active.day,
+          exclude: keep.map((k) => k.exId),
+        },
+        target,
+        keep,
+      )
+      if (!replacement) return 'none'
+
+      // Inside a block the SLOT is the prescription, not the movement (§18m):
+      // a three-set slot stays three sets whoever fills it, so swapping the
+      // exercise can never quietly hand you less work than the block asked for.
+      const fitted =
+        active.blockId && target.plan.reps.length !== replacement.plan.reps.length
+          ? (() => {
+              const n = target.plan.reps.length
+              const at = <T,>(list: T[] | undefined, i: number) => list?.[Math.min(i, list.length - 1)]
+              const reps = Array.from({ length: n }, (_, i) => at(replacement.plan.reps, i) ?? replacement.plan.reps[0])
+              const weights = replacement.plan.weights
+                ? Array.from({ length: n }, (_, i) => at(replacement.plan.weights, i) as number)
+                : undefined
+              return { ...replacement, plan: { ...replacement.plan, reps, weights }, quality: target.quality }
+            })()
+          : replacement
+
+      commit((d) => {
+        if (!d.gym.active) return
+        d.gym.active.exercises = d.gym.active.exercises.map((e) =>
+          e.exId === exId ? { ...fitted, why: `swapped in for ${target.name} — same job, different movement` } : e,
+        )
+      })
+      return 'swapped'
     },
 
     gymDeleteExercise(exId) {

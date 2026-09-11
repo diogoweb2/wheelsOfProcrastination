@@ -138,7 +138,7 @@ export function loadLabel(w: number, unit: 'lb' | 'kg' = 'lb', kind: LoadKind | 
 const MAX_MOVES: Record<number, number> = { 5: 3, 10: 4, 15: 5, 20: 6, 25: 7, 30: 8, 45: 10, 60: 12 }
 
 /** Hours a muscle group wants before it is asked again. Core and cardio bounce back fast. */
-const RECOVERY_HOURS: Record<BodyPart, number> = {
+export const RECOVERY_HOURS: Record<BodyPart, number> = {
   chest: 48,
   back: 48,
   shoulders: 40,
@@ -1385,4 +1385,95 @@ export function bumpStreak(streak: GymState['streak'], day: string): GymState['s
   const gap = daysSince(streak.lastDay, day)
   const current = streak.lastDay && gap === 1 ? streak.current + 1 : 1
   return { current, best: Math.max(streak.best, current), lastDay: day }
+}
+
+// --- live records -----------------------------------------------------------
+//
+// `isPersonalRecord` above grades a WHOLE exercise at the end of a session —
+// it pays the PR bonus. This pair grades ONE SET, the instant it is logged,
+// because that is when it means something: you put the bar down and the app
+// tells you it has never gone that heavy before.
+
+/** The numbers a freshly logged set is measured against. */
+export interface Bests {
+  /** Heaviest load ever moved on this exercise. 0 = never loaded. */
+  weight: number
+  /** Best single set ever — reps, or seconds for a hold. */
+  reps: number
+  /** Best single set AT `weight`. What "same load, more reps" is measured against. */
+  repsAtWeight: number
+}
+
+/**
+ * Everything this exercise has ever done, before the set in front of you.
+ * `earlier` is the sets already logged TODAY — beating your own first set of the
+ * session is a record, beating it twice with the same number is not.
+ *
+ * The permanent memory (`mem`) is the floor: the session log is capped, so an
+ * old best can outlive the workout it was set in. `repsAtWeight` can only come
+ * from the log, which is why it is a best-effort number rather than a promise.
+ */
+export function bestsFor(mem: ExerciseMemory | undefined, history: GymSession[], exId: string, earlier: LoggedSet[]): Bests {
+  const sets: LoggedSet[] = [...earlier]
+  for (const s of history) {
+    for (const e of s.exercises) {
+      if (e.exId !== exId || e.skipped) continue
+      sets.push(...e.sets)
+    }
+  }
+  const weight = Math.max(mem?.bestWeight ?? 0, 0, ...sets.map((s) => s.weight ?? 0))
+  const reps = Math.max(mem?.bestReps ?? 0, 0, ...sets.map((s) => s.reps))
+  const at = sets.filter((s) => (s.weight ?? 0) === weight).map((s) => s.reps)
+  return { weight, reps, repsAtWeight: Math.max(0, ...at) }
+}
+
+/** A record worth an animation, with the reason spelled out. */
+export interface SetRecord {
+  kind: 'weight' | 'reps' | 'hold'
+  title: string
+  /** Why this counts — shown under the title, because an unexplained party is noise. */
+  why: string
+}
+
+/**
+ * Did THIS set beat anything? Three ways, and the third is the one people miss:
+ * the same top weight for more reps is progress, and the app says so out loud.
+ * A first-ever set is never a record — there is nothing to beat yet.
+ */
+export function recordForSet(
+  best: Bests,
+  set: { reps: number; weight?: number },
+  e: Pick<SessionExercise, 'kind' | 'loaded' | 'loadKind'>,
+  /** How to say a load out loud — "25 lb", or "red band" when the load is a colour. */
+  load: (n: number) => string,
+): SetRecord | null {
+  const clocked = e.kind === 'timed' || e.kind === 'cardio'
+  const amount = (n: number) => (e.kind === 'timed' ? `${n}s` : e.kind === 'cardio' ? `${n} min` : `${n} reps`)
+  const w = set.weight ?? 0
+
+  if (isLoaded(e) && w > 0) {
+    if (best.weight > 0 && w > best.weight)
+      return {
+        kind: 'weight',
+        title: e.loadKind === 'band' ? 'TOUGHEST BAND EVER' : 'HEAVIEST EVER',
+        why: `${load(w)} — your old best was ${load(best.weight)}.`,
+      }
+    // The quiet record. The bar didn't move, YOU did: same top load, more work.
+    if (w === best.weight && best.repsAtWeight > 0 && set.reps > best.repsAtWeight)
+      return {
+        kind: clocked ? 'hold' : 'reps',
+        title: 'SAME LOAD, MORE WORK',
+        why: `${amount(set.reps)} at ${load(w)} — you had never done more than ${amount(best.repsAtWeight)} at that load.`,
+      }
+    return null
+  }
+
+  // Nothing to load: the reps (or the seconds) ARE the record.
+  if (best.reps > 0 && set.reps > best.reps)
+    return {
+      kind: clocked ? 'hold' : 'reps',
+      title: clocked ? 'LONGEST EVER' : 'MOST EVER',
+      why: `${amount(set.reps)} — your old best was ${amount(best.reps)}.`,
+    }
+  return null
 }

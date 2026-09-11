@@ -54,6 +54,7 @@ export function RestTimer({
   nextEmoji,
   nextExId,
   nextName,
+  loadNote,
   footNote,
   onNext,
 }: {
@@ -77,6 +78,12 @@ export function RestTimer({
    */
   nextExId?: string
   nextName?: string
+  /**
+   * "The next set is heavier." Rest is when you walk over and change the
+   * plates, so the load change belongs HERE — not on the card that appears
+   * fifteen seconds after you should already have loaded it.
+   */
+  loadNote?: ReactNode
   /** Rides above NEXT in the foot bar — the runner puts the session countdown here. */
   footNote?: ReactNode
   /**
@@ -205,6 +212,8 @@ export function RestTimer({
         </p>
 
         {upNext && <div className="gym-upnext">{upNext}</div>}
+
+        {loadNote}
 
         {/* left-aligned on purpose: the card above is centred numbers, this is
             prose, and centred prose is unreadable at a glance */}

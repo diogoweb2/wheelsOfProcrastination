@@ -539,7 +539,7 @@ One review question, per profile, resurfaced when the app opens — a light dail
 
 An AI personal trainer **designed to make itself redundant**. Everything it decides is written down in a form the app can reproduce on its own, so the AI can be switched off later without losing the training.
 
-Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the training block, §18m), `src/logic/gymStats.ts` (aggregations), `src/logic/gymVideo.ts` (the YouTube link rules, §18n), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, scripts `scripts/gym-equipment.mjs`, `scripts/gym-seed.mjs`, `scripts/gym-demos.mjs`, `scripts/gym-videos.mjs`.
+Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the training block, §18m), `src/logic/gymBody.ts` (recovery, §18q), `src/logic/gymStats.ts` (aggregations), `src/logic/gymVideo.ts` (the YouTube link rules, §18n), `src/logic/wakeLock.ts`, `src/screens/GymScreen.tsx` + `src/components/gym/*`, scripts `scripts/gym-equipment.mjs`, `scripts/gym-seed.mjs`, `scripts/gym-demos.mjs`, `scripts/gym-videos.mjs`.
 
 ### 18a. The two-layer rule (the whole design)
 
@@ -870,7 +870,7 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 
 **What the app still decides: the loading, not the programme.** Every weight on the card comes from the same per-exercise memory as before (§18d), so the block is fixed and the numbers under it are learned. The Train tab therefore has **no minutes picker and no "build" button** — the session is already known, and the estimate (19–29 min for these six) comes out of your own measured set times.
 
-**Swapping is deliberately gone from a block session.** "🔄 Not this one" and "⚡ Offline" — the free planner's substitution buttons — are hidden; a slot you haven't got time for is **✕ Skip this one today**, and it just closes. **↑ / ↓ still reorder it** — running order is not the programme. Substituting something similar is precisely what the block exists to stop. **↔️ Do a different one** picks another session of the rotation instead, and moves the cursor there (the next one is then the one after it).
+**A block slot is the prescription; the movement in it is not.** The free planner's coach-backed **"🔄 Not this one"** stays hidden — a block is not a place to shop for exercises — but every slot has **🔄 Swap for something similar**, the offline planner picking the closest thing in the same body area. **The slot keeps its sets**: a three-set slot is three sets whoever fills it, so a swap can never quietly hand you less work than the block asked for. It refuses rather than empties — with nothing to offer, the exercise stays put and the app buzzes. A slot you haven't got time for at all is still **✕ Skip this one today**, and that one just closes. **↑ / ↓ still reorder it** — running order is not the programme. (This is a deliberate loosening of the original rule: a rack in use or a shoulder that doesn't like today's angle is a real reason, and losing the slot entirely was costing more than substituting ever did.) Substituting something similar is precisely what the block exists to stop. **↔️ Do a different one** picks another session of the rotation instead, and moves the cursor there (the next one is then the one after it).
 
 **Blocks expire on sessions FINISHED, not weeks owned.** `reviewSessions: 24` (four full trips round a six-session rotation), `retireSessions: 42`. This ran on the calendar first and that was wrong: at two sessions a week "eight weeks" is sixteen sessions — barely three rotations, nowhere near enough exposure to have finished progressing on anything — while at five a week it is forty. The calendar measures how long you have owned the programme; the counter measures how much of it you have done, so a fortnight off now costs the block nothing. Both numbers are editable per block on the Blocks tab; weeks are still displayed, as information.
 
@@ -913,6 +913,53 @@ Every exercise can also carry **one short YouTube demonstration**, and the **▶
 
 **Flags:** `--dry-run`, `--refresh`, `--only=<exerciseId>`, `--pin=<exerciseId>:<url>`, `--max=<seconds>`, `--no-ai`, `--verbose` (prints the whole scored shortlist).
 
+
+### 18o. The load changes before you walk over, not after
+
+Rest and the 15 s setup are **when you load the bar**, so that is where the app says what to load. Any time another set of the SAME exercise is coming and it is a loaded movement, a band sits under the rest clock and inside the setup card:
+
+- **⬆️ HEAVIER NEXT SET · ~~18.5 lb~~ → 25 lb** — gold, and unmissable. A ramp (§18e) climbs on purpose and used to do it silently: you found out set 3 wanted more only once the set was already live and your hands were full.
+- **⬇️ Lighter next set** — the same band in blue.
+- **⚖️ Same load next set — 25 lb** — muted, and it is shown anyway. "Did it change?" is a question that deserves an answer even when the answer is no.
+
+The number shown is the one the app will actually arm the stepper with: a ramp's per-set weight, and otherwise **what you really lifted last set**, not what was prescribed. Band exercises say the colour. A *new* exercise gets no band — its load is already in "Up next" and in the brief.
+
+### 18p. Records are celebrated the second they happen
+
+`isPersonalRecord` grades a whole exercise at the end of a session and pays the Berry bonus. **That is too late to be motivating.** So every set is also checked the instant you tap DONE, against every set that exercise has ever done — the permanent memory for the all-time bests, the session log for "how many reps at that exact load", and the sets already done today, so beating your own first set of the session counts.
+
+Three records, and the third is the one other apps miss:
+
+| | When | What it says |
+|---|---|---|
+| **🏋️ HEAVIEST EVER** | a loaded set above your best load | *25 lb — your old best was 18.5 lb.* (bands say **TOUGHEST BAND EVER** and name the colour) |
+| **🏅 MOST EVER / ⏱️ LONGEST EVER** | a bodyweight or unloaded set above your best reps/seconds | *9 reps — your old best was 8 reps.* |
+| **🏅 SAME LOAD, MORE WORK** | the **same** top weight, for **more reps** | *10 reps at 25 lb — you had never done more than 9 at that load.* |
+
+That last one is why the reason is always printed. The bar didn't move, so without the sentence a party looks like a bug — and "same weight, more reps" is exactly what progress looks like on the weeks the dumbbells don't change.
+
+Gold medal, confetti, `gymSfx.win()`, and it **clears itself after 3.4 s** or on a tap: rest is already running underneath it. A first-ever set is never a record — there is nothing to beat yet.
+
+### 18q. The Body tab (`/gym/body`) — what is still recovering
+
+The planner has always scored recovery; this is the same number with a face on it. **Two figures, front and back, with every muscle group tinted by how rested it is.**
+
+The drawing is **SVG, drawn in the app** (`src/components/gym/BodyMap.tsx`), not a photograph. A photo of a body cannot be tinted per muscle, and colouring one muscle differently from the next is the entire feature. It also costs nothing to store — see the image rule in CLAUDE.md — and reads at any size. It is a map, not an anatomy plate: the only job is finding a body part in half a second.
+
+**The colours** (`src/logic/gymBody.ts`), by how far through its recovery window a part is:
+
+| | % recovered | Meaning |
+|---|---|---|
+| 🔴 red | under 40 % | Just worked |
+| 🟠 orange | 40–75 % | Still recovering |
+| 🟡 yellow | 75–99 % | Nearly there |
+| 🟢 green | 100 % | Ready to train |
+
+**The model is hours-based, and the page says so out loud.** Hours since a part was last worked, against `RECOVERY_HOURS` for that part (chest/back/legs/glutes 48, shoulders/arms/full-body/power 40, forearms/core 24, cardio 12). **Volume is not counted** — one set of curls and ten are the same hit. It is exactly what the planner scores on, so the map and your next session can never disagree; a different, better model would have to change both.
+
+**A session still in progress counts from right now**, not from when you press Finish — the map goes red while you are still on the bench. A part never trained comes back fully rested and green, which is also how new gear talks the planner into using it.
+
+Under the figures: a legend, a tap-any-muscle detail card ("last worked 14h ago, wants 48h, yours again in 34h"), and every area as a bar sorted worst-first. **Full body, power and cardio have no place on a drawing** — they are efforts, not muscles — so they are listed separately underneath. The page re-renders every minute, so leaving it open really does show the bars moving.
 
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
