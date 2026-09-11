@@ -2645,6 +2645,31 @@ input, select { font-family: inherit; }
 }
 .gym-rest-brief > :first-child { margin-top: 0; }
 
+/* 🏓 the pickleball card (§18r) — "why am I doing this", answered on the rest
+   screen. Bronze/gold so it reads as the paddle block at a glance and never
+   competes with the blue countdown above it. */
+.gym-why {
+  margin-top: 10px; text-align: left;
+  padding: 12px 14px; border-radius: 16px;
+  background: linear-gradient(160deg, rgb(175 101 40 / 22%), rgb(18 50 82 / 0%));
+  border: 1px solid var(--bronze);
+}
+.gym-why-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.gym-why-paddle { flex: none; filter: drop-shadow(0 2px 4px rgb(0 0 0 / 35%)); }
+.gym-why-kicker {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.6px;
+  text-transform: uppercase; color: var(--bronze);
+}
+.gym-why-name { font-size: 15px; font-weight: 900; line-height: 1.2; }
+.gym-why-block + .gym-why-block { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
+.gym-why-label { font-size: 11px; font-weight: 900; color: var(--gold); margin-bottom: 2px; }
+.gym-why-block p { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--text); }
+/* the preview under the "add an exercise" form: same card, smaller everything */
+.gym-why--compact { padding: 10px 12px; }
+.gym-why--compact .gym-why-head { gap: 9px; margin-bottom: 8px; }
+.gym-why--compact .gym-why-name { font-size: 13px; }
+.gym-why--compact .gym-why-block p { font-size: 12px; }
+
 /* PAUSE and +TIME, side by side — both buy you reading time, honestly logged. */
 .gym-rest-actions { display: flex; gap: 8px; margin-top: 10px; }
 .gym-rest-actions .btn { flex: 1; margin-top: 0; }

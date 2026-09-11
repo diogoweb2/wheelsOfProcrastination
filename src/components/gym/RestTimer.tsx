@@ -50,6 +50,7 @@ export function RestTimer({
   seconds,
   upNext,
   nextBrief,
+  whyCard,
   nextDemo,
   nextEmoji,
   nextExId,
@@ -69,6 +70,13 @@ export function RestTimer({
    * more of it — and the extra seconds are real rest, not a fudge.
    */
   nextBrief?: ReactNode
+  /**
+   * 🏓 What the movement you are about to do is FOR — the pickleball card
+   * (§18s). Unlike `nextBrief` this shows on every rest, including between two
+   * sets of the same exercise: "how to do it" is worth reading once, "why you
+   * are doing it" is worth reading on the set where you'd otherwise quit.
+   */
+  whyCard?: ReactNode
   /** The animation for what's coming, played big while you rest. */
   nextDemo?: Demo
   nextEmoji?: string
@@ -218,6 +226,8 @@ export function RestTimer({
         {/* left-aligned on purpose: the card above is centred numbers, this is
             prose, and centred prose is unreadable at a glance */}
         {nextBrief && <div className="gym-rest-brief">{nextBrief}</div>}
+
+        {whyCard}
 
         <div className="gym-rest-actions">
           <button

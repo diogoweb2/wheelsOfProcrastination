@@ -975,6 +975,23 @@ The drawing is **SVG, drawn in the app** (`src/components/gym/BodyMap.tsx`), not
 
 Under the figures: a legend, a tap-any-muscle detail card ("last worked 14h ago, wants 48h, yours again in 34h"), and every area as a bar sorted worst-first. **Full body, power and cardio have no place on a drawing** — they are efforts, not muscles — so they are listed separately underneath. The page re-renders every minute, so leaving it open really does show the bars moving.
 
+### 18s. 🏓 Why you are doing this — the pickleball card on the rest screen
+
+**Every exercise in the catalog carries two sentences about pickleball, and they are shown while you rest.** The brief (§18g) says the whole goal in one line — *pickleball is my cardio, and I want a core and a lower back that let me play it for decades* — but standing in a basement holding a dumbbell, the connection between a wrist curl and a third game is not obvious. Rest is ninety seconds with nothing to do and every reason to want a reason, so that is where the app says it: a bronze card under the countdown, with a **pickleball paddle drawn next to it** (inline SVG, like all the app's art — §14 — so it costs no storage and recolours with the theme).
+
+**Two answers, never one**, because they are different questions that pull in different directions:
+
+| | Answers | Example |
+|---|---|---|
+| 🏓 **Your game** | what it does for the pickleball you play *this month* | *"The punch volley at the kitchen line is a short, stiff press. This is where that stiffness comes from."* |
+| 🛡 **Your next twenty years** | what it does for the pickleball you are still playing *at sixty* | *"Pressing strength is what lets the shoulder stop relying on the rotator cuff alone."* |
+
+A lateral raise is a weak answer to the first and a strong one to the second; a squat jump is the reverse. Collapsing them into "it's good for you" would throw away the only information worth having.
+
+**It shows on every rest**, including between two sets of the same exercise — unlike the "how to do it" brief, which is suppressed on a repeat because reading it twice is noise. *Why* you are doing something is worth re-reading precisely on the set where you would otherwise quit. The card is always about the movement you are walking back to, so on the last rest of a session it is the one you have just finished.
+
+**Where the words come from** (`src/logic/gymPickleball.ts`). Every exercise in the seeded catalog is **written by hand** — a real reason beats a generated one every time, and these name the actual mechanism (the split step, the adductor lunge, the extensor tendon), not a generic benefit. Anything the written map has never heard of — **an exercise you add in the Gear tab**, or one that joins the catalog later — is **derived from what the app already knows about it**: its primary body part, whether it is held or counted, whether it is one side at a time. So a new exercise has both answers **the moment it exists**, offline, with no key and no waiting, and the ➕ Add an exercise form shows you what it will say as soon as you have picked a main body part.
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.

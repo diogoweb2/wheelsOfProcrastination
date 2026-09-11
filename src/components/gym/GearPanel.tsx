@@ -12,6 +12,7 @@ import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
+import { PickleballWhy } from './PickleballWhy'
 import { shrinkPhoto, type ShrunkPhoto } from '../../logic/photo'
 import { identifyEquipment, visionReady } from '../../logic/gymVision'
 import { uploadGymImage } from '../../store/cloud'
@@ -668,6 +669,18 @@ function ExerciseForm({ onSave, onCancel }: { onSave: (e: ExerciseDef) => void; 
           ))}
         </div>
       </div>
+
+      {/* 🏓 Every exercise has to answer "why am I doing this?" on the rest
+          screen (§18s), and a new one answers it the moment it has a main body
+          part — worked out from the part rather than written by hand, and shown
+          here so you can see what it will say before you save it. The empty id
+          is the point: it can't match anything in the written map. */}
+      {parts.length > 0 && (
+        <div className="field">
+          <label>What it will say while you rest</label>
+          <PickleballWhy ex={{ id: '', name: name.trim() || 'This exercise', parts, kind }} compact />
+        </div>
+      )}
       {gear.length > 0 && (
         <div className="field">
           <label>Needs which equipment?</label>

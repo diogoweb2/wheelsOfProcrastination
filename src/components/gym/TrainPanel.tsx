@@ -67,6 +67,7 @@ import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
 import { PlanChangeModal } from './PlanChangeModal'
+import { PickleballWhy } from './PickleballWhy'
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
   { id: 'lazy', label: 'Lazy', emoji: '🥱' },
@@ -966,6 +967,10 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           // NEW exercise — re-reading the brief for the set you have just done
           // twice is noise, and it would push the clock off a phone screen.
           nextBrief={setsLeft === 0 && upNext ? <ExerciseBrief ex={upNext} setNo={upNext.sets.length} /> : undefined}
+          // 🏓 and the reason you are doing any of it (§18s). Always the movement
+          // you are about to walk back to — on the last rest of the session that
+          // is the one you just finished, which is the right one to leave you with.
+          whyCard={<PickleballWhy ex={nextUpEx ?? current} />}
           upNext={
             setsLeft > 0 ? (
               <>
