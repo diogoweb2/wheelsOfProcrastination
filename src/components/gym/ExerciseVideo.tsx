@@ -15,7 +15,8 @@
 // because the video lives on the shared catalog row exactly like the animation.
 import { useState } from 'react'
 import { useStore } from '../../store/useStore'
-import { PART_LABEL, exerciseById } from '../../logic/gym'
+import { exerciseById } from '../../logic/gym'
+import { MuscleMap } from './BodyMap'
 import { clipLength, embedUrl, parseYouTube, searchUrl, watchUrl } from '../../logic/gymVideo'
 import type { ExerciseVideo } from '../../types'
 import { sfx } from '../../audio'
@@ -122,10 +123,10 @@ function VideoSheet({
           <div className="gym-yt-how">
             <div className="gym-yt-how-label">What this app says the movement is</div>
             <p>{def.how}</p>
+            <MuscleMap parts={def.parts} />
             <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-              {def.parts.map((p) => PART_LABEL[p]).join(' · ')}
-              {def.perSide ? ' · one side at a time' : ''}
-              {' — if the video is doing something else, it is the wrong video.'}
+              {def.perSide ? 'One side at a time. ' : ''}
+              If the video is working something else, it is the wrong video.
             </p>
           </div>
         )}

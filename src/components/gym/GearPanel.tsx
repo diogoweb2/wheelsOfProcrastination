@@ -10,6 +10,7 @@ import type { BodyPart, Equipment, ExerciseDef, ExerciseRating, GymCatalog } fro
 import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince } from '../../logic/gym'
 import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
+import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
 import { shrinkPhoto, type ShrunkPhoto } from '../../logic/photo'
 import { identifyEquipment, visionReady } from '../../logic/gymVision'
@@ -425,6 +426,7 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                   </div>
                 )}
                 <p className="muted" style={{ fontSize: 12, lineHeight: 1.4 }}>{e.how}</p>
+                <MuscleMap parts={e.parts} />
 
                 {mem && (
                   <div className="gym-move-stats">

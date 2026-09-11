@@ -63,6 +63,7 @@ import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
 import { SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
+import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
 
 const MOODS: { id: Mood; label: string; emoji: string }[] = [
@@ -1228,6 +1229,8 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
       )}
 
       {ex.how && <p className="muted" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.4 }}>{ex.how}</p>}
+      {/* the words say how to do it; the figure says where you should feel it */}
+      <MuscleMap parts={ex.parts} />
       {/* the rep box shows the LOW end of the range — the number that has to
           be there. The range itself is the thing you are aiming at, and it
           belongs on screen while you are deciding whether to stop. */}

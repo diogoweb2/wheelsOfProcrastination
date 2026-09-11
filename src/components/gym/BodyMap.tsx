@@ -93,42 +93,49 @@ const BACK_DETAIL: string[] = [
 /** Parts with no place on the drawing — they are efforts, not muscles. */
 export const OFF_BODY: BodyPart[] = ['fullBody', 'power', 'cardio']
 
+/** How one region should be drawn. Recovery colours it one way, a muscle map another. */
+interface Paint {
+  fill: string
+  opacity: number
+  /** Draw the bright outline — the recovery map uses it for the muscle you tapped. */
+  ringed?: boolean
+  /** Tooltip text, for the pointer users who get one. */
+  title?: string
+}
+
 function Figure({
   title,
   regions,
   detail,
-  by,
-  selected,
+  paint,
   onPick,
 }: {
   title: string
   regions: Region[]
   detail: string[]
-  by: Map<BodyPart, PartRecovery>
-  selected: BodyPart | null
-  onPick: (p: BodyPart) => void
+  paint: (part: BodyPart) => Paint
+  onPick?: (p: BodyPart) => void
 }) {
   return (
     <figure className="gym-body-fig">
-      <svg viewBox={VIEW} role="img" aria-label={`${title} view, muscles coloured by how recovered they are`}>
+      <svg viewBox={VIEW} role="img" aria-label={`${title} view`}>
         {FRAME.map((d, i) => (
           <path key={`f${i}`} d={d} fill={NEUTRAL} stroke={OUTLINE} strokeWidth={1.2} />
         ))}
         {regions.map((r, i) => {
-          const rec = by.get(r.part)
-          const fill = TONE_COLOR[toneFor(rec?.pct ?? 1)]
+          const p = paint(r.part)
           return (
             <path
               key={i}
               d={r.d}
-              fill={fill}
-              fillOpacity={selected && selected !== r.part ? 0.3 : 0.92}
-              stroke={selected === r.part ? '#eaf4ff' : OUTLINE}
-              strokeWidth={selected === r.part ? 2.2 : 1.2}
-              onClick={() => onPick(r.part)}
-              style={{ cursor: 'pointer' }}
+              fill={p.fill}
+              fillOpacity={p.opacity}
+              stroke={p.ringed ? '#eaf4ff' : OUTLINE}
+              strokeWidth={p.ringed ? 2.2 : 1.2}
+              onClick={onPick ? () => onPick(r.part) : undefined}
+              style={onPick ? { cursor: 'pointer' } : undefined}
             >
-              <title>{`${PART_LABEL[r.part]} — ${Math.round((rec?.pct ?? 1) * 100)}% recovered`}</title>
+              {p.title && <title>{p.title}</title>}
             </path>
           )
         })}
@@ -153,10 +160,95 @@ export function BodyMap({
   onPick: (p: BodyPart) => void
 }) {
   const by = new Map(recovery.map((r) => [r.part, r]))
+  const paint = (part: BodyPart): Paint => {
+    const rec = by.get(part)
+    return {
+      fill: TONE_COLOR[toneFor(rec?.pct ?? 1)],
+      // one muscle picked dims every other one, so the answer to "which is that
+      // red one?" is the drawing itself rather than a legend lookup
+      opacity: selected && selected !== part ? 0.3 : 0.92,
+      ringed: selected === part,
+      title: `${PART_LABEL[part]} — ${Math.round((rec?.pct ?? 1) * 100)}% recovered`,
+    }
+  }
   return (
     <div className="gym-body-map">
-      <Figure title="Front" regions={FRONT} detail={FRONT_DETAIL} by={by} selected={selected} onPick={onPick} />
-      <Figure title="Back" regions={BACK} detail={BACK_DETAIL} by={by} selected={selected} onPick={onPick} />
+      <Figure title="Front" regions={FRONT} detail={FRONT_DETAIL} paint={paint} onPick={onPick} />
+      <Figure title="Back" regions={BACK} detail={BACK_DETAIL} paint={paint} onPick={onPick} />
+    </div>
+  )
+}
+
+// --- the same body, answering a different question ---------------------------
+//
+// "What does THIS exercise work?" A row of body-part chips is a list you have to
+// already know how to read; a lit-up figure is an answer you can take in while
+// you are still walking to the bench. Same drawing, so a muscle you learned on
+// the recovery map is in the same place here.
+
+/** Parts that aren't a place on the body, spread over the places they actually reach. */
+const SPREAD: Partial<Record<BodyPart, BodyPart[]>> = {
+  fullBody: ['chest', 'back', 'shoulders', 'arms', 'legs', 'glutes', 'core'],
+  power: ['back', 'shoulders', 'legs', 'glutes', 'core'],
+  cardio: ['legs', 'glutes', 'core'],
+}
+
+const PRIME = '#ffce00'
+const HELPER = '#ff9600'
+
+export function MuscleMap({ parts, className = '' }: { parts: BodyPart[]; className?: string }) {
+  // The catalog writes the parts most-important-first, which is the same order
+  // the block planner trusts to decide what a movement is "for" — so the first
+  // one is drawn as the target and the rest as the muscles that help.
+  const prime = new Set<BodyPart>()
+  const helper = new Set<BodyPart>()
+  // "Full body" is not a target, so it never takes the gold — on a farmer's
+  // carry the forearms are what you are actually training, and they are listed
+  // second only because the effort is listed first.
+  const target = parts.find((p) => !SPREAD[p])
+  for (const p of parts) {
+    const spread = SPREAD[p]
+    if (spread) spread.forEach((q) => helper.add(q))
+    else if (p === target) prime.add(p)
+    else helper.add(p)
+  }
+  for (const p of prime) helper.delete(p)
+
+  const paint = (part: BodyPart): Paint =>
+    prime.has(part)
+      ? { fill: PRIME, opacity: 0.95, title: `${PART_LABEL[part]} — the target` }
+      : helper.has(part)
+        ? { fill: HELPER, opacity: 0.8, title: `${PART_LABEL[part]} — helps out` }
+        : { fill: NEUTRAL, opacity: 1 }
+
+  const lit = [...prime, ...helper]
+  return (
+    <div className={`gym-muscle ${className}`}>
+      <div className="gym-muscle-figs">
+        <Figure title="Front" regions={FRONT} detail={FRONT_DETAIL} paint={paint} />
+        <Figure title="Back" regions={BACK} detail={BACK_DETAIL} paint={paint} />
+      </div>
+      <div className="gym-muscle-key">
+        <div className="gym-muscle-head">🫁 What this works</div>
+        {lit.length === 0 ? (
+          <p className="muted" style={{ fontSize: 11 }}>Nothing the drawing can point at — it is an effort, not a muscle.</p>
+        ) : (
+          <ul>
+            {[...prime].map((p) => (
+              <li key={p}>
+                <i style={{ background: PRIME }} />
+                <strong>{PART_LABEL[p]}</strong>
+              </li>
+            ))}
+            {[...helper].map((p) => (
+              <li key={p}>
+                <i style={{ background: HELPER }} />
+                {PART_LABEL[p]}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

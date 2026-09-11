@@ -940,6 +940,18 @@ That last one is why the reason is always printed. The bar didn't move, so witho
 
 Gold medal, confetti, `gymSfx.win()`, and it **clears itself after 3.4 s** or on a tap: rest is already running underneath it. A first-ever set is never a record — there is nothing to beat yet.
 
+### 18r. Every exercise shows the muscles it works
+
+Wherever the app explains a movement, the **same two figures from the Body tab** (§18q) sit next to the words with that exercise's muscles lit up: 🟡 gold for the **target**, 🟠 orange for the muscles that **help out**, everything else left as body. Three places, all of them the moment you actually want it:
+
+- **the card you are working from**, and the "up next" brief during rest — the words say how to do it, the figure says where you should feel it;
+- **the video sheet** (§18n), directly under our own description, so a video quietly demonstrating a different movement is caught in one glance;
+- **the Gear list**, under each exercise's description.
+
+It is the same drawing on purpose: a muscle you learned on the recovery map is in the same place here, so the two screens teach each other.
+
+**Order in the catalog is meaning.** `ExerciseDef.parts` is written most-important-first — the same order the block planner trusts to decide what a movement is "for" — so the first entry takes the gold. **Except when it isn't a muscle**: `fullBody`, `power` and `cardio` are efforts, so they spread over the places they actually reach and hand the gold to the first real muscle in the list. A farmer's carry is `fullBody · forearms`, and the forearms are what you are training.
+
 ### 18q. The Body tab (`/gym/body`) — what is still recovering
 
 The planner has always scored recovery; this is the same number with a face on it. **Two figures, front and back, with every muscle group tinted by how rested it is.**
