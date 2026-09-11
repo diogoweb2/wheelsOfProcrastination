@@ -458,8 +458,42 @@ function GearModePicker({ value, onChange }: { value: GearMode; onChange: (m: Ge
 
 // --- preview ----------------------------------------------------------------
 
+/**
+ * Running order, before you commit. The planner sequences the session, but the
+ * order is a suggestion — heavy first, or the one you actually came for first,
+ * is your call. Same ↑/↓ pair the block editor uses, so it reads the same way.
+ */
+function MoveButtons({ onMove, first, last }: { onMove: (dir: -1 | 1) => void; first: boolean; last: boolean }) {
+  return (
+    <>
+      <button
+        className="btn btn--ghost btn--small"
+        title="Do this one earlier"
+        disabled={first}
+        onClick={() => {
+          sfx.click()
+          onMove(-1)
+        }}
+      >
+        ↑
+      </button>
+      <button
+        className="btn btn--ghost btn--small"
+        title="Do this one later"
+        disabled={last}
+        onClick={() => {
+          sfx.click()
+          onMove(1)
+        }}
+      >
+        ↓
+      </button>
+    </>
+  )
+}
+
 function Preview({ session }: { session: GymSession }) {
-  const { gymStart, gymSwap, gymDrop, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, data } = useStore()
+  const { gymStart, gymSwap, gymDrop, gymReorder, gymDeleteExercise, gymDiscard, gymPlan, gymPlanning, data } = useStore()
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
@@ -520,16 +554,23 @@ function Preview({ session }: { session: GymSession }) {
                 one out for "something similar" is exactly what the block exists
                 to stop. Short on time? Drop it; the slot just closes. */}
             {session.blockId ? (
-              <button
-                className="btn btn--ghost btn--small"
-                style={{ marginTop: 10, width: '100%' }}
-                onClick={() => {
-                  sfx.click()
-                  gymDrop(e.exId)
-                }}
-              >
-                ✕ Skip this one today
-              </button>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <MoveButtons
+                  onMove={(dir) => gymReorder(e.exId, dir)}
+                  first={i === 0}
+                  last={i === session.exercises.length - 1}
+                />
+                <button
+                  className="btn btn--ghost btn--small"
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    sfx.click()
+                    gymDrop(e.exId)
+                  }}
+                >
+                  ✕ Skip this one today
+                </button>
+              </div>
             ) : (
               <>
                 <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
@@ -561,20 +602,27 @@ function Preview({ session }: { session: GymSession }) {
                     ⚡ Offline
                   </button>
                 </div>
-                <button
-                  className="btn btn--ghost btn--small"
-                  style={{ marginTop: 8, width: '100%' }}
-                  onClick={() => {
-                    // "✕" only drops it from today. This removes it from the shared
-                    // catalog, so no planner — AI or offline — can ever offer it again.
-                    if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
-                      return
-                    sfx.click()
-                    gymDeleteExercise(e.exId)
-                  }}
-                >
-                  🗑 Never show this
-                </button>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <MoveButtons
+                    onMove={(dir) => gymReorder(e.exId, dir)}
+                    first={i === 0}
+                    last={i === session.exercises.length - 1}
+                  />
+                  <button
+                    className="btn btn--ghost btn--small"
+                    style={{ flex: 1 }}
+                    onClick={() => {
+                      // "✕" only drops it from today. This removes it from the shared
+                      // catalog, so no planner — AI or offline — can ever offer it again.
+                      if (!confirm(`Delete “${e.name}” for good? It leaves the crew’s exercise list and will never be planned again.`))
+                        return
+                      sfx.click()
+                      gymDeleteExercise(e.exId)
+                    }}
+                  >
+                    🗑 Never show this
+                  </button>
+                </div>
               </>
             )}
           </div>

@@ -739,6 +739,8 @@ interface StoreState {
    * 'dropped' when there was nothing left to swap in and the slot just closed.
    */
   gymDrop: (exId: string) => 'swapped' | 'dropped'
+  /** Move one previewed exercise up (-1) or down (+1) the running order. */
+  gymReorder: (exId: string, dir: -1 | 1) => void
   /** Kill an exercise for good: out of the shared catalog and never planned again. */
   gymDeleteExercise: (exId: string) => void
   /** Throw away the previewed session. */
@@ -3908,6 +3910,21 @@ export const useStore = create<StoreState>((set, get) => {
           : d.gym.active.exercises.filter((e) => e.exId !== exId)
       })
       return replacement ? 'swapped' : 'dropped'
+    },
+
+    gymReorder(exId, dir) {
+      // Order is yours before you commit: the planner's sequence is a suggestion,
+      // and "I want to squat first today" shouldn't cost you the whole session.
+      // Block sessions reorder too — the list is still the same list (§18m); only
+      // swapping something out is off the table.
+      commit((d) => {
+        const list = d.gym.active?.exercises
+        if (!list) return
+        const i = list.findIndex((e) => e.exId === exId)
+        const to = i + dir
+        if (i < 0 || to < 0 || to >= list.length) return
+        ;[list[i], list[to]] = [list[to], list[i]]
+      })
     },
 
     gymDeleteExercise(exId) {
