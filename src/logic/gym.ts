@@ -29,7 +29,7 @@ import { dayKey, parseDay } from './dates'
 // The effort model (§18t) is a leaf module — it reads nothing back from here,
 // which is what lets the planner, the Body map and the Stats split all score
 // recovery off the same numbers.
-import { doseFactor, effortMix, effortRows, loggedReps } from './gymEffort'
+import { effortMix, effortRows, hitFatigue, loggedReps } from './gymEffort'
 import starters from './gymStarters.json'
 
 // --- constants --------------------------------------------------------------
@@ -745,11 +745,12 @@ export function sessionSeconds(s: GymSession): number {
  * minutes ago. Not hours any more — hours alone said a push-up and a plank cost
  * the core the same day off, which was never true (§18t).
  *
- * Each session hands every part a DOSE in effort units, and the recovery window
- * for that hit is the part's full window scaled by how big the dose was. Three
- * hard sets of side plank buy the core its whole 24 hours; the 0.15 share a set
- * of push-ups drops on it buys a couple. A part is as fatigued as its worst
- * outstanding hit.
+ * Each session hands every part a DOSE in effort units, and that dose sets both
+ * how long the hole takes to fill and how deep it is. Three hard sets of side
+ * plank dig the core all the way down for its whole 24 hours; the 0.15 share a
+ * set of push-ups drops on it barely scratches it, and anything under
+ * `IGNORE_DOSE` was not training, it was arithmetic. A part is as fatigued as
+ * whichever outstanding hit leaves it most fatigued right now.
  */
 export function partFatigue(sessions: GymSession[], now = Date.now(), live?: GymSession | null): Record<string, number> {
   // Doses land per SESSION, not per exercise: two movements that each brush the
@@ -765,9 +766,7 @@ export function partFatigue(sessions: GymSession[], now = Date.now(), live?: Gym
   for (const [at, bucket] of perSession) {
     const hours = Math.max(0, (now - at) / 3_600_000)
     for (const [part, dose] of Object.entries(bucket)) {
-      const need = (RECOVERY_HOURS[part as BodyPart] ?? 40) * doseFactor(dose)
-      if (need <= 0) continue
-      out[part] = Math.max(out[part] ?? 0, clamp(1 - hours / need, 0, 1))
+      out[part] = Math.max(out[part] ?? 0, hitFatigue(dose, hours, RECOVERY_HOURS[part as BodyPart] ?? 40))
     }
   }
   return out

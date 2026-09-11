@@ -8,7 +8,7 @@ import { useStore } from '../../store/useStore'
 import type { BodyPart } from '../../types'
 import { PART_EMOJI, PART_LABEL } from '../../logic/gym'
 import { TONE_COLOR, TONE_LABEL, partRecovery, readyIn, toneFor, type Tone } from '../../logic/gymBody'
-import { FULL_DOSE } from '../../logic/gymEffort'
+import { FULL_DOSE, IGNORE_DOSE } from '../../logic/gymEffort'
 import { BodyMap, OFF_BODY } from './BodyMap'
 import { sfx } from '../../audio'
 
@@ -51,10 +51,10 @@ export function RecoveryPanel() {
           </p>
         )}
         <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-          Hours since you worked it, against what that muscle wants <em>after the work it actually got</em>. Every
-          exercise splits its effort across the muscles by how much each one really does, so the core takes a full day
-          off after side planks and a couple of hours after push-ups. It is the same number the planner scores on, so
-          the map and your next session can never disagree.
+          How much work this muscle actually took, and how long ago. Every exercise splits its effort by how much each
+          muscle really does, and that dose sets both <em>how deep</em> the hole is and how long it takes to fill — so
+          red means you genuinely trained it, not that it was listed on something you did. It is the same number the
+          planner scores on, so the map and your next session can never disagree.
         </p>
       </div>
 
@@ -93,13 +93,21 @@ export function RecoveryPanel() {
                 ? `Last worked ${readyIn(pick.since)} ago. Fully recovered.`
                 : `Last worked ${readyIn(pick.since)} ago. It wants ${Math.round(pick.need)}h after that much work, so it is yours again in ${readyIn(pick.left)}.`}
           </p>
-          {pick.dose > 0 && (
-            <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
-              That session dropped <strong>{pick.dose.toFixed(1)}</strong> effort units here — {pick.dose >= FULL_DOSE
-                ? `a full dose, so it gets the whole ${pick.fullNeed}h window.`
-                : `a ${Math.round((pick.need / pick.fullNeed) * 100)}% dose, so it needs a fraction of the full ${pick.fullNeed}h.`}
-            </p>
-          )}
+          <p className="muted" style={{ fontSize: 11, marginTop: 4 }}>
+            {pick.dose > 0 ? (
+              <>
+                That session dropped <strong>{pick.dose.toFixed(1)}</strong> effort units here —{' '}
+                {pick.dose >= FULL_DOSE
+                  ? `a full dose, so it goes all the way down and takes the whole ${pick.fullNeed}h.`
+                  : `${Math.round((pick.dose / FULL_DOSE) * 100)}% of a full dose, so it goes that far down and no further.`}
+              </>
+            ) : Number.isFinite(pick.since) ? (
+              <>
+                You did touch it {readyIn(pick.since)} ago, but under <strong>{IGNORE_DOSE}</strong> effort units — that
+                is arithmetic, not training, so it doesn’t open a recovery window.
+              </>
+            ) : null}
+          </p>
         </div>
       )}
 

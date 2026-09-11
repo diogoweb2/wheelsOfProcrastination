@@ -303,11 +303,41 @@ export function effortRows(
  */
 export const FULL_DOSE = 3
 
-/** The shortest a recovery window can be scaled to. A brush is still a touch, not nothing. */
-const MIN_DOSE_FACTOR = 0.3
+/**
+ * Under this many units, a part was not trained — it was brushed. The 0.07 core
+ * share of a one-arm row is real arithmetic and zero stimulus, and letting it
+ * open a recovery window is how the Body map ended up red on a core that had
+ * done nothing all day.
+ */
+export const IGNORE_DOSE = 0.25
 
-/** What share of a part's full recovery window this much work actually bought. */
+/** The shortest a recovery window can be scaled to, for a dose that clears `IGNORE_DOSE`. */
+const MIN_DOSE_FACTOR = 0.1
+
+/**
+ * What share of a part's full recovery window this much work bought — and, just
+ * as importantly, HOW DEEP the hole is.
+ *
+ * Both, from the same number, because a light dose is shallow as well as short.
+ * Scaling only the window was the first version and it was wrong: a 0.3-unit
+ * brush got a 7-hour window, and for the first three of those hours the part sat
+ * at "just worked" red — the same colour a real session earns. Depth fixes that.
+ * A part can only be driven as far into the red as the work actually put it, so
+ * red now means "you genuinely trained this", which is the only thing the colour
+ * was ever supposed to say.
+ */
 export function doseFactor(dose: number): number {
-  if (dose <= 0) return 0
+  if (dose < IGNORE_DOSE) return 0
   return clamp(dose / FULL_DOSE, MIN_DOSE_FACTOR, 1)
+}
+
+/**
+ * How fatigued ONE hit leaves a part right now: 0 = done with it, 1 = flattened.
+ * Depth from the dose, decay from the clock.
+ */
+export function hitFatigue(dose: number, hoursAgo: number, fullNeed: number): number {
+  const factor = doseFactor(dose)
+  if (factor <= 0) return 0
+  const need = fullNeed * factor
+  return factor * clamp(1 - hoursAgo / need, 0, 1)
 }

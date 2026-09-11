@@ -7,15 +7,19 @@
 //
 // TIME AND DOSE, not time alone (§18t). It used to be time alone, and that was
 // the lie: one set of curls and twenty were the same hit, and the 0.15 share of
-// a push-up that lands on the core put the core in the red for a day. Now every
-// session hands each part a dose in effort units, and the window for that hit
-// is the part's full window scaled by how big the dose was. A part is as tired
-// as its worst outstanding hit — so a heavy session three days ago and a brush
-// this morning are both considered, and whichever is really holding you back
-// is the one that shows.
+// a push-up that lands on the core put the core in the red for a day.
+//
+// Now every session hands each part a dose in effort units, and that dose sets
+// BOTH how long the hole takes to fill and HOW DEEP IT IS. Depth is the half
+// that matters for the colour: scaling only the window still let a 0.3-unit
+// brush paint a part the same red a real session earns, just for fewer hours.
+// A part can only be driven as far down as the work actually put it, so red
+// means "you genuinely trained this" — which is the only thing it ever meant
+// to say. A part is as tired as whichever outstanding hit leaves it most tired
+// right now, which is not always the most recent one.
 import type { BodyPart, GymState } from '../types'
 import { RECOVERY_HOURS } from './gym'
-import { doseFactor, effortRows } from './gymEffort'
+import { doseFactor, effortRows, hitFatigue } from './gymEffort'
 
 /** One muscle group's state, ready to draw. */
 export interface PartRecovery {
@@ -100,17 +104,23 @@ export function partRecovery(gym: GymState, now = Date.now()): PartRecovery[] {
   return (Object.keys(RECOVERY_HOURS) as BodyPart[])
     .map((part) => {
       const fullNeed = RECOVERY_HOURS[part]
+      // The hit still holding this part back is the one leaving it MOST tired
+      // right now — not the most recent, and not the biggest. A heavy session
+      // three days ago can still outweigh a brush this morning, and should.
       const list = all.get(part) ?? []
-      // the hit that is actually holding this part back — the one with the
-      // least of its own window served, not simply the most recent
-      let worst: PartRecovery = { part, pct: 1, since: Infinity, left: 0, need: fullNeed, dose: 0, fullNeed }
+      // "when did I last touch this at all" is a separate question from "what is
+      // still holding it back", and the panel asks both. A part brushed by a
+      // one-arm row this morning is fully recovered AND was worked today; saying
+      // "never trained" there would be a plain lie.
+      const touched = list.reduce((best, h) => Math.min(best, h.hours), Infinity)
+      let worst: PartRecovery = { part, pct: 1, since: touched, left: 0, need: fullNeed, dose: 0, fullNeed }
+      let deepest = 0
       for (const h of list) {
+        const fatigue = hitFatigue(h.dose, h.hours, fullNeed)
+        if (fatigue <= deepest) continue
+        deepest = fatigue
         const need = fullNeed * doseFactor(h.dose)
-        if (need <= 0) continue
-        const pct = Math.max(0, Math.min(1, h.hours / need))
-        if (pct < worst.pct) {
-          worst = { part, pct, since: h.hours, left: Math.max(0, need - h.hours), need, dose: h.dose, fullNeed }
-        }
+        worst = { part, pct: 1 - fatigue, since: h.hours, left: Math.max(0, need - h.hours), need, dose: h.dose, fullNeed }
       }
       return worst
     })

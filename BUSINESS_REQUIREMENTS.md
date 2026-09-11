@@ -1003,13 +1003,18 @@ Same three parts on the push-up as before; **a fifth of the core credit**. A mix
 
 That is the honest reading: the second time at 40 lb is not the achievement the first time was. **Bodyweight work gets the same treatment on reps** rather than pounds — there are no dumbbells to add, so the rep ladder (§18d) is the axis, and the top set is the number compared. A first-ever attempt is never an overload; it is a baseline.
 
-**Recovery is time AND dose, not time alone.** Each session hands every part a dose in effort units, and the recovery window for that hit is the part's full `RECOVERY_HOURS` window **scaled by how big the dose was** (`dose / 3`, floored at 0.3 — a brush is a touch, not nothing). Doses land per *session*, not per exercise, so a split squat and a side plank in the same workout add up to one real dose on the core rather than two light ones. A part is as tired as its **worst outstanding hit**, so a heavy session three days ago and a brush this morning are both weighed and whichever is really holding you back is the one that shows.
+**Recovery is time AND dose, not time alone.** Each session hands every part a dose in effort units, and that dose sets **two** things: how long the hole takes to fill (`RECOVERY_HOURS × dose/3`) and **how deep it is**. Doses land per *session*, not per exercise, so a split squat and a side plank in the same workout add up to one real dose on the core rather than two light ones. A part is as tired as whichever outstanding hit leaves it **most tired right now** — not the most recent one, so a heavy session three days ago can still outrank a brush this morning, and should.
 
-| Core, after… | Dose | Window |
+**Depth is the half that decides the colour, and the first version didn't have it.** Scaling only the window meant a 0.3-unit brush still drove a part to 0 % the instant you finished — the same red a real session earns, just for fewer hours. So a session of pull-ups, rows and shoulder press painted the core red on the strength of one-arm-row's 0.07 share. Now a hit can only push a part as far down as the work put it: `fatigue = doseFactor × (1 − hours/need)`. **Red means you genuinely trained it**, which is the only thing the colour was ever meant to say. Fixed 2026-09-11.
+
+**And below `IGNORE_DOSE` (0.25 units) there is no hit at all** — that is arithmetic, not training, and it opens no window. The panel still says you touched it and when, because that is true; it just doesn't pretend it cost you anything.
+
+| Core, after… | Dose | 3 h later |
 |---|---|---|
-| 3 sets of push-ups | 0.55 | ~7 h |
-| 3 sets of plank | 2.85 | ~23 h |
-| a whole core session | 5.0 | the full 24 h |
+| S5 (pull-ups · row · press · band ER · wrist curls) | 0.30 | 🟢 ready — under the floor |
+| 3 sets of push-ups | 0.55 | 🟡 |
+| S6 (band rotational press 45 % core + farmer's carry 35 %) | 3.19 | 🔴 — and correctly so |
+| 3 sets of plank | 2.85 | 🔴 |
 
 **One model, three consumers.** The Body map (§18q), the planner's candidate scoring and the Stats split all read the same `effortRows`, so they cannot disagree — which was already the rule for the hours-based model and is still the rule. The planner also weights fatigue **by the mix of the exercise it is considering**: a fried core barely discourages a push-up (15 % core) and rules out a side plank (100 %).
 
