@@ -955,6 +955,21 @@ export interface ExerciseDef {
    * loaded by definition.
    */
   loaded?: boolean
+  /**
+   * The number you log is what hangs on ONE side. A hip-thrust harness with a
+   * dumbbell on each end is one movement with two dumbbells: the weight you can
+   * actually SET is the per-dumbbell one, so that is the number the app stores,
+   * suggests and progresses — and it says the total out loud everywhere it
+   * shows a load, because the hips still feel both of them.
+   */
+  loadPerSide?: boolean
+  /**
+   * A hold with no number on it: go until you cannot. The first side's clock is
+   * open — no target, no bell — and whatever it reaches becomes the target for
+   * the second side, so the two still have to match. `timed` only; the catalog
+   * `defaultReps` stays as the floor everything else (budget, grade) reads.
+   */
+  maxHold?: boolean
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
   demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
@@ -1130,6 +1145,8 @@ export interface SessionExercise {
   perSide?: boolean // reps are per side; denormalised like `name` so old sessions read right
   loaded?: boolean // carries weight as well as its own unit; denormalised like `perSide`
   loadKind?: LoadKind // 'band' = the load is a colour, not a number; denormalised like `perSide`
+  loadPerSide?: boolean // the weight is what's on EACH side; denormalised like `perSide`
+  maxHold?: boolean // open-ended hold, the first side sets the target; denormalised like `perSide`
   ladder?: boolean
   ladderTest?: boolean // this one is a max-rep test — do as many as you can
   why?: string // the coach's reason, shown on the preview card

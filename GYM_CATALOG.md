@@ -1,8 +1,8 @@
 # Gym — equipment & exercise catalog
 
-Generated from Firestore `app/gymCatalog` by `npm run gym:catalog` on 2026-09-01. Do not edit by hand — edit the gym, then re-run it.
+Generated from Firestore `app/gymCatalog` by `npm run gym:catalog` on 2026-09-14. Do not edit by hand — edit the gym, then re-run it.
 
-**11 pieces of equipment · 61 exercises** (54 with an animation).
+**11 pieces of equipment · 61 exercises** (53 with an animation).
 
 The catalog file is [scripts/data/gym-catalog.json](scripts/data/gym-catalog.json) (`npm run gym:seed` to push it); day-to-day edits happen in the app at Gym → Gear. Rules: [BUSINESS_REQUIREMENTS.md](BUSINESS_REQUIREMENTS.md) §18k.
 
@@ -38,7 +38,7 @@ A pair of yellow parallel dip bars with black foam grips. They appear to be fixe
 
 Pair of adjustable dumbbells, TRULAP, 8.5 lb to 92 lb per hand. TWO HARD LIMITS, confirmed by the owner: (1) the handles are ROUND-BODIED and ROLL under load — they are NOT a stable base for any bodyweight movement, so never prescribe push-ups, planks, renegade rows or any hold that puts bodyweight through them; (2) 8.5 lb is the LOWEST notch, which is too heavy for light prehab work — rotator-cuff external rotation, scaption, W-raises and similar belong on bands, not on these.
 
-*Used by 26 exercises.*
+*Used by 27 exercises.*
 
 ### 🏋 Kettlebell
 
@@ -78,7 +78,7 @@ A portable Nordic hamstring curl device — a padded knee board with a foot roll
 
 ### 🤸 No equipment
 
-Floor and bodyweight work — 12 exercises need nothing but the room.
+Floor and bodyweight work — 11 exercises need nothing but the room.
 
 ---
 
@@ -146,7 +146,7 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🦵 Band Leg Curl 🎬 | Resistance bands | 3 × 15 /side | 60s | — |
 | 🦿 Band Leg Extension 🎬 | Resistance bands | 3 × 15 /side | 60s | — |
 | 🦵 Band-Assisted Nordic Curl | Nordic curl pad, Resistance bands | 3 × 6 | 90s | Glutes, Core |
-| 🦶 Calf Raise 🎬 | Bodyweight | 3 × 20 | 35s | — |
+| 🦶 Calf Raise 🎬 | Adjustable dumbbells on stand | 3 × 20 | 35s | — |
 | 🇧🇬 Dumbbell Bulgarian Split Squat 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 10 /side | 90s | Glutes, Core |
 | ↔️ Dumbbell Lateral Lunge 🎬 | Adjustable dumbbells on stand | 3 × 10 /side | 75s | Glutes |
 | 🔙 Dumbbell Reverse Lunge 🎬 | Adjustable dumbbells on stand | 3 × 12 /side | 75s | Glutes, Core |
@@ -161,7 +161,7 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
-| 🍑 Bench Hip Thrust 🎬 | Flat weight bench, Adjustable dumbbells on stand | 3 × 15 | 90s | Legs, Core |
+| 🍑 Bench Hip Thrust | Flat weight bench, Adjustable dumbbells on stand | 3 × 15 | 90s | Legs, Core |
 | 🌉 Glute Bridge 🎬 | Bodyweight | 3 × 20 | 40s | Core |
 | 🔔 Kettlebell Swing 🎬 | Kettlebell | 3 × 20 | 90s | Back, Power |
 | 🦿 Single-Leg Glute Bridge 🎬 | Bodyweight | 3 × 15 /side | 45s | Core |

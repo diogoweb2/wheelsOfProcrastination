@@ -62,7 +62,7 @@ import { keepScreenAwake } from '../../logic/wakeLock'
 import confetti from 'canvas-confetti'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
-import { SetupCountdown } from './SetupCountdown'
+import { SIDE_SEC, SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
@@ -780,6 +780,12 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    * is done, with the total in `reps` and the split in `sides`.
    */
   const [sideSec, setSideSec] = useState<number[]>([])
+  /**
+   * The gap between "that side is done" and the next side's clock. Rolling from
+   * one forearm to the other takes a few seconds whatever you do, and measuring
+   * them as hold time makes the second side look longer than it was held.
+   */
+  const [sidePrep, setSidePrep] = useState(false)
   const [finishing, setFinishing] = useState(false)
   /** The record the set you just logged beat, if it beat one. Cleared on a tap or on its own. */
   const [pr, setPr] = useState<(SetRecord & { exName: string }) | null>(null)
@@ -836,12 +842,19 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const lastLoad = current.sets.length ? current.sets[current.sets.length - 1].weight : undefined
   const loadNote =
     setsLeft > 0 && isLoaded(current) && armedWeight != null && lastLoad != null ? (
-      <LoadChange from={lastLoad} to={armedWeight} unit={unit} loadKind={current.loadKind} />
+      <LoadChange
+        from={lastLoad}
+        to={armedWeight}
+        unit={unit}
+        loadKind={current.loadKind}
+        perSide={current.loadPerSide}
+      />
     ) : null
 
   /** Start (or restart) the clock on the set in front of you — side one, if there are sides. */
   const begin = () => {
     setSideSec([])
+    setSidePrep(false)
     setStartedAt(Date.now())
     setPhase('working')
   }
@@ -855,13 +868,35 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    * is planned from.
    */
   const twoSided = isClocked(current) && !!current.perSide
-  const sideTarget = sideSec.length === 0 ? plannedReps : Math.max(plannedReps, ...sideSec)
+  /**
+   * An OPEN HOLD (§18t) has no number on the first side: you go until you cannot,
+   * and what you managed is the target the second side has to match — asking for
+   * the prescribed 30 s after a first side that failed at 20 would be asking the
+   * weak side to beat the strong one.
+   */
+  const openHold = !!current.maxHold && isClocked(current) && sideSec.length === 0
+  const sideTarget =
+    sideSec.length === 0
+      ? plannedReps
+      : current.maxHold
+        ? Math.max(...sideSec)
+        : Math.max(plannedReps, ...sideSec)
 
-  /** "Ready on the other side." Bank this side and start the next one's clock. */
+  /**
+   * "That side is done." Bank it, then hand over five seconds to roll onto the
+   * other side — the next clock starts when the countdown does, not when your
+   * elbow is still moving.
+   */
   const switchSides = () => {
     const sec = Math.max(1, (Date.now() - startedAt) / 1000)
     gymSfx.go()
     setSideSec([...sideSec, sec])
+    setSidePrep(true)
+  }
+
+  /** The five seconds are up (or you skipped them): the other side is live. */
+  const startOtherSide = () => {
+    setSidePrep(false)
     setStartedAt(Date.now())
   }
 
@@ -898,9 +933,10 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       bestsFor(memory, data.gym.sessions, current.exId, current.sets),
       { reps: logged, weight },
       current,
-      (n) => loadLabel(n, unit, current.loadKind),
+      (n) => loadLabel(n, unit, current.loadKind, current.loadPerSide),
     )
     gymSfx.logged()
+    setSidePrep(false)
     gymLogSet(current.exId, logged, weight, sec, twoSided ? sides : undefined)
     if (beat) celebrate(() => setPr({ ...beat, exName: current.name }))
     const moreHere = current.sets.length + 1 < current.plan.reps.length
@@ -1035,11 +1071,21 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 planned={plannedLoad}
                 onChange={setWeight}
                 loadKind={current.loadKind}
+                perSide={current.loadPerSide}
               />
             </div>
           )}
 
-          {phase === 'working' && isClocked(current) ? (
+          {phase === 'working' && sidePrep ? (
+            // the roll-over. Five seconds, then the other side's clock starts on
+            // its own — you never have to find the phone with one arm down
+            <SetupCountdown
+              seconds={SIDE_SEC}
+              onDone={startOtherSide}
+              title="↔️ Other side"
+              note={`Roll over and get set. The second side's clock starts at zero — or the second you tap GO.`}
+            />
+          ) : phase === 'working' && isClocked(current) ? (
             // a plank or a run: no numbers to type, just a clock that keeps going.
             // a per-side hold runs one clock PER SIDE, and the second side's
             // target is whatever the first one actually managed
@@ -1049,6 +1095,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               startedAt={startedAt}
               target={twoSided ? sideTarget : plannedReps}
               kind={current.kind}
+              open={openHold}
               side={twoSided ? (sideSec.length === 0 ? 'first' : 'second') : undefined}
               banked={sideSec[0]}
             />
@@ -1062,6 +1109,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                   planned={plannedLoad}
                   onChange={setWeight}
                   loadKind={current.loadKind}
+                  perSide={current.loadPerSide}
                 />
               )}
             </div>
@@ -1151,9 +1199,19 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       {phase !== 'resting' && (
         <div className="gym-foot">
           <SessionCountdown session={session} />
-          {phase === 'working' && twoSided && sideSec.length === 0 ? (
-            // the honest end of side one: you press it when you are set up on the
-            // OTHER side, so the seconds up to the press are side one's
+          {phase === 'working' && sidePrep ? (
+            <button
+              className="btn"
+              onClick={() => {
+                sfx.click()
+                startOtherSide()
+              }}
+            >
+              ▶️ GO NOW
+            </button>
+          ) : phase === 'working' && twoSided && sideSec.length === 0 ? (
+            // the honest end of side one: press it the moment that side is done
+            // and the five seconds that follow are yours, not the clock's
             <button className="btn" onClick={switchSides}>
               ↔️ OTHER SIDE
             </button>
@@ -1184,8 +1242,20 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
  * find out it wanted 25 when the set is already live and your hands are full.
  * It says "same" out loud too — "did it change?" deserves an answer either way.
  */
-function LoadChange({ from, to, unit, loadKind }: { from: number; to: number; unit: 'lb' | 'kg'; loadKind?: LoadKind }) {
-  const say = (n: number) => loadLabel(n, unit, loadKind)
+function LoadChange({
+  from,
+  to,
+  unit,
+  loadKind,
+  perSide,
+}: {
+  from: number
+  to: number
+  unit: 'lb' | 'kg'
+  loadKind?: LoadKind
+  perSide?: boolean
+}) {
+  const say = (n: number) => loadLabel(n, unit, loadKind, perSide)
   if (to === from)
     return <div className="gym-load-change is-same">⚖️ Same load next set — {say(to)}</div>
   const up = to > from
@@ -1277,9 +1347,9 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
         <div className="gym-banner">
           {twoSided ? (
             <>
-              ↔️ <strong>One side at a time.</strong> Hold the first side, then press{' '}
-              <strong>↔️ OTHER SIDE</strong> when you are set up on the second — and hold that one just as long.
-              Press <strong>✓ DONE</strong> at the end of it.
+              ↔️ <strong>One side at a time.</strong> {ex.maxHold ? 'Hold the first side as long as you can' : 'Hold the first side'}, then press{' '}
+              <strong>↔️ OTHER SIDE</strong> the moment it drops — you get 5s to roll over before the second clock
+              starts, and that side has to match the first. Press <strong>✓ DONE</strong> at the end of it.
             </>
           ) : (
             <>
@@ -1287,6 +1357,20 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
               the right. Log it once, when both are done.
             </>
           )}
+        </div>
+      )}
+
+      {ex.maxHold && (
+        <div className="gym-banner">
+          ⏳ <strong>Max hold.</strong> No target on the first side — go until the form goes. Whatever you manage is
+          what the other side is asked for, and what the next session starts from.
+        </div>
+      )}
+
+      {ex.loadPerSide && (
+        <div className="gym-banner">
+          ⚖️ <strong>One dumbbell each side.</strong> The weight you type is what goes on <em>one</em> of them
+          {ex.plan.weight ? ` — ${ex.plan.weight} means ${ex.plan.weight} a side, ${ex.plan.weight * 2} across you` : ''}.
         </div>
       )}
 
@@ -1363,12 +1447,15 @@ function WorkClock({
   kind,
   side,
   banked,
+  open,
 }: {
   startedAt: number
   target: number
   kind: SessionExercise['kind']
   side?: 'first' | 'second'
   banked?: number
+  /** An open hold: no target, no bell, no bar to fill. You stop when you stop. */
+  open?: boolean
 }) {
   const targetSec = kind === 'cardio' ? target * 60 : target
   const [now, setNow] = useState(Date.now())
@@ -1381,14 +1468,15 @@ function WorkClock({
 
   const elapsed = Math.max(0, Math.floor((now - startedAt) / 1000))
   useEffect(() => {
+    if (open) return
     if (elapsed >= targetSec && !rang.current) {
       rang.current = true
       gymSfx.go()
     }
-  }, [elapsed, targetSec])
+  }, [elapsed, targetSec, open])
 
-  const hit = elapsed >= targetSec
-  const pct = Math.min(1, targetSec > 0 ? elapsed / targetSec : 1)
+  const hit = !open && elapsed >= targetSec
+  const pct = open ? 1 : Math.min(1, targetSec > 0 ? elapsed / targetSec : 1)
 
   return (
     <div className="gym-clock">
@@ -1402,13 +1490,15 @@ function WorkClock({
         <span style={{ width: `${pct * 100}%` }} />
       </div>
       <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-        {side === 'second' && banked != null
+        {open
+          ? '⏳ no target — hold until you cannot, and the other side has to match it'
+          : side === 'second' && banked != null
           ? hit
-            ? `matched the ${mmss(banked)} you did on the first side`
-            : `match the first side — ${mmss(targetSec)}`
-          : hit
-            ? `past the ${mmss(targetSec)} asked for — every extra second counts`
-            : `target ${mmss(targetSec)}`}
+              ? `matched the ${mmss(banked)} you did on the first side`
+              : `match the first side — ${mmss(targetSec)}`
+            : hit
+              ? `past the ${mmss(targetSec)} asked for — every extra second counts`
+              : `target ${mmss(targetSec)}`}
       </div>
     </div>
   )
@@ -1743,25 +1833,34 @@ function WeightStepper({
   planned,
   onChange,
   loadKind,
+  perSide,
 }: {
   unit: 'lb' | 'kg'
   value: number | undefined
   planned: number | undefined
   onChange: (n: number) => void
   loadKind?: LoadKind
+  /** Two dumbbells, one movement: the number asked for is what goes on EACH. */
+  perSide?: boolean
 }) {
   // a band is not a number you dial, it is one of four things on the hook
   if (loadKind === 'band') return <BandPicker unit={unit} value={value} planned={planned} onChange={onChange} />
   return (
     <Stepper
-      label={`weight (${unit})`}
+      label={perSide ? `weight per side (${unit})` : `weight (${unit})`}
       value={value ?? 0}
       step={2.5}
       min={0}
       // + and − walk the dumbbell's real notches, not arithmetic
       notches={loadSteps(unit)}
       onChange={onChange}
-      hint={planned != null ? `asked for ${planned}` : 'first time — set it'}
+      hint={
+        planned != null
+          ? `asked for ${planned}${perSide ? ` on each side (${planned * 2} total)` : ''}`
+          : perSide
+            ? 'first time — set ONE dumbbell'
+            : 'first time — set it'
+      }
     />
   )
 }
@@ -1856,7 +1955,7 @@ function planLine(e: SessionExercise, unit: 'lb' | 'kg'): string {
   } else bits.push(`${repAsk(e)} ${repLabel(e)}`)
   // a ramp is two numbers: where it starts and where it ends up
   if (isRamped(e) && e.plan.weights) bits.push(`${e.plan.weights[0]} → ${e.plan.weight} ${unit}`)
-  else if (e.plan.weight) bits.push(loadLabel(e.plan.weight, unit, e.loadKind))
+  else if (e.plan.weight) bits.push(loadLabel(e.plan.weight, unit, e.loadKind, e.loadPerSide))
   bits.push(`rest ${e.plan.restSec}s`)
   return bits.join(' · ')
 }

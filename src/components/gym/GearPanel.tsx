@@ -7,7 +7,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { BodyPart, Equipment, ExerciseDef, ExerciseRating, GymCatalog } from '../../types'
-import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince } from '../../logic/gym'
+import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince, isLoaded } from '../../logic/gym'
 import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
@@ -534,6 +534,36 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                     }}
                   >
                     {e.loaded ? '🏋️ Also carries weight' : '🏋️ No weight, just you'}
+                  </button>
+                )}
+
+                {isLoaded(e) && (
+                  <button
+                    className={`btn btn--small ${e.loadPerSide ? '' : 'btn--ghost'}`}
+                    style={{ marginBottom: 8 }}
+                    onClick={() => {
+                      sfx.click()
+                      // a harness with a dumbbell on each end: the number you can
+                      // actually set is one dumbbell's, so that is what is stored
+                      patch(e, { loadPerSide: !e.loadPerSide })
+                    }}
+                  >
+                    {e.loadPerSide ? '⚖️ One dumbbell each side' : '⚖️ The weight is the whole load'}
+                  </button>
+                )}
+
+                {e.kind === 'timed' && (
+                  <button
+                    className={`btn btn--small ${e.maxHold ? '' : 'btn--ghost'}`}
+                    style={{ marginBottom: 8 }}
+                    onClick={() => {
+                      sfx.click()
+                      // no target on the first side — the runner opens the clock
+                      // and the second side is asked to match what it reached
+                      patch(e, { maxHold: !e.maxHold })
+                    }}
+                  >
+                    {e.maxHold ? '⏳ Hold until you cannot' : '⏳ Hold the time asked for'}
                   </button>
                 )}
 

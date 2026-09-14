@@ -132,10 +132,20 @@ export function bandFor(w: number | undefined, unit: 'lb' | 'kg' = 'lb'): (typeo
  * How a load READS on screen: "65 lb" off the rack, "Black band (65 lb)" off
  * the bands — the colour is what you go and pick up, the pounds ride along as
  * a sense of scale.
+ *
+ * `eachSide` is the two-dumbbell case (`loadPerSide`): the stored number is one
+ * dumbbell, so the screen says both — you set 32 on each and 64 goes across the
+ * hips, and neither number is allowed to be the silent one.
  */
-export function loadLabel(w: number, unit: 'lb' | 'kg' = 'lb', kind: LoadKind | undefined = 'dumbbell'): string {
+export function loadLabel(
+  w: number,
+  unit: 'lb' | 'kg' = 'lb',
+  kind: LoadKind | undefined = 'dumbbell',
+  eachSide = false,
+): string {
   const band = kind === 'band' ? bandFor(w, unit) : undefined
-  return band ? `${band.color} band (${w} ${unit})` : `${w} ${unit}`
+  if (band) return `${band.color} band (${w} ${unit})`
+  return eachSide ? `${w} ${unit} each side (${round(w * 2)} total)` : `${w} ${unit}`
 }
 
 /** Max exercises in a session, by minute budget. */
@@ -1012,6 +1022,8 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     paceSec: learnedSetSeconds(mem, e.kind, reps[0]) ?? undefined,
     perSide: e.perSide,
     loaded: e.loaded,
+    loadPerSide: e.loadPerSide,
+    maxHold: e.maxHold,
     // denormalised like `perSide`: a session logged in colours still reads in
     // colours after the catalog moves the exercise onto different gear
     loadKind: load === 'band' ? 'band' : undefined,
