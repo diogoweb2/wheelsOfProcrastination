@@ -531,8 +531,12 @@ interface StoreState {
   savePrizeShelf: (ownerId: string, prizes: Prize[]) => void // admin: add/edit/delete one profile's treasures
 
   // --- Roblox bank (§20) ---
-  /** Dad (or an official top-up) puts screen time into a crewmate's bank. */
-  grantRobloxTime: (targetId: string, minutes: number, note: string, kind?: 'grant' | 'official') => void
+  /**
+   * Dad (or an official top-up) puts screen time into a crewmate's bank.
+   * FALSE when the write never happened — Ben's world hadn't arrived from the
+   * server yet, so `commitFor` refused it. The caller must say so out loud.
+   */
+  grantRobloxTime: (targetId: string, minutes: number, note: string, kind?: 'grant' | 'official') => boolean
   /** "I played 45 minutes" — pays the time back off the balance. */
   logRobloxPlay: (minutes: number) => 'ok' | 'broke'
   /** The kid's app has shown the banner for one of Dad's grants. */
@@ -2312,9 +2316,9 @@ export const useStore = create<StoreState>((set, get) => {
 
     grantRobloxTime(targetId, minutes, note, kind = 'grant') {
       const mins = Math.round(minutes)
-      if (mins <= 0) return
+      if (mins <= 0) return false
       const by = get().activeProfile()?.name ?? 'Dad'
-      commitFor(targetId, (d) => {
+      return commitFor(targetId, (d) => {
         applyRobloxEntry(d.roblox, makeRobloxEntry({ minutes: mins, kind, note: note.trim(), by }))
       })
     },

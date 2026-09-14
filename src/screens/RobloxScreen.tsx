@@ -190,7 +190,7 @@ function PlayTab({ state }: { state: RobloxState }) {
 
 /** Dad's side: put time in, with a reason Ben reads verbatim. */
 function GrantTab({ state }: { state: RobloxState }) {
-  const { grantRobloxTime } = useStore()
+  const { grantRobloxTime, kidDataFresh } = useStore()
   const [mins, setMins] = useState(60)
   const [note, setNote] = useState('')
   const [kind, setKind] = useState<'grant' | 'official'>('grant')
@@ -198,7 +198,20 @@ function GrantTab({ state }: { state: RobloxState }) {
 
   function give() {
     if (mins <= 0) return
-    grantRobloxTime(KID_ID, mins, note.trim() || (kind === 'official' ? 'Official Roblox top-up' : 'From Dad'), kind)
+    // The store refuses to write into Ben's world until his doc has arrived from
+    // the SERVER, and it says so by returning false. Cheering anyway is how
+    // hours got “granted” into nothing: the toast said saved, Firestore never
+    // heard about it, and the balance was 0 again on the next load.
+    const ok = grantRobloxTime(
+      KID_ID,
+      mins,
+      note.trim() || (kind === 'official' ? 'Official Roblox top-up' : 'From Dad'),
+      kind,
+    )
+    if (!ok) {
+      setMsg('❌ Not saved — Ben’s bank hasn’t loaded from the cloud yet. Wait a moment and try again.')
+      return
+    }
     sfx.gem()
     setMsg(`Added ${formatMinutes(mins)} to Ben’s bank.`)
     setNote('')
@@ -255,8 +268,8 @@ function GrantTab({ state }: { state: RobloxState }) {
           </button>
         </div>
 
-        <button className="btn btn--red" style={{ width: '100%' }} disabled={mins <= 0} onClick={give}>
-          Add {formatMinutes(mins)} to the bank
+        <button className="btn btn--red" style={{ width: '100%' }} disabled={mins <= 0 || !kidDataFresh} onClick={give}>
+          {kidDataFresh ? `Add ${formatMinutes(mins)} to the bank` : 'loading Ben’s bank from the cloud…'}
         </button>
         {msg && <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>{msg}</p>}
       </div>
