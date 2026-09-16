@@ -37,6 +37,7 @@ import {
   exerciseById,
   exerciseSeconds,
   holdFor,
+  fixedLoad,
   isLoaded,
   loadKindOf,
   planOne,
@@ -446,7 +447,15 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
     // 8.5 lb dumbbell floor, plus the horizontal work — is not the cold heavy
     // lift a ramp exists to protect. You move further from the anchor instead.
     const ramp =
-      cold && slot.sets >= 3 && !slot.quality && isLoaded(def) && loadKindOf(def) !== 'band' && one.plan.weight != null
+      cold &&
+      slot.sets >= 3 &&
+      !slot.quality &&
+      isLoaded(def) &&
+      loadKindOf(def) !== 'band' &&
+      // one lump of iron has nothing to climb (§18x): the kettlebell is the
+      // kettlebell on set one and on set three
+      fixedLoad(def, catalog, unit) == null &&
+      one.plan.weight != null
         ? rampToTop(one.plan.weight, slot.sets, low, high, unit)
         : null
 

@@ -1174,6 +1174,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 onChange={setWeight}
                 loadKind={current.loadKind}
                 perSide={current.loadPerSide}
+                fixed={current.loadFixed}
               />
             </div>
           )}
@@ -1225,6 +1226,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                   onChange={setWeight}
                   loadKind={current.loadKind}
                   perSide={current.loadPerSide}
+                  fixed={current.loadFixed}
                 />
               )}
             </div>
@@ -2059,6 +2061,7 @@ function WeightStepper({
   onChange,
   loadKind,
   perSide,
+  fixed,
 }: {
   unit: 'lb' | 'kg'
   value: number | undefined
@@ -2067,9 +2070,23 @@ function WeightStepper({
   loadKind?: LoadKind
   /** Two dumbbells, one movement: the number asked for is what goes on EACH. */
   perSide?: boolean
+  /** The gear weighs what it weighs (§18x) — there is nothing to dial. */
+  fixed?: number
 }) {
   // a band is not a number you dial, it is one of four things on the hook
   if (loadKind === 'band') return <BandPicker unit={unit} value={value} planned={planned} onChange={onChange} />
+  // neither is a kettlebell: ± on the dumbbell's notches would offer 42 and 48.5
+  // of a thing that is 46, which is how 46 came to be logged as 35.5
+  if (fixed != null)
+    return (
+      <div className="gym-stepper" style={{ flex: '1 0 100%' }}>
+        <label>weight ({unit})</label>
+        <div className="gym-fixed-load">
+          🏋 {fixed} {unit}
+        </div>
+        <span className="gym-stepper-hint">the gear weighs what it weighs — nothing to set</span>
+      </div>
+    )
   return (
     <Stepper
       label={perSide ? `weight per side (${unit})` : `weight (${unit})`}

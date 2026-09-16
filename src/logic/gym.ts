@@ -95,6 +95,31 @@ export function loadKindOf(e: Pick<ExerciseDef, 'equipmentIds'> | undefined): Lo
   return e?.equipmentIds?.includes(BAND_EQUIPMENT) ? 'band' : 'dumbbell'
 }
 
+/**
+ * The load an exercise has no choice about (§18x): one lump of iron with a
+ * number on it. A kettlebell is not a ladder — it is 46 lb, and the dumbbell's
+ * notches have nothing to say about it, which is how three sessions of 46 lb
+ * swings came to be logged as 35.5 (the nearest dumbbell rung).
+ *
+ * Read off the gear, like `loadKindOf`: exactly one piece of this exercise's
+ * equipment carrying a `weightLb` IS the load. Two of them (a kettlebell and a
+ * med ball in the same movement) is ambiguous, so it declines to answer and the
+ * normal suggestion takes over.
+ */
+export function fixedLoad(
+  e: Pick<ExerciseDef, 'equipmentIds'> | undefined,
+  catalog: GymCatalog | null | undefined,
+  unit: 'lb' | 'kg' = 'lb',
+): number | undefined {
+  if (!e || !catalog) return undefined
+  const loaded = (e.equipmentIds ?? [])
+    .map((id) => catalog.equipment.find((g) => g.id === id))
+    .filter((g): g is Equipment => !!g && typeof g.weightLb === 'number' && g.weightLb > 0)
+  if (loaded.length !== 1) return undefined
+  const lb = loaded[0].weightLb as number
+  return unit === 'kg' ? round(lb * 0.4536) : round(lb)
+}
+
 /** The notches available for a given unit — empty when there is no ladder to follow. */
 export function loadSteps(unit: 'lb' | 'kg' | undefined, kind: LoadKind = 'dumbbell'): readonly number[] {
   // the bands have a ladder in either unit: four of them is four of them
@@ -1029,8 +1054,11 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
   // prehab and anti-rotation, so half of yellow is not a warm-up, it is nothing.
   const unit = gym.brief.weightUnit ?? 'lb'
   const load = loadKindOf(e)
-  let weight = weightFor(e, mem, unit)
-  if (weight != null && index < 2 && load !== 'band')
+  // one lump of iron has no lighter setting (§18x), so it neither ramps in nor
+  // gets a suggestion: the weight IS the kettlebell
+  const fixed = isLoaded(e) ? fixedLoad(e, input.catalog, unit) : undefined
+  let weight = fixed ?? weightFor(e, mem, unit)
+  if (fixed == null && weight != null && index < 2 && load !== 'band')
     weight = snapLoad(Math.max(2.5, weight * (index === 0 ? 0.5 : 0.75)), unit)
 
   return {
@@ -1049,6 +1077,7 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     loadPerSide: e.loadPerSide,
     maxHold: e.maxHold,
     benchAngle: e.benchAngle,
+    loadFixed: fixed,
     // denormalised like `perSide`: a session logged in colours still reads in
     // colours after the catalog moves the exercise onto different gear
     loadKind: load === 'band' ? 'band' : undefined,

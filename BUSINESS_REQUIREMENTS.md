@@ -1077,6 +1077,20 @@ So a loaded exercise puts it in **its own card, at 46px**, above the set chips: 
 
 `ExerciseDef.benchAngle` — degrees, `0` flat, negative decline, `90` upright — and the runner says it in words on the card and on the rest screen before you walk over: **🪑 Bench: incline 30°**. The adjustable bench has a dozen holes and 30° is a different exercise from 45°, which made it exactly the kind of thing that was buried mid-sentence in `how` and read on precisely none of the sessions where it mattered. Set it in Gym → Gear → tap the exercise → **Backrest angle**; tapping the angle already set clears it, because a step-up uses the bench as a box and has no angle worth saying.
 
+### 18x. Gear that weighs what it weighs
+
+A kettlebell is not a ladder. The app had only two kinds of load — the dumbbell's notches and the bands' four colours (§18d) — so a 37.5 lb kettlebell was snapped onto the nearest dumbbell rung and **three sessions of swings were logged at 35.5 lb**, a weight that does not exist in this basement.
+
+So a piece of equipment can carry its own weight: `Equipment.weightLb`. When an exercise uses **exactly one** piece of gear that has it, that number **is** the load — `fixedLoad()` — and three things stop happening:
+
+- **no suggestion.** The per-exercise memory (§18d) isn't consulted; there is nothing to progress towards and nothing to nudge up or down. What changes the load is buying plates, and that is a Gear edit.
+- **no ramp-in.** Neither the first-two-moves de-load (§18e) nor a block's within-exercise ramp: the kettlebell is the kettlebell on set one and on set three.
+- **no stepper.** The runner shows the number locked — *🏋 46 lb · the gear weighs what it weighs* — instead of ± walking notches the thing does not have.
+
+Two pieces of weighted gear in one movement is ambiguous, so it declines to answer and the normal suggestion takes over. Set it in Gym → Gear → the **weighs __ lb** box on the equipment row; blank means adjustable, which is what the dumbbells and the bands stay.
+
+**The kettlebell went 37.5 → 46 lb on 2026-09-16** (plates added). Old sessions keep the numbers they were logged with — that is what was lifted, wrong rounding and all.
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.

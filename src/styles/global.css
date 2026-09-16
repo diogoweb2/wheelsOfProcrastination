@@ -2728,6 +2728,16 @@ input, select { font-family: inherit; }
 }
 .gym-next-load-sub { margin-top: 2px; font-size: 12px; font-weight: 800; color: var(--muted); }
 
+/* --- gear that weighs what it weighs: no stepper, just the number (§18x) --- */
+.gym-gear-weight { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; }
+.gym-gear-weight input { width: 68px; padding: 3px 6px; font-size: 12px; font-weight: 900; }
+
+.gym-fixed-load {
+  padding: 8px 10px; border-radius: 12px; text-align: center;
+  background: var(--bg2); border: 2px solid var(--line);
+  font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--text);
+}
+
 /* --- the optional band warm-up (§18u) --- */
 .gym-warmup { margin-top: 12px; border-color: var(--gold); }
 

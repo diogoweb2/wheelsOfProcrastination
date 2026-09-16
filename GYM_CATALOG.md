@@ -42,7 +42,7 @@ Pair of adjustable dumbbells, TRULAP, 8.5 lb to 92 lb per hand. TWO HARD LIMITS,
 
 ### 🏋 Kettlebell
 
-37.5lb
+46 lb. Adjustable-plate kettlebell — it was 37.5 lb until plates were added on 2026-09-16. ONE weight at a time: the dumbbell notches do not apply to it (BUSINESS_REQUIREMENTS.md §18x).
 
 *Used by 2 exercises.*
 

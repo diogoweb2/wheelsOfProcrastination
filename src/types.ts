@@ -869,6 +869,13 @@ export interface Equipment {
   emoji: string
   img?: string // thumbnail in public/gym/, written by the photo script
   notes?: string // "adjustable 5–25 lb", "resistance bands: light/medium/heavy" — the coach reads this
+  /**
+   * What this thing WEIGHS, in pounds, when it is one fixed lump of iron — a
+   * kettlebell, a med ball, a weight vest. It is not a ladder: there is exactly
+   * one number and the app must stop pretending the dumbbell's notches apply to
+   * it (§18x). Absent on anything adjustable, and on anything that isn't a load.
+   */
+  weightLb?: number
   addedBy: 'ai' | 'manual'
   createdAt: string
   retired?: boolean // kept for history, never planned again
@@ -1181,6 +1188,8 @@ export interface SessionExercise {
   loadPerSide?: boolean // the weight is what's on EACH side; denormalised like `perSide`
   maxHold?: boolean // open-ended hold, the first side sets the target; denormalised like `perSide`
   benchAngle?: number // backrest degrees; denormalised like `perSide` so old sessions read right
+  /** The gear's own weight when there is only one (§18x) — the runner shows it locked, not as a stepper. */
+  loadFixed?: number
   /** The optional band set that opens the exercise (§18u). Absent until it is offered. */
   warmup?: WarmupSet
   ladder?: boolean

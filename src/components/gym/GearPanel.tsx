@@ -99,6 +99,35 @@ function EquipmentList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => v
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 900, fontSize: 15 }}>{eq.name}</div>
             {eq.notes && <div className="muted" style={{ fontSize: 12 }}>{eq.notes}</div>}
+            {/* One fixed lump of iron (§18x). Filled in, it IS the load for every
+                exercise that uses this and nothing else heavy — no suggestion, no
+                ramp, no ± on notches it doesn't have. Blank means adjustable. */}
+            <div className="muted gym-gear-weight">
+              <label htmlFor={`w-${eq.id}`}>weighs</label>
+              <input
+                id={`w-${eq.id}`}
+                type="number"
+                inputMode="decimal"
+                placeholder="—"
+                defaultValue={eq.weightLb ?? ''}
+                onBlur={(ev) => {
+                  const n = Number(ev.target.value)
+                  const next = Number.isFinite(n) && n > 0 ? Math.round(n * 2) / 2 : undefined
+                  if (next === eq.weightLb) return
+                  sfx.click()
+                  save((c) => ({
+                    ...c,
+                    equipment: c.equipment.map((x) => {
+                      if (x.id !== eq.id) return x
+                      const copy = { ...x, weightLb: next }
+                      if (next === undefined) delete copy.weightLb
+                      return copy
+                    }),
+                  }))
+                }}
+              />
+              <span>lb — blank if it adjusts</span>
+            </div>
             <div className="muted" style={{ fontSize: 11 }}>{eq.addedBy === 'ai' ? 'added from a photo' : 'added by hand'}</div>
           </div>
           <button

@@ -46,13 +46,14 @@
       "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-7e29076d.webp?alt=media&token=98b45cdc-84bd-492e-9247-07f0d161fab9"
     },
     {
-      "notes": "37.5lb",
+      "notes": "46 lb. Adjustable-plate kettlebell — it was 37.5 lb until plates were added on 2026-09-16. ONE weight at a time: the dumbbell notches do not apply to it (BUSINESS_REQUIREMENTS.md §18x).",
       "createdAt": "2026-08-20T22:41:01.592Z",
       "img": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fequipment%2Feq-11c7fb07.webp?alt=media&token=d25bd6f1-58e9-48fa-beaf-6eda5a95c146",
       "name": "Kettlebell",
       "emoji": "🏋",
       "addedBy": "ai",
-      "id": "eq-11c7fb07"
+      "id": "eq-11c7fb07",
+      "weightLb": 46
     },
     {
       "emoji": "🏀",
