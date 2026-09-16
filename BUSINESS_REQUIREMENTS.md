@@ -1051,6 +1051,32 @@ A lateral raise is a weak answer to the first and a strong one to the second; a 
 
 **Where the words come from** (`src/logic/gymPickleball.ts`). Every exercise in the seeded catalog is **written by hand** — a real reason beats a generated one every time, and these name the actual mechanism (the split step, the adductor lunge, the extensor tendon), not a generic benefit. Anything the written map has never heard of — **an exercise you add in the Gear tab**, or one that joins the catalog later — is **derived from what the app already knows about it**: its primary body part, whether it is held or counted, whether it is one side at a time. So a new exercise has both answers **the moment it exists**, offline, with no key and no waiting, and the ➕ Add an exercise form shows you what it will say as soon as you have picked a main body part.
 
+### 18u. The optional band warm-up
+
+**The first heavy set of a movement is the one you are least ready for**, and the ramp (§18e) only fixes it where a ramp fits — three sets or more, a cold body part, a dumbbell to climb. The presses want something before that: the same movement, a **band**, and about **double the reps**, done at nothing like effort.
+
+So a **loaded, counted** exercise (`kind: 'weight'`, not itself a band movement) opens with the question, once, before its first set: **🔥 Warm-up set first?** The card names the band you used last time, the foot button becomes **🔥 WARM-UP SET**, and **Skip it** is one tap and is recorded — an answer, not a silence, so a refresh mid-exercise never asks twice. Saying yes runs the ordinary START → DONE loop with a band picker in place of the weight stepper, and is followed by **ordinary rest** before set 1, because a warm-up you go straight from is not a warm-up.
+
+**The band is remembered, not configured** (`ExerciseMemory.warmupBand`). It is written the moment you arm the set, so every session after that the offer arrives pre-answered — a warm-up you have to set up is a warm-up you skip.
+
+**It is not a set, and nothing downstream pretends it is.** It lives on `SessionExercise.warmup` and never joins `sets`: it earns no Berries, breaks no records (§18p), moves no weight suggestion (§18d), counts as no volume on the Body map (§18t), and is invisible to the pace grade (§18c-3). A rubber band held for twenty reps is not evidence about anything except that you are warm. The session's chip row shows it as a 🔥 chip with the band's colour, so the history still says it happened.
+
+**It makes the session longer, on purpose.** Two or three minutes an exercise, and the session countdown (§18c-1b) counts them like any other minute — going over the budget is allowed and always was.
+
+**The fifth band.** A **GREEN 230 lb** powerlifting band joined the four loops on 2026-09-15 — the four were prehab tools under the dumbbell's 8.5 lb floor, and none of them was heavy enough to warm up a press. It is on the same ladder as the others (`BANDS`), so it is pickable anywhere a band is.
+
+### 18v. The next set's load, at a size you can read from standing
+
+The weight for the set in front of you used to be a clause inside a 12px grey line that also carried the reps, the range, the ramp and the rest: `3 × 12–10 · 25 → 32 lb · rest 86s`. On the floor of a basement, with the phone by your foot and the plan already in your hands, the only thing you actually need out of that is **what to set the dumbbell to**.
+
+So a loaded exercise puts it in **its own card, at 46px**, above the set chips: the load for the **next** set, what set it is (`set 2 of 3`), and the reps asked for. A per-side load (§18d) says both halves — **32** big, *on EACH side · 64 lb total* underneath. A band says the **colour**, with a dot in it, because the colour is what you pick up.
+
+**And the line underneath stops repeating it.** The grey plan line on the runner card drops the weight entirely when the big card is showing — including the ramp's `25 → 32`, which is a range where a single instruction belongs. The Plan and preview screens keep the full line: there you are reading the shape of the session, not lifting.
+
+### 18w. What angle the bench goes to
+
+`ExerciseDef.benchAngle` — degrees, `0` flat, negative decline, `90` upright — and the runner says it in words on the card and on the rest screen before you walk over: **🪑 Bench: incline 30°**. The adjustable bench has a dozen holes and 30° is a different exercise from 45°, which made it exactly the kind of thing that was buried mid-sentence in `how` and read on precisely none of the sessions where it mattered. Set it in Gym → Gear → tap the exercise → **Backrest angle**; tapping the angle already set clears it, because a step-up uses the bench as a box and has no angle worth saying.
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.

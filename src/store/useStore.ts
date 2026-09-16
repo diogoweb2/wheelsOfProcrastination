@@ -769,6 +769,13 @@ interface StoreState {
    */
   gymLogSet: (exId: string, reps: number, weight?: number, sec?: number, sides?: number[]) => void
   gymUndoSet: (exId: string) => void
+  /**
+   * Arm the band warm-up for one exercise (§18u) and REMEMBER the band, so the
+   * offer comes pre-answered next time. `band` is the stored load of the band.
+   */
+  gymArmWarmup: (exId: string, band: number, reps: number) => void
+  /** Bank the band set that was just done, or mark the offer turned down. */
+  gymLogWarmup: (exId: string, done: { reps: number; sec: number } | null) => void
   /** Record the rest you actually took after a set, and what was offered, in seconds. */
   gymLogRest: (exId: string, seconds: number, targetSec?: number) => void
   /** Rate an exercise from inside the runner (asked the first time you meet one). */
@@ -4050,6 +4057,36 @@ export const useStore = create<StoreState>((set, get) => {
           s.workSec = Math.max(0, (s.workSec ?? 0) - gone.sec)
           s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - setSeconds(se.kind, planned ?? gone.reps))
         }
+      })
+    },
+
+    gymArmWarmup(exId, band, reps) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (!se) return
+        se.warmup = { band, reps }
+        // the band is remembered on the exercise, not on the session: the point
+        // is that next time it is already chosen
+        const mem = d.gym.ex[exId] ?? { timesDone: 0, totalReps: 0 }
+        mem.warmupBand = band
+        d.gym.ex[exId] = mem
+      })
+    },
+
+    gymLogWarmup(exId, done) {
+      commit((d) => {
+        const se = d.gym.active?.exercises.find((e) => e.exId === exId)
+        if (!se) return
+        // turning the offer down before arming it still has to be recorded, or a
+        // refresh mid-exercise would ask again. `band: 0` is "no band chosen".
+        if (!se.warmup) {
+          if (!done) se.warmup = { band: 0, reps: 0, skipped: true }
+          return
+        }
+        if (done) se.warmup.done = { reps: done.reps, sec: Math.round(done.sec) }
+        else se.warmup.skipped = true
+        // a warm-up is not work: it stays out of `sets`, out of the volume, and
+        // out of the pace grade (§18c-3), which only ever reads the real sets
       })
     },
 

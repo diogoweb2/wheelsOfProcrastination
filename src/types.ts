@@ -970,6 +970,14 @@ export interface ExerciseDef {
    * `defaultReps` stays as the floor everything else (budget, grade) reads.
    */
   maxHold?: boolean
+  /**
+   * Where the backrest goes, in degrees: `0` flat, `90` bolt upright, negative
+   * for decline. The adjustable bench has a dozen holes and the difference
+   * between 30° and 45° is a different exercise, so the number belongs on the
+   * row rather than buried in the middle of `how`. Only meaningful on an
+   * exercise that actually lies on a bench; absent everywhere else.
+   */
+  benchAngle?: number
   backRisk?: boolean // loads the lower back — skipped when the profile flags back issues
   ladder?: boolean // eligible for the rep-ladder game (pushups, pullups, squats…)
   demo?: ExerciseDemo // animation + still, once `npm run gym:demos` has found one
@@ -1041,6 +1049,13 @@ export interface ExerciseMemory {
    */
   repPlan?: RepPlan
   bestWeight?: number
+  /**
+   * The band you warm this movement up with (§18u). Remembered the first time
+   * you pick one, so the offer comes pre-answered every session after — the
+   * whole point being that a warm-up you have to configure is a warm-up you
+   * skip. Absent until you have warmed this exercise up once.
+   */
+  warmupBand?: number
   notes?: string // your own note; the coach reads it
 }
 
@@ -1081,6 +1096,24 @@ export interface LadderState {
   level: number // step within the cycle
   cyclesSinceTest: number
   lastTestDay?: string
+}
+
+/**
+ * The band set that opens a loaded exercise (§18u).
+ *
+ * It is NOT a `LoggedSet` and never joins `sets`: a warm-up is deliberately
+ * light and deliberately long, so letting it into the log would drag the
+ * working weight down, invent personal records out of a rubber band, and count
+ * as training volume it isn't. It rides alongside instead — the band you chose,
+ * the reps asked for, and what actually happened — so the session still
+ * remembers you did it.
+ */
+export interface WarmupSet {
+  /** The band, stored in pounds/kg like every other load (see `BANDS`). */
+  band: number
+  reps: number // the ask: high on purpose
+  done?: { reps: number; sec: number }
+  skipped?: boolean
 }
 
 /** One set you actually did. `reps` = seconds for 'timed', minutes for 'cardio'. */
@@ -1147,6 +1180,9 @@ export interface SessionExercise {
   loadKind?: LoadKind // 'band' = the load is a colour, not a number; denormalised like `perSide`
   loadPerSide?: boolean // the weight is what's on EACH side; denormalised like `perSide`
   maxHold?: boolean // open-ended hold, the first side sets the target; denormalised like `perSide`
+  benchAngle?: number // backrest degrees; denormalised like `perSide` so old sessions read right
+  /** The optional band set that opens the exercise (§18u). Absent until it is offered. */
+  warmup?: WarmupSet
   ladder?: boolean
   ladderTest?: boolean // this one is a max-rep test — do as many as you can
   why?: string // the coach's reason, shown on the preview card

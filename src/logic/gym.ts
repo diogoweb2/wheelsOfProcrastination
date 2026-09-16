@@ -74,6 +74,10 @@ export const BANDS = [
   { color: 'Red', lb: 35, kg: 16, css: '#e03131' },
   { color: 'Black', lb: 65, kg: 30, css: '#4a4a4a' },
   { color: 'Purple', lb: 85, kg: 40, css: '#8b3fd1' },
+  // bought 2026-09-15. A different animal from the other four: it is a
+  // powerlifting band, and it is the one that makes a band warm-up (§18u)
+  // possible for the heavy presses.
+  { color: 'Green', lb: 230, kg: 104, css: '#2f9e44' },
 ] as const
 
 const BAND_LB = BANDS.map((b) => b.lb)
@@ -146,6 +150,26 @@ export function loadLabel(
   const band = kind === 'band' ? bandFor(w, unit) : undefined
   if (band) return `${band.color} band (${w} ${unit})`
   return eachSide ? `${w} ${unit} each side (${round(w * 2)} total)` : `${w} ${unit}`
+}
+
+/**
+ * The backrest, in words. The number is the setting; the word is what you
+ * recognise when you are standing over the bench with a dumbbell in each hand.
+ */
+export function benchAngleLabel(deg: number): string {
+  if (deg <= -5) return `decline ${Math.abs(deg)}°`
+  if (deg < 10) return 'flat'
+  if (deg >= 80) return 'upright'
+  return `incline ${deg}°`
+}
+
+/**
+ * How many reps a band warm-up asks for (§18u). Deliberately about double the
+ * working set and never fewer than 15: the job is blood and groove, and a band
+ * you can do eight of is a band that is warming nothing up.
+ */
+export function warmupReps(workingReps: number): number {
+  return Math.max(15, Math.min(30, Math.round(workingReps * 2)))
 }
 
 /** Max exercises in a session, by minute budget. */
@@ -1024,6 +1048,7 @@ function buildSessionExercise(e: ExerciseDef, input: PlanInput, index: number): 
     loaded: e.loaded,
     loadPerSide: e.loadPerSide,
     maxHold: e.maxHold,
+    benchAngle: e.benchAngle,
     // denormalised like `perSide`: a session logged in colours still reads in
     // colours after the catalog moves the exercise onto different gear
     loadKind: load === 'band' ? 'band' : undefined,

@@ -30,6 +30,7 @@ import {
   SESSION_MINUTES,
   allExercises,
   bandFor,
+  benchAngleLabel,
   bestsFor,
   isLoaded,
   isRamped,
@@ -42,6 +43,7 @@ import {
   sessionReport,
   sessionSeconds,
   stepLoad,
+  warmupReps,
   romanChairMove,
 } from '../../logic/gym'
 import type { BlockAge } from '../../logic/gymBlock'
@@ -764,7 +766,8 @@ function Preview({ session }: { session: GymSession }) {
 type Phase = 'ready' | 'working' | 'resting' | 'setup'
 
 function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Banked) => void }) {
-  const { data, gymLogSet, gymUndoSet, gymLogRest, gymRateInSession, gymSkip, gymAbandon } = useStore()
+  const { data, gymLogSet, gymUndoSet, gymLogRest, gymRateInSession, gymSkip, gymAbandon, gymArmWarmup, gymLogWarmup } =
+    useStore()
   // a refresh mid-session lands on the first exercise that still has sets owed,
   // not back at the top — `gym.active` is synced, so this is a real recovery
   const [idx, setIdx] = useState(() => {
@@ -786,6 +789,12 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    * them as hold time makes the second side look longer than it was held.
    */
   const [sidePrep, setSidePrep] = useState(false)
+  /**
+   * The band set that opens a loaded exercise (§18u) — `true` while you are
+   * actually doing it, so the same START/DONE loop drives a set that is
+   * deliberately not a set.
+   */
+  const [warming, setWarming] = useState(false)
   const [finishing, setFinishing] = useState(false)
   /** The record the set you just logged beat, if it beat one. Cleared on a tap or on its own. */
   const [pr, setPr] = useState<(SetRecord & { exName: string }) | null>(null)
@@ -796,6 +805,15 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const current = list[Math.min(idx, list.length - 1)] as SessionExercise | undefined
   const memory = current ? data.gym.ex[current.exId] : undefined
   const needsRating = !!current && !current.rating && !memory?.rating
+
+  /**
+   * A band warm-up is offered on a LOADED, COUNTED movement that hasn't started
+   * yet — the heavy presses and rows. Not on a band exercise (the band is the
+   * work), not on a hold, and never twice: once the offer has been answered,
+   * `warmup` exists and the card is gone for the rest of the session.
+   */
+  const canWarmUp = (e: SessionExercise | undefined): boolean =>
+    !!e && !e.skipped && e.kind === 'weight' && e.loadKind !== 'band' && e.sets.length === 0 && !e.warmup
 
   const nextSetNo = current ? current.sets.length : 0
   const plannedReps = current?.plan.reps[Math.min(nextSetNo, (current?.plan.reps.length ?? 1) - 1)] ?? 10
@@ -810,6 +828,8 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
   const [reps, setReps] = useState(plannedReps)
   const [weight, setWeight] = useState<number | undefined>(armedWeight)
+  /** The band picked for the warm-up, until it is armed. Undefined = whatever you used last time. */
+  const [band, setBand] = useState<number | undefined>(undefined)
 
   // a new exercise (or a new set) re-arms the inputs with what was prescribed —
   // you only touch them when reality differs, and that difference is the signal
@@ -817,6 +837,12 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     setReps(plannedReps)
     setWeight(armedWeight)
   }, [idx, nextSetNo, plannedReps, armedWeight])
+
+  // a new exercise brings its own band and its own warm-up question
+  useEffect(() => {
+    setBand(undefined)
+    setWarming(false)
+  }, [idx])
 
   // hold the screen on for the whole workout, so a phone on the bench doesn't
   // lock between sets and swallow the rest timer
@@ -855,8 +881,33 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const begin = () => {
     setSideSec([])
     setSidePrep(false)
+    setWarming(false)
     setStartedAt(Date.now())
     setPhase('working')
+  }
+
+  /** The band this warm-up would use: your last answer for this movement, or the lightest one. */
+  const bandDefault = memory?.warmupBand ?? (unit === 'kg' ? BANDS[0].kg : BANDS[0].lb)
+  const chosenBand = band ?? bandDefault
+  const warmAsk = warmupReps(plannedReps)
+
+  /** Yes to the warm-up: remember the band, then run it like any other set. */
+  const startWarmup = () => {
+    if (!current) return
+    gymArmWarmup(current.exId, chosenBand, warmAsk)
+    setReps(warmAsk)
+    setSideSec([])
+    setSidePrep(false)
+    setWarming(true)
+    setStartedAt(Date.now())
+    setPhase('working')
+  }
+
+  /** No to it — recorded as an answer, so a refresh doesn't ask again. Straight into setup. */
+  const skipWarmup = () => {
+    if (!current) return
+    gymLogWarmup(current.exId, null)
+    setPhase('setup')
   }
 
   /**
@@ -911,12 +962,23 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       return
     }
     setIdx(idx + 1)
-    setPhase('setup')
+    // the warm-up question has to be asked BEFORE the setup countdown starts the
+    // real set, so an exercise that owes one holds in 'ready'
+    setPhase(canWarmUp(list[idx + 1]) ? 'ready' : 'setup')
   }
 
   /** DONE — measure the set, log it, and drop straight into rest. */
   const done = () => {
     const thisSide = Math.max(1, (Date.now() - startedAt) / 1000)
+    // the band set is not a set: it is banked on `warmup`, pays nothing, beats
+    // no records, and is followed by ordinary rest before the real set 1
+    if (warming) {
+      gymSfx.logged()
+      gymLogWarmup(current.exId, { reps, sec: thisSide })
+      setWarming(false)
+      setPhase('resting')
+      return
+    }
     // every side of the set, the one just finished included — for anything that
     // isn't per-side that is simply the one clock
     const sides = [...sideSec, thisSide]
@@ -962,7 +1024,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       return
     }
     setIdx(idx + 1)
-    setPhase('setup')
+    setPhase(canWarmUp(list[idx + 1]) ? 'ready' : 'setup')
   }
 
   return (
@@ -1028,7 +1090,11 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             <ExerciseDemo demo={demos.get(current.exId)} emoji={current.emoji} size={96} autoPlay className="gym-ex-emoji--big" />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 900, fontSize: 19 }}>{current.name}</div>
-              <div className="muted" style={{ fontSize: 12 }}>{planLine(current, unit)}</div>
+              {/* the load lives in its own card now (§18v), so the line under
+                  the name carries everything EXCEPT the weight */}
+              <div className="muted" style={{ fontSize: 12 }}>
+                {planLine(current, unit, { load: !isLoaded(current) })}
+              </div>
             </div>
             <VideoButton exId={current.exId} name={current.name} />
           </div>
@@ -1036,7 +1102,29 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           <ExerciseBrief ex={current} setNo={nextSetNo} topped={memory?.repPlan?.phase === 3} />
           <DemoCaption demo={demos.get(current.exId)} />
 
+          {/* The one number you walk to the rack with. It used to be a clause
+              inside a grey plan line — "3 × 12–10 · 25 → 32 lb" — which is the
+              whole plan in the place where only the NEXT set matters. */}
+          {isLoaded(current) && !warming && armedWeight != null && (
+            <NextLoad
+              weight={armedWeight}
+              unit={unit}
+              loadKind={current.loadKind}
+              perSide={current.loadPerSide}
+              setNo={nextSetNo + 1}
+              sets={current.plan.reps.length}
+              reps={plannedReps}
+              repLabel={repLabel(current)}
+            />
+          )}
+
           <div className="gym-set-row">
+            {current.warmup?.done && (
+              <span className="gym-set done" title="band warm-up">
+                🔥{current.warmup.done.reps}
+                <em>{bandFor(current.warmup.band, unit)?.color.toLowerCase() ?? '—'}</em>
+              </span>
+            )}
             {current.plan.reps.map((r, i) => {
               const logged = current.sets[i]
               return (
@@ -1054,6 +1142,20 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
                 </span>
               ))}
           </div>
+
+          {canWarmUp(current) && !warming && phase !== 'working' && (
+            <WarmupOffer
+              unit={unit}
+              band={chosenBand}
+              reps={warmAsk}
+              remembered={memory?.warmupBand != null}
+              onBand={setBand}
+              onSkip={() => {
+                sfx.click()
+                skipWarmup()
+              }}
+            />
+          )}
 
           {phase === 'setup' && <SetupCountdown onDone={begin} />}
           {phase === 'setup' && loadNote}
@@ -1099,6 +1201,19 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               side={twoSided ? (sideSec.length === 0 ? 'first' : 'second') : undefined}
               banked={sideSec[0]}
             />
+          ) : phase === 'working' && warming ? (
+            // the band set: reps you count, a colour instead of a load, and no
+            // record to beat — it is the groove, not the work
+            <>
+              <div className="gym-banner">
+                🔥 <strong>Warm-up set.</strong> {warmAsk} easy {repLabel(current)} with the band, nothing near
+                failure. It is not logged as a set and it beats no records.
+              </div>
+              <div className="gym-inputs">
+                <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
+                <BandPicker unit={unit} value={chosenBand} planned={chosenBand} onChange={setBand} />
+              </div>
+            </>
           ) : phase === 'working' ? (
             <div className="gym-inputs">
               <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
@@ -1219,6 +1334,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             <button className="btn" onClick={done}>
               ✓ DONE
             </button>
+          ) : canWarmUp(current) && phase !== 'setup' ? (
+            <button
+              className="btn"
+              onClick={() => {
+                sfx.fanfare()
+                startWarmup()
+              }}
+            >
+              🔥 WARM-UP SET
+            </button>
           ) : (
             <button
               className="btn"
@@ -1233,6 +1358,99 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
         </div>
       )}
     </>
+  )
+}
+
+/**
+ * THE NUMBER YOU WALK TO THE RACK WITH (§18v).
+ *
+ * A set is one instruction — *put this on the dumbbell and do this many* — and
+ * it used to be a clause in a 12px grey line that also carried the rep range,
+ * the ramp, the rest and the session budget. Standing over the rack with the
+ * phone on the floor, that is unreadable. So the next set's real load gets a
+ * card of its own, at a size you can read from standing, and the plan line
+ * underneath stops repeating it.
+ */
+function NextLoad({
+  weight,
+  unit,
+  loadKind,
+  perSide,
+  setNo,
+  sets,
+  reps,
+  repLabel,
+}: {
+  weight: number
+  unit: 'lb' | 'kg'
+  loadKind?: LoadKind
+  perSide?: boolean
+  setNo: number
+  sets: number
+  reps: number
+  repLabel: string
+}) {
+  const band = loadKind === 'band' ? bandFor(weight, unit) : undefined
+  return (
+    <div className="gym-next-load">
+      <div className="gym-next-load-head">
+        set {Math.min(setNo, sets)} of {sets} · {reps} {repLabel}
+      </div>
+      <div className="gym-next-load-big">
+        {band ? (
+          <>
+            <span className="gym-next-load-dot" style={{ '--band': band.css } as CSSProperties} />
+            {band.color}
+          </>
+        ) : (
+          <>
+            {weight} <small>{unit}</small>
+          </>
+        )}
+      </div>
+      {perSide && <div className="gym-next-load-sub">on EACH side · {weight * 2} {unit} total</div>}
+      {band && <div className="gym-next-load-sub">the {band.color.toLowerCase()} band ({weight} {unit})</div>}
+    </div>
+  )
+}
+
+/**
+ * "Warm this one up first?" (§18u)
+ *
+ * Offered on the heavy counted lifts, before the first set, and answered in one
+ * tap either way — the band is already the one you used last time, because a
+ * warm-up you have to configure is a warm-up you skip. Saying no is recorded as
+ * an answer, not left open, so it is asked once per exercise per session.
+ */
+function WarmupOffer({
+  unit,
+  band,
+  reps,
+  remembered,
+  onBand,
+  onSkip,
+}: {
+  unit: 'lb' | 'kg'
+  band: number
+  reps: number
+  remembered: boolean
+  onBand: (n: number) => void
+  onSkip: () => void
+}) {
+  const chosen = bandFor(band, unit)
+  return (
+    <div className="card gym-warmup">
+      <div style={{ fontWeight: 900, fontSize: 15 }}>🔥 Warm-up set first?</div>
+      <p className="muted" style={{ fontSize: 12, margin: '4px 0 8px' }}>
+        {reps} easy reps of the same movement with a band, then rest, then the real work. It costs a couple of
+        minutes and it is never logged as a set.{' '}
+        {remembered ? `Last time you used the ${chosen?.color.toLowerCase()} one.` : 'Pick a band — it is remembered.'}
+      </p>
+      <BandPicker unit={unit} value={band} planned={band} onChange={onBand} />
+      <button className="btn btn--ghost btn--small" style={{ width: '100%', marginTop: 8 }} onClick={onSkip}>
+        Skip it — straight into the work
+      </button>
+    </div>
   )
 }
 
@@ -1357,6 +1575,13 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
               the right. Log it once, when both are done.
             </>
           )}
+        </div>
+      )}
+
+      {ex.benchAngle != null && (
+        <div className="gym-banner">
+          🪑 <strong>Bench: {benchAngleLabel(ex.benchAngle)}.</strong> Set it before you pick anything up — the angle
+          is what makes this a different exercise from the one next to it.
         </div>
       )}
 
@@ -1938,7 +2163,8 @@ function repAsk(e: SessionExercise): string {
   return new Set(e.plan.reps).size === 1 ? `${e.plan.reps.length} × ${e.plan.reps[0]}` : e.plan.reps.join(' · ')
 }
 
-function planLine(e: SessionExercise, unit: 'lb' | 'kg'): string {
+function planLine(e: SessionExercise, unit: 'lb' | 'kg', opts: { load?: boolean } = {}): string {
+  const withLoad = opts.load !== false
   const bits: string[] = []
   if (e.ladderTest) bits.push('1 all-out set')
   else if (e.repRange) {
@@ -1954,7 +2180,9 @@ function planLine(e: SessionExercise, unit: 'lb' | 'kg'): string {
     )
   } else bits.push(`${repAsk(e)} ${repLabel(e)}`)
   // a ramp is two numbers: where it starts and where it ends up
-  if (isRamped(e) && e.plan.weights) bits.push(`${e.plan.weights[0]} → ${e.plan.weight} ${unit}`)
+  if (!withLoad) {
+    /* the NextLoad card is saying it, bigger */
+  } else if (isRamped(e) && e.plan.weights) bits.push(`${e.plan.weights[0]} → ${e.plan.weight} ${unit}`)
   else if (e.plan.weight) bits.push(loadLabel(e.plan.weight, unit, e.loadKind, e.loadPerSide))
   bits.push(`rest ${e.plan.restSec}s`)
   return bits.join(' · ')

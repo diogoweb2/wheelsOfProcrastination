@@ -74,7 +74,7 @@
       "id": "eq-bands",
       "name": "Resistance bands",
       "emoji": "🎗️",
-      "notes": "TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour. ONE MORE JOB, added with the Nordic pad: a band can ASSIST a movement instead of resisting it (looped over the pull-up bar and under the chest to take weight off a Nordic curl). That is not covered by the \"never where a dumbbell would do\" rule above — nothing else here can unload a bodyweight eccentric — and it progresses BACKWARDS: thickest band first, lighter as you get stronger.",
+      "notes": "TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb), and a fifth bought 2026-09-15: GREEN, a powerlifting band labelled 230 lb — the only one heavy enough to warm up a press (BUSINESS_REQUIREMENTS.md §18u). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour. ONE MORE JOB, added with the Nordic pad: a band can ASSIST a movement instead of resisting it (looped over the pull-up bar and under the chest to take weight off a Nordic curl). That is not covered by the \"never where a dumbbell would do\" rule above — nothing else here can unload a bodyweight eccentric — and it progresses BACKWARDS: thickest band first, lighter as you get stronger.",
       "addedBy": "manual",
       "createdAt": "2026-08-24T02:44:00.477Z"
     },
@@ -127,7 +127,8 @@
         "match": "exact"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 0
     },
     {
       "id": "mv-incline-dumbbell-bench-press",
@@ -160,7 +161,8 @@
         "source": "ExerciseDB"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 30
     },
     {
       "id": "mv-decline-dumbbell-bench-press",
@@ -192,7 +194,8 @@
         "sourceName": "dumbbell decline bench press"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": -20
     },
     {
       "id": "mv-dips",
@@ -378,7 +381,8 @@
         "source": "ExerciseDB"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 45
     },
     {
       "id": "mv-one-arm-dumbbell-row",
@@ -410,7 +414,8 @@
         "sourceId": "C0MA9bC"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 0
     },
     {
       "id": "mv-seated-dumbbell-shoulder-press",
@@ -442,7 +447,8 @@
         "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-seated-dumbbell-shoulder-press.webp?alt=media&token=78511fb9-aa47-41e7-8c7b-aa66dd133eb0"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 90
     },
     {
       "id": "mv-dumbbell-lateral-raise",
@@ -504,7 +510,8 @@
         "match": "close"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 30
     },
     {
       "id": "mv-prone-dumbbell-y-raise",
@@ -536,7 +543,8 @@
         "sourceId": "PbzNu7c"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 30
     },
     {
       "id": "mv-dumbbell-biceps-curl",
@@ -628,7 +636,8 @@
         "sourceName": "dumbbell incline curl"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 45
     },
     {
       "id": "mv-lying-dumbbell-triceps-extension",
@@ -659,7 +668,8 @@
         "sourceId": "mpKZGWz"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 0
     },
     {
       "id": "mv-seated-overhead-dumbbell-triceps-extensi",
@@ -690,7 +700,8 @@
         "sourceId": "kont8Ut"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "benchAngle": 90
     },
     {
       "id": "mv-dumbbell-bulgarian-split-squat",
@@ -888,7 +899,9 @@
       "id": "bw-calf-raise",
       "name": "Calf Raise",
       "emoji": "🦶",
-      "equipmentIds": [],
+      "equipmentIds": [
+        "eq-7e29076d"
+      ],
       "kind": "bodyweight",
       "parts": [
         "legs"
@@ -908,7 +921,8 @@
         "sourceName": "bodyweight standing calf raise"
       },
       "addedBy": "manual",
-      "createdAt": "2026-08-06T00:00:00.000Z"
+      "createdAt": "2026-08-06T00:00:00.000Z",
+      "loaded": true
     },
     {
       "id": "mv-single-leg-calf-raise",
@@ -971,7 +985,9 @@
         "match": "close"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-23T01:20:54.910Z"
+      "createdAt": "2026-08-23T01:20:54.910Z",
+      "benchAngle": 0,
+      "loadPerSide": true
     },
     {
       "id": "bw-glute-bridge",
@@ -1138,7 +1154,8 @@
         "source": "ExerciseDB"
       },
       "addedBy": "manual",
-      "createdAt": "2026-08-06T00:00:00.000Z"
+      "createdAt": "2026-08-06T00:00:00.000Z",
+      "maxHold": true
     },
     {
       "id": "mv-copenhagen-plank",

@@ -2709,6 +2709,28 @@ input, select { font-family: inherit; }
 }
 .gym-clock-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; transition: width 200ms linear; }
 
+/* --- the next set's load: the one number you walk to the rack with (§18v) --- */
+.gym-next-load {
+  margin-top: 12px; padding: 10px 12px; text-align: center;
+  border-radius: 14px; background: var(--bg2); border: 2px solid var(--gold);
+}
+.gym-next-load-head {
+  font-size: 12px; font-weight: 900; color: var(--muted); letter-spacing: 0.3px; text-transform: uppercase;
+}
+.gym-next-load-big {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 2px; font-size: 46px; font-weight: 900; line-height: 1.05;
+  letter-spacing: -1.5px; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.gym-next-load-big small { font-size: 20px; font-weight: 900; color: var(--muted); }
+.gym-next-load-dot {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--band); border: 2px solid var(--line);
+}
+.gym-next-load-sub { margin-top: 2px; font-size: 12px; font-weight: 800; color: var(--muted); }
+
+/* --- the optional band warm-up (§18u) --- */
+.gym-warmup { margin-top: 12px; border-color: var(--gold); }
+
 /* --- end-of-session report --- */
 .gym-grade {
   font-size: 64px; font-weight: 900; line-height: 1; letter-spacing: -2px;

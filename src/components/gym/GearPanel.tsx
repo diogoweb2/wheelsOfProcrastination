@@ -19,6 +19,15 @@ import { uploadGymImage } from '../../store/cloud'
 
 const RATINGS: ExerciseRating[] = ['hate', 'dislike', 'ok', 'like', 'love']
 
+/** The holes worth having on the adjustable bench, in the order you meet them. */
+const BENCH_ANGLES = [
+  { deg: -20, label: 'decline' },
+  { deg: 0, label: 'flat' },
+  { deg: 30, label: '30°' },
+  { deg: 45, label: '45°' },
+  { deg: 90, label: 'upright' },
+] as const
+
 export function GearPanel() {
   const { gymCatalog, gymSaveCatalog } = useStore()
   const [tab, setTab] = useState<'gear' | 'moves'>('gear')
@@ -331,6 +340,15 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
   const unit = data.gym.brief.weightUnit ?? 'lb'
 
   const list = useMemo(() => allExercises(gymCatalog), [gymCatalog])
+  /**
+   * Which gear is a bench you lie on. Read off the equipment names rather than
+   * hard-coded ids, so a bench bought next year needs no code change — and the
+   * backrest field only appears on exercises that actually use one.
+   */
+  const benches = useMemo(
+    () => new Set((gymCatalog?.equipment ?? []).filter((g) => /bench|chair/i.test(g.name)).map((g) => g.id)),
+    [gymCatalog],
+  )
   // typing beats tapping once the list is long — match the name first, then the
   // body parts, so "legs" finds the squats even if the word isn't in the name
   const q = query.trim().toLowerCase()
@@ -535,6 +553,32 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                   >
                     {e.loaded ? '🏋️ Also carries weight' : '🏋️ No weight, just you'}
                   </button>
+                )}
+
+                {e.equipmentIds.some((id) => benches.has(id)) && (
+                  <div className="field" style={{ marginBottom: 8 }}>
+                    <label>Backrest angle</label>
+                    <div className="seg">
+                      {BENCH_ANGLES.map((a) => (
+                        <button
+                          key={a.deg}
+                          className={e.benchAngle === a.deg ? 'on' : ''}
+                          onClick={() => {
+                            sfx.click()
+                            // tapping the one already set clears it: not every
+                            // bench exercise has an angle worth saying (a step-up
+                            // uses the bench as a box)
+                            patch(e, { benchAngle: e.benchAngle === a.deg ? undefined : a.deg })
+                          }}
+                        >
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="muted" style={{ fontSize: 11 }}>
+                      Shown on the card while you train, and on the rest screen before you walk over.
+                    </span>
+                  </div>
                 )}
 
                 {isLoaded(e) && (
