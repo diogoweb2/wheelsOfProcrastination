@@ -1338,6 +1338,13 @@ export interface GymState {
   totals: { sessions: number; minutes: number; reps: number; coins: number }
   soundOn: boolean // rest-timer beeps
   keepAwake: boolean // hold a screen Wake Lock during a session
+  /**
+   * FOCUS MODE (§18y) — the runner shows the name, the video button and the
+   * next set's weight and reps, and nothing else. Off, every card comes back:
+   * the brief, the animation, the pickleball reason, the set pills.
+   * Read as `!== false`, so a profile saved before it existed is focused.
+   */
+  focusMode: boolean
 }
 
 // --- Essays (the ✍️ Essay app, shared `app/essays` doc) ---------------------

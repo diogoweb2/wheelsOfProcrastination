@@ -806,7 +806,7 @@ interface StoreState {
    * Throws with a reason worth showing — the caller decides how loudly.
    */
   gymFindExerciseVideo: (exId: string, avoid?: string[]) => Promise<ExerciseVideo>
-  gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'soundOn' | 'keepAwake'>>) => void
+  gymSetOptions: (patch: Partial<Pick<AppData['gym'], 'soundOn' | 'keepAwake' | 'focusMode'>>) => void
   /** Add / edit / retire gear and exercises in the shared basement. */
   // --- essays (the ✍️ Essay app; every action writes the shared app/essays doc) ---
   /** Ask the AI for a fresh batch of ideas. Nothing is stored yet — the parent decides. */

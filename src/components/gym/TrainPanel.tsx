@@ -766,8 +766,18 @@ function Preview({ session }: { session: GymSession }) {
 type Phase = 'ready' | 'working' | 'resting' | 'setup'
 
 function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Banked) => void }) {
-  const { data, gymLogSet, gymUndoSet, gymLogRest, gymRateInSession, gymSkip, gymAbandon, gymArmWarmup, gymLogWarmup } =
-    useStore()
+  const {
+    data,
+    gymLogSet,
+    gymUndoSet,
+    gymLogRest,
+    gymRateInSession,
+    gymSkip,
+    gymAbandon,
+    gymArmWarmup,
+    gymLogWarmup,
+    gymSetOptions,
+  } = useStore()
   // a refresh mid-session lands on the first exercise that still has sets owed,
   // not back at the top — `gym.active` is synced, so this is a real recovery
   const [idx, setIdx] = useState(() => {
@@ -800,6 +810,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const [pr, setPr] = useState<(SetRecord & { exName: string }) | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
+  /**
+   * 👁 FOCUS MODE (§18y). On (the default, and read as `!== false` so an old
+   * profile gets it too) the runner is the name, the video button and the two
+   * numbers. Everything explanatory — the animation, the brief, the pickleball
+   * reason, the set pills, the plan line — is one tap away, not in the way.
+   */
+  const lean = data.gym.focusMode !== false
 
   const list = session.exercises
   const current = list[Math.min(idx, list.length - 1)] as SessionExercise | undefined
@@ -876,6 +893,25 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
         perSide={current.loadPerSide}
       />
     ) : null
+
+  /**
+   * The two numbers for whatever the runner is pointing at, drawn the same on
+   * the set screen and on the rest screen (§18y). During rest that is the NEXT
+   * thing — another set of this one, or the movement you should be walking to.
+   */
+  const bigFor = (e: SessionExercise, setNo: number, w: number | undefined, r: number) => (
+    <NextUp
+      weight={isLoaded(e) ? w : undefined}
+      unit={unit}
+      loadKind={e.loadKind}
+      perSide={e.loadPerSide}
+      setNo={setNo}
+      sets={e.plan.reps.length}
+      reps={r}
+      repLabel={repLabel(e)}
+      open={!!e.maxHold}
+    />
+  )
 
   /** Start (or restart) the clock on the set in front of you — side one, if there are sides. */
   const begin = () => {
@@ -1039,6 +1075,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
           </span>
           <WallClock />
           <button
+            className="gym-quit gym-eye"
+            onClick={() => {
+              sfx.click()
+              gymSetOptions({ focusMode: !lean })
+            }}
+            aria-pressed={!lean}
+          >
+            {lean ? '👁 More' : '🙈 Less'}
+          </button>
+          <button
             className="gym-quit"
             onClick={() => {
               sfx.click()
@@ -1055,22 +1101,39 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
         // sets left, otherwise the one you should be walking over to now
         <RestTimer
           seconds={current.plan.restSec}
-          nextDemo={demos.get(nextUpEx?.exId ?? '')}
-          nextEmoji={nextUpEx?.emoji}
+          lean={lean}
+          nextDemo={lean ? undefined : demos.get(nextUpEx?.exId ?? '')}
+          nextEmoji={lean ? undefined : nextUpEx?.emoji}
           nextExId={nextUpEx?.exId}
           nextName={nextUpEx?.name}
-          loadNote={loadNote}
+          // the weight and the reps for whatever NEXT starts, at the same size
+          // they have on the set screen — rest is when you walk over and load it
+          bigNext={
+            setsLeft > 0
+              ? bigFor(current, current.sets.length + 1, armedWeight, plannedReps)
+              : upNext
+                ? bigFor(upNext, 1, plannedWeight(upNext, 0), upNext.plan.reps[0] ?? 10)
+                : undefined
+          }
+          loadNote={
+            <>
+              {lean && nextUpEx && <LeanFacts ex={nextUpEx} />}
+              {loadNote}
+            </>
+          }
           footNote={<SessionCountdown session={session} />}
           // the words for the thing you are about to walk over to. Only for a
           // NEW exercise — re-reading the brief for the set you have just done
           // twice is noise, and it would push the clock off a phone screen.
-          nextBrief={setsLeft === 0 && upNext ? <ExerciseBrief ex={upNext} setNo={upNext.sets.length} /> : undefined}
+          nextBrief={
+            !lean && setsLeft === 0 && upNext ? <ExerciseBrief ex={upNext} setNo={upNext.sets.length} /> : undefined
+          }
           // 🏓 and the reason you are doing any of it (§18s). Always the movement
           // you are about to walk back to — on the last rest of the session that
           // is the one you just finished, which is the right one to leave you with.
-          whyCard={<PickleballWhy ex={nextUpEx ?? current} />}
+          whyCard={lean ? undefined : <PickleballWhy ex={nextUpEx ?? current} />}
           upNext={
-            setsLeft > 0 ? (
+            lean ? undefined : setsLeft > 0 ? (
               <>
                 Up next: <strong>set {current.sets.length + 1}</strong> of {current.name}
               </>
@@ -1087,38 +1150,56 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       ) : (
         <div className="card gym-ex-card">
           <div className="gym-ex-head">
-            <ExerciseDemo demo={demos.get(current.exId)} emoji={current.emoji} size={96} autoPlay className="gym-ex-emoji--big" />
+            {!lean && (
+              <ExerciseDemo
+                demo={demos.get(current.exId)}
+                emoji={current.emoji}
+                size={96}
+                autoPlay
+                className="gym-ex-emoji--big"
+              />
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 900, fontSize: 19 }}>{current.name}</div>
+              <div style={{ fontWeight: 900, fontSize: lean ? 24 : 19, lineHeight: 1.15 }}>{current.name}</div>
               {/* the load lives in its own card now (§18v), so the line under
                   the name carries everything EXCEPT the weight */}
-              <div className="muted" style={{ fontSize: 12 }}>
-                {planLine(current, unit, { load: !isLoaded(current) })}
-              </div>
+              {!lean && (
+                <div className="muted" style={{ fontSize: 12 }}>
+                  {planLine(current, unit, { load: !isLoaded(current) })}
+                </div>
+              )}
             </div>
             <VideoButton exId={current.exId} name={current.name} />
           </div>
 
-          <ExerciseBrief ex={current} setNo={nextSetNo} topped={memory?.repPlan?.phase === 3} />
-          <DemoCaption demo={demos.get(current.exId)} />
-
-          {/* The one number you walk to the rack with. It used to be a clause
-              inside a grey plan line — "3 × 12–10 · 25 → 32 lb" — which is the
-              whole plan in the place where only the NEXT set matters. */}
-          {isLoaded(current) && !warming && armedWeight != null && (
-            <NextLoad
-              weight={armedWeight}
-              unit={unit}
-              loadKind={current.loadKind}
-              perSide={current.loadPerSide}
-              setNo={nextSetNo + 1}
-              sets={current.plan.reps.length}
-              reps={plannedReps}
-              repLabel={repLabel(current)}
-            />
+          {lean ? (
+            <LeanFacts ex={current} />
+          ) : (
+            <>
+              <ExerciseBrief ex={current} setNo={nextSetNo} topped={memory?.repPlan?.phase === 3} />
+              <DemoCaption demo={demos.get(current.exId)} />
+            </>
           )}
 
-          <div className="gym-set-row">
+          {/* The two numbers you walk to the rack with (§18v/§18y) — the load
+              for the NEXT set and the reps it wants, never hidden by focus
+              mode, because they are the whole instruction. */}
+          {warming ? (
+            <NextUp
+              head="🔥 warm-up set"
+              weight={chosenBand}
+              unit={unit}
+              loadKind="band"
+              setNo={1}
+              sets={1}
+              reps={warmAsk}
+              repLabel={repLabel(current)}
+            />
+          ) : (
+            bigFor(current, nextSetNo + 1, armedWeight, plannedReps)
+          )}
+
+          <div className="gym-set-row" style={lean ? { display: 'none' } : undefined}>
             {current.warmup?.done && (
               <span className="gym-set done" title="band warm-up">
                 🔥{current.warmup.done.reps}
@@ -1206,10 +1287,12 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             // the band set: reps you count, a colour instead of a load, and no
             // record to beat — it is the groove, not the work
             <>
-              <div className="gym-banner">
-                🔥 <strong>Warm-up set.</strong> {warmAsk} easy {repLabel(current)} with the band, nothing near
-                failure. It is not logged as a set and it beats no records.
-              </div>
+              {!lean && (
+                <div className="gym-banner">
+                  🔥 <strong>Warm-up set.</strong> {warmAsk} easy {repLabel(current)} with the band, nothing near
+                  failure. It is not logged as a set and it beats no records.
+                </div>
+              )}
               <div className="gym-inputs">
                 <Stepper label={repLabel(current)} value={reps} step={1} min={1} onChange={setReps} />
                 <BandPicker unit={unit} value={chosenBand} planned={chosenBand} onChange={setBand} />
@@ -1364,16 +1447,42 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 }
 
 /**
- * THE NUMBER YOU WALK TO THE RACK WITH (§18v).
+ * The handful of facts from the brief that change what your HANDS do, kept in
+ * focus mode (§18y) as one line of chips: which hole the bench goes in (§18w),
+ * whether the number is per side (§18c-1a), whether this one is all-out. The
+ * prose around them is what focus mode is for hiding; these are instructions.
+ */
+function LeanFacts({ ex }: { ex: SessionExercise }) {
+  const bits: string[] = []
+  if (ex.benchAngle != null) bits.push(`🪑 ${benchAngleLabel(ex.benchAngle)}`)
+  if (ex.perSide) bits.push(isClocked(ex) ? '↔️ one side at a time' : '↔️ both sides')
+  if (ex.loadPerSide) bits.push('⚖️ that weight EACH side')
+  if (ex.maxHold) bits.push('⏳ max hold — no target')
+  if (ex.ladderTest) bits.push('🏁 max test — one all-out set')
+  if (bits.length === 0) return null
+  return (
+    <div className="gym-lean-facts">
+      {bits.map((b) => (
+        <span key={b}>{b}</span>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * THE TWO NUMBERS YOU WALK TO THE RACK WITH (§18v, widened by §18y).
  *
  * A set is one instruction — *put this on the dumbbell and do this many* — and
  * it used to be a clause in a 12px grey line that also carried the rep range,
  * the ramp, the rest and the session budget. Standing over the rack with the
- * phone on the floor, that is unreadable. So the next set's real load gets a
- * card of its own, at a size you can read from standing, and the plan line
- * underneath stops repeating it.
+ * phone on the floor, that is unreadable. So the next set's real load AND its
+ * rep ask get a card of their own, at a size you can read from standing with
+ * glasses off, and the plan line underneath stops repeating them.
+ *
+ * It is on the set screen and on the rest screen, always, focus mode or not:
+ * these are the only two numbers the session ever actually asks you for.
  */
-function NextLoad({
+function NextUp({
   weight,
   unit,
   loadKind,
@@ -1382,8 +1491,11 @@ function NextLoad({
   sets,
   reps,
   repLabel,
+  open,
+  head,
 }: {
-  weight: number
+  /** Undefined on bodyweight work — then the card is reps alone. */
+  weight?: number
   unit: 'lb' | 'kg'
   loadKind?: LoadKind
   perSide?: boolean
@@ -1391,26 +1503,48 @@ function NextLoad({
   sets: number
   reps: number
   repLabel: string
+  /** A max hold (§18t) has no rep number: you go until it goes. */
+  open?: boolean
+  /** Overrides "set 2 of 3" — the band warm-up (§18u) is not a numbered set. */
+  head?: string
 }) {
-  const band = loadKind === 'band' ? bandFor(weight, unit) : undefined
+  const band = weight != null && loadKind === 'band' ? bandFor(weight, unit) : undefined
+  // "reps per side" is two words too many at 44px — the label carries it
+  const label = repLabel.replace(' per side', '')
   return (
     <div className="gym-next-load">
-      <div className="gym-next-load-head">
-        set {Math.min(setNo, sets)} of {sets} · {reps} {repLabel}
-      </div>
-      <div className="gym-next-load-big">
-        {band ? (
-          <>
-            <span className="gym-next-load-dot" style={{ '--band': band.css } as CSSProperties} />
-            {band.color}
-          </>
-        ) : (
-          <>
-            {weight} <small>{unit}</small>
-          </>
+      <div className="gym-next-load-head">{head ?? `set ${Math.min(setNo, sets)} of ${sets}`}</div>
+      <div className="gym-next-load-grid">
+        {weight != null && (
+          <div className="gym-next-load-cell">
+            <div className="gym-next-load-label">weight</div>
+            <div className="gym-next-load-big">
+              {band ? (
+                <>
+                  <span className="gym-next-load-dot" style={{ '--band': band.css } as CSSProperties} />
+                  <span className="gym-next-load-band">{band.color}</span>
+                </>
+              ) : (
+                <>
+                  {weight} <small>{unit}</small>
+                </>
+              )}
+            </div>
+          </div>
         )}
+        <div className="gym-next-load-cell">
+          <div className="gym-next-load-label">{open ? 'hold' : label}</div>
+          <div className="gym-next-load-big">
+            {open ? <span className="gym-next-load-band">MAX</span> : reps}
+          </div>
+        </div>
       </div>
-      {perSide && <div className="gym-next-load-sub">on EACH side · {weight * 2} {unit} total</div>}
+      {perSide && weight != null && (
+        <div className="gym-next-load-sub">
+          on EACH side · {weight * 2} {unit} total
+        </div>
+      )}
+      {repLabel.includes('per side') && <div className="gym-next-load-sub">per side</div>}
       {band && <div className="gym-next-load-sub">the {band.color.toLowerCase()} band ({weight} {unit})</div>}
     </div>
   )

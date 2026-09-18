@@ -1091,6 +1091,25 @@ Two pieces of weighted gear in one movement is ambiguous, so it declines to answ
 
 **The kettlebell went 37.5 → 46 lb on 2026-09-16** (plates added). Old sessions keep the numbers they were logged with — that is what was lifted, wrong rounding and all.
 
+### 18y. Focus mode — two numbers, and a switch for everything else
+
+The runner had grown into an essay. On the set screen: the animation, the name, the plan line, the per-side banner, the bench angle, the max-hold banner, the `how` paragraph, the muscle figure, the rep-range aim, the ramp, the `why`, the demo credit, the set pills, the load card. On the rest screen: the clock, the animation, a paragraph explaining where the rest number came from, the up-next line, the load change, the whole brief for the next movement, and the pickleball card. All of it true, none of it readable standing over a rack without glasses.
+
+**Four things are always on screen, in both screens, at a size you can read from standing:**
+
+- the **name** of the exercise,
+- the **▶️ video button** (§18n),
+- the **weight** for the current or next set,
+- the **reps** it wants.
+
+The weight and the reps share one gold card — two cells, a hairline between them, **52px** each (§18v used to give the weight a card of its own and leave the reps at 12px in its header). It is on the set screen for every exercise, loaded or not: bodyweight work drops the weight cell and the reps get the card. It is on the **rest** screen too, showing what NEXT starts — another set of this one, or the first set of the movement you should be walking to. A band still says its **colour** with a dot; a per-side load still says *on EACH side · 64 lb total*; a max hold (§18t) says **MAX** where the number would be.
+
+**👁 More / 🙈 Less** sits in the runner header next to 🏁 Finish. Focus mode is **ON by default** and stored on the profile (`gym.focusMode`, read as `!== false`, so a profile saved before it existed is focused). Off, every card comes back exactly as it was.
+
+**What focus mode hides:** the animation, the grey plan line, the whole brief (`how`, the muscle figure, the aim line, the ramp line, the `why`), the demo caption, the set pills, the warm-up explainer, and on the rest screen the up-next line, the source-of-the-number paragraph, the next movement's brief and the pickleball card (§18s).
+
+**What it never hides, because these are instructions and not prose:** the load change (§18v — *⬆️ HEAVIER NEXT SET*), and a one-line chip row of the facts that change what your hands do — **🪑 incline 30°** (§18w), **↔️ one side at a time** / **both sides**, **⚖️ that weight EACH side**, **⏳ max hold — no target**, **🏁 max test**. Every button is untouched: nothing you can press moved or disappeared.
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.

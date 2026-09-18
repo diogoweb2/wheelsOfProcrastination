@@ -48,9 +48,11 @@ const NEXT_ART = 170
 
 export function RestTimer({
   seconds,
+  lean,
   upNext,
   nextBrief,
   whyCard,
+  bigNext,
   nextDemo,
   nextEmoji,
   nextExId,
@@ -60,6 +62,13 @@ export function RestTimer({
   onNext,
 }: {
   seconds: number
+  /**
+   * 👁 Focus mode (§18y). The runner has already stripped the cards it owns;
+   * this only tells the timer to drop its own prose — the sentence explaining
+   * where the number came from — so the clock, the name, the video button and
+   * the two big numbers are the whole screen.
+   */
+  lean?: boolean
   /** What NEXT will start — shown so you never tap it blind. */
   upNext?: ReactNode
   /**
@@ -77,6 +86,12 @@ export function RestTimer({
    * are doing it" is worth reading on the set where you'd otherwise quit.
    */
   whyCard?: ReactNode
+  /**
+   * The weight and the reps the NEXT set wants, drawn exactly as they are on
+   * the set screen (§18y). Rest is when you walk over and load the thing, so
+   * these never leave the screen and never shrink.
+   */
+  bigNext?: ReactNode
   /** The animation for what's coming, played big while you rest. */
   nextDemo?: Demo
   nextEmoji?: string
@@ -170,6 +185,16 @@ export function RestTimer({
           {paused ? '⏸️ Paused' : over ? '⏱️ Rest is over' : '⏱️ Resting'}
         </div>
 
+        {/* who you are resting FOR, and the one button that can talk (§18n) —
+            on screen in focus mode too, because "which exercise is this" is
+            the question the rest screen used to answer only in 12px grey */}
+        {nextName && (
+          <div className="gym-rest-who">
+            <span className="gym-rest-who-name">{nextName}</span>
+            {nextExId && <VideoButton exId={nextExId} name={nextName} />}
+          </div>
+        )}
+
         {/* the clock and what's coming, side by side — rest is when you walk
             over and load the next thing, so the next thing is on screen */}
         <div className="gym-rest-row">
@@ -211,7 +236,9 @@ export function RestTimer({
           )}
         </div>
 
-        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+        {bigNext}
+
+        <p className="muted" style={{ fontSize: 12, marginTop: 4 }} hidden={lean}>
           {paused
             ? `Held for ${Math.round(pausedSoFar / 1000)}s — it all counts as rest. Resume when you're ready.`
             : addedSec > 0

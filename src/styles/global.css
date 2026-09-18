@@ -2525,7 +2525,7 @@ input, select { font-family: inherit; }
 .gym-progress-bar { height: 8px; background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
 .gym-progress-bar span { display: block; height: 100%; background: var(--blue); border-radius: 999px; transition: width 250ms ease; }
 .gym-progress-text {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
   margin-top: 6px; font-size: 12px; font-weight: 900; color: var(--muted);
 }
 .gym-quit { background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 900; color: var(--yellow); cursor: pointer; }
@@ -2621,6 +2621,13 @@ input, select { font-family: inherit; }
 
 /* --- rest timer --- */
 .gym-rest { text-align: center; }
+/* WHICH exercise you are resting for, and the button that can talk. Never
+   hidden by focus mode (§18y): the clock alone doesn't say what's coming. */
+.gym-rest-who {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+.gym-rest-who-name { font-size: 22px; font-weight: 900; line-height: 1.15; }
 .gym-upnext {
   margin-top: 10px; padding: 8px 10px; border-radius: 12px;
   background: var(--bg2); border: 1px solid var(--line);
@@ -2717,16 +2724,39 @@ input, select { font-family: inherit; }
 .gym-next-load-head {
   font-size: 12px; font-weight: 900; color: var(--muted); letter-spacing: 0.3px; text-transform: uppercase;
 }
+/* Two numbers, side by side, both readable from standing (§18y). They split
+   the card evenly and a hairline keeps "32 lb" from reading as "32 lb 12". */
+.gym-next-load-grid { display: flex; align-items: stretch; margin-top: 2px; }
+.gym-next-load-cell { flex: 1; min-width: 0; padding: 0 6px; }
+.gym-next-load-cell + .gym-next-load-cell { border-left: 2px solid var(--line); }
+.gym-next-load-label {
+  font-size: 11px; font-weight: 900; letter-spacing: 0.6px;
+  text-transform: uppercase; color: var(--muted);
+}
 .gym-next-load-big {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 2px; font-size: 46px; font-weight: 900; line-height: 1.05;
+  margin-top: 2px; font-size: 52px; font-weight: 900; line-height: 1.05;
   letter-spacing: -1.5px; color: var(--text); font-variant-numeric: tabular-nums;
 }
 .gym-next-load-big small { font-size: 20px; font-weight: 900; color: var(--muted); }
+/* a word, not a number: "PURPLE" at 52px does not fit a half-card */
+.gym-next-load-band { font-size: 26px; letter-spacing: -0.5px; }
 .gym-next-load-dot {
   width: 26px; height: 26px; border-radius: 50%; background: var(--band); border: 2px solid var(--line);
 }
 .gym-next-load-sub { margin-top: 2px; font-size: 12px; font-weight: 800; color: var(--muted); }
+
+/* The instructions focus mode keeps: bench hole, per-side, all-out (§18y). */
+.gym-lean-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; justify-content: center; }
+.gym-lean-facts span {
+  padding: 5px 9px; border-radius: 999px;
+  background: rgb(255 206 0 / 12%); border: 1px solid var(--gold);
+  font-size: 12px; font-weight: 900; color: var(--text);
+}
+
+/* 👁 the focus-mode switch, in the runner header next to 🏁 Finish */
+.gym-eye { color: var(--muted); }
+.gym-eye[aria-pressed='true'] { color: var(--blue); }
 
 /* --- gear that weighs what it weighs: no stepper, just the number (§18x) --- */
 .gym-gear-weight { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; }

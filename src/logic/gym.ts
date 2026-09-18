@@ -321,6 +321,7 @@ export function defaultGymState(): GymState {
     totals: { sessions: 0, minutes: 0, reps: 0, coins: 0 },
     soundOn: true,
     keepAwake: true,
+    focusMode: true,
   }
 }
 
