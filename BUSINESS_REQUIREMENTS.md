@@ -863,7 +863,7 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 | S2 | 🫸 Upper push + pull | DB bench · chest-supported row · pull-ups · lateral raise · band face pull |
 | S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · KB swing (power: 3 × 8–12 explosive) · Copenhagen plank · band Pallof |
 | S4 | 🦿 Lower unilateral + posterior chain | reverse lunge · goblet squat · single-leg glute bridge · band leg curl · single-leg calf raise |
-| S5 | 🧗 Upper pull + shoulder health | pull-ups · one-arm row · DB shoulder press · band external rotation · wrist curls |
+| S5 | 🧗 Upper pull + shoulder health | pull-ups · chest-supported row · DB shoulder press · band external rotation · wrist curls |
 | S6 | 🏓 Full body + pickleball | step-up · incline DB press · band lat pulldown · band rotational press · farmer's carry · med-ball chest pass |
 
 **You do the next one. That is the entire scheduling rule.** No Monday/Wednesday/Friday, because the number of sessions in a week is 2 to 5 and unpredictable, and every calendar programme silently breaks on that. Train twice this week → S1, S2. Next week starts at S3 and runs on. **The rotation is never restarted by the calendar**, only advanced by finishing a session — and only when something was actually logged, so an abandoned session leaves you where you were.

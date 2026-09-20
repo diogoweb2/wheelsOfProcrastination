@@ -141,7 +141,7 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     emoji: '🧗',
     exercises: [
       ex('bw-pullup', 3, 4, 8, { note: 'Chin-ups instead are fine — same slot.' }),
-      ex('mv-one-arm-dumbbell-row', 3, 8, 12),
+      ex('mv-chest-supported-dumbbell-row', 3, 8, 12),
       ex('mv-seated-dumbbell-shoulder-press', 3, 8, 12),
       ex('mv-band-external-rotation', 2, 12, 20),
       ex('mv-dumbbell-reverse-wrist-curl', 2, 15, 20),
