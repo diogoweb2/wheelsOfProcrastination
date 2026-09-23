@@ -64,7 +64,7 @@ import { keepScreenAwake } from '../../logic/wakeLock'
 import confetti from 'canvas-confetti'
 import { primeGymAudio, gymSfx, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
-import { SIDE_SEC, SetupCountdown } from './SetupCountdown'
+import { LEAD_SEC, SETUP_SEC, SIDE_SEC, SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
 import { VideoButton } from './ExerciseVideo'
@@ -765,6 +765,15 @@ function Preview({ session }: { session: GymSession }) {
 
 type Phase = 'ready' | 'working' | 'resting' | 'setup'
 
+/**
+ * What comes off a CLOCKED set when you stop it (§18c-1e). You cannot end a
+ * plank and press the phone in the same instant: you unwind, you reach, you
+ * press. Those seconds were never hold time, so they are not logged as hold
+ * time. The bell allows for them too — it rings at target + this — so the
+ * number that gets banked is still the number that was asked for.
+ */
+const STOP_LAG_SEC = 10
+
 function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Banked) => void }) {
   const {
     data,
@@ -831,6 +840,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    */
   const canWarmUp = (e: SessionExercise | undefined): boolean =>
     !!e && !e.skipped && e.kind === 'weight' && e.loadKind !== 'band' && e.sets.length === 0 && !e.warmup
+
+  /**
+   * Where the runner lands when it arrives at a set with the rest behind it.
+   * A COUNTED set starts itself after the 15s setup, as it always has. A
+   * CLOCKED one never does (§18c-1e): a plank you didn't start is a plank the
+   * app is timing while you are still walking to the mat, so it waits in
+   * 'ready' with START under your foot.
+   */
+  const landing = (e: SessionExercise | undefined): Phase =>
+    !e || canWarmUp(e) || isClocked(e) ? 'ready' : 'setup'
 
   const nextSetNo = current ? current.sets.length : 0
   const plannedReps = current?.plan.reps[Math.min(nextSetNo, (current?.plan.reps.length ?? 1) - 1)] ?? 10
@@ -913,6 +932,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     />
   )
 
+  /** A hold or a run: the app measures it, and it is the measurement that is logged. */
+  const clocked = isClocked(current)
+
+  /**
+   * How long the clock that just stopped really ran. On a clocked set the walk
+   * back to the phone comes off it (§18c-1e); on a counted one the number is
+   * only the pace, so it stays as measured.
+   */
+  const stopClock = () => Math.max(1, (Date.now() - startedAt) / 1000 - (clocked ? STOP_LAG_SEC : 0))
+
   /** Start (or restart) the clock on the set in front of you — side one, if there are sides. */
   const begin = () => {
     setSideSec([])
@@ -975,7 +1004,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
    * elbow is still moving.
    */
   const switchSides = () => {
-    const sec = Math.max(1, (Date.now() - startedAt) / 1000)
+    const sec = stopClock()
     gymSfx.go()
     setSideSec([...sideSec, sec])
     setSidePrep(true)
@@ -988,8 +1017,9 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   }
 
   /**
-   * Move on without logging anything more for this exercise. It lands in setup,
-   * not in 'ready' — jumping ahead shouldn't cost you an extra tap on GO.
+   * Move on without logging anything more for this exercise. It lands wherever
+   * the next movement's own rule puts it (`landing`) — straight into setup for a
+   * counted one, so jumping ahead doesn't cost an extra tap on GO.
    */
   const moveOn = (skip: boolean) => {
     if (skip) gymSkip(current.exId)
@@ -999,13 +1029,14 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     }
     setIdx(idx + 1)
     // the warm-up question has to be asked BEFORE the setup countdown starts the
-    // real set, so an exercise that owes one holds in 'ready'
-    setPhase(canWarmUp(list[idx + 1]) ? 'ready' : 'setup')
+    // real set, so an exercise that owes one holds in 'ready' — and so does a
+    // clocked one, which is never started by anything but a tap
+    setPhase(landing(list[idx + 1]))
   }
 
   /** DONE — measure the set, log it, and drop straight into rest. */
   const done = () => {
-    const thisSide = Math.max(1, (Date.now() - startedAt) / 1000)
+    const thisSide = stopClock()
     // the band set is not a set: it is banked on `warmup`, pays nothing, beats
     // no records, and is followed by ordinary rest before the real set 1
     if (warming) {
@@ -1052,7 +1083,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const next = (restedSec: number) => {
     gymLogRest(current.exId, restedSec, current.plan.restSec)
     if (setsLeft > 0) {
-      setPhase('setup')
+      setPhase(landing(current))
       return
     }
     if (isLast) {
@@ -1060,7 +1091,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       return
     }
     setIdx(idx + 1)
-    setPhase(canWarmUp(list[idx + 1]) ? 'ready' : 'setup')
+    setPhase(landing(list[idx + 1]))
   }
 
   return (
@@ -1238,7 +1269,21 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             />
           )}
 
-          {phase === 'setup' && <SetupCountdown onDone={begin} />}
+          {phase === 'setup' && (
+            // a counted set gets the full 15s to walk over and load the bar; a
+            // clocked one gets the short lead-in, because you only tapped START
+            // once you were already standing over the mat (§18c-1e)
+            <SetupCountdown
+              seconds={clocked ? LEAD_SEC : SETUP_SEC}
+              onDone={begin}
+              title={clocked ? '⏱ Clock starts in' : undefined}
+              note={
+                clocked
+                  ? 'Get into position. The clock starts at zero — or the second you tap GO.'
+                  : undefined
+              }
+            />
+          )}
           {phase === 'setup' && loadNote}
 
           {/* A loaded hold — a farmer's carry, a weighted plank — is clocked AND
@@ -1279,6 +1324,7 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               startedAt={startedAt}
               target={twoSided ? sideTarget : plannedReps}
               kind={current.kind}
+              lag={STOP_LAG_SEC}
               open={openHold}
               side={twoSided ? (sideSec.length === 0 ? 'first' : 'second') : undefined}
               banked={sideSec[0]}
@@ -1434,10 +1480,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               className="btn"
               onClick={() => {
                 sfx.fanfare()
-                begin()
+                // on a clocked set START does not start the clock — it starts
+                // the countdown to the clock (§18c-1e)
+                if (clocked && phase !== 'setup') setPhase('setup')
+                else begin()
               }}
             >
-              {phase === 'setup' ? '▶️ GO NOW' : '▶️ START'}
+              {phase === 'setup' ? '▶️ GO NOW' : clocked ? `▶️ START — ${LEAD_SEC}s LEAD` : '▶️ START'}
             </button>
           )}
         </div>
@@ -1458,6 +1507,9 @@ function LeanFacts({ ex }: { ex: SessionExercise }) {
   if (ex.perSide) bits.push(isClocked(ex) ? '↔️ one side at a time' : '↔️ both sides')
   if (ex.loadPerSide) bits.push('⚖️ that weight EACH side')
   if (ex.maxHold) bits.push('⏳ max hold — no target')
+  // focus mode hides the brief, and the two rules that change what your thumb
+  // does on a clocked set are exactly the ones you need before you lie down
+  if (isClocked(ex)) bits.push(`⏱ ${LEAD_SEC}s lead, −${STOP_LAG_SEC}s on stop`)
   if (ex.ladderTest) bits.push('🏁 max test — one all-out set')
   if (bits.length === 0) return null
   return (
@@ -1728,6 +1780,15 @@ function ExerciseBrief({ ex, setNo, topped }: { ex: SessionExercise; setNo: numb
         </div>
       )}
 
+      {isClocked(ex) && (
+        <div className="gym-banner">
+          ⏱ <strong>You start this one.</strong> The clock never starts itself — tap <strong>▶️ START</strong> and you
+          get <strong>{LEAD_SEC}s</strong> to get into position. Stopping it takes <strong>{STOP_LAG_SEC}s</strong> off
+          what gets logged, for the unwind and the reach, so the bell rings {STOP_LAG_SEC}s late on purpose: when it
+          goes, the {ex.kind === 'cardio' ? 'minutes' : 'seconds'} asked for are already banked.
+        </div>
+      )}
+
       {ex.loadPerSide && (
         <div className="gym-banner">
           ⚖️ <strong>One dumbbell each side.</strong> The weight you type is what goes on <em>one</em> of them
@@ -1801,6 +1862,11 @@ function setChip(set: LoggedSet): string {
  * On a per-side move it is the clock for ONE side, and `side` says which — the
  * second side's target is the first side's real time, so the line under the bar
  * is telling you the number to match rather than the number you were prescribed.
+ *
+ * The big number is the wall clock, because that is what a clock is. What gets
+ * LOGGED is `lag` seconds less (§18c-1e), so the line underneath says that
+ * number out loud and the bell waits for it — hold a 30 s plank and the bell
+ * rings at 0:40, when 0:30 is actually in the bank.
  */
 function WorkClock({
   startedAt,
@@ -1809,6 +1875,7 @@ function WorkClock({
   side,
   banked,
   open,
+  lag = 0,
 }: {
   startedAt: number
   target: number
@@ -1817,6 +1884,8 @@ function WorkClock({
   banked?: number
   /** An open hold: no target, no bell, no bar to fill. You stop when you stop. */
   open?: boolean
+  /** Seconds that come off when you stop it — the reach for the phone. */
+  lag?: number
 }) {
   const targetSec = kind === 'cardio' ? target * 60 : target
   const [now, setNow] = useState(Date.now())
@@ -1828,16 +1897,19 @@ function WorkClock({
   }, [])
 
   const elapsed = Math.max(0, Math.floor((now - startedAt) / 1000))
+  /** What stopping right now would log. */
+  const bank = Math.max(0, elapsed - lag)
   useEffect(() => {
     if (open) return
-    if (elapsed >= targetSec && !rang.current) {
+    if (bank >= targetSec && !rang.current) {
       rang.current = true
       gymSfx.go()
     }
-  }, [elapsed, targetSec, open])
+  }, [bank, targetSec, open])
 
-  const hit = !open && elapsed >= targetSec
-  const pct = open ? 1 : Math.min(1, targetSec > 0 ? elapsed / targetSec : 1)
+  const hit = !open && bank >= targetSec
+  const pct = open ? 1 : Math.min(1, targetSec > 0 ? bank / targetSec : 1)
+  const lagNote = lag > 0 ? ` · banks ${mmss(bank)} (−${lag}s when you stop)` : ''
 
   return (
     <div className="gym-clock">
@@ -1852,14 +1924,14 @@ function WorkClock({
       </div>
       <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
         {open
-          ? '⏳ no target — hold until you cannot, and the other side has to match it'
+          ? `⏳ no target — hold until you cannot, and the other side has to match it${lagNote}`
           : side === 'second' && banked != null
           ? hit
               ? `matched the ${mmss(banked)} you did on the first side`
-              : `match the first side — ${mmss(targetSec)}`
+              : `match the first side — ${mmss(targetSec)}${lagNote}`
             : hit
               ? `past the ${mmss(targetSec)} asked for — every extra second counts`
-              : `target ${mmss(targetSec)}`}
+              : `target ${mmss(targetSec)}${lagNote}`}
       </div>
     </div>
   )
