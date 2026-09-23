@@ -23,6 +23,13 @@ const WARN_AT = 5
  */
 export const SIDE_SEC = 5
 
+/**
+ * The lead-in on a CLOCKED set (§18c-1e). A hold never starts itself: you tap
+ * START, and these seconds are what you get to lie down and get square before
+ * the clock that measures the plank is the plank's clock.
+ */
+export const LEAD_SEC = 5
+
 export function SetupCountdown({
   seconds = SETUP_SEC,
   onDone,

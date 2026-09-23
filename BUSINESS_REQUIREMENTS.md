@@ -573,15 +573,15 @@ The session in progress lives in `gym.active` and is synced, so a refresh — or
 
 #### 18c-1. START → DONE → DONE → …
 
-**One click for the whole exercise is the default.** You tap **▶️ START** once, on the first set of the session. From there the session drives itself — rest ends by itself, the 15 s setup ends by itself, the next set is live — and the only button you ever *have* to press again is **✓ DONE**, because only you know when the reps are finished.
+**One click for the whole exercise is the default, on a COUNTED set.** You tap **▶️ START** once, on the first set of the session. From there the session drives itself — rest ends by itself, the 15 s setup ends by itself, the next set is live — and the only button you ever *have* to press again is **✓ DONE**, because only you know when the reps are finished. **A clocked set is the exception and always waits for you** (§18c-1e).
 
 | Button | What it does |
 |---|---|
-| **▶️ START** | Starts the very first set of the session and starts the clock. |
-| **✓ DONE** | "I've finished this set." Logs it with the **measured** time, and the app drops straight into rest on its own. |
-| **▶️ GO NOW** | Optional. During the 15 s setup countdown, starts the set early instead of waiting. |
+| **▶️ START** | Starts the very first set of the session and starts the clock. On a **clocked** set it starts the **5 s lead-in**, not the clock (§18c-1e). |
+| **✓ DONE** | "I've finished this set." Logs it with the **measured** time, and the app drops straight into rest on its own. On a clocked set that measurement is **10 s shorter** than the clock read (§18c-1e). |
+| **▶️ GO NOW** | Optional. During the 15 s setup countdown (or the 5 s lead-in), starts the set early instead of waiting. |
 
-**Rest ends itself.** When the rest countdown reaches zero the app moves on with no tap: 15 s of setup (§18c-1), then the set is live. Two escapes, both honest:
+**Rest ends itself.** When the rest countdown reaches zero the app moves on with no tap: 15 s of setup (§18c-1), then the set is live — **unless the next set is clocked**, which lands on **▶️ START** and waits (§18c-1e). Two escapes, both honest:
 
 - **⏭ Skip rest — start now** ends rest early, and the short rest is what gets learned.
 - **⏸️ Pause** stops the auto-advance for as long as you need. **Paused time counts as rest** — it is added to the rest that gets logged and learned from (§18d), never pretended away — and the countdown resumes where it left off.
@@ -590,7 +590,7 @@ The session in progress lives in `gym.active` and is synced, so a refresh — or
 
 - **Reps** — a stepper pre-filled with what was prescribed, exactly as before. You touch it only when reality differs, and that difference is the signal.
 - **Weight** — the same, for `weight` exercises.
-- **Holds and runs** (`timed` / `cardio`) — **nothing to type**. A big count-up clock replaces the stepper, beeps when it passes the target, and **keeps counting**. Asked for a 30 s plank and held it for a minute? DONE at 1:00 logs 60 seconds, and the next session is planned from that.
+- **Holds and runs** (`timed` / `cardio`) — **nothing to type**. A big count-up clock replaces the stepper, beeps when it passes the target, and **keeps counting**. Asked for a 30 s plank and held it for a minute? DONE at 1:10 logs 60 seconds — the clock read is minus the 10 s it takes to stop it (§18c-1e) — and the next session is planned from that.
 - **Loaded holds and carries** (`timed` / `cardio` **+ `loaded`**) — **both**. The weight stepper appears **before** the clock, on the card you are looking at while you set up, because once a farmer's carry is live your hands are full of dumbbells and the phone is on the floor. Then START, and it is the same count-up clock as any other hold. The set logs seconds **and** weight.
 
 **Measured-in and loaded are two different questions (`loaded`).** `kind` says *how the set is counted* — reps, seconds or minutes. `loaded` says *whether there is iron in your hands*. A farmer's carry is both: measured by the clock, progressed by the dumbbells, and neither half is optional. So the flag is independent of the kind and every part of the app reads it rather than reading `kind === 'weight'`: the weight suggestion and the up/down-a-notch learning (§18d), the weights/bodyweight filter (§18c-2), the work score's load multiplier (§18c-3), and personal records — a loaded hold has **two** records and either one counts, heavier *or* longer, as long as the extra seconds weren't bought by dropping a notch. It is redundant on `kind: 'weight'`, which is loaded by definition, and the audit says so. Set by hand: Gym → Gear → tap the exercise → 🏋️, and on the ➕ new-exercise form. Carrying the flag today: **Farmer's Carry**, **Dumbbell Farmer's Hold**, **Suitcase Hold**, **Calf Raise** (bodyweight reps, a dumbbell in the hands).
@@ -615,7 +615,7 @@ So a clocked per-side exercise runs **one clock per side**, and the foot button 
 
 | Button | What it does |
 |---|---|
-| **↔️ OTHER SIDE** | Replaces DONE on the first side. Press it **the moment that side drops** — the seconds up to the press are the first side's, honestly, and what follows is a **5-second roll-over countdown** (§18c-1c), not hold time. |
+| **↔️ OTHER SIDE** | Replaces DONE on the first side. Press it **the moment that side drops** — the seconds up to the press, **less the 10 s it takes to press it** (§18c-1e), are the first side's, and what follows is a **5-second roll-over countdown** (§18c-1c), not hold time. |
 | **✓ DONE** | Ends the second side and logs the set. |
 
 **The second side is asked to match the first, not the plan.** Prescribed 40 s, held it for 70? The second clock's target is **70**, and the line under it reads *match the first side — 1:10*. That is the point of a per-side hold: the two sides are supposed to be equal, so the number to beat is the one you just set, and a bar that only ever asks for 40 is teaching the strong side nothing.
@@ -637,6 +637,25 @@ Pressing **↔️ OTHER SIDE** used to start the second clock instantly, which f
 Some holds have nothing to prescribe. The point of a side plank is *how long can you hold a side plank*, and a bar filling towards 30 s teaches you to stop at 30 s. An exercise flagged **`maxHold`** therefore runs the first side's clock **open** — no target, no bell, no bar to fill, and the line underneath says *no target — hold until you cannot, and the other side has to match it*.
 
 **The first side sets the target for the second.** Exactly as in §18c-1a, but without the plan as a floor: if the first side failed at 20 s, the second is asked for **20**, not the catalog's 30. Asking the weaker side to beat the stronger one is how a max hold turns back into a prescription. Everything downstream is unchanged — the total is still stored on `reps`, the split on `sides`, and `suggestedHold` still climbs from what both sides actually held (§18d), so the ask grows on its own without ever being the thing you are aiming at. Set by hand: Gym → Gear → tap the exercise → ⏳. Carrying the flag today: **Side Plank**.
+
+#### 18c-1e. A clock you start, and a clock that knows you have to stop it
+
+The auto-advance (§18c-1) is right for a counted set and wrong for a clocked one. Rest ends, 15 seconds of setup run out, and the plank's clock is live — while you are still unrolling the mat. Every second of that is logged as a hold, and the number the next session is planned from is a number you never held. The mirror image happens at the other end: you drop out of the plank, unwind, find the phone, press **✓ DONE** — and the app credits the unwinding.
+
+So a **clocked** exercise (`timed` / `cardio`) is bracketed by two fixed corrections, and neither one is optional:
+
+| | |
+|---|---|
+| **Nothing starts itself.** | The runner lands on **▶️ START — 5s LEAD** and waits. Rest still ends on its own, the card is still there to read; the clock is not running. |
+| **START buys 5 seconds** (`LEAD_SEC`). | The same countdown the between-sets setup and the roll-over use (§18c-1, §18c-1c) — shorter than 15 s, because you only tapped START standing over the mat. **▶️ GO NOW** skips it. |
+| **Stopping costs 10 seconds** (`STOP_LAG_SEC`). | **✓ DONE** and **↔️ OTHER SIDE** both log the clock read **minus 10 s**, floored at 1 s. Every side of a per-side hold pays it, so the two sides stay on the same scale and "match the first side" still means what it says. |
+
+**The bell moves with it, so the target stays true.** The big number on the clock is the wall clock — that is what a clock is — but the bar, the bell and the *past the target* state all measure **what is banked**, which is the clock read minus 10 s. Prescribed 30 s? The bell rings at **0:40**, and when it rings the 30 s is genuinely in the bank. The line under the clock says the banked number out loud the whole way (`target 0:30 · banks 0:12 (−10s when you stop)`), so the deduction is never something you discover in the log afterwards.
+
+**Ten seconds is a deliberate over-payment, not a measurement.** It is not timed per press and it does not adapt. A fixed, visible, slightly generous number means every hold in the history is comparable to every other one, and a plank that the log says was 30 s was a plank of *at least* 30 s. §18d progresses from the banked seconds, so the whole ladder simply sits on the honest scale.
+
+**Counted sets are untouched.** A weight or bodyweight set still auto-advances through the 15 s setup, and its measured duration — which is only ever the pace grade (§18c-3), never the result — is the raw wall clock. Nothing comes off it, because nothing about pressing DONE on ten reps is a lie about the reps.
+
 
 #### 18c-2. Weights, bodyweight, or both
 
