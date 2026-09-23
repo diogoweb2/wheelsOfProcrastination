@@ -445,12 +445,19 @@ export function isLoaded(e: Pick<ExerciseDef, 'kind' | 'loaded'> | Pick<SessionE
  * The answer always lands on a real rung of whatever this movement loads off
  * (see `DUMBBELL_LB`, `BANDS`), so "nudge up" means the next hole in the
  * dumbbell — or the next band colour — not an arithmetic 5%.
+ *
+ * With no history at all it falls back to the catalog's `startLb` — where this
+ * movement starts for someone who has never done it.
  */
 export function weightFor(e: ExerciseDef, mem: ExerciseMemory | undefined, unit: 'lb' | 'kg' = 'lb'): number | undefined {
   if (!isLoaded(e)) return undefined
   const kind = loadKindOf(e)
   const last = mem?.suggestedWeight ?? mem?.lastWeight
-  if (!last) return undefined
+  // never done it: the catalog's starting load, so a first-time carry is
+  // prescribed with a real number instead of silence (§18c-2). Silence is what
+  // kept the farmer's carry weightless — no suggestion, nothing typed, nothing
+  // remembered, and the same nothing next time.
+  if (!last) return e.startLb != null ? snapLoad(e.startLb, unit, kind) : undefined
   if (mem?.lastAdjust === 'up') return stepLoad(last, 1, unit, kind)
   if (mem?.lastAdjust === 'down') return stepLoad(last, -1, unit, kind)
   return snapLoad(last, unit, kind)

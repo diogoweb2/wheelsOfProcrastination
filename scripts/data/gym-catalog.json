@@ -1341,7 +1341,8 @@
         "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-farmer-s-walk.webp?alt=media&token=4f727f6f-e8ab-411e-94f2-c7e9fad9675d"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-06T19:35:38.648Z"
+      "createdAt": "2026-08-06T19:35:38.648Z",
+      "startLb": 32
     },
     {
       "id": "mv-dumbbell-wrist-curl",
@@ -1436,7 +1437,8 @@
         "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-dumbbell-farmer-s-carry-hold-poster.webp?alt=media&token=5c47ca0e-4852-49d9-8f5e-e9f75afb478b"
       },
       "addedBy": "ai",
-      "createdAt": "2026-08-23T01:20:54.911Z"
+      "createdAt": "2026-08-23T01:20:54.911Z",
+      "startLb": 32
     },
     {
       "equipmentIds": [

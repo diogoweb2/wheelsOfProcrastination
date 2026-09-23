@@ -625,6 +625,26 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                   </button>
                 )}
 
+                {isLoaded(e) && (
+                  <div className="field" style={{ marginBottom: 8 }}>
+                    <label>Starting load (lb)</label>
+                    <input
+                      type="number"
+                      defaultValue={e.startLb ?? ''}
+                      placeholder="—"
+                      key={`${e.id}-start-${e.startLb ?? ''}`}
+                      onBlur={(ev) => {
+                        const raw = ev.target.value.trim()
+                        const n = raw === '' ? undefined : Math.max(0, Number(raw) || 0)
+                        if (n !== e.startLb) patch(e, { startLb: n && n > 0 ? n : undefined })
+                      }}
+                    />
+                    <span className="muted" style={{ fontSize: 11 }}>
+                      Only used the first time — after one logged set your own history decides.
+                    </span>
+                  </div>
+                )}
+
                 {e.kind === 'timed' && (
                   <button
                     className={`btn btn--small ${e.maxHold ? '' : 'btn--ghost'}`}

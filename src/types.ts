@@ -963,6 +963,16 @@ export interface ExerciseDef {
    */
   loaded?: boolean
   /**
+   * Where the load STARTS, in pounds, the first time you ever do this one —
+   * before there is any history to suggest from. Without it a loaded move that
+   * has never been logged is prescribed with no weight at all, which reads as
+   * "no weight": you carry whatever, nothing is stored, and the next session
+   * has just as little to go on. Only the first time matters — once a set is
+   * logged, your own history takes over and this number is never read again.
+   * Absent on anything whose load is fixed (§18x) or unloaded.
+   */
+  startLb?: number
+  /**
    * The number you log is what hangs on ONE side. A hip-thrust harness with a
    * dumbbell on each end is one movement with two dumbbells: the weight you can
    * actually SET is the per-dumbbell one, so that is the number the app stores,

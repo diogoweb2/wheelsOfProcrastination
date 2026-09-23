@@ -137,6 +137,13 @@ function checkExercise(e, i, ownedIds, retiredEquip, allIds) {
   // nothing to load means nothing to type: a bodyweight plank with `loaded` on
   // would ask for a weight the room hasn't got
   if (e.loaded && gear.length === 0) warn('combo.loaded', where, '`loaded` but needs no equipment — what are you carrying?')
+  // a starting load is the answer to "what do I pick up the first time", so it
+  // only means anything on something you pick up
+  if (e.startLb != null) {
+    const isLoaded = e.kind === 'weight' || e.loaded
+    if (!isLoaded) err('exercise.startLb', where, 'startLb on an unloaded exercise — there is nothing to start')
+    else if (!(e.startLb > 0)) err('exercise.startLb', where, `startLb must be > 0, got ${e.startLb}`)
+  }
 
   return true
 }

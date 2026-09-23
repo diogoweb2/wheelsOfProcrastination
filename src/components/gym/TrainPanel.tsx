@@ -999,6 +999,17 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
         : Math.max(plannedReps, ...sideSec)
 
   /**
+   * What to have in your hands when the clock starts. A loaded carry is the one
+   * set you cannot fix once it is live — the phone is on the floor and both
+   * hands are full — so the setup countdown says the load and the time out loud
+   * instead of the generic "walk over, load it".
+   */
+  const setupNote =
+    isClocked(current) && isLoaded(current) && weight != null
+      ? `${loadLabel(weight, unit, current.loadKind, current.loadPerSide)}${current.perSide ? ' — one side at a time' : ' in each hand'}, ${openHold ? 'held for as long as it lasts' : `held for ${plannedReps}s`}. Pick it up now: the clock starts at zero.`
+      : undefined
+
+  /**
    * "That side is done." Bank it, then hand over five seconds to roll onto the
    * other side — the next clock starts when the countdown does, not when your
    * elbow is still moving.
@@ -1278,9 +1289,11 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
               onDone={begin}
               title={clocked ? '⏱ Clock starts in' : undefined}
               note={
-                clocked
+                // a loaded carry says its own load and its own seconds (§18c-2)
+                setupNote ??
+                (clocked
                   ? 'Get into position. The clock starts at zero — or the second you tap GO.'
-                  : undefined
+                  : undefined)
               }
             />
           )}
