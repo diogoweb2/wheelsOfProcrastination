@@ -67,6 +67,22 @@ App tile artwork is generated from art already in `public/` (see CLAUDE.md's ima
 - **The URL is not a way past a gate.** A path is only honoured once we're past the PIN, and it is re-checked against who is logged in: `/admin/...` in Ben's hands falls back to the landing page, as does any unknown app. `gate`d apps (Clocks) *are* reachable by URL — a gate hides an icon, it isn't a lock.
 - Implementation: [src/lib/route.ts](src/lib/route.ts) (`pathToRoute` / `routeToPath`) plus the three sync effects in [src/App.tsx](src/App.tsx). No router library — the whole navigation state is `{app, tab}`, so the History API is enough.
 
+## 1d. Ben's tablet runs an installed app, not a tab
+
+Chrome cannot be put to bed. Family Link and Digital Wellbeing schedule and
+time-limit **installed packages**, so the tablet gets one: `com.wheelsofprocrastination.app`,
+a WebView shell over the live site ([android/](android/README.md)).
+
+- **It holds no game logic.** The site is the app; a deploy reaches the tablet on
+  the next launch, and the shell never needs rebuilding for a feature.
+- **It hosts the site honestly**: back walks the site's history before it exits,
+  gym demos go fullscreen, the gear-photo picker reaches Android's file chooser,
+  off-site links (Roblox) leave for Chrome, and the screen stays awake while the
+  app is in front — spin, rest and gym timers were the reason.
+- **Push is the one native part** — see §10.
+- Portrait-locked, matching the PWA manifest. Installed by sideload
+  (`./gradlew assembleRelease`, `adb install -r`), never published to Play.
+
 ## 2. Tasks
 
 Fields when creating a task:
@@ -226,6 +242,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
+  - **On Ben's tablet the push device is the Android shell** (`android/`, §1d). A WebView has neither service-worker push nor the Notification API, so the shell fetches a **native FCM token** and hands it to the site over `window.WheelsShell` (`src/push.ts` → `inShell()`). It lands on `profiles/{id}.pushTokens` like any browser's, labelled "Android app", and the site asks for it on the same open-after-PIN pass — Android's own permission dialog stands in for the browser's. Because a token from the app is not a webpush token, the fan-out sends a platform-neutral `notification` (Android channel `crew_pings`) and lets the `webpush` block override it for browsers; the `data.link` it carries is the screen a tap opens.
   - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19i). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
 - **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
   - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.

@@ -36,6 +36,7 @@ import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { LANDING, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
+import { inShell } from './push'
 import { backgroundUrl } from './logic/backgrounds'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
@@ -133,10 +134,14 @@ export default function App() {
   // token (FCM rotates them) — registerPushDevice ignores one it already has.
   // 'denied' is left alone: the browser won't re-prompt, and Settings → Alerts
   // still has the manual button.
+  //
+  // The Android shell has no Notification API at all, so it takes the same road
+  // by a different door: native asks Android, and the refresh-on-open is what
+  // keeps a rotated token from quietly dropping the tablet off the list.
   const askedPush = useRef(false)
   useEffect(() => {
     if (!unlocked || askedPush.current) return
-    if (!('Notification' in window) || Notification.permission === 'denied') return
+    if (!inShell() && (!('Notification' in window) || Notification.permission === 'denied')) return
     askedPush.current = true
     void registerPushDevice() // errors surface on the Settings screen's button instead
   }, [unlocked, registerPushDevice])

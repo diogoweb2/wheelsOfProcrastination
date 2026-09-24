@@ -1,5 +1,6 @@
-// Root build file. The shell has no third-party dependencies on purpose: it is
-// a WebView pointed at the live site, so there is nothing to keep in sync.
+// Root build file. The shell carries no game logic — it is a WebView pointed at
+// the live site. Its one native dependency is push, which a WebView cannot do.
 plugins {
     id 'com.android.application' version '8.12.0' apply false
+    id 'com.google.gms.google-services' version '4.4.2' apply false
 }

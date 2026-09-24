@@ -1,12 +1,15 @@
 package com.wheelsofprocrastination.app;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Insets;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +30,10 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.window.OnBackInvokedDispatcher;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+
+import org.json.JSONObject;
+
 /**
  * A shell around https://spinningwheel-6ff51.web.app.
  *
@@ -36,12 +43,18 @@ import android.window.OnBackInvokedDispatcher;
  * the app, and this only has to host it honestly: history back, fullscreen
  * video for the gym demos, file picks for gear photos, and a retry screen when
  * the wifi drops.
+ *
+ * The one thing it adds is push. Web push does not cross into a WebView, so the
+ * token comes from native FCM and is handed to the site through
+ * {@link PushBridge}; the site stores it on the profile exactly as it stores a
+ * browser's, and the Cloud Function cannot tell the difference.
  */
 public class MainActivity extends Activity {
 
     private static final String APP_HOST = "spinningwheel-6ff51.web.app";
     private static final String START_URL = "https://" + APP_HOST + "/";
     private static final int REQ_FILE_CHOOSER = 1;
+    private static final int REQ_NOTIFICATIONS = 2;
     private static final String STATE_WEBVIEW = "webview";
 
     private WebView web;
@@ -73,11 +86,17 @@ public class MainActivity extends Activity {
 
         configureWebView();
 
+        web.addJavascriptInterface(new PushBridge(this), "WheelsShell");
+
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState.getBundle(STATE_WEBVIEW));
         } else {
-            web.loadUrl(START_URL);
+            web.loadUrl(urlFromIntent(getIntent()));
         }
+
+        // Tokens rotate. Refreshing on every start keeps the copy in Firestore
+        // alive; the site drops it in place if it is already the one it has.
+        refreshToken();
 
         // Android 16 ignores the legacy opt-out, so back has to be claimed
         // explicitly or the system just finishes the activity and eats the
@@ -216,6 +235,96 @@ public class MainActivity extends Activity {
         } catch (ActivityNotFoundException ignored) {
             // No browser, no handler, nothing to do but stay put.
         }
+    }
+
+    // --- push ---------------------------------------------------------------
+
+    /** Called from {@link PushBridge#requestPush()}, on the UI thread. */
+    void startPushRequest() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFICATIONS);
+            return; // picked up again in onRequestPermissionsResult
+        }
+        fetchTokenForSite();
+    }
+
+    boolean notificationsAllowed() {
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        return manager != null && manager.areNotificationsEnabled();
+    }
+
+    private void fetchTokenForSite() {
+        if (!notificationsAllowed()) {
+            answerSite(null, "Notifications are switched off for this app. Turn them on in Android settings.");
+            return;
+        }
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            String token = task.isSuccessful() ? task.getResult() : null;
+            if (token == null || token.isEmpty()) {
+                answerSite(null, "Couldn't get a device token. Try again.");
+                return;
+            }
+            PushService.saveToken(this, token);
+            answerSite(token, null);
+        });
+    }
+
+    /** Quietly keeps the cached token current, without prompting for anything. */
+    private void refreshToken() {
+        if (!notificationsAllowed()) return;
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
+                PushService.saveToken(this, task.getResult());
+            }
+        });
+    }
+
+    /** Resolves the promise src/push.ts is holding. One argument is always null. */
+    private void answerSite(String token, String error) {
+        String js = "window.__wheelsShellPush && window.__wheelsShellPush("
+                + quote(token) + ", " + quote(error) + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
+    }
+
+    private static String quote(String value) {
+        return value == null ? "null" : JSONObject.quote(value);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (requestCode == REQ_NOTIFICATIONS) {
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchTokenForSite();
+            } else {
+                answerSite(null, "Notifications are blocked. Allow them for this app in Android settings.");
+            }
+            return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+    }
+
+    // --- notification taps --------------------------------------------------
+
+    /**
+     * A tray notification carries the data payload the Cloud Function attached,
+     * so a tap can land on the screen the ping is about instead of the wheel.
+     */
+    private String urlFromIntent(Intent intent) {
+        if (intent == null) return START_URL;
+        String link = intent.getStringExtra("link");
+        if (link == null) return START_URL;
+        Uri uri = Uri.parse(link);
+        return staysInApp(uri) ? link : START_URL;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String url = urlFromIntent(intent);
+        if (!url.equals(START_URL) || web.getUrl() == null) web.loadUrl(url);
     }
 
     private void showOffline() {

@@ -4,4 +4,6 @@
     <string name="offline_title">No connection</string>
     <string name="offline_body">The wheel lives online. Reconnect and try again.</string>
     <string name="offline_retry">Try again</string>
+    <string name="channel_name">Crew pings</string>
+    <string name="channel_description">Freeze requests, granted freezes, sticker trades and daily nudges.</string>
 </resources>

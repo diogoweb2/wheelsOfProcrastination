@@ -195,7 +195,7 @@ import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowa
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
-import { enablePush } from '../push'
+import { enablePush, inShell } from '../push'
 import {
   GYM_LOG_CAP,
   STARTER_EXERCISES,
@@ -254,6 +254,7 @@ import {
 
 /** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
 function deviceLabel(): string {
+  if (inShell()) return 'Android app'
   const ua = navigator.userAgent
   for (const [re, name] of [[/iPhone/, 'iPhone'], [/iPad/, 'iPad'], [/Android/, 'Android'], [/Macintosh/, 'Mac'], [/Windows/, 'Windows']] as const) {
     if (re.test(ua)) return name
