@@ -4113,7 +4113,11 @@ export const useStore = create<StoreState>((set, get) => {
     gymSkip(exId) {
       commit((d) => {
         const se = d.gym.active?.exercises.find((e) => e.exId === exId)
-        if (se) se.skipped = true
+        // SKIP on an exercise you have already logged sets for means "no more
+        // sets of this", not "none of that happened": `skipped` is what the
+        // report, the pay and the permanent memory all read as "didn't do it",
+        // so setting it here would delete work that is already on the board.
+        if (se && se.sets.length === 0) se.skipped = true
       })
     },
 

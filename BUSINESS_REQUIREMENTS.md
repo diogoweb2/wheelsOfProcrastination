@@ -586,6 +586,8 @@ The session in progress lives in `gym.active` and is synced, so a refresh — or
 - **⏭ Skip rest — start now** ends rest early, and the short rest is what gets learned.
 - **⏸️ Pause** stops the auto-advance for as long as you need. **Paused time counts as rest** — it is added to the rest that gets logged and learned from (§18d), never pretended away — and the countdown resumes where it left off.
 
+**The card says when it is the same exercise again.** A second set of the same movement is not a new exercise, but a clocked one waiting on START looks exactly like one — so under the name, at a size you can read from the mat, sits `↻ same exercise · set 2 of 2`. Without it the honest reading of that screen is "the app repeated itself", and the honest response is SKIP.
+
 **A set is timed, not typed.** The wall clock runs from the moment the set goes live to DONE and that measurement is the only source for the pace grade. What you type is only ever the *result*:
 
 - **Reps** — a stepper pre-filled with what was prescribed, exactly as before. You touch it only when reality differs, and that difference is the signal.
@@ -621,6 +623,10 @@ So a clocked per-side exercise runs **one clock per side**, and the foot button 
 |---|---|
 | **↔️ OTHER SIDE** | Replaces DONE on the first side. Press it **the moment that side drops** — the seconds up to the press, **less the 10 s it takes to press it** (§18c-1e), are the first side's, and what follows is a **5-second roll-over countdown** (§18c-1c), not hold time. |
 | **✓ DONE** | Ends the second side and logs the set. |
+
+**The sides belong to one set.** A banked first side never survives the set it was banked in: leaving a clocked set — SKIP, **Next exercise →**, or simply logging it — clears it. It has to, now that a clocked set waits on START (§18c-1e) and can therefore be walked away from mid-exercise: a first side left lying around makes the *next* hold open on **✓ DONE** instead of **↔️ OTHER SIDE**, and logs a set built out of the previous exercise's clock.
+
+**⏭ Skip this one never deletes work.** On an exercise with nothing logged it marks the exercise skipped, as it always has. On one you are **part way through** — set 1 done, set 2 on screen — it means *no more sets of this*, and the sets already logged keep their Berries, their records and their place in the report. Marking it skipped there would erase a set you actually did.
 
 **The second side is asked to match the first, not the plan.** Prescribed 40 s, held it for 70? The second clock's target is **70**, and the line under it reads *match the first side — 1:10*. That is the point of a per-side hold: the two sides are supposed to be equal, so the number to beat is the one you just set, and a bar that only ever asks for 40 is teaching the strong side nothing.
 

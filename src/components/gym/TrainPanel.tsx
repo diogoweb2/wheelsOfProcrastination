@@ -880,6 +880,21 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     setWarming(false)
   }, [idx])
 
+  /**
+   * The sides belong to ONE set. Move to a new set — or a new exercise — and
+   * they go with the old one: `sideSec` used to be cleared only by `begin()`,
+   * which was safe while every landing ran through the setup countdown and
+   * therefore through `begin()`. A clocked set now lands on ▶️ START and waits
+   * (§18c-1e), so it can be left by SKIP or NEXT with side one still banked —
+   * and the stale entry then tells the NEXT clocked hold that its first side is
+   * already done: the foot button says ✓ DONE instead of ↔️ OTHER SIDE, and
+   * pressing it logs a set made of someone else's clock.
+   */
+  useEffect(() => {
+    setSideSec([])
+    setSidePrep(false)
+  }, [idx, nextSetNo])
+
   // hold the screen on for the whole workout, so a phone on the bench doesn't
   // lock between sets and swallow the rest timer
   useEffect(() => {
@@ -1203,6 +1218,16 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
             )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 900, fontSize: lean ? 24 : 19, lineHeight: 1.15 }}>{current.name}</div>
+              {/* You have done this one already and it is on screen again: say
+                  so at the size of the name, not in the 11px progress line. A
+                  clocked set waits on ▶️ START (§18c-1e), so the card sits there
+                  looking exactly like a new exercise until something says it
+                  isn't — and "didn't I just do this?" is answered with SKIP. */}
+              {!warming && nextSetNo > 0 && (
+                <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--yellow)' }}>
+                  ↻ same exercise · set {nextSetNo + 1} of {current.plan.reps.length}
+                </div>
+              )}
               {/* the load lives in its own card now (§18v), so the line under
                   the name carries everything EXCEPT the weight */}
               {!lean && (
