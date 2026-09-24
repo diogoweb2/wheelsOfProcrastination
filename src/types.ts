@@ -3,6 +3,7 @@
 // only the stored shapes belong here.
 import type { DuelState } from './logic/cardGame'
 import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
+import type { CurfewSettings } from './logic/curfew'
 import type { SeaState } from './logic/seaBattle'
 import type { OptcgDeck, OptcgState } from './logic/optcg'
 
@@ -176,6 +177,12 @@ export interface Settings {
    */
   boardMoveSeconds?: number
   duelMoveSeconds?: number
+  /**
+   * 🌙 Night watch (§23): the daily window where most of the app is asleep.
+   * Set by the captain in the Parent app, per crewmate. Undefined on an old
+   * save; `defaultCurfew()` fills it in on load.
+   */
+  curfew?: CurfewSettings
 }
 
 /** One device registered for web push, so a closed app can still be reached. */

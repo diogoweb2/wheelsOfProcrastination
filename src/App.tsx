@@ -9,6 +9,8 @@ import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { FinalTest } from './components/FinalTest'
 import { AppHeader, AppTabBar } from './components/AppShell'
 import { AdminSection } from './components/AdminSection'
+import { NightWatch } from './components/NightWatch'
+import { useCurfew } from './hooks/useCurfew'
 import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
 import { StoreScreen } from './screens/StoreScreen'
@@ -49,6 +51,8 @@ export default function App() {
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
+  // 🌙 the night watch (§23) — which apps are awake right now, for whoever is looking
+  const curfewNow = useCurfew()
 
   /** Open an app (optionally on a given tab), falling back to its first tab. */
   function openApp(appId: string, tabId?: string) {
@@ -483,6 +487,20 @@ export default function App() {
         </div>
       )}
 
+      {/* 🌙 the night watch is on: say so once, at the top, so a locked icon is
+          never a surprise. It carries the countdown, not just the fact. */}
+      {curfewNow.active && (
+        <div className="banner" style={{ background: '#1b2a6b' }}>
+          <span style={{ fontSize: 20 }}>🌙</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Night watch — most apps are asleep</div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              back in {curfewNow.left} · opens again at {curfewNow.opensAt}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* remote final tests: Ben's "start it" prompt, Dad's verdict banner */}
       <FinalTest />
 
@@ -686,7 +704,10 @@ export default function App() {
       ))}
 
       {open === null ? (
-        <HomeScreen onOpen={openApp} badges={homeBadges} />
+        <HomeScreen onOpen={openApp} badges={homeBadges} curfew={curfewNow} />
+      ) : !curfewNow.isOpen(open.app) ? (
+        // the URL still works — it just answers with the schedule (§1c, §23)
+        <NightWatch appId={open.app} curfewNow={curfewNow} onOpen={openApp} />
       ) : (
         <AppBodyRouter
           open={open}
@@ -701,7 +722,7 @@ export default function App() {
         />
       )}
 
-      {openDef && openTabs.length > 1 && (
+      {openDef && openTabs.length > 1 && curfewNow.isOpen(openDef.id) && (
         <AppTabBar
           tabs={openTabs}
           tab={open!.tab}
