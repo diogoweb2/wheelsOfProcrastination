@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <!-- Shows behind the WebView and behind the system bars, so the launch
+             flash and the padded inset strips are the app's navy, not white. -->
+        <item name="android:windowBackground">@color/brand_navy</item>
+    </style>
+</resources>

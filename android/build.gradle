@@ -1,0 +1,5 @@
+// Root build file. The shell has no third-party dependencies on purpose: it is
+// a WebView pointed at the live site, so there is nothing to keep in sync.
+plugins {
+    id 'com.android.application' version '8.12.0' apply false
+}

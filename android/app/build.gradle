@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.wheelsofprocrastination.app'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.wheelsofprocrastination.app"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Signed with the local debug key so `assembleRelease` produces an
+            // APK that installs (and updates in place) from this machine. This
+            // app is sideloaded onto family tablets, never published.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

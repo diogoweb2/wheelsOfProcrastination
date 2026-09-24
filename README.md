@@ -15,6 +15,8 @@ npm run preview    # serve the production build
 ```
 
 Install on Android: open the served URL in Chrome → menu → *Add to Home screen*.
+Or build [`android/`](android/README.md) — a WebView shell around the live site, so
+Family Link can put a bedtime and a daily limit on it.
 
 ## Tour
 
