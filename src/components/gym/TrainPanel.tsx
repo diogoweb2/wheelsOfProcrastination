@@ -1069,6 +1069,13 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
       gymSfx.logged()
       gymLogWarmup(current.exId, { reps, sec: thisSide })
       setWarming(false)
+      // the stepper was holding the BAND set's reps (20 of them, on purpose —
+      // §18u). The set that follows is the real one, so it must be pre-filled
+      // with what the plan asks for again: nothing else re-arms it, because no
+      // set was logged and `nextSetNo` has not moved. Left alone it offers the
+      // warm-up's twenty reps against the working weight.
+      setReps(plannedReps)
+      setWeight(armedWeight)
       setPhase('resting')
       return
     }
@@ -1900,6 +1907,9 @@ function setChip(set: LoggedSet): string {
  * On a per-side move it is the clock for ONE side, and `side` says which — the
  * second side's target is the first side's real time, so the line under the bar
  * is telling you the number to match rather than the number you were prescribed.
+ * That side counts DOWN to it (§18c-1c): the number is already decided, so the
+ * only thing worth showing is how much of it is left. Past zero it turns around
+ * and counts the overtime up.
  *
  * The big number is the wall clock, because that is what a clock is. What gets
  * LOGGED is `lag` seconds less (§18c-1e), so the line underneath says that
@@ -1949,6 +1959,22 @@ function WorkClock({
   const pct = open ? 1 : Math.min(1, targetSec > 0 ? bank / targetSec : 1)
   const lagNote = lag > 0 ? ` · banks ${mmss(bank)} (−${lag}s when you stop)` : ''
 
+  /**
+   * THE SECOND SIDE COUNTS DOWN (§18c-1c). The first side asked a question you
+   * cannot answer — "how long have I been here?" is not something you know with
+   * your face on a mat — but the second side does not ask it: the number is
+   * already set, and the only thing you want from the screen is how much of it
+   * is left. So the big digits run down to the first side's time and the bell
+   * rings at zero. It counts the BANKED seconds, like everything else here, so
+   * zero is the moment the two sides are genuinely equal.
+   *
+   * Past zero it turns around and counts the overtime up, because holding
+   * longer than the first side is allowed and still gets logged.
+   */
+  const down = !open && side === 'second' && banked != null
+  const left = Math.max(0, targetSec - bank)
+  const big = down ? (hit ? `+${mmss(bank - targetSec)}` : mmss(left)) : mmss(elapsed)
+
   return (
     <div className="gym-clock">
       {side && (
@@ -1956,17 +1982,17 @@ function WorkClock({
           ↔️ {side === 'first' ? 'FIRST SIDE' : 'SECOND SIDE'}
         </div>
       )}
-      <div className={`gym-clock-time ${hit ? 'over' : ''}`}>{mmss(elapsed)}</div>
+      <div className={`gym-clock-time ${hit ? 'over' : ''}`}>{big}</div>
       <div className="gym-clock-bar">
         <span style={{ width: `${pct * 100}%` }} />
       </div>
       <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
         {open
           ? `⏳ no target — hold until you cannot, and the other side has to match it${lagNote}`
-          : side === 'second' && banked != null
-          ? hit
-              ? `matched the ${mmss(banked)} you did on the first side`
-              : `match the first side — ${mmss(targetSec)}${lagNote}`
+          : down
+            ? hit
+              ? `matched the ${mmss(banked!)} you did on the first side — every extra second counts`
+              : `counting down to the ${mmss(targetSec)} you held on the first side${lagNote}`
             : hit
               ? `past the ${mmss(targetSec)} asked for — every extra second counts`
               : `target ${mmss(targetSec)}${lagNote}`}
