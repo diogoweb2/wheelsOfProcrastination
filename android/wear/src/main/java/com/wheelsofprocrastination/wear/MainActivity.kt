@@ -31,7 +31,10 @@ class MainActivity : ComponentActivity() {
         repo = SessionRepo()
         alerts = Alerts(this)
         repo.start()
-        setContent { WearApp(repo, alerts) }
+        // The done screen closes the app when its countdown runs out (§18aa).
+        // `finishAndRemoveTask` rather than `finish`: coming back to a finished
+        // workout out of the recents list is a screen with nothing on it.
+        setContent { WearApp(repo, alerts, onClose = { finishAndRemoveTask() }) }
     }
 
     override fun onDestroy() {

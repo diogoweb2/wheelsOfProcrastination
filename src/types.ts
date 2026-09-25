@@ -1237,6 +1237,14 @@ export interface GymSession {
   status: 'preview' | 'running' | 'done'
   startedAt?: string // ISO, set on GO
   finishedAt?: string
+  /**
+   * Which device said "that's it" (§18aa). Absent means the website, as it
+   * always was. `'watch'` means the wrist wrote `status: 'done'` and the
+   * website banked it afterwards — so the finishing INSTANT is the watch's and
+   * must be kept, or `activeSec` would count however long the phone stayed in
+   * a pocket.
+   */
+  finishedBy?: 'watch'
   minutes: number // the budget you asked for
   mood: Mood
   gearMode?: GearMode // weights / bodyweight / both (default 'mixed')

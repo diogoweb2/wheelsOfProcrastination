@@ -152,18 +152,55 @@ export function TrainPanel() {
  */
 export function SessionFlow({ idle }: { idle: React.ReactNode }) {
   const active = useStore((s) => s.data.gym.active)
+  const gymFinish = useStore((s) => s.gymFinish)
   const [banked, setBanked] = useState<Banked | null>(null)
   const hasActive = !!active
+  const watchFinished = active?.status === 'done'
+  /** Sessions already banked here, so a re-render can't pay for one twice. */
+  const settled = useRef(new Set<string>())
 
   // ordering a "do more" block from the report retires the report
   useEffect(() => {
     if (hasActive) setBanked(null)
   }, [hasActive])
 
+  /**
+   * The session was ended on the WATCH (§18aa). All the watch could honestly
+   * write is `status: 'done'` and the instant it happened — the Berries, the
+   * grade, the records, the rep and hold ladders and the block rotation are
+   * `gymFinish`, and a second copy of that reasoning in Kotlin would be wrong
+   * within a month.
+   *
+   * So the banking happens HERE, the first time you open the app afterwards,
+   * which is also the first moment there is a screen big enough to read the
+   * report on. Nothing is asked of you: it pays, it learns, and the report is
+   * simply sitting there — the stars are optional and always were.
+   */
+  useEffect(() => {
+    if (!watchFinished || !active || settled.current.has(active.id)) return
+    settled.current.add(active.id)
+    const res = gymFinish()
+    if (res.session) setBanked({ session: res.session, coins: res.coins })
+  }, [watchFinished, active, gymFinish])
+
   if (active?.status === 'preview') return <Preview session={active} />
-  if (active) return <Runner session={active} onBanked={setBanked} />
+  // a session the watch closed is not a session to keep running: the effect
+  // above is one tick away from turning it into a report
+  if (active && !watchFinished) return <Runner session={active} onBanked={setBanked} />
   if (banked) return <ReportCard banked={banked} onClose={() => setBanked(null)} />
+  if (watchFinished) return <BankingCard />
   return <>{idle}</>
+}
+
+/** The half-second between "the watch ended it" and the report. */
+function BankingCard() {
+  return (
+    <div className="card" style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 40 }}>⌚</div>
+      <p style={{ fontWeight: 900, fontSize: 15, marginTop: 6 }}>You finished this one on your watch.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>Counting the Berries…</p>
+    </div>
+  )
 }
 
 // --- setup ------------------------------------------------------------------
@@ -2264,6 +2301,16 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
   return (
     <>
       <div className="h2">📊 How that went</div>
+
+      {session.finishedBy === 'watch' && (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <p style={{ fontWeight: 900, fontSize: 14 }}>⌚ You ended this one on your watch.</p>
+          <p className="muted" style={{ fontSize: 11, marginTop: 4, lineHeight: 1.45 }}>
+            Everything below was worked out here just now — the Berries are paid and the ladders have moved. The stars
+            are still yours to give, and still optional.
+          </p>
+        </div>
+      )}
 
       {report && (
         <div className="card" style={{ textAlign: 'center' }}>

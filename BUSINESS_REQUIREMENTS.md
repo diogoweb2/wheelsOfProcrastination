@@ -1194,7 +1194,7 @@ The third is the biggest and it is not an exercise at all, which is why no amoun
 
 ### 18aa. The watch (`android/wear`) — a second pair of hands, not a second brain
 
-**The phone is for starting a session, reordering it and watching the demo videos. Everything you do between sets happens on the wrist.** A Pixel Watch 3 runs the workout: what is next, what goes on the bar, how many, what angle the bench is at, **✓ DONE**, **⏭ skip rest**, **▶ START** on a hold, and ± on the two numbers reality argues with.
+**The phone is for starting a session, reordering it and watching the demo videos. Everything from the first set to the last one happens on the wrist.** A Pixel Watch 3 runs the workout: what is next, what goes on the bar, how many, what angle the bench is at, **✓ DONE**, **⏭ skip rest**, **▶ START** on a hold, ± on the two numbers reality argues with — and **the end of the session**.
 
 **It is a client, not a remote control.** The watch reads and writes `profiles/diogo` itself, exactly as a second browser tab already could — no command channel, no phone app relaying anything, **no requirement that the phone be awake**. Put the phone in your pocket with a podcast on; the watch does not care. Put the watch on the charger flat; the phone picks the session up mid-set, which it has always been able to do.
 
@@ -1211,7 +1211,17 @@ The third is the biggest and it is not an exercise at all, which is why no amoun
 
 **Reads are typed; writes are not.** A snapshot is parsed into a read-only view for drawing, but every write starts from the raw map that came off the wire, changes the two or three keys it means to, and puts it back. Deserialising into Kotlin classes and writing *those* back would drop every field the watch does not model — `how`, `why`, `ladder`, `warmup`, the demo, the block ids — and the phone would never know what it lost.
 
-**What stays on the phone.** Building and starting a session, reordering, swapping and skipping exercises, the videos, and **finishing** — the report, the grade and the Berries (§18c-3) all run there. The watch is the forty minutes in between.
+**The last set does not get a rest.** Rest is the gap *between* two pieces of work, and there is no gap after the final set of the final exercise. The website has always known that (`moreHere || !isLast`); the watch started a countdown anyway, so the end of a workout was a screen asking you to wait sixty seconds for nothing. `logSet` now only arms `restUntil` when something is still owed.
+
+**One number at a time, on a screen of its own.** The reps and the weight were always tappable, which on a 45 mm watch nobody can see — so before a set starts there is a **✎ reps** button (and **✎ weight** on a loaded move) that says so out loud, and it opens a **full screen**: what it belongs to, the number, and − / + big enough to press with a thumb under a dumbbell. **✕ cancel puts back what was prescribed**, because on a wrist an edit you did not mean is one bump away. Both buttons disappear once the clock is running: mid-set is not when you re-plan the set. A hold steps in **fives** — nobody has ever wanted a 31-second plank.
+
+**🏁 Finishing is the watch's job now, and it still isn't a second brain.** When nothing is owed, the watch writes the one fact it honestly knows — `status: 'done'`, the instant, and `finishedBy: 'watch'` — and hands the driver back. It does **not** compute Berries, the grade, the records, the rep and hold ladders or the block rotation: that is `gymFinish`, the most carefully-argued three hundred lines in the app, and a second implementation of it in Kotlin would be wrong within a month.
+
+So the website banks it the first time you open the Gym afterwards — no stars asked, no button pressed, the report simply sitting there with a line saying where it came from. In the meantime the Body map is already correct, because a session carrying `finishedAt` stops counting as work happening right now (§18t); and `gymFinish` **keeps that timestamp** rather than stamping its own, or an hour in a pocket would be logged as an hour of training.
+
+**Then it closes itself.** Standing in the basement with a finished workout, the right amount of watch UI is none. The done screen counts **ten seconds** out loud and calls `finishAndRemoveTask()` — long enough to read the line, long enough to press **Stay open**, which cancels the countdown for good rather than deferring it. The session is banked on arrival, not at zero: a watch that dies in those ten seconds has still ended the workout.
+
+**What stays on the phone.** Building and starting a session, reordering, swapping and skipping exercises, the videos, and reading the report. The watch is everything from ▶ to 🏁.
 
 Build and install: `android/README-wear.md`. The watch has no USB data port, so it pairs over Wi-Fi (`adb pair` / `adb connect`).
 

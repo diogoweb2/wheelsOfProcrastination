@@ -4235,7 +4235,12 @@ export const useStore = create<StoreState>((set, get) => {
         if (!s) return
         const day = s.day
         s.status = 'done'
-        s.finishedAt = new Date().toISOString()
+        // A session the WATCH closed already carries the instant it really
+        // ended (§18aa). Stamping `now` here would date it to whenever the
+        // phone was next unlocked — an hour in a pocket would be logged as an
+        // hour of training, and the Body map would keep it "just worked" the
+        // whole time.
+        s.finishedAt = s.finishedAt ?? new Date().toISOString()
         s.rating = rating
         s.feedback = feedback
         if (s.startedAt) s.activeSec = Math.round((Date.parse(s.finishedAt) - Date.parse(s.startedAt)) / 1000)

@@ -140,7 +140,48 @@ class SessionRepo(private val profileId: String = "diogo") {
             active["workTargetSec"] = num(active["workTargetSec"]) + plannedSetSeconds(ex, reps)
         }
         active["exercises"] = list
-        active["restUntil"] = iso(System.currentTimeMillis() + restSec * 1000L)
+        // Rest is the gap BETWEEN two pieces of work. There is no gap after the
+        // last set of the last exercise, and a 60-second countdown at the end
+        // of a workout is a screen asking you to wait for nothing — so the rest
+        // only starts when something is still owed.
+        active["restUntil"] = if (owesWork(list)) iso(System.currentTimeMillis() + restSec * 1000L) else null
+        push(active)
+    }
+
+    /** Is any exercise still owed sets? The Kotlin twin of `livePosition().done`. */
+    @Suppress("UNCHECKED_CAST")
+    private fun owesWork(list: List<Map<String, Any?>>): Boolean = list.any { e ->
+        val planned = (e["plan"] as? Map<String, Any?>)?.get("reps") as? List<*>
+        val done = (e["sets"] as? List<*>)?.size ?: 0
+        e["skipped"] != true && done < (planned?.size ?: 0)
+    }
+
+    /**
+     * End the session from the wrist (§18aa).
+     *
+     * It marks the session finished and NOTHING ELSE — no Berries, no grade, no
+     * folding into the per-exercise memory. All of that is `gymFinish` in
+     * `src/store/useStore.ts`: the rep ladders, the hold ladder, the load
+     * verdict, the records, the streak and the block rotation are the most
+     * carefully-argued three hundred lines in the app, and a second
+     * implementation of them in Kotlin would be wrong within a month.
+     *
+     * So the watch writes the one fact it actually knows — *that is the end of
+     * it, at this instant* — and the website banks it the next time it opens,
+     * which is also when there is a screen big enough to show the report. The
+     * timestamp means the Body map is already right in the meantime: a session
+     * with `finishedAt` stops counting as work happening right now (§18t).
+     *
+     * The driver goes with it, so nothing has to wait out the 90-second
+     * heartbeat before the phone can pick the finished session up.
+     */
+    fun finish() {
+        val active = raw ?: return
+        active["status"] = "done"
+        active["finishedAt"] = iso(System.currentTimeMillis())
+        active["finishedBy"] = "watch"
+        active["restUntil"] = null
+        active.remove("driver")
         push(active)
     }
 

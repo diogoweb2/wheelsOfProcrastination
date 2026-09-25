@@ -31,12 +31,17 @@ what decides it in real life:
 | | |
 |---|---|
 | no session | "Start it on your phone" + which one is next (S3 · Pickleball power) |
+| nothing owed | 🏁 done — it ends the session and closes itself in 10 s |
 | resting | the countdown, what is up next, **⏭ Skip rest** |
 | otherwise | the set: name, weight, reps, bench angle, **▶ START** / **✓ DONE** |
 
 Weight and reps are the only editable numbers, because they are the only two
-reality ever disagrees with. Weight steps along the **real rungs** of the
-dumbbell (`DUMBBELL_LB`) or the **band colours**, never an arithmetic 2.5.
+reality ever disagrees with. Before a set starts, **✎ reps** / **✎ weight**
+open a **screen of their own** — the numbers were always tappable, which on a
+45 mm watch nobody can see, and ± you press under a dumbbell have to be the
+biggest thing in front of you. **✕ cancel** puts back what was prescribed.
+Weight steps along the **real rungs** of the dumbbell (`DUMBBELL_LB`) or the
+**band colours**, never an arithmetic 2.5; a hold steps in fives.
 
 ## The two rules it lives by
 
@@ -69,5 +74,8 @@ is honest on a watch running 37.
   costs battery; a workout is forty minutes.
 - The debug APK is ~43 MB (Compose + Firestore, unminified). Fine on a watch
   with 32 GB, but `minifyEnabled` would cut it a lot if it ever matters.
-- **Finishing** a session is still the phone's job — the report, the Berries and
-  the grade all run there (§18c-3).
+- **Finishing** happens here, but the arithmetic does not. `finish()` writes
+  `status: 'done'`, the instant and `finishedBy: "watch"`, and the website banks
+  it — Berries, grade, records, ladders, rotation — the next time it opens
+  (§18aa). Reimplementing `gymFinish` in Kotlin would be a second copy of the
+  app's most subtle three hundred lines, wrong within a month.
