@@ -1221,6 +1221,8 @@ So the website banks it the first time you open the Gym afterwards — no stars 
 
 **Then it closes itself.** Standing in the basement with a finished workout, the right amount of watch UI is none. The done screen counts **ten seconds** out loud and calls `finishAndRemoveTask()` — long enough to read the line, long enough to press **Stay open**, which cancels the countdown for good rather than deferring it. The session is banked on arrival, not at zero: a watch that dies in those ten seconds has still ended the workout.
 
+**The phone follows, and the phone notices when it is over.** Two bugs, one cause: `idx` — which exercise the runner is looking at — is local state, because normally this device is the one advancing it. Hand the session to the wrist and *nothing* advances it. The watch logged three sets of Hollow Hold and the phone sat on the same card counting them up, reading **“set 4 of 3”**; and the "last set logged → finish card" path is in the phone's own log handler, so a workout finished on the wrist left the phone in the runner for ever. So while another device is driving, the runner **mirrors `livePosition`** instead of remembering, and the test for *the session is over* is the derived one — nothing left owing — which is true whichever device did the work. That is deliberately a **second route** to the finish: `status: 'done'` arriving is the normal one, and this one still fires if a flat battery means that write never lands.
+
 **What stays on the phone.** Building and starting a session, reordering, swapping and skipping exercises, the videos, and reading the report. The watch is everything from ▶ to 🏁.
 
 Build and install: `android/README-wear.md`. The watch has no USB data port, so it pairs over Wi-Fi (`adb pair` / `adb connect`).

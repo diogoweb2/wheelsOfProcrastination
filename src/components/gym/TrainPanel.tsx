@@ -50,7 +50,7 @@ import {
 import type { BlockAge } from '../../logic/gymBlock'
 import type { SessionLength } from '../../logic/gymBlock'
 import { PACE_MIN_SAMPLES, honestRange, paceCalibration } from '../../logic/gymPace'
-import { DRIVER_BEAT_MS, deviceId, liveDriver } from '../../logic/gymLive'
+import { DRIVER_BEAT_MS, deviceId, liveDriver, livePosition } from '../../logic/gymLive'
 import {
   SESSION_LENGTHS,
   activeBlock,
@@ -1021,6 +1021,40 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     setGymHandedOff(watching)
     return () => setGymHandedOff(false)
   }, [watching])
+
+  /**
+   * WHILE THE WATCH DRIVES, THIS RUNNER IS A DISPLAY — so where it is looking
+   * has to come from the sets, not from an index this device stopped moving.
+   *
+   * `idx` is local state because normally this device is the one advancing it.
+   * Hand the session to the wrist and nothing advances it at all: the watch
+   * logged three sets of Hollow Hold and the phone sat on the same card
+   * counting them, which is how it came to say **“set 4 of 3”**. `livePosition`
+   * is the answer §18aa already wrote down — the first exercise still owing
+   * sets — and mirroring it is all the phone has to do.
+   */
+  useEffect(() => {
+    if (!watching) return
+    const at = livePosition(session).idx
+    setIdx((n) => (n === at ? n : at))
+  }, [watching, session])
+
+  /**
+   * THE SESSION BEING OVER IS NOT AN EVENT THIS DEVICE HAS TO WITNESS.
+   *
+   * Logging the last set here has always gone straight to the finish card. Then
+   * the watch started doing the logging (§18aa) and that path simply never ran,
+   * so a workout finished on the wrist left the phone in the runner for ever.
+   * The honest test is the derived one — nothing left owing — and it is true
+   * whichever device did the work. This is deliberately a second route to the
+   * same place: `gym.active.status` going `done` (`SessionFlow`) is the normal
+   * one, and this one still fires if a flat watch battery means that write
+   * never lands.
+   */
+  const nothingLeft = livePosition(session).done
+  useEffect(() => {
+    if (nothingLeft) setFinishing(true)
+  }, [nothingLeft])
 
   useEffect(() => {
     if (watching) return
