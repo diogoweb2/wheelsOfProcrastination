@@ -1182,6 +1182,29 @@ The third is the biggest and it is not an exercise at all, which is why no amoun
 
 **The report's "planned" line was the same lie, smaller.** *time working: 32:36, planned 7:32* compared the clock against `reps × 3.5 s` — a formula the session was not planned from and never had been. It now reads the same learned pace the estimate uses (`plannedSetSeconds`), so the two can never disagree. It remains **information, never a score** (§18c-3): the grade's only clock is rest.
 
+### 18aa. The watch (`android/wear`) — a second pair of hands, not a second brain
+
+**The phone is for starting a session, reordering it and watching the demo videos. Everything you do between sets happens on the wrist.** A Pixel Watch 3 runs the workout: what is next, what goes on the bar, how many, what angle the bench is at, **✓ DONE**, **⏭ skip rest**, **▶ START** on a hold, and ± on the two numbers reality argues with.
+
+**It is a client, not a remote control.** The watch reads and writes `profiles/diogo` itself, exactly as a second browser tab already could — no command channel, no phone app relaying anything, **no requirement that the phone be awake**. Put the phone in your pocket with a podcast on; the watch does not care. Put the watch on the charger flat; the phone picks the session up mid-set, which it has always been able to do.
+
+**That works because "where am I?" was never state — it was always derivable.** `src/logic/gymLive.ts` (`livePosition`) says it once: the first exercise still owing sets, the set number from how many are logged, the weight from what you last actually lifted, falling back to what was planned. The React runner used to hold these in `useState` and recompute them after a refresh; they are written down now so the Kotlin has something to **mirror** (`Session.kt`) rather than something to reinvent. The one exception is rest — *"resting until 14:32:05"* cannot be derived from the sets — so the session carries `restUntil`, a **wall-clock instant** rather than a countdown: a device arriving mid-rest computes the same number as the one that started it.
+
+**One driver at a time, and this part is not a nicety.** `commit` writes the WHOLE `gym` object on any change, so two writers is last-write-wins over every session, every block and every exercise memory — a phone waking with a stale copy would silently eat the sets logged on the wrist. So a running session names its `driver`: device, a per-install id, and a heartbeat.
+
+- **30 s heartbeat, 90 s staleness.** A flat watch battery hands the session back on its own; nothing locks you out of your own workout.
+- **The guard is in the store, not on the buttons** — `gymLogSet`, `gymUndoSet`, `gymLogRest`, `gymSkip` and the warm-up all refuse when another device holds it. "The phone won't log anything" has to be true of every path in, not just of the controls someone remembered to disable.
+- **Both sides can take over**, in one tap, and the watch will not re-claim a session the phone is actively holding — otherwise the phone's button would look broken rather than merely outvoted.
+- The phone shows *"⌚ Your watch has this one"* and stays live and readable throughout. It is not an error screen.
+
+**And the phone goes quiet.** While the watch holds the session, the phone's gym alerts are muted (`setGymHandedOff`) — two devices beeping is one device interrupting a podcast. It is deliberately a separate flag from the app-wide sound setting, which is the user's and not something a watch gets to rewrite. The watch buzzes *and* beeps for the same events the phone would: a set logged, ten seconds of rest left, rest over, a hold passing its target.
+
+**Reads are typed; writes are not.** A snapshot is parsed into a read-only view for drawing, but every write starts from the raw map that came off the wire, changes the two or three keys it means to, and puts it back. Deserialising into Kotlin classes and writing *those* back would drop every field the watch does not model — `how`, `why`, `ladder`, `warmup`, the demo, the block ids — and the phone would never know what it lost.
+
+**What stays on the phone.** Building and starting a session, reordering, swapping and skipping exercises, the videos, and **finishing** — the report, the grade and the Berries (§18c-3) all run there. The watch is the forty minutes in between.
+
+Build and install: `android/README-wear.md`. The watch has no USB data port, so it pairs over Wi-Fi (`adb pair` / `adb connect`).
+
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 
 Ben writes essays; Diogo runs the desk. The AI does the reading and the marking, but it **never writes for him** and it **never has the last word** — every note is Diogo's to keep, reword or bin, and the grade only happens once Diogo says everything is fixed.
