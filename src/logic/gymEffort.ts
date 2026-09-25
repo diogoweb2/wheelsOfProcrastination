@@ -135,7 +135,7 @@ const MIX: Record<string, EffortMix> = {
   // the hold is the same muscles doing the same job without the movement, so
   // the split is the movement's — a touch more core for standing still in it
   'mv-back-extension-hold': { back: 0.48, glutes: 0.32, core: 0.2 },
-  'mv-band-pull-through': { glutes: 0.55, legs: 0.25, power: 0.2 },
+  'mv-band-pull-through': { glutes: 0.55, legs: 0.25, core: 0.1, back: 0.1 },
 }
 
 /**

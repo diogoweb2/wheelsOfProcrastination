@@ -438,8 +438,23 @@ function clip(id: string, build: () => string, volume: number): HTMLAudioElement
   return el
 }
 
+/**
+ * THE WATCH HAS THE ALERTS (§18aa). While the Pixel Watch is driving a session
+ * it beeps and buzzes on your wrist, and the phone is in a pocket playing a
+ * podcast. Two devices alerting is one device interrupting, so the phone's gym
+ * alerts go quiet for exactly as long as the watch is holding the session.
+ *
+ * Deliberately separate from `muted`: that is the app-wide sound setting the
+ * user owns, and a watch must never silently rewrite it.
+ */
+let gymHandedOff = false
+
+export function setGymHandedOff(v: boolean) {
+  gymHandedOff = v
+}
+
 function fire(el: HTMLAudioElement) {
-  if (muted) return
+  if (muted || gymHandedOff) return
   el.currentTime = 0
   void el.play().catch(() => {
     /* autoplay blocked (no gesture yet) — the on-screen timer is still correct */

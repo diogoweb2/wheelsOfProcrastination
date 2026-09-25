@@ -1,0 +1,7 @@
+# Android build output and machine-local SDK path
+.gradle/
+build/
+local.properties
+*.apk
+captures/
+.cxx/

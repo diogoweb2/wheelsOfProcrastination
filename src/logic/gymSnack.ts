@@ -57,10 +57,12 @@ export interface SnackRoutine {
 }
 
 /**
- * The ceiling. A snack that runs to twenty minutes is a workout you did not
- * plan for, and the next one is the one you skip — so the tail comes off
- * instead (`fitToSnack`). Fifteen is the published promise; the estimate on the
- * card is the honest one.
+ * The ceiling, in REAL minutes — the corrected estimate (§18z), not the model.
+ * A snack that runs to twenty minutes is a workout you did not plan for, and
+ * the next one is the one you skip, so the tail comes off instead
+ * (`fitToSnack`). Measuring it on the raw model would have been the same lie
+ * §18z exists to end: his sessions run about 1.4× what the sets add up to, so a
+ * "fifteen minute" snack would have been twenty-one in the kitchen.
  */
 export const SNACK_CAP_SEC = 15 * 60
 
@@ -142,6 +144,8 @@ export interface SnackPlanInput {
   day?: string
   /** Filed with the session so a 🥱 day and a 🔥 day can be told apart later. Never changes the work. */
   mood?: Mood
+  /** Your measured slippage (§18z). The cap and the minutes are both real minutes because of it. */
+  paceFactor?: number
 }
 
 /**
@@ -149,9 +153,10 @@ export interface SnackPlanInput {
  * session uses (`fitToLength`). The routines are written most-important-first,
  * so what comes off is the finisher, never the movement the snack is named for.
  */
-function fitToSnack(list: SessionExercise[]): SessionExercise[] {
+function fitToSnack(list: SessionExercise[], paceFactor = 1): SessionExercise[] {
   const out = [...list]
-  while (out.length > SNACK_MIN_MOVES && out.reduce((n, e) => n + exerciseSeconds(e), 0) > SNACK_CAP_SEC) out.pop()
+  while (out.length > SNACK_MIN_MOVES && out.reduce((n, e) => n + exerciseSeconds(e, paceFactor), 0) > SNACK_CAP_SEC)
+    out.pop()
   return out
 }
 
@@ -177,14 +182,15 @@ export function planSnackSession(input: SnackPlanInput): GymSession | null {
     const one = buildSnackExercise(s, { catalog, gym, day, mood })
     if (one) built.push(one)
   }
-  const exercises = fitToSnack(built)
+  const paceFactor = input.paceFactor ?? 1
+  const exercises = fitToSnack(built, paceFactor)
   const trimmed = built.length - exercises.length
 
   return {
     id: crypto.randomUUID(),
     day,
     status: 'preview',
-    minutes: Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession) / 60)),
+    minutes: Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession, paceFactor) / 60)),
     mood,
     gearMode: 'bodyweight',
     source: 'local',

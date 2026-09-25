@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import { PART_LABEL, exerciseById, sessionSeconds } from '../../logic/gym'
 import { slotLine } from '../../logic/gymBlock'
+import { paceCalibration } from '../../logic/gymPace'
 import { TONE_COLOR, toneFor } from '../../logic/gymBody'
 import { SNACK_CAP_SEC, planSnackSession, rankSnacks, type SnackPick } from '../../logic/gymSnack'
 import { primeGymAudio, sfx } from '../../audio'
@@ -63,14 +64,17 @@ function SnackCard({ pick }: { pick: SnackPick }) {
   const gym = data.gym
   const [open, setOpen] = useState(false)
   const { routine, ready, recommended, why, moves } = pick
+  // Your own measured slippage (§18z) — the number on the button is the number
+  // in the kitchen, or the lunch break it was supposed to fit inside is a lie.
+  const cal = useMemo(() => paceCalibration(gym), [gym])
 
   // Built for real, not estimated: the card's minutes are the minutes the
   // preview will show, because it is the same function that builds both.
   const built = useMemo(
-    () => planSnackSession({ catalog: gymCatalog, gym, snackId: routine.id }),
-    [gymCatalog, gym, routine.id],
+    () => planSnackSession({ catalog: gymCatalog, gym, snackId: routine.id, paceFactor: cal.factor }),
+    [gymCatalog, gym, routine.id, cal.factor],
   )
-  const minutes = built ? Math.max(1, Math.round(sessionSeconds(built) / 60)) : 0
+  const minutes = built ? Math.max(1, Math.round(sessionSeconds(built, cal.factor) / 60)) : 0
   const planned = built?.exercises ?? []
   const tone = toneFor(ready)
   const runnable = moves > 0 && planned.length > 0
@@ -147,7 +151,7 @@ function SnackCard({ pick }: { pick: SnackPick }) {
         </ul>
       )}
 
-      {open && built && sessionSeconds(built) > SNACK_CAP_SEC * 0.9 && (
+      {open && built && sessionSeconds(built, cal.factor) > SNACK_CAP_SEC * 0.9 && (
         <p className="muted" style={{ fontSize: 11, marginTop: 6, lineHeight: 1.45 }}>
           This one has grown to the top of its fifteen minutes. The next rep it earns comes off the tail instead — the
           movement the snack is named for never goes.

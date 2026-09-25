@@ -40,6 +40,7 @@ import type {
   OptcgMatch,
   StickerTrade,
   Task,
+  SessionDriver,
 } from '../types'
 import {
   KID_ID,
@@ -58,6 +59,7 @@ import {
   subscribeAudit,
   fireAndForget,
   saveDataFields,
+  saveField,
   setWriteErrorHandler,
   saveAiConfig,
   saveGymCatalog,
@@ -195,7 +197,7 @@ import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowa
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
-import { enablePush } from '../push'
+import { enablePush, inShell } from '../push'
 import {
   GYM_LOG_CAP,
   STARTER_EXERCISES,
@@ -210,11 +212,13 @@ import {
   pickReplacement,
   planSession,
   planSolo,
+  plannedSetSeconds,
   seedBrief,
   sessionBonus,
-  setSeconds,
   advanceLadder,
 } from '../logic/gym'
+import { paceCalibration } from '../logic/gymPace'
+import { canDrive, deviceId } from '../logic/gymLive'
 import { SEED_VERSION, copyBlock, planBlockSession, repairBlock, seedBlock } from '../logic/gymBlock'
 import { planSnackSession } from '../logic/gymSnack'
 import { findExerciseVideo } from '../logic/gymVideoAi'
@@ -256,6 +260,7 @@ import {
 
 /** Rough device hint for the registered-devices list ("iPhone", "Mac", …). */
 function deviceLabel(): string {
+  if (inShell()) return 'Android app'
   const ua = navigator.userAgent
   for (const [re, name] of [[/iPhone/, 'iPhone'], [/iPad/, 'iPad'], [/Android/, 'Android'], [/Macintosh/, 'Mac'], [/Windows/, 'Windows']] as const) {
     if (re.test(ua)) return name
@@ -786,6 +791,23 @@ interface StoreState {
   gymLogWarmup: (exId: string, done: { reps: number; sec: number } | null) => void
   /** Record the rest you actually took after a set, and what was offered, in seconds. */
   gymLogRest: (exId: string, seconds: number, targetSec?: number) => void
+  /**
+   * Claim the running session for THIS device, or refresh the claim (§18aa).
+   * Returns false when someone else is driving and still beating — the caller
+   * shows "⌚ the watch has this" rather than fighting over the document.
+   * `force` is the deliberate takeover behind that message.
+   */
+  /** True when this device is allowed to write to the running session (§18aa). */
+  gymMayDrive: () => boolean
+  gymClaimDrive: (force?: boolean) => boolean
+  /** Put the session down, so the other device can pick it up without waiting out the heartbeat. */
+  gymReleaseDrive: () => void
+  /**
+   * Publish when the current rest ends, as a wall-clock instant — the one part
+   * of the runner's position that cannot be derived from the logged sets.
+   * `null` clears it. Written by field path, not through the whole gym blob.
+   */
+  gymSetRestUntil: (until: string | null) => void
   /** Rate an exercise from inside the runner (asked the first time you meet one). */
   gymRateInSession: (exId: string, rating: ExerciseRating) => void
   gymSkip: (exId: string) => void
@@ -3744,6 +3766,7 @@ export const useStore = create<StoreState>((set, get) => {
           mood,
           gearMode: opts?.gearMode,
           followUp: opts?.followUp ?? null,
+          paceFactor: paceCalibration(data.gym).factor,
         })
         commit((d) => {
           d.gym.active = session
@@ -3769,6 +3792,7 @@ export const useStore = create<StoreState>((set, get) => {
         mood: followUp?.mood ?? 'normal',
         gearMode: 'mixed',
         followUp: followUp ?? null,
+        paceFactor: paceCalibration(data.gym).factor,
       })
       commit((d) => {
         d.gym.active = session
@@ -3784,6 +3808,7 @@ export const useStore = create<StoreState>((set, get) => {
         mood: opts?.mood ?? 'normal',
         pos: opts?.pos,
         length: opts?.length,
+        paceFactor: paceCalibration(data.gym).factor,
       })
       if (!session) return false
       commit((d) => {
@@ -3797,7 +3822,13 @@ export const useStore = create<StoreState>((set, get) => {
 
     gymPlanSnack(snackId, mood) {
       const { data, gymCatalog } = get()
-      const session = planSnackSession({ catalog: gymCatalog, gym: data.gym, snackId, mood })
+      const session = planSnackSession({
+        catalog: gymCatalog,
+        gym: data.gym,
+        snackId,
+        mood,
+        paceFactor: paceCalibration(data.gym).factor,
+      })
       if (!session || session.exercises.length === 0) return false
       commit((d) => {
         d.gym.active = session
@@ -4047,6 +4078,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymLogSet(exId, reps, weight, sec, sides) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const s = d.gym.active
         const se = s?.exercises.find((e) => e.exId === exId)
@@ -4062,12 +4094,13 @@ export const useStore = create<StoreState>((set, get) => {
         se.skipped = false
         if (base.sec != null) {
           s.workSec = (s.workSec ?? 0) + base.sec
-          s.workTargetSec = (s.workTargetSec ?? 0) + setSeconds(se.kind, planned)
+          s.workTargetSec = (s.workTargetSec ?? 0) + plannedSetSeconds(se, planned)
         }
       })
     },
 
     gymUndoSet(exId) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const s = d.gym.active
         const se = s?.exercises.find((e) => e.exId === exId)
@@ -4076,12 +4109,13 @@ export const useStore = create<StoreState>((set, get) => {
         const gone = se.sets.pop()
         if (gone?.sec != null) {
           s.workSec = Math.max(0, (s.workSec ?? 0) - gone.sec)
-          s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - setSeconds(se.kind, planned ?? gone.reps))
+          s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - plannedSetSeconds(se, planned ?? gone.reps))
         }
       })
     },
 
     gymArmWarmup(exId, band, reps) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const se = d.gym.active?.exercises.find((e) => e.exId === exId)
         if (!se) return
@@ -4095,6 +4129,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymLogWarmup(exId, done) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const se = d.gym.active?.exercises.find((e) => e.exId === exId)
         if (!se) return
@@ -4112,6 +4147,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymLogRest(exId, seconds, targetSec) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const s = d.gym.active
         const se = s?.exercises.find((e) => e.exId === exId)
@@ -4124,6 +4160,50 @@ export const useStore = create<StoreState>((set, get) => {
       })
     },
 
+    /**
+     * May this device write to the running session right now? (§18aa)
+     *
+     * Enforced HERE and not on the buttons, because "the phone won't log
+     * anything" has to be true of every path into the session — a stray hook,
+     * a rest timer firing in a backgrounded tab, a hot-reload — not just of the
+     * controls I remembered to disable.
+     */
+    gymMayDrive() {
+      return canDrive(get().data.gym.active, deviceId())
+    },
+
+    gymClaimDrive(force) {
+      const { data, activeProfileId: id } = get()
+      const active = data.gym.active
+      if (!active || !id) return false
+      const me = deviceId()
+      if (!force && !canDrive(active, me)) return false
+      const driver: SessionDriver = { device: 'phone', id: me, at: new Date().toISOString() }
+      // Local first so the UI is instant, then ONE field up the wire. A
+      // heartbeat must not cost the whole gym object every 30 s (§18aa).
+      set((st) => ({ data: { ...st.data, gym: { ...st.data.gym, active: { ...active, driver } } } }))
+      fireAndForget(saveField(id, 'gym.active.driver', driver))
+      return true
+    },
+
+    gymReleaseDrive() {
+      const { data, activeProfileId: id } = get()
+      const active = data.gym.active
+      if (!active || !id || active.driver?.id !== deviceId()) return
+      set((st) => ({ data: { ...st.data, gym: { ...st.data.gym, active: { ...active, driver: undefined } } } }))
+      fireAndForget(saveField(id, 'gym.active.driver', null))
+    },
+
+    gymSetRestUntil(until) {
+      const { data, activeProfileId: id } = get()
+      const active = data.gym.active
+      if (!active || !id) return
+      set((st) => ({
+        data: { ...st.data, gym: { ...st.data.gym, active: { ...active, restUntil: until ?? undefined } } },
+      }))
+      fireAndForget(saveField(id, 'gym.active.restUntil', until))
+    },
+
     gymRateInSession(exId, rating) {
       commit((d) => {
         const se = d.gym.active?.exercises.find((e) => e.exId === exId)
@@ -4132,6 +4212,7 @@ export const useStore = create<StoreState>((set, get) => {
     },
 
     gymSkip(exId) {
+      if (!get().gymMayDrive()) return // the watch has the session (§18aa)
       commit((d) => {
         const se = d.gym.active?.exercises.find((e) => e.exId === exId)
         // SKIP on an exercise you have already logged sets for means "no more

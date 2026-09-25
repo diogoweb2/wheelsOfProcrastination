@@ -1,0 +1,11 @@
+// Root build file. The shell carries no game logic — it is a WebView pointed at
+// the live site. Its one native dependency is push, which a WebView cannot do.
+plugins {
+    id 'com.android.application' version '8.12.0' apply false
+    id 'com.google.gms.google-services' version '4.4.2' apply false
+    // Only :wear is Kotlin. The phone shell stays plain Java — it is a WebView
+    // and a push service, and giving it a second language to be written in
+    // would buy nothing.
+    id 'org.jetbrains.kotlin.android' version '2.4.20' apply false
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.4.20' apply false
+}

@@ -10,6 +10,7 @@ import { defaultAlbumState } from '../logic/album'
 import { GYM_LOG_CAP, defaultGymState } from '../logic/gym'
 import { ROBLOX_LOG_CAP, defaultRobloxState } from '../logic/roblox'
 import { defaultFrontierState } from '../logic/frontier'
+import { defaultCurfew } from '../logic/curfew'
 
 const DATA_PREFIX = 'wheels-of-procrastination:v1' // legacy per-profile blob: `${DATA_PREFIX}:${id}`
 const LEGACY_PROFILES_KEY = 'wheels-of-procrastination:profiles:v1' // legacy local roster
@@ -41,6 +42,7 @@ export function defaultData(): AppData {
       soundOn: true,
       streakGoal: 7,
       goalsReached: [],
+      curfew: defaultCurfew(),
     },
     economy: { gems: 0, freezes: 0, totalGemsEarned: 0, devilFruits: 0 },
     streak: { current: 0, best: 0, lastCompletionDay: null, lastRolloverDay: dayKey() },
@@ -79,7 +81,13 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
   const merged = {
     ...base,
     ...parsed,
-    settings: { ...base.settings, ...parsed.settings },
+    // curfew merges a level deeper: a save written before the night watch
+    // existed still gets the default window rather than an undefined one
+    settings: {
+      ...base.settings,
+      ...parsed.settings,
+      curfew: { ...base.settings.curfew!, ...parsed.settings?.curfew },
+    },
     economy: { ...base.economy, ...parsed.economy },
     streak: { ...base.streak, ...parsed.streak },
     daily: { ...base.daily, ...parsed.daily },

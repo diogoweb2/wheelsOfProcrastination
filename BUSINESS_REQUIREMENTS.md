@@ -67,6 +67,22 @@ App tile artwork is generated from art already in `public/` (see CLAUDE.md's ima
 - **The URL is not a way past a gate.** A path is only honoured once we're past the PIN, and it is re-checked against who is logged in: `/admin/...` in Ben's hands falls back to the landing page, as does any unknown app. `gate`d apps (Clocks) *are* reachable by URL — a gate hides an icon, it isn't a lock.
 - Implementation: [src/lib/route.ts](src/lib/route.ts) (`pathToRoute` / `routeToPath`) plus the three sync effects in [src/App.tsx](src/App.tsx). No router library — the whole navigation state is `{app, tab}`, so the History API is enough.
 
+## 1d. Ben's tablet runs an installed app, not a tab
+
+Chrome cannot be put to bed. Family Link and Digital Wellbeing schedule and
+time-limit **installed packages**, so the tablet gets one: `com.wheelsofprocrastination.app`,
+a WebView shell over the live site ([android/](android/README.md)).
+
+- **It holds no game logic.** The site is the app; a deploy reaches the tablet on
+  the next launch, and the shell never needs rebuilding for a feature.
+- **It hosts the site honestly**: back walks the site's history before it exits,
+  gym demos go fullscreen, the gear-photo picker reaches Android's file chooser,
+  off-site links (Roblox) leave for Chrome, and the screen stays awake while the
+  app is in front — spin, rest and gym timers were the reason.
+- **Push is the one native part** — see §10.
+- Portrait-locked, matching the PWA manifest. Installed by sideload
+  (`./gradlew assembleRelease`, `adb install -r`), never published to Play.
+
 ## 2. Tasks
 
 Fields when creating a task:
@@ -226,6 +242,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
 - **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
+  - **On Ben's tablet the push device is the Android shell** (`android/`, §1d). A WebView has neither service-worker push nor the Notification API, so the shell fetches a **native FCM token** and hands it to the site over `window.WheelsShell` (`src/push.ts` → `inShell()`). It lands on `profiles/{id}.pushTokens` like any browser's, labelled "Android app", and the site asks for it on the same open-after-PIN pass — Android's own permission dialog stands in for the browser's. Because a token from the app is not a webpush token, the fan-out sends a platform-neutral `notification` (Android channel `crew_pings`) and lets the `webpush` block override it for browsers; the `data.link` it carries is the screen a tap opens.
   - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19i). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
 - **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
   - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
@@ -508,7 +525,7 @@ Once the fleet is hidden, each captain is **dealt three special cards** (`logic/
 The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · **🗺️ Voyage** (lifetime stats, map, habit log) · **⚙️ Settings** · **🛠️ Admin** (Diogo only, deliberately last: least-used feature). All management lives in the Admin tab (`src/components/AdminSection.tsx`):
 
 - Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **⚓ Mark conquered / ↩︎ Un-conquer** (stamps a topic passed by hand — a test sat off-app, or one the app failed to record; it also drops the topic off the wheel and opens the next one, exactly like a real pass, but hands out **no** 🍇 — use +1 🍇 for that. Un-conquering puts the topic back on the wheel), **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher (on the spot **or** 📡 allowed on his device with a code + note for a nearby grown-up, result reported back here), ⚔️ preview of Ben's training (records nothing).
-- **⏳ Limits**: how many **training-hall card matches vs the AI** each crewmate may start per day (§13) — separate dials for Ben and Diogo, default **2**, 0 to shut the hall, 20 max, each row showing what has been played today and a one-tap reset to the default. Ben's dial is written into his world through the `kidData` subscription, so it only moves once his doc has arrived from the server. The same tab holds **⏱️ Move clock** — seconds per move for the board games and for the card game (§15e), 5-second steps up to 60, 0 to switch the clock off, written into **both** worlds at once because a clock only works if both sides of the board are on it.
+- **⏳ Limits**: how many **training-hall card matches vs the AI** each crewmate may start per day (§13) — separate dials for Ben and Diogo, default **2**, 0 to shut the hall, 20 max, each row showing what has been played today and a one-tap reset to the default. Ben's dial is written into his world through the `kidData` subscription, so it only moves once his doc has arrived from the server. The same tab also holds **🌙 Night watch** — Ben's daily curfew (§23) — and **⏱️ Move clock** — seconds per move for the board games and for the card game (§15e), 5-second steps up to 60, 0 to switch the clock off, written into **both** worlds at once because a clock only works if both sides of the board are on it.
 - **🧊 Free freezes for Ben** (top of the desk): answer his freeze asks or gift unprompted — count + custom message, revives a dead streak for free. See §6.
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
 - Prize settlement: "Prizes to settle" list + topbar banners, and the **treasure shelves** themselves — add/edit/delete a prize and set its 30-day limit, per profile (see §15).
@@ -565,7 +582,7 @@ Code: `src/logic/gym.ts` (the offline brain), `src/logic/gymBlock.ts` (the train
 ### 18c. The session loop
 
 1. **Set up** — for a **training block** (§18m, the normal case) there is nothing to set up: the Train tab shows the next session of the rotation and you press **▶️ Do session N**. Off-programme (or on a profile with no block) the old setup stands: how many minutes (5/10/15/20/25/30/45/60), how you feel (**🥱 lazy · 🙂 normal · 🔥 fired up**, default normal) and **what you want to use** (§18c-2), with mood changing set counts, rep targets and how hard the planner leans.
-2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest, and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks the coach for a replacement in the same body area) or **⚡ Offline** (the same thing from the offline planner — instant, free, no network). **Neither ever leaves a hole**: you asked for 30 minutes, so the slot gets refilled from your own history with something that fits what the rest of the session is working, and the card says so ("swapped in offline for X"). It only empties when there is genuinely nothing left to offer. **↑ / ↓ reorder** the session in place — the planner's sequence is a suggestion, not the programme, and the order you actually train in is yours to set before you start (it works on block sessions too: the list is the same list, only the order moves). Also **🎲 Plan a different one** and **🗑 Cancel**.
+2. **Preview, before you commit** — the whole session, with who built it (🧠 AI trainer / ⚙️ offline plan), the estimated real length including rest (§18z — wall clock, corrected by your own finished sessions, with the middle-half range beside it and one line saying where the number came from), and the coach's reason per exercise. Per exercise: **🔄 Not this one** (asks the coach for a replacement in the same body area) or **⚡ Offline** (the same thing from the offline planner — instant, free, no network). **Neither ever leaves a hole**: you asked for 30 minutes, so the slot gets refilled from your own history with something that fits what the rest of the session is working, and the card says so ("swapped in offline for X"). It only empties when there is genuinely nothing left to offer. **↑ / ↓ reorder** the session in place — the planner's sequence is a suggestion, not the programme, and the order you actually train in is yours to set before you start (it works on block sessions too: the list is the same list, only the order moves). Also **🎲 Plan a different one** and **🗑 Cancel**.
 3. **Train — three buttons, never more** (§18c-1).
 4. **Rate a new exercise** — 🤢 Hate it · 😕 Don't like · 😐 OK · 🙂 Like it · 🤩 Great, asked only the first time you meet one. Editable forever in the Gear tab. **Hate is a hard filter** — it is never prescribed again.
 5. **Finish** — 1–5 stars plus optional free text for the trainer, then Berries are paid and everything is folded into memory. Leaving early keeps whatever you logged (and pays for it); a session with nothing logged is thrown away rather than polluting the history.
@@ -638,7 +655,7 @@ So a clocked per-side exercise runs **one clock per side**, and the foot button 
 
 #### 18c-1b. The session countdown
 
-You said 20 minutes, so the app shows you 20 minutes: a small `⏳ 12:34 left of 20 min` rides above the foot button for the whole workout and is never scrolled away. **It does not stop at zero** — going over is allowed and expected; the clock just turns amber and counts `−2:10 over your 20 min`. It is information, not a buzzer: nothing about the session changes when it passes zero, and (since §18c-3) nothing about the grade does either. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
+The session says what it will cost, so the app counts that down: a small `⏳ 12:34 left of 46 min` rides above the foot button for the whole workout and is never scrolled away. The number is `session.minutes`, which since §18z is the **corrected** estimate of the session that was actually built — not the budget you asked for and not the model's own optimism. **It does not stop at zero** — going over is allowed and expected; the clock just turns amber and counts `−2:10 over your 20 min`. It is information, not a buzzer: nothing about the session changes when it passes zero, and (since §18c-3) nothing about the grade does either. **⏭ Skip this one**, **Next exercise →**, **↩︎ Undo last set** and **🏁 Finish** are all still there; they are just out of the way of the loop.
 
 #### 18c-1c. Five seconds to roll over
 
@@ -753,7 +770,7 @@ The motivating pattern from Diogo's old push-up app, for bodyweight staples (`la
 
 Lives on **Gear → 🧠 You** (`/gym/gear`) since the Plan tab went (§18m). Free text plus the hard rules the offline planner enforces, because it can't read prose:
 
-- **Protect my lower back** — `backRisk` exercises are filtered out entirely: out of the planner's pool, out of 🔄 Swap, and out of the exercise snacks (§18ab). **A block slot is the one exception, by design** — you wrote that rotation by hand, so it is assumed you meant it. That is why banning a movement means flagging `backRisk` in the catalog *and* replacing it in the block.
+- **Protect my lower back** — `backRisk` exercises are filtered out entirely: out of the planner's pool, out of **🔄 Swap for something similar**, out of the free session, and out of the exercise snacks (§18ab). Carrying the flag today: **Dumbbell Romanian Deadlift**, **Kettlebell Swing**, **One-Arm Dumbbell Row** (knee-on-bench, an asymmetric loaded row), and all three **Nordic Curl** rows. The last four were flagged on 2026-09-25 — they had already been swapped out of Block 1 by hand, but a row that is merely unused is one 🔄 Swap away from coming back, and two of them were rated 🙂/🤩, which made the planner actively *prefer* them. **The flag is the block's business, not the block's boss:** a block slot is the prescription and is taken as written (§18m), so it can still name a `backRisk` move — the flag governs everything the app *chooses* for you, and a snack routine counts as chosen because nobody edited it.
 - **No warm-up block** — see §18e.
 - **Roman chair first, always** — see §18e. Default ON.
 
@@ -787,11 +804,11 @@ Every chart is deliberately **single-series**: running the dataviz validator ove
 
 **The exercise library is not generated any more** (2026-08-24). It used to be: a model saw the whole inventory and proposed everything it could think of, which produced **199 rows nobody had ever read one by one** — a Pallof press with no anchor, a seal row on a bench too low for it, prehab work prescribed at a load 3× heavier than the movement wants. A second, model-driven audit pass then existed only to find those, and a review queue existed only to work through what the audit found. All of it is gone: `gym:exercises`, `gym:audit:semantic` and `gym-apply-review` are deleted, and so is the per-row audit metadata they wrote (`catalogStatus`, `movementPattern`, `primaryRole`, `laterality`, `progressionMode`, `riskProfiles`, `reviewFlags`) — the app never read a single one of those fields.
 
-**The catalog is now 63 exercises chosen by hand**, and the file is the catalog: `scripts/data/gym-catalog.json` holds every row, `npm run gym:seed` REPLACES `app/gymCatalog` with it, and anything in the database that is not in the file is dropped. The seed refuses to write a file that fails `npm run gym:audit`, and it carries over the `demo` of any id that already has one, because animations cost a match run each. Day-to-day edits — a new exercise, a fixed how-to, retiring something — happen in **Gear**, which writes straight to Firestore; the seed is for resetting to the file. `--dry-run` prints the diff first.
+**The catalog is now 62 exercises chosen by hand**, and the file is the catalog: `scripts/data/gym-catalog.json` holds every row, `npm run gym:seed` REPLACES `app/gymCatalog` with it, and anything in the database that is not in the file is dropped. The seed refuses to write a file that fails `npm run gym:audit`, and it carries over the `demo` of any id that already has one, because animations cost a match run each. Day-to-day edits — a new exercise, a fixed how-to, retiring something — happen in **Gear**, which writes straight to Firestore; the seed is for resetting to the file. `--dry-run` prints the diff first.
 
 **Eleven body parts, not nine.** `forearms` and `power` joined `chest / back / shoulders / arms / legs / glutes / core / fullBody / cardio` on 2026-08-24. Neither is a muscle in the way the others are — `power` is jumps, throws and swings, the pickleball block — but they are how the catalog is actually organised, and hiding grip work inside `arms` and plyometrics inside `legs` made both invisible to the stats filter and to recovery spacing (`forearms` recovers in 24 h, `power` wants 48).
 
-**Resistance bands** were added as the ninth piece of gear at the same time. They anchor to the door **or the basement post at any height**, which is what finally makes lat pulldowns, face pulls, pushdowns and a real Pallof press possible, and they are the answer to the 8.5 lb dumbbell floor for cuff, scaption and wrist work. 15 of the 63 exercises are band moves.
+**Resistance bands** were added as the ninth piece of gear at the same time. They anchor to the door **or the basement post at any height**, which is what finally makes lat pulldowns, face pulls, pushdowns and a real Pallof press possible, and they are the answer to the 8.5 lb dumbbell floor for cuff, scaption and wrist work. 16 of the 62 exercises are band moves.
 
 `src/logic/gymStarters.json` stays what it always was — the built-in moves an app with no catalog still has — but it is now exactly the **gear-free subset of that same file** (12 rows), so a move deleted from the catalog can't quietly return through the back door.
 
@@ -892,7 +909,7 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 |---|---|---|
 | S1 | 🦵 Lower strength + core | Bulgarian split squat · hip thrust · side plank · calf raise |
 | S2 | 🫸 Upper push + pull | DB bench · chest-supported row · pull-ups · lateral raise · band face pull |
-| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · KB swing (power: 3 × 8–12 explosive) · Copenhagen plank · band Pallof |
+| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · **band pull-through** (power: 3 × 12–18 explosive) · Copenhagen plank · band Pallof |
 | S4 | 🦿 Lower unilateral + posterior chain | reverse lunge · goblet squat · single-leg glute bridge · band leg curl · single-leg calf raise |
 | S5 | 🧗 Upper pull + shoulder health | pull-ups · chest-supported row · DB shoulder press · band external rotation · wrist curls |
 | S6 | 🏓 Full body + pickleball | step-up · incline DB press · band lat pulldown · band rotational press · farmer's carry · med-ball chest pass |
@@ -913,13 +930,17 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 
 **Rep ranges, not rep counts.** A slot prescribes `3 × 8–12`. The **low end is what has to be there** for the set to count (it is what `plan.reps` holds, so the pace grade is honest), the **high end is what you chase**, and hitting the top on every set is the signal to add load next time. **On counted bodyweight work the low end itself climbs** (§18d): there is no load to add, so `3 × 4–8` pull-ups are asked for as **4 4 4** the first time, **5 4 4** the next and **8 8 8** three months later. The written range is the frame; the card carries today's ask, and the Train and Blocks tabs read `5 · 5 · 4 of 4–8` rather than a `3 × 4–8` that never changes. Timed slots are the same in seconds (`2 × 30–45s`). Power slots are **quality-terminated** (`quality: true`) — split squat jumps, lateral shuffles, med-ball throws stop the moment height, speed or landing goes, whatever the count says. Chasing a rep number on those trains exactly the wrong thing.
 
-**What the app still decides: the loading, not the programme.** Every weight on the card comes from the same per-exercise memory as before (§18d), so the block is fixed and the numbers under it are learned. The Train tab therefore has **no minutes picker and no "build" button** — the session is already known, and the estimate (19–29 min for these six) comes out of your own measured set times.
+**What the app still decides: the loading, not the programme.** Every weight on the card comes from the same per-exercise memory as before (§18d), so the block is fixed and the numbers under it are learned. The Train tab therefore has **no minutes picker and no "build" button** — the session is already known, and the estimate comes out of your own measured set times **and your own finished sessions** (§18z).
+
+**20 · 30 · 40 are shapes, and the buttons stopped printing them** (2026-09-25). They are the three ways to run *this* session — tail off, as written, a set more — and what each one costs in wall clock is a different question with a different answer per session and per month. So the button carries the answer (`~46 min` over a small `short`) and the shape is the caption. The number comes from building that exact session with `planBlockSession` and correcting it (§18z), which is the same call the ▶️ button makes: what the button promises is by construction what the countdown starts from. **A button that changes nothing says so on its face** — on S3 both leading slots are ⚡ quality-capped, so `+1 set` has nothing to add it and the caption reads **`no change`** instead. The modal still explains why when you tap it; it just no longer has to be tapped to find out that two buttons print the same minutes. **A block session grows.** Written for 30 minutes in August, Block 1 measured 41 · 62 · 38 · 62 · 54 · 78 real minutes on 2026-09-25 — the programme never changed, the loads did, and heavier sets take longer. The buttons say so now instead of all six claiming 30.
 
 **A block slot is the prescription; the movement in it is not.** The free planner's coach-backed **"🔄 Not this one"** stays hidden — a block is not a place to shop for exercises — but every slot has **🔄 Swap for something similar**, the offline planner picking the closest thing in the same body area. **The slot keeps its sets**: a three-set slot is three sets whoever fills it, so a swap can never quietly hand you less work than the block asked for. It refuses rather than empties — with nothing to offer, the exercise stays put and the app buzzes. A slot you haven't got time for at all is still **✕ Skip this one today**, and that one just closes. **↑ / ↓ still reorder it** — running order is not the programme. (This is a deliberate loosening of the original rule: a rack in use or a shoulder that doesn't like today's angle is a real reason, and losing the slot entirely was costing more than substituting ever did.) Substituting something similar is precisely what the block exists to stop. **↔️ Do a different one** picks another session of the rotation instead, and moves the cursor there (the next one is then the one after it).
 
 **Blocks expire on sessions FINISHED, not weeks owned.** `reviewSessions: 24` (four full trips round a six-session rotation), `retireSessions: 42`. This ran on the calendar first and that was wrong: at two sessions a week "eight weeks" is sixteen sessions — barely three rotations, nowhere near enough exposure to have finished progressing on anything — while at five a week it is forty. The calendar measures how long you have owned the programme; the counter measures how much of it you have done, so a fortnight off now costs the block nothing. Both numbers are editable per block on the Blocks tab; weeks are still displayed, as information.
 
 **And it is a suggestion, not a deadline.** The warning says so in as many words: *"if it is still progressing, keep going"*. A block that is still adding weight is worth keeping past `retireSessions`.
+
+**The swing came out of S3** (2026-09-25, `SEED_VERSION` 4). It was the hip-drive slot and it is `backRisk` for a reason: 46 lb hanging off the spine at the bottom of a ballistic hinge is the exact thing the brief means by *nothing that loads the spine heavily*. The **Band Pull-Through** is the same hip snap with the load pulling from **behind** you instead of hanging in front — still ⚡ quality-terminated, still the power slot, 3 × 12–18 because a band is not 46 lb. The block was edited in place on the profile that had already trained against it; the seed carries the change for anyone starting fresh.
 
 **Block 2 changes 2–4 movements and nothing else.** Split squat → reverse lunge, flat press → incline, chest-supported row → one-arm, split squat jump → another lateral or vertical power move. The patterns stay: you want **progressive exposure, not novelty**, and a programme that reshuffles itself every block is the exercise generator this replaced, wearing a different hat. Block 1 establishes the baseline, Block 2 is a small variation, Block 3 is a small variation. The warning can also be answered with **🔄 carry on with these**, which copies the rotation into a new block with the counter back at zero — a real answer, not a snooze.
 
@@ -1142,6 +1163,57 @@ The weight and the reps share one gold card — two cells, a hairline between th
 **What focus mode hides:** the animation, the grey plan line, the whole brief (`how`, the muscle figure, the aim line, the ramp line, the `why`), the demo caption, the set pills, the warm-up explainer, and on the rest screen the up-next line, the source-of-the-number paragraph, the next movement's brief and the pickleball card (§18s).
 
 **What it never hides, because these are instructions and not prose:** the load change (§18v — *⬆️ HEAVIER NEXT SET*), and a one-line chip row of the facts that change what your hands do — **🪑 incline 30°** (§18w), **↔️ one side at a time** / **both sides**, **⚖️ that weight EACH side**, **⏳ max hold — no target**, **🏁 max test**. Every button is untouched: nothing you can press moved or disappeared.
+
+### 18z. How long it really takes — the honest estimate
+
+**The estimate was a third short, every time, and the reason was never the exercises.** The planner could always add up a session: learned seconds per set (§18d), the rest it prescribes, twenty seconds to walk over. Across the 19 block sessions Diogo had *finished* by 2026-09-25 it predicted an average **1.37× short** — 18 of the 19 ran over, and the last one built said 35 minutes and took 57. Picking "30 min" and finishing at 45 is not a session that went badly; it is a number that was never true.
+
+**Three things go missing, and only one of them is about exercises:**
+
+| | What the model says | What the clock says |
+|---|---|---|
+| the **work** | learned seconds per set | ~1.26× that — the pace lags a heavy day, and the formula behind it (`reps × 3.5 s`) is half the measured 6.6 s/rep |
+| the **rest** | what `restFor` *offers* you | ~1.31× that — you take the rest you need, not the rest on the card |
+| **everything else** | 20 s per exercise | **61 s** per exercise (median), 140 s on the recent long sessions — changing the dumbbell, reading the card, watching the demo, setting the bench |
+
+The third is the biggest and it is not an exercise at all, which is why no amount of cleverness in the planner was ever going to find it.
+
+**So it is measured, not modelled.** `paceCalibration` (`src/logic/gymPace.ts`) divides each finished session's **wall clock** by what the model predicted for it, and takes the **median of the last 10**. That is the factor, and it multiplies every time estimate in the app. On this profile it is **1.39**, and it cuts the mean error on the same history from **35 % to 14 %**.
+
+- **Completed sessions only.** Every planned set logged, nothing skipped, at least two exercises, a plan worth at least five model-minutes, a wall clock between one minute and four hours. A session you walked out of halfway ran short for reasons that have nothing to do with how long the work takes, and letting it in would teach the app that its estimates are generous.
+- **Median, not mean.** One session with a phone call in the middle of it should drift the number, not rewrite it — and there is one of those in every ten.
+- **A window, not all of history.** The block gets heavier and so does the correction. Ten sessions is what it looks at.
+- **One number, not three.** Tempting to learn a work multiplier, a rest multiplier and a per-exercise overhead separately, and wrong: twenty noisy sessions cannot support three parameters, and fitting them is fitting the noise. A scalar is what that much evidence buys.
+- **Silent until it knows.** Under **3** usable sessions the factor is exactly 1, the raw model is shown, and the card says it has no history to correct itself with yet. It is clamped to **0.75–2.5** — a sanity band, not a thumb on the scale.
+
+**Where it lands.** Everywhere a length is claimed, so no two screens can disagree: the ⏱ chip on the preview, `session.minutes` (hence the `⏳ left of N min` countdown, §18c-1), the three length buttons on the Train card (§18m), the plan-change modal's before → after, and **the budget the off-programme planner fills** — asking for 30 minutes now deflates the budget by the factor and picks 4 movements instead of 5, so "30 minutes" buys thirty minutes instead of forty-one.
+
+**And it shows its working.** The preview card says the factor, how many sessions it came from, and what it covers, plus the **middle half** of those sessions as a range (`usually 44–56`). A median promises that half the time you go over; saying so out loud is cheaper than being wrong twice and never being believed again. An estimate you cannot audit is a number you stop reading.
+
+**The report's "planned" line was the same lie, smaller.** *time working: 32:36, planned 7:32* compared the clock against `reps × 3.5 s` — a formula the session was not planned from and never had been. It now reads the same learned pace the estimate uses (`plannedSetSeconds`), so the two can never disagree. It remains **information, never a score** (§18c-3): the grade's only clock is rest.
+
+### 18aa. The watch (`android/wear`) — a second pair of hands, not a second brain
+
+**The phone is for starting a session, reordering it and watching the demo videos. Everything you do between sets happens on the wrist.** A Pixel Watch 3 runs the workout: what is next, what goes on the bar, how many, what angle the bench is at, **✓ DONE**, **⏭ skip rest**, **▶ START** on a hold, and ± on the two numbers reality argues with.
+
+**It is a client, not a remote control.** The watch reads and writes `profiles/diogo` itself, exactly as a second browser tab already could — no command channel, no phone app relaying anything, **no requirement that the phone be awake**. Put the phone in your pocket with a podcast on; the watch does not care. Put the watch on the charger flat; the phone picks the session up mid-set, which it has always been able to do.
+
+**That works because "where am I?" was never state — it was always derivable.** `src/logic/gymLive.ts` (`livePosition`) says it once: the first exercise still owing sets, the set number from how many are logged, the weight from what you last actually lifted, falling back to what was planned. The React runner used to hold these in `useState` and recompute them after a refresh; they are written down now so the Kotlin has something to **mirror** (`Session.kt`) rather than something to reinvent. The one exception is rest — *"resting until 14:32:05"* cannot be derived from the sets — so the session carries `restUntil`, a **wall-clock instant** rather than a countdown: a device arriving mid-rest computes the same number as the one that started it.
+
+**One driver at a time, and this part is not a nicety.** `commit` writes the WHOLE `gym` object on any change, so two writers is last-write-wins over every session, every block and every exercise memory — a phone waking with a stale copy would silently eat the sets logged on the wrist. So a running session names its `driver`: device, a per-install id, and a heartbeat.
+
+- **30 s heartbeat, 90 s staleness.** A flat watch battery hands the session back on its own; nothing locks you out of your own workout.
+- **The guard is in the store, not on the buttons** — `gymLogSet`, `gymUndoSet`, `gymLogRest`, `gymSkip` and the warm-up all refuse when another device holds it. "The phone won't log anything" has to be true of every path in, not just of the controls someone remembered to disable.
+- **Both sides can take over**, in one tap, and the watch will not re-claim a session the phone is actively holding — otherwise the phone's button would look broken rather than merely outvoted.
+- The phone shows *"⌚ Your watch has this one"* and stays live and readable throughout. It is not an error screen.
+
+**And the phone goes quiet.** While the watch holds the session, the phone's gym alerts are muted (`setGymHandedOff`) — two devices beeping is one device interrupting a podcast. It is deliberately a separate flag from the app-wide sound setting, which is the user's and not something a watch gets to rewrite. The watch buzzes *and* beeps for the same events the phone would: a set logged, ten seconds of rest left, rest over, a hold passing its target.
+
+**Reads are typed; writes are not.** A snapshot is parsed into a read-only view for drawing, but every write starts from the raw map that came off the wire, changes the two or three keys it means to, and puts it back. Deserialising into Kotlin classes and writing *those* back would drop every field the watch does not model — `how`, `why`, `ladder`, `warmup`, the demo, the block ids — and the phone would never know what it lost.
+
+**What stays on the phone.** Building and starting a session, reordering, swapping and skipping exercises, the videos, and **finishing** — the report, the grade and the Berries (§18c-3) all run there. The watch is the forty minutes in between.
+
+Build and install: `android/README-wear.md`. The watch has no USB data port, so it pairs over Wi-Fi (`adb pair` / `adb connect`).
 
 ### 18ab. 🍿 Exercise snacks — ten minutes at lunch (`/gym/snack`)
 
@@ -1619,5 +1691,19 @@ Three grades, and the knob that matters is **`tell`**: Casual is not a monster t
 **Berries.** A boss's bounty (**18 / 40 / 60**) is paid **once**, the first time it goes down. After that a clear pays **6**, **3 a day**, exactly like the other games' solo modes — a boss rush you can farm is a Berry printer and not a game.
 
 **Drawn, not downloaded.** The show's art belongs to somebody else and the repo keeps `public/` tight (CLAUDE.md), so the arena, the monsters, the telegraphs and the bird mask are all canvas primitives, and every sound is synthesized ([src/audio.ts](src/audio.ts) `slfSfx`). The hunt reuses the football game's control chrome (`.ops-full` / `.ops-stick` / `.ops-btn` / `.ops-bar`) on purpose: one set of thumb controls, learned once.
+
+
+## 23. Night watch — the daily curfew (🌙, set from the Parent app)
+
+Most of the app goes to sleep on a schedule, and **the schedule is visible**: the whole point is that a locked island never reads as a bug.
+
+- **The window.** One per day, **19:00 → 07:00 by default**, set by Diogo in the Parent app → **⏳ Limits** → **🌙 Night watch**, in 30-minute steps on either end. It may wrap past midnight (19:00 → 07:00) or not (13:00 → 15:00); both shapes work. The clock is the device's own — one family, one timezone.
+- **Whose watch.** Ben's. It is stored on **his** settings (`settings.curfew`, written through `setSettingsFor` like the card-game cap, so the dial only moves once his doc has arrived from the server). **Diogo is never on watch** — he is the one who sets it.
+- **What stays open.** A tick-list of islands, grouped Work / 🎮 Games. **Default: 📋 Tasks · 🏦 Bank · 🎓 Quiz · ✍️ Essays**, plus **♟️ Chess · 🔴 Checkers · 🚢 Sea Battle**. **⚙️ Settings and the 👨‍👦 Parent app are never closable** and never appear on the list — the desk is where the watch is switched off, so locking it would lock the key inside the room.
+- **What a sleeping island looks like.** It **keeps its home-screen slot**, dimmed and wearing a 🌙 badge (a folder only sleeps when every app inside it does). The home screen and the top of every page carry a banner naming the watch, the time it lifts, and how long is left.
+- **Its URL still works** (§1c): `/gym/train` during the watch renders the **night-watch card** instead of the Gym — "*{App} is asleep*", the exact window, a live countdown to the minute it lifts, and one-tap buttons to the islands that *are* open. There is **no dismiss and no "continue anyway"**: a curfew with a back door isn't one.
+- **Off is off.** Turning the watch off restores the app exactly as it was.
+
+Code: `src/logic/curfew.ts` (pure rules), `src/hooks/useCurfew.ts` (the live clock, re-read every 30s and on refocus), `src/components/NightWatch.tsx` (the blocked screen), `NightWatchDesk` in `src/components/AdminSection.tsx` (the dials).
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

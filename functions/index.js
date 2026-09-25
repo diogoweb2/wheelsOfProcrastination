@@ -4,7 +4,8 @@
 // functions are what reach a CLOSED app. Each one watches a shared Firestore
 // doc, diffs before/after to find what's genuinely new, and pushes to the
 // target profile's registered devices (profiles/{id}.pushTokens, written by
-// src/push.ts). Dead tokens are pruned as they're discovered.
+// src/push.ts — browsers and the Android shell in android/ both land there).
+// Dead tokens are pruned as they're discovered.
 import { onDocumentWritten } from 'firebase-functions/v2/firestore'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { initializeApp } from 'firebase-admin/app'
@@ -18,8 +19,15 @@ const SITE = 'https://spinningwheel-6ff51.web.app'
 const PARENT_ID = 'diogo'
 const KID_ID = 'ben'
 
-/** Push to every device the given profile registered. Prunes tokens FCM rejects. */
-async function pushTo(profileId, { title, body }) {
+/**
+ * Push to every device the given profile registered. Prunes tokens FCM rejects.
+ *
+ * Two kinds of device are on that list now: browsers (webpush) and the Android
+ * shell (a plain FCM token). A message carrying only a `webpush` block is
+ * invalid for the second kind, so the payload leads with a platform-neutral
+ * notification and lets the webpush block override it for browsers.
+ */
+async function pushTo(profileId, { title, body, link = SITE }) {
   const snap = await db.doc(`profiles/${profileId}`).get()
   const entries = snap.get('pushTokens') ?? []
   const tokens = entries.map((t) => t.token).filter(Boolean)
@@ -30,9 +38,15 @@ async function pushTo(profileId, { title, body }) {
 
   const res = await getMessaging().sendEachForMulticast({
     tokens,
+    notification: { title, body },
+    data: { link }, // Android reads this off the tap intent to pick the screen
+    android: {
+      priority: 'high',
+      notification: { channelId: 'crew_pings', color: '#f2d38a' },
+    },
     webpush: {
       notification: { title, body, icon: `${SITE}/pwa-192.png`, badge: `${SITE}/pwa-192.png` },
-      fcmOptions: { link: SITE },
+      fcmOptions: { link },
     },
   })
 
