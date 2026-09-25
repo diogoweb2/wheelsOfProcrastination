@@ -52,6 +52,7 @@ import { PACE_MIN_SAMPLES, honestRange, paceCalibration } from '../../logic/gymP
 import {
   SESSION_LENGTHS,
   activeBlock,
+  diffBlockPlans,
   blockAge,
   blockPos as blockPosOf,
   blockSessionsDone,
@@ -322,11 +323,26 @@ function NextSessionCard() {
    * had enough history to know better.
    */
   const costs = useMemo(() => {
-    const out = {} as Record<SessionLength, number | null>
+    const built = {} as Record<SessionLength, GymSession | null>
     for (const len of SESSION_LENGTHS) {
-      out[len] = planBlockSession({ catalog: gymCatalog, gym, mood: 'normal', length: len, pos, paceFactor: cal.factor })?.minutes ?? null
+      built[len] = planBlockSession({ catalog: gymCatalog, gym, mood: 'normal', length: len, pos, paceFactor: cal.factor })
     }
-    return out
+    const written = built[30]
+    return SESSION_LENGTHS.reduce(
+      (acc, len) => {
+        const s = built[len]
+        acc[len] = {
+          min: s?.minutes ?? null,
+          // Two buttons printing the same minutes is not a bug — on S3 both
+          // leading slots are ⚡ quality-capped, so "+1 set" has nothing to add
+          // it (§18m). It IS confusing, and the modal explaining it only opens
+          // AFTER you tap. The caption says it up front instead.
+          same: len !== 30 && !!s && !!written && diffBlockPlans(written, s).changes.length === 0,
+        }
+        return acc
+      },
+      {} as Record<SessionLength, { min: number | null; same: boolean }>,
+    )
   }, [gymCatalog, gym, pos, cal.factor])
   if (!block) return null
 
@@ -407,11 +423,11 @@ function NextSessionCard() {
                 onClick={() => {
                   sfx.click()
                   if (m === length) return
-                  propose({ mood, length: m }, `⏱ ${costs[m] ?? m} min`, LENGTH_NO_CHANGE[m])
+                  propose({ mood, length: m }, `⏱ ${costs[m].min ?? m} min`, LENGTH_NO_CHANGE[m])
                 }}
               >
-                {costs[m] ? `~${costs[m]} min` : `${m} min`}
-                <span>{LENGTH_SHAPE[m]}</span>
+                {costs[m].min ? `~${costs[m].min} min` : `${m} min`}
+                <span>{costs[m].same ? 'no change' : LENGTH_SHAPE[m]}</span>
               </button>
             ))}
           </div>
