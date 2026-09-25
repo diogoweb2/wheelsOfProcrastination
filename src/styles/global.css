@@ -5931,3 +5931,7 @@ input, select { font-family: inherit; }
    the session will really cost you (§18z) over what it does to the session. */
 .gym-len button { display: flex; flex-direction: column; gap: 1px; line-height: 1.15; }
 .gym-len button span { font-size: 9px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* "Your watch has this one" — the phone's runner, live but read-only (§18aa). */
+.gym-handoff { display: flex; align-items: center; gap: 12px; border-color: var(--gold); }
+.gym-handoff button { flex: none; margin-left: auto; }

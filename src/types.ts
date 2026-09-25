@@ -1218,6 +1218,19 @@ export interface SessionExercise {
 }
 
 /** One workout, from "GO" to the closing star rating. */
+/**
+ * The device currently allowed to log sets on a running session (§18aa).
+ * `at` is a heartbeat: a driver that stops beating has put the session down,
+ * and the other device may pick it up without asking.
+ */
+export interface SessionDriver {
+  device: 'phone' | 'watch'
+  /** Random per-install id, so two phones are two different drivers. */
+  id: string
+  /** ISO, refreshed while the driver is awake and on the session. */
+  at: string
+}
+
 export interface GymSession {
   id: string
   day: string // YYYY-MM-DD
@@ -1247,6 +1260,21 @@ export interface GymSession {
   restTargetSec?: number
   /** True when this one was planned as "do more" right after another session. */
   followUp?: boolean
+  /**
+   * WHO IS DRIVING (§18aa). While a session runs, exactly one device logs sets
+   * — the phone in your hand or the watch on your wrist. It is not a nicety:
+   * `commit` writes the whole `gym` object, so two writers is last-write-wins
+   * over the entire gym, and a phone waking with a stale copy would silently
+   * eat the sets the watch logged.
+   */
+  driver?: SessionDriver
+  /**
+   * When the current rest ends, as an ISO instant — the one piece of the
+   * runner's live position that cannot be derived from the logged sets.
+   * Wall-clock, never a tick count, so a device that arrives late (or wakes up)
+   * lands on the same number as the one that started it. Absent = not resting.
+   */
+  restUntil?: string
   /** The training block this came out of, and which session of the rotation it was. */
   blockId?: string
   blockSessionId?: string

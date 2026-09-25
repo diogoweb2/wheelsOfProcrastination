@@ -49,6 +49,7 @@ import {
 import type { BlockAge } from '../../logic/gymBlock'
 import type { SessionLength } from '../../logic/gymBlock'
 import { PACE_MIN_SAMPLES, honestRange, paceCalibration } from '../../logic/gymPace'
+import { DRIVER_BEAT_MS, deviceId, liveDriver } from '../../logic/gymLive'
 import {
   SESSION_LENGTHS,
   activeBlock,
@@ -64,7 +65,7 @@ import {
 } from '../../logic/gymBlock'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import confetti from 'canvas-confetti'
-import { primeGymAudio, gymSfx, sfx } from '../../audio'
+import { primeGymAudio, gymSfx, setGymHandedOff, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
 import { LEAD_SEC, SETUP_SEC, SIDE_SEC, SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
@@ -852,7 +853,20 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     gymArmWarmup,
     gymLogWarmup,
     gymSetOptions,
+    gymClaimDrive,
+    gymReleaseDrive,
+    gymSetRestUntil,
   } = useStore()
+  /**
+   * WHO HAS THE SESSION (§18aa). The watch is a full client of the same
+   * document, not a remote control — so while it is driving, this runner reads
+   * and does not write. Two writers means last-write-wins over the whole `gym`
+   * object, and the set you just did on your wrist is what gets lost.
+   */
+  const me = deviceId()
+  const driver = liveDriver(session)
+  const watching = !!driver && driver.id !== me
+
   // a refresh mid-session lands on the first exercise that still has sets owed,
   // not back at the top — `gym.active` is synced, so this is a real recovery
   const [idx, setIdx] = useState(() => {
@@ -932,6 +946,44 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const [weight, setWeight] = useState<number | undefined>(armedWeight)
   /** The band picked for the warm-up, until it is armed. Undefined = whatever you used last time. */
   const [band, setBand] = useState<number | undefined>(undefined)
+
+  /**
+   * Hold the session while this runner is on screen, and let go when it isn't.
+   *
+   * Claiming is not a lock on the workout — it is a lock on WRITING. A driver
+   * that stops beating for `DRIVER_STALE_MS` has gone (flat watch battery,
+   * closed tab) and the session is free again without anyone having to say so.
+   */
+  /** The watch beeps on your wrist; the phone stays out of the podcast (§18aa). */
+  useEffect(() => {
+    setGymHandedOff(watching)
+    return () => setGymHandedOff(false)
+  }, [watching])
+
+  useEffect(() => {
+    if (watching) return
+    gymClaimDrive()
+    const id = window.setInterval(() => gymClaimDrive(), DRIVER_BEAT_MS)
+    return () => {
+      window.clearInterval(id)
+      gymReleaseDrive()
+    }
+  }, [watching, gymClaimDrive, gymReleaseDrive])
+
+  /**
+   * Publish when rest ends, so a device that arrives mid-rest — the watch, or
+   * this phone waking up — lands on the same countdown rather than starting a
+   * fresh one. Wall clock, never a tick count.
+   */
+  useEffect(() => {
+    if (watching) return
+    const secs = current?.plan.restSec ?? 60
+    if (phase === 'resting') gymSetRestUntil(new Date(Date.now() + secs * 1000).toISOString())
+    else gymSetRestUntil(null)
+    // the rest LENGTH is deliberately absent from the deps: +TIME during a rest
+    // must not republish the instant and restart everyone else's countdown
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, watching, idx])
 
   // a new exercise (or a new set) re-arms the inputs with what was prescribed —
   // you only touch them when reality differs, and that difference is the signal
@@ -1173,6 +1225,30 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
   return (
     <>
+      {watching && (
+        // Not an error and not a lock on the workout: the watch has the pen,
+        // this screen is the same session read live. Taking it back is one tap
+        // and costs nothing — the sets are in the document either way.
+        <div className="card gym-handoff">
+          <div style={{ fontSize: 30 }}>⌚</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 900 }}>Your watch has this one</div>
+            <div className="muted" style={{ fontSize: 12, lineHeight: 1.4 }}>
+              Everything below is live. This phone is staying quiet and won’t log anything — so the two can’t overwrite
+              each other.
+            </div>
+          </div>
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              sfx.click()
+              gymClaimDrive(true)
+            }}
+          >
+            Take over
+          </button>
+        </div>
+      )}
       <div className="gym-progress">
         <div className="gym-progress-bar">
           <span style={{ width: `${(doneCount / Math.max(1, list.length)) * 100}%` }} />
