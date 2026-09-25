@@ -209,11 +209,12 @@ import {
   pickReplacement,
   planSession,
   planSolo,
+  plannedSetSeconds,
   seedBrief,
   sessionBonus,
-  setSeconds,
   advanceLadder,
 } from '../logic/gym'
+import { paceCalibration } from '../logic/gymPace'
 import { SEED_VERSION, copyBlock, planBlockSession, repairBlock, seedBlock } from '../logic/gymBlock'
 import { findExerciseVideo } from '../logic/gymVideoAi'
 import {
@@ -3737,6 +3738,7 @@ export const useStore = create<StoreState>((set, get) => {
           mood,
           gearMode: opts?.gearMode,
           followUp: opts?.followUp ?? null,
+          paceFactor: paceCalibration(data.gym).factor,
         })
         commit((d) => {
           d.gym.active = session
@@ -3762,6 +3764,7 @@ export const useStore = create<StoreState>((set, get) => {
         mood: followUp?.mood ?? 'normal',
         gearMode: 'mixed',
         followUp: followUp ?? null,
+        paceFactor: paceCalibration(data.gym).factor,
       })
       commit((d) => {
         d.gym.active = session
@@ -3777,6 +3780,7 @@ export const useStore = create<StoreState>((set, get) => {
         mood: opts?.mood ?? 'normal',
         pos: opts?.pos,
         length: opts?.length,
+        paceFactor: paceCalibration(data.gym).factor,
       })
       if (!session) return false
       commit((d) => {
@@ -4042,7 +4046,7 @@ export const useStore = create<StoreState>((set, get) => {
         se.skipped = false
         if (base.sec != null) {
           s.workSec = (s.workSec ?? 0) + base.sec
-          s.workTargetSec = (s.workTargetSec ?? 0) + setSeconds(se.kind, planned)
+          s.workTargetSec = (s.workTargetSec ?? 0) + plannedSetSeconds(se, planned)
         }
       })
     },
@@ -4056,7 +4060,7 @@ export const useStore = create<StoreState>((set, get) => {
         const gone = se.sets.pop()
         if (gone?.sec != null) {
           s.workSec = Math.max(0, (s.workSec ?? 0) - gone.sec)
-          s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - setSeconds(se.kind, planned ?? gone.reps))
+          s.workTargetSec = Math.max(0, (s.workTargetSec ?? 0) - plannedSetSeconds(se, planned ?? gone.reps))
         }
       })
     },

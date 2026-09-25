@@ -334,9 +334,13 @@ export function blockSessionsDone(gym: GymState, block: TrainingBlock | null = a
 // --- turning a block session into a workout ---------------------------------
 
 /**
- * The three honest answers to "how long have you got?". A block session is
- * written for 30; the other two are the same session run short or run properly,
+ * The three answers to "how long have you got?". A block session is written for
+ * the middle one; the other two are the same session run short or run properly,
  * never a different session. See `fitToLength`.
+ *
+ * These are SHAPES, not promises — 30 is "the session as written", and what
+ * that costs you in wall clock is a different number the card works out from
+ * your own history (§18z). The buttons show that number, not these.
  */
 export const SESSION_LENGTHS = [20, 30, 40] as const
 export type SessionLength = (typeof SESSION_LENGTHS)[number]
@@ -350,6 +354,8 @@ export interface BlockPlanInput {
   pos?: number
   /** 20 · 30 · 40 minutes. Default 30, which is what the sessions are written for. */
   length?: SessionLength
+  /** Your measured correction on every time estimate (§18z). 1 = uncorrected. */
+  paceFactor?: number
 }
 
 /**
@@ -368,7 +374,7 @@ export interface BlockPlanInput {
  *            on the power sessions, where more exercises would be actively
  *            wrong.
  */
-export function fitToLength(list: SessionExercise[], length: SessionLength): SessionExercise[] {
+export function fitToLength(list: SessionExercise[], length: SessionLength, paceFactor = 1): SessionExercise[] {
   if (length === 30 || list.length === 0) return list
 
   if (length === 40) {
@@ -379,10 +385,12 @@ export function fitToLength(list: SessionExercise[], length: SessionLength): Ses
     )
   }
 
-  // 20: pop the tail until it fits, never below three movements
+  // 20: pop the tail until it fits, never below three movements. The budget is
+  // twenty REAL minutes — the tail comes off until your corrected estimate fits
+  // it (§18z), so "short" is short on the clock in the kitchen, not on a model.
   const out = [...list]
   const budget = 20 * 60 * 1.06
-  while (out.length > 3 && out.reduce((n, e) => n + exerciseSeconds(e), 0) > budget) out.pop()
+  while (out.length > 3 && out.reduce((n, e) => n + exerciseSeconds(e, paceFactor), 0) > budget) out.pop()
   return out
 }
 
@@ -487,9 +495,12 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
   }
 
   const length = input.length ?? 30
-  const exercises = fitToLength(built, length)
+  const paceFactor = input.paceFactor ?? 1
+  const exercises = fitToLength(built, length, paceFactor)
   const trimmed = built.length - exercises.length
-  const minutes = Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession) / 60))
+  // Minutes on the wall, not minutes in the model (§18z). This is the number
+  // the countdown counts down and the number the length buttons print.
+  const minutes = Math.max(5, Math.round(sessionSeconds({ exercises } as GymSession, paceFactor) / 60))
   return {
     id: crypto.randomUUID(),
     day,

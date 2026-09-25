@@ -48,6 +48,7 @@ import {
 } from '../../logic/gym'
 import type { BlockAge } from '../../logic/gymBlock'
 import type { SessionLength } from '../../logic/gymBlock'
+import { PACE_MIN_SAMPLES, honestRange, paceCalibration } from '../../logic/gymPace'
 import {
   SESSION_LENGTHS,
   activeBlock,
@@ -269,6 +270,17 @@ interface PendingChange {
   after: GymSession
 }
 
+/**
+ * What each button does to the SESSION, now that its face says what the button
+ * does to your evening. Both halves are needed: "~42 min" alone can't tell you
+ * whether the tail came off.
+ */
+const LENGTH_SHAPE: Record<SessionLength, string> = {
+  20: 'short',
+  30: 'as written',
+  40: '+1 set',
+}
+
 /** Why a length button sometimes moves nothing — always a real reason, never a shrug. */
 const LENGTH_NO_CHANGE: Record<SessionLength, string> = {
   20: 'This session already fits inside 20 minutes. Nothing has to come off — the tail you would cut isn’t there.',
@@ -298,9 +310,25 @@ function NextSessionCard() {
   // A length or mood tap is held here until you have seen what it does.
   const [pending, setPending] = useState<PendingChange | null>(null)
   const byId = useMemo(() => new Map(allExercises(gymCatalog).map((e) => [e.id, e])), [gymCatalog])
-  if (!block) return null
-
+  const cal = useMemo(() => paceCalibration(gym), [gym])
   const pos = blockPosOf(gym)
+  /**
+   * What each of the three buttons actually costs you, in wall-clock minutes.
+   *
+   * Built, not described: the same `planBlockSession` the ▶️ button will call,
+   * run three times, so the number on the button is by construction the number
+   * the countdown will start from. 20 · 30 · 40 are shapes (§18m); these are
+   * minutes (§18z), and the two stopped being the same number the day the app
+   * had enough history to know better.
+   */
+  const costs = useMemo(() => {
+    const out = {} as Record<SessionLength, number | null>
+    for (const len of SESSION_LENGTHS) {
+      out[len] = planBlockSession({ catalog: gymCatalog, gym, mood: 'normal', length: len, pos, paceFactor: cal.factor })?.minutes ?? null
+    }
+    return out
+  }, [gymCatalog, gym, pos, cal.factor])
+  if (!block) return null
 
   /**
    * Build today's session as it stands and as the tapped setting would make it,
@@ -309,8 +337,15 @@ function NextSessionCard() {
    * a modal with nothing in it is worse than no modal.
    */
   const propose = (next: { mood: Mood; length: SessionLength }, label: string, emptyNote: string) => {
-    const before = planBlockSession({ catalog: gymCatalog, gym, mood, length, pos })
-    const after = planBlockSession({ catalog: gymCatalog, gym, mood: next.mood, length: next.length, pos })
+    const before = planBlockSession({ catalog: gymCatalog, gym, mood, length, pos, paceFactor: cal.factor })
+    const after = planBlockSession({
+      catalog: gymCatalog,
+      gym,
+      mood: next.mood,
+      length: next.length,
+      pos,
+      paceFactor: cal.factor,
+    })
     if (!before || !after) {
       setMood(next.mood)
       setLength(next.length)
@@ -359,10 +394,12 @@ function NextSessionCard() {
         </ul>
 
         {/* How long you have got — never WHAT you do, only how much of it.
-            20 drops the tail, 40 adds a set to the first two movements. */}
+            20 drops the tail, 40 adds a set to the first two movements. The
+            button says what that costs YOU (§18z), not what the shape is
+            called: "30" has meant 42 minutes on this profile all along. */}
         <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
           <label>How long have you got?</label>
-          <div className="seg">
+          <div className="seg gym-len">
             {SESSION_LENGTHS.map((m) => (
               <button
                 key={m}
@@ -370,10 +407,11 @@ function NextSessionCard() {
                 onClick={() => {
                   sfx.click()
                   if (m === length) return
-                  propose({ mood, length: m }, `⏱ ${m} min`, LENGTH_NO_CHANGE[m])
+                  propose({ mood, length: m }, `⏱ ${costs[m] ?? m} min`, LENGTH_NO_CHANGE[m])
                 }}
               >
-                {m} min
+                {costs[m] ? `~${costs[m]} min` : `${m} min`}
+                <span>{LENGTH_SHAPE[m]}</span>
               </button>
             ))}
           </div>
@@ -383,6 +421,7 @@ function NextSessionCard() {
               : length === 40
                 ? 'An extra set on the first two movements — not extra exercises. Take the longer rests too.'
                 : 'The session exactly as written.'}
+            {cal.learned && ` Timings from your last ${cal.samples} finished session${cal.samples === 1 ? '' : 's'}, not from the plan.`}
           </span>
         </div>
 
@@ -568,7 +607,10 @@ function Preview({ session }: { session: GymSession }) {
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
-  const estimate = Math.round(sessionSeconds(session) / 60)
+  // Your own correction, on the number you are about to commit an evening to.
+  const cal = useMemo(() => paceCalibration(data.gym), [data.gym])
+  const estimate = Math.max(1, Math.round(sessionSeconds(session, cal.factor) / 60))
+  const range = honestRange(session, cal)
 
   return (
     <>
@@ -579,14 +621,22 @@ function Preview({ session }: { session: GymSession }) {
           {session.blockSessionName ? (
             <span className="chip chip--test">🧱 {session.blockSessionName}</span>
           ) : (
-            <span className="chip">⚙️ {session.minutes} min plan</span>
+            <span className="chip">⚙️ Off-programme</span>
           )}
           <span className="chip">⏱ ~{estimate} min</span>
+          {range && <span className="chip">usually {range[0]}–{range[1]}</span>}
           <span className="chip">{MOODS.find((m) => m.id === session.mood)?.emoji} {MOODS.find((m) => m.id === session.mood)?.label}</span>
           {session.gearMode && session.gearMode !== 'mixed' && <span className="chip">{GEAR_MODE_LABEL[session.gearMode]}</span>}
           {session.followUp && <span className="chip chip--test">➕ Bonus block</span>}
         </div>
         {session.note && <p style={{ fontSize: 14, fontWeight: 700, marginTop: 8 }}>“{session.note}”</p>}
+        {/* Where the number came from. An estimate you can't audit is a number
+            you stop believing the second it is wrong once (§18z). */}
+        <p className="muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
+          {cal.learned
+            ? `⏱ is wall clock, from your last ${cal.samples} finished session${cal.samples === 1 ? '' : 's'}: they ran ${cal.factor.toFixed(2)}× what the sets and rests add up to. Changing the dumbbell, reading the card and the rest you actually take are all in there.`
+            : `⏱ is sets plus rests plus a walk-over. It has nothing to correct itself with yet: ${PACE_MIN_SAMPLES} finished sessions and it starts measuring how long they really take you.`}
+        </p>
       </div>
 
       {session.exercises.length === 0 && (
