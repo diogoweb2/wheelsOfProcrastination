@@ -404,7 +404,7 @@
       "defaultReps": 12,
       "defaultSets": 3,
       "perSide": true,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "demo": {
         "source": "ExerciseDB",
@@ -1739,7 +1739,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1764,7 +1764,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1788,7 +1788,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1918,6 +1918,29 @@
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-27T00:00:00.000Z"
+    },
+    {
+      "id": "mv-band-pull-through",
+      "name": "Band Pull-Through",
+      "emoji": "🍑",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "glutes",
+        "legs",
+        "power"
+      ],
+      "intensity": 2,
+      "how": "BAND: BLACK (65 lb label) to start, PURPLE when black stops arguing. Anchor it LOW behind you — the basement post at ankle height — and straddle it facing AWAY, the band running between your legs with one end in each hand. Walk forward until your arms hang straight and there is already tension. Now hinge: push the hips BACK, let the band draw your hands down between your thighs, flat back, knees soft, shins vertical. Then snap the hips forward and stand tall, glutes hard. Your arms are rope — they never pull. This is the swing's hip drive with the load pulling from BEHIND you rather than hanging off your spine, which is the whole reason it is in the session. Stop when the hinge gets sloppy, not when the count says so.",
+      "restSec": 75,
+      "defaultReps": 15,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T15:18:27.415Z"
     }
   ]
 }

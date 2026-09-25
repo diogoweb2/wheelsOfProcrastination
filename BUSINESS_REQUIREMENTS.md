@@ -762,7 +762,7 @@ The motivating pattern from Diogo's old push-up app, for bodyweight staples (`la
 
 Free text the coach reads **verbatim** before every session, plus four hard rules the offline planner enforces too (it can't read prose):
 
-- **Protect my lower back** — `backRisk` exercises are filtered out entirely.
+- **Protect my lower back** — `backRisk` exercises are filtered out entirely: out of the planner's pool, out of **🔄 Swap for something similar**, out of the free session. Carrying the flag today: **Dumbbell Romanian Deadlift**, **Kettlebell Swing**, **One-Arm Dumbbell Row** (knee-on-bench, an asymmetric loaded row), and all three **Nordic Curl** rows. The last four were flagged on 2026-09-25 — they had already been swapped out of Block 1 by hand, but a row that is merely unused is one 🔄 Swap away from coming back, and two of them were rated 🙂/🤩, which made the planner actively *prefer* them. **The flag is the block's business, not the block's boss:** a block slot is the prescription and is taken as written (§18m), so it can still name a `backRisk` move — the flag governs everything the app *chooses* for you.
 - **No warm-up block** — see §18e.
 - **Roman chair first, always** — see §18e. Default ON.
 
@@ -796,11 +796,11 @@ Every chart is deliberately **single-series**: running the dataviz validator ove
 
 **The exercise library is not generated any more** (2026-08-24). It used to be: a model saw the whole inventory and proposed everything it could think of, which produced **199 rows nobody had ever read one by one** — a Pallof press with no anchor, a seal row on a bench too low for it, prehab work prescribed at a load 3× heavier than the movement wants. A second, model-driven audit pass then existed only to find those, and a review queue existed only to work through what the audit found. All of it is gone: `gym:exercises`, `gym:audit:semantic` and `gym-apply-review` are deleted, and so is the per-row audit metadata they wrote (`catalogStatus`, `movementPattern`, `primaryRole`, `laterality`, `progressionMode`, `riskProfiles`, `reviewFlags`) — the app never read a single one of those fields.
 
-**The catalog is now 63 exercises chosen by hand**, and the file is the catalog: `scripts/data/gym-catalog.json` holds every row, `npm run gym:seed` REPLACES `app/gymCatalog` with it, and anything in the database that is not in the file is dropped. The seed refuses to write a file that fails `npm run gym:audit`, and it carries over the `demo` of any id that already has one, because animations cost a match run each. Day-to-day edits — a new exercise, a fixed how-to, retiring something — happen in **Gear**, which writes straight to Firestore; the seed is for resetting to the file. `--dry-run` prints the diff first.
+**The catalog is now 62 exercises chosen by hand**, and the file is the catalog: `scripts/data/gym-catalog.json` holds every row, `npm run gym:seed` REPLACES `app/gymCatalog` with it, and anything in the database that is not in the file is dropped. The seed refuses to write a file that fails `npm run gym:audit`, and it carries over the `demo` of any id that already has one, because animations cost a match run each. Day-to-day edits — a new exercise, a fixed how-to, retiring something — happen in **Gear**, which writes straight to Firestore; the seed is for resetting to the file. `--dry-run` prints the diff first.
 
 **Eleven body parts, not nine.** `forearms` and `power` joined `chest / back / shoulders / arms / legs / glutes / core / fullBody / cardio` on 2026-08-24. Neither is a muscle in the way the others are — `power` is jumps, throws and swings, the pickleball block — but they are how the catalog is actually organised, and hiding grip work inside `arms` and plyometrics inside `legs` made both invisible to the stats filter and to recovery spacing (`forearms` recovers in 24 h, `power` wants 48).
 
-**Resistance bands** were added as the ninth piece of gear at the same time. They anchor to the door **or the basement post at any height**, which is what finally makes lat pulldowns, face pulls, pushdowns and a real Pallof press possible, and they are the answer to the 8.5 lb dumbbell floor for cuff, scaption and wrist work. 15 of the 63 exercises are band moves.
+**Resistance bands** were added as the ninth piece of gear at the same time. They anchor to the door **or the basement post at any height**, which is what finally makes lat pulldowns, face pulls, pushdowns and a real Pallof press possible, and they are the answer to the 8.5 lb dumbbell floor for cuff, scaption and wrist work. 16 of the 62 exercises are band moves.
 
 `src/logic/gymStarters.json` stays what it always was — the built-in moves an app with no catalog still has — but it is now exactly the **gear-free subset of that same file** (12 rows), so a move deleted from the catalog can't quietly return through the back door.
 
@@ -901,7 +901,7 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 |---|---|---|
 | S1 | 🦵 Lower strength + core | Bulgarian split squat · hip thrust · side plank · calf raise |
 | S2 | 🫸 Upper push + pull | DB bench · chest-supported row · pull-ups · lateral raise · band face pull |
-| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · KB swing (power: 3 × 8–12 explosive) · Copenhagen plank · band Pallof |
+| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · **band pull-through** (power: 3 × 12–18 explosive) · Copenhagen plank · band Pallof |
 | S4 | 🦿 Lower unilateral + posterior chain | reverse lunge · goblet squat · single-leg glute bridge · band leg curl · single-leg calf raise |
 | S5 | 🧗 Upper pull + shoulder health | pull-ups · chest-supported row · DB shoulder press · band external rotation · wrist curls |
 | S6 | 🏓 Full body + pickleball | step-up · incline DB press · band lat pulldown · band rotational press · farmer's carry · med-ball chest pass |
@@ -931,6 +931,8 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 **Blocks expire on sessions FINISHED, not weeks owned.** `reviewSessions: 24` (four full trips round a six-session rotation), `retireSessions: 42`. This ran on the calendar first and that was wrong: at two sessions a week "eight weeks" is sixteen sessions — barely three rotations, nowhere near enough exposure to have finished progressing on anything — while at five a week it is forty. The calendar measures how long you have owned the programme; the counter measures how much of it you have done, so a fortnight off now costs the block nothing. Both numbers are editable per block on the Blocks tab; weeks are still displayed, as information.
 
 **And it is a suggestion, not a deadline.** The warning says so in as many words: *"if it is still progressing, keep going"*. A block that is still adding weight is worth keeping past `retireSessions`.
+
+**The swing came out of S3** (2026-09-25, `SEED_VERSION` 4). It was the hip-drive slot and it is `backRisk` for a reason: 46 lb hanging off the spine at the bottom of a ballistic hinge is the exact thing the brief means by *nothing that loads the spine heavily*. The **Band Pull-Through** is the same hip snap with the load pulling from **behind** you instead of hanging in front — still ⚡ quality-terminated, still the power slot, 3 × 12–18 because a band is not 46 lb. The block was edited in place on the profile that had already trained against it; the seed carries the change for anyone starting fresh.
 
 **Block 2 changes 2–4 movements and nothing else.** Split squat → reverse lunge, flat press → incline, chest-supported row → one-arm, split squat jump → another lateral or vertical power move. The patterns stay: you want **progressive exposure, not novelty**, and a programme that reshuffles itself every block is the exercise generator this replaced, wearing a different hat. Block 1 establishes the baseline, Block 2 is a small variation, Block 3 is a small variation. The warning can also be answered with **🔄 carry on with these**, which copies the rotation into a new block with the counter back at zero — a real answer, not a snooze.
 

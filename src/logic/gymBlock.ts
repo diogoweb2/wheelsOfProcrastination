@@ -70,7 +70,7 @@ const ex = (exId: string, sets: number, repLow: number, repHigh: number, extra?:
  * against it is left alone forever — that is your training history's programme,
  * not ours to rewrite.
  */
-export const SEED_VERSION = 3
+export const SEED_VERSION = 4
 
 /**
  * Four full rotations before the app suggests a new block, seven before it
@@ -115,9 +115,14 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     exercises: [
       ex('mv-split-squat-jump', 3, 5, 8, { quality: true, note: 'Stop the set the moment height or landing quality drops.' }),
       ex('mv-lateral-shuffle', 4, 15, 20, { quality: true, note: 'Short, sharp efforts. This is not a cardio circuit.' }),
-      ex('mv-kettlebell-swing', 3, 8, 12, {
+      // The swing was the hip-drive slot until 2026-09-25 and it is flagged
+      // `backRisk` for a reason: 46 lb hanging off a spine at the bottom of a
+      // ballistic hinge is exactly what the brief says to keep away from. The
+      // pull-through is the same hip snap with the load pulling from BEHIND —
+      // still ⚡ quality, still the power slot, no load on the spine at all.
+      ex('mv-band-pull-through', 3, 12, 18, {
         quality: true,
-        note: 'Explosive, not a rep count. Full rest between sets, and stop the moment the hinge gets sloppy.',
+        note: 'Explosive hip snap, arms are rope. Stop the moment the hinge gets sloppy, not at a number.',
       }),
       ex('mv-copenhagen-plank', 2, 20, 30),
       ex('mv-band-pallof-press', 3, 8, 12),

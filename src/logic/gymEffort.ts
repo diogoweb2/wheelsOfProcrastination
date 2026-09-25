@@ -124,6 +124,7 @@ const MIX: Record<string, EffortMix> = {
   'mv-band-pallof-press': { core: 0.88, shoulders: 0.12 },
   'mv-band-rotational-press': { core: 0.45, power: 0.3, shoulders: 0.25 },
   'mv-back-extension': { back: 0.5, glutes: 0.35, core: 0.15 },
+  'mv-band-pull-through': { glutes: 0.55, legs: 0.25, core: 0.1, back: 0.1 },
 }
 
 /**
