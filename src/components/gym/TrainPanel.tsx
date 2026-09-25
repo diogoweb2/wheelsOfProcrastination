@@ -32,6 +32,7 @@ import {
   bandFor,
   benchAngleLabel,
   bestsFor,
+  isFixedSession,
   isLoaded,
   isRamped,
   loadLabel,
@@ -129,6 +130,24 @@ function useDemos() {
 }
 
 export function TrainPanel() {
+  return <SessionFlow idle={<Setup />} />
+}
+
+/**
+ * The whole session loop — preview → runner → report — over whatever is in
+ * `gym.active`, with `idle` shown when there is nothing running.
+ *
+ * It is exported because the Snack tab (§18ab) runs the SAME loop: a snack is
+ * an ordinary session in the ordinary slot, so it gets the ordinary animation,
+ * rest clock, records, grade and Berries by simply being handed to the same
+ * three screens. Two runners would be two runners to keep in step, and one of
+ * them would quietly rot.
+ *
+ * Whichever tab you started on, the other one shows the session too — there is
+ * one `gym.active` and pretending otherwise would mean losing a workout by
+ * tapping the wrong tab mid-set.
+ */
+export function SessionFlow({ idle }: { idle: React.ReactNode }) {
   const active = useStore((s) => s.data.gym.active)
   const [banked, setBanked] = useState<Banked | null>(null)
   const hasActive = !!active
@@ -141,7 +160,7 @@ export function TrainPanel() {
   if (active?.status === 'preview') return <Preview session={active} />
   if (active) return <Runner session={active} onBanked={setBanked} />
   if (banked) return <ReportCard banked={banked} onClose={() => setBanked(null)} />
-  return <Setup />
+  return <>{idle}</>
 }
 
 // --- setup ------------------------------------------------------------------
@@ -569,6 +588,10 @@ function Preview({ session }: { session: GymSession }) {
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
   const estimate = Math.round(sessionSeconds(session) / 60)
+  // A block rotation and a snack routine are both written down in advance, so
+  // both get the fixed-list treatment: drop a slot, reorder it, swap it for
+  // something that does the same job — never "here is a different exercise".
+  const fixed = isFixedSession(session)
 
   return (
     <>
@@ -576,7 +599,9 @@ function Preview({ session }: { session: GymSession }) {
 
       <div className="card">
         <div className="gym-note-head">
-          {session.blockSessionName ? (
+          {session.snackName ? (
+            <span className="chip chip--test">🍿 {session.snackName} snack</span>
+          ) : session.blockSessionName ? (
             <span className="chip chip--test">🧱 {session.blockSessionName}</span>
           ) : (
             <span className="chip">⚙️ {session.minutes} min plan</span>
@@ -624,7 +649,7 @@ function Preview({ session }: { session: GymSession }) {
             {/* On a block session the exercise list is the programme — swapping
                 one out for "something similar" is exactly what the block exists
                 to stop. Short on time? Drop it; the slot just closes. */}
-            {session.blockId && (
+            {fixed && (
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <MoveButtons
                   onMove={(dir) => gymReorder(e.exId, dir)}
@@ -643,7 +668,7 @@ function Preview({ session }: { session: GymSession }) {
                 </button>
               </div>
             )}
-            {session.blockId && (
+            {fixed && (
               <button
                 className="btn btn--ghost btn--small"
                 style={{ marginTop: 8, width: '100%' }}
@@ -658,7 +683,7 @@ function Preview({ session }: { session: GymSession }) {
                 🔄 Swap for something similar
               </button>
             )}
-            {!session.blockId && (
+            {!fixed && (
               <>
                 <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                   <button
@@ -728,7 +753,7 @@ function Preview({ session }: { session: GymSession }) {
         ▶️ GO
       </button>
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        {!session.blockId && (
+        {!fixed && (
           <button
             className="btn btn--ghost btn--small"
             style={{ flex: 1 }}

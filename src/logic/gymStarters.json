@@ -326,5 +326,136 @@
     "ladder": false,
     "addedBy": "ai",
     "createdAt": "2026-08-23T01:20:54.911Z"
+  },
+  {
+    "id": "bw-wide-pushup",
+    "name": "Wide Push-ups",
+    "emoji": "🫳",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "chest",
+      "shoulders",
+      "arms"
+    ],
+    "intensity": 2,
+    "how": "Hands a hand-width wider than a normal push-up, fingers turned slightly out. Same straight line, same chest-to-the-floor depth — the wider hands put the work on the outer chest and take it off the triceps. Stop if the front of the shoulder complains.",
+    "restSec": 45,
+    "defaultReps": 10,
+    "defaultSets": 3,
+    "perSide": false,
+    "ladder": false,
+    "addedBy": "manual",
+    "createdAt": "2026-09-25T00:00:00.000Z",
+    "demo": {
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-wide-pushup-poster.webp?alt=media&token=7c931fd3-c99f-4dab-86c3-991c0ee70f8c",
+      "match": "ai",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-wide-pushup.webp?alt=media&token=35d9e526-1a93-41bb-bd1b-9d2b282baccc",
+      "source": "ExerciseDB",
+      "sourceId": "JmMVpR3",
+      "sourceName": "wide hand push up"
+    }
+  },
+  {
+    "id": "bw-diamond-pushup",
+    "name": "Diamond Push-ups",
+    "emoji": "💎",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "arms",
+      "chest",
+      "core"
+    ],
+    "intensity": 3,
+    "how": "Hands together under the chest, index fingers and thumbs making a triangle. Elbows stay tucked to the ribs on the way down. The hardest of the three — expect about half the reps of a normal push-up, and that is the point.",
+    "restSec": 60,
+    "defaultReps": 8,
+    "defaultSets": 3,
+    "perSide": false,
+    "ladder": false,
+    "addedBy": "manual",
+    "createdAt": "2026-09-25T00:00:00.000Z",
+    "demo": {
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-diamond-pushup-poster.webp?alt=media&token=0d4f9809-eb4a-45b2-881b-fb09eb81708d",
+      "match": "exact",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-diamond-pushup.webp?alt=media&token=37f46e98-e93b-4808-a20b-6cead2f09740",
+      "source": "ExerciseDB",
+      "sourceName": "diamond push-up",
+      "sourceId": "soIB2rj"
+    }
+  },
+  {
+    "id": "bw-pushup-hold",
+    "name": "Push-up Hold",
+    "emoji": "⏸️",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "chest",
+      "arms",
+      "core"
+    ],
+    "intensity": 2,
+    "how": "Lower to halfway — elbows at about 90°, chest a fist off the floor — and stop there. Body in one line, ribs down, breathe. This is the isometric finisher: no reps, just time under the same tension the push-ups just used.",
+    "restSec": 45,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "perSide": false,
+    "addedBy": "manual",
+    "createdAt": "2026-09-25T00:00:00.000Z",
+    "demo": {
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-hold-poster.webp?alt=media&token=e8feee31-825e-417f-820c-e043fb4be97f",
+      "sourceName": "push-up",
+      "match": "exact",
+      "sourceId": "I4hDWkc",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-hold.webp?alt=media&token=9a7f6d10-6e06-4b6a-8d65-15702e1d9e8c",
+      "source": "ExerciseDB"
+    }
+  },
+  {
+    "id": "bw-hollow-hold",
+    "name": "Hollow Hold",
+    "emoji": "🌙",
+    "equipmentIds": [],
+    "kind": "timed",
+    "parts": [
+      "core"
+    ],
+    "intensity": 2,
+    "how": "On your back, lower back pressed FLAT into the floor — that never lifts. Shoulders and legs off the ground, arms overhead, body in a shallow banana. Lower the legs if the back starts to arch; a small hollow held properly beats a big one that isn’t.",
+    "restSec": 45,
+    "defaultReps": 20,
+    "defaultSets": 3,
+    "perSide": false,
+    "addedBy": "manual",
+    "createdAt": "2026-09-25T00:00:00.000Z"
+  },
+  {
+    "id": "bw-reverse-crunch",
+    "name": "Reverse Crunch",
+    "emoji": "🔄",
+    "equipmentIds": [],
+    "kind": "bodyweight",
+    "parts": [
+      "core"
+    ],
+    "intensity": 2,
+    "how": "On your back, knees at 90°, hands flat beside you. Curl the hips off the floor and bring the knees towards the chest — the lower back rounds UP, it never arches. Lower slowly; the slow half is the half that counts.",
+    "restSec": 45,
+    "defaultReps": 12,
+    "defaultSets": 3,
+    "perSide": false,
+    "ladder": false,
+    "addedBy": "manual",
+    "createdAt": "2026-09-25T00:00:00.000Z",
+    "demo": {
+      "sourceName": "reverse crunch",
+      "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-reverse-crunch.webp?alt=media&token=eb85a7df-f4ac-42c4-8bf8-4e9cf0f6cb87",
+      "match": "exact",
+      "source": "ExerciseDB",
+      "sourceId": "nCU1Ekp",
+      "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-reverse-crunch-poster.webp?alt=media&token=569e8022-0d1b-4943-81bd-8590f1507ff0"
+    }
   }
 ]

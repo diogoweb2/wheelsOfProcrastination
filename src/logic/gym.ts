@@ -272,7 +272,7 @@ export const GEAR_MODE_LABEL: Record<GearMode, string> = {
 
 // --- the crew's starting briefs ---------------------------------------------
 // Seeded the first time a profile opens the Gym; fully editable afterwards in
-// Plan → Your brief. The planner reads it before building every session.
+// Gear → You. The planner reads it before building every session.
 
 const DIOGO_BRIEF: GymBrief = {
   age: 43,
@@ -396,7 +396,7 @@ export function usableExercises(
 // --- the roman-chair opener -------------------------------------------------
 // A back extension before anything else is Diogo's standing instruction: it
 // wakes the lower back up before the session asks anything of it. It is a
-// SETTING (Plan → "Roman chair first, always", ON by default), enforced by the
+// SETTING (Gear → You → "Roman chair first, always", ON by default), enforced by the
 // planner as a hard rule rather than a preference — the ordering pass
 // gets told about it, but the app doesn't rely on it obeying.
 
@@ -426,6 +426,17 @@ export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number
   const learned = mem?.restLearned
   const base = learned ? Math.round(learned * 0.75 + e.restSec * 0.25) : e.restSec
   return clamp(base, REST_MIN, REST_MAX)
+}
+
+/**
+ * A session whose exercise LIST is fixed — a training block's rotation (§18m)
+ * or an exercise snack's routine (§18ab). Both are a promise made in advance,
+ * so the preview closes a slot you haven't got time for rather than quietly
+ * substituting something else, and the free planner's rep-ladder game (§18f)
+ * stays out of both of them.
+ */
+export function isFixedSession(s: Pick<GymSession, 'blockId' | 'snack'>): boolean {
+  return !!s.blockId || !!s.snack
 }
 
 /**

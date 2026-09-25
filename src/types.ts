@@ -1244,6 +1244,15 @@ export interface GymSession {
   blockId?: string
   blockSessionId?: string
   blockSessionName?: string
+  /**
+   * The exercise snack this came out of (§18ab) — `abs`, `pushup`, `roman`.
+   * Like `blockId` it marks a session whose exercise list is FIXED: the routine
+   * is the point, so the preview drops a slot rather than substituting one, and
+   * the free planner's rep-ladder game (§18f) stays out of it.
+   */
+  snack?: string
+  /** The snack's name, denormalised like `blockSessionName` so an old log still reads. */
+  snackName?: string
 }
 
 // --- the training block -----------------------------------------------------
@@ -1291,7 +1300,7 @@ export interface TrainingBlock {
   name: string
   /** Where it came from — `seed` is the copy that ships in code, `manual` is yours. */
   source?: 'seed' | 'manual'
-  /** What this block is FOR, in one line. Shown on the Plan tab. */
+  /** What this block is FOR, in one line. Shown on the Blocks tab. */
   goal?: string
   startedAt: string // ISO
   /**

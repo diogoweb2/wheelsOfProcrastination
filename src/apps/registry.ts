@@ -325,11 +325,14 @@ export const APPS: AppDef[] = [
     tint: ['#ff9600', '#8c3d00'],
     tabs: [
       { id: 'train', label: 'Train', icon: '💪' },
+      // 🍿 Exercise snacks (§18ab): ten minutes at lunch, its own URL. It took
+      // the Plan tab's slot — Plan was the AI trainer's page, and the AI
+      // trainer is gone; what was still live on it moved to Gear → You.
+      { id: 'snack', label: 'Snack', icon: '🍿' },
       { id: 'blocks', label: 'Blocks', icon: '🧱' },
       { id: 'body', label: 'Body', icon: '🩹' },
       { id: 'stats', label: 'Stats', icon: '📊' },
       { id: 'gear', label: 'Gear', icon: '🏋️' },
-      { id: 'plan', label: 'Plan', icon: '📋' },
     ],
   },
   {

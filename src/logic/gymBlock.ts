@@ -191,7 +191,7 @@ const RETIRED_MOVES: Record<string, BlockExercise> = {
  * writes to Firestore when something actually changed.
  *
  * A dead slot with no known replacement is left exactly as it is: that is the
- * visible gap the Plan tab warns about, and guessing a substitute is worse.
+ * visible gap the Blocks tab warns about, and guessing a substitute is worse.
  */
 export function repairBlock(block: TrainingBlock, catalog: GymCatalog | null): TrainingBlock | null {
   if (!catalog) return null // basement not loaded yet — nothing is "missing" until it is
@@ -417,7 +417,7 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
   const warm = new Set<BodyPart>()
   for (const slot of template.exercises) {
     const def = exerciseById(catalog, slot.exId)
-    if (!def || def.retired) continue // shown as a gap on the Plan tab, never silently substituted
+    if (!def || def.retired) continue // shown as a gap on the Blocks tab, never silently substituted
     // index 2 = "no whole-exercise de-load"; a block ramps WITHIN the exercise instead
     const one = planOne(def, planInput, 2)
     // A hold progresses in seconds the way a lift progresses in pounds: hold the
@@ -508,7 +508,7 @@ export function planBlockSession(input: BlockPlanInput): GymSession | null {
 }
 
 /** The slot's range, moved up by whatever you have already proved on a hold. */
-function holdRange(slot: BlockExercise, def: ExerciseDef, gym: GymState): [number, number] {
+export function holdRange(slot: BlockExercise, def: ExerciseDef, gym: GymState): [number, number] {
   if (def.kind !== 'timed' && def.kind !== 'cardio') return [slot.repLow, slot.repHigh]
   const learned = holdFor({ kind: def.kind, defaultReps: 0 }, gym.ex[def.id])
   const low = Math.max(slot.repLow, learned)
@@ -516,7 +516,7 @@ function holdRange(slot: BlockExercise, def: ExerciseDef, gym: GymState): [numbe
 }
 
 function sessionNote(count: number, template: BlockSession): string {
-  if (count === 0) return 'Nothing in this session is in the catalog any more — check Plan.'
+  if (count === 0) return 'Nothing in this session is in the catalog any more — check the Blocks tab.'
   if (template.exercises.some((e) => e.quality)) return 'Quality first: the fast work stops when the speed goes, not when the count says so.'
   return 'Same session as last time round — beat the top of a rep range and the weight goes up.'
 }
@@ -544,7 +544,7 @@ export function slotLine(slot: BlockExercise, catalog: GymCatalog | null, gym?: 
     const plan = repPlanFor(slot, gym.ex[def.id])
     const reps = repShape(plan.sets, plan.total)
     const ask = new Set(reps).size === 1 ? `${reps.length} × ${reps[0]}` : reps.join(' · ')
-    // phase 3 is the end of the rep road, and the Plan tab should say so
+    // phase 3 is the end of the rep road, and the Blocks tab should say so
     return `${ask} of ${range}${side}${plan.phase === 3 ? ' · ready for load' : ''}`
   }
   return `${slot.sets} × ${range}${side}`

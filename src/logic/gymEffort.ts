@@ -68,6 +68,12 @@ const MIX: Record<string, EffortMix> = {
   'mv-decline-dumbbell-bench-press': { chest: 0.7, arms: 0.3 },
   'mv-dips': { chest: 0.45, arms: 0.4, shoulders: 0.15 },
   'bw-pushup': { chest: 0.55, arms: 0.3, core: 0.15 },
+  // the push-up snack (§18ab): the same movement moved around the chest. Wide
+  // hands take work off the triceps and give it to the outer chest; a diamond
+  // does the opposite; the hold is the same tension with the reps taken out.
+  'bw-wide-pushup': { chest: 0.65, shoulders: 0.2, arms: 0.15 },
+  'bw-diamond-pushup': { arms: 0.55, chest: 0.32, core: 0.13 },
+  'bw-pushup-hold': { chest: 0.45, arms: 0.35, core: 0.2 },
   'bw-pullup': { back: 0.6, arms: 0.28, forearms: 0.12 },
   'mv-chin-up': { back: 0.5, arms: 0.38, forearms: 0.12 },
   'mv-negative-pull-up': { back: 0.55, arms: 0.33, forearms: 0.12 },
@@ -96,6 +102,8 @@ const MIX: Record<string, EffortMix> = {
   'mv-kettlebell-swing': { glutes: 0.45, power: 0.25, back: 0.2, legs: 0.1 },
   'bw-bird-dog': { core: 0.75, back: 0.25 },
   'bw-dead-bug': { core: 1 },
+  'bw-hollow-hold': { core: 1 },
+  'bw-reverse-crunch': { core: 1 },
   'bw-side-plank': { core: 1 },
   'mv-copenhagen-plank': { core: 0.55, legs: 0.45 },
   'bw-plank': { core: 0.88, shoulders: 0.12 },
@@ -124,6 +132,10 @@ const MIX: Record<string, EffortMix> = {
   'mv-band-pallof-press': { core: 0.88, shoulders: 0.12 },
   'mv-band-rotational-press': { core: 0.45, power: 0.3, shoulders: 0.25 },
   'mv-back-extension': { back: 0.5, glutes: 0.35, core: 0.15 },
+  // the hold is the same muscles doing the same job without the movement, so
+  // the split is the movement's — a touch more core for standing still in it
+  'mv-back-extension-hold': { back: 0.48, glutes: 0.32, core: 0.2 },
+  'mv-band-pull-through': { glutes: 0.55, legs: 0.25, power: 0.2 },
 }
 
 /**

@@ -2830,7 +2830,17 @@ input, select { font-family: inherit; }
   font-size: 11px; font-weight: 800; color: var(--muted);
 }
 
-/* --- the training block (§18f): the rotation, on Train and on Plan --- */
+/* --- 🍿 exercise snacks (§18ab): the lunchtime menu --- */
+.gym-snack { padding-top: 12px; padding-bottom: 12px; }
+/* the app's pick wears the same gold the "up next" block session does — one
+   colour means "this is the one", everywhere in the Gym */
+.gym-snack--pick { border-color: var(--gold); }
+.gym-snack-head { display: flex; align-items: flex-start; gap: 10px; }
+.gym-snack-head .chip { flex: none; margin-top: 2px; }
+/* the moves list reuses the block's rows, so a snack reads like a session does */
+.gym-snack .gym-block-list li { align-items: center; }
+
+/* --- the training block (§18f): the rotation, on Train and in Blocks --- */
 .gym-block-list { list-style: none; margin: 12px 0 0; padding: 0; }
 .gym-block-list li {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;

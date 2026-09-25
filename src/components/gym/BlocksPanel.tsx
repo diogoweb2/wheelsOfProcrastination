@@ -1,9 +1,10 @@
 // 🧱 Blocks — every training block you have, and the editor for them.
 //
-// The Train tab answers "what's next?" and deliberately shows nothing else. The
-// Plan tab shows the block you are ON. This tab is the library: past blocks,
-// the current one, anything drafted for later — and it is the only place a
-// rotation can be CHANGED.
+// The Train tab answers "what's next?" and deliberately shows nothing else.
+// This tab is the library: past blocks, the current one, anything drafted for
+// later — and it is the only place a rotation can be CHANGED. Since the Plan
+// tab went (§18ab took its slot) it is also where a slot pointing at an
+// exercise that no longer exists gets reported.
 //
 // Why editing lives here and not in Train: a block is a promise you made to
 // yourself eight weeks ago. Editing it mid-session is how a programme quietly
@@ -23,18 +24,23 @@ import {
   copyBlock,
   emptyBlock,
   emptySession,
+  missingSlots,
   slotLine,
 } from '../../logic/gymBlock'
 import { sfx } from '../../audio'
 import { VideoButton } from './ExerciseVideo'
 
 export function BlocksPanel() {
-  const { data, gymAddBlock, gymSetActiveBlock } = useStore()
+  const { data, gymCatalog, gymAddBlock, gymSetActiveBlock } = useStore()
   const gym = data.gym
   const [openId, setOpenId] = useState<string | null>(gym.activeBlockId)
 
   const blocks = gym.blocks
   const active = blocks.find((b) => b.id === gym.activeBlockId) ?? null
+  // a slot whose exercise has left the catalog is skipped when the session is
+  // built, silently — so it has to be said out loud somewhere, and this is the
+  // only tab that can fix it
+  const gaps = active ? missingSlots(active, gymCatalog) : []
 
   return (
     <>
@@ -54,6 +60,18 @@ export function BlocksPanel() {
           <div style={{ fontSize: 44 }}>🧱</div>
           <p className="muted" style={{ fontSize: 13, marginTop: 6, lineHeight: 1.45 }}>
             No blocks yet. Until there is one, the Train tab builds a session from your history each time.
+          </p>
+        </div>
+      )}
+
+      {gaps.length > 0 && (
+        <div className="card gym-block-warn">
+          <div style={{ fontWeight: 900, fontSize: 13 }}>
+            ⚠️ {gaps.length} slot{gaps.length === 1 ? '' : 's'} in {active?.name} point at an exercise that is gone
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.45 }}>
+            {gaps.map((g) => `${g.session.name}: ${g.slot.exId}`).join(' · ')}. They are skipped when the session is
+            built — put the exercise back in Gear, swap the slot below, or accept the shorter session.
           </p>
         </div>
       )}

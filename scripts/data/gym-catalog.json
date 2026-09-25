@@ -404,7 +404,7 @@
       "defaultReps": 12,
       "defaultSets": 3,
       "perSide": true,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "demo": {
         "source": "ExerciseDB",
@@ -1507,7 +1507,15 @@
         "arms"
       ],
       "how": "BAR: RED or GREEN. Sit with the working forearm resting on your thigh, palm down, hand past the knee. Hold the bar upright, pin the far end with the other hand, and rotate the working palm UP against the bar's twist, then let it wind back slowly. Rotation only — the elbow stays on the leg and the shoulder does not move. This is the forearm rotation a racquet stroke lives on, and it is the one thing the dumbbells cannot load through range.",
-      "defaultReps": 12
+      "defaultReps": 12,
+      "demo": {
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-flexbar-supination.webp?alt=media&token=cf253d95-79f9-4bb8-9a65-17955fcfa177",
+        "sourceName": "dumbbell lying supination",
+        "sourceId": "M2Pm3zj",
+        "match": "close",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-flexbar-supination-poster.webp?alt=media&token=e02659fe-ca9c-42a0-85f7-23dcacda7ee8"
+      }
     },
     {
       "id": "mv-split-squat-jump",
@@ -1739,7 +1747,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1764,7 +1772,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1788,7 +1796,7 @@
     {
       "kind": "bodyweight",
       "perSide": false,
-      "backRisk": false,
+      "backRisk": true,
       "ladder": false,
       "addedBy": "manual",
       "createdAt": "2026-08-28T15:48:29.171Z",
@@ -1835,6 +1843,37 @@
         "sourceName": "resistance band leg extension",
         "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-extension.webp?alt=media&token=d0e871cd-65df-42e1-a042-fc1015cc07e1",
         "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-leg-extension-poster.webp?alt=media&token=e0773612-bb9e-4d71-a6cc-3db75d69b6f6"
+      }
+    },
+    {
+      "addedBy": "manual",
+      "parts": [
+        "glutes",
+        "legs",
+        "power"
+      ],
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "createdAt": "2026-09-25T15:18:27.415Z",
+      "emoji": "🍑",
+      "ladder": false,
+      "defaultReps": 15,
+      "kind": "weight",
+      "restSec": 75,
+      "perSide": false,
+      "defaultSets": 3,
+      "how": "BAND: BLACK (65 lb label) to start, PURPLE when black stops arguing. Anchor it LOW behind you — the basement post at ankle height — and straddle it facing AWAY, the band running between your legs with one end in each hand. Walk forward until your arms hang straight and there is already tension. Now hinge: push the hips BACK, let the band draw your hands down between your thighs, flat back, knees soft, shins vertical. Then snap the hips forward and stand tall, glutes hard. Your arms are rope — they never pull. This is the swing's hip drive with the load pulling from BEHIND you rather than hanging off your spine, which is the whole reason it is in the session. Stop when the hinge gets sloppy, not when the count says so.",
+      "name": "Band Pull-Through",
+      "intensity": 2,
+      "id": "mv-band-pull-through",
+      "demo": {
+        "sourceName": "band pull through",
+        "sourceId": "VtTbiP3",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-pull-through.webp?alt=media&token=eb392406-2898-4807-8117-9d7c5502c548",
+        "match": "exact",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-pull-through-poster.webp?alt=media&token=700b44b5-af20-4422-b184-9d56a4a147a6"
       }
     },
     {
@@ -1917,7 +1956,177 @@
       "backRisk": false,
       "ladder": false,
       "addedBy": "manual",
-      "createdAt": "2026-08-27T00:00:00.000Z"
+      "createdAt": "2026-08-27T00:00:00.000Z",
+      "demo": {
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-back-extension.webp?alt=media&token=5bf5c1fb-0a35-4144-b4ad-d61a1f3a140b",
+        "match": "ai",
+        "source": "ExerciseDB",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-back-extension-poster.webp?alt=media&token=e6fcc1ca-cfa8-4203-be71-301fac9794a4",
+        "sourceName": "lever back extension",
+        "sourceId": "rUXfn3R"
+      }
+    },
+    {
+      "id": "bw-wide-pushup",
+      "name": "Wide Push-ups",
+      "emoji": "🫳",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "chest",
+        "shoulders",
+        "arms"
+      ],
+      "intensity": 2,
+      "how": "Hands a hand-width wider than a normal push-up, fingers turned slightly out. Same straight line, same chest-to-the-floor depth — the wider hands put the work on the outer chest and take it off the triceps. Stop if the front of the shoulder complains.",
+      "restSec": 45,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-wide-pushup-poster.webp?alt=media&token=7c931fd3-c99f-4dab-86c3-991c0ee70f8c",
+        "match": "ai",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-wide-pushup.webp?alt=media&token=35d9e526-1a93-41bb-bd1b-9d2b282baccc",
+        "source": "ExerciseDB",
+        "sourceId": "JmMVpR3",
+        "sourceName": "wide hand push up"
+      }
+    },
+    {
+      "id": "bw-diamond-pushup",
+      "name": "Diamond Push-ups",
+      "emoji": "💎",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "arms",
+        "chest",
+        "core"
+      ],
+      "intensity": 3,
+      "how": "Hands together under the chest, index fingers and thumbs making a triangle. Elbows stay tucked to the ribs on the way down. The hardest of the three — expect about half the reps of a normal push-up, and that is the point.",
+      "restSec": 60,
+      "defaultReps": 8,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-diamond-pushup-poster.webp?alt=media&token=0d4f9809-eb4a-45b2-881b-fb09eb81708d",
+        "match": "exact",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-diamond-pushup.webp?alt=media&token=37f46e98-e93b-4808-a20b-6cead2f09740",
+        "source": "ExerciseDB",
+        "sourceName": "diamond push-up",
+        "sourceId": "soIB2rj"
+      }
+    },
+    {
+      "id": "bw-pushup-hold",
+      "name": "Push-up Hold",
+      "emoji": "⏸️",
+      "equipmentIds": [],
+      "kind": "timed",
+      "parts": [
+        "chest",
+        "arms",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Lower to halfway — elbows at about 90°, chest a fist off the floor — and stop there. Body in one line, ribs down, breathe. This is the isometric finisher: no reps, just time under the same tension the push-ups just used.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-hold-poster.webp?alt=media&token=e8feee31-825e-417f-820c-e043fb4be97f",
+        "sourceName": "push-up",
+        "match": "exact",
+        "sourceId": "I4hDWkc",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-pushup-hold.webp?alt=media&token=9a7f6d10-6e06-4b6a-8d65-15702e1d9e8c",
+        "source": "ExerciseDB"
+      }
+    },
+    {
+      "id": "bw-hollow-hold",
+      "name": "Hollow Hold",
+      "emoji": "🌙",
+      "equipmentIds": [],
+      "kind": "timed",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "On your back, lower back pressed FLAT into the floor — that never lifts. Shoulders and legs off the ground, arms overhead, body in a shallow banana. Lower the legs if the back starts to arch; a small hollow held properly beats a big one that isn’t.",
+      "restSec": 45,
+      "defaultReps": 20,
+      "defaultSets": 3,
+      "perSide": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z"
+    },
+    {
+      "id": "bw-reverse-crunch",
+      "name": "Reverse Crunch",
+      "emoji": "🔄",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "On your back, knees at 90°, hands flat beside you. Curl the hips off the floor and bring the knees towards the chest — the lower back rounds UP, it never arches. Lower slowly; the slow half is the half that counts.",
+      "restSec": 45,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "sourceName": "reverse crunch",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-reverse-crunch.webp?alt=media&token=eb85a7df-f4ac-42c4-8bf8-4e9cf0f6cb87",
+        "match": "exact",
+        "source": "ExerciseDB",
+        "sourceId": "nCU1Ekp",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-reverse-crunch-poster.webp?alt=media&token=569e8022-0d1b-4943-81bd-8590f1507ff0"
+      }
+    },
+    {
+      "id": "mv-back-extension-hold",
+      "name": "Back Extension Hold",
+      "emoji": "🐍",
+      "equipmentIds": [
+        "eq-6b040b1d"
+      ],
+      "kind": "timed",
+      "parts": [
+        "back",
+        "glutes",
+        "core"
+      ],
+      "intensity": 2,
+      "how": "Set up as for a back extension, come up to ONE straight line — level with the body, never arched past it — and hold there. Glutes squeezed, chin tucked. The isometric version of the same movement: endurance for the lower back, no swinging.",
+      "restSec": 60,
+      "defaultReps": 25,
+      "defaultSets": 3,
+      "perSide": false,
+      "backRisk": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-back-extension-hold-poster.webp?alt=media&token=9ed30335-1e4a-45f1-92d2-50249e942294",
+        "sourceId": "qLpO4vV",
+        "match": "close",
+        "sourceName": "back extension on exercise ball",
+        "source": "ExerciseDB",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-back-extension-hold.webp?alt=media&token=b460357e-6c91-426d-a71e-a9d8630c81f3"
+      }
     }
   ]
 }

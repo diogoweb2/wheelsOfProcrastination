@@ -203,6 +203,7 @@ import {
   coinsForExercise,
   defaultLadder,
   exerciseById,
+  isFixedSession,
   isPersonalRecord,
   learnFromExercise,
   loggedReps,
@@ -215,6 +216,7 @@ import {
   advanceLadder,
 } from '../logic/gym'
 import { SEED_VERSION, copyBlock, planBlockSession, repairBlock, seedBlock } from '../logic/gymBlock'
+import { planSnackSession } from '../logic/gymSnack'
 import { findExerciseVideo } from '../logic/gymVideoAi'
 import {
   applyEntry as applyRobloxEntry,
@@ -725,6 +727,12 @@ interface StoreState {
    */
   gymPlanBlock: (opts?: { pos?: number; mood?: Mood; length?: SessionLength }) => boolean
   /** Move the rotation cursor by hand — "not that one today, give me S4". */
+  /**
+   * Build one of the exercise snacks (§18ab) and put it on the preview — the
+   * ten-minute lunchtime twin of `gymPlanBlock`. False for an unknown id or a
+   * routine the basement can't supply a single movement for.
+   */
+  gymPlanSnack: (snackId: string, mood?: Mood) => boolean
   gymSetBlockPos: (pos: number) => void
   /** Start a fresh block from the rotation you are on: same sessions, clock reset to today. */
   gymRestartBlock: (name?: string) => void
@@ -3787,6 +3795,16 @@ export const useStore = create<StoreState>((set, get) => {
       return true
     },
 
+    gymPlanSnack(snackId, mood) {
+      const { data, gymCatalog } = get()
+      const session = planSnackSession({ catalog: gymCatalog, gym: data.gym, snackId, mood })
+      if (!session || session.exercises.length === 0) return false
+      commit((d) => {
+        d.gym.active = session
+      })
+      return true
+    },
+
     gymSetBlockPos(pos) {
       commit((d) => {
         const n = d.gym.blocks.find((b) => b.id === d.gym.activeBlockId)?.sessions.length ?? 0
@@ -3895,10 +3913,12 @@ export const useStore = create<StoreState>((set, get) => {
       if (!active || !target) return 'dropped'
       const keep = active.exercises.filter((e) => e.exId !== exId)
 
-      // A block session is a fixed list (§18m). "I haven't got time for this
-      // one" must not quietly become "here's a different exercise" — that is
-      // the behaviour the block replaced. The slot simply closes for today.
-      if (active.blockId) {
+      // A block session — and an exercise snack (§18ab) — is a fixed list.
+      // "I haven't got time for this one" must not quietly become "here's a
+      // different exercise": that is the behaviour the block replaced, and a
+      // push-up snack that hands you a lateral raise is not a push-up snack.
+      // The slot simply closes for today.
+      if (isFixedSession(active)) {
         commit((d) => {
           if (d.gym.active) d.gym.active.exercises = d.gym.active.exercises.filter((e) => e.exId !== exId)
         })
@@ -3967,11 +3987,12 @@ export const useStore = create<StoreState>((set, get) => {
       )
       if (!replacement) return 'none'
 
-      // Inside a block the SLOT is the prescription, not the movement (§18m):
-      // a three-set slot stays three sets whoever fills it, so swapping the
-      // exercise can never quietly hand you less work than the block asked for.
+      // Inside a block — or a snack — the SLOT is the prescription, not the
+      // movement (§18m): a three-set slot stays three sets whoever fills it, so
+      // swapping the exercise can never quietly hand you less work than the
+      // programme asked for.
       const fitted =
-        active.blockId && target.plan.reps.length !== replacement.plan.reps.length
+        isFixedSession(active) && target.plan.reps.length !== replacement.plan.reps.length
           ? (() => {
               const n = target.plan.reps.length
               const at = <T,>(list: T[] | undefined, i: number) => list?.[Math.min(i, list.length - 1)]
@@ -4157,12 +4178,13 @@ export const useStore = create<StoreState>((set, get) => {
           // rep ladders: seeded from your first honest set, then climbed; a max
           // test reseeds the whole thing from the new number.
           //
-          // Only OFF-PROGRAMME sessions feed it. A block session's pull-ups are
-          // done under the block's own prescription (§18d's rep ladder), and
-          // letting them advance this one means a later free session starts from
-          // a rung that was never earned under these rules.
+          // Only OFF-PROGRAMME sessions feed it. A block session's pull-ups —
+          // and a snack's push-ups — are done under their own prescription
+          // (§18d's rep ladder), and letting them advance this one means a later
+          // free session starts from a rung that was never earned under these
+          // rules. A movement on two ladders at once has neither of them honest.
           const def = exerciseById(catalog, se.exId)
-          if (def?.ladder && !s.blockId && !se.skipped && se.sets.length > 0) {
+          if (def?.ladder && !isFixedSession(s) && !se.skipped && se.sets.length > 0) {
             const best = Math.max(...se.sets.map((x) => x.reps))
             const cur = d.gym.ladders[se.exId]
             d.gym.ladders[se.exId] = cur ? advanceLadder(cur, se.ladderTest ? best : null, day) : defaultLadder(best)
