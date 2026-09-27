@@ -9,6 +9,8 @@ import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { FinalTest } from './components/FinalTest'
 import { AppHeader, AppTabBar } from './components/AppShell'
 import { AdminSection } from './components/AdminSection'
+import { NightWatch } from './components/NightWatch'
+import { useCurfew } from './hooks/useCurfew'
 import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
 import { TodayScreen } from './screens/TodayScreen'
@@ -36,6 +38,7 @@ import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
+import { inShell } from './push'
 import { backgroundUrl } from './logic/backgrounds'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
@@ -55,6 +58,9 @@ export default function App() {
   // bottom menu and where the app lands on open, so it is threaded through
   // every route call below.
   const dailyMode = data.settings.dailyMode
+
+  // 🌙 the night watch (§23) — which apps are awake right now, for whoever is looking
+  const curfewNow = useCurfew()
 
   /** Open an app (optionally on a given tab), falling back to its first tab. */
   function openApp(appId: string, tabId?: string) {
@@ -147,10 +153,14 @@ export default function App() {
   // token (FCM rotates them) — registerPushDevice ignores one it already has.
   // 'denied' is left alone: the browser won't re-prompt, and Settings → Alerts
   // still has the manual button.
+  //
+  // The Android shell has no Notification API at all, so it takes the same road
+  // by a different door: native asks Android, and the refresh-on-open is what
+  // keeps a rotated token from quietly dropping the tablet off the list.
   const askedPush = useRef(false)
   useEffect(() => {
     if (!unlocked || askedPush.current) return
-    if (!('Notification' in window) || Notification.permission === 'denied') return
+    if (!inShell() && (!('Notification' in window) || Notification.permission === 'denied')) return
     askedPush.current = true
     void registerPushDevice() // errors surface on the Settings screen's button instead
   }, [unlocked, registerPushDevice])
@@ -501,6 +511,20 @@ export default function App() {
         </div>
       )}
 
+      {/* 🌙 the night watch is on: say so once, at the top, so a locked icon is
+          never a surprise. It carries the countdown, not just the fact. */}
+      {curfewNow.active && (
+        <div className="banner" style={{ background: '#1b2a6b' }}>
+          <span style={{ fontSize: 20 }}>🌙</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 13 }}>Night watch — most apps are asleep</div>
+            <div style={{ fontSize: 11, opacity: 0.9 }}>
+              back in {curfewNow.left} · opens again at {curfewNow.opensAt}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* remote final tests: Ben's "start it" prompt, Dad's verdict banner */}
       <FinalTest />
 
@@ -704,7 +728,10 @@ export default function App() {
       ))}
 
       {open === null ? (
-        <HomeScreen onOpen={openApp} badges={homeBadges} />
+        <HomeScreen onOpen={openApp} badges={homeBadges} curfew={curfewNow} />
+      ) : !curfewNow.isOpen(open.app) ? (
+        // the URL still works — it just answers with the schedule (§1c, §23)
+        <NightWatch appId={open.app} curfewNow={curfewNow} onOpen={openApp} />
       ) : (
         <AppBodyRouter
           open={open}
@@ -719,7 +746,7 @@ export default function App() {
         />
       )}
 
-      {openDef && openTabs.length > 1 && (
+      {openDef && openTabs.length > 1 && curfewNow.isOpen(openDef.id) && (
         <AppTabBar
           tabs={openTabs}
           tab={open!.tab}

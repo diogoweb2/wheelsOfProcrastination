@@ -1,13 +1,22 @@
-// 🏋️ Gear — the shared basement. Equipment on top, then every exercise that
-// equipment makes possible, with what the app has learned about YOU on each row.
+// 🏋️ Gear — the shared basement, and the file on you.
 //
-// The catalog is shared (one basement, one Firestore doc) but the ratings, the
-// weights and the rest times are personal, so this screen edits two different
-// things at once and says which is which.
-import { useMemo, useRef, useState } from 'react'
+// Equipment on top, then every exercise that equipment makes possible, with
+// what the app has learned about YOU on each row. The catalog is shared (one
+// basement, one Firestore doc) but the ratings, the weights and the rest times
+// are personal, so this screen edits two different things at once and says
+// which is which.
+//
+// The third segment, 🧠 You, is what survived the Plan tab. Plan was built for
+// the AI trainer — a brief for a model to read, and a readiness meter counting
+// down to switching that model off. The model is gone; the brief is not, because
+// the offline planner enforces the hard rules in it (§18g) and always did. So it
+// lives here with the rest of the settings instead of owning a URL of its own,
+// and /gym/plan became /gym/snack (§18ab).
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import type { BodyPart, Equipment, ExerciseDef, ExerciseRating, GymCatalog } from '../../types'
-import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince, isLoaded } from '../../logic/gym'
+import { ALL_PARTS, PART_LABEL, RATING_LABEL, allExercises, daysSince, isLoaded, romanChairMove, seedBrief } from '../../logic/gym'
+import { wakeLockSupported } from '../../logic/wakeLock'
 import { sfx } from '../../audio'
 import { DemoCredit, ExerciseDemo } from './ExerciseDemo'
 import { MuscleMap } from './BodyMap'
@@ -30,7 +39,7 @@ const BENCH_ANGLES = [
 
 export function GearPanel() {
   const { gymCatalog, gymSaveCatalog } = useStore()
-  const [tab, setTab] = useState<'gear' | 'moves'>('gear')
+  const [tab, setTab] = useState<'gear' | 'moves' | 'you'>('gear')
 
   /** Write-through helper: the catalog doc may not exist yet on a fresh install. */
   function save(patch: (c: GymCatalog) => GymCatalog) {
@@ -49,8 +58,14 @@ export function GearPanel() {
         <button className={tab === 'moves' ? 'on' : ''} onClick={() => { sfx.click(); setTab('moves') }}>
           🤸 Exercises
         </button>
+        <button className={tab === 'you' ? 'on' : ''} onClick={() => { sfx.click(); setTab('you') }}>
+          🧠 You
+        </button>
       </div>
-      {tab === 'gear' ? <EquipmentList save={save} /> : <ExerciseList save={save} />}
+      {tab === 'you' && <YouPanel />}
+      {tab === 'gear' && <EquipmentList save={save} />}
+      {tab === 'moves' && <ExerciseList save={save} />}
+      {tab !== 'you' && (
       <p className="muted" style={{ fontSize: 11, marginTop: 16, lineHeight: 1.5 }}>
         The fast way to fill this in: photograph everything in the basement, drop the photos in <code>gym-photos/</code> and run{' '}
         <code>npm run gym:equipment</code>. It identifies each machine and writes every exercise it enables — and it reads your
@@ -62,7 +77,198 @@ export function GearPanel() {
         and weights below are yours alone;{' '}
         the equipment and exercise lists are shared with the rest of the crew.
       </p>
+      )}
     </>
+  )
+}
+
+// --- 🧠 You -----------------------------------------------------------------
+//
+// The brief, the four hard rules, what you think of each exercise, and the two
+// switches a session runs under. Everything here is read by the offline planner
+// before it builds anything — this is not a profile page, it is the input.
+
+function YouPanel() {
+  const { data, activeProfileId, gymSetBrief, gymSetOptions, gymCatalog } = useStore()
+  const gym = data.gym
+  const brief = gym.brief
+  const [text, setText] = useState(brief.text)
+  const [dirty, setDirty] = useState(false)
+
+  // another device editing the brief shouldn't be clobbered by a stale textarea
+  useEffect(() => {
+    if (!dirty) setText(brief.text)
+  }, [brief.text, dirty])
+
+  // said out loud in the toggle's hint: the setting is only worth anything if
+  // there is actually a bench in the basement for it to prescribe
+  const romanChair = romanChairMove(gymCatalog, { ...brief, romanChairWarmup: true }, gym.ex)
+
+  return (
+    <>
+      <div className="h2" style={{ marginTop: 0 }}>🧠 Your brief</div>
+      <div className="card">
+        <p className="muted" style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.45 }}>
+          Age, goals, injuries, what bores you, what makes you show up. The four switches under it are the parts the
+          planner can actually enforce — it can’t read prose, so anything that matters medically belongs in a switch as
+          well as in the text.
+        </p>
+        <div className="field" style={{ marginBottom: 10 }}>
+          <textarea
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value)
+              setDirty(true)
+            }}
+            style={{ minHeight: 220 }}
+            placeholder="43, plays pickleball, lower back history, wants a strong core…"
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn btn--small"
+            style={{ flex: 1 }}
+            disabled={!dirty}
+            onClick={() => {
+              sfx.gem()
+              gymSetBrief({ text })
+              setDirty(false)
+            }}
+          >
+            💾 Save brief
+          </button>
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              sfx.click()
+              const seed = seedBrief(activeProfileId)
+              setText(seed.text)
+              setDirty(true)
+            }}
+          >
+            ↺ Reset
+          </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="field" style={{ marginBottom: 10 }}>
+          <label>Age</label>
+          <input
+            type="number"
+            value={brief.age ?? ''}
+            onChange={(e) => gymSetBrief({ age: Number(e.target.value) || undefined })}
+          />
+        </div>
+        <div className="field" style={{ marginBottom: 10 }}>
+          <label>Weight unit</label>
+          <div className="seg">
+            {(['lb', 'kg'] as const).map((u) => (
+              <button key={u} className={(brief.weightUnit ?? 'lb') === u ? 'on' : ''} onClick={() => gymSetBrief({ weightUnit: u })}>
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
+        <Toggle
+          on={!!brief.avoidBackLoad}
+          label="Protect my lower back"
+          hint="Filters out anything that loads the spine heavily — the planner, 🔄 Swap and the exercise snacks all obey it. A block slot is the one exception: you wrote that one by hand."
+          onChange={(v) => gymSetBrief({ avoidBackLoad: v })}
+        />
+        <Toggle
+          on={!!brief.noWarmup}
+          label="No warm-up block"
+          hint="The first one or two exercises run light instead, so the warm-up happens by itself."
+          onChange={(v) => gymSetBrief({ noWarmup: v })}
+        />
+        <Toggle
+          on={brief.romanChairWarmup !== false}
+          label="Roman chair first, always"
+          hint={
+            romanChair
+              ? `Every session opens with ${romanChair.name} to wake the lower back up, before anything else asks the lower back for a favour.`
+              : 'On, but there is no roman chair / back-extension bench in the catalog yet — add one above and it will start opening every session.'
+          }
+          onChange={(v) => gymSetBrief({ romanChairWarmup: v })}
+        />
+      </div>
+
+      <RatingSummary />
+
+      <div className="h2">⚙️ Session settings</div>
+      <div className="card">
+        <Toggle
+          on={gym.soundOn}
+          label="Rest-timer sounds"
+          hint="A double blip at 10 seconds left, a rising tone when rest is over. Built to still fire with the screen off."
+          onChange={(v) => gymSetOptions({ soundOn: v })}
+        />
+        <Toggle
+          on={gym.keepAwake}
+          label="Keep the screen on during a session"
+          hint={
+            wakeLockSupported()
+              ? 'Stops the phone locking between sets — the most reliable way to get the alerts on time.'
+              : 'This browser has no Wake Lock API, so this does nothing here. The beeps still work.'
+          }
+          onChange={(v) => gymSetOptions({ keepAwake: v })}
+        />
+      </div>
+
+      <div className="card">
+        <div className="gym-card-head"><span>📚 What it knows about you</span></div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.45 }}>
+          {gym.sessions.length} session{gym.sessions.length === 1 ? '' : 's'} logged. Every set, every weight correction
+          and every rest you actually take is stored per exercise — that memory is what the planner reads instead of
+          asking a model, and it is the only thing here that cannot be typed back in.
+        </p>
+      </div>
+    </>
+  )
+}
+
+/** What you think of each exercise, grouped. Ratings are edited on the 🤸 Exercises rows. */
+function RatingSummary() {
+  const { data, gymCatalog } = useStore()
+  const moves = allExercises(gymCatalog)
+  const byRating = (r: ExerciseRating) =>
+    moves.filter((m) => data.gym.ex[m.id]?.rating === r).map((m) => m.name)
+
+  const groups: { r: ExerciseRating; names: string[] }[] = (['love', 'like', 'dislike', 'hate'] as ExerciseRating[])
+    .map((r) => ({ r, names: byRating(r) }))
+    .filter((g) => g.names.length > 0)
+
+  if (groups.length === 0) return null
+
+  return (
+    <div className="card">
+      {groups.map((g) => (
+        <div key={g.r} style={{ marginBottom: 8 }}>
+          <div style={{ fontWeight: 900, fontSize: 13 }}>{RATING_LABEL[g.r]}</div>
+          <div className="muted" style={{ fontSize: 12 }}>{g.names.join(', ')}</div>
+        </div>
+      ))}
+      <p className="muted" style={{ fontSize: 11 }}>Change any of these on the 🤸 Exercises tab.</p>
+    </div>
+  )
+}
+
+function Toggle({ on, label, hint, onChange }: { on: boolean; label: string; hint: string; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      className="gym-toggle"
+      onClick={() => {
+        sfx.click()
+        onChange(!on)
+      }}
+    >
+      <span className={`gym-toggle-box ${on ? 'on' : ''}`}>{on ? '✓' : ''}</span>
+      <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+        <span style={{ display: 'block', fontWeight: 900, fontSize: 14 }}>{label}</span>
+        <span className="muted" style={{ display: 'block', fontSize: 11, lineHeight: 1.4 }}>{hint}</span>
+      </span>
+    </button>
   )
 }
 

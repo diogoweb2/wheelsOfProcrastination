@@ -12,6 +12,8 @@ import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
 import { QuestionManager } from './QuestionManager'
 import { dayKey } from '../logic/dates'
+import { APPS } from '../apps/registry'
+import { ALWAYS_OPEN, DEFAULT_ALLOW, clockLabel, curfewActive, defaultCurfew, type CurfewSettings } from '../logic/curfew'
 import { sfx } from '../audio'
 
 export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
@@ -45,6 +47,7 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
 
       {tab === 'limits' && (
         <>
+          <NightWatchDesk />
           <ScreenLimits />
           <MoveClocks />
         </>
@@ -97,6 +100,165 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
         </>
       )}
     </>
+  )
+}
+
+/**
+ * 🌙 Night watch (§23) — the daily curfew on Ben's world.
+ *
+ * Two dials (when it starts, when it lifts) and a list of islands that stay
+ * open through it. It is written into Ben's own settings, which is why it only
+ * moves once his doc has arrived from the server — the same rule the card-game
+ * cap plays by. Diogo's own world is never on watch; he sets it.
+ */
+function NightWatchDesk() {
+  const { kidData, kidDataFresh, setSettingsFor } = useStore()
+  const ready = !!kidData && kidDataFresh
+  const curfew: CurfewSettings = kidData?.settings.curfew ?? defaultCurfew()
+  const onWatch = curfewActive(curfew)
+
+  function patch(next: Partial<CurfewSettings>) {
+    sfx.click()
+    setSettingsFor(KID_ID, { curfew: { ...curfew, ...next } })
+  }
+
+  /** Nudge one end of the window by 30 minutes, wrapping round the clock. */
+  function nudge(which: 'start' | 'end', deltaMin: number) {
+    const h = which === 'start' ? curfew.startHour : curfew.endHour
+    const m = which === 'start' ? curfew.startMin : curfew.endMin
+    const t = (h * 60 + m + deltaMin + 24 * 60) % (24 * 60)
+    patch(
+      which === 'start'
+        ? { startHour: Math.floor(t / 60), startMin: t % 60 }
+        : { endHour: Math.floor(t / 60), endMin: t % 60 },
+    )
+  }
+
+  function toggleApp(id: string) {
+    const has = curfew.allow.includes(id)
+    patch({ allow: has ? curfew.allow.filter((a) => a !== id) : [...curfew.allow, id] })
+  }
+
+  // everything that has an icon on his home screen; Settings and the Parent app
+  // are never on the list because they are never closed
+  const choices = APPS.filter((a) => !a.hidden && !a.adminOnly && !ALWAYS_OPEN.includes(a.id))
+  const games = choices.filter((a) => a.folder === 'games')
+  const rest = choices.filter((a) => a.folder !== 'games')
+
+  const dials = [
+    { which: 'start' as const, label: 'Goes to sleep', value: clockLabel(curfew.startHour, curfew.startMin) },
+    { which: 'end' as const, label: 'Wakes up', value: clockLabel(curfew.endHour, curfew.endMin) },
+  ]
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 900 }}>🌙 Night watch — Ben</div>
+          <div className="muted" style={{ fontSize: 12 }}>
+            {curfew.on
+              ? `${onWatch ? 'on watch right now · ' : ''}${clockLabel(curfew.startHour, curfew.startMin)} → ${clockLabel(curfew.endHour, curfew.endMin)}`
+              : 'off — his apps never sleep'}
+          </div>
+        </div>
+        <button className="btn btn--small" style={{ width: 'auto' }} disabled={!ready} onClick={() => patch({ on: !curfew.on })}>
+          {curfew.on ? 'Turn off' : 'Turn on'}
+        </button>
+      </div>
+      <p className="muted" style={{ fontSize: 12, margin: '8px 0 0' }}>
+        Inside the window only the islands ticked below open. Every other one keeps its icon, dimmed and wearing a 🌙,
+        and its screen tells him it is the schedule and when it lifts — so it can never look like a bug.
+      </p>
+      {!ready && (
+        <p className="muted" style={{ fontSize: 11, marginTop: 6 }}>
+          loading Ben’s log from the cloud…
+        </p>
+      )}
+
+      {curfew.on && (
+        <>
+          {dials.map((d) => (
+            <div
+              key={d.which}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--line)', padding: '10px 0' }}
+            >
+              <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 14 }}>{d.label}</div>
+              <button className="btn btn--ghost btn--small" disabled={!ready} onClick={() => nudge(d.which, -30)}>
+                −
+              </button>
+              <b style={{ minWidth: 52, textAlign: 'center', fontSize: 16 }}>{d.value}</b>
+              <button className="btn btn--ghost btn--small" disabled={!ready} onClick={() => nudge(d.which, 30)}>
+                +
+              </button>
+            </div>
+          ))}
+
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 2 }}>Open through the night</div>
+            <p className="muted" style={{ fontSize: 11, marginBottom: 8 }}>
+              Settings and your own desk are never closed, so they are not on this list.
+            </p>
+            <AllowGroup title="Work" apps={rest} allow={curfew.allow} ready={ready} onToggle={toggleApp} />
+            <AllowGroup title="🎮 Games" apps={games} allow={curfew.allow} ready={ready} onToggle={toggleApp} />
+            <button
+              className="btn btn--small"
+              style={{ marginTop: 10 }}
+              disabled={!ready}
+              onClick={() => patch(defaultCurfew())}
+            >
+              ↩︎ Back to the default (19:00 → 07:00, {DEFAULT_ALLOW.length} open)
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** One row of tick-chips — tap an island to leave it open through the night. */
+function AllowGroup({
+  title,
+  apps,
+  allow,
+  ready,
+  onToggle,
+}: {
+  title: string
+  apps: { id: string; name: string; icon: string }[]
+  allow: string[]
+  ready: boolean
+  onToggle: (id: string) => void
+}) {
+  if (apps.length === 0) return null
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div className="muted" style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+        {title}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+        {apps.map((a) => {
+          const on = allow.includes(a.id)
+          return (
+            <button
+              key={a.id}
+              className="btn btn--small"
+              style={{
+                width: 'auto',
+                padding: '6px 10px',
+                fontSize: 12,
+                background: on ? undefined : 'transparent',
+                boxShadow: on ? undefined : 'inset 0 0 0 2px var(--line)',
+                color: on ? undefined : 'var(--muted)',
+              }}
+              disabled={!ready}
+              onClick={() => onToggle(a.id)}
+            >
+              {on ? '✓' : '🌙'} {a.icon} {a.name}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

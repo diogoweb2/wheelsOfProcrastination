@@ -17,6 +17,7 @@ import {
   orderBy,
   query,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
@@ -115,6 +116,24 @@ export async function saveDataFields(id: string, fields: Partial<AppData>): Prom
   if (Object.keys(fields).length === 0) return
   await ensureAuth()
   await setDoc(dataRef(id), fields, { merge: true })
+}
+
+/**
+ * Write ONE nested field, by path, touching nothing else on the document —
+ * `saveDataFields`'s smaller sibling.
+ *
+ * `saveDataFields` merges at the TOP level, so the smallest gym write there is
+ * the whole `gym` object: every session, every block, every exercise memory.
+ * That is fine for a mutation the user made and wrong for a heartbeat. The
+ * watch driving a session (§18aa) beats every 30 s, and dragging the entire
+ * gym up the wire each time — from a watch, on battery — is not a thing to do.
+ *
+ * It is `updateDoc`, so the document must already exist; a profile always does
+ * by the time anything is driving a workout.
+ */
+export async function saveField(id: string, path: string, value: unknown): Promise<void> {
+  await ensureAuth()
+  await updateDoc(dataRef(id), { [path]: value })
 }
 
 /**

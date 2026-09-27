@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- theme_color / background_color from the PWA manifest in vite.config.ts -->
+    <color name="brand_navy">#0c2338</color>
+    <color name="brand_sand">#f2d38a</color>
+    <color name="ic_launcher_background">#0c2338</color>
+</resources>

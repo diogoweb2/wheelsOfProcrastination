@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "30669970378",
+    "project_id": "spinningwheel-6ff51",
+    "storage_bucket": "spinningwheel-6ff51.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30669970378:android:94e9ff661bf96f15d28d33",
+        "android_client_info": {
+          "package_name": "com.wheelsofprocrastination.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqaSzN4XUUimIcfBzDe1974sy6u-E-0DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

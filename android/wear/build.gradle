@@ -1,0 +1,79 @@
+// The Pixel Watch app. Unlike :app — a WebView with no game logic in it — this
+// one is a real client: it reads and writes the same Firestore profile document
+// the website does, and it does not need the phone to be awake.
+//
+// Same applicationId as the phone shell on purpose: it is the standalone-Wear
+// pairing Google expects, and it means `app/google-services.json` works here
+// unchanged instead of needing a second Firebase client registration.
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'com.wheelsofprocrastination.wear'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.wheelsofprocrastination.app"
+        // Wear OS 3 and up. The Pixel Watch 3 is far past this; the floor only
+        // exists because everything below it is a different UI toolkit.
+        minSdk 30
+        targetSdk 36
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Debug key, like the phone shell: sideloaded onto one watch, never published.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
+    }
+}
+
+// VERSIONS ARE PINNED TO THE compileSdk 36 GENERATION, on purpose.
+//
+// Everything current (core 1.19, wear-compose 1.7, compose-bom 2026.x) demands
+// Android Gradle Plugin 9.1+ and compileSdk 37. Taking that would mean dragging
+// Gradle, AGP and the working phone shell along with it, and installing an SDK
+// platform this machine has no `sdkmanager` to fetch — all so a watch app can
+// be compiled against an API it does not use. `targetSdk` is what decides
+// runtime behaviour, and 36 is honest on a watch running 37.
+dependencies {
+    implementation platform('androidx.compose:compose-bom:2025.12.01')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // Wear's own Compose libraries. NOT androidx.compose.material — that is the
+    // phone's, and it draws a phone's UI on a round screen.
+    implementation 'androidx.wear.compose:compose-material3:1.5.6'
+    implementation 'androidx.wear.compose:compose-foundation:1.5.6'
+
+    implementation 'androidx.activity:activity-compose:1.12.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.9.4'
+    implementation 'androidx.core:core-ktx:1.17.0'
+
+    implementation platform('com.google.firebase:firebase-bom:34.19.0')
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-auth'
+}

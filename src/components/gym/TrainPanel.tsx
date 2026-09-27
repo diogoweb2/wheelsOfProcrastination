@@ -32,6 +32,7 @@ import {
   bandFor,
   benchAngleLabel,
   bestsFor,
+  isFixedSession,
   isLoaded,
   isRamped,
   loadLabel,
@@ -48,9 +49,12 @@ import {
 } from '../../logic/gym'
 import type { BlockAge } from '../../logic/gymBlock'
 import type { SessionLength } from '../../logic/gymBlock'
+import { PACE_MIN_SAMPLES, honestRange, paceCalibration } from '../../logic/gymPace'
+import { DRIVER_BEAT_MS, deviceId, liveDriver, livePosition } from '../../logic/gymLive'
 import {
   SESSION_LENGTHS,
   activeBlock,
+  diffBlockPlans,
   blockAge,
   blockPos as blockPosOf,
   blockSessionsDone,
@@ -62,7 +66,7 @@ import {
 } from '../../logic/gymBlock'
 import { keepScreenAwake } from '../../logic/wakeLock'
 import confetti from 'canvas-confetti'
-import { primeGymAudio, gymSfx, sfx } from '../../audio'
+import { primeGymAudio, gymSfx, setGymHandedOff, sfx } from '../../audio'
 import { RestTimer } from './RestTimer'
 import { LEAD_SEC, SETUP_SEC, SIDE_SEC, SetupCountdown } from './SetupCountdown'
 import { DemoCaption, DemoCredit, ExerciseDemo } from './ExerciseDemo'
@@ -129,19 +133,74 @@ function useDemos() {
 }
 
 export function TrainPanel() {
+  return <SessionFlow idle={<Setup />} />
+}
+
+/**
+ * The whole session loop — preview → runner → report — over whatever is in
+ * `gym.active`, with `idle` shown when there is nothing running.
+ *
+ * It is exported because the Snack tab (§18ab) runs the SAME loop: a snack is
+ * an ordinary session in the ordinary slot, so it gets the ordinary animation,
+ * rest clock, records, grade and Berries by simply being handed to the same
+ * three screens. Two runners would be two runners to keep in step, and one of
+ * them would quietly rot.
+ *
+ * Whichever tab you started on, the other one shows the session too — there is
+ * one `gym.active` and pretending otherwise would mean losing a workout by
+ * tapping the wrong tab mid-set.
+ */
+export function SessionFlow({ idle }: { idle: React.ReactNode }) {
   const active = useStore((s) => s.data.gym.active)
+  const gymFinish = useStore((s) => s.gymFinish)
   const [banked, setBanked] = useState<Banked | null>(null)
   const hasActive = !!active
+  const watchFinished = active?.status === 'done'
+  /** Sessions already banked here, so a re-render can't pay for one twice. */
+  const settled = useRef(new Set<string>())
 
   // ordering a "do more" block from the report retires the report
   useEffect(() => {
     if (hasActive) setBanked(null)
   }, [hasActive])
 
+  /**
+   * The session was ended on the WATCH (§18aa). All the watch could honestly
+   * write is `status: 'done'` and the instant it happened — the Berries, the
+   * grade, the records, the rep and hold ladders and the block rotation are
+   * `gymFinish`, and a second copy of that reasoning in Kotlin would be wrong
+   * within a month.
+   *
+   * So the banking happens HERE, the first time you open the app afterwards,
+   * which is also the first moment there is a screen big enough to read the
+   * report on. Nothing is asked of you: it pays, it learns, and the report is
+   * simply sitting there — the stars are optional and always were.
+   */
+  useEffect(() => {
+    if (!watchFinished || !active || settled.current.has(active.id)) return
+    settled.current.add(active.id)
+    const res = gymFinish()
+    if (res.session) setBanked({ session: res.session, coins: res.coins })
+  }, [watchFinished, active, gymFinish])
+
   if (active?.status === 'preview') return <Preview session={active} />
-  if (active) return <Runner session={active} onBanked={setBanked} />
+  // a session the watch closed is not a session to keep running: the effect
+  // above is one tick away from turning it into a report
+  if (active && !watchFinished) return <Runner session={active} onBanked={setBanked} />
   if (banked) return <ReportCard banked={banked} onClose={() => setBanked(null)} />
-  return <Setup />
+  if (watchFinished) return <BankingCard />
+  return <>{idle}</>
+}
+
+/** The half-second between "the watch ended it" and the report. */
+function BankingCard() {
+  return (
+    <div className="card" style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 40 }}>⌚</div>
+      <p style={{ fontWeight: 900, fontSize: 15, marginTop: 6 }}>You finished this one on your watch.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>Counting the Berries…</p>
+    </div>
+  )
 }
 
 // --- setup ------------------------------------------------------------------
@@ -269,6 +328,17 @@ interface PendingChange {
   after: GymSession
 }
 
+/**
+ * What each button does to the SESSION, now that its face says what the button
+ * does to your evening. Both halves are needed: "~42 min" alone can't tell you
+ * whether the tail came off.
+ */
+const LENGTH_SHAPE: Record<SessionLength, string> = {
+  20: 'short',
+  30: 'as written',
+  40: '+1 set',
+}
+
 /** Why a length button sometimes moves nothing — always a real reason, never a shrug. */
 const LENGTH_NO_CHANGE: Record<SessionLength, string> = {
   20: 'This session already fits inside 20 minutes. Nothing has to come off — the tail you would cut isn’t there.',
@@ -298,9 +368,40 @@ function NextSessionCard() {
   // A length or mood tap is held here until you have seen what it does.
   const [pending, setPending] = useState<PendingChange | null>(null)
   const byId = useMemo(() => new Map(allExercises(gymCatalog).map((e) => [e.id, e])), [gymCatalog])
-  if (!block) return null
-
+  const cal = useMemo(() => paceCalibration(gym), [gym])
   const pos = blockPosOf(gym)
+  /**
+   * What each of the three buttons actually costs you, in wall-clock minutes.
+   *
+   * Built, not described: the same `planBlockSession` the ▶️ button will call,
+   * run three times, so the number on the button is by construction the number
+   * the countdown will start from. 20 · 30 · 40 are shapes (§18m); these are
+   * minutes (§18z), and the two stopped being the same number the day the app
+   * had enough history to know better.
+   */
+  const costs = useMemo(() => {
+    const built = {} as Record<SessionLength, GymSession | null>
+    for (const len of SESSION_LENGTHS) {
+      built[len] = planBlockSession({ catalog: gymCatalog, gym, mood: 'normal', length: len, pos, paceFactor: cal.factor })
+    }
+    const written = built[30]
+    return SESSION_LENGTHS.reduce(
+      (acc, len) => {
+        const s = built[len]
+        acc[len] = {
+          min: s?.minutes ?? null,
+          // Two buttons printing the same minutes is not a bug — on S3 both
+          // leading slots are ⚡ quality-capped, so "+1 set" has nothing to add
+          // it (§18m). It IS confusing, and the modal explaining it only opens
+          // AFTER you tap. The caption says it up front instead.
+          same: len !== 30 && !!s && !!written && diffBlockPlans(written, s).changes.length === 0,
+        }
+        return acc
+      },
+      {} as Record<SessionLength, { min: number | null; same: boolean }>,
+    )
+  }, [gymCatalog, gym, pos, cal.factor])
+  if (!block) return null
 
   /**
    * Build today's session as it stands and as the tapped setting would make it,
@@ -309,8 +410,15 @@ function NextSessionCard() {
    * a modal with nothing in it is worse than no modal.
    */
   const propose = (next: { mood: Mood; length: SessionLength }, label: string, emptyNote: string) => {
-    const before = planBlockSession({ catalog: gymCatalog, gym, mood, length, pos })
-    const after = planBlockSession({ catalog: gymCatalog, gym, mood: next.mood, length: next.length, pos })
+    const before = planBlockSession({ catalog: gymCatalog, gym, mood, length, pos, paceFactor: cal.factor })
+    const after = planBlockSession({
+      catalog: gymCatalog,
+      gym,
+      mood: next.mood,
+      length: next.length,
+      pos,
+      paceFactor: cal.factor,
+    })
     if (!before || !after) {
       setMood(next.mood)
       setLength(next.length)
@@ -359,10 +467,12 @@ function NextSessionCard() {
         </ul>
 
         {/* How long you have got — never WHAT you do, only how much of it.
-            20 drops the tail, 40 adds a set to the first two movements. */}
+            20 drops the tail, 40 adds a set to the first two movements. The
+            button says what that costs YOU (§18z), not what the shape is
+            called: "30" has meant 42 minutes on this profile all along. */}
         <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
           <label>How long have you got?</label>
-          <div className="seg">
+          <div className="seg gym-len">
             {SESSION_LENGTHS.map((m) => (
               <button
                 key={m}
@@ -370,10 +480,11 @@ function NextSessionCard() {
                 onClick={() => {
                   sfx.click()
                   if (m === length) return
-                  propose({ mood, length: m }, `⏱ ${m} min`, LENGTH_NO_CHANGE[m])
+                  propose({ mood, length: m }, `⏱ ${costs[m].min ?? m} min`, LENGTH_NO_CHANGE[m])
                 }}
               >
-                {m} min
+                {costs[m].min ? `~${costs[m].min} min` : `${m} min`}
+                <span>{costs[m].same ? 'no change' : LENGTH_SHAPE[m]}</span>
               </button>
             ))}
           </div>
@@ -383,6 +494,7 @@ function NextSessionCard() {
               : length === 40
                 ? 'An extra set on the first two movements — not extra exercises. Take the longer rests too.'
                 : 'The session exactly as written.'}
+            {cal.learned && ` Timings from your last ${cal.samples} finished session${cal.samples === 1 ? '' : 's'}, not from the plan.`}
           </span>
         </div>
 
@@ -568,7 +680,14 @@ function Preview({ session }: { session: GymSession }) {
   const [swapping, setSwapping] = useState<string | null>(null)
   const demos = useDemos()
   const unit = data.gym.brief.weightUnit ?? 'lb'
-  const estimate = Math.round(sessionSeconds(session) / 60)
+  // Your own correction, on the number you are about to commit an evening to.
+  const cal = useMemo(() => paceCalibration(data.gym), [data.gym])
+  const estimate = Math.max(1, Math.round(sessionSeconds(session, cal.factor) / 60))
+  const range = honestRange(session, cal)
+  // A block rotation and a snack routine are both written down in advance, so
+  // both get the fixed-list treatment: drop a slot, reorder it, swap it for
+  // something that does the same job — never "here is a different exercise".
+  const fixed = isFixedSession(session)
 
   return (
     <>
@@ -576,17 +695,27 @@ function Preview({ session }: { session: GymSession }) {
 
       <div className="card">
         <div className="gym-note-head">
-          {session.blockSessionName ? (
+          {session.snackName ? (
+            <span className="chip chip--test">🍿 {session.snackName} snack</span>
+          ) : session.blockSessionName ? (
             <span className="chip chip--test">🧱 {session.blockSessionName}</span>
           ) : (
-            <span className="chip">⚙️ {session.minutes} min plan</span>
+            <span className="chip">⚙️ Off-programme</span>
           )}
           <span className="chip">⏱ ~{estimate} min</span>
+          {range && <span className="chip">usually {range[0]}–{range[1]}</span>}
           <span className="chip">{MOODS.find((m) => m.id === session.mood)?.emoji} {MOODS.find((m) => m.id === session.mood)?.label}</span>
           {session.gearMode && session.gearMode !== 'mixed' && <span className="chip">{GEAR_MODE_LABEL[session.gearMode]}</span>}
           {session.followUp && <span className="chip chip--test">➕ Bonus block</span>}
         </div>
         {session.note && <p style={{ fontSize: 14, fontWeight: 700, marginTop: 8 }}>“{session.note}”</p>}
+        {/* Where the number came from. An estimate you can't audit is a number
+            you stop believing the second it is wrong once (§18z). */}
+        <p className="muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.45 }}>
+          {cal.learned
+            ? `⏱ is wall clock, from your last ${cal.samples} finished session${cal.samples === 1 ? '' : 's'}: they ran ${cal.factor.toFixed(2)}× what the sets and rests add up to. Changing the dumbbell, reading the card and the rest you actually take are all in there.`
+            : `⏱ is sets plus rests plus a walk-over. It has nothing to correct itself with yet: ${PACE_MIN_SAMPLES} finished sessions and it starts measuring how long they really take you.`}
+        </p>
       </div>
 
       {session.exercises.length === 0 && (
@@ -624,7 +753,7 @@ function Preview({ session }: { session: GymSession }) {
             {/* On a block session the exercise list is the programme — swapping
                 one out for "something similar" is exactly what the block exists
                 to stop. Short on time? Drop it; the slot just closes. */}
-            {session.blockId && (
+            {fixed && (
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <MoveButtons
                   onMove={(dir) => gymReorder(e.exId, dir)}
@@ -643,7 +772,7 @@ function Preview({ session }: { session: GymSession }) {
                 </button>
               </div>
             )}
-            {session.blockId && (
+            {fixed && (
               <button
                 className="btn btn--ghost btn--small"
                 style={{ marginTop: 8, width: '100%' }}
@@ -658,7 +787,7 @@ function Preview({ session }: { session: GymSession }) {
                 🔄 Swap for something similar
               </button>
             )}
-            {!session.blockId && (
+            {!fixed && (
               <>
                 <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                   <button
@@ -728,7 +857,7 @@ function Preview({ session }: { session: GymSession }) {
         ▶️ GO
       </button>
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        {!session.blockId && (
+        {!fixed && (
           <button
             className="btn btn--ghost btn--small"
             style={{ flex: 1 }}
@@ -786,7 +915,20 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
     gymArmWarmup,
     gymLogWarmup,
     gymSetOptions,
+    gymClaimDrive,
+    gymReleaseDrive,
+    gymSetRestUntil,
   } = useStore()
+  /**
+   * WHO HAS THE SESSION (§18aa). The watch is a full client of the same
+   * document, not a remote control — so while it is driving, this runner reads
+   * and does not write. Two writers means last-write-wins over the whole `gym`
+   * object, and the set you just did on your wrist is what gets lost.
+   */
+  const me = deviceId()
+  const driver = liveDriver(session)
+  const watching = !!driver && driver.id !== me
+
   // a refresh mid-session lands on the first exercise that still has sets owed,
   // not back at the top — `gym.active` is synced, so this is a real recovery
   const [idx, setIdx] = useState(() => {
@@ -866,6 +1008,78 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
   const [weight, setWeight] = useState<number | undefined>(armedWeight)
   /** The band picked for the warm-up, until it is armed. Undefined = whatever you used last time. */
   const [band, setBand] = useState<number | undefined>(undefined)
+
+  /**
+   * Hold the session while this runner is on screen, and let go when it isn't.
+   *
+   * Claiming is not a lock on the workout — it is a lock on WRITING. A driver
+   * that stops beating for `DRIVER_STALE_MS` has gone (flat watch battery,
+   * closed tab) and the session is free again without anyone having to say so.
+   */
+  /** The watch beeps on your wrist; the phone stays out of the podcast (§18aa). */
+  useEffect(() => {
+    setGymHandedOff(watching)
+    return () => setGymHandedOff(false)
+  }, [watching])
+
+  /**
+   * WHILE THE WATCH DRIVES, THIS RUNNER IS A DISPLAY — so where it is looking
+   * has to come from the sets, not from an index this device stopped moving.
+   *
+   * `idx` is local state because normally this device is the one advancing it.
+   * Hand the session to the wrist and nothing advances it at all: the watch
+   * logged three sets of Hollow Hold and the phone sat on the same card
+   * counting them, which is how it came to say **“set 4 of 3”**. `livePosition`
+   * is the answer §18aa already wrote down — the first exercise still owing
+   * sets — and mirroring it is all the phone has to do.
+   */
+  useEffect(() => {
+    if (!watching) return
+    const at = livePosition(session).idx
+    setIdx((n) => (n === at ? n : at))
+  }, [watching, session])
+
+  /**
+   * THE SESSION BEING OVER IS NOT AN EVENT THIS DEVICE HAS TO WITNESS.
+   *
+   * Logging the last set here has always gone straight to the finish card. Then
+   * the watch started doing the logging (§18aa) and that path simply never ran,
+   * so a workout finished on the wrist left the phone in the runner for ever.
+   * The honest test is the derived one — nothing left owing — and it is true
+   * whichever device did the work. This is deliberately a second route to the
+   * same place: `gym.active.status` going `done` (`SessionFlow`) is the normal
+   * one, and this one still fires if a flat watch battery means that write
+   * never lands.
+   */
+  const nothingLeft = livePosition(session).done
+  useEffect(() => {
+    if (nothingLeft) setFinishing(true)
+  }, [nothingLeft])
+
+  useEffect(() => {
+    if (watching) return
+    gymClaimDrive()
+    const id = window.setInterval(() => gymClaimDrive(), DRIVER_BEAT_MS)
+    return () => {
+      window.clearInterval(id)
+      gymReleaseDrive()
+    }
+  }, [watching, gymClaimDrive, gymReleaseDrive])
+
+  /**
+   * Publish when rest ends, so a device that arrives mid-rest — the watch, or
+   * this phone waking up — lands on the same countdown rather than starting a
+   * fresh one. Wall clock, never a tick count.
+   */
+  useEffect(() => {
+    if (watching) return
+    const secs = current?.plan.restSec ?? 60
+    if (phase === 'resting') gymSetRestUntil(new Date(Date.now() + secs * 1000).toISOString())
+    else gymSetRestUntil(null)
+    // the rest LENGTH is deliberately absent from the deps: +TIME during a rest
+    // must not republish the instant and restart everyone else's countdown
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, watching, idx])
 
   // a new exercise (or a new set) re-arms the inputs with what was prescribed —
   // you only touch them when reality differs, and that difference is the signal
@@ -1129,6 +1343,30 @@ function Runner({ session, onBanked }: { session: GymSession; onBanked: (b: Bank
 
   return (
     <>
+      {watching && (
+        // Not an error and not a lock on the workout: the watch has the pen,
+        // this screen is the same session read live. Taking it back is one tap
+        // and costs nothing — the sets are in the document either way.
+        <div className="card gym-handoff">
+          <div style={{ fontSize: 30 }}>⌚</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 900 }}>Your watch has this one</div>
+            <div className="muted" style={{ fontSize: 12, lineHeight: 1.4 }}>
+              Everything below is live. This phone is staying quiet and won’t log anything — so the two can’t overwrite
+              each other.
+            </div>
+          </div>
+          <button
+            className="btn btn--ghost btn--small"
+            onClick={() => {
+              sfx.click()
+              gymClaimDrive(true)
+            }}
+          >
+            Take over
+          </button>
+        </div>
+      )}
       <div className="gym-progress">
         <div className="gym-progress-bar">
           <span style={{ width: `${(doneCount / Math.max(1, list.length)) * 100}%` }} />
@@ -2097,6 +2335,16 @@ function ReportCard({ banked, onClose }: { banked: Banked; onClose: () => void }
   return (
     <>
       <div className="h2">📊 How that went</div>
+
+      {session.finishedBy === 'watch' && (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <p style={{ fontWeight: 900, fontSize: 14 }}>⌚ You ended this one on your watch.</p>
+          <p className="muted" style={{ fontSize: 11, marginTop: 4, lineHeight: 1.45 }}>
+            Everything below was worked out here just now — the Berries are paid and the ladders have moved. The stars
+            are still yours to give, and still optional.
+          </p>
+        </div>
+      )}
 
       {report && (
         <div className="card" style={{ textAlign: 'center' }}>

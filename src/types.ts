@@ -3,6 +3,7 @@
 // only the stored shapes belong here.
 import type { DuelState } from './logic/cardGame'
 import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
+import type { CurfewSettings } from './logic/curfew'
 import type { SeaState } from './logic/seaBattle'
 import type { OptcgDeck, OptcgState } from './logic/optcg'
 
@@ -188,6 +189,12 @@ export interface Settings {
    */
   boardMoveSeconds?: number
   duelMoveSeconds?: number
+  /**
+   * 🌙 Night watch (§23): the daily window where most of the app is asleep.
+   * Set by the captain in the Parent app, per crewmate. Undefined on an old
+   * save; `defaultCurfew()` fills it in on load.
+   */
+  curfew?: CurfewSettings
 }
 
 /** One device registered for web push, so a closed app can still be reached. */
@@ -1249,12 +1256,33 @@ export interface SessionExercise {
 }
 
 /** One workout, from "GO" to the closing star rating. */
+/**
+ * The device currently allowed to log sets on a running session (§18aa).
+ * `at` is a heartbeat: a driver that stops beating has put the session down,
+ * and the other device may pick it up without asking.
+ */
+export interface SessionDriver {
+  device: 'phone' | 'watch'
+  /** Random per-install id, so two phones are two different drivers. */
+  id: string
+  /** ISO, refreshed while the driver is awake and on the session. */
+  at: string
+}
+
 export interface GymSession {
   id: string
   day: string // YYYY-MM-DD
   status: 'preview' | 'running' | 'done'
   startedAt?: string // ISO, set on GO
   finishedAt?: string
+  /**
+   * Which device said "that's it" (§18aa). Absent means the website, as it
+   * always was. `'watch'` means the wrist wrote `status: 'done'` and the
+   * website banked it afterwards — so the finishing INSTANT is the watch's and
+   * must be kept, or `activeSec` would count however long the phone stayed in
+   * a pocket.
+   */
+  finishedBy?: 'watch'
   minutes: number // the budget you asked for
   mood: Mood
   gearMode?: GearMode // weights / bodyweight / both (default 'mixed')
@@ -1278,10 +1306,34 @@ export interface GymSession {
   restTargetSec?: number
   /** True when this one was planned as "do more" right after another session. */
   followUp?: boolean
+  /**
+   * WHO IS DRIVING (§18aa). While a session runs, exactly one device logs sets
+   * — the phone in your hand or the watch on your wrist. It is not a nicety:
+   * `commit` writes the whole `gym` object, so two writers is last-write-wins
+   * over the entire gym, and a phone waking with a stale copy would silently
+   * eat the sets the watch logged.
+   */
+  driver?: SessionDriver
+  /**
+   * When the current rest ends, as an ISO instant — the one piece of the
+   * runner's live position that cannot be derived from the logged sets.
+   * Wall-clock, never a tick count, so a device that arrives late (or wakes up)
+   * lands on the same number as the one that started it. Absent = not resting.
+   */
+  restUntil?: string
   /** The training block this came out of, and which session of the rotation it was. */
   blockId?: string
   blockSessionId?: string
   blockSessionName?: string
+  /**
+   * The exercise snack this came out of (§18ab) — `abs`, `pushup`, `roman`.
+   * Like `blockId` it marks a session whose exercise list is FIXED: the routine
+   * is the point, so the preview drops a slot rather than substituting one, and
+   * the free planner's rep-ladder game (§18f) stays out of it.
+   */
+  snack?: string
+  /** The snack's name, denormalised like `blockSessionName` so an old log still reads. */
+  snackName?: string
 }
 
 // --- the training block -----------------------------------------------------
@@ -1329,7 +1381,7 @@ export interface TrainingBlock {
   name: string
   /** Where it came from — `seed` is the copy that ships in code, `manual` is yours. */
   source?: 'seed' | 'manual'
-  /** What this block is FOR, in one line. Shown on the Plan tab. */
+  /** What this block is FOR, in one line. Shown on the Blocks tab. */
   goal?: string
   startedAt: string // ISO
   /**

@@ -10,6 +10,7 @@ import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import { homeTiles, type AppDef, type Gates, type HomeTile } from '../apps/registry'
 import { converterActive } from '../logic/bank'
+import type { CurfewNow } from '../hooks/useCurfew'
 import { sfx } from '../audio'
 
 const HOLD_MS = 320 // press-and-hold before the grid enters arrange mode
@@ -33,10 +34,13 @@ function swallowNextClick() {
 export function HomeScreen({
   onOpen,
   badges,
+  curfew,
 }: {
   onOpen: (appId: string, tabId?: string) => void
   /** app id → count shown as a red badge on its icon */
   badges?: Record<string, number>
+  /** 🌙 the night watch (§23) — a sleeping icon stays put, wearing a moon */
+  curfew?: CurfewNow
 }) {
   const { data, activeProfileId, activeProfile, kidData, setSettings } = useStore()
   const me = activeProfile()
@@ -60,6 +64,7 @@ export function HomeScreen({
       <FolderPage
         folder={folder}
         badges={badges}
+        curfew={curfew}
         onClose={() => setFolder(null)}
         onOpen={(id) => {
           setFolder(null)
@@ -79,9 +84,22 @@ export function HomeScreen({
         </div>
       </div>
 
+      {curfew?.active && (
+        <div className="card" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 26 }}>🌙</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 900, fontSize: 14 }}>Night watch</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              The dimmed islands are asleep until {curfew.opensAt} — {curfew.left} to go. It’s the schedule, not a bug.
+            </div>
+          </div>
+        </div>
+      )}
+
       <IconGrid
         tiles={tiles}
         badges={badges}
+        curfew={curfew}
         onOpen={(id) => {
           const tile = tiles.find((t) => t.id === id)
           if (tile?.apps) setFolder(tile)
@@ -97,11 +115,13 @@ export function HomeScreen({
 function FolderPage({
   folder,
   badges,
+  curfew,
   onOpen,
   onClose,
 }: {
   folder: HomeTile
   badges?: Record<string, number>
+  curfew?: CurfewNow
   onOpen: (appId: string) => void
   onClose: () => void
 }) {
@@ -126,7 +146,7 @@ function FolderPage({
         {(folder.apps ?? []).map((app) => (
           <button
             key={app.id}
-            className="app-icon"
+            className={`app-icon${curfew && !curfew.isOpen(app.id) ? ' app-icon--asleep' : ''}`}
             onClick={() => {
               sfx.click()
               onOpen(app.id)
@@ -134,6 +154,7 @@ function FolderPage({
           >
             <span className="app-icon-tile" style={{ background: `linear-gradient(150deg, ${app.tint[0]}, ${app.tint[1]})` }}>
               {app.img ? <img src={app.img} alt="" draggable={false} /> : <span className="app-icon-emoji">{app.icon}</span>}
+              {curfew && !curfew.isOpen(app.id) && <span className="app-icon-moon" aria-label="asleep">🌙</span>}
               {!!badges?.[app.id] && <span className="app-icon-badge">{badges[app.id]}</span>}
             </span>
             <span className="app-icon-label">{app.name}</span>
@@ -157,12 +178,14 @@ function greeting(): string {
 function IconGrid({
   tiles,
   badges,
+  curfew,
   onOpen,
   onReorder,
 }: {
   tiles: HomeTile[]
   /** app id → count. A folder tile shows the sum of the apps inside it. */
   badges?: Record<string, number>
+  curfew?: CurfewNow
   onOpen: (tileId: string) => void
   onReorder: (order: string[]) => void
 }) {
@@ -171,6 +194,9 @@ function IconGrid({
   /** A folder wears one badge for everything waiting inside it. */
   const badgeFor = (tile: HomeTile) =>
     tile.apps ? tile.apps.reduce((n, a) => n + (badges?.[a.id] ?? 0), 0) : (badges?.[tile.id] ?? 0)
+  /** A folder sleeps only when every app inside it does — one open game keeps it lit. */
+  const asleep = (tile: HomeTile) =>
+    !!curfew && (tile.apps ? tile.apps.every((a) => !curfew.isOpen(a.id)) : !curfew.isOpen(tile.id))
   const [order, setOrder] = useState<string[]>(ids)
   const [arrange, setArrange] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
@@ -326,7 +352,9 @@ function IconGrid({
             <button
               key={id}
               data-app={id}
-              className={`app-icon${dragId === id ? ' is-held' : ''}${app.apps ? ' app-icon--folder' : ''}`}
+              className={`app-icon${dragId === id ? ' is-held' : ''}${app.apps ? ' app-icon--folder' : ''}${
+                asleep(app) ? ' app-icon--asleep' : ''
+              }`}
               onPointerDown={(e) => onDown(e, id)}
               onPointerMove={onMove}
               onPointerUp={() => onUp(id)}
@@ -346,6 +374,7 @@ function IconGrid({
                     ))}
                   </span>
                 )}
+                {!arrange && asleep(app) && <span className="app-icon-moon" aria-label="asleep">🌙</span>}
                 {!arrange && !!badge && <span className="app-icon-badge">{badge}</span>}
               </span>
               <span className="app-icon-label">{app.name}</span>

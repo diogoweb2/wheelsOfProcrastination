@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wheels of Procrastination</string>
+    <string name="offline_title">No connection</string>
+    <string name="offline_body">The wheel lives online. Reconnect and try again.</string>
+    <string name="offline_retry">Try again</string>
+    <string name="channel_name">Crew pings</string>
+    <string name="channel_description">Freeze requests, granted freezes, sticker trades and daily nudges.</string>
+</resources>

@@ -272,7 +272,7 @@ export const GEAR_MODE_LABEL: Record<GearMode, string> = {
 
 // --- the crew's starting briefs ---------------------------------------------
 // Seeded the first time a profile opens the Gym; fully editable afterwards in
-// Plan → Your brief. The planner reads it before building every session.
+// Gear → You. The planner reads it before building every session.
 
 const DIOGO_BRIEF: GymBrief = {
   age: 43,
@@ -396,7 +396,7 @@ export function usableExercises(
 // --- the roman-chair opener -------------------------------------------------
 // A back extension before anything else is Diogo's standing instruction: it
 // wakes the lower back up before the session asks anything of it. It is a
-// SETTING (Plan → "Roman chair first, always", ON by default), enforced by the
+// SETTING (Gear → You → "Roman chair first, always", ON by default), enforced by the
 // planner as a hard rule rather than a preference — the ordering pass
 // gets told about it, but the app doesn't rely on it obeying.
 
@@ -426,6 +426,17 @@ export function restFor(e: ExerciseDef, mem: ExerciseMemory | undefined): number
   const learned = mem?.restLearned
   const base = learned ? Math.round(learned * 0.75 + e.restSec * 0.25) : e.restSec
   return clamp(base, REST_MIN, REST_MAX)
+}
+
+/**
+ * A session whose exercise LIST is fixed — a training block's rotation (§18m)
+ * or an exercise snack's routine (§18ab). Both are a promise made in advance,
+ * so the preview closes a slot you haven't got time for rather than quietly
+ * substituting something else, and the free planner's rep-ladder game (§18f)
+ * stays out of both of them.
+ */
+export function isFixedSession(s: Pick<GymSession, 'blockId' | 'snack'>): boolean {
+  return !!s.blockId || !!s.snack
 }
 
 /**
@@ -789,8 +800,28 @@ export function learnedSetSeconds(mem: ExerciseMemory | undefined, kind: Exercis
   return mem.setSecLearned ?? null
 }
 
-/** Seconds this planned exercise will eat, rest and the walk-over included. */
-export function exerciseSeconds(se: SessionExercise): number {
+/**
+ * What the PLAN expected one set to take — the learned pace it was built on,
+ * falling back to the formula when this exercise had no measured sets yet.
+ *
+ * The report's "time working: 32:36, planned 7:32" line used to read the raw
+ * formula instead (`reps × 3.5 s`), which is not what the session was planned
+ * from and never was: it made a normal session look like four times the work it
+ * asked for. Same number the estimate uses, so the two can never disagree.
+ */
+export function plannedSetSeconds(se: Pick<SessionExercise, 'kind' | 'perSide' | 'paceSec'>, reps: number): number {
+  return se.paceSec ?? setSeconds(se.kind, reps) * (se.perSide ? 2 : 1)
+}
+
+/**
+ * Seconds this planned exercise will eat, rest and the walk-over included.
+ *
+ * `factor` is YOUR correction (§18z, `paceCalibration`): this model is honest
+ * about sets and rests and blind to everything between them, and the factor is
+ * the measured size of that blind spot. 1 is the uncorrected model, which is
+ * what a profile with no finished sessions gets.
+ */
+export function exerciseSeconds(se: SessionExercise, factor = 1): number {
   // a per-side move is prescribed per side, so every set is performed twice —
   // but a measured pace already covers both sides, it was clocked end to end
   const perSet = se.perSide ? 2 : 1
@@ -798,11 +829,11 @@ export function exerciseSeconds(se: SessionExercise): number {
     ? se.paceSec * se.plan.reps.length
     : se.plan.reps.reduce((sum, r) => sum + setSeconds(se.kind, r) * perSet, 0)
   const rests = Math.max(0, se.plan.reps.length - 1) * se.plan.restSec
-  return work + rests + 20 // 20s to walk over and set up
+  return (work + rests + 20) * factor // 20s to walk over and set up
 }
 
-export function sessionSeconds(s: GymSession): number {
-  return s.exercises.reduce((sum, e) => sum + exerciseSeconds(e), 0)
+export function sessionSeconds(s: GymSession, factor = 1): number {
+  return s.exercises.reduce((sum, e) => sum + exerciseSeconds(e, factor), 0)
 }
 
 // --- recovery ---------------------------------------------------------------
@@ -865,6 +896,13 @@ export interface PlanInput {
   exclude?: string[]
   /** The session this one is a "do more" continuation of, if any. */
   followUp?: GymSession | null
+  /**
+   * Your measured correction on every time estimate (§18z). The minutes you
+   * asked for are REAL minutes, so the budget the planner fills is deflated by
+   * this before anything is picked: at 1.4, "30 minutes" buys 21 minutes of
+   * model and lands on 30 minutes of wall clock.
+   */
+  paceFactor?: number
   /** Deterministic ordering for tests; leave undefined in the app. */
   seed?: number
 }
@@ -881,7 +919,14 @@ export function planSession(input: PlanInput): GymSession {
     id: crypto.randomUUID(),
     day,
     status: 'preview',
-    minutes: input.minutes,
+    // what it will ACTUALLY cost, not what you asked for. The two are usually
+    // the same number now that the budget is deflated (§18z) — but when the
+    // catalog runs out of things to put in a 60-minute session, the countdown
+    // should say the 41 minutes it built, not the hour you had free.
+    minutes: Math.max(
+      1,
+      Math.round(sessionSeconds({ exercises } as GymSession, input.paceFactor ?? 1) / 60),
+    ),
     mood: input.mood,
     gearMode: input.gearMode ?? 'mixed',
     source: 'local',
@@ -916,7 +961,7 @@ export function planSolo(e: ExerciseDef, input: PlanInput): GymSession {
     id: crypto.randomUUID(),
     day,
     status: 'preview',
-    minutes: Math.max(1, Math.round(exerciseSeconds(se) / 60)),
+    minutes: Math.max(1, Math.round(exerciseSeconds(se, input.paceFactor ?? 1) / 60)),
     mood: input.mood,
     gearMode: input.gearMode ?? 'mixed',
     source: 'local',
@@ -985,7 +1030,8 @@ function scoreCandidates(input: PlanInput, day: string, partsUsed: BodyPart[]): 
 }
 
 function pickExercises(input: PlanInput, day: string): ExerciseDef[] {
-  const budget = input.minutes * 60
+  // You asked for real minutes, so the model is given fewer of its own (§18z).
+  const budget = (input.minutes * 60) / (input.paceFactor ?? 1)
   const maxMoves = MAX_MOVES[input.minutes] ?? Math.max(2, Math.round(input.minutes / 4))
   const chosen: ExerciseDef[] = []
   const partsUsed: BodyPart[] = []
