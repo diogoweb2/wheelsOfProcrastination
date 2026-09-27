@@ -164,6 +164,18 @@ export interface Settings {
   /** Home-screen icon order (app ids). Unknown/new apps append at the end. */
   homeOrder?: string[]
   /**
+   * §2b — how this crewmate is asked to work. `'wheel'` is the original daily
+   * loop (spin, plate, must-do checklist). `'today'` replaces all of it with
+   * one card holding one task. Per profile, because they are different people:
+   * undefined means `'wheel'`, so nobody's app changes under them.
+   */
+  dailyMode?: 'today' | 'wheel'
+  /**
+   * §17 — the Question of the Day, off. It is a daily interruption with a fine
+   * attached, which is the wrong shape for some people. Undefined = on.
+   */
+  qotdOff?: boolean
+  /**
    * Training-hall matches (card game vs the AI) allowed per day. Set by the
    * captain in the Parent app; undefined means SOLO_PLAY_LIMIT_DEFAULT.
    */
@@ -218,6 +230,32 @@ export interface DailyState {
   completionsToday: number
   respinsToday: number
   pendingPicks: PendingPick[] // newest first; each unfinished one is penalized at rollover
+}
+
+/**
+ * §2b — the Today card. One task a day, chosen by the app, with a day that
+ * ends. Everything here is thrown away and rebuilt at the next rollover: the
+ * card is deliberately not a list, and yesterday's is of no interest.
+ */
+export interface TodayState {
+  day: string // which local day this card belongs to
+  taskId: string | null // what is being asked for today; null = nothing to ask
+  startedAt?: string // ISO — when ▶️ START was pressed (the clock reads from here)
+  startPaid?: boolean // the starting bonus is paid once a day, never twice
+  passed: string[] // waved off today with "not today", in the order they were passed
+  closed?: boolean // a task was finished: the day is over unless he asks for more
+  reopened?: boolean // "＋ one more" — he asked for a second one after the close
+}
+
+/**
+ * §2c — the Sunday pick. The handful of quests the coming week is allowed to
+ * ask for, chosen once while calm. Anything not in here is backlog, and the
+ * Today card never mentions it.
+ */
+export interface WeekPlan {
+  weekOf: string // the Monday (YYYY-MM-DD) this plan covers
+  taskIds: string[] // in the order they were picked
+  pickedAt: string // ISO
 }
 
 export interface BackgroundsState {
@@ -1574,6 +1612,10 @@ export interface AppData {
   economy: EconomyState
   streak: StreakState
   daily: DailyState
+  /** §2b — today's one card. Rebuilt every rollover. */
+  today: TodayState
+  /** §2c — this week's shortlist, picked on Sunday. Absent until the first pick. */
+  week?: WeekPlan
   backgrounds: BackgroundsState
   quiz: QuizState
   giftcards: GiftCardPurchase[]

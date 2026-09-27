@@ -43,6 +43,9 @@ function ProfileTab() {
         </div>
       )}
 
+      <div className="h2">📌 How the day works</div>
+      <DailyModeCard />
+
       <div className="h2">🏴‍☠️ The crew</div>
       {profiles.map((p) => (
         <div key={p.id} className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -52,6 +55,53 @@ function ProfileTab() {
           {!p.pinHash && <span className="chip">no code yet</span>}
         </div>
       ))}
+    </>
+  )
+}
+
+/**
+ * §2b — the switch between the two daily loops, and §17's off switch for the
+ * daily question. Both are preferences rather than ranks: whether a wheel
+ * motivates you or buries you is not a thing the app gets to decide for you.
+ */
+function DailyModeCard() {
+  const { data, setSettings } = useStore()
+  const todayMode = data.settings.dailyMode === 'today'
+  const qotdOff = !!data.settings.qotdOff
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 10 }}>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 10 }}>
+          <b style={{ color: 'var(--text)' }}>Today</b> asks for one task a day, picks it for you, tells you why, and
+          says when the day is over. <b style={{ color: 'var(--text)' }}>The wheel</b> is the original loop: spin,
+          a plate of three, and the must-do checklist.
+        </p>
+        <button
+          className={todayMode ? 'btn' : 'btn btn--ghost'}
+          onClick={() => {
+            sfx.click()
+            setSettings({ dailyMode: todayMode ? 'wheel' : 'today' })
+          }}
+        >
+          {todayMode ? '📌 One task a day — tap for the wheel' : '🎡 The wheel — tap for one task a day'}
+        </button>
+      </div>
+
+      <div className="card" style={{ marginBottom: 14 }}>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 10 }}>
+          The <b style={{ color: 'var(--text)' }}>Question of the Day</b> pops one review question when you open the
+          app, and charges Berries if you leave it unanswered.
+        </p>
+        <button
+          className={qotdOff ? 'btn btn--ghost' : 'btn'}
+          onClick={() => {
+            sfx.click()
+            setSettings({ qotdOff: !qotdOff })
+          }}
+        >
+          {qotdOff ? '⭐ Question of the Day is OFF — tap to turn on' : '⭐ Question of the Day is ON — tap to turn off'}
+        </button>
+      </div>
     </>
   )
 }

@@ -186,10 +186,12 @@ import {
   rewardFor,
   requiredPenalty,
   requiredReward,
+  START_BONUS,
   streakGoalBonus,
   streakRepairCost,
 } from '../logic/economy'
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, missedSince, pickWeighted, studyLockedIds } from '../logic/wheel'
+import { MAX_PASSES, pickToday, weekOf } from '../logic/today'
 import { newBadges } from '../logic/badges'
 import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowance, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat, type Prize, type PrizeCatalog } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
@@ -478,6 +480,20 @@ interface StoreState {
   manualPick: (taskId: string) => 'ok' | 'broke' | 'full'
   dropPendingPick: (taskId: string) => void
   completeTask: (taskId: string) => number
+
+  // --- the Today card (§2b) — one task, one day, no list, no fines ---
+  /** Make sure today's card holds a task, picking one if it doesn't. Cheap to call on every render. */
+  ensureToday: () => void
+  /** ▶️ START: stamps the clock and pays the starting bonus (once a day). Returns the Berries paid. */
+  startToday: () => number
+  /** "not today": wave this one off and take the next candidate. Free, silent, at most MAX_PASSES a day. */
+  passToday: () => void
+  /** ＋ one more: reopen a closed day with a fresh pick. */
+  oneMoreToday: () => void
+  /** Put a specific task on today's card by hand (from the backlog). */
+  setTodayTask: (taskId: string) => void
+  /** §2c — save this week's shortlist (the Sunday pick). */
+  setWeekPlan: (taskIds: string[]) => void
 
   // --- quiz (every action names the profile it touches; admin can target Ben from Diogo's session) ---
   /** Log a quiz answer to `targetId`'s stats. `rewarded` = training mode pays Berries. Returns Berries earned. */
@@ -1643,12 +1659,16 @@ export const useStore = create<StoreState>((set, get) => {
         const frozen = new Set(d.frozenDays.map((f) => f.day))
         // "task X was done on day Y" — required items are judged per task, per day
         const donePerDay = new Set(d.completions.map((c) => `${c.day}|${c.taskId}`))
+        // §2b — the Today card promises no fines, ever. Not for a must-do day
+        // that passed, not for a card left unstarted. A quest that picks up a
+        // penalty later must not start charging for the days before it did.
+        const noFines = d.settings.dailyMode === 'today'
         let missedRequired = 0
         const missedNames: string[] = []
         let cur = d.streak.lastRolloverDay ?? today
         while (cur < today) {
           // Every requirement that was live that day and never ticked off costs Berries.
-          for (const t of d.tasks) {
+          for (const t of noFines ? [] : d.tasks) {
             // a day the user volunteered for is never a miss — it was a bonus, not a duty
             if (t.doTodayDay === cur) continue
             if (!isRequiredOn(t, cur, d.completions, d.tasks) || donePerDay.has(`${cur}|${t.id}`)) continue
@@ -1690,7 +1710,7 @@ export const useStore = create<StoreState>((set, get) => {
           // every pick you left hanging yesterday gets its own fine
           let penalty = 0
           const names: string[] = []
-          for (const p of d.daily.pendingPicks) {
+          for (const p of noFines ? [] : d.daily.pendingPicks) {
             const t = d.tasks.find((x) => x.id === p.taskId)
             if (t && !t.archived) {
               const fine = abandonPenalty(t)
@@ -1710,6 +1730,10 @@ export const useStore = create<StoreState>((set, get) => {
           }
           d.daily = { day: today, completionsToday: 0, respinsToday: 0, pendingPicks: [] }
         }
+        // §2b — a new day, a new card. Yesterday's pick, its clock and the
+        // things waved off are all thrown away: the Today card is never a
+        // backlog of its own, and nothing carries over to be ashamed of.
+        if (d.today.day !== today) d.today = { day: today, taskId: null, passed: [] }
       })
     },
 
@@ -1985,6 +2009,14 @@ export const useStore = create<StoreState>((set, get) => {
         d.economy.totalGemsEarned += earned
         d.daily.completionsToday += 1
         d.daily.pendingPicks = d.daily.pendingPicks.filter((p) => p.taskId !== taskId)
+        // §2b — finishing CLOSES the day. The point of the Today card is that
+        // there is an end to it: one thing done and the app stops asking. Only
+        // "＋ one more" reopens it, and only because he asked.
+        if (d.today.day === today && (d.today.taskId === taskId || !d.today.closed)) {
+          d.today.closed = true
+          d.today.taskId = taskId
+          delete d.today.startedAt
+        }
         // one-shots retire on completion, and so do "repeat until done" quests
         if (!task.repeats || task.untilDone) task.archived = true
 
@@ -2010,6 +2042,99 @@ export const useStore = create<StoreState>((set, get) => {
       })
       return earned
     },
+
+    // --- the Today card (§2b) -------------------------------------------------
+    //
+    // One task, chosen by `logic/today.ts` and held on `data.today`, so the same
+    // task is still there when the app is reopened — a card that re-rolled on
+    // every render would be a wheel with extra steps.
+
+    ensureToday() {
+      const today = dayKey()
+      const { data, dataLoaded } = get()
+      if (!dataLoaded) return
+      if (data.today.day === today && data.today.closed) return // the day is over; only ＋ one more reopens it
+      if (data.today.day === today && data.today.taskId) {
+        // The held task can go stale under us: archived from the Quests page,
+        // ticked off on another device, or edited out of today's schedule.
+        const held = data.tasks.find((t) => t.id === data.today.taskId)
+        const doneToday = data.completions.some((c) => c.day === today && c.taskId === data.today.taskId)
+        const stale = !held || held.archived || doneToday || !isAvailableOn(held, today, data.completions, data.tasks)
+        if (!stale) return
+      }
+      const passed = data.today.day === today ? data.today.passed : []
+      const next = pickToday(data.tasks, data.completions, data.week, today, passed)?.task.id ?? null
+      // Nothing would change. Committing anyway hands React a brand-new `data`
+      // object, which re-fires the effect that called us — a render loop, and on
+      // a day with no candidates at all it would never settle.
+      if (data.today.day === today && data.today.taskId === next) return
+      commit((d) => {
+        if (d.today.day !== today) d.today = { day: today, taskId: null, passed: [] }
+        d.today.taskId = next
+        // a different task means a fresh clock; the bonus stays paid for the day
+        delete d.today.startedAt
+      })
+    },
+
+    startToday() {
+      const today = dayKey()
+      let paid = 0
+      commit((d) => {
+        if (d.today.day !== today || !d.today.taskId || d.today.startedAt) return
+        d.today.startedAt = new Date().toISOString()
+        // Starting is the part that fails, so starting is what gets paid — once
+        // a day, and never taken back if the work doesn't finish (§2b).
+        if (!d.today.startPaid) {
+          d.today.startPaid = true
+          paid = START_BONUS
+          d.economy.gems += paid
+          d.economy.totalGemsEarned += paid
+        }
+      })
+      return paid
+    },
+
+    passToday() {
+      const today = dayKey()
+      commit((d) => {
+        if (d.today.day !== today || !d.today.taskId) return
+        if (d.today.passed.length >= MAX_PASSES) return
+        d.today.passed.push(d.today.taskId)
+        const pick = pickToday(d.tasks, d.completions, d.week, today, d.today.passed)
+        d.today.taskId = pick?.task.id ?? null
+        delete d.today.startedAt
+      })
+    },
+
+    oneMoreToday() {
+      const today = dayKey()
+      commit((d) => {
+        if (d.today.day !== today) return
+        d.today.reopened = true
+        d.today.closed = false
+        const pick = pickToday(d.tasks, d.completions, d.week, today, d.today.passed)
+        d.today.taskId = pick?.task.id ?? null
+        delete d.today.startedAt
+      })
+    },
+
+    setTodayTask(taskId) {
+      const today = dayKey()
+      commit((d) => {
+        if (!d.tasks.some((t) => t.id === taskId)) return
+        if (d.today.day !== today) d.today = { day: today, taskId: null, passed: [] }
+        d.today.taskId = taskId
+        d.today.closed = false
+        delete d.today.startedAt
+      })
+    },
+
+    setWeekPlan(taskIds) {
+      commit((d) => {
+        d.week = { weekOf: weekOf(), taskIds: [...taskIds], pickedAt: new Date().toISOString() }
+      })
+    },
+
 
     // --- quiz ----------------------------------------------------------------
 
@@ -2174,6 +2299,13 @@ export const useStore = create<StoreState>((set, get) => {
       const { data, quizBank, quizBankLoaded, dataLoaded, activeProfileId } = get()
       if (!activeProfileId || !dataLoaded || !quizBankLoaded) return
       const cur = data.quiz.daily
+      // §17 — switched off. A daily interruption with a fine on it is the wrong
+      // shape for some people; clear whatever is parked rather than leaving a
+      // question sitting there to be charged for.
+      if (data.settings.qotdOff) {
+        if (cur) commit((d) => { delete d.quiz.daily })
+        return
+      }
       if (cur && cur.day === today) return // already set up for today
       const qid = pickDailyQuestion(quizBank, data.quiz, today)
       const needsPenalty = !!cur && cur.day < today && cur.state !== 'done'

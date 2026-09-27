@@ -14,6 +14,14 @@ export const STREAK_GOAL_OPTIONS = [7, 14, 30, 50, 100]
 export const BACKGROUND_COST = 20
 export const MAX_PENDING = 3
 /**
+ * §2b — what pressing ▶️ START on the Today card pays, before a single rep of
+ * the actual work is done. Starting is the part that fails, so starting is what
+ * gets paid; finishing still pays the full `rewardFor` on top. Once a day, and
+ * never taken back if the task isn't finished — a fine on a started task would
+ * teach exactly the wrong lesson.
+ */
+export const START_BONUS = 5
+/**
  * Berries lost when a task is left undone — a wheel pick abandoned at end of
  * day, or a must-do day skipped. Nothing is ever fined by default: a quest only
  * costs Berries if whoever wrote it explicitly gave it a `penalty`.

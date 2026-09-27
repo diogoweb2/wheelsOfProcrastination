@@ -6,7 +6,7 @@
 // it maps onto two path segments and the History API does the rest. Firebase
 // Hosting rewrites ** → /index.html (firebase.json), so a hard reload on a deep
 // link serves the app rather than a 404.
-import { appById, tabsFor } from '../apps/registry'
+import { appById, tabsFor, type DailyMode } from '../apps/registry'
 import { PARENT_ID } from '../store/storage'
 
 /** Which app is open, and which of its bottom-menu tabs. `null` = Dashboard. */
@@ -14,6 +14,11 @@ export type OpenApp = { app: string; tab: string } | null
 
 /** Where the app lands on open: the wheel, not the Dashboard. */
 export const LANDING: OpenApp = { app: 'wheel', tab: 'spin' }
+
+/** …and for a crewmate on the Today card (§2b), that card instead of the wheel. */
+export function landingFor(dailyMode?: DailyMode): OpenApp {
+  return dailyMode === 'today' ? { app: 'wheel', tab: 'today' } : LANDING
+}
 
 /** The Dashboard's own path — `/` lands on [LANDING] instead. */
 const HOME_PATH = '/home'
@@ -30,15 +35,15 @@ export function routeToPath(open: OpenApp): string {
  * Gated apps (the trip-mode clocks) are let through on purpose — the gate hides
  * an icon from the Dashboard, it isn't a lock.
  */
-export function pathToRoute(pathname: string, profileId: string | null): OpenApp {
+export function pathToRoute(pathname: string, profileId: string | null, dailyMode?: DailyMode): OpenApp {
   const [appId, tabId] = pathname.split('/').filter(Boolean)
-  if (!appId) return LANDING
+  if (!appId) return landingFor(dailyMode)
   if (`/${appId}` === HOME_PATH) return null
 
   const app = appById(appId)
-  if (!app || (app.adminOnly && profileId !== PARENT_ID)) return LANDING
+  if (!app || (app.adminOnly && profileId !== PARENT_ID)) return landingFor(dailyMode)
 
-  const tabs = tabsFor(app, profileId)
+  const tabs = tabsFor(app, profileId, dailyMode)
   return { app: app.id, tab: tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id }
 }
 

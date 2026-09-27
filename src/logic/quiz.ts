@@ -1,5 +1,5 @@
 // Grand Line Academy — quiz rules. Keep in sync with BUSINESS_REQUIREMENTS.md §14–15.
-import type { AppData, QuizQuestion, QuizState, QuizStat } from '../types'
+import type { AppData, QuizQuestion, QuizQuestionType, QuizState, QuizStat } from '../types'
 import { addDays, dayKey, daysUntil } from './dates'
 
 // --- topics ----------------------------------------------------------------
@@ -562,9 +562,21 @@ export function qotdPenalty(q: QuizQuestion): number {
  * favoured: the weight climbs with how long since it was last seen and how weak
  * the success rate is. Returns null if nothing's been mastered yet.
  */
+/**
+ * §17 — the only question types the daily question may use. A tap-to-match or
+ * put-in-order question is a two-minute job on a screen you opened to be asked
+ * ONE thing, and the honest answer to it is "later", which is how it ends up
+ * being charged for. Choice and write-in are answered in seconds.
+ */
+export const QOTD_TYPES: QuizQuestionType[] = ['choice', 'write']
+
 export function pickDailyQuestion(bank: QuizQuestion[], quiz: QuizState, today: string = dayKey()): string | null {
   const candidates = bank.filter(
-    (q) => q.status === 'active' && quiz.unlockedTopics.includes(q.topicId) && quiz.stats[q.id]?.everCorrect,
+    (q) =>
+      q.status === 'active' &&
+      QOTD_TYPES.includes(q.type) &&
+      quiz.unlockedTopics.includes(q.topicId) &&
+      quiz.stats[q.id]?.everCorrect,
   )
   if (candidates.length === 0) return null
   const weights = candidates.map((q) => {

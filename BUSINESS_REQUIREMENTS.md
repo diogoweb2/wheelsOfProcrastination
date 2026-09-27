@@ -1,7 +1,7 @@
 # Wheels of Procrastination — Business Requirements
 
 > Living document. Update this file whenever a rule changes. The code should always match this doc.
-> Last updated: 2026-08-06
+> Last updated: 2026-09-25
 
 ## 1. Concept
 
@@ -33,7 +33,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 
 | App | Bottom menu |
 |---|---|
-| 📋 **Tasks** *(the wheel + the daily loop)* | Spin · Quests · Streak · Map · Record |
+| 📋 **Tasks** *(the wheel + the daily loop)* | Spin · Quests · Streak · Map · Record — *on `dailyMode: 'today'` (§2b):* Today · Week · Quests · Streak · Record |
 | 🎓 **Quiz** | Topics · Study · Progress |
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🛒 **Shop** | Wallpapers · Treasures · Orders |
@@ -94,6 +94,42 @@ Fields when creating a task:
 
 **Search**: the quest log shows a 🔍 search box once there are more than 4 active quests; it filters the list by name.
 
+## 2b. The Today card — one task, and a day that ends
+
+**There are two daily loops in this app and which one you get is a setting, not a rank.** `settings.dailyMode` is `'wheel'` (the original: spin, a plate of three, the must-do checklist) or `'today'` (this section). Per profile, because whether a wheel motivates you or buries you is not something the app gets to decide for you. Switch it in **Settings → Profile → 📌 How the day works**. Undefined means `'wheel'`, so nobody's app changes under them.
+
+**Why it exists.** The wheel is random, and random means risk: it can hand you the two-hour job on the evening you have twenty minutes, and the only way out costs Berries. A daily checklist of small duties (teeth, floss, read) is the other failure — five rows that are all "not done yet" read as one big reproach, and the app stops being opened at all. The Today card is the opposite of both: it asks for **one** thing, it says **why** that thing, and when it is done it **says the day is over and stops asking**. The shape is lifted from the gym runner (§18c-1, §18y), which is the screen in this app that actually gets used day after day.
+
+- **Its menu.** A profile in today mode gets the Tasks app's `todayTabs` — **📌 Today · 🗓️ Week · 📋 Quests · 🔥 Streak · 🏅 Record** — instead of the wheel's. `/wheel/spin` still works and still shows the wheel; it just isn't in the menu, and `/` lands on `/wheel/today` (see §1c).
+- **One card, one task.** The pick is **ranked, never random**, and it is the same pick every time the app is reopened that day (`data.today.taskId`). The reason it won is printed under the name in one line, and the order of the clauses IS the priority:
+  1. **overdue** — "12 days past its date"
+  2. **due soon** — "due today" / "due in 3 days" (inside a week)
+  3. **this week's pick** — "you picked this for the week" (§2c)
+  4. **urgent** — "urgent · waiting 8 days"
+  5. **waiting longest** — "waiting 51 days", or "new today"
+
+  A week's pick outranks anything undated, and never jumps an overdue date. Ties break on the name, so the order never wobbles between renders.
+- **What can be asked for**: any active quest available today (start date, day scope, season, prerequisite, rest days — every §2 filter still applies) that hasn't already been done today. **Must-do and wheel-only stop meaning anything here**: there is no checklist and no wheel, so the distinction has nowhere to land. **Study quests are excluded** — the Academy asks for those itself (§14).
+- **Two buttons, and both are reachable from a standing start.**
+  - **▶️ START** stamps the clock, shows a big count-up timer, and **pays `START_BONUS` = 5 🪙 immediately**. Starting is the part that fails, so starting is what gets paid. It is paid once a day and **never taken back** if the work doesn't finish — a fine on a started task would teach exactly the wrong lesson.
+  - **✓ DONE** is a normal completion: full `rewardFor` on top of the start bonus, streak, badges, the map node, all of it.
+- **The day closes.** A completion sets `today.closed` and the whole screen becomes **"That's the day — nothing else is asked of you."** Nothing else is offered, and the card does not repopulate. **＋ one more** reopens it with a fresh pick, and only because it was asked for.
+- **"not today"** hands the card the next candidate. **Free, silent, no record, at most `MAX_PASSES` = 2 a day** — the passed quest sinks to the bottom of today's ranking rather than disappearing, so a day where everything was passed still has something to show. Passing is not a re-spin: it costs nothing, ever.
+- **Nothing in this mode is ever fined.** Rollover skips the missed-must-do charge and the abandoned-pick charge entirely while `dailyMode` is `'today'` — including for a quest that picks up a `penalty` later, which must not start charging for the days before it did.
+- **A new day is a new card.** At rollover `data.today` is thrown away and rebuilt: yesterday's pick, its clock and the things waved off all go. The Today card is never a backlog of its own.
+- **The card self-heals.** A held task that gets archived from the Quests page, ticked off on another device, or edited out of today's schedule is detected as stale and replaced on the next render.
+- **The evening reminder names the task.** In today mode the daily nudge (§10, `reminderHour`) is the *cue*, not an invitation to come and decide: it reads **"👒 Garagem arrumar — waiting 56 days. Press START, that's the whole ask."** A notification that says "open the app and pick something" is the part that doesn't happen. Once the day is closed it says so instead.
+- Implementation: [src/logic/today.ts](src/logic/today.ts) (ranking, candidates, backlog), [src/screens/TodayScreen.tsx](src/screens/TodayScreen.tsx), state in `AppData.today`.
+
+## 2c. The Sunday pick — the only list this mode shows
+
+Its own page at **`/wheel/week`** (§1c — a screen you can open is a screen you can bookmark), reached from the **🗓️ Week** tab or the row under the Today card. The decision about what matters is made **once, while calm, for the whole week**; daily-you then never chooses. It is the only screen in today mode that shows a list.
+
+- **Up to `WEEK_PICK_MAX` = 5 quests.** Five, because a week that asks for eight things is the list that killed the last app, and five ranked beats ten unranked.
+- Saved as `AppData.week` = `{ weekOf, taskIds, pickedAt }`, where `weekOf` is the **Monday** of the week it covers. A plan from a previous week is not a plan at all — it stops counting the moment its week ends, and the Today card falls back to the plain ranking.
+- Everything else stays visible **only here**, ranked the same way, each with the line that explains it — a backlog you open on purpose, never a thing that greets you.
+- Each row also carries a **today** button that puts that quest straight onto the card, for the days you already know what you're doing.
+
 ## 3. The Wheel
 
 - Must-dos are off the wheel unless they set **also on the wheel** (`onWheel`), in which case they sit in both places.
@@ -149,6 +185,7 @@ Rewards per completion:
 Modifiers:
 - Urgent (or date-escalated urgent): × 1.5, rounded.
 - First completion of the day: +5 bonus.
+- **Starting** a Today card (§2b): **+5 🪙 the moment ▶️ START is pressed**, once a day, on top of whatever finishing pays. Never clawed back if the work doesn't finish.
 - Streak-goal reached: one-time bonus of **10 🪙 per goal day** (7→70, 14→140, 30→300, 50→500, 100→1000) — bigger goals visibly pay more.
 
 Costs:
@@ -533,6 +570,8 @@ One review question, per profile, resurfaced when the app opens — a light dail
   3. **Answer wrong** → lose `qotdPenalty` = `ceil(points/2)` 🪙 (Berries floor at 0).
 - **Ignored all day**: a question still `unseen`/`later` at midnight costs `qotdPenalty` 🪙 at the next rollover/open, shown as a 🕰️ penalty event, then a fresh question is picked.
 - Answering also updates the training stat (it's a real review) but pays **no** training Berries — the win/lose Berries are the only economy effect. No Devil Fruits involved.
+- **Only the fast question types.** The daily question is drawn from **multiple choice and short write-in only** (`QOTD_TYPES`). A tap-to-match or put-in-order question is a two-minute job on a screen you opened to be asked ONE thing; the honest answer to it is "later", which is exactly how it ends up being charged for.
+- **It can be switched off** (`settings.qotdOff`, in Settings → Profile). Off clears anything parked rather than leaving a question sitting there to be fined for, and no new one is picked. Per profile: a daily interruption with a penalty attached is the wrong shape for some people and the right one for others.
 - Only exists once the profile has answered at least one question correctly; until then there's no Question of the Day.
 
 ## 18. Gym — "Training Deck" (the 💪 Gym app)

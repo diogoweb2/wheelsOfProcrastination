@@ -5,6 +5,9 @@
 // (home icon, drag ordering, bottom menu, back-to-main chrome) comes for free.
 import { PARENT_ID } from '../store/storage'
 
+/** §2b — which daily loop a crewmate is on. Mirrors `Settings['dailyMode']`. */
+export type DailyMode = 'today' | 'wheel'
+
 export interface AppTabDef {
   id: string
   label: string
@@ -21,6 +24,12 @@ export interface AppDef {
   tabs: AppTabDef[]
   /** Parent-only bottom menu; the same app looks different from the parent's side. */
   adminTabs?: AppTabDef[]
+  /**
+   * §2b — the bottom menu for a crewmate in "today" mode. Unlike `adminTabs`
+   * this keys off a *preference* rather than who you are, because whether the
+   * daily loop suits you is not a question about your rank.
+   */
+  todayTabs?: AppTabDef[]
   adminOnly?: boolean
   /** Only on the home screen while this gate is open (see `Gates`). */
   gate?: keyof Gates
@@ -75,6 +84,16 @@ export const APPS: AppDef[] = [
       { id: 'quests', label: 'Quests', icon: '📋' },
       { id: 'streak', label: 'Streak', icon: '🔥' },
       { id: 'map', label: 'Map', icon: '🗺️' },
+      { id: 'record', label: 'Record', icon: '🏅' },
+    ],
+    // §2b — the Today menu. Whoever has `settings.dailyMode: 'today'` gets this
+    // instead of the list above: one task, chosen for them, and a day that ends.
+    // The wheel stays reachable at /wheel/spin, it just isn't in the menu.
+    todayTabs: [
+      { id: 'today', label: 'Today', icon: '📌' },
+      { id: 'week', label: 'Week', icon: '🗓️' },
+      { id: 'quests', label: 'Quests', icon: '📋' },
+      { id: 'streak', label: 'Streak', icon: '🔥' },
       { id: 'record', label: 'Record', icon: '🏅' },
     ],
   },
@@ -386,7 +405,8 @@ export function appById(id: string): AppDef | undefined {
 }
 
 /** The bottom menu this profile sees for an app (the parent gets their own version). */
-export function tabsFor(app: AppDef, profileId: string | null): AppTabDef[] {
+export function tabsFor(app: AppDef, profileId: string | null, dailyMode?: DailyMode): AppTabDef[] {
+  if (dailyMode === 'today' && app.todayTabs) return app.todayTabs
   return profileId === PARENT_ID && app.adminTabs ? app.adminTabs : app.tabs
 }
 

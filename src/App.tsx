@@ -11,6 +11,8 @@ import { AppHeader, AppTabBar } from './components/AppShell'
 import { AdminSection } from './components/AdminSection'
 import { HomeScreen } from './screens/HomeScreen'
 import { SpinScreen } from './screens/SpinScreen'
+import { TodayScreen } from './screens/TodayScreen'
+import { WeekPick } from './components/WeekPick'
 import { StoreScreen } from './screens/StoreScreen'
 import { AlbumScreen } from './screens/AlbumScreen'
 import { DuelScreen } from './screens/DuelScreen'
@@ -32,7 +34,7 @@ import { formatMinutes, unseenGrants } from './logic/roblox'
 import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
-import { LANDING, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
+import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { scheduleDailyReminder } from './notifications'
 import { backgroundUrl } from './logic/backgrounds'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
@@ -49,12 +51,16 @@ export default function App() {
   // topic a quiz quest card asked to jump into; consumed by the Quiz app on arrival
   const [trainTopic, setTrainTopic] = useState<string | null>(null)
   const unlocked = activeProfileId !== null
+  // §2b — which daily loop this crewmate is on. It decides the Tasks app's
+  // bottom menu and where the app lands on open, so it is threaded through
+  // every route call below.
+  const dailyMode = data.settings.dailyMode
 
   /** Open an app (optionally on a given tab), falling back to its first tab. */
   function openApp(appId: string, tabId?: string) {
     const app = appById(appId)
     if (!app) return
-    const tabs = tabsFor(app, activeProfileId)
+    const tabs = tabsFor(app, activeProfileId, dailyMode)
     setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id })
   }
 
@@ -67,8 +73,20 @@ export default function App() {
     if (activeProfileId === null) return
     const first = seenProfile.current === null
     seenProfile.current = activeProfileId
-    setOpen(first ? pathToRoute(window.location.pathname, activeProfileId) : LANDING)
+    setOpen(first ? pathToRoute(window.location.pathname, activeProfileId, dailyMode) : landingFor(dailyMode))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProfileId])
+
+  // The profile's data arrives AFTER the PIN, so the route above was decided
+  // without knowing which daily loop is on. Once it's known, a tab that doesn't
+  // exist on this menu (the captain landing on `spin`) is corrected in place.
+  useEffect(() => {
+    if (!unlocked || !dataLoaded || !open) return
+    const app = appById(open.app)
+    if (!app) return
+    const tabs = tabsFor(app, activeProfileId, dailyMode)
+    if (!tabs.some((t) => t.id === open.tab)) setOpen({ app: open.app, tab: tabs[0].id })
+  }, [unlocked, dataLoaded, dailyMode, open, activeProfileId])
 
   // State → URL. A move to a different app/tab is a new history entry (so back
   // works); a route we merely cleaned up (unknown tab, `/`) replaces it, which
@@ -77,16 +95,16 @@ export default function App() {
     if (!unlocked) return
     const path = routeToPath(open)
     if (window.location.pathname === path) return
-    const clean = sameRoute(pathToRoute(window.location.pathname, activeProfileId), open)
+    const clean = sameRoute(pathToRoute(window.location.pathname, activeProfileId, dailyMode), open)
     window.history[clean ? 'replaceState' : 'pushState'](null, '', path)
-  }, [open, unlocked, activeProfileId])
+  }, [open, unlocked, activeProfileId, dailyMode])
 
   // URL → state, for the browser/phone back button
   useEffect(() => {
-    const onPop = () => setOpen(pathToRoute(window.location.pathname, activeProfileId))
+    const onPop = () => setOpen(pathToRoute(window.location.pathname, activeProfileId, dailyMode))
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
-  }, [activeProfileId])
+  }, [activeProfileId, dailyMode])
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
   useEffect(() => {
@@ -433,7 +451,7 @@ export default function App() {
   }
 
   const openDef = open ? appById(open.app) : undefined
-  const openTabs = openDef ? tabsFor(openDef, activeProfileId) : []
+  const openTabs = openDef ? tabsFor(openDef, activeProfileId, dailyMode) : []
 
   return (
     <div
@@ -770,6 +788,11 @@ function AppBodyRouter({
 }) {
   switch (open.app) {
     case 'wheel':
+      // §2b — one task, chosen, with an end to the day. The wheel is still at
+      // /wheel/spin for anyone who wants it; this is just what the captain's
+      // menu opens on.
+      if (open.tab === 'today') return <TodayScreen goWeek={() => setTab('week')} />
+      if (open.tab === 'week') return <WeekPick onClose={() => setTab('today')} />
       if (open.tab === 'quests') return <TasksScreen goSpin={goSpin} />
       // streak/map/record are the voyage pages — same daily loop, same app
       if (open.tab === 'streak' || open.tab === 'map' || open.tab === 'record') {
