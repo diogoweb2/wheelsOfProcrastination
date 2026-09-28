@@ -70,7 +70,7 @@ const ex = (exId: string, sets: number, repLow: number, repHigh: number, extra?:
  * against it is left alone forever — that is your training history's programme,
  * not ours to rewrite.
  */
-export const SEED_VERSION = 4
+export const SEED_VERSION = 5
 
 /**
  * Four full rotations before the app suggests a new block, seven before it
@@ -88,7 +88,13 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
     exercises: [
       ex('mv-dumbbell-bulgarian-split-squat', 3, 8, 12),
       ex('mv-bench-hip-thrust', 3, 10, 15),
-      ex('bw-side-plank', 2, 30, 45),
+      // Was the side plank until 2026-09-28. A 2 × 40 s hold has no progression
+      // left in it for an advanced trainee — you cannot add load to a plank, so
+      // the tenth month of it is the first month of it. This is the one abs
+      // movement in the basement that takes real, increasing resistance.
+      ex('mv-band-face-away-crunch', 3, 8, 12, {
+        note: 'Hips against the post, and walk out until the band is tight BEFORE the first rep. Stepping further out is your next increment, not a thicker band.',
+      }),
       ex('bw-calf-raise', 3, 15, 20),
       ex('mv-back-extension', 2, 10, 15, {
         note: 'Finisher, not a lift. Stop level with the body — never arch past straight.',
@@ -125,6 +131,13 @@ const BLOCK_1_SESSIONS: BlockSession[] = [
         note: 'Explosive hip snap, arms are rope. Stop the moment the hinge gets sloppy, not at a number.',
       }),
       ex('mv-copenhagen-plank', 2, 20, 30),
+      // Added 2026-09-28. S3 is the shortest session in the rotation (38 real
+      // minutes on 2026-09-25), so the loaded lower-ab movement goes here
+      // rather than on top of a 60-minute one. It sits AHEAD of the Pallof
+      // because `fitToLength` trims from the back.
+      ex('mv-bench-garhammer-raise', 3, 6, 12, {
+        note: 'Thighs stay tucked at 90°. The rep is the pelvis curling, not the legs dropping.',
+      }),
       ex('mv-band-pallof-press', 3, 8, 12),
     ],
   },

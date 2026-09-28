@@ -1,8 +1,8 @@
 # Gym — equipment & exercise catalog
 
-Generated from Firestore `app/gymCatalog` by `npm run gym:catalog` on 2026-09-16. Do not edit by hand — edit the gym, then re-run it.
+Generated from Firestore `app/gymCatalog` by `npm run gym:catalog` on 2026-09-28. Do not edit by hand — edit the gym, then re-run it.
 
-**11 pieces of equipment · 61 exercises** (53 with an animation).
+**11 pieces of equipment · 72 exercises** (64 with an animation).
 
 The catalog file is [scripts/data/gym-catalog.json](scripts/data/gym-catalog.json) (`npm run gym:seed` to push it); day-to-day edits happen in the app at Gym → Gear. Rules: [BUSINESS_REQUIREMENTS.md](BUSINESS_REQUIREMENTS.md) §18k.
 
@@ -14,19 +14,19 @@ The catalog file is [scripts/data/gym-catalog.json](scripts/data/gym-catalog.jso
 
 CONFIRMED BY THE OWNER: this bench DOES reach a true DECLINE (head below hips), not incline-only. Decline pressing, decline flyes and decline abdominal work are all performable, with the front leg rollers anchoring the legs. Bench1000 PRO FITNESS. Backrest and seat adjust independently through flat, incline and decline. The front leg attachment is FIXED — the rollers do not pivot or lever, so this bench CANNOT do leg extensions or leg curls. The rollers exist only to anchor the legs in decline positions. Knee isolation stays on bands.
 
-*Used by 8 exercises.*
+*Used by 9 exercises.*
 
 ### 🏋 Hyperextension bench
 
 A hyperextension bench or Roman chair. The back pad appears adjustable for height, and the foot rollers are fixed. The angle of the main frame seems to be fixed, providing a decline angle.
 
-*Used by 1 exercise.*
+*Used by 2 exercises.*
 
 ### 🏋 Flat weight bench
 
 A black flat weight bench with a black upholstered pad. The brand "CAP" is visible on the side of the pad. It appears to be in good condition. The bench has a stable H-shaped base.
 
-*Used by 9 exercises.*
+*Used by 10 exercises.*
 
 ### 🏋 Parallel dip bars
 
@@ -62,7 +62,7 @@ _No notes recorded._
 
 TWO KINDS, both on hand. (1) LOOP BANDS — a 4-band set of flat continuous loops, 208 cm round, 3 mm thick, colour-coded by strength: YELLOW 0.64 cm (20 lb label), RED 1.3 cm (35 lb), BLACK 2.1 cm (65 lb), PURPLE 3.2 cm (85 lb), and a fifth bought 2026-09-15: GREEN, a powerlifting band labelled 230 lb — the only one heavy enough to warm up a press (BUSINESS_REQUIREMENTS.md §18u). The labels are the vendor MAXIMUM and these are 3 mm rather than the usual 4.5 mm, so every band runs LIGHTER than its number — treat the colour as the unit, not the pounds. ALWAYS name the colour when prescribing a band exercise; the bands themselves are not printed with any weight. (2) OLDER TUBE BANDS with handles and a door anchor. Both can loop around the basement post, so the anchor can sit at ANY height. DELIBERATELY NARROW ROLE, confirmed by the owner: dumbbells are ALWAYS preferred when they can do the job, so bands are NOT used for pressing, rowing, pulldowns, curls, pushdowns or wrist work — the dumbbells and the pull-up bar cover all of those. Bands are kept for exactly two things they alone can do: (a) light prehab BELOW the 8.5 lb dumbbell floor (rotator-cuff external rotation, scaption); (b) HORIZONTAL resistance, which gravity cannot supply (Pallof press, rotational press), plus the two knee-isolation moves the fixed-roller bench cannot do. Never prescribe a band exercise that has a dumbbell equivalent. Progress by moving further from the anchor first, then by changing colour. ONE MORE JOB, added with the Nordic pad: a band can ASSIST a movement instead of resisting it (looped over the pull-up bar and under the chest to take weight off a Nordic curl). That is not covered by the "never where a dumbbell would do" rule above — nothing else here can unload a bodyweight eccentric — and it progresses BACKWARDS: thickest band first, lighter as you get stronger.
 
-*Used by 7 exercises.*
+*Used by 9 exercises.*
 
 ### 〰️ Flexible resistance bar
 
@@ -78,7 +78,7 @@ A portable Nordic hamstring curl device — a padded knee board with a foot roll
 
 ### 🤸 No equipment
 
-Floor and bodyweight work — 11 exercises need nothing but the room.
+Floor and bodyweight work — 17 exercises need nothing but the room.
 
 ---
 
@@ -86,7 +86,7 @@ Floor and bodyweight work — 11 exercises need nothing but the room.
 
 Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = has an animation.
 
-### Chest — 5
+### Chest — 7
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
@@ -94,13 +94,16 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🟨 Dips 🎬 | Parallel dip bars | 4 × 8 | 90s | Arms, Shoulders |
 | 🏋️ Dumbbell Bench Press 🎬 | Adjustable dumbbells on stand, Flat weight bench | 4 × 10 | 90s | Arms, Shoulders |
 | 📈 Incline Dumbbell Bench Press 🎬 | Adjustable dumbbells on stand, Adjustable Weight Bench | 4 × 10 | 90s | Shoulders, Arms |
+| ⏸️ Push-up Hold 🎬 | Bodyweight | 3 × 20s | 45s | Arms, Core |
 | 🫸 Push-ups 🎬 | Bodyweight | 3 × 10 | 60s | Arms, Core |
+| 🫳 Wide Push-ups 🎬 | Bodyweight | 3 × 10 | 45s | Shoulders, Arms |
 
-### Back — 6
+### Back — 7
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
 | 🐍 Back Extension 🎬 | Hyperextension bench | 3 × 12 | 60s | Glutes, Core |
+| 🐍 Back Extension Hold 🎬 | Hyperextension bench | 3 × 25s | 60s | Glutes, Core |
 | 🛶 Chest-Supported Dumbbell Row 🎬 | Adjustable dumbbells on stand, Adjustable Weight Bench | 4 × 12 | 75s | Arms, Shoulders |
 | 🆙 Chin-up 🎬 | Pull-up bar | 4 × 6 | 120s | Arms |
 | ⬇️ Negative Pull-up 🎬 | Pull-up bar | 3 × 5 | 90s | Arms |
@@ -118,10 +121,11 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🎪 Dumbbell Shoulder Press 🎬 | Adjustable dumbbells on stand, Adjustable Weight Bench | 3 × 10 | 90s | Arms |
 | 🅨 Dumbbell Y-Raise 🎬 | Adjustable dumbbells on stand, Adjustable Weight Bench | 3 × 15 | 45s | Back |
 
-### Arms — 5
+### Arms — 6
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
+| 💎 Diamond Push-ups 🎬 | Bodyweight | 3 × 8 | 60s | Chest, Core |
 | 💪 Dumbbell Biceps Curl 🎬 | Adjustable dumbbells on stand | 3 × 12 | 60s | — |
 | 🔨 Dumbbell Hammer Curl 🎬 | Adjustable dumbbells on stand | 3 × 12 | 60s | Forearms |
 | 💪 Incline Dumbbell Curl 🎬 | Adjustable dumbbells on stand, Adjustable Weight Bench | 3 × 10 | 60s | — |
@@ -136,7 +140,7 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | ✋ Dumbbell Reverse Wrist Curl 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 15 | 30s | — |
 | 🤲 Dumbbell Wrist Curl 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 20 | 30s | — |
 | 〰️ Flexbar Reverse Tyler Twist | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
-| 🌀 Flexbar Supination | Flexible resistance bar | 3 × 12 /side | 40s | Arms |
+| 🌀 Flexbar Supination 🎬 | Flexible resistance bar | 3 × 12 /side | 40s | Arms |
 | 〰️ Flexbar Tyler Twist | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
 
 ### Legs — 13
@@ -157,27 +161,34 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🦵 Nordic Curl Negative | Nordic curl pad | 3 × 5 | 120s | Glutes, Core |
 | 🦶 Single-Leg Calf Raise 🎬 | Adjustable dumbbells on stand | 3 × 20 /side | 45s | — |
 
-### Glutes — 4
+### Glutes — 5
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
-| 🍑 Bench Hip Thrust | Flat weight bench, Adjustable dumbbells on stand | 3 × 15 | 90s | Legs, Core |
+| 🍑 Band Pull-Through 🎬 | Resistance bands | 3 × 15 | 75s | Legs, Power |
+| 🍑 Bench Hip Thrust 🎬 | Flat weight bench, Adjustable dumbbells on stand | 3 × 15 | 90s | Legs, Core |
 | 🌉 Glute Bridge 🎬 | Bodyweight | 3 × 20 | 40s | Core |
 | 🔔 Kettlebell Swing 🎬 | Kettlebell | 3 × 20 | 90s | Back, Power |
 | 🦿 Single-Leg Glute Bridge 🎬 | Bodyweight | 3 × 15 /side | 45s | Core |
 
-### Core — 10
+### Core — 16
 
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
+| 🥐 AbMat Crunch 🎬 | Bodyweight | 3 × 12 | 45s | — |
+| 🙇 Band Face-Away Crunch 🎬 | Resistance bands | 3 × 10 | 60s | — |
 | 🛡️ Band Pallof Press 🎬 | Resistance bands | 3 × 12 /side | 45s | — |
+| ⤴️ Bench Garhammer Raise 🎬 | Adjustable Weight Bench | 3 × 8 | 60s | — |
 | 🐦 Bird Dog 🎬 | Bodyweight | 3 × 16 /side | 40s | Back |
 | 🇩🇰 Copenhagen Plank 🎬 | Flat weight bench | 3 × 20s /side | 60s | Legs |
 | 🐞 Dead Bug 🎬 | Bodyweight | 3 × 16 | 40s | — |
-| 🦵 Dip Bar Knee Raise 🎬 | Parallel dip bars | 3 × 12 | 60s | — |
+| 🦵 Dip Bar Garhammer Raise 🎬 | Parallel dip bars | 3 × 12 | 60s | — |
 | 🚜 Farmer's Carry 🎬 | Adjustable dumbbells on stand | 3 × 45s | 60s | Forearms, Legs |
+| ⏳ Garhammer Hold | Flat weight bench | 2 × 25s | 60s | — |
+| 🌙 Hollow Hold | Bodyweight | 3 × 20s | 45s | — |
 | 🇱 L-Sit Hold 🎬 | Parallel dip bars | 3 × 20s | 90s | Arms, Shoulders |
 | 🧱 Plank 🎬 | Bodyweight | 3 × 40s | 45s | — |
+| 🔄 Reverse Crunch 🎬 | Bodyweight | 3 × 12 | 45s | — |
 | 📏 Side Plank 🎬 | Bodyweight | 2 × 30s /side | 40s | — |
 | 🧤 Suitcase Hold 🎬 | Kettlebell | 3 × 30s /side | 60s | Forearms, Back |
 

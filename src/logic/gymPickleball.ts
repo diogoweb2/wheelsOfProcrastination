@@ -198,8 +198,28 @@ const WHY: Record<string, PickleballWhy> = {
     longevity: 'Hip-flexor and deep-core strength at end range, plus the shoulder strength to hold yourself down off your hands. Unglamorous, and it keeps both joints honest.',
   },
   'mv-dip-bar-knee-raise': {
-    game: 'Hip flexors drive your knee through the first step. Strong ones have you moving before the ball has landed.',
-    longevity: 'It trains the hip flexors without the spinal flexion of a sit-up. For a back you are protecting, that distinction is the whole point.',
+    game: 'Curling the pelvis is how you stay low and still reach — the lower abs are what stop the hips sagging on the third dink of a long rally.',
+    longevity: 'Hanging on your arms unloads the spine while you work, so the lower abs get strong in the one position that takes pressure OFF the discs rather than adding it.',
+  },
+  'bw-reverse-crunch': {
+    game: 'Lower abs curling the pelvis under is what keeps your hips from collapsing backwards when you get jammed at the kitchen line.',
+    longevity: 'The towel under your back is what makes it worth doing: it adds the bottom stretch, and it costs the spine nothing because you are lying on the floor while it happens.',
+  },
+  'mv-bench-garhammer-raise': {
+    game: 'The lower abs decide whether your hips stay under you when you lunge forward for a drop shot. This is the only way to load them heavily without your hip flexors stealing the set.',
+    longevity: 'It is spinal flexion trained against a locked upper body, lying down — all of the ab work, none of the compression. The pelvis learns to tuck on demand, which is the single best defence a lower back has.',
+  },
+  'mv-garhammer-hold': {
+    game: 'A pickleball point is not reps, it is one long brace held while you get pulled out of position. This trains exactly that, in the stretched position where bracing is hardest.',
+    longevity: 'An isometric at long muscle length is the kindest way to load abs hard. It builds the anti-extension strength that stops your lower back taking the arch it hurts in.',
+  },
+  'mv-band-face-away-crunch': {
+    game: 'Every overhead and every hard drive finishes with the ribs pulling towards the hips. This is that finish, loaded — the part of the swing that sends the ball rather than reaching for it.',
+    longevity: 'The one ab exercise in this basement you can genuinely add resistance to for years. Strong abs share the load your spine would otherwise carry alone, and load is what keeps them strong.',
+  },
+  'bw-abmat-crunch': {
+    game: 'A full-range crunch trains the abs through the arc your torso actually travels when you load up for a put-away, instead of the two inches a floor crunch allows.',
+    longevity: 'The stretch at the bottom is the point: muscle trained at long length stays stronger through range, and range is the thing you lose first. Build the roll height slowly.',
   },
   'mv-kettlebell-farmer-s-hold': {
     game: 'Load on one side while you stand tall — the exact anti-lean your core does when you reach out wide for a ball.',

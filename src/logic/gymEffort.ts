@@ -104,7 +104,14 @@ const MIX: Record<string, EffortMix> = {
   'bw-dead-bug': { core: 1 },
   'bw-hollow-hold': { core: 1 },
   'bw-reverse-crunch': { core: 1 },
+  'bw-abmat-crunch': { core: 1 },
   'bw-side-plank': { core: 1 },
+  // the Garhammer family. Held on the arms rather than hanging from them, so
+  // the shoulders take a real slice on the two bench versions and more on the
+  // dip bars, where the whole bodyweight goes through them.
+  'mv-bench-garhammer-raise': { core: 0.92, shoulders: 0.08 },
+  'mv-garhammer-hold': { core: 0.92, shoulders: 0.08 },
+  'mv-band-face-away-crunch': { core: 1 },
   'mv-copenhagen-plank': { core: 0.55, legs: 0.45 },
   'bw-plank': { core: 0.88, shoulders: 0.12 },
   'mv-l-sit-hold': { core: 0.6, shoulders: 0.22, arms: 0.18 },

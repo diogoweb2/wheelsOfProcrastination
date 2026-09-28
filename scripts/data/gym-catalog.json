@@ -1249,7 +1249,7 @@
     },
     {
       "id": "mv-dip-bar-knee-raise",
-      "name": "Dip Bar Knee Raise",
+      "name": "Dip Bar Garhammer Raise",
       "emoji": "🦵",
       "equipmentIds": [
         "eq-fd35329b"
@@ -1259,7 +1259,7 @@
         "core"
       ],
       "intensity": 2,
-      "how": "Support yourself on the dip bars with straight arms and raise your knees to your chest. Keep shoulders pressed down, no swinging.",
+      "how": "Support yourself on the dip bars, arms straight, shoulders pressed DOWN away from your ears. Knees bent at 90° and kept there. Do not think \"raise your knees\" — think CURL THE PELVIS: roll the hips up towards your ribs so the lower back rounds into a C, hold the top for a beat, then lower under control to a stretch without letting the body swing. Knees-to-chest with a straight spine is a hip-flexor exercise; the pelvic curl is the ab one. This is the grip-free version of the bench Garhammer raise — use it when the bench is busy or the hands have had enough.",
       "restSec": 60,
       "defaultReps": 12,
       "defaultSets": 3,
@@ -2080,7 +2080,7 @@
         "core"
       ],
       "intensity": 2,
-      "how": "On your back, knees at 90°, hands flat beside you. Curl the hips off the floor and bring the knees towards the chest — the lower back rounds UP, it never arches. Lower slowly; the slow half is the half that counts.",
+      "how": "Put a rolled-up bath towel (or an AbMat) under your LOWER BACK, just above the waistband — that is the upgrade, and it is most of the exercise: it lets the pelvis drop BELOW flat at the bottom so the abs start each rep stretched. On your back, knees at 90°, hands flat beside you. Curl the hips up and bring the knees towards the chest — the lower back rounds UP, it never arches. Lower slowly over the roll until you feel the stretch; the slow half is the half that counts. No towel yet? Do it flat, it still works — just with less at the bottom.",
       "restSec": 45,
       "defaultReps": 12,
       "defaultSets": 3,
@@ -2127,6 +2127,113 @@
         "source": "ExerciseDB",
         "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-back-extension-hold.webp?alt=media&token=b460357e-6c91-426d-a71e-a9d8630c81f3"
       }
+    },
+    {
+      "id": "mv-bench-garhammer-raise",
+      "name": "Bench Garhammer Raise",
+      "emoji": "⤴️",
+      "equipmentIds": [
+        "eq-ea11007d"
+      ],
+      "kind": "bodyweight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 3,
+      "benchAngle": 30,
+      "how": "BENCH: backrest to about 30° and lie on it HEAD-HIGH, hips right at the bottom edge of the pad. Reach back and grip the top of the backrest — that is your anchor, and your upper body never moves again. Knees stay bent at 90° for the whole set; the thighs stay TUCKED, they never drop to straight. The only thing that moves is your PELVIS: curl it up off the pad so the lower back rounds into a C and the hips travel towards your ribs, then lower until you feel the abs pull and stop before the back arches. The rep is two inches of pelvis, not two feet of leg — swinging legs means you have handed the set to your hip flexors. Slow on the way down; that half is the half that counts.",
+      "restSec": 60,
+      "defaultReps": 8,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-28T00:00:00.000Z",
+      "demo": {
+        "match": "manual",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-bench-garhammer-raise-poster.webp?alt=media&token=76806ad8-f028-4a12-a5f3-0b64187f3ea3",
+        "sourceName": "leg pull in flat bench",
+        "source": "ExerciseDB",
+        "sourceId": "OyoZ3Pu",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-bench-garhammer-raise.webp?alt=media&token=e2981388-4695-4443-9bf5-df65e4b5afc9"
+      }
+    },
+    {
+      "id": "mv-band-face-away-crunch",
+      "name": "Band Face-Away Crunch",
+      "emoji": "🙇",
+      "equipmentIds": [
+        "eq-bands"
+      ],
+      "kind": "weight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 3,
+      "how": "BAND: the TUBE band with handles, looped as HIGH on the post as you can reach (a RED loop band over the pull-up bar does the same job). Kneel FACING AWAY from the post with your hips pressed back against it — that contact is the whole anti-cheat, it is what stops this becoming a hip hinge. A handle at each ear, elbows down. Now walk your knees FORWARD until the band is already tight with your torso upright: a band gives its least resistance where it is least stretched, and upright-and-stretched is the position you came for, so pre-tension it. Crunch ribs towards pelvis, spine rounding into a C, head finishing near your thighs. The hips do not move an inch. Come back up slowly under tension until you are tall again. Progress by stepping further from the post FIRST, then by moving up a band.",
+      "restSec": 60,
+      "defaultReps": 10,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-28T00:00:00.000Z",
+      "demo": {
+        "sourceName": "band standing crunch",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-away-crunch-poster.webp?alt=media&token=4a416490-d97d-444a-954c-27266646a808",
+        "match": "manual",
+        "sourceId": "Kzg30R7",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-band-face-away-crunch.webp?alt=media&token=1ab977e1-abae-48cb-a2d5-30dd1b13b902",
+        "source": "ExerciseDB"
+      }
+    },
+    {
+      "id": "bw-abmat-crunch",
+      "name": "AbMat Crunch",
+      "emoji": "🥐",
+      "equipmentIds": [],
+      "kind": "bodyweight",
+      "parts": [
+        "core"
+      ],
+      "intensity": 2,
+      "how": "A rolled-up bath towel (or an AbMat) goes under your LOWER BACK, just above the waistband — not under your backside. That bump IS the exercise: it lets the spine extend below flat, so every rep starts with the abs already stretched, which a floor crunch can never do. Knees bent, feet down, hands on your chest. Crunch up over the roll, ribs towards hips, then go all the way back over it until you feel the stretch. Start with a SMALL roll and build the height over weeks — if the lower back complains at the bottom, flatten it, do not push through. Too easy at 16 reps? Hold a dumbbell on your chest.",
+      "restSec": 45,
+      "defaultReps": 12,
+      "defaultSets": 3,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-28T00:00:00.000Z",
+      "demo": {
+        "sourceId": "TFqbd8t",
+        "source": "ExerciseDB",
+        "match": "manual",
+        "sourceName": "crunch floor",
+        "anim": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-abmat-crunch.webp?alt=media&token=44f3becc-bdfa-4354-a194-00114008be86",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-abmat-crunch-poster.webp?alt=media&token=2014e3ef-1529-4c58-8ff4-5373c16ea070"
+      }
+    },
+    {
+      "id": "mv-garhammer-hold",
+      "name": "Garhammer Hold",
+      "emoji": "⏳",
+      "equipmentIds": [
+        "eq-dec18228"
+      ],
+      "kind": "timed",
+      "parts": [
+        "core"
+      ],
+      "intensity": 3,
+      "how": "Lie flat on the bench with your hips just OFF the bottom edge, gripping the sides. Tuck the knees, then lower them until the thighs are below the line of the bench and you feel the abs pull — hips extended, the back of the pelvis hanging. Now stay there. Nothing moves for the whole clock. This is the one hold worth keeping: a plank holds you at your SHORTEST, this holds you at your LONGEST, and the stretched position is where the ab work actually is. The moment the lower back arches off the pad or the knees creep up, the hold is over — stop the clock honestly.",
+      "restSec": 60,
+      "defaultReps": 25,
+      "defaultSets": 2,
+      "perSide": false,
+      "ladder": false,
+      "addedBy": "manual",
+      "createdAt": "2026-09-28T00:00:00.000Z"
     }
   ]
 }

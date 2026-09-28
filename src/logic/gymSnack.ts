@@ -94,13 +94,18 @@ export const SNACKS: SnackRoutine[] = [
     id: 'abs',
     name: 'Abs',
     emoji: '🧱',
-    goal: 'The core, four ways: two that move and two that don’t.',
-    note: 'Abs snack. Quality over count — the moment the lower back lifts off the floor, that set is finished.',
+    goal: 'Four ways to load the abs through a stretch. Lower, upper, lower, then hold.',
+    note: 'Abs snack. Every rep starts from a stretch and finishes in a C — curl the spine, never swing the legs.',
     slots: [
-      slot('bw-dead-bug', 3, 10, 16, 'Lower back stays pressed into the floor. That is the whole exercise.'),
-      slot('bw-reverse-crunch', 3, 10, 16, 'Curl the hips up, don’t swing the legs. Slow on the way down.'),
-      slot('bw-hollow-hold', 3, 20, 40, 'Legs higher if the back starts to arch — a smaller hollow held properly wins.'),
-      slot('bw-side-plank', 2, 25, 40, 'Both sides, and the second one has to match the first.'),
+      slot('mv-bench-garhammer-raise', 3, 6, 12, 'Knees locked at 90°, thighs tucked. Only the pelvis moves — two inches of hips beats two feet of legs.'),
+      slot('bw-abmat-crunch', 3, 10, 16, 'Towel or AbMat under the lower back. Go all the way back over it; the stretch at the bottom is what you came for.'),
+      // two sets, not three, and the reason is arithmetic: at three this
+      // routine models to 16.5 real minutes and `fitToSnack` would pop the
+      // finisher off every single time. A slot that never appears is not a
+      // slot. This is also the most redundant one — the Garhammer raise above
+      // is the same job done heavier.
+      slot('bw-reverse-crunch', 2, 10, 16, 'Same towel, now under the hips. Curl the pelvis up, lower slowly over the roll.'),
+      slot('mv-garhammer-hold', 2, 20, 40, 'The finisher. Thighs below the bench line and nothing moves — stop the clock the second the back arches.'),
     ],
   },
   {

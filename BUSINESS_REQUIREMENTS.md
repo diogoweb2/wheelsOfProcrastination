@@ -771,6 +771,7 @@ The motivating pattern from Diogo's old push-up app, for bodyweight staples (`la
 Lives on **Gear → 🧠 You** (`/gym/gear`) since the Plan tab went (§18m). Free text plus the hard rules the offline planner enforces, because it can't read prose:
 
 - **Protect my lower back** — `backRisk` exercises are filtered out entirely: out of the planner's pool, out of **🔄 Swap for something similar**, out of the free session, and out of the exercise snacks (§18ab). Carrying the flag today: **Dumbbell Romanian Deadlift**, **Kettlebell Swing**, **One-Arm Dumbbell Row** (knee-on-bench, an asymmetric loaded row), and all three **Nordic Curl** rows. The last four were flagged on 2026-09-25 — they had already been swapped out of Block 1 by hand, but a row that is merely unused is one 🔄 Swap away from coming back, and two of them were rated 🙂/🤩, which made the planner actively *prefer* them. **The flag is the block's business, not the block's boss:** a block slot is the prescription and is taken as written (§18m), so it can still name a `backRisk` move — the flag governs everything the app *chooses* for you, and a snack routine counts as chosen because nobody edited it.
+- **The abs that are deliberately NOT here** (2026-09-28). The abs rework (§18m, §18ab) also decided what *not* to add, and the reasons belong somewhere they can't be lost: **feet-anchored sit-ups** on the hyperextension bench or a decline bench (anchored feet hand the work to the hip flexors and the lumbar spine takes the shear), **straight-leg hanging leg raises / toes-to-bar** (at the bottom the pelvis tips and the lumbar spine hyperextends under the longest lever in the body — the Garhammer raise is precisely the version with that bottom position removed), **standing ab-wheel rollouts** (maximum lumbar extension moment with nothing supporting the spine), and **weighted side bends or loaded Russian twists** with the 46 lb kettlebell (rotation plus lateral flexion under compression, when the Pallof press and the rotational press already cover rotation at no spinal cost). None of these are catalog rows, so none of them carries a flag; this list is the record. **The L-Sit Hold is a separate case and is deliberately NOT flagged `backRisk`**: it is a maximal hip-flexor isometric and therefore a poor abs exercise, but "wrong tool" is not "medical reason", and the flag means the second one. It stays in the catalog as the shoulder-and-arm hold it actually is.
 - **No warm-up block** — see §18e.
 - **Roman chair first, always** — see §18e. Default ON.
 
@@ -907,9 +908,9 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 
 | | Session | Focus |
 |---|---|---|
-| S1 | 🦵 Lower strength + core | Bulgarian split squat · hip thrust · side plank · calf raise |
+| S1 | 🦵 Lower strength + core | Bulgarian split squat · hip thrust · **band face-away crunch** · calf raise |
 | S2 | 🫸 Upper push + pull | DB bench · chest-supported row · pull-ups · lateral raise · band face pull |
-| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · **band pull-through** (power: 3 × 12–18 explosive) · Copenhagen plank · band Pallof |
+| S3 | ⚡ Pickleball power + stability | split squat jump · lateral shuffle · **band pull-through** (power: 3 × 12–18 explosive) · Copenhagen plank · **bench Garhammer raise** · band Pallof |
 | S4 | 🦿 Lower unilateral + posterior chain | reverse lunge · goblet squat · single-leg glute bridge · band leg curl · single-leg calf raise |
 | S5 | 🧗 Upper pull + shoulder health | pull-ups · chest-supported row · DB shoulder press · band external rotation · wrist curls |
 | S6 | 🏓 Full body + pickleball | step-up · incline DB press · band lat pulldown · band rotational press · farmer's carry · med-ball chest pass |
@@ -941,6 +942,17 @@ Re-runnable and idempotent: exercises that already have a demo are skipped unles
 **And it is a suggestion, not a deadline.** The warning says so in as many words: *"if it is still progressing, keep going"*. A block that is still adding weight is worth keeping past `retireSessions`.
 
 **The swing came out of S3** (2026-09-25, `SEED_VERSION` 4). It was the hip-drive slot and it is `backRisk` for a reason: 46 lb hanging off the spine at the bottom of a ballistic hinge is the exact thing the brief means by *nothing that loads the spine heavily*. The **Band Pull-Through** is the same hip snap with the load pulling from **behind** you instead of hanging in front — still ⚡ quality-terminated, still the power slot, 3 × 12–18 because a band is not 46 lb. The block was edited in place on the profile that had already trained against it; the seed carries the change for anyone starting fresh.
+
+**The abs got loaded** (2026-09-28, `SEED_VERSION` 5). Two slots changed, and the reason is the one thing a plank cannot do: **you cannot add weight to it**, so the tenth month of a 2 × 40 s side plank is the first month of it. The evidence for training abs is the evidence for training anything — load through range, and load that goes up — plus one thing abs specifically want: **tension in the stretched position**, which floor work with the spine flat never reaches.
+
+| Session | Out | In | Why |
+|---|---|---|---|
+| S1 🦵 | Side Plank `2 × 30–45s` | **Band Face-Away Crunch** `3 × 8–12` | the only abs movement in the basement that takes real, increasing resistance |
+| S3 ⚡ | — | **Bench Garhammer Raise** `3 × 6–12` | loaded lower abs, lying down, zero spinal compression. S3 is the shortest session in the rotation (38 real minutes), so it is where the room was |
+
+**A band is not a cable, and the how-to says so.** The face-away crunch is the best available stand-in for the cable crunch, and it has one honest flaw: a band gives its *least* resistance where it is *most* stretched-muscle — the top — which is backwards from what the movement is for. So the prescription is to pre-tension it: walk out until the band is tight with the torso already upright, and **progress by stepping further from the post before changing colour**. That is written into the `how`, not left as folklore.
+
+**What stayed, and why it is not a plank.** The **Copenhagen plank** kept its S3 slot: it is an adductor exercise wearing a plank's clothes, and adductor strength is the best-evidenced groin-strain prevention in court sport. The **band Pallof press** kept its slot: anti-rotation, loaded, and it progresses. Neither is core filler.
 
 **Block 2 changes 2–4 movements and nothing else.** Split squat → reverse lunge, flat press → incline, chest-supported row → one-arm, split squat jump → another lateral or vertical power move. The patterns stay: you want **progressive exposure, not novelty**, and a programme that reshuffles itself every block is the exercise generator this replaced, wearing a different hat. Block 1 establishes the baseline, Block 2 is a small variation, Block 3 is a small variation. The warning can also be answered with **🔄 carry on with these**, which copies the rotation into a new block with the counter back at zero — a real answer, not a snooze.
 
@@ -1237,7 +1249,7 @@ The idea is Huberman's *exercise snacks*: a short, hard, self-contained bout of 
 
 | | | |
 |---|---|---|
-| 🧱 **Abs** | dead bug · reverse crunch · hollow hold · side plank | the core, two that move and two that don't |
+| 🧱 **Abs** | bench Garhammer raise · AbMat crunch · reverse crunch · Garhammer hold | four ways to load the abs through a stretch |
 | 🫸 **Push-ups** | push-up · wide · diamond · push-up hold | one movement moved around the chest |
 | 🐍 **Roman chair** | back extension · back extension hold · glute bridge · bird dog | the lower back and glutes that keep you on court |
 
@@ -1259,6 +1271,21 @@ Adding a fourth is **one entry in `SNACKS`** — the tab, the recommendation, th
 **Starting it is the phone's job.** The watch (a client on `gym.active`, not a remote control) shows *"start it on your phone"* until there is a session, then drives it set by set — which is exactly the snack loop: pick the routine at your desk, put the phone down, do the ten minutes off your wrist.
 
 **Six movements were added to the catalog for this**: Wide Push-ups, Diamond Push-ups, Push-up Hold, Hollow Hold, Reverse Crunch, Back Extension Hold. All six have a YouTube demonstration; five have an animation (the free libraries have no hollow hold — it keeps its 🌙 and its video).
+
+**The abs routine was rewritten** (2026-09-28), for the same reason S1 changed (§18m): three of its four slots were holds or beginner drills with no progression in them, and *dead bug · hollow hold · side plank* is a rehab circuit, not ten minutes of abs for someone who has been training for years. What replaced it is four movements that all load the abs **through a stretch** — the quality the research the change came from ranks above everything else:
+
+| | | |
+|---|---|---|
+| ⤴️ **Bench Garhammer Raise** | `3 × 6–12` | lower abs, knees locked at 90°, only the pelvis moves |
+| 🥐 **AbMat Crunch** | `3 × 10–16` | upper abs, full range over a rolled towel |
+| 🔄 **Reverse Crunch** | `2 × 10–16` | lower abs, same towel, now under the hips |
+| ⏳ **Garhammer Hold** | `2 × 20–40s` | the finisher, and the one hold kept |
+
+**One hold survived, and it is not a plank.** A plank holds the abs at their **shortest**; the Garhammer hold holds them at their **longest**, off the end of a flat bench with the thighs below the bench line. A stretched-position isometric is the one kind of hold that earns its ten minutes, so it stays — as the finisher, where a hold belongs.
+
+**Still bodyweight only, still reps-and-seconds progression** (rule 1 above). The bench is gear, not load: the roman-chair routine has always used the hyperextension bench, and what rule 1 rules out is *choosing a weight*, not *lying on something*. **A rolled bath towel is the AbMat**, and the `how` says so — the towel is adjustable in height and the mat is not, which is the right way round for a lower back nobody has fully characterised.
+
+**Four movements were added to the catalog for it**: Bench Garhammer Raise, Band Face-Away Crunch, AbMat Crunch, Garhammer Hold. All four have a YouTube demonstration; three have an animation (no free library has a Garhammer hold — it keeps its ⏳). Two existing rows were upgraded **in place**, keeping their ids and therefore every set ever logged against them: **Reverse Crunch** now prescribes the towel under the hips, and **Dip Bar Knee Raise** became the **Dip Bar Garhammer Raise** — the cue changed from "raise your knees" to "curl the pelvis", which is the difference between a hip-flexor exercise and an ab one. It is the grip-free stand-in for the bench version.
 
 ## 19. Essays — "the red pen" (the ✍️ Essays app)
 

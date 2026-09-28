@@ -49,3 +49,4 @@ scripts/.free-exercise-db.json
 # scratchpad is outside the tree and `firebase` is not importable from there,
 # so they land here and must never be committed.
 .tmp-*/
+.gym-blocks-backup-*.json
