@@ -42,7 +42,7 @@ function render({ equipment = [], exercises = [] }) {
     '',
     `Generated from Firestore \`app/gymCatalog\` by \`npm run gym:catalog\` on ${new Date().toISOString().slice(0, 10)}. Do not edit by hand — edit the gym, then re-run it.`,
     '',
-    `**${equipment.filter((e) => !e.retired).length} pieces of equipment · ${live.length} exercises** (${live.filter((e) => e.demo).length} with an animation).`,
+    `**${equipment.filter((e) => !e.retired).length} pieces of equipment · ${live.length} exercises** (${live.filter((e) => e.demo?.anim).length} with an animation, ${live.filter((e) => e.demo && !e.demo.anim).length} with a still photo, ${live.filter((e) => !e.demo).length} with neither).`,
     '',
     'The catalog file is [scripts/data/gym-catalog.json](scripts/data/gym-catalog.json) (`npm run gym:seed` to push it); day-to-day edits happen in the app at Gym → Gear. Rules: [BUSINESS_REQUIREMENTS.md](BUSINESS_REQUIREMENTS.md) §18k.',
     '',
@@ -58,14 +58,19 @@ function render({ equipment = [], exercises = [] }) {
   const bw = live.filter((e) => !e.equipmentIds.length).length
   out.push('### 🤸 No equipment', '', `Floor and bodyweight work — ${bw} exercises need nothing but the room.`, '', '---', '')
 
-  out.push('## 💪 Exercises by muscle area', '', 'Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = has an animation.', '')
+  out.push(
+    '## 💪 Exercises by muscle area',
+    '',
+    'Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = has an animation; 📷 = a still from its own demonstration video, because no library animates it (§18l).',
+    '',
+  )
   for (const [key, heading] of PARTS) {
     const list = live.filter((e) => e.parts[0] === key).sort((a, b) => a.name.localeCompare(b.name))
     if (!list.length) continue
     out.push(`### ${heading} — ${list.length}`, '', '| Exercise | Equipment | Sets × reps | Rest | Also works |', '| --- | --- | --- | --- | --- |')
     for (const e of list) {
       const also = e.parts.slice(1).map((p) => LABEL.get(p) ?? p).join(', ') || '—'
-      out.push(`| ${e.emoji ?? ''} ${esc(e.name)}${e.demo ? ' 🎬' : ''} | ${esc(gearOf(e))} | ${amount(e)} | ${e.restSec}s | ${esc(also)} |`)
+      out.push(`| ${e.emoji ?? ''} ${esc(e.name)}${e.demo ? (e.demo.anim ? ' 🎬' : ' 📷') : ''} | ${esc(gearOf(e))} | ${amount(e)} | ${e.restSec}s | ${esc(also)} |`)
     }
     out.push('')
   }

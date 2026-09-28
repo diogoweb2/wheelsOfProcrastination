@@ -194,9 +194,14 @@ function score(ex, v) {
 }
 
 /**
- * Confirm a video can actually be embedded, and get its exact length. An
- * uploader's "no embedding" is invisible to the app — the player just refuses —
- * so it is caught here, once, rather than by you in a basement.
+ * Confirm a video can actually be embedded, and get its exact length, title and
+ * channel. An uploader's "no embedding" is invisible to the app — the player
+ * just refuses — so it is caught here, once, rather than by you in a basement.
+ *
+ * The title and channel come from the same page because a PINNED pick had no
+ * other way to get them, and was landing in the catalog with nothing but an id:
+ * §18n promises the sheet tells you at a glance what a pick actually is, and a
+ * blank line does not.
  */
 async function verify(id) {
   let html
@@ -208,8 +213,27 @@ async function verify(id) {
   const embeddable = /"playableInEmbed":true/.test(html)
   const sec = Number(html.match(/"lengthSeconds":"(\d+)"/)?.[1]) || undefined
   const live = /"isLiveContent":true/.test(html)
+  const title = unescapeJson(html.match(/<meta name="title" content="([^"]*)"/)?.[1])
+  const channel = unescapeJson(html.match(/"ownerChannelName":"((?:[^"\\]|\\.)*)"/)?.[1])
   if (!embeddable || live) return null
-  return { sec }
+  return { sec, title, channel }
+}
+
+/** YouTube's page holds both HTML entities and JSON escapes; undo both. */
+function unescapeJson(v) {
+  if (!v) return undefined
+  try {
+    v = JSON.parse(`"${v.replace(/"/g, '\\"')}"`)
+  } catch {
+    // not valid JSON string content — take it as it came
+  }
+  return v
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim() || undefined
 }
 
 /** One batched claude call for everything scoring couldn't settle. ourId → videoId|null. */
@@ -285,7 +309,7 @@ async function main() {
       }
       const ok = await verify(id)
       if (!ok) console.log(`  ⚠️  ${ex.name}: that video refuses to embed — pinning it anyway, it's your call`)
-      decided.set(ex.id, { id, source: 'manual', sec: ok?.sec })
+      decided.set(ex.id, { id, source: 'manual', sec: ok?.sec, title: ok?.title, channel: ok?.channel })
       console.log(`  🖐  ${ex.name} → ${id}`)
       continue
     }

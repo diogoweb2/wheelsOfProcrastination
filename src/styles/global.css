@@ -2933,6 +2933,9 @@ input, select { font-family: inherit; }
   font-size: 8px; line-height: 16px; text-align: center; padding-left: 1px;
 }
 .gym-demo-detail { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+/* a photo demo is not a control: no pointer, nothing happens when you tap it */
+.gym-demo--photo { cursor: default; }
+.gym-demo--photo .gym-demo-approx { background: rgb(120 170 255 / 92%); color: #06203f; font-size: 8px; }
 /* an approximate demo never pretends to be the real movement */
 .gym-demo-approx {
   position: absolute; left: 3px; top: 3px;

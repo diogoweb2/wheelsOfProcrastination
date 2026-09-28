@@ -1461,7 +1461,14 @@
         "arms"
       ],
       "how": "BAR: RED (10 lb) — start here, green only when red is easy through full range. Hold the bar upright in the WORKING hand with the wrist bent back (knuckles toward you), grab the top with the other hand palm-out. Twist the TOP hand to wind the bar up, then bring both arms out in front of you so the bar is horizontal. Now release the wound-up bar SLOWLY — four full seconds — letting the working wrist un-bend against it. The slow release is the entire exercise; winding it up is just setup. Elbow-tendon work: light, controlled, no speed.",
-      "defaultReps": 15
+      "defaultReps": 15,
+      "demo": {
+        "sourceId": "gsKGbqA9aNo",
+        "source": "youtube.com",
+        "match": "photo",
+        "sourceName": "Thera-Band Flexbar \"Tyler Twist\" exercise for Tennis Elbow",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-flexbar-tyler-twist-poster.webp?alt=media&token=aa1750d2-82e4-41c3-9e5f-1f26dbe1af71"
+      }
     },
     {
       "equipmentIds": [
@@ -1484,7 +1491,14 @@
         "arms"
       ],
       "how": "BAR: RED (10 lb). The mirror of the Tyler twist, for the INSIDE of the elbow. Hold the bar upright in the working hand with the wrist bent FORWARD (palm curling in), grab the top with the other hand and wind the bar up the opposite way. Arms out in front, bar horizontal, then let it unwind over four slow seconds through the working wrist. Same rule: the release is the work.",
-      "defaultReps": 15
+      "defaultReps": 15,
+      "demo": {
+        "source": "youtube.com",
+        "sourceId": "vZsa0bBCAf0",
+        "match": "photo",
+        "sourceName": "Thera-Band FlexBar \"Reverse Tyler Twist\" for Golfers Elbow",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-flexbar-reverse-tyler-twist-poster.webp?alt=media&token=121fc0ff-e216-456b-886e-9fe8a53250fe"
+      }
     },
     {
       "equipmentIds": [
@@ -1627,7 +1641,14 @@
       "backRisk": false,
       "ladder": false,
       "addedBy": "ai",
-      "createdAt": "2026-08-23T01:20:54.911Z"
+      "createdAt": "2026-08-23T01:20:54.911Z",
+      "demo": {
+        "source": "youtube.com",
+        "sourceName": "Lateral Shuffle",
+        "sourceId": "Z0HtdkwhHnI",
+        "match": "photo",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-lateral-shuffle-poster.webp?alt=media&token=1169cfef-d5bb-4f16-9613-8aac005421c9"
+      }
     },
     {
       "id": "mv-medicine-ball-chest-pass",
@@ -1767,7 +1788,14 @@
       "how": "BAND: PURPLE (the thickest, so the most help) to start. The band here is a SPOTTER, not resistance — you go LIGHTER as you get stronger, backwards from every other band move. Loop it over the pull-up bar so it hangs in front of you and pass it under your armpits across the chest: it is a pair of hands holding you up. Kneel on the pad with your ankles under the roller and squeeze the glutes so knee-to-shoulder is one straight line — you are a drawbridge hinged at the knees, and nothing bends at the hip. Lower that drawbridge as slowly as you can and let the band take whatever the hamstrings cannot hold. Push the floor away to come back up. The moment the descent stops being a drawbridge and becomes a falling tree, the set is over — a drop trains nothing. Progress purple → black → red, never by adding reps first.",
       "restSec": 90,
       "defaultReps": 6,
-      "defaultSets": 3
+      "defaultSets": 3,
+      "demo": {
+        "source": "youtube.com",
+        "sourceId": "QD7FZzjuqiM",
+        "match": "photo",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-nordic-curl-band-assisted-poster.webp?alt=media&token=48e35d01-0d82-4d57-8a87-a8f18737aa52",
+        "sourceName": "Band Assisted Nordic Hamstring Curl"
+      }
     },
     {
       "kind": "bodyweight",
@@ -1791,7 +1819,14 @@
       "how": "The step AFTER band-assisted, not a starting point. Kneel on the pad, ankles under the roller, hips locked straight, hands ready in front of you. Lower under control for as long as you can hold it, then CATCH yourself on your hands and push back to the top with the arms — the hamstrings only do the way down. Every session the catch should happen a little lower. Hips never hinge.",
       "restSec": 120,
       "defaultReps": 5,
-      "defaultSets": 3
+      "defaultSets": 3,
+      "demo": {
+        "sourceId": "1yPWmNoMEo0",
+        "source": "youtube.com",
+        "sourceName": "Nordic Hamstring Curl Negatives",
+        "match": "photo",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-nordic-curl-negative-poster.webp?alt=media&token=5289f870-591e-4522-817b-8e22c4593db3"
+      }
     },
     {
       "kind": "bodyweight",
@@ -1815,7 +1850,14 @@
       "how": "The full movement, and the top of the ladder — do not prescribe this until band-assisted is easy for 3 × 6 with a slow descent. Kneel on the pad, ankles under the roller, hips locked so knee to shoulder is one straight line. Lower all the way to the floor under hamstring control, touch down lightly with the hands, and pull yourself back up with the hamstrings. Low reps forever: this is a very high-tension movement and five good ones beat ten scrappy ones.",
       "restSec": 120,
       "defaultReps": 5,
-      "defaultSets": 3
+      "defaultSets": 3,
+      "demo": {
+        "match": "photo",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-nordic-curl-poster.webp?alt=media&token=1a8d1852-2568-41f5-b3b6-b710f519bdb6",
+        "sourceId": "qPRZcNx_C0A",
+        "sourceName": "Nordic Curl",
+        "source": "youtube.com"
+      }
     },
     {
       "id": "mv-band-leg-extension",
@@ -2068,7 +2110,14 @@
       "defaultSets": 3,
       "perSide": false,
       "addedBy": "manual",
-      "createdAt": "2026-09-25T00:00:00.000Z"
+      "createdAt": "2026-09-25T00:00:00.000Z",
+      "demo": {
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fbw-hollow-hold-poster.webp?alt=media&token=bf3d864e-f8da-4f2d-9933-29bd8afed22c",
+        "match": "photo",
+        "source": "youtube.com",
+        "sourceName": "Hollow Body Hold - OPEX Exercise Library",
+        "sourceId": "EsnM8eBtazU"
+      }
     },
     {
       "id": "bw-reverse-crunch",
@@ -2233,7 +2282,14 @@
       "perSide": false,
       "ladder": false,
       "addedBy": "manual",
-      "createdAt": "2026-09-28T00:00:00.000Z"
+      "createdAt": "2026-09-28T00:00:00.000Z",
+      "demo": {
+        "sourceId": "Z8v3t8JlEqM",
+        "poster": "https://firebasestorage.googleapis.com/v0/b/spinningwheel-6ff51.firebasestorage.app/o/gym%2Fmoves%2Fmv-garhammer-hold-poster.webp?alt=media&token=1fd86c45-4d4d-4d96-a08d-f074d60506b2",
+        "sourceName": "Garhammer Hold",
+        "match": "photo",
+        "source": "youtube.com"
+      }
     }
   ]
 }

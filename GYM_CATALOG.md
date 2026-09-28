@@ -2,7 +2,7 @@
 
 Generated from Firestore `app/gymCatalog` by `npm run gym:catalog` on 2026-09-28. Do not edit by hand — edit the gym, then re-run it.
 
-**11 pieces of equipment · 72 exercises** (64 with an animation).
+**11 pieces of equipment · 72 exercises** (64 with an animation, 8 with a still photo, 0 with neither).
 
 The catalog file is [scripts/data/gym-catalog.json](scripts/data/gym-catalog.json) (`npm run gym:seed` to push it); day-to-day edits happen in the app at Gym → Gear. Rules: [BUSINESS_REQUIREMENTS.md](BUSINESS_REQUIREMENTS.md) §18k.
 
@@ -84,7 +84,7 @@ Floor and bodyweight work — 17 exercises need nothing but the room.
 
 ## 💪 Exercises by muscle area
 
-Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = has an animation.
+Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = has an animation; 📷 = a still from its own demonstration video, because no library animates it (§18l).
 
 ### Chest — 7
 
@@ -139,9 +139,9 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🪣 Dumbbell Farmer's Hold 🎬 | Adjustable dumbbells on stand | 3 × 40s | 45s | Core, Back |
 | ✋ Dumbbell Reverse Wrist Curl 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 15 | 30s | — |
 | 🤲 Dumbbell Wrist Curl 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 20 | 30s | — |
-| 〰️ Flexbar Reverse Tyler Twist | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
+| 〰️ Flexbar Reverse Tyler Twist 📷 | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
 | 🌀 Flexbar Supination 🎬 | Flexible resistance bar | 3 × 12 /side | 40s | Arms |
-| 〰️ Flexbar Tyler Twist | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
+| 〰️ Flexbar Tyler Twist 📷 | Flexible resistance bar | 3 × 15 /side | 45s | Arms |
 
 ### Legs — 13
 
@@ -149,7 +149,7 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | --- | --- | --- | --- | --- |
 | 🦵 Band Leg Curl 🎬 | Resistance bands | 3 × 15 /side | 60s | — |
 | 🦿 Band Leg Extension 🎬 | Resistance bands | 3 × 15 /side | 60s | — |
-| 🦵 Band-Assisted Nordic Curl | Nordic curl pad, Resistance bands | 3 × 6 | 90s | Glutes, Core |
+| 🦵 Band-Assisted Nordic Curl 📷 | Nordic curl pad, Resistance bands | 3 × 6 | 90s | Glutes, Core |
 | 🦶 Calf Raise 🎬 | Adjustable dumbbells on stand | 3 × 20 | 35s | — |
 | 🇧🇬 Dumbbell Bulgarian Split Squat 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 10 /side | 90s | Glutes, Core |
 | ↔️ Dumbbell Lateral Lunge 🎬 | Adjustable dumbbells on stand | 3 × 10 /side | 75s | Glutes |
@@ -157,8 +157,8 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | ⚠️ Dumbbell Romanian Deadlift 🎬 | Adjustable dumbbells on stand | 3 × 10 | 90s | Glutes, Back |
 | 🪜 Dumbbell Step-up 🎬 | Adjustable dumbbells on stand, Flat weight bench | 3 × 12 /side | 75s | Glutes |
 | 🏺 Goblet Squat 🎬 | Adjustable dumbbells on stand | 3 × 15 | 75s | Glutes, Core |
-| 🦵 Nordic Curl | Nordic curl pad | 3 × 5 | 120s | Glutes, Core |
-| 🦵 Nordic Curl Negative | Nordic curl pad | 3 × 5 | 120s | Glutes, Core |
+| 🦵 Nordic Curl 📷 | Nordic curl pad | 3 × 5 | 120s | Glutes, Core |
+| 🦵 Nordic Curl Negative 📷 | Nordic curl pad | 3 × 5 | 120s | Glutes, Core |
 | 🦶 Single-Leg Calf Raise 🎬 | Adjustable dumbbells on stand | 3 × 20 /side | 45s | — |
 
 ### Glutes — 5
@@ -184,8 +184,8 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | 🐞 Dead Bug 🎬 | Bodyweight | 3 × 16 | 40s | — |
 | 🦵 Dip Bar Garhammer Raise 🎬 | Parallel dip bars | 3 × 12 | 60s | — |
 | 🚜 Farmer's Carry 🎬 | Adjustable dumbbells on stand | 3 × 45s | 60s | Forearms, Legs |
-| ⏳ Garhammer Hold | Flat weight bench | 2 × 25s | 60s | — |
-| 🌙 Hollow Hold | Bodyweight | 3 × 20s | 45s | — |
+| ⏳ Garhammer Hold 📷 | Flat weight bench | 2 × 25s | 60s | — |
+| 🌙 Hollow Hold 📷 | Bodyweight | 3 × 20s | 45s | — |
 | 🇱 L-Sit Hold 🎬 | Parallel dip bars | 3 × 20s | 90s | Arms, Shoulders |
 | 🧱 Plank 🎬 | Bodyweight | 3 × 40s | 45s | — |
 | 🔄 Reverse Crunch 🎬 | Bodyweight | 3 × 12 | 45s | — |
@@ -197,7 +197,7 @@ Filed under the **first** of its body parts; "Also works" is the rest. 🎬 = ha
 | Exercise | Equipment | Sets × reps | Rest | Also works |
 | --- | --- | --- | --- | --- |
 | 🌀 Band Rotational Press 🎬 | Resistance bands | 3 × 10 /side | 60s | Core, Shoulders |
-| ↔️ Lateral Shuffle | Bodyweight | 3 × 20 | 45s | Legs, Cardio |
+| ↔️ Lateral Shuffle 📷 | Bodyweight | 3 × 20 | 45s | Legs, Cardio |
 | 🎯 Medicine Ball Chest Pass 🎬 | Medicine ball | 3 × 6 | 90s | Chest, Arms |
 | ✂️ Split Squat Jump 🎬 | Bodyweight | 3 × 6 | 90s | Legs, Glutes |
 | 🦘 Squat Jump 🎬 | Bodyweight | 3 × 12 | 60s | Legs, Glutes |

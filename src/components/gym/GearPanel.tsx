@@ -662,7 +662,9 @@ function ExerciseList({ save }: { save: (p: (c: GymCatalog) => GymCatalog) => vo
                             ? ' (matched by AI)'
                             : e.demo.match === 'close'
                               ? ' — an approximation, not this exact movement'
-                              : ' (pinned by hand)'}.
+                              : e.demo.match === 'photo'
+                                ? ' — a still from its demonstration video; nothing animates this one'
+                                : ' (pinned by hand)'}.
                       </div>
                       <button
                         className="btn btn--ghost btn--small"

@@ -902,18 +902,27 @@ export interface Equipment {
  * the second view of an exercise costs nothing.
  */
 export interface ExerciseDemo {
-  anim: string // animated webp — the movement
-  poster: string // single still frame, for lists and as the animation's placeholder
-  source: string // attribution — "ExerciseDB" or "free-exercise-db"
+  /**
+   * Animated webp — the movement. ABSENT on a `photo` demo: some exercises
+   * exist in no free animation library at all (there is no Garhammer hold
+   * anywhere), and for those a single honest still beats an emoji. Anything
+   * rendering a demo must therefore fall back to `poster` when this is missing.
+   */
+  anim?: string
+  poster: string // single still frame, for lists, as the animation's placeholder — and the whole picture on a `photo`
+  source: string // attribution — "ExerciseDB", "free-exercise-db", "giphy.com", "youtube.com"
   sourceId: string // their exerciseId, so a bad match can be re-pinned by hand
   sourceName: string // their name for it — this is what you check when a match looks wrong
   /**
-   * How this demo was chosen. `close` matters to the UI: the free library is
-   * missing plenty of basics, so rather than show nothing we allow an
-   * approximate demonstration — but it is always LABELLED as approximate, and
-   * the written instructions stay the authority on form.
+   * How this demo was chosen. Two of these matter to the UI. `close`: the free
+   * library is missing plenty of basics, so rather than show nothing we allow
+   * an approximate demonstration — but it is always LABELLED as approximate.
+   * `photo`: there is no animation at all, just one frame lifted from the
+   * demonstration video this exercise already carries (§18l), so the card must
+   * not offer a ▶ that does nothing. In both cases the written instructions
+   * stay the authority on form.
    */
-  match: 'exact' | 'ai' | 'close' | 'manual'
+  match: 'exact' | 'ai' | 'close' | 'manual' | 'photo'
 }
 
 /**

@@ -10,6 +10,12 @@
 // Not every exercise has one: the free ExerciseDB tier is a 1,500-row subset
 // and genuinely lacks some basics (there is no plain "plank" in it). Missing is
 // a normal state, not an error — it falls back to the emoji and says nothing.
+//
+// And some demos are a PHOTO, not an animation (§18l): one frame lifted from
+// the demonstration video the exercise already carries, for the handful of
+// movements no free animation library has ever heard of. It has no `anim`, so
+// there is nothing to play — it renders as a plain picture with no ▶, because a
+// play button that does nothing is worse than no play button.
 import { useState } from 'react'
 import type { ExerciseDemo as Demo } from '../../types'
 
@@ -34,6 +40,25 @@ export function ExerciseDemo({
     return (
       <span className={className} style={{ fontSize: size * 0.62, lineHeight: 1, flex: 'none' }} aria-hidden>
         {emoji}
+      </span>
+    )
+  }
+
+  // a photo has nothing to play: no button, no ▶, no tap target that lies
+  if (!demo.anim) {
+    return (
+      <span className={`gym-demo gym-demo--photo ${className ?? ''}`} style={{ width: size, height: size }} title={demo.sourceName}>
+        <img
+          src={demo.poster}
+          alt={`${demo.sourceName} — a still from the demonstration video`}
+          width={size}
+          height={size}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onError={() => setBroken(true)}
+        />
+        <span className="gym-demo-approx" aria-hidden>📷</span>
       </span>
     )
   }
@@ -73,7 +98,14 @@ export function ExerciseDemo({
  * to admit it, because the written instructions are the authority on form.
  */
 export function DemoCaption({ demo }: { demo?: Demo }) {
-  if (!demo || demo.match !== 'close') return null
+  if (!demo) return null
+  if (demo.match === 'photo')
+    return (
+      <p className="muted" style={{ fontSize: 11, marginTop: 6, lineHeight: 1.35 }}>
+        📷 A still from the demonstration video — nothing animates this one. Tap ▶ to watch it move.
+      </p>
+    )
+  if (demo.match !== 'close') return null
   return (
     <p className="muted" style={{ fontSize: 11, marginTop: 6, lineHeight: 1.35 }}>
       ≈ Closest demo we could find (“{demo.sourceName}”) — near enough for the pattern, but follow the steps above for the
@@ -86,7 +118,8 @@ export function DemoCaption({ demo }: { demo?: Demo }) {
 export function DemoCredit() {
   return (
     <p className="muted" style={{ fontSize: 10, textAlign: 'center', marginTop: 14 }}>
-      Exercise animations from ExerciseDB (oss.exercisedb.dev) and free-exercise-db
+      Exercise animations from ExerciseDB (oss.exercisedb.dev) and free-exercise-db; stills from each movement’s own
+      demonstration video
     </p>
   )
 }

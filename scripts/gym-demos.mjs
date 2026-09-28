@@ -21,6 +21,22 @@
 //      so the model is shown frames of the top few and picks by LOOKING, or
 //      answers "none". Needs the claude CLI; `--no-ai` switches it off entirely.
 //
+//   4. A PHOTO, from the exercise's OWN demonstration video (§18n). When three
+//      libraries and the open web have all failed, the app is still not out of
+//      pictures: that exercise already carries a short YouTube clip that was
+//      chosen and verified as showing this exact movement, and YouTube serves
+//      three frames of every video — hq1, hq2, hq3, sampled about a quarter,
+//      half and three-quarters of the way through — plus the uploader's own
+//      thumbnail. For a fifteen-second demonstration those are pictures of the
+//      movement, already vetted. The model looks at all four and picks the one
+//      that shows the exercise mid-rep, or answers "none": a title card, a
+//      talking head or a logo is worse than an emoji.
+//
+//      It produces a STILL, not an animation — `demo.anim` is absent and the
+//      card renders a plain photo with no ▶, because a play button that does
+//      nothing is a lie. This is the last source on purpose: one frame is worth
+//      less than a loop, so it only ever gets what nothing else could cover.
+//
 // Each source only ever sees what the one before it couldn't match, so nothing
 // already animated gets downgraded to a two-frame flip or a stranger's GIF.
 //
@@ -57,6 +73,7 @@
 //   --key=<rapidapi key>   use the paid v1 tier, ~2,000 exercises (or set EXERCISEDB_KEY)
 //   --no-photos            skip source 2 (the two-frame photo fallback)
 //   --no-web               skip source 3 (the web search)
+//   --no-stills            skip source 4 (a frame from the exercise's own video)
 //   --gif=<ourId>:<url>    use an image YOU found for that exercise (repeatable).
 //                          Neither free library has bird dog, wall sit, hollow
 //                          hold or jumping jacks, and no automatic search can
@@ -105,6 +122,7 @@ const REFRESH = args.includes('--refresh')
 const NO_AI = args.includes('--no-ai')
 const NO_PHOTOS = args.includes('--no-photos')
 const NO_WEB = args.includes('--no-web')
+const NO_STILLS = args.includes('--no-stills')
 const REINDEX = args.includes('--reindex')
 const ONLY = flag('only', null)
 const TO = flag('to', 'storage')
@@ -491,6 +509,115 @@ async function webPass({ targets, decided }) {
   }
 }
 
+// --- source 4: a photo, from the movement's own demonstration video ----------
+//
+// The last resort, and the one that finally clears the board. Everything that
+// reaches this pass has already been turned down by 1,500 GIFs, 873 photo
+// pairs and the open web — but it is not picture-less: §18n gave it a short
+// YouTube clip that was checked as showing this exact movement, and YouTube
+// serves frames of every video at fixed URLs. hq1/hq2/hq3 are sampled roughly
+// a quarter, half and three-quarters of the way in; `maxresdefault` is the
+// uploader's chosen thumbnail, which is sometimes the best shot of the
+// movement and sometimes a face with an arrow on it. So all four are offered
+// and the model picks by LOOKING, exactly as in the web pass.
+//
+// The result is a still. There is no honest way to animate it: two frames a
+// second apart in the middle of a rep are not a start and an end, they are two
+// arbitrary positions, and flipping between them would invent a movement
+// nobody performed.
+
+/** 280 px: this is the ONLY picture these exercises get, and it is a photo
+ *  rather than a line drawing, so it is allowed 2× its 140 px display size. */
+const STILL_PX = 280
+
+/** The frames YouTube exposes for any video id, worst-case first. */
+const FRAME_NAMES = ['hq1', 'hq2', 'hq3', 'maxresdefault']
+
+async function stillPass({ targets, decided }) {
+  const dir = join(WORK_DIR, 'frames')
+  mkdirSync(dir, { recursive: true })
+
+  for (const ex of targets) {
+    const vid = ex.video?.id
+    if (!vid) {
+      console.log(`  ·   ${ex.name} — no demonstration video either, so there is nothing to take a frame from`)
+      continue
+    }
+
+    const shots = []
+    for (const [i, name] of FRAME_NAMES.entries()) {
+      const url = `https://i.ytimg.com/vi/${vid}/${name}.jpg`
+      try {
+        const buf = await download(url)
+        // YouTube answers 404s with a 120×90 grey placeholder rather than an
+        // error, so a frame that is too small to be a frame is dropped here
+        const meta = await sharp(buf).metadata()
+        if ((meta.width ?? 0) < 200) continue
+        const p = join(dir, `${ex.id}-${name}.png`)
+        await sharp(buf).resize({ width: 320, withoutEnlargement: true }).png().toFile(p)
+        shots.push({ n: i + 1, name, url, title: `${name} — ${name === 'maxresdefault' ? "the uploader's thumbnail" : 'a frame from the video'}`, paths: [p] })
+      } catch {
+        // a frame we cannot open is a frame we cannot judge
+      }
+    }
+    if (shots.length === 0) {
+      console.log(`  ✗  ${ex.name} — no usable frames came back`)
+      continue
+    }
+
+    const pick = askClaudeToPickFrame(ex, shots)
+    const hit = shots.find((s) => s.n === pick)
+    if (!hit) {
+      console.log(`  ✗  ${ex.name} — no frame actually shows the movement`)
+      continue
+    }
+    decided.set(ex.id, {
+      row: { exerciseId: vid, name: ex.video.title || ex.name, stillUrl: hit.url, still: true },
+      how: 'photo',
+      source: 'youtube.com',
+    })
+    console.log(`  📷  ${ex.name} → ${hit.name} of ${vid}`)
+  }
+}
+
+/** One photo per candidate; the model answers with a number, or 0 for none. */
+function askClaudeToPickFrame(ex, shots) {
+  const blocks = shots.map((s) => `Candidate ${s.n} — ${s.title}\n  ${s.paths[0]}`).join('\n\n')
+
+  const prompt = `A personal training app needs a still PHOTOGRAPH of one exercise. No animation library has this movement, so the fallback is a frame from the short demonstration video the app already links for it — that video definitely shows the right exercise, but any given frame might be the intro card, the presenter talking, or a logo.
+
+THE EXERCISE: "${ex.name}"
+How it is performed: ${String(ex.how ?? '').slice(0, 300)}
+Muscles: ${(ex.parts ?? []).join(', ')}
+
+Below are the candidate frames, as image files. READ EVERY IMAGE FILE with the Read tool before answering — you are judging what is in the pictures.
+
+${blocks}
+
+Pick the ONE frame that most clearly shows a person IN the exercise position, where someone who had never seen this movement would learn something from the picture. Prefer a frame mid-movement over a person standing still, and prefer a clear view of the whole body over a close-up.
+
+DISQUALIFY any frame carrying large overlaid text — a title, a headline, a channel name across the picture. The candidate labelled "the uploader's thumbnail" is the one designed to be clicked on, so it is the likeliest to be a title card with a word over the athlete; hold it to the same standard as the rest and take it only when it genuinely shows the movement more clearly than the video's own frames do. Small burnt-in captions or a corner watermark are fine.
+
+Answer 0 — meaning none — if every frame is a title card, a logo, a talking head, a blank or dark frame, or otherwise shows nothing useful about the movement. A bad picture is worse than the emoji it replaces.
+
+Reply with ONLY a JSON object: {"pick": <candidate number, or 0>}`
+
+  try {
+    const out = execFileSync('claude', ['--model', 'opus', '--effort', 'medium', '-p', prompt], {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'inherit'],
+    })
+    const a = out.indexOf('{')
+    const b = out.lastIndexOf('}')
+    if (a === -1 || b === -1) return 0
+    return Number(JSON.parse(out.slice(a, b + 1)).pick) || 0
+  } catch (e) {
+    console.log(`  ⚠️  claude couldn't be reached (${e.message})`)
+    return 0
+  }
+}
+
 /** Show the model the frames and let it answer with a number, or 0 for none. */
 function askClaudeToLook(ex, shots) {
   const blocks = shots
@@ -656,6 +783,7 @@ async function download(url) {
 
 /** GIF → an animated webp (the movement) and a single still (the list thumbnail). */
 async function convert(row) {
+  if (row.still) return convertStill(row.stillUrl)
   if (row.frames) return convertPhotos(row.frames)
   if (row.byHand) return convertAny(row.gifUrl)
   const gif = await download(row.gifUrl)
@@ -713,6 +841,19 @@ async function thin(buf, meta, box) {
  * the two sources apart. A second a frame is slow enough to read as "this
  * position, then that one" rather than a flicker.
  */
+/**
+ * One photograph, and deliberately no `anim`. `fit: 'inside'` rather than the
+ * `cover` the photo pairs use: a video frame is 16:9 and cropping it square
+ * is how you cut the legs off a hamstring curl.
+ */
+async function convertStill(url) {
+  const buf = await download(url)
+  const poster = await sharp(buf)
+    .resize({ width: STILL_PX, height: STILL_PX, fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 74 })
+    .toBuffer()
+  return { anim: null, poster, original: buf.length }
+}
 async function convertPhotos(urls) {
   const shots = await Promise.all(urls.map(download))
   const frames = await Promise.all(
@@ -893,6 +1034,18 @@ async function main() {
     console.log(`\n🌐 ${leftovers.length} left — the web search needs the model to judge what it finds, so --no-ai skips it.`)
   }
 
+  // 4. nothing animated it. Take a PHOTO instead, from the demonstration video
+  //    the exercise already carries — a still of the right movement beats an
+  //    emoji, and that clip was already verified as the right movement.
+  leftovers = targets.filter((e) => !decided.has(e.id))
+  if (leftovers.length > 0 && !NO_STILLS && !NO_AI && !DRY) {
+    mkdirSync(WORK_DIR, { recursive: true })
+    console.log(`\n📸 ${leftovers.length} with no animation anywhere — taking a still from each one's own video\n`)
+    await stillPass({ targets: leftovers, decided })
+  } else if (leftovers.length > 0 && !NO_STILLS && NO_AI) {
+    console.log(`\n📸 ${leftovers.length} left — a frame is only worth keeping if the model has looked at it, so --no-ai skips it.`)
+  }
+
   saveCache()
   console.log(`\n📊 Matched ${decided.size} of ${targets.length}`)
   if (DRY) {
@@ -915,16 +1068,25 @@ async function main() {
     try {
       const { anim, poster, original } = await convert(row)
       const [animUrl, posterUrl] = await Promise.all([
-        upload(`${ourId}.webp`, anim),
+        anim ? upload(`${ourId}.webp`, anim) : Promise.resolve(null),
         upload(`${ourId}-poster.webp`, poster),
       ])
-      ex.demo = { anim: animUrl, poster: posterUrl, source, sourceId: row.exerciseId, sourceName: row.name, match: how }
+      // no `anim` key at all on a still — Firestore will not store undefined,
+      // and the app reads a missing one as "this is a photo, do not offer ▶"
+      ex.demo = {
+        ...(animUrl ? { anim: animUrl } : {}),
+        poster: posterUrl,
+        source,
+        sourceId: row.exerciseId,
+        sourceName: row.name,
+        match: how,
+      }
       // a built-in earning a demo becomes a real catalog row from now on
       if (!stored.has(ex.id)) {
         exercises.push(ex)
         stored.add(ex.id)
       }
-      animBytes += anim.length
+      animBytes += anim?.length ?? 0
       posterBytes += poster.length
       originalBytes += original
       done += 1
