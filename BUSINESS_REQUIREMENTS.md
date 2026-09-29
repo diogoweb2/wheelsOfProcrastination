@@ -347,6 +347,23 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **Devil Fruits 🍇** = the diamond currency, per profile. Sources: first official topic pass + admin bonus grants. Shown in the topbar next to Berries (the admin sees Ben's count on his own topbar too).
 - **Must-do integration**: every unlocked topic is auto-synced into the owner's **daily must-do checklist** ("<emoji> <topic> quiz training", medium effort, ⚡ high priority, `required: true`) — never a wheel segment, since study shouldn't depend on a spin. The checklist row gets a **🏫** button straight into that topic's training. Locking archives the habit. Quiz habits created before this rule are promoted to must-dos on the next sync.
 
+## 14b. School quiz (the 🏫 tab of the Quiz app, `/academy/school`)
+
+**The material his teacher actually set, painted One Piece.** A separate category from the academy proper, because the academy is a game Dad runs and this is homework — the game must not be able to change what school asks of him, and school must not be able to hand out the game's prizes.
+
+- **Its own URL** (§1c): `/academy/school`. School topics are *removed* from `/academy/topics`, so a topic is on exactly one page.
+- **A school topic is a `QuizTopic` with `school: true`** (`src/logic/quiz.ts`), plus `source` (the class + the text it came from, printed on the card) and usually `optionCount`. What the flag buys:
+  - **Berries 🪙 and nothing else.** No Devil Fruit, no CONQUERED stamp to chase, **no official final test** — the Parent desk hides the Final Test button and the 🍇 grant/revoke pair for these topics. School already runs the real test; this is the studying.
+  - **Never the prize for passing something else** — `nextTopicToUnlock` skips school topics, so conquering Canada Geography can't "reward" him with homework.
+  - **No daily must-do.** `syncQuizTasks` leaves school topics off the checklist: a unit ends, and a habit that outlives the unit is just noise (an already-created one archives itself on the next sync).
+  - Otherwise it is ordinary training — same adaptive picker, same spaced repetition, same half-Berries-on-repeat, same once-per-question-per-day cap, and a **🧪 Mock test** for a dry run before the real one at school.
+- **Retiring a finished unit**: the Parent desk's 🔓/🔒 toggle still works on a school topic. Locking it greys the card (the work he did stays visible), closes the way in and takes its questions out of the Question of the Day — which is how a unit gets put away once the class has moved on.
+- **Three options, not four** (`optionCount: 3` on the topic, read by `pickChoiceOptions`). Still sampled from a bigger pool, so the set and the position change every showing.
+- **Questions teach USAGE, not definitions.** Each word gets two questions: **(a)** a scene from his world (One Piece / Blue Lock) → *which word is this?*, distractors drawn from the other words on the same worksheet so the contrast is the lesson; **(b)** the word already inside a sentence → *what does it mean HERE?* — which is the only way to teach the two-sense words (`concussion` = shock **and** brain injury, `bore` = carried **and** made-you-yawn, `stakes` = what you can lose **and** wooden posts, `avalanche` literal **and** figurative). The `funFact` on a miss is the plain-English definition plus where he'll meet the word again.
+- **Illustrations cost nothing**: questions point `image` at stickers already shipped in `public/stickers/` (the album's art). No new files (see CLAUDE.md on image storage). The picture drifts in and keeps breathing (`.quiz-illus`), the subject emoji bobs and the card carries a slow chalk-dust sheen (`.school-card`) — all disabled under `prefers-reduced-motion`.
+- **Live unit** — `asiad-vocab`: *"All Summer in a Day"* (Ray Bradbury), ELA. 25 vocabulary words × 2 questions = **50** (`src/quiz/asiadVocabSeed.ts`).
+- **Adding the next unit**: one seed file in `src/quiz/`, one line in `ALL_SEEDS` (`src/store/cloud.ts`), one entry in `QUIZ_TOPICS` with `owner: 'ben'`, `track: 'school'`, `school: true`, `optionCount: 3`. It auto-unlocks once and appears on the School tab; nothing else to register.
+
 ## 15. Store pages & Treasures (prizes)
 
 - Store pages: **🖼️ Wallpapers** (mystery gacha), **🍇 Treasures**, and **🧾 Orders** (every treasure ever ordered + its paid/pending status). Each profile shops from its OWN shelf with its OWN 🍇; prize logos live in `public/prizes/` and spin like the Luffy tab icon, and a prize **without** a logo spins its emoji instead.

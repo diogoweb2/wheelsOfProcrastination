@@ -1122,6 +1122,59 @@ input, select { font-family: inherit; }
 .quiz-answer--right .quiz-answer-text { color: var(--green); }
 .quiz-answer-text--big { font-size: 24px; line-height: 1.25; }
 
+/* --- 🏫 School quiz (§14b) -------------------------------------------------
+   Homework has to look like the least boring thing on the page, so the card
+   gets a slow chalk-dust sheen and the subject emoji bobs. */
+.school-card {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--bronze);
+}
+.school-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgb(255 255 255 / 9%) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: school-sheen 6s ease-in-out infinite;
+}
+@keyframes school-sheen {
+  0%, 70% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+.school-emoji {
+  font-size: 34px;
+  line-height: 1;
+  animation: float 3.4s ease-in-out infinite;
+}
+
+/* A question's illustration: the character drifts in and then keeps breathing,
+   so a vocabulary drill has something alive on it. */
+.quiz-illus {
+  width: 100%;
+  max-height: 170px;
+  object-fit: contain;
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 12px;
+  background:
+    radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--yellow) 26%, transparent) 0%, transparent 62%),
+    #ffffff0f;
+  animation: quiz-illus-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4), float 4.5s ease-in-out 0.45s infinite;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 40%));
+}
+@keyframes quiz-illus-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .school-card::after,
+  .school-emoji,
+  .quiz-illus { animation: none; }
+}
+
 /* prize logos spin like the Luffy tab icon */
 .prize-logo { object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; flex-shrink: 0; }
 

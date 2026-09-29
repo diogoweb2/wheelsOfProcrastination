@@ -21,6 +21,18 @@ export interface QuizTopic {
   level?: number // position in the ladder, shown as "LEVEL n"
   /** One-line promise of what you can do once this level is conquered. */
   outcome?: string
+  /**
+   * §14b — a SCHOOL QUIZ: something he was actually set in class, not part of
+   * the academy's own ladder. Berries and nothing else. No Devil Fruit, no
+   * official final test, never the prize another topic's pass hands out, and
+   * no daily must-do — a unit of schoolwork is over when the unit is over, and
+   * a habit that outlives it is just noise.
+   */
+  school?: boolean
+  /** How many options a choice question shows here. Defaults to CHOICE_OPTIONS_SHOWN. */
+  optionCount?: number
+  /** Where the material came from, printed on the card ("All Summer in a Day"). */
+  source?: string
 }
 
 /** Sections on the Academy screen, in display order. */
@@ -31,6 +43,11 @@ export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
     blurb: 'Six levels, vendor-neutral. Pass a level’s final test to unlock the next one.',
   },
   { id: 'tooling', title: '🧰 Tooling & day job', blurb: 'The specific tools you actually type into.' },
+  {
+    id: 'school',
+    title: '🏫 School quiz',
+    blurb: 'Real homework, pirate paint. Berries only — no Devil Fruits, no final test.',
+  },
 ]
 
 export const QUIZ_TOPICS: QuizTopic[] = [
@@ -100,6 +117,19 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     title: 'Logic',
     emoji: '🧩',
     description: 'Riddles, patterns and puzzles. No math calculations, promise.',
+    targetCount: 50,
+  },
+  // --- Ben: school quizzes (§14b) — the stuff his teacher actually set ---
+  {
+    id: 'asiad-vocab',
+    owner: 'ben',
+    title: 'All Summer in a Day — Words',
+    emoji: '☔',
+    description: 'The 25 vocabulary words, used in real moments instead of memorised off a sheet.',
+    source: 'ELA · “All Summer in a Day” by Ray Bradbury',
+    track: 'school',
+    school: true,
+    optionCount: 3,
     targetCount: 50,
   },
   // --- Diogo: the Agent Engineer path (vendor-neutral, six levels) ---
@@ -274,6 +304,7 @@ export function nextTopicToUnlock(d: AppData, ownerId: string, passedTopicId: st
   return topicsFor(ownerId).find(
     (t) =>
       !t.comingSoon &&
+      !t.school && // homework is never the prize for passing something else
       t.id !== passedTopicId &&
       !d.quiz.unlockedTopics.includes(t.id) &&
       (!t.unlockAfter || d.quiz.passedTopics.includes(t.unlockAfter)),
@@ -775,7 +806,11 @@ export const CHOICE_OPTIONS_SHOWN = 4
  * ones can be guessed without knowing anything. If the sample leaves the answer
  * clearly the longest, we swap in a beefier distractor from the pool.
  */
-export function pickChoiceOptions(q: QuizQuestion, shown: number = CHOICE_OPTIONS_SHOWN): string[] {
+export function optionsShownFor(topicId: string): number {
+  return topicById(topicId)?.optionCount ?? CHOICE_OPTIONS_SHOWN
+}
+
+export function pickChoiceOptions(q: QuizQuestion, shown: number = optionsShownFor(q.topicId)): string[] {
   const pool = q.choices ?? []
   const answer = q.answer
   if (!answer) return shuffle(pool).slice(0, shown)
@@ -824,7 +859,9 @@ export const QUIZ_TASK_PREFIX = 'quiz-'
 export function syncQuizTasks(d: AppData, ownerId: string): void {
   for (const t of topicsFor(ownerId)) {
     const id = QUIZ_TASK_PREFIX + t.id
-    const unlocked = d.quiz.unlockedTopics.includes(t.id)
+    // §14b — a school quiz never becomes a forever-daily must-do: the unit ends,
+    // the habit wouldn't. An already-created one gets archived on the next sync.
+    const unlocked = d.quiz.unlockedTopics.includes(t.id) && !t.school
     const task = d.tasks.find((x) => x.id === id)
     if (unlocked) {
       if (!task) {

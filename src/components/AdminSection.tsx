@@ -75,7 +75,8 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
               topic={t}
               targetId={KID_ID}
               targetData={kidData}
-              onTest={() => setSession({ kind: 'ben-official', topicId: t.id })}
+              // §14b — a school quiz has no official final test: school runs that part
+              onTest={t.school ? undefined : () => setSession({ kind: 'ben-official', topicId: t.id })}
               onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
               onManage={() => setManaging(t.id)}
             />
@@ -866,6 +867,7 @@ function AdminTopicCard({
             ⚔️ Preview
           </button>
         )}
+        {!topic.school && (
         <button
           className="btn btn--blue btn--small"
           style={{ flex: 1 }}
@@ -883,6 +885,8 @@ function AdminTopicCard({
         >
           +1 🍇
         </button>
+        )}
+        {!topic.school && (
         <button
           className="btn btn--ghost btn--small"
           disabled={!targetData || (targetData?.economy.devilFruits ?? 0) <= 0}
@@ -900,6 +904,7 @@ function AdminTopicCard({
         >
           −1 🍇
         </button>
+        )}
         <button
           className="btn btn--ghost btn--small"
           disabled={!targetData}

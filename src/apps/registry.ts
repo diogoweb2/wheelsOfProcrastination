@@ -104,7 +104,10 @@ export const APPS: AppDef[] = [
     img: '/app-academy.webp',
     tint: ['#2e63a4', '#12315a'],
     tabs: [
-      { id: 'topics', label: 'Topics', icon: '🏫' },
+      { id: 'topics', label: 'Topics', icon: '🎓' },
+      // §14b — school quizzes are their own category, so they get their own URL
+      // (/academy/school) rather than a section buried in the topic list.
+      { id: 'school', label: 'School', icon: '🏫' },
       { id: 'study', label: 'Study', icon: '📖' },
       { id: 'progress', label: 'Progress', icon: '📊' },
     ],

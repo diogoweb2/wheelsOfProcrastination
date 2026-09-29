@@ -73,10 +73,15 @@ export function QuizScreen({
     return <QuestionManager topicId={manage} onClose={() => setManage(null)} />
   }
 
+  // §14b — school quizzes have their own tab (/academy/school), so the academy's
+  // own topic list leaves them out entirely rather than showing them twice.
+  const academyTopics = topics.filter((t) => !t.school)
+  const schoolTopics = topics.filter((t) => t.school)
+
   // topics grouped into their tracks, with anything untracked falling through last
   const sections = [
-    ...QUIZ_TRACKS.map((tr) => ({ ...tr, items: topics.filter((t) => t.track === tr.id) })),
-    { id: '', title: '', blurb: '', items: topics.filter((t) => !t.track) },
+    ...QUIZ_TRACKS.map((tr) => ({ ...tr, items: academyTopics.filter((t) => t.track === tr.id) })),
+    { id: '', title: '', blurb: '', items: academyTopics.filter((t) => !t.track) },
   ].filter((s) => s.items.length > 0)
 
   return (
@@ -121,9 +126,116 @@ export function QuizScreen({
           </div>
         ))}
 
+      {tab === 'school' && (
+        <SchoolShelf
+          topics={schoolTopics}
+          data={data}
+          bank={quizBank}
+          onStart={(mode, topicId) => setSession({ mode, topicId })}
+          onManage={isAdmin ? setManage : undefined}
+        />
+      )}
+
       {tab === 'study' && <StudyShelf topics={topics} bank={quizBank} onOpen={setStudy} />}
 
       {tab === 'progress' && <ProgressBoard topics={topics} data={data} bank={quizBank} />}
+    </div>
+  )
+}
+
+// --- School tab: the quizzes his teacher actually set (§14b) -----------------
+
+/**
+ * Homework, pirate-painted. Everything here pays Berries and nothing else — no
+ * Devil Fruit, no final test, no daily must-do — so the card is deliberately
+ * quieter than a TopicCard: what the unit is, how much of it he owns, and one
+ * button in.
+ */
+function SchoolShelf({
+  topics,
+  data,
+  bank,
+  onStart,
+  onManage,
+}: {
+  topics: QuizTopic[]
+  data: AppData
+  bank: QuizQuestion[]
+  onStart: (mode: QuizMode, topicId: string) => void
+  onManage?: (topicId: string) => void
+}) {
+  if (topics.length === 0) {
+    return (
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 44 }}>🏫</div>
+        <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+          No school quiz right now. When a unit comes home, it shows up here.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="h2" style={{ marginBottom: 2 }}>🏫 School quiz</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        Real class material, One Piece paint. Pays Berries 🪙 like any training — no Devil Fruits and no final test,
+        because school already has one of those.
+      </p>
+      {topics.map((t) => {
+        const pool = activeQuestions(bank, t.id)
+        const mastered = pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length
+        const dueCount = duePool(pool, data.quiz.stats).length
+        const pct = pool.length > 0 ? Math.round((mastered / pool.length) * 100) : 0
+        // A finished unit is retired by locking it from the Parent desk — the
+        // card stays (so the work he did is still visible) but the way in closes.
+        const open = data.quiz.unlockedTopics.includes(t.id)
+        return (
+          <div key={t.id} className="card school-card" style={{ marginBottom: 12, opacity: open ? 1 : 0.65 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="school-emoji">{t.emoji}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 900, fontSize: 16 }}>{t.title}</div>
+                {t.source && <div className="muted" style={{ fontSize: 11 }}>{t.source}</div>}
+              </div>
+              {pct === 100 && <span className="chip" style={{ background: 'var(--green)', color: '#06121f' }}>✔ all learned</span>}
+            </div>
+            <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>{t.description}</div>
+            {pool.length > 0 && open && (
+              <>
+                <div className="quiz-bar" title={`${mastered}/${pool.length} learned`}>
+                  <div className="quiz-bar-fill" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="muted" style={{ fontSize: 11, marginTop: 3 }}>
+                  {mastered}/{pool.length} learned
+                  {dueCount > 0 ? ` · ${dueCount} to practise today` : ' · all caught up today 😴'}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                  <button className="btn btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); onStart('training', t.id) }}>
+                    📚 Study
+                  </button>
+                  <button className="btn btn--blue btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); onStart('simulation', t.id) }}>
+                    🧪 Mock test
+                  </button>
+                  {onManage && (
+                    <button className="btn btn--ghost btn--small" style={{ flexBasis: '100%' }} onClick={() => { sfx.click(); onManage(t.id) }}>
+                      📋 Review the {pool.length} questions
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+            {pool.length === 0 && (
+              <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>🚧 The questions for this unit aren’t written yet.</div>
+            )}
+            {pool.length > 0 && !open && (
+              <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+                🔒 This unit is finished and put away. Ask Dad to open it again.
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -516,12 +516,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
         {q.prompt}
       </div>
       {q.image && (
-        <img
-          src={q.image}
-          alt="question illustration"
-          draggable={false}
-          style={{ width: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 10, background: '#ffffff10', padding: 8, marginBottom: 12 }}
-        />
+        <img className="quiz-illus" src={q.image} alt="question illustration" draggable={false} />
       )}
       {q.type === 'choice' && <ChoiceQ q={q} onAnswer={onAnswer} instantMark={instantMark} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
