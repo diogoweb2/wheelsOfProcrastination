@@ -752,6 +752,16 @@ export function nextTestQuestion(
 export const CHOICE_OPTIONS_SHOWN = 4
 
 /**
+ * …and in a FINAL TEST, mock or official, one more. Training is where you learn
+ * the material, so four is kind; a test is where you prove it, and a fifth
+ * option takes a pure guess from 25 % down to 20 % — the difference between a
+ * pass you earned and a pass you got lucky into. The mock uses the same number
+ * on purpose: a rehearsal that is easier than the real thing tells you nothing.
+ * A question with fewer choices than this simply shows all it has.
+ */
+export const TEST_CHOICE_OPTIONS_SHOWN = 5
+
+/**
  * Pick the options for one showing of a choice question.
  *
  * `q.choices` is a *pool* — it may hold far more wrong answers than fit on

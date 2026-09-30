@@ -25,6 +25,8 @@ import {
   lastReviewAttempt,
   nextTestQuestion,
   pickChoiceOptions,
+  CHOICE_OPTIONS_SHOWN,
+  TEST_CHOICE_OPTIONS_SHOWN,
   pickTraining,
   reviewBreakdown,
   reviewTopicIds,
@@ -337,7 +339,14 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       )}
 
       {question && !feedback && (
-        <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
+        <QuestionCard
+          key={question.id}
+          q={question}
+          fresh={isFresh(question, stats[question.id])}
+          onAnswer={submit}
+          instantMark={mode === 'training'}
+          optionsShown={mode === 'training' ? CHOICE_OPTIONS_SHOWN : TEST_CHOICE_OPTIONS_SHOWN}
+        />
       )}
 
       {/* training: only WRONG answers pause the flow, so the right answer sinks in */}
@@ -503,7 +512,20 @@ function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTest
 
 // --- question renderers ----------------------------------------------------
 
-export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
+export function QuestionCard({
+  q,
+  fresh,
+  onAnswer,
+  instantMark,
+  optionsShown = CHOICE_OPTIONS_SHOWN,
+}: {
+  q: QuizQuestion
+  fresh?: boolean
+  onAnswer: (correct: boolean, given?: Given) => void
+  instantMark: boolean
+  /** Choice questions only: 4 in training and the Question of the Day, 5 in a final test. */
+  optionsShown?: number
+}) {
   return (
     <div className="card">
       {fresh && (
@@ -523,7 +545,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
           style={{ width: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 10, background: '#ffffff10', padding: 8, marginBottom: 12 }}
         />
       )}
-      {q.type === 'choice' && <ChoiceQ q={q} onAnswer={onAnswer} instantMark={instantMark} />}
+      {q.type === 'choice' && <ChoiceQ q={q} onAnswer={onAnswer} instantMark={instantMark} shown={optionsShown} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
       {q.type === 'match' && <MatchQ q={q} onAnswer={onAnswer} />}
       {q.type === 'order' && <OrderQ q={q} onAnswer={onAnswer} />}
@@ -531,8 +553,8 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
   )
 }
 
-function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
-  const options = useMemo(() => pickChoiceOptions(q), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
+function ChoiceQ({ q, onAnswer, instantMark, shown }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean; shown: number }) {
+  const options = useMemo(() => pickChoiceOptions(q, shown), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [picked, setPicked] = useState<string | null>(null)
   return (
     <div style={{ display: 'grid', gap: 8 }}>
