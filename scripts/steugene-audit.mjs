@@ -7,29 +7,11 @@
 // can actually spell the answer, a walk-through on every question, a YouTube
 // id of the right shape, and a bench long enough for the longest lesson.
 //
-// The checks are TypeScript (they share the app's own types), so Vite — which
-// is already here — bundles them to a temp file and we import that. No loader
-// flag, no extra dependency.
-import { build } from 'vite'
-import { mkdtempSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+// The checks are TypeScript (they share the app's own types), so `loadTs`
+// bundles them with Vite and imports the result. No loader flag, no extra
+// dependency.
+import { fileURLToPath } from 'node:url'
+import { loadTs } from './lib/se-bundle.mjs'
 
-const entry = fileURLToPath(new URL('./steugene-audit.entry.ts', import.meta.url))
-const outDir = mkdtempSync(join(tmpdir(), 'se-audit-'))
-
-await build({
-  configFile: false,
-  logLevel: 'error',
-  build: {
-    ssr: entry,
-    outDir,
-    emptyOutDir: false,
-    minify: false,
-    rollupOptions: { output: { entryFileNames: 'audit.mjs', format: 'es' } },
-  },
-})
-
-const { audit } = await import(pathToFileURL(join(outDir, 'audit.mjs')).href)
-process.exit(audit() ? 0 : 1)
+const { audit } = await loadTs(fileURLToPath(new URL('./steugene-audit.entry.ts', import.meta.url)))
+process.exit((await audit(process.argv.includes('--verbose'))) ? 0 : 1)

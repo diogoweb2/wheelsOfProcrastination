@@ -1795,7 +1795,30 @@ Five block kinds, and nothing else (`src/steugene/types.ts`): **explain** (short
 
 Drawings are a closed set of six inline-SVG renderers (`SeArtwork.tsx`): number line, fraction bar, fraction circle, integer counters, balance scale, comparison bars. One line to author, which is the only reason nearly every card has a picture. No files in `public/`.
 
-A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the bench). The bench is deliberately bigger than the spine: see §24d. **Live pack: `math-rational`** — 14 core blocks, 14 extra.
+A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the bench). The bench is deliberately bigger than the spine: see §24d.
+
+**Every subtopic in the year has one.** `math-rational` is hand-written and is the reference for the rest; the other 104 are seeded by `npm run se:seed` (§24k) and sit in `src/steugene/packs/generated/`. Hand-written always wins over generated for the same id, so correcting a generated pack by hand is just moving it up a directory.
+
+### 24k. Seeding the year — `npm run se:seed`
+
+Writing 105 packs by hand is not a plan, so the rest of the year is generated, **once, at build time, into committed TypeScript**. Not rows in a database: a lesson has to be reviewable in a diff, correctable by hand, and shipped in the bundle so his tablet has it offline. A model wrote it; the repo owns it.
+
+- Six calls per subtopic, in parallel, each with a different angle — *teach · basics · applied · build · deeper · games* — because a model asked for fifty cards in one breath writes the last twenty carelessly, and one bad call then costs a sixth of a subtopic instead of all of it.
+- Plus one YouTube pass (§24g) and one call that writes two questions per video.
+- Everything goes through the **same validator** as the in-app generator (`scripts/lib/se-generate.mjs`), and anything that does not survive it is dropped.
+- **Resumable**: a subtopic with a file is skipped, so a dropped connection costs nothing. `--force` rewrites, `HAND_WRITTEN` never is.
+- Seeded with `anthropic/claude-haiku-5.5` — chosen on price per quality (~US$0.02 a subtopic, about $2 for the year). The in-app "generate more" button (§24h) keeps using whatever model is set in `app/aiConfig`.
+- Packs **load on demand**. 105 of them is ~4 MB of lesson content; bundling it would quadruple everyone's download and push one asset past the service worker's 2 MiB per-file precache limit, costing the tablet its offline mode. Each pack is its own chunk instead (`import.meta.glob`), fetched the first time he opens that subtopic. `hasPack` answers "is there one" without fetching; `ensurePack` fetches.
+
+### 24l. Checking the marking — `npm run se:audit` and `npm run se:verify`
+
+Two passes, because "well formed" and "right" are different questions and only the first one is a schema.
+
+**`se:audit`** is structural: three options, an answer index in range, no two options reading the same, tiles that can actually spell the answer, a walk-through on every question, a real YouTube id, no `order` game whose values tie. Structural failures fail the run. A bench shorter than a 60-minute lesson is a *warning* — a content backlog, not a bug, and the estimates are "already knows it" time while his real pace runs ~1.4× (§18z).
+
+**`se:verify`** is semantic, and it is not optional. A generator produces mis-keyed answers at a real rate — the first pack sampled had **4 wrong keys in 36 questions**, including one whose `why` sentence described a different option than the one marked correct. That is not a cosmetic bug here: §24f means he cannot re-answer, so a wrong key records his *correct* answer as a mistake, seals the question away, and puts it in front of me as something he needs help with. One bad key costs all three.
+
+So every question goes to the model a second time, cold, with an adversarial brief: is the marked answer factually right, is exactly one option defensibly correct, does `why` agree with the key, is the question coherent, does a `build` answer exactly answer its prompt. A sound question with the wrong key is **corrected**; anything ambiguous, incoherent or unconvincing is **deleted**. A batch the checker will not answer is split and retried down to single questions, and anything still unanswered is reported rather than quietly passed — "we could not look" must never become "it is fine". There are 5000 questions; losing the doubtful ones costs nothing and makes every survivor trustworthy.
 
 ### 24c. It reads to him
 

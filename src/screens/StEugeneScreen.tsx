@@ -6,7 +6,7 @@
 //   /steugene7/lesson    the lesson in flight
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { sfx } from '../audio'
@@ -20,7 +20,7 @@ import {
   type SeSubject,
   type SeTerm,
 } from '../logic/steugene'
-import { packFor, writtenSubtopics } from '../steugene/packs'
+import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
 import { SE_LENGTHS } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { speak } from '../lib/speak'
@@ -171,16 +171,23 @@ function TopicSheet({
   setTab: (tab: string) => void
 }) {
   const { data, seDesk, seStart, seAskAi, seSetMinutes } = useStore()
+  const [opening, setOpening] = useState(false)
   const where = seFind(subtopicId)
-  const pack = packFor(subtopicId)
+  const written = hasPack(subtopicId)
   const stat = data.steugene.stats[subtopicId]
   const asks = seDesk.requests.filter((r) => r.subtopicId === subtopicId)
   const pending = asks.filter((r) => r.status === 'pending')
   const locked = data.steugene.locks.filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
   if (!where) return null
 
-  const start = () => {
+  // The pack is its own chunk (see steugene/packs/generated), so it has to
+  // arrive before the lesson can be dealt. On wifi this is a blink; on his
+  // tablet's first run of a new unit it is a second, and saying so beats a
+  // button that looks broken.
+  const start = async () => {
     sfx.fanfare()
+    setOpening(true)
+    await ensurePack(subtopicId)
     seStart(subtopicId)
     onClose()
     setTab('lesson')
@@ -223,9 +230,9 @@ function TopicSheet({
           ))}
         </div>
 
-        {pack ? (
-          <button className="btn btn--blue" onClick={start}>
-            ▶️ Start the lesson
+        {written ? (
+          <button className="btn btn--blue" disabled={opening} onClick={() => void start()}>
+            {opening ? 'Getting it ready…' : '▶️ Start the lesson'}
           </button>
         ) : (
           <p className="muted" style={{ marginTop: 8 }}>
@@ -299,6 +306,7 @@ function Verdicts({ subtopicId }: { subtopicId: string }) {
 function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
   const { data, seStart } = useStore()
   const [subjectId, setSubjectId] = useState<string | null>(null)
+  const [opening, setOpening] = useState(false)
   const [i, setI] = useState(0)
   const list: SeSubTopic[] = useMemo(() => (subjectId ? seSubtopicsOf(subjectId) : []), [subjectId])
   const here = list[i]
@@ -378,15 +386,22 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
       <button
         className="btn btn--blue"
         style={{ marginTop: 14 }}
-        disabled={!here || !packFor(here.id)}
+        disabled={!here || !hasPack(here.id) || opening}
         onClick={() => {
           if (!here) return
           sfx.fanfare()
-          seStart(here.id)
-          setTab('lesson')
+          setOpening(true)
+          void ensurePack(here.id).then(() => {
+            seStart(here.id)
+            setTab('lesson')
+          })
         }}
       >
-        {here && packFor(here.id) ? '✅ That is the one — make me a lesson' : 'Nothing written for this one yet'}
+        {!here || !hasPack(here.id)
+          ? 'Nothing written for this one yet'
+          : opening
+            ? 'Getting it ready…'
+            : '✅ That is the one — make me a lesson'}
       </button>
       {data.steugene.run && (
         <p className="muted" style={{ marginTop: 10 }}>
@@ -401,7 +416,21 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
 
 function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
   const { data } = useStore()
-  if (data.steugene.run) return <LessonPlayer onLeave={() => setTab('subjects')} />
+  const run = data.steugene.run
+  // A reload (or the app being killed) lands here with a lesson in flight and
+  // nothing in memory to render it from, so fetch the chunk back first.
+  const [ready, setReady] = useState(() => !run || !!packFor(run.subtopicId))
+  useEffect(() => {
+    if (!run || ready) return
+    let alive = true
+    void ensurePack(run.subtopicId).then(() => alive && setReady(true))
+    return () => {
+      alive = false
+    }
+  }, [run?.subtopicId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (run && !ready) return <div className="card">Opening your lesson…</div>
+  if (run) return <LessonPlayer onLeave={() => setTab('subjects')} />
   return (
     <>
       <div className="h1">📘 No lesson running</div>

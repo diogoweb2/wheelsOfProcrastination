@@ -28,6 +28,8 @@
     "errors": "node scripts/errors.mjs",
     "se:videos": "node scripts/steugene-videos.mjs",
     "se:audit": "node scripts/steugene-audit.mjs",
+    "se:seed": "node scripts/steugene-seed.mjs",
+    "se:verify": "node scripts/steugene-verify.mjs",
     "gym:audit": "node scripts/gym-audit.mjs",
     "frontier:audit": "node scripts/frontier-audit.mjs"
   },

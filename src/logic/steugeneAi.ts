@@ -105,10 +105,15 @@ function clean(item: unknown, id: string): SeBlock | null {
   if (o.kind === 'build') {
     const prompt = str(o.prompt)
     const why = str(o.why)
-    const answer = str(o.answer)
+    // A build answer is matched character by character, and U+2212 MINUS is
+    // indistinguishable from ASCII hyphen-minus on a tile. One of each in the
+    // same hand is a question he loses to typography, not to maths.
+    const answer = str(o.answer)?.replace(/\u2212/g, '-') ?? null
     if (!prompt || !why || !answer || answer.length > 8) return null
     const decoys = Array.isArray(o.decoys)
-      ? o.decoys.map(str).filter((x): x is string => !!x && x.length === 1)
+      ? o.decoys
+          .map((d) => str(d)?.replace(/\u2212/g, '-'))
+          .filter((x): x is string => !!x && x.length === 1 && !answer.includes(x))
       : []
     const block: SeBuild = { kind: 'build', id, prompt, answer, decoys, why, steps }
     return block
