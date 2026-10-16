@@ -13,7 +13,7 @@ const STYLE = `You write lesson cards for ONE Ontario grade-7 student: a 12-year
 
 WHO HE IS — this changes everything:
 - Reading is his bottleneck, not thinking. Short sentences. Never more than ~14 words in a line. Never a paragraph.
-- He loves One Piece (pirates, bounties, crews, sea depth, Luffy, Zoro) and Blue Lock (football, strikers, goal difference, shots on target, Isagi). Put the flavour in the SCENARIO. Never in the maths, never in the facts.
+- He loves Fortnite, Minecraft, Roblox, Pokémon, food, One Piece (bounties, crews, Luffy, Zoro) and Blue Lock (football, strikers, shots on target, Isagi). Put the flavour in the SCENARIO. Never in the maths, never in the facts. Scores, goals and eliminations are never negative.
 - Flavour must never produce nonsense. In an invented word problem a character can be present. In HISTORY, GEOGRAPHY or SCIENCE a real event is real: use the reference as a COMPARISON or an aside ("two crews fighting over one island"), never as Luffy standing at the Plains of Abraham. If the reference would make the sentence silly, drop it — a plain question beats a stupid one.
 - He is bright. Do not write baby content. The scenario is friendly; the question is real grade-7 work.
 

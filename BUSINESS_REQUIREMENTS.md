@@ -1793,11 +1793,20 @@ Each subtopic carries a `sample` — one line as it looks on the board (`|−20|
 
 Five block kinds, and nothing else (`src/steugene/types.ts`): **explain** (short lines + a drawing), **choice** (three options), **build** (he assembles the answer from tiles), **video**, **game**. Every block is data, so a hand-written block and an AI-written one (§24h) are indistinguishable to the player.
 
-Drawings are a closed set of six inline-SVG renderers (`SeArtwork.tsx`): number line, fraction bar, fraction circle, integer counters, balance scale, comparison bars. One line to author, which is the only reason nearly every card has a picture. No files in `public/`.
+Drawings are a closed set of inline renderers (`SeArtwork.tsx`, with the newer ones in `src/components/steugene/art/`), each one line to author — which is the only reason nearly every card has a picture. No files in `public/`; the Minecraft blocks and items are drawn from pixel maps in code.
+
+- **Numbers:** number line (with hops for a walk-through), fraction bar, fraction circle, integer counters, balance scale, comparison bars.
+- **His world:** a Minecraft Y-level column, a thermometer, hearts (with half-hearts breaking), a Fortnite health/shield bar, the storm circle, real pizzas, inventory slots, countable items (diamonds, emeralds, TNT, V-Bucks, Robux, Poké Balls…).
+- **Space:** a top-down block floor, isometric prisms and cylinders (they can fill with water), the coordinate plane (it doubles as the F3 screen), angles (split and crossing), any polygon with labelled sides and angles, tick marks, right-angle boxes and dashed heights.
+- **Data, money and code:** a table, bar and line charts (a chart may start above 0, only to show how a graph lies), a circle graph, a spinner, dice, shop cards, a till receipt, and code — Scratch-coloured blocks or Roblox Lua with an Output window.
+
+Every drawing animates in when its card appears (slices slide out, blocks drop, the storm pulses, lines draw themselves) and stays still under reduced motion. **A drawing on a question shows the situation, never the result**: number-line hops, which literally draw the answer, are only allowed on explanations and walk-throughs, and the audit enforces it (§24l).
+
+Games come in three modes: **order** (tap them in order — smallest first, or a step order with its own `hint`, like crafting a torch), **pair** (match left to right) and **line** (tap the spot on a number line).
 
 A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the bench). The bench is deliberately bigger than the spine: see §24d.
 
-**Every subtopic in the year has one.** `math-rational` is hand-written and is the reference for the rest; the other 104 are seeded by `npm run se:seed` (§24k) and sit in `src/steugene/packs/generated/`. Hand-written always wins over generated for the same id, so correcting a generated pack by hand is just moving it up a directory.
+**Every subtopic in the year has one.** All 42 Mathematics subtopics — including Coding and Financial Literacy — are hand-written and live in `src/steugene/packs/written/` (§24n). The other 63 (History, Geography, Language, Science) are seeded by `npm run se:seed` (§24k) and sit in `src/steugene/packs/generated/`. Hand-written always wins over generated for the same id, so correcting a generated pack is writing it by hand into `written/` and deleting its generated twin.
 
 ### 24k. Seeding the year — `npm run se:seed`
 
@@ -1807,7 +1816,7 @@ Writing 105 packs by hand is not a plan, so the rest of the year is generated, *
 - Plus one YouTube pass (§24g) and one call that writes two questions per video.
 - Everything goes through the **same validator** as the in-app generator (`scripts/lib/se-generate.mjs`), and anything that does not survive it is dropped.
 - A **maths** subtopic also gets the world brief (§24m) bolted onto the system prompt, so a re-seed never undoes it.
-- **Resumable**: a subtopic with a file is skipped, so a dropped connection costs nothing. `--force` rewrites, `HAND_WRITTEN` never is.
+- **Resumable**: a subtopic with a file is skipped, so a dropped connection costs nothing. `--force` rewrites, but a subtopic with a pack in `packs/written/` is never seeded — the script reads that directory, so writing a pack by hand is all it takes to take it out of the generator's hands.
 - Seeded with `anthropic/claude-haiku-5.5` — chosen on price per quality (~US$0.02 a subtopic, about $2 for the year). The in-app "generate more" button (§24h) keeps using whatever model is set in `app/aiConfig`.
 - Packs **load on demand**. 105 of them is ~4 MB of lesson content; bundling it would quadruple everyone's download and push one asset past the service worker's 2 MiB per-file precache limit, costing the tablet its offline mode. Each pack is its own chunk instead (`import.meta.glob`), fetched the first time he opens that subtopic. `hasPack` answers "is there one" without fetching; `ensurePack` fetches.
 
@@ -1816,6 +1825,8 @@ Writing 105 packs by hand is not a plan, so the rest of the year is generated, *
 Two passes, because "well formed" and "right" are different questions and only the first one is a schema.
 
 **`se:audit`** is structural: three options, an answer index in range, no two options reading the same, tiles that can actually spell the answer, a walk-through on every question, a real YouTube id, no `order` game whose values tie. Structural failures fail the run. A bench shorter than a 60-minute lesson is a *warning* — a content backlog, not a bug, and the estimates are "already knows it" time while his real pace runs ~1.4× (§18z).
+
+**Hand-written packs (§24n) get a stricter audit on top.** The right answer is never the strictly longest option. Every question has a `why` and at least two steps, and no step is a placeholder ("TODO", "fixed below"). The `why` must state the keyed answer's numbers — the check that caught a card keyed 100° whose own explanation worked out 80°. A `build` answer is typed with ASCII "-" and no commas, so the tiles can spell it. No question carries number-line hops (they draw the answer). No two pair or order cards read the same. And every drawing's numbers are in range.
 
 **`se:verify`** is semantic, and it is not optional. A generator produces mis-keyed answers at a real rate — the first pack sampled had **4 wrong keys in 36 questions**, including one whose `why` sentence described a different option than the one marked correct. That is not a cosmetic bug here: §24f means he cannot re-answer, so a wrong key records his *correct* answer as a mistake, seals the question away, and puts it in front of me as something he needs help with. One bad key costs all three.
 
@@ -1835,11 +1846,28 @@ Three things make it teaching rather than decoration:
 
 `npm run se:world` rewrites the 42 maths subtopics in place. The block **id never changes**, so his history and his report still point at something; a rewrite that fails the validator is discarded and the original kept; video blocks are skipped, since their questions are about the video. The keys move, so **`se:verify` (§24l) must be re-run over everything it touched** — that is printed at the end of the run, not left to memory.
 
+`se:world` was the first pass, and it was not enough: the maths year has since been rewritten by hand (§24n). The brief stays in `world.ts`, because the in-app generator (§24h) still uses it — tightened with what the hand-written year taught: **the situation must be possible** (no negative scores, no match "wiped from the record") and **facts about the games must be true** (if unsure, give the number in the question).
+
+### 24n. The maths year, written by hand
+
+What `se:world` produced beat plain textbook questions and was still not good enough. He noticed the nonsense before the maths: a football score of −2, goal difference as the model of a negative number, pirates handing out "integer chips", a match "wiped from the record" to show subtracting a negative. A setting that cannot happen teaches him that the setting does not matter.
+
+So all 42 maths subtopics — Number Sense, Algebra, Measurement, Data, Geometry, Coding and Financial Literacy — are written by hand in `src/steugene/packs/written/`, one file each, 30–50 blocks, with their generated twins deleted. CLAUDE.md is explicit that this is how content gets made: written in the session, by hand, never by spending the app's own OpenRouter key.
+
+The rules they follow:
+
+- **Only situations that can happen.** Negative numbers come from places that really go below zero: Minecraft Y levels and F3 coordinates west or north of spawn, Toronto winter mornings, metres below sea level, money owed. Never a score, a goal or a number of players.
+- **Real numbers from his games, checked.** A stack is 64 and a chunk 16; diamonds sit near Y = −59; a furnace takes 10 s an item and one coal smelts 8; fall damage is blocks fallen − 3; XP to the next level is 2L + 7; the Nether is 1 : 8. Fortnite mats cap at 500 and a build piece costs 10. Roblox's default WalkSpeed is 16 and a creator keeps 70%. Pokédex weights, Charmander evolving at 16, shiny odds 1 in 4,096. Ontario HST is 13% (5% + 8%) and is not charged on buying a gift card. Prices that change — a V-Bucks bundle, a pizza — are given in the question, never claimed as today's price.
+- **Code is real code.** Roblox Lua that would run (lists count from 1, `~=` is not-equal, `for i = 0, 10` runs 11 times) and Scratch blocks in Scratch's own colours.
+- **A picture wherever one helps** (§24b), animated, and never one that gives the answer away.
+- **Videos stay only when they are on topic.** The generated packs had English-grammar "conditionals" under coding and an operations-management lecture under debugging; those are gone. No new video was added without the embed check (§24g). A pack with no good video simply has more cards.
+- **Enough for an hour.** Every written pack has about 40 estimated minutes or more on its bench, which at his real pace covers a 60-minute lesson without repeating a card. A video's estimate is its length plus 40 s a check, never less.
+
 ### 24c. It reads to him
 
 He can do the thinking; reading is what stops him. So **read-aloud is ON by default**, every card speaks itself when it appears, and every card has a 🔊 to hear it again. **It costs nothing** — the device's own voice, never a model.
 
-Two engines (`src/lib/speak.ts`): Android's native `TextToSpeech` through the shell bridge when we are in the shell, otherwise the browser's `speechSynthesis`. The shell is preferred because Android's WebView exposes a `speechSynthesis` object that reports no voices and silently says nothing — a lying API is worse than a missing one. Maths is rewritten before it is spoken (`−` → "minus", `3/4` → "three over four", `|−20|` → "the absolute value of −20").
+Two engines (`src/lib/speak.ts`): Android's native `TextToSpeech` through the shell bridge when we are in the shell, otherwise the browser's `speechSynthesis`. The shell is preferred because Android's WebView exposes a `speechSynthesis` object that reports no voices and silently says nothing — a lying API is worse than a missing one. Maths is rewritten before it is spoken (`−` → "minus", `3/4` → "three over four", `|−20|` → "the absolute value of −20", `5²` → "5 squared", `2½` → "2 and a half", `3 : 5` → "3 to 5", `≈` → "about").
 
 ### 24d. 30 to 60 minutes, honestly measured
 

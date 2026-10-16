@@ -10,10 +10,11 @@
 // apples"); a situation where the operation is the obvious thing a person in
 // that situation would do, and where knowing the answer is worth something.
 //
-// It lives in `src/` rather than in the seeding script because BOTH writers
-// need it: `npm run se:world`, which moved the whole maths year in here, and
-// the in-app "generate more" button (§24h), which must not hand him back the
-// generic textbook questions this pass just took away.
+// It lives in `src/` rather than in the seeding script because the in-app
+// "generate more" button (§24h) needs it, and must not hand him back the
+// generic textbook questions. (`npm run se:world` used it once to move the
+// generated maths year here; the maths year has since been rewritten by hand,
+// §24n, and these pairings are what those packs actually use.)
 
 /** His places, with numbers that are actually true inside them. */
 export const WORLD_KIT = `HIS WORLD — use these, and use the real numbers in them:
@@ -42,14 +43,18 @@ POKÉMON
 
 FOOTBALL — the real game and EA FC on the console
 - 90 minutes plus stoppage. 11 a side. A win is 3 points, a draw 1, a loss 0.
-- Goal difference is a signed number: a table reads +12 or −7, and he already knows which is better.
+- Scores, goals, eliminations and players are NEVER negative. A team cannot have −2 goals, and a played match cannot be "taken away".
 - A full pitch is about 105 m × 68 m. The centre circle has a 9.15 m radius. The penalty spot is 11 m out. A goal is 7.32 m × 2.44 m.
 - Possession %, pass accuracy %, shots on target out of shots, player ratings like 87, xG like 1.37.
 - Ultimate Team packs have published odds — a walkout is rare on purpose.
 
 FOOD — he loves it, and it is the model that always works
 - A large pizza is 8 slices, a party size is 12. Cutting one pizza for 4 people is the picture that makes a fraction click.
-- Timbits by the 10, 20, 40. A 2 L bottle. A chocolate bar in 4 pieces. Shawarma, poutine, Toronto prices, 13% HST.
+- Timbits by the 10, 20, 40. A 2 L bottle, a 355 mL can. A chocolate bar in 4 pieces. Shawarma, poutine, Toronto prices.
+- Ontario HST is 13% (5% GST + 8% Ontario) on most things — but NOT on buying a gift card; the tax comes when the card is spent.
+
+WHERE NEGATIVE NUMBERS REALLY LIVE
+- Minecraft Y below 0, and F3 X / Z west or north of spawn. Toronto winter mornings (−8°C). Metres below sea level (the Dead Sea is −430 m). Money owed.
 
 MANGA — One Piece and Blue Lock
 - One Piece: past chapter 1100, 110+ volumes, bounties in Berries up to 3,000,000,000 — huge numbers worth rounding.
@@ -66,7 +71,9 @@ export const WORLD_RULES = `HOW TO USE IT — this is the difference between tea
 6. A naked sum is still allowed — about one card in five should be plain practice, because a test will be plain. Mix them in.
 7. Keep the maths EXACTLY as hard as it was. Same skill, same size of number, same number of steps. You are changing where it happens, not how difficult it is.
 8. Never say "imagine you are". Just state the situation: "Your squad drops with 400 wood."
-9. Keep the reading short. He is a weak reader: no sentence over ~14 words, and the scenario takes at most two lines before the question.`
+9. Keep the reading short. He is a weak reader: no sentence over ~14 words, and the scenario takes at most two lines before the question.
+10. The situation must be POSSIBLE. No negative scores, goals, kills or players; no match "wiped from the record"; no pirates handing out integer chips. A negative number has to come from something that really goes below zero (see WHERE NEGATIVE NUMBERS REALLY LIVE).
+11. Facts about the games must be true. Do not invent a rule, a price or a drop rate; if you are not sure, give the number in the question ("say a bundle costs $11").`
 
 /**
  * Which settings belong to which subtopic.
@@ -79,14 +86,14 @@ export const WORLD_RULES = `HOW TO USE IT — this is the difference between tea
 export const SUB_WORLDS = {
   // --- Number Sense ---
   'math-rational': 'Minecraft Y levels (sea level 62, bedrock −64, diamonds at −59) for negatives; pizza slices and hearts for fractions; player ratings and xG for decimals.',
-  'math-compare': 'A league table sorted by goal difference (+12, −7, 0); Minecraft depths; decimal player ratings 87.4 vs 87.04; shiny odds vs pack odds.',
+  'math-compare': 'Minecraft depths (−59 is above −64); Toronto winter mornings; decimal player ratings 87.4 vs 87.04; Pokédex weights; shiny odds vs pack odds.',
   'math-abs': 'How far you are from spawn when your coordinate is negative; how many blocks to climb from Y = −59 to sea level; how far off a 950 V-Bucks target you are either way.',
-  'math-int-add': 'Hearts lost to fall damage and healed back; goal difference after a 4–1 win and a 0–3 loss; V-Bucks earned and spent; descending from Y = 30 to Y = −24.',
-  'math-int-mult': 'Losing 3 hearts four times; the storm taking 2 HP a tick for 6 ticks; a team conceding 2 goals in each of 5 matches; undoing a repeated loss.',
+  'math-int-add': 'Hearts lost to fall damage and healed back; F3 X going negative as you walk west past spawn; descending from Y = 30 to Y = −24; a −8°C morning warming up.',
+  'math-int-mult': 'Losing 3 health four times; late storms taking 10 a second; digging down 4 blocks a minute for 5 minutes (Y changes by −20); a temperature falling 2°C an hour.',
   'math-fdp': 'A health bar at 3/4 = 0.75 = 75%; pack odds written three ways; battle pass progress; pass accuracy.',
   'math-frac-add': 'PIZZA FIRST — one large pizza is 8 slices, a party size is 12, and sharing between 4 is where the denominator comes from. Then Minecraft stacks (1/4 of 64 = 16), the hunger bar, halves of a match.',
   'math-frac-mult': 'Half of a half pizza; 2/3 of a stack of 64; doubling a recipe; 3/4 of the 500 wood you are carrying.',
-  'math-percent': '13% HST on a Roblox gift card; a 25% off skin sale; battle pass 70% done; pass accuracy and possession.',
+  'math-percent': '13% HST on a game or a restaurant bill (never on buying a gift card); a 25% off skin sale; battle pass 70% done; pass accuracy and possession.',
   'math-ratio': 'K/D ratio — eliminations to deaths; Robux per hour of building; damage per second; shots to goals; blocks mined per minute; 3 : 5 wins to losses.',
   'math-power': '2 × 2 × 2 chest doubling; a square base 12 × 12 blocks; 9² blocks in a wall; √ to get back to the side length; big round numbers of visits.',
   'math-round': 'One Piece bounties (3,000,000,000 Berries); Roblox visit counts like 1,043,221; a stadium crowd of 54,321; V-Bucks totals.',
@@ -124,7 +131,7 @@ export const SUB_WORLDS = {
   'fin-budget': 'His allowance against a 950 V-Bucks pass; money in, money out, money left; saving two weeks for a skin.',
   'fin-interest': 'Saving for a skin while the money earns interest; $100 at 5% for 3 years; the same money borrowed instead.',
   'fin-unit': 'Which V-Bucks bundle is cheaper per V-Buck — 1,000 for $11 against 2,800 for $28; Robux per dollar; a 900 g bag against a 500 g one.',
-  'fin-tax': '13% HST on a gift card; a skin at 25% off and then taxed; the sticker price versus the till.',
+  'fin-tax': '13% HST on headphones or a delivery order (none on buying a gift card); a game at 30% off and then taxed; the sticker price versus the till; a tip on the bill before tax.',
   'fin-credit': 'Borrowing the pass money from Dad and paying it back; buy-now-pay-later on a game; why a minimum payment takes years.',
 }
 
