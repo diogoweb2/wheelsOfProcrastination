@@ -212,7 +212,8 @@ export type SeArt =
   /** A till receipt. */
   | { art: 'receipt'; lines: { item: string; price: string }[]; total?: string; note?: string }
   /** A vertical bar chart or a line graph, animating in. */
-  | { art: 'chart'; type: 'bar' | 'line'; labels: string[]; values: number[]; unit?: string; max?: number; title?: string }
+  /** `min` starts the scale above 0 — only ever to show how a graph can lie. */
+  | { art: 'chart'; type: 'bar' | 'line'; labels: string[]; values: number[]; unit?: string; max?: number; min?: number; title?: string }
   /** A circle graph with a legend. */
   | { art: 'circlegraph'; slices: { label: string; value: number }[]; unit?: string }
   /** A fraction bar: `filled` of `parts` shaded. */

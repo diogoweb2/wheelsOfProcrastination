@@ -200,7 +200,7 @@ export const pack: SePack = {
           ['y = 2x', '(4, 8)'],
           ['y = 3x − 1', '(2, 5)'],
           ['y = 10 − x', '(6, 4)'],
-          ['y = 5x', '(0, 0)'],
+          ['y = 5x', '(2, 10)'],
         ],
       },
       why: 'Put the x in, see if you get the y.',

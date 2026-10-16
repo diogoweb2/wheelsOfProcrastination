@@ -288,13 +288,14 @@ export function Chart({ art }: { art: ArtOf<'chart'> }) {
   const top = art.title ? 30 : 14
   const [left, right, bottom] = [40, 312, top + 150]
   const H = bottom + 30
-  const peak = Math.max(...art.values, 1)
-  const step = niceStep(art.max ?? peak, 4)
-  const max = art.max ?? Math.ceil(peak / step) * step
+  const lo = art.min ?? 0
+  const peak = Math.max(...art.values, lo + 1)
+  const step = niceStep((art.max ?? peak) - lo, 4)
+  const max = art.max ?? lo + Math.ceil((peak - lo) / step) * step
   const n = art.values.length
   const band = (right - left) / n
   const X = (i: number) => left + band * i + band / 2
-  const Y = (v: number) => bottom - (v / max) * (bottom - top)
+  const Y = (v: number) => bottom - ((v - lo) / (max - lo)) * (bottom - top)
   const unit = art.unit ?? ''
   const line = art.values.map((v, i) => `${X(i)},${Y(v)}`).join(' ')
   return (
@@ -304,9 +305,9 @@ export function Chart({ art }: { art: ArtOf<'chart'> }) {
           {art.title}
         </text>
       )}
-      {ticksOf(0, max, step).map((v) => (
+      {ticksOf(lo, max, step).map((v) => (
         <g key={v}>
-          <line x1={left} y1={Y(v)} x2={right} y2={Y(v)} stroke="var(--line)" strokeWidth={v === 0 ? 2 : 0.8} opacity={v === 0 ? 1 : 0.6} />
+          <line x1={left} y1={Y(v)} x2={right} y2={Y(v)} stroke="var(--line)" strokeWidth={v === lo ? 2 : 0.8} opacity={v === lo ? 1 : 0.6} />
           <text x={left - 5} y={Y(v) + 4} textAnchor="end" fontSize={10} fontWeight={800} fill="var(--muted)">
             {v}
           </text>
