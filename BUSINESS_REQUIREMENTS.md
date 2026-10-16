@@ -1835,6 +1835,16 @@ Three things make it teaching rather than decoration:
 
 `npm run se:world` rewrites the 42 maths subtopics in place. The block **id never changes**, so his history and his report still point at something; a rewrite that fails the validator is discarded and the original kept; video blocks are skipped, since their questions are about the video. The keys move, so **`se:verify` (§24l) must be re-run over everything it touched** — that is printed at the end of the run, not left to memory.
 
+### 24n. The calculator
+
+A calculator sits on every **maths** lesson, and only a maths lesson — nothing in History is helped by a keypad, and a second thing on the screen is a cost wherever it is not a help.
+
+- **Always there, never in the way.** It floats over the card, fixed to the viewport so it cannot scroll off mid-sum. `▁` folds it down to a 🧮 button; `⇄` sends it to the other side when it is sitting on top of the answers. Both choices are remembered in `localStorage`, so he sets it up once and never thinks about it again.
+- **Why it is allowed at all:** in grade 7 the thing being taught is almost never the arithmetic. Making him hand-divide 161 ÷ 7 to answer a question about ratios tests the wrong skill and costs him the question (§24f, no second go).
+- **It shows the fraction too.** `1 ÷ 4` reads `= 0.25` and `= 1/4` side by side. Converting between the two forms is half of this term's number sense, so he gets that lesson free every time he divides.
+- **No `eval`.** `src/logic/seCalc.ts` parses the expression by hand — `+ − × ÷ ( )`, precedence, unary minus — so the calculator can never become a way to run something, and a half-typed `5 ×` fails quietly instead of throwing. Dividing by zero shows nothing rather than `Infinity`. The parser is split from the component precisely so it can be tested without a browser.
+- Its taps count as activity on the lesson clock (§24d), because working a sum out is working.
+
 ### 24c. It reads to him
 
 He can do the thinking; reading is what stops him. So **read-aloud is ON by default**, every card speaks itself when it appears, and every card has a 🔊 to hear it again. **It costs nothing** — the device's own voice, never a model.

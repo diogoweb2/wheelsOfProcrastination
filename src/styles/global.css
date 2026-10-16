@@ -6373,3 +6373,67 @@ input, select { font-family: inherit; }
   .se-shake { animation: none; }
   .se-voyage__ship { transition: none; }
 }
+
+/* --- 🏫 St. Eugene 7 · the calculator (§24n) ------------------------------- */
+/* Fixed to the viewport, not the card, so it never scrolls off mid-sum. It
+   sits above the lesson but below nothing else, and it can be folded to a
+   button or sent to the other side when it covers the answers. */
+.se-calc-fab {
+  position: fixed; bottom: 18px; z-index: 60;
+  width: 58px; height: 58px; border-radius: 50%; font-size: 27px; line-height: 1;
+  background: var(--card2); color: var(--text); border: 2px solid var(--line);
+  box-shadow: 0 5px 0 var(--line), 0 10px 22px rgba(0, 0, 0, 0.42); cursor: pointer;
+}
+.se-calc-fab:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--line); }
+.se-calc-fab--right { right: 16px; }
+.se-calc-fab--left { left: 16px; }
+
+.se-calc {
+  position: fixed; bottom: 14px; z-index: 60; width: 232px;
+  background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+  padding: 9px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+.se-calc--right { right: 14px; }
+.se-calc--left { left: 14px; }
+
+.se-calc__bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+.se-calc__name { font-size: 17px; }
+.se-calc__chip {
+  width: 34px; height: 30px; border-radius: 9px; font: inherit; font-size: 15px; font-weight: 900;
+  background: var(--card2); color: var(--muted); border: 1px solid var(--line); cursor: pointer;
+}
+.se-calc__chip:active { background: var(--line); color: var(--text); }
+
+.se-calc__screen {
+  background: var(--bg); border-radius: 11px; padding: 8px 10px; min-height: 56px;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+}
+.se-calc__expr {
+  font-size: 21px; font-weight: 900; text-align: right; color: var(--text);
+  overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+}
+.se-calc__expr::-webkit-scrollbar { display: none; }
+.se-calc__out { display: flex; justify-content: flex-end; gap: 9px; font-size: 14px; font-weight: 800; color: var(--blue); min-height: 18px; }
+/* the same number as a fraction — half of this term is converting between the two */
+.se-calc__frac { color: var(--yellow); }
+
+.se-calc__pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.se-calc__key {
+  height: 48px; border-radius: 11px; font: inherit; font-size: 20px; font-weight: 900;
+  background: var(--card2); color: var(--text); border: 1px solid var(--line);
+  box-shadow: 0 3px 0 var(--line); cursor: pointer;
+}
+.se-calc__key:active { transform: translateY(3px); box-shadow: none; }
+.se-calc__key--op { background: var(--bg2); color: var(--blue); }
+.se-calc__key--act { background: var(--bg2); color: var(--muted); font-size: 17px; }
+.se-calc__key--go {
+  grid-column: 1 / -1; background: var(--blue); color: var(--bg);
+  box-shadow: 0 3px 0 var(--blue-dark);
+}
+.se-calc__key--go:active { box-shadow: none; }
+
+/* On a phone it spans the width instead of floating in a corner. */
+@media (max-width: 560px) {
+  .se-calc { left: 10px; right: 10px; width: auto; }
+  .se-calc__key { height: 44px; }
+}

@@ -21,6 +21,7 @@ import { packFor } from '../../steugene/packs'
 import { seAvailable, seTiles } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
+import { SeCalculator } from './SeCalculator'
 import { SeVideoBlock } from './SeVideoBlock'
 import type { SeBlock, SeChoice, SeBuild, SeExplain, SeGame, SeStep } from '../../steugene/types'
 
@@ -204,6 +205,10 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
           <VideoCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
         )}
       </div>
+
+      {/* §24n — maths only. Nothing in History is helped by a keypad, and an
+          extra thing on the screen is a cost whenever it is not a help. */}
+      {where?.subject.id === 'math' && <SeCalculator />}
     </div>
   )
 }
