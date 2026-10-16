@@ -6437,3 +6437,9 @@ input, select { font-family: inherit; }
   .se-calc { left: 10px; right: 10px; width: auto; }
   .se-calc__key { height: 44px; }
 }
+
+/* The two-minute hold on a video (§24g). Held, it reads as a label with a
+   countdown; released, it is an ordinary button. Never the brightest thing
+   on the card — watching is still the default. */
+.se-video__skip { width: 100%; margin-top: 7px; background: var(--card2); color: var(--text); border: 1px solid var(--line); }
+.se-video__skip--held { background: transparent; color: var(--muted); border-style: dashed; opacity: 1; cursor: default; }

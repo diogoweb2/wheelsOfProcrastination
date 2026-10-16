@@ -555,6 +555,8 @@ function VideoCard({
           start={block.start}
           end={block.end}
           onFinished={(reason) => {
+            // Broken → move on entirely. Ended OR let go after the two-minute
+            // hold (§24g) → the questions, which is why the skip button says so.
             if (reason === 'broken') onNext()
             else setWatched(true)
           }}

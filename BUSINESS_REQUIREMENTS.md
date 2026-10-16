@@ -1880,6 +1880,10 @@ A video only earns its place because questions follow it, and that only works if
 
 So none of it is reachable. `youtube-nocookie.com` through the IFrame API with `controls=0`, a **transparent shield over the whole frame** so no click lands inside it, and every control he gets is ours (play/pause, ⏪10s, replay) driving the player through the API. The end screen never appears because the moment the video ends we cover it. It **fails open**: a video that will not load says so and lets him move on.
 
+**Two minutes, then he is free.** The skip button is held for the first 120 seconds and reads `⏭ Skip in 1:12`; after that it reads `⏭ Skip to the questions` and ends the video. Two minutes is long enough that the video has made its point and short enough that a ten-minute upload cannot eat a third of his hour — and a lesson he is allowed to leave is a lesson he does not spend fighting.
+
+The hold counts **playing seconds only**, so pausing it and walking away buys him nothing; rewinding still counts, because rewinding is watching. Skipping goes to the **questions**, not past them, and the button says so — the questions are the entire reason a video is here, and discovering them after pressing skip would read as a trick.
+
 The Android shell closes the last gap — `isYouTube()` lets YouTube's frames load inside the WebView but swallows any **main-frame** navigation to them, so the watch page is unreachable even if something slips.
 
 Videos are hand-picked with `npm run se:videos "<search>"`, which reads YouTube's search page and checks each candidate against the oEmbed endpoint — the single best test of "will this actually play in an iframe". No API key.
