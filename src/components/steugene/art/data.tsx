@@ -13,6 +13,11 @@ type ArtOf<K extends SeArt['art']> = Extract<SeArt, { art: K }>
 /** Slice and bar colours — Fortnite's rarity ladder, then a few more. */
 const PALETTE = ['#49acf2', '#b15be2', '#60aa3a', '#d37841', '#ffd83d', '#e8312a', '#b1b1b1', '#3fd1c4']
 
+/** "$32", but "32%" and "32 kg": a currency sign goes in front. */
+function withUnit(v: number, unit: string): string {
+  return unit === '$' ? `$${v}` : `${v}${unit}`
+}
+
 // --- code ---------------------------------------------------------------------
 
 /** Which Scratch colour a line wears, from its first word. */
@@ -285,7 +290,8 @@ export function Receipt({ art }: { art: ArtOf<'receipt'> }) {
 // --- graphs ---------------------------------------------------------------------------------
 
 export function Chart({ art }: { art: ArtOf<'chart'> }) {
-  const top = art.title ? 30 : 14
+  // Room above the top grid line for a value label sitting on it, under the title.
+  const top = art.title ? 44 : 24
   const [left, right, bottom] = [40, 312, top + 150]
   const H = bottom + 30
   const lo = art.min ?? 0
@@ -318,8 +324,7 @@ export function Chart({ art }: { art: ArtOf<'chart'> }) {
           <g key={i}>
             <rect x={X(i) - band * 0.32} y={Y(v)} width={band * 0.64} height={bottom - Y(v)} rx={4} fill={PALETTE[i % PALETTE.length]} {...anim('growy', 150 + i * 110)} />
             <text x={X(i)} y={Y(v) - 5} textAnchor="middle" fontSize={11} fontWeight={900} fill="var(--text)" {...anim('fade', 600 + i * 110)}>
-              {v}
-              {unit}
+              {withUnit(v, unit)}
             </text>
           </g>
         ))}
@@ -330,8 +335,7 @@ export function Chart({ art }: { art: ArtOf<'chart'> }) {
             <g key={i} {...anim('pop', 250 + i * 120)}>
               <circle cx={X(i)} cy={Y(v)} r={5} fill="var(--yellow)" stroke="#0c2338" strokeWidth={2} />
               <text x={X(i)} y={Y(v) - 9} textAnchor="middle" fontSize={11} fontWeight={900} fill="var(--text)" style={halo}>
-                {v}
-                {unit}
+                {withUnit(v, unit)}
               </text>
             </g>
           ))}
@@ -368,8 +372,7 @@ export function CircleGraph({ art }: { art: ArtOf<'circlegraph'> }) {
             <g {...anim('fade', 200 + i * 160)}>
               <rect x={176} y={14 + i * 26} width={14} height={14} rx={3} fill={PALETTE[i % PALETTE.length]} />
               <text x={196} y={26 + i * 26} fontSize={12} fontWeight={800} fill="var(--text)">
-                {s.label} — {s.value}
-                {art.unit ?? ''}
+                {s.label} — {withUnit(s.value, art.unit ?? '')}
               </text>
             </g>
           </g>
