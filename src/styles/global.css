@@ -6373,3 +6373,147 @@ input, select { font-family: inherit; }
   .se-shake { animation: none; }
   .se-voyage__ship { transition: none; }
 }
+
+/* --- the drawings move (§24b) ---
+   Everything is drawn at its final position; these only bring it in. With
+   reduced motion they all switch off and the picture is simply there. */
+.se-a-pop, .se-a-drop, .se-a-growx, .se-a-growy, .se-a-bob, .se-a-break, .se-a-roll { transform-box: fill-box; transform-origin: center; }
+.se-a-pop { animation: seaPop 460ms cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+.se-a-drop { animation: seaDrop 380ms cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.se-a-fade { animation: seaFade 420ms ease-out both; }
+.se-a-draw { stroke-dasharray: 1; animation: seaDraw 760ms ease-out both; }
+.se-a-growx { transform-origin: left center; animation: seaGrowX 700ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.se-a-growy { transform-origin: center bottom; animation: seaGrowY 900ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.se-a-march { stroke-dasharray: 8 6; animation: seaMarch 900ms linear infinite; }
+.se-a-pulse { animation: seaPulse 2.2s ease-in-out infinite alternate; }
+.se-a-bob { animation: seaBob 1.4s ease-in-out infinite alternate; }
+.se-a-break { animation: seaBreak 1.5s ease-out both; }
+.se-a-slide { animation: seaSlide 520ms cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+.se-a-spin { animation: seaSpin 2.8s cubic-bezier(0.12, 0.7, 0.2, 1) both; }
+.se-a-orbit { transform-box: view-box; animation: seaOrbit 5s linear infinite; }
+.se-a-sweep { transform-box: view-box; animation: seaSweep 850ms cubic-bezier(0.3, 1.2, 0.5, 1) both; }
+.se-a-roll { animation: seaRoll 700ms cubic-bezier(0.3, 1.3, 0.5, 1) both; }
+.se-a-wave { animation: seaWave 1.6s ease-in-out infinite alternate; }
+
+@keyframes seaPop { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: none; } }
+@keyframes seaDrop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes seaFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes seaDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes seaGrowX { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes seaGrowY { from { transform: scaleY(0); } to { transform: none; } }
+@keyframes seaMarch { to { stroke-dashoffset: -28; } }
+@keyframes seaPulse { from { opacity: 0.55; } to { opacity: 1; } }
+@keyframes seaBob { from { transform: translateY(1px); } to { transform: translateY(-3px); } }
+@keyframes seaBreak {
+  0% { opacity: 1; transform: none; }
+  15% { transform: scale(1.25); }
+  30% { opacity: 0.2; }
+  45% { opacity: 1; transform: translateX(-2px); }
+  60% { opacity: 0.2; transform: translateX(2px); }
+  100% { opacity: 0; transform: scale(0.6); }
+}
+@keyframes seaSlide { from { transform: translate(0, 0); } to { transform: translate(var(--dx), var(--dy)); } }
+@keyframes seaSpin { from { transform: rotate(0deg); } to { transform: rotate(var(--end)); } }
+@keyframes seaOrbit { to { transform: rotate(360deg); } }
+@keyframes seaSweep { from { transform: rotate(var(--from)); } to { transform: none; } }
+@keyframes seaRoll {
+  0% { opacity: 0; transform: translateY(-18px) rotate(-200deg); }
+  70% { opacity: 1; transform: translateY(2px) rotate(12deg); }
+  100% { transform: none; }
+}
+@keyframes seaWave { from { opacity: 0.75; } to { opacity: 1; } }
+
+.se-art__caption { text-align: center; font-size: 13px; font-weight: 900; margin-top: 6px; }
+
+/* --- code: Scratch blocks or Roblox Studio Lua --- */
+.se-code { border-radius: 12px; padding: 10px; font-size: 14px; }
+.se-code--text { background: #0a1724; border: 2px solid var(--line); font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+.se-code--blocks { background: var(--bg2); display: flex; flex-direction: column; gap: 3px; }
+.se-code__line { display: flex; align-items: baseline; gap: 10px; border-radius: 6px; padding: 1px 4px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.se-code__line--hl { animation: seaLine 600ms ease-out both; }
+@keyframes seaLine { from { background: rgba(255, 206, 0, 0.55); } to { background: rgba(255, 206, 0, 0.14); } }
+.se-code__ln { flex: none; width: 16px; text-align: right; color: var(--muted); opacity: 0.6; font-size: 12px; }
+.se-code__src { color: var(--text); }
+.se-code__k { color: #ff7ab8; font-weight: 800; }
+.se-code__n { color: #ffce00; }
+.se-code__s { color: #7ee787; }
+.se-code__c { color: var(--muted); font-style: italic; }
+.se-code__f { color: #79c0ff; }
+.se-block {
+  display: inline-block; padding: 6px 12px; border-radius: 8px 8px 8px 2px; color: #fff; font-weight: 900; font-size: 14px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+.se-block--event { background: #ffbf00; color: #2a1c00; text-shadow: none; border-radius: 16px 16px 8px 2px; }
+.se-block--control { background: #ffab19; color: #2a1c00; text-shadow: none; }
+.se-block--motion { background: #4c97ff; }
+.se-block--looks { background: #9966ff; }
+.se-block--var { background: #ff8c1a; }
+.se-code__out {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #000; color: #b7ff3a;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px;
+}
+.se-code__outlabel { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+
+/* --- tables --- */
+.se-table-wrap { overflow-x: auto; }
+.se-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px; text-align: center; }
+.se-table th { background: var(--line); color: var(--text); font-weight: 900; padding: 7px 6px; }
+.se-table th:first-child { border-top-left-radius: 10px; }
+.se-table th:last-child { border-top-right-radius: 10px; }
+.se-table td { padding: 7px 6px; font-weight: 800; background: var(--bg2); border-bottom: 1px solid var(--card2); }
+.se-table__hl { color: var(--yellow); }
+.se-table__row--hl td { background: rgba(255, 206, 0, 0.16); color: var(--yellow); }
+
+/* --- things to count --- */
+.se-items { display: flex; flex-direction: column; gap: 8px; }
+.se-items__row { display: flex; flex-direction: column; gap: 4px; }
+.se-items__label { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.se-items__set { display: flex; flex-wrap: wrap; gap: 3px; }
+.se-items__it { display: inline-flex; }
+.se-items__it--gap { margin-left: 10px; }
+.se-items__emoji { font-size: 21px; line-height: 1; }
+
+/* Minecraft's inventory: grey bevelled slots, the count in the corner. */
+.se-inv { display: grid; gap: 3px; justify-content: center; padding: 6px; background: #8b8b8b; border-radius: 6px; width: fit-content; margin: 0 auto; }
+.se-inv__slot {
+  position: relative; aspect-ratio: 1; display: grid; place-items: center; background: #6f6f6f;
+  box-shadow: inset 2px 2px 0 #3c3c3c, inset -2px -2px 0 #c6c6c6;
+}
+.se-inv__n {
+  position: absolute; right: 2px; bottom: 0; font-size: 13px; font-weight: 900; color: #fff;
+  text-shadow: 2px 2px 0 #3c3c3c; font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* --- the item shop --- */
+.se-shop { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.se-shop__card {
+  position: relative; flex: 1 1 0; min-width: 88px; max-width: 150px; padding: 12px 8px 10px; border-radius: 12px; text-align: center;
+  background: linear-gradient(180deg, #2b6fd6, #173f86); border: 2px solid #60bff5; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.se-shop__icon { display: grid; place-items: center; height: 38px; font-size: 30px; }
+.se-shop__qty { font-size: 15px; font-weight: 900; margin-top: 4px; line-height: 1.2; }
+.se-shop__price { font-size: 17px; font-weight: 900; color: var(--yellow); margin-top: 3px; }
+.se-shop__price s { color: var(--muted); font-size: 13px; font-weight: 800; }
+.se-shop__tag {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  padding: 2px 8px; border-radius: 999px; background: var(--red); color: #fff; font-size: 11px; font-weight: 900;
+}
+
+/* --- a till receipt --- */
+.se-receipt {
+  max-width: 260px; margin-inline: auto; padding: 12px 14px; border-radius: 4px; background: #f7f3e8; color: #222;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+.se-receipt__head { text-align: center; font-weight: 900; letter-spacing: 1px; margin-bottom: 6px; }
+.se-receipt__row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+.se-receipt__total { border-top: 2px dashed #888; margin-top: 4px; padding-top: 5px; font-weight: 900; }
+.se-receipt__note { margin-top: 6px; font-size: 11px; color: #555; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .se-art, .se-art * { animation: none !important; }
+}
+.se-code--blocks .se-code__line--hl { animation: seaRun 700ms ease-out both; }
+@keyframes seaRun {
+  from { background: rgba(255, 206, 0, 0.4); }
+  to { background: transparent; box-shadow: inset 4px 0 0 var(--yellow); }
+}

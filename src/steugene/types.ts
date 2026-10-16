@@ -15,9 +15,61 @@
 export type SeTone = 'good' | 'bad' | 'focus' | 'calm'
 
 /**
- * The drawings. Deliberately a small closed set rather than free SVG: he has
- * trouble reading, so almost every block wants a picture, and a picture that
- * takes ten minutes to author never gets authored. These five take one line.
+ * The little pixel sprites (`src/components/steugene/art/sprites.tsx`). Drawn
+ * in code, so they cost no storage and stay sharp at any size.
+ */
+export type SeIcon =
+  | 'diamond'
+  | 'emerald'
+  | 'gold'
+  | 'iron'
+  | 'coal'
+  | 'redstone'
+  | 'heart'
+  | 'drumstick'
+  | 'pickaxe'
+  | 'sword'
+  | 'grass'
+  | 'stone'
+  | 'plank'
+  | 'tnt'
+  | 'chest'
+  | 'xp'
+  | 'apple'
+  | 'cookie'
+  | 'egg'
+  | 'pizza'
+  | 'ball'
+  | 'trophy'
+  | 'vbuck'
+  | 'robux'
+  | 'pokeball'
+  | 'potion'
+  | 'star'
+  | 'skull'
+  | 'player'
+
+/** A Minecraft block face, for the grids and boxes. */
+export type SeTile = 'grass' | 'dirt' | 'stone' | 'plank' | 'glass' | 'water' | 'sand' | 'wool' | 'brick' | 'gold' | 'diamond' | 'obsidian'
+
+/** A point on the Cartesian plane, optionally named and drawn as a sprite. */
+export interface SePlanePoint {
+  x: number
+  y: number
+  label?: string
+  tone?: SeTone
+  icon?: SeIcon
+}
+
+/**
+ * The drawings. Deliberately a closed set rather than free SVG: he has trouble
+ * reading, so almost every block wants a picture, and a picture that takes ten
+ * minutes to author never gets authored. Every one of these is one line.
+ *
+ * Every drawing animates in when its card appears — slices slide out, blocks
+ * drop in, the storm pulses, the hops arc along the line — because a moving
+ * picture is the one he actually looks at. None of it ever gives the answer
+ * away: a drawing on a question shows the situation, never the result.
  */
 export type SeArt =
   /** A number line. The workhorse — integers, fractions, negatives, distance. */
@@ -30,7 +82,134 @@ export type SeArt =
       points?: { at: number; label?: string; tone?: SeTone }[]
       /** Shade the span between two values — "how far apart", visually. */
       span?: [number, number]
+      /** Jumps drawn as arcs, one after another — "start at −3, go up 7". */
+      hops?: { from: number; to: number; label?: string; tone?: SeTone }[]
     }
+  /**
+   * A Minecraft world, cut open: sky, grass, stone, deepslate, bedrock, with
+   * the Y numbers up the side exactly as F3 shows them. Negative numbers are
+   * literally underground here.
+   */
+  | {
+      art: 'ylevel'
+      from: number
+      to: number
+      step?: number
+      marks?: { at: number; label?: string; icon?: SeIcon; tone?: SeTone }[]
+      /** A mine shaft between two levels — the distance, made visible. */
+      dig?: [number, number]
+    }
+  /** A thermometer — Toronto in January is a negative number nobody argues with. */
+  | { art: 'thermo'; from: number; to: number; step?: number; at: number; label?: string; marks?: { at: number; label?: string }[] }
+  /** A Minecraft health (or hunger) bar: 10 icons, halves allowed. `lost` ones flash and break. */
+  | { art: 'hearts'; full: number; max?: number; lost?: number; kind?: 'heart' | 'drumstick'; label?: string }
+  /** Fortnite's shield-over-health bars. Starting values only; the answer is never drawn. */
+  | { art: 'hp'; health: number; shield?: number; max?: number; label?: string }
+  /**
+   * The Fortnite storm: a safe circle with the storm wall pulsing outside it.
+   * Radius and diameter are drawn as lines with whatever label you give them
+   * ("120 m", "?"); `ring` sends a runner round the edge for circumference;
+   * `next` draws the next, smaller circle at that fraction of this one.
+   */
+  | { art: 'storm'; r?: string; d?: string; ring?: string; next?: number; label?: string }
+  /**
+   * Real pizzas. `take` slices slide out (the fraction you are pointing at),
+   * `gone` slices have been eaten. Several pizzas side by side for anything
+   * bigger than one, and `size` (0.4–1) to put a small one next to a large.
+   */
+  | { art: 'pizza'; pies: { slices: number; take?: number; gone?: number; size?: number; label?: string }[]; label?: string }
+  /**
+   * A top-down Minecraft floor, w × h blocks. `holes` cut pieces out (an L-shaped
+   * base), `paint` lays a different block over a region, `edge` marches round
+   * the outside for perimeter. `wLabel` / `hLabel` name the sides.
+   */
+  | {
+      art: 'blocks'
+      w: number
+      h: number
+      tile?: SeTile
+      holes?: [number, number, number, number][]
+      paint?: { x: number; y: number; w: number; h: number; tile: SeTile }[]
+      wLabel?: string
+      hLabel?: string
+      edge?: boolean
+      label?: string
+    }
+  /**
+   * A 3-D solid. `rect` is a box of blocks you can count (with `water` layers
+   * rising inside a glass one), `tri` is a roof-shaped triangular prism,
+   * `circle` is a cylinder. The labels name the edges.
+   */
+  | {
+      art: 'prism'
+      base: 'rect' | 'tri' | 'circle'
+      l: number
+      w: number
+      h: number
+      tile?: SeTile
+      water?: number
+      labels?: { l?: string; w?: string; h?: string }
+      label?: string
+    }
+  /** The Cartesian plane — or the F3 screen's X and Z. Points, segments, shapes and y = mx + b lines. */
+  | {
+      art: 'plane'
+      x: [number, number]
+      y: [number, number]
+      step?: number
+      xName?: string
+      yName?: string
+      points?: SePlanePoint[]
+      segs?: { from: [number, number]; to: [number, number]; tone?: SeTone; dash?: boolean }[]
+      polys?: { pts: [number, number][]; tone?: SeTone; label?: string; dash?: boolean }[]
+      lines?: { m: number; b: number; tone?: SeTone; label?: string }[]
+    }
+  /**
+   * An angle, swept open. `split` adds a ray inside it so the two parts can be
+   * labelled (complementary, supplementary); `cross` draws two crossing lines
+   * with four labelled angles (vertically opposite).
+   */
+  | { art: 'angle'; deg: number; label?: string; split?: number; labels?: [string, string]; cross?: [string, string, string, string] }
+  /**
+   * Any polygon, fitted to the frame. Sides and angles can be labelled, equal
+   * sides ticked, right angles boxed. `also` draws more shapes beside it, for
+   * congruent / similar / before-and-after.
+   */
+  | {
+      art: 'shape'
+      pts: [number, number][]
+      sides?: (string | null)[]
+      angles?: (string | null)[]
+      ticks?: number[]
+      right?: number[]
+      tone?: SeTone
+      label?: string
+      also?: { pts: [number, number][]; sides?: (string | null)[]; angles?: (string | null)[]; tone?: SeTone; label?: string }[]
+    }
+  /**
+   * Code. `blocks` draws it Scratch-style, coloured by what each line does;
+   * `text` is Roblox-Studio-style Lua with the keywords lit. `hl` lines light
+   * up one after another, like the program running; `out` is the console.
+   */
+  | { art: 'code'; lines: string[]; style?: 'blocks' | 'text'; hl?: number[]; out?: string[] }
+  /** A small table — pattern rules, data, a scoreboard. */
+  | { art: 'table'; head: string[]; rows: (string | number)[][]; hl?: { r?: number; c?: number } }
+  /** Countable sprites, in rows. `per` leaves a gap every so many; `dim` greys out the last few. */
+  | { art: 'items'; rows: { icon?: SeIcon; emoji?: string; n: number; label?: string; per?: number; dim?: number }[] }
+  /** Minecraft inventory slots: an item and a count in the corner. `null` is an empty slot. */
+  | { art: 'slots'; slots: ({ icon: SeIcon; n?: number } | null)[]; cols?: number; label?: string }
+  /** A spinner, weighted by `n`. It spins when the card opens — probability you can watch. */
+  | { art: 'spinner'; parts: { label: string; n?: number; tone?: SeTone }[] }
+  /** Dice faces. */
+  | { art: 'dice'; faces: number[] }
+  /** Shop cards side by side — bundles, sale prices (`was`), a ribbon `tag`. */
+  | { art: 'shop'; offers: { icon?: SeIcon; emoji?: string; qty: string; price: string; was?: string; tag?: string }[] }
+  /** A till receipt. */
+  | { art: 'receipt'; lines: { item: string; price: string }[]; total?: string; note?: string }
+  /** A vertical bar chart or a line graph, animating in. */
+  | { art: 'chart'; type: 'bar' | 'line'; labels: string[]; values: number[]; unit?: string; max?: number; title?: string }
+  /** A circle graph with a legend. */
+  | { art: 'circlegraph'; slices: { label: string; value: number }[]; unit?: string }
   /** A fraction bar: `filled` of `parts` shaded. */
   | { art: 'bar'; parts: number; filled: number; label?: string; tone?: SeTone }
   /** The same thing as a circle, for when the question is about pizza. */

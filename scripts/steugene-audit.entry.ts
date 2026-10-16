@@ -8,9 +8,9 @@
 //   THIN is a length warning — a bench too short for the longest lesson. Real,
 //   but it is a content backlog, not a bug, so it reports and moves on.
 import { SE_SUBJECTS, CURRENT_SUBTOPIC, seFind, seAllSubtopics } from '../src/logic/steugene'
-import { ensurePack, writtenSubtopics } from '../src/steugene/packs'
+import { WRITTEN_IDS, ensurePack, writtenSubtopics } from '../src/steugene/packs'
 import { SE_LENGTHS, seAvailable, seBlockSeconds, sePlanLesson, seTiles } from '../src/logic/steugeneLesson'
-import type { SeBlock } from '../src/steugene/types'
+import type { SeArt, SeBlock, SeChoice } from '../src/steugene/types'
 
 export async function audit(verbose = false): Promise<boolean> {
   const problems: string[] = []
@@ -46,6 +46,7 @@ export async function audit(verbose = false): Promise<boolean> {
       if (ids.has(b.id)) fail(`${subtopic.id}: duplicate block id "${b.id}"`)
       ids.add(b.id)
       checkBlock(b, subtopic.id, fail)
+      if (WRITTEN_IDS.includes(subtopic.id)) checkWritten(b, fail)
       if (b.kind === 'video') videos++
     }
 
@@ -139,4 +140,89 @@ function checkBlock(b: SeBlock, where: string, fail: (m: string) => void) {
   }
 
   if (where === '') fail('unreachable')
+}
+
+// --- the stricter bar for hand-written packs (§24n) -----------------------------
+//
+// A generator cannot be held to these; a person writing by hand can. Each one
+// is a way a card can be technically "fine" and still teach the wrong thing.
+
+type Check = Omit<SeChoice, 'kind' | 'id'>
+
+function checkWritten(b: SeBlock, fail: (m: string) => void) {
+  const arts: SeArt[] = []
+  const ask = (c: Check, where: string) => {
+    // §24f: the right answer must never be the one that LOOKS right — the
+    // longest option is the oldest tell there is.
+    const len = c.options.map((o) => o.length)
+    const mine = len[c.answer]
+    if (mine > 0 && len.every((l, i) => i === c.answer || l < mine)) fail(`${where}: the right answer is the longest option`)
+    if (!c.why?.trim()) fail(`${where}: no "why"`)
+    if (c.art) arts.push(c.art)
+    for (const st of c.steps ?? []) if (st.art) arts.push(st.art)
+  }
+  if (b.kind === 'choice') {
+    ask(b, b.id)
+    if ((b.steps?.length ?? 0) < 2) fail(`${b.id}: a walk-through needs at least two steps`)
+  }
+  if (b.kind === 'video') b.checks.forEach((c, i) => ask(c, `${b.id} check ${i}`))
+  if (b.kind === 'build') {
+    if (b.art) arts.push(b.art)
+    for (const st of b.steps ?? []) if (st.art) arts.push(st.art)
+    if ((b.steps?.length ?? 0) < 2) fail(`${b.id}: a walk-through needs at least two steps`)
+    if (/[−–]/.test(b.answer)) fail(`${b.id}: a build answer is typed with tiles, so its minus is "-", not "−"`)
+  }
+  if (b.kind === 'explain' && b.art) arts.push(b.art)
+  for (const a of arts) checkArt(a, b.id, fail)
+}
+
+function checkArt(a: SeArt, id: string, fail: (m: string) => void) {
+  const inside = (v: number, lo: number, hi: number, what: string) => {
+    if (v < lo - 1e-9 || v > hi + 1e-9) fail(`${id}: ${what} ${v} is off the drawing (${lo}…${hi})`)
+  }
+  switch (a.art) {
+    case 'numberline':
+      for (const p of a.points ?? []) inside(p.at, a.from, a.to, 'point')
+      for (const h of a.hops ?? []) {
+        inside(h.from, a.from, a.to, 'hop start')
+        inside(h.to, a.from, a.to, 'hop end')
+      }
+      for (const v of a.span ?? []) inside(v, a.from, a.to, 'span end')
+      break
+    case 'ylevel':
+      for (const m of a.marks ?? []) inside(m.at, a.from, a.to, 'Y mark')
+      for (const v of a.dig ?? []) inside(v, a.from, a.to, 'dig end')
+      break
+    case 'thermo':
+      inside(a.at, a.from, a.to, 'temperature')
+      for (const m of a.marks ?? []) inside(m.at, a.from, a.to, 'mark')
+      break
+    case 'plane':
+      for (const p of a.points ?? []) {
+        inside(p.x, a.x[0], a.x[1], 'x')
+        inside(p.y, a.y[0], a.y[1], 'y')
+      }
+      for (const poly of a.polys ?? [])
+        for (const [x, y] of poly.pts) {
+          inside(x, a.x[0], a.x[1], 'x')
+          inside(y, a.y[0], a.y[1], 'y')
+        }
+      break
+    case 'pizza':
+      for (const p of a.pies) if ((p.take ?? 0) + (p.gone ?? 0) > p.slices) fail(`${id}: more slices taken than the pizza has`)
+      break
+    case 'hearts':
+      if (a.full + (a.lost ?? 0) > (a.max ?? 10)) fail(`${id}: more hearts than the bar holds`)
+      break
+    case 'bar':
+    case 'pie':
+      if (a.filled > a.parts) fail(`${id}: ${a.filled} of ${a.parts} filled`)
+      break
+    case 'table':
+      for (const r of a.rows) if (r.length !== a.head.length) fail(`${id}: a table row is the wrong width`)
+      break
+    case 'chart':
+      if (a.labels.length !== a.values.length) fail(`${id}: chart labels and values differ in number`)
+      break
+  }
 }
