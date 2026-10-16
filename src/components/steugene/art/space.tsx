@@ -267,17 +267,23 @@ export function Plane({ art }: { art: ArtOf<'plane'> }) {
   const [x0, x1] = art.x
   const [y0, y1] = art.y
   const step = art.step ?? 1
-  const cell = Math.min(296 / (x1 - x0), 236 / (y1 - y0))
-  const gw = cell * (x1 - x0)
-  const gh = cell * (y1 - y0)
-  const ox = (320 - gw) / 2
+  const ystep = art.ystep ?? step
+  // Same units on both axes → square cells. A real-world graph (Robux against
+  // weeks) gets its own y scale instead, or it would be a sliver.
+  const free = art.ystep !== undefined
+  const cx = free ? 270 / (x1 - x0) : Math.min(296 / (x1 - x0), 236 / (y1 - y0))
+  const cy = free ? 200 / (y1 - y0) : cx
+  const gw = cx * (x1 - x0)
+  const gh = cy * (y1 - y0)
+  const ox = free ? 36 : (320 - gw) / 2
   const oy = 22
   const H = oy + gh + 14
-  const X = (v: number) => ox + (v - x0) * cell
-  const Y = (v: number) => oy + (y1 - v) * cell
-  const every = cell * step < 15 ? 2 : 1
+  const X = (v: number) => ox + (v - x0) * cx
+  const Y = (v: number) => oy + (y1 - v) * cy
+  const every = cx * step < 15 ? 2 : 1
+  const everyY = cy * ystep < 15 ? 2 : 1
   const xs = ticksOf(x0, x1, step)
-  const ys = ticksOf(y0, y1, step)
+  const ys = ticksOf(y0, y1, ystep)
 
   // y = mx + b, cut to the window.
   const clip = (m: number, b: number) => {
@@ -313,7 +319,7 @@ export function Plane({ art }: { art: ArtOf<'plane'> }) {
         ) : null,
       )}
       {ys.map((v, i) =>
-        v !== 0 && i % every === 0 ? (
+        v !== 0 && i % everyY === 0 ? (
           <text key={`ty${v}`} x={(x0 <= 0 && x1 >= 0 ? X(0) : ox) - 4} y={Y(v) + 4} textAnchor="end" fontSize={10} fontWeight={800} fill="var(--muted)">
             {v < 0 ? `−${-v}` : v}
           </text>

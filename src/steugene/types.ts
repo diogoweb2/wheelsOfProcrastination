@@ -158,6 +158,8 @@ export type SeArt =
       x: [number, number]
       y: [number, number]
       step?: number
+      /** Give the y axis its own spacing (and its own scale) — Robux per week, not blocks. */
+      ystep?: number
       xName?: string
       yName?: string
       points?: SePlanePoint[]
