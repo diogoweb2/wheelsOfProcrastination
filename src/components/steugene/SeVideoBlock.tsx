@@ -13,8 +13,16 @@
 //
 // It still fails open: a video that will not load says so and lets him move
 // on, rather than parking him in front of a black rectangle.
+//
+// He is held for the first TWO MINUTES and then released (§24g). Two minutes
+// is long enough that the video has made its point and short enough that a
+// ten-minute upload cannot eat a third of his hour. The hold counts PLAYING
+// seconds only, so pausing it and walking away buys him nothing.
 import { useEffect, useRef, useState } from 'react'
 import { sfx } from '../../audio'
+
+/** How long he has to actually watch before the skip unlocks (§24g). */
+const HOLD_SECONDS = 120
 
 interface YtPlayer {
   playVideo(): void
@@ -66,13 +74,16 @@ export function SeVideoBlock({
   by?: string
   start?: number
   end?: number
-  /** Fired once, when the video has genuinely played to the end (or broke). */
-  onFinished: (reason: 'ended' | 'broken') => void
+  /** Fired once: it played out, he let it go after the hold, or it broke. */
+  onFinished: (reason: 'ended' | 'broken' | 'skipped') => void
 }) {
   const host = useRef<HTMLDivElement>(null)
   const player = useRef<YtPlayer | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'playing' | 'paused' | 'ended' | 'broken'>('loading')
   const [progress, setProgress] = useState(0)
+  /** Seconds of actual playback. Not position — rewinding is still watching. */
+  const [watched, setWatched] = useState(0)
+  const playing = useRef(false)
 
   useEffect(() => {
     let alive = true
@@ -107,17 +118,24 @@ export function SeVideoBlock({
             onStateChange: (e: { data: number }) => {
               if (!alive || !window.YT) return
               if (e.data === window.YT.PlayerState.ENDED) {
+                playing.current = false
                 setState('ended')
                 sfx.click()
                 onFinished('ended')
-              } else if (e.data === window.YT.PlayerState.PLAYING) setState('playing')
-              else if (e.data === window.YT.PlayerState.PAUSED) setState('paused')
+              } else if (e.data === window.YT.PlayerState.PLAYING) {
+                playing.current = true
+                setState('playing')
+              } else if (e.data === window.YT.PlayerState.PAUSED) {
+                playing.current = false
+                setState('paused')
+              }
             },
           },
         })
         ticker = setInterval(() => {
           const p = player.current
           if (!p?.getDuration) return
+          if (playing.current) setWatched((w) => (w >= HOLD_SECONDS ? w : w + 0.5))
           const dur = (end ?? p.getDuration()) - (start ?? 0)
           if (dur > 0) setProgress(Math.min(1, (p.getCurrentTime() - (start ?? 0)) / dur))
         }, 500)
@@ -155,6 +173,10 @@ export function SeVideoBlock({
     player.current?.playVideo()
   }
 
+  const left = Math.max(0, Math.ceil(HOLD_SECONDS - watched))
+  const canSkip = left === 0
+  const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`
+
   return (
     <div className="se-video">
       <div className="se-video__frame">
@@ -189,6 +211,23 @@ export function SeVideoBlock({
             🔁
           </button>
         </div>
+      )}
+
+      {state !== 'broken' && state !== 'ended' && (
+        // Two minutes in, he is allowed to leave. The button says exactly
+        // where it goes, because the questions come either way (§24g) and
+        // finding that out afterwards would feel like a trick.
+        <button
+          className={`btn btn--small se-video__skip${canSkip ? '' : ' se-video__skip--held'}`}
+          disabled={!canSkip}
+          onClick={() => {
+            sfx.click()
+            player.current?.pauseVideo()
+            onFinished('skipped')
+          }}
+        >
+          {canSkip ? '⏭ Skip to the questions' : `⏭ Skip in ${clock}`}
+        </button>
       )}
     </div>
   )

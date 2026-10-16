@@ -1863,6 +1863,16 @@ The rules they follow:
 - **Videos stay only when they are on topic.** The generated packs had English-grammar "conditionals" under coding and an operations-management lecture under debugging; those are gone. No new video was added without the embed check (§24g). A pack with no good video simply has more cards.
 - **Enough for an hour.** Every written pack has about 40 estimated minutes or more on its bench, which at his real pace covers a 60-minute lesson without repeating a card. A video's estimate is its length plus 40 s a check, never less.
 
+### 24o. The calculator
+
+A calculator sits on every **maths** lesson, and only a maths lesson — nothing in History is helped by a keypad, and a second thing on the screen is a cost wherever it is not a help.
+
+- **Always there, never in the way.** It floats over the card, fixed to the viewport so it cannot scroll off mid-sum. `▁` folds it down to a 🧮 button; `⇄` sends it to the other side when it is sitting on top of the answers. Both choices are remembered in `localStorage`, so he sets it up once and never thinks about it again.
+- **Why it is allowed at all:** in grade 7 the thing being taught is almost never the arithmetic. Making him hand-divide 161 ÷ 7 to answer a question about ratios tests the wrong skill and costs him the question (§24f, no second go).
+- **It shows the fraction too.** `1 ÷ 4` reads `= 0.25` and `= 1/4` side by side. Converting between the two forms is half of this term's number sense, so he gets that lesson free every time he divides.
+- **No `eval`.** `src/logic/seCalc.ts` parses the expression by hand — `+ − × ÷ ( )`, precedence, unary minus — so the calculator can never become a way to run something, and a half-typed `5 ×` fails quietly instead of throwing. Dividing by zero shows nothing rather than `Infinity`. The parser is split from the component precisely so it can be tested without a browser.
+- Its taps count as activity on the lesson clock (§24d), because working a sum out is working.
+
 ### 24c. It reads to him
 
 He can do the thinking; reading is what stops him. So **read-aloud is ON by default**, every card speaks itself when it appears, and every card has a 🔊 to hear it again. **It costs nothing** — the device's own voice, never a model.
@@ -1897,6 +1907,10 @@ Ask him if he is on rational numbers and he does not know. Show him `|−20|` an
 A video only earns its place because questions follow it, and that only works if it is the video we chose. YouTube's own chrome is a corridor out: the title links away, the end screen offers six more, the avatar is a door.
 
 So none of it is reachable. `youtube-nocookie.com` through the IFrame API with `controls=0`, a **transparent shield over the whole frame** so no click lands inside it, and every control he gets is ours (play/pause, ⏪10s, replay) driving the player through the API. The end screen never appears because the moment the video ends we cover it. It **fails open**: a video that will not load says so and lets him move on.
+
+**Two minutes, then he is free.** The skip button is held for the first 120 seconds and reads `⏭ Skip in 1:12`; after that it reads `⏭ Skip to the questions` and ends the video. Two minutes is long enough that the video has made its point and short enough that a ten-minute upload cannot eat a third of his hour — and a lesson he is allowed to leave is a lesson he does not spend fighting.
+
+The hold counts **playing seconds only**, so pausing it and walking away buys him nothing; rewinding still counts, because rewinding is watching. Skipping goes to the **questions**, not past them, and the button says so — the questions are the entire reason a video is here, and discovering them after pressing skip would read as a trick.
 
 The Android shell closes the last gap — `isYouTube()` lets YouTube's frames load inside the WebView but swallows any **main-frame** navigation to them, so the watch page is unreachable even if something slips.
 
