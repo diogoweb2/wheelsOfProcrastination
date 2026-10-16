@@ -161,6 +161,10 @@ function checkWritten(b: SeBlock, fail: (m: string) => void) {
     if (c.art) arts.push(c.art)
     for (const st of c.steps ?? []) if (st.art) arts.push(st.art)
   }
+  // A hop is drawn to where it LANDS, and on a question that is the answer.
+  // Hops belong on explanations and walk-throughs.
+  if ((b.kind === 'choice' || b.kind === 'build') && b.art?.art === 'numberline' && b.art.hops?.length)
+    fail(`${b.id}: hops on a question draw the answer`)
   if (b.kind === 'choice') {
     ask(b, b.id)
     if ((b.steps?.length ?? 0) < 2) fail(`${b.id}: a walk-through needs at least two steps`)

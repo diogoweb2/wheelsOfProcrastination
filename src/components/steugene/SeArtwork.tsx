@@ -79,11 +79,20 @@ export function SeArtwork({ art }: { art: SeArt }) {
 function NumberLine({ art }: { art: Extract<SeArt, { art: 'numberline' }> }) {
   const { from, to, step = 1, points = [], span, hops = [] } = art
   const W = 320
-  const lift = hops.length ? 44 : 0
+  const px = (v: number) => 16 + ((v - from) / (to - from)) * (W - 32)
+  // Each hop arcs over its span; a hop that overlaps an earlier one flies
+  // higher, so a there-and-back walk reads as two arcs, not one tangle.
+  const lifts = hops.map((h, i) => {
+    const base = Math.min(34, 14 + Math.abs(px(h.to) - px(h.from)) * 0.2)
+    const lo = Math.min(h.from, h.to)
+    const hi = Math.max(h.from, h.to)
+    const under = hops.slice(0, i).filter((o) => Math.min(o.from, o.to) < hi && Math.max(o.from, o.to) > lo).length
+    return base + under * 26
+  })
   const below = hops.length > 0 && points.some((p) => p.label)
-  const H = (points.some((p) => p.label) ? 92 : 64) + lift + (below ? 18 : 0)
   const pad = 16
-  const y = 44 + lift
+  const y = hops.length ? Math.max(...lifts) + 30 : 44
+  const H = hops.length ? y + (below ? 54 : 34) : points.some((p) => p.label) ? 92 : 64
   const x = (v: number) => pad + ((v - from) / (to - from)) * (W - pad * 2)
 
   const ticks: number[] = []
@@ -133,7 +142,7 @@ function NumberLine({ art }: { art: Extract<SeArt, { art: 'numberline' }> }) {
         const x1 = x(h.from)
         const x2 = x(h.to)
         const mx = (x1 + x2) / 2
-        const lift2 = Math.min(38, 14 + Math.abs(x2 - x1) * 0.22)
+        const lift2 = lifts[i]
         const y0 = y - 5
         const cy = y0 - 2 * lift2
         const ang = Math.atan2(y0 - cy, x2 - mx)
