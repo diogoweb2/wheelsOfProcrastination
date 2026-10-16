@@ -392,7 +392,7 @@ export function Plane({ art }: { art: ArtOf<'plane'> }) {
           {p.label && (
             <text
               x={X(p.x) + (X(p.x) > 250 ? -12 : 12)}
-              y={Y(p.y) + (Y(p.y) < 30 ? 18 : -9)}
+              y={Y(p.y) + (Y(p.y) < 30 || (y0 <= 0 && y1 >= 0 && Y(p.y) > Y(0) && Y(p.y) - Y(0) < 40) ? 18 : -9)}
               textAnchor={X(p.x) > 250 ? 'end' : 'start'}
               fontSize={13}
               fontWeight={900}
