@@ -29,11 +29,18 @@ export interface CurfewSettings {
 export const DEFAULT_ALLOW = ['wheel', 'bank', 'academy', 'essay', 'chess', 'checkers', 'seabattle']
 
 /**
- * Apps nobody can lock away, whatever the allow-list says: Settings (it holds
- * the PIN and the sound) and the parent's own desk — the desk is where the
- * curfew is switched off, so locking it would lock the key inside the room.
+ * Apps nobody can lock away, whatever the allow-list says.
+ *
+ * Settings holds the PIN and the sound. The parent's desk is where the curfew
+ * is switched off, so locking it would lock the key inside the room. And
+ * **St. Eugene 7 is homework** (§24): the watch exists to stop him playing at
+ * 21:00, never to stop him studying — a curfew that can close his schoolwork
+ * is a curfew that eventually gets switched off entirely.
+ *
+ * Because they can never be closed, these never appear on the desk's
+ * tick-list either (`AdminSection`), so the list only offers real choices.
  */
-export const ALWAYS_OPEN = ['settings', 'admin']
+export const ALWAYS_OPEN = ['settings', 'admin', 'steugene7']
 
 export function defaultCurfew(): CurfewSettings {
   return { on: true, startHour: 19, startMin: 0, endHour: 7, endMin: 0, allow: [...DEFAULT_ALLOW] }
