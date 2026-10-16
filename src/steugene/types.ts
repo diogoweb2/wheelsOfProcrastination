@@ -187,6 +187,8 @@ export type SeArt =
       right?: number[]
       tone?: SeTone
       label?: string
+      /** Dashed heights (or any helper line), in the same coordinates, with a label. */
+      heights?: { from: [number, number]; to: [number, number]; label?: string }[]
       also?: { pts: [number, number][]; sides?: (string | null)[]; angles?: (string | null)[]; tone?: SeTone; label?: string }[]
     }
   /**

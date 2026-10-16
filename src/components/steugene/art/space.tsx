@@ -527,7 +527,7 @@ export function Shape({ art }: { art: ArtOf<'shape'> }) {
     { pts: art.pts, sides: art.sides, angles: art.angles, tone: art.tone, label: art.label, main: true },
     ...(art.also ?? []).map((s) => ({ ...s, main: false })),
   ]
-  const all = shapes.flatMap((s) => s.pts)
+  const all = [...shapes.flatMap((s) => s.pts), ...(art.heights ?? []).flatMap((h) => [h.from, h.to])]
   const minX = Math.min(...all.map((p) => p[0]))
   const maxX = Math.max(...all.map((p) => p[0]))
   const minY = Math.min(...all.map((p) => p[1]))
@@ -625,6 +625,20 @@ export function Shape({ art }: { art: ArtOf<'shape'> }) {
             {s.label && (
               <text x={gx} y={bottom + 34} textAnchor="middle" fontSize={13} fontWeight={900} fill="var(--text)">
                 {s.label}
+              </text>
+            )}
+          </g>
+        )
+      })}
+      {(art.heights ?? []).map((h, i) => {
+        const [x1, y1] = P(h.from)
+        const [x2, y2] = P(h.to)
+        return (
+          <g key={`h${i}`} {...anim('fade', 600)}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--yellow)" strokeWidth={2.5} strokeDasharray="5 4" />
+            {h.label && (
+              <text x={(x1 + x2) / 2 + 8} y={(y1 + y2) / 2 + 5} fontSize={14} fontWeight={900} fill="var(--yellow)" style={halo}>
+                {h.label}
               </text>
             )}
           </g>
