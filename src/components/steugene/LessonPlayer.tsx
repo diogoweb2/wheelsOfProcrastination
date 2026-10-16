@@ -112,7 +112,7 @@ function SpeakButton({ text, rate }: { text: string; rate: number }) {
 // --- the player --------------------------------------------------------------
 
 export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
-  const { data, seDesk, seTick, seAdvance, seRecord, seFinish, seAbandon } = useStore()
+  const { data, seDesk, seTick, seAdvance, seRecord, seFinish } = useStore()
   const run = data.steugene.run
   const speakOn = data.steugene.speak.on
   const rate = data.steugene.speak.rate
@@ -169,11 +169,14 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   return (
     <div className="se-lesson">
       <div className="se-lesson__top">
+        {/* Leaving keeps his place: the lesson stays in flight and ▶️ Carry on
+            picks it up here. The clock needs nothing — it only runs while
+            this player is on screen (§24d). */}
         <button
           className="btn btn--ghost btn--small"
+          title="Leave — your place is kept"
           onClick={() => {
             stopSpeaking()
-            seAbandon()
             onLeave()
           }}
         >

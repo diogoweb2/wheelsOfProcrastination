@@ -178,6 +178,8 @@ function TopicSheet({
   const asks = seDesk.requests.filter((r) => r.subtopicId === subtopicId)
   const pending = asks.filter((r) => r.status === 'pending')
   const locked = data.steugene.locks.filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
+  const inFlight = data.steugene.run
+  const resuming = inFlight?.subtopicId === subtopicId
   if (!where) return null
 
   // The pack is its own chunk (see steugene/packs/generated), so it has to
@@ -230,13 +232,37 @@ function TopicSheet({
           ))}
         </div>
 
+        {resuming && (
+          <button
+            className="btn btn--blue"
+            onClick={() => {
+              sfx.click()
+              onClose()
+              setTab('lesson')
+            }}
+          >
+            ▶️ Carry on where you stopped
+          </button>
+        )}
+
         {written ? (
-          <button className="btn btn--blue" disabled={opening} onClick={() => void start()}>
-            {opening ? 'Getting it ready…' : '▶️ Start the lesson'}
+          <button
+            className={`btn ${resuming ? 'btn--ghost' : 'btn--blue'}`}
+            style={resuming ? { marginTop: 10 } : undefined}
+            disabled={opening}
+            onClick={() => void start()}
+          >
+            {opening ? 'Getting it ready…' : resuming ? '🔄 Start a fresh one' : '▶️ Start the lesson'}
           </button>
         ) : (
           <p className="muted" style={{ marginTop: 8 }}>
             Nothing written for this one yet. Ask Dad and he can have some made.
+          </p>
+        )}
+
+        {written && inFlight && !resuming && (
+          <p className="muted" style={{ marginTop: 10 }}>
+            Starting this one finishes your {seFind(inFlight.subtopicId)?.subtopic.title} lesson.
           </p>
         )}
 
@@ -405,7 +431,7 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
       </button>
       {data.steugene.run && (
         <p className="muted" style={{ marginTop: 10 }}>
-          Starting a new one drops the lesson you already have open.
+          Starting a new one finishes the lesson you already have open.
         </p>
       )}
     </>
@@ -415,7 +441,7 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
 // --- the lesson --------------------------------------------------------------------
 
 function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
-  const { data } = useStore()
+  const { data, seResume } = useStore()
   const run = data.steugene.run
   // A reload (or the app being killed) lands here with a lesson in flight and
   // nothing in memory to render it from, so fetch the chunk back first.
@@ -428,6 +454,16 @@ function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
       alive = false
     }
   }, [run?.subtopicId, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Once per visit, and only after the pack is here (stepping on may need to
+  // top the queue up from it): if he left with a card answered but not yet
+  // ▶️ Next'd, he comes back to the card after it.
+  const [resumed, setResumed] = useState(false)
+  useEffect(() => {
+    if (!run || !ready || resumed) return
+    setResumed(true)
+    seResume()
+  }, [!!run, ready, resumed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (run && !ready) return <div className="card">Opening your lesson…</div>
   if (run) return <LessonPlayer onLeave={() => setTab('subjects')} />

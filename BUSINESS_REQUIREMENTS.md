@@ -1889,6 +1889,8 @@ Working faster than the plan tops the queue up from the bench (`seTopUp`), two c
 
 **Repeating a subtopic deals different cards.** Every block he has been served is remembered in `stats[id].seen`, and the planner takes unseen ones first.
 
+**Leaving keeps his place.** ✕ takes him out of the lesson and **nothing is thrown away**: the run stays on his profile, the Subjects page shows **▶️ Carry on with …**, and the topic's own sheet offers **▶️ Carry on where you stopped** above **🔄 Start a fresh one**. Closing the app is the same thing. The clock does not run while he is away, because it only runs while the lesson is on screen. A card he answered but did not ▶️ Next past is **behind him** when he comes back, never shown again (§24f). Only two things end a lesson: the clock at the end of a card, or **starting another lesson**, which *finishes* the open one exactly as the clock would (misses sealed, cards marked seen), so starting over is never a way round §24f. (Until Oct 2026 ✕ deleted the lesson outright with nothing banked and nothing sealed. That cost Ben an 18-question rational-numbers lesson with no way back in.)
+
 ### 24e. "What are you learning right now?" (`/steugene7/finder`)
 
 Ask him if he is on rational numbers and he does not know. Show him `|−20|` and he does. The Finder is that: pick the class, then slide one card at a time — big `sample`, plain-English line, 🔊 — until one looks like today's board. Tapping **"That is the one"** builds the lesson.

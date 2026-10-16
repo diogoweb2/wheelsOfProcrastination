@@ -441,8 +441,10 @@ interface StoreState {
   slfRepair: () => boolean
 
   // --- 🏫 St. Eugene 7 (§24) ------------------------------------------------
-  /** Deal a lesson for a subtopic and make it the one in flight. */
+  /** Deal a lesson for a subtopic and make it the one in flight. An open lesson is finished first, not dropped. */
   seStart: (subtopicId: string) => void
+  /** Picking a lesson back up: step past a card he already answered, so it is never a second go (§24f). */
+  seResume: () => void
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
   seTick: (seconds: number) => void
   /** File one answer. There is no un-filing it (§24f). */
@@ -451,8 +453,6 @@ interface StoreState {
   seAdvance: () => void
   /** End the lesson: bank the stats and seal the mistakes. */
   seFinish: () => void
-  /** Walk out. Nothing is banked and nothing is sealed. */
-  seAbandon: () => void
   seSetMinutes: (minutes: number) => void
   seSetSpeak: (on: boolean, rate?: number) => void
   /** Ben asks Dad for more content on a subtopic (§24h). */
@@ -3902,6 +3902,10 @@ export const useStore = create<StoreState>((set, get) => {
     // --- 🏫 St. Eugene 7 (§24) ---------------------------------------------
 
     seStart(subtopicId) {
+      // A lesson already in flight is finished, not thrown away: its misses
+      // are sealed and its cards count as seen, so starting over is never a
+      // way round §24f.
+      if (get().data.steugene.run?.answers.length) get().seFinish()
       const { data, seDesk } = get()
       const blocks = seBench(data, seDesk, subtopicId)
       const seen = data.steugene.stats[subtopicId]?.seen ?? []
@@ -3985,9 +3989,10 @@ export const useStore = create<StoreState>((set, get) => {
         stat.lessons += 1
         stat.seconds += run.activeSeconds
         stat.lastAt = Date.now()
-        // Every card he was dealt is now "seen", so a repeat of this subtopic
-        // reaches for the bench before it reaches for these again.
-        stat.seen = [...new Set([...stat.seen, ...run.blockIds])]
+        // Every card he was shown is now "seen", so a repeat of this subtopic
+        // reaches for the bench before it reaches for these again. Only up to
+        // `pos`: a lesson closed early leaves the rest of its queue unseen.
+        stat.seen = [...new Set([...stat.seen, ...run.blockIds.slice(0, run.pos + 1)])]
         if (wrong.length) {
           d.steugene.locks.push({
             id: `lock-${Date.now().toString(36)}`,
@@ -4000,10 +4005,12 @@ export const useStore = create<StoreState>((set, get) => {
       })
     },
 
-    seAbandon() {
-      commit((d) => {
-        d.steugene.run = null
-      })
+    seResume() {
+      const run = get().data.steugene.run
+      const id = run?.blockIds[run.pos]
+      // A video's questions are filed as `<id>-q<n>`.
+      if (!id || !run.answers.some((a) => a.id === id || a.id.startsWith(`${id}-q`))) return
+      get().seAdvance()
     },
 
     seSetMinutes(minutes) {
