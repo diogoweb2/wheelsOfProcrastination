@@ -30,6 +30,7 @@ import { VoyageScreen } from './screens/VoyageScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { IdeasScreen } from './screens/IdeasScreen'
 import { GymScreen } from './screens/GymScreen'
+import { StEugeneScreen } from './screens/StEugeneScreen'
 import { FcLockScreen } from './screens/FcLockScreen'
 import { RobloxScreen } from './screens/RobloxScreen'
 import { formatMinutes, unseenGrants } from './logic/roblox'
@@ -863,6 +864,8 @@ function AppBodyRouter({
           <OptcgScreen tab={open.tab} setTab={setTab} />
         </Suspense>
       )
+    case 'steugene7':
+      return <StEugeneScreen tab={open.tab} setTab={setTab} />
     case 'gym':
       return <GymScreen tab={open.tab} />
     case 'fclock':

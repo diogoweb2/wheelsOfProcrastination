@@ -1774,4 +1774,87 @@ Most of the app goes to sleep on a schedule, and **the schedule is visible**: th
 
 Code: `src/logic/curfew.ts` (pure rules), `src/hooks/useCurfew.ts` (the live clock, re-read every 30s and on refocus), `src/components/NightWatch.tsx` (the blocked screen), `NightWatchDesk` in `src/components/AdminSection.tsx` (the dials).
 
+
+## 24. St. Eugene 7 — his real school year (the 🏫 St. Eugene 7 app)
+
+**Not the Academy.** §14 is a game Dad runs with prizes in it. This is grade 7 at St. Eugene Catholic School, Toronto: the curriculum his teacher is actually walking, in her order. It pays **nothing** — no Berries, no Devil Fruits, no stamps. The only rewards are the animation, the sound and the fact that he gets it.
+
+It is a **web app in this repo**, not a second native project. His tablet already runs the whole site as an installed package (§1d), which is what Family Link schedules; a separate app would duplicate the profiles, the push, the sounds and the parent desk to buy nothing. The two things that genuinely needed native are two small additions to the existing shell: §24c and §24g.
+
+### 24a. The map of the year
+
+`src/logic/steugene.ts` holds the curriculum, in teaching order: **Term 1 — History** (Strand A: New France and British North America 1713–1800 · Strand B: Canada 1800–1850), then the **all-year subjects** (Language, Mathematics, Science), then **Term 2 — Geography** (Strand A: Physical Patterns · Strand B: Natural Resources) at the bottom, where it stays until February.
+
+Three levels: **subject → strand → subtopic**. A subtopic is the unit of everything — a lesson, a report row, a Finder card. `CURRENT_SUBTOPIC` marks where the class actually is (October 2025: `math-rational`); it wears a **📍 you are here** pin and the Subjects tab opens on its subject.
+
+Each subtopic carries a `sample` — one line as it looks on the board (`|−20| = 20`, `1 043 221 → 1.0 million`) — and a `plain` one-liner. Those two, not the formal title, are what he is ever shown first. See §24e.
+
+### 24b. What a lesson is made of
+
+Five block kinds, and nothing else (`src/steugene/types.ts`): **explain** (short lines + a drawing), **choice** (three options), **build** (he assembles the answer from tiles), **video**, **game**. Every block is data, so a hand-written block and an AI-written one (§24h) are indistinguishable to the player.
+
+Drawings are a closed set of six inline-SVG renderers (`SeArtwork.tsx`): number line, fraction bar, fraction circle, integer counters, balance scale, comparison bars. One line to author, which is the only reason nearly every card has a picture. No files in `public/`.
+
+A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the bench). The bench is deliberately bigger than the spine: see §24d. **Live pack: `math-rational`** — 14 core blocks, 14 extra.
+
+### 24c. It reads to him
+
+He can do the thinking; reading is what stops him. So **read-aloud is ON by default**, every card speaks itself when it appears, and every card has a 🔊 to hear it again. **It costs nothing** — the device's own voice, never a model.
+
+Two engines (`src/lib/speak.ts`): Android's native `TextToSpeech` through the shell bridge when we are in the shell, otherwise the browser's `speechSynthesis`. The shell is preferred because Android's WebView exposes a `speechSynthesis` object that reports no voices and silently says nothing — a lying API is worse than a missing one. Maths is rewritten before it is spoken (`−` → "minus", `3/4` → "three over four", `|−20|` → "the absolute value of −20").
+
+### 24d. 30 to 60 minutes, honestly measured
+
+He picks 30, 40 or 60. The engine deals a run it believes is about that long, then **measures the real thing**: one second is banked only while the tab is visible **and** something has happened in the last 60 seconds. Walk away and the minutes do not accrue.
+
+**There is no visible clock, ever.** A timer on screen turns the lesson into something to outlast. The only progress he sees is a ⛵ sailing along the top, and it moves **per card**, so sitting still gains nothing.
+
+Working faster than the plan tops the queue up from the bench (`seTopUp`), two cards of lookahead ahead of him. Running out of content before the time is up is the one failure that matters, which is why packs carry far more `extra` than `core`.
+
+**Repeating a subtopic deals different cards.** Every block he has been served is remembered in `stats[id].seen`, and the planner takes unseen ones first.
+
+### 24e. "What are you learning right now?" (`/steugene7/finder`)
+
+Ask him if he is on rational numbers and he does not know. Show him `|−20|` and he does. The Finder is that: pick the class, then slide one card at a time — big `sample`, plain-English line, 🔊 — until one looks like today's board. Tapping **"That is the one"** builds the lesson.
+
+### 24f. A wrong answer is final, and then it is taught
+
+- **No fixing it in the moment.** The instant he answers, the options go dead. There is no second go, so there is nothing to brute-force.
+- **The explanation uses a different number.** Every question carries `steps`, a 3–4 step walk-through on *other* numbers, revealed one tap at a time. Showing him the answer he just missed teaches him to copy; showing him the move on a fresh number teaches him the move.
+- **The misses are sealed.** At the end of a lesson every wrong question is written into a `SeFixLock` on his profile, and those block ids are **taken out of the deck** for that subtopic. He sees them on the result card, under "Show Dad these".
+- **Only Dad unseals them** — St. Eugene 7 → **Desk** → *Allow Ben to fix these*. That is the whole point of the mechanism: it puts a conversation between the mistake and the retry, every day.
+- **Choice questions show three options** (§14b's rule, same reasoning), and the right one must never be the longest.
+- **Build questions** hand him the answer in pieces: every character of it, shuffled, plus decoys (`seTiles`). He is being asked whether he knows the answer, not whether he can type.
+
+### 24g. Videos he cannot walk out of
+
+A video only earns its place because questions follow it, and that only works if it is the video we chose. YouTube's own chrome is a corridor out: the title links away, the end screen offers six more, the avatar is a door.
+
+So none of it is reachable. `youtube-nocookie.com` through the IFrame API with `controls=0`, a **transparent shield over the whole frame** so no click lands inside it, and every control he gets is ours (play/pause, ⏪10s, replay) driving the player through the API. The end screen never appears because the moment the video ends we cover it. It **fails open**: a video that will not load says so and lets him move on.
+
+The Android shell closes the last gap — `isYouTube()` lets YouTube's frames load inside the WebView but swallows any **main-frame** navigation to them, so the watch page is unreachable even if something slips.
+
+Videos are hand-picked with `npm run se:videos "<search>"`, which reads YouTube's search page and checks each candidate against the oEmbed endpoint — the single best test of "will this actually play in an iframe". No API key.
+
+### 24h. "Generate more" — he asks, Dad decides
+
+Any subtopic offers **➕ More questions** and **💡 Explain it differently**. Pressing one writes a row to the shared `app/steugene` doc and pushes Dad. **Nothing is generated.**
+
+Dad answers from **Desk**. *Allow* runs the generation **on his device with his OpenRouter key** (`src/logic/steugeneAi.ts`, same key as Essays and the Gym), appends the blocks to that subtopic's bench, and pushes Ben back. *Deny* costs nothing. An unlimited "more" button wired to a paid API is a bill, not a study tool.
+
+The model may only write the three **text** kinds. Videos are hand-picked and minigames are hand-built; neither is something a model should invent unsupervised. Everything it returns is validated structurally and anything malformed is dropped — a broken question is worse than one fewer, because he cannot tell a broken one from a hard one.
+
+**One open ask per subtopic per kind** — the button is not a doorbell.
+
+### 24i. The report (`/steugene7/report`)
+
+The page Dad actually opens. Not a leaderboard: **worst first**, so the ten minutes he has with Ben go on the right thing. Per subtopic — accuracy, attempts, real minutes, last seen — and anything **under 60% with 4+ attempts is flagged "needs a hand"**. Under it, the latest misses with what he said and what it should have been. Ben sees his own; Dad sees Ben's through `kidData`.
+
+### 24j. URLs (§1c)
+
+`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/report`, and for Diogo `/steugene7/desk`.
+
+Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video), `src/screens/StEugeneScreen.tsx` (the five pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
+
+
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

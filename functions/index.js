@@ -403,6 +403,44 @@ function tradeWatcher(where) {
   }
 }
 
+/**
+ * 🏫 St. Eugene 7 (§24h): Ben asks for more content, Dad decides.
+ *
+ * Nothing is generated until Dad taps Allow, so this notification IS the
+ * feature — without it the ask sits in a doc nobody opens and he concludes the
+ * button does nothing. Diffed by id, so the verdict write never re-pushes the
+ * original ask.
+ */
+export const onStEugeneWrite = onDocumentWritten('app/steugene', async (event) => {
+  const before = event.data?.before?.data() ?? {}
+  const after = event.data?.after?.data() ?? {}
+
+  const known = new Set((before.requests ?? []).map((r) => r.id))
+  const decided = new Map((before.requests ?? []).map((r) => [r.id, r.status]))
+
+  for (const r of after.requests ?? []) {
+    // A brand-new ask → tell Dad.
+    if (!known.has(r.id) && r.status === 'pending') {
+      await pushTo(PARENT_ID, {
+        title: `🏫 Ben wants ${r.want === 'questions' ? 'more questions' : 'another explanation'}`,
+        body: `${r.subtopicTitle} — open St. Eugene 7 → Desk to allow or deny.`,
+        link: `${SITE}/steugene7/desk`,
+      })
+      continue
+    }
+    // A verdict on an ask that was pending → tell Ben.
+    if (decided.get(r.id) === 'pending' && r.status !== 'pending') {
+      const body =
+        r.status === 'approved'
+          ? `${r.made} new card${r.made === 1 ? '' : 's'} on ${r.subtopicTitle}.`
+          : r.status === 'denied'
+            ? `Not right now — ask again later.`
+            : `It did not work this time.`
+      await pushTo(KID_ID, { title: r.status === 'approved' ? '✅ Dad said yes' : '🏫 Dad answered', body, link: `${SITE}/steugene7/subjects` })
+    }
+  }
+})
+
 export const onStickerTradeWrite = onDocumentWritten('app/stickerTrades', tradeWatcher('the Album tab'))
 export const onCardTradeWrite = onDocumentWritten('app/cardTrades', tradeWatcher('the One Piece Album'))
 export const onFcTradeWrite = onDocumentWritten('app/fcTrades', tradeWatcher('FC Lock → Trade'))

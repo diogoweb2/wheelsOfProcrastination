@@ -71,9 +71,28 @@ export function defaultData(): AppData {
     roblox: defaultRobloxState(),
     fcLock: { leagues: [], teams: [], watch: [] },
     frontier: defaultFrontierState(),
+    steugene: defaultStEugeneState(),
     pushTokens: [],
   }
 }
+
+/**
+ * 🏫 St. Eugene 7 (§24). Read-aloud starts ON: he struggles with reading, and
+ * a feature he has to go and find is a feature he never uses.
+ */
+export function defaultStEugeneState(): AppData['steugene'] {
+  return {
+    run: null,
+    stats: {},
+    locks: [],
+    history: [],
+    speak: { on: true, rate: 0.9 },
+    minutes: 40,
+  }
+}
+
+/** The mistake history is uncapped by nature, so it is capped here. */
+export const SE_HISTORY_CAP = 600
 
 /** Merge a stored (possibly older/partial) blob over fresh defaults so new fields never break old saves. */
 export function mergeData(parsed: Partial<AppData> | undefined): AppData {
@@ -103,6 +122,16 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       entries: (parsed.roblox?.entries ?? []).slice(-ROBLOX_LOG_CAP),
     },
     fcLock: { ...base.fcLock, ...parsed.fcLock },
+    steugene: {
+      ...base.steugene,
+      ...parsed.steugene,
+      stats: { ...parsed.steugene?.stats },
+      locks: parsed.steugene?.locks ?? [],
+      // trimmed on load, so a long year never grows the profile doc past
+      // Firestore's 1 MB ceiling
+      history: (parsed.steugene?.history ?? []).slice(-SE_HISTORY_CAP),
+      speak: { ...base.steugene.speak, ...parsed.steugene?.speak },
+    },
     // the bag and the kill list are objects, so they merge a level deeper —
     // and `scars` is spread from the save rather than the defaults, because
     // losing one to a merge would quietly undo a curse

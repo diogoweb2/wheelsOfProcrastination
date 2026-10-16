@@ -13,7 +13,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
+import java.util.Locale;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -60,6 +62,10 @@ public class MainActivity extends Activity {
     private WebView web;
     private View offline;
     private FrameLayout fullscreenHost;
+
+    /** 🏫 St. Eugene 7 (§24c): built on first use, never on launch. */
+    private TextToSpeech tts;
+    private boolean ttsReady;
 
     private ValueCallback<Uri[]> pendingFilePick;
     private WebChromeClient chromeClient;
@@ -139,6 +145,12 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 if (staysInApp(uri)) return false;
+                // 🏫 St. Eugene 7 (§24g): lesson videos are YouTube iframes, so
+                // YouTube's own frames have to load. The MAIN frame never does
+                // — tapping through to the watch page is exactly the escape
+                // hatch the video block exists to close, so it is swallowed
+                // here rather than handed to Chrome.
+                if (isYouTube(uri)) return request.isForMainFrame();
                 openExternally(uri);
                 return true;
             }
@@ -227,6 +239,60 @@ public class MainActivity extends Activity {
                 || host.endsWith(".firebasestorage.app")
                 || host.endsWith(".googleapis.com")
                 || host.equals("accounts.google.com");
+    }
+
+    /** YouTube's player hosts — allowed inside a frame, never as the page. */
+    private boolean isYouTube(Uri uri) {
+        String host = uri.getHost();
+        if (host == null) return false;
+        return host.endsWith("youtube.com")
+                || host.endsWith("youtube-nocookie.com")
+                || host.endsWith("ytimg.com")
+                || host.endsWith("googlevideo.com")
+                || host.endsWith("youtu.be");
+    }
+
+    // --- read-aloud (§24c) --------------------------------------------------
+
+    /**
+     * Say one line of a lesson. Built the first time it is asked for, because
+     * most sessions of this app never say a word and starting a speech engine
+     * on launch costs a second of cold start for nothing.
+     */
+    void speakAloud(String text, float rate) {
+        if (text == null || text.trim().isEmpty()) return;
+        if (tts == null) {
+            final String first = text;
+            final float firstRate = rate;
+            tts = new TextToSpeech(this, status -> {
+                ttsReady = status == TextToSpeech.SUCCESS;
+                if (!ttsReady) return;
+                int set = tts.setLanguage(Locale.CANADA);
+                if (set == TextToSpeech.LANG_MISSING_DATA || set == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    tts.setLanguage(Locale.US);
+                }
+                say(first, firstRate);
+            });
+            return;
+        }
+        if (ttsReady) say(text, rate);
+    }
+
+    private void say(String text, float rate) {
+        tts.setSpeechRate(rate <= 0 ? 1f : rate);
+        // FLUSH, not ADD: the newest card is the one he is looking at, and a
+        // queue of stale sentences is worse than silence.
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "steugene");
+    }
+
+    void stopSpeaking() {
+        if (tts != null && ttsReady) tts.stop();
+    }
+
+    boolean ttsReady() {
+        // Before the engine is built we claim we can speak: the first call is
+        // what builds it, and reporting false would stop that ever happening.
+        return tts == null || ttsReady;
     }
 
     private void openExternally(Uri uri) {
@@ -431,6 +497,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        stopSpeaking();
         web.onPause();
         super.onPause();
     }
@@ -443,6 +510,11 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+            tts = null;
+        }
         web.destroy();
         super.onDestroy();
     }

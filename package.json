@@ -26,6 +26,8 @@
     "optcg:scrape": "node scripts/optcg-scrape.mjs",
     "optcg:cards": "node scripts/optcg-catalog.mjs",
     "errors": "node scripts/errors.mjs",
+    "se:videos": "node scripts/steugene-videos.mjs",
+    "se:audit": "node scripts/steugene-audit.mjs",
     "gym:audit": "node scripts/gym-audit.mjs",
     "frontier:audit": "node scripts/frontier-audit.mjs"
   },

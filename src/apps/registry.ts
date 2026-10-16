@@ -341,6 +341,27 @@ export const APPS: AppDef[] = [
     ],
   },
   {
+    // 🏫 St. Eugene 7 (§24): his real grade-7 curriculum — lessons that fill
+    // half an hour to an hour, a report I read, and nothing he can unlock by
+    // himself. Its own app rather than a tab on the Quiz: the Academy is a game
+    // I run, and this is school.
+    id: 'steugene7',
+    name: 'St. Eugene 7',
+    icon: '🏫',
+    tint: ['#ffce00', '#8c3d00'],
+    tabs: [
+      { id: 'subjects', label: 'My year', icon: '📚' },
+      { id: 'finder', label: 'Find it', icon: '🔍' },
+      { id: 'lesson', label: 'Lesson', icon: '📘' },
+      { id: 'report', label: 'Report', icon: '📊' },
+    ],
+    adminTabs: [
+      { id: 'desk', label: 'Desk', icon: '🖊️' },
+      { id: 'report', label: 'Report', icon: '📊' },
+      { id: 'subjects', label: 'The year', icon: '📚' },
+    ],
+  },
+  {
     id: 'gym',
     name: 'Gym',
     icon: '💪',

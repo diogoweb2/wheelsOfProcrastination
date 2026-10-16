@@ -27,6 +27,16 @@ interface ShellBridge {
   pushToken(): string | null
   notificationsAllowed(): boolean
   requestPush(): void
+  /**
+   * 🏫 St. Eugene 7 (§24c) — Android's own text-to-speech engine. Added to the
+   * shell because Android's WebView ships `speechSynthesis` as an object that
+   * exists, reports no voices and says nothing: a browser API that lies rather
+   * than one that is missing. Optional, so an older shell still runs.
+   */
+  speak?(text: string, rate: number): void
+  stopSpeaking?(): void
+  /** True once the engine has a voice installed and loaded. */
+  canSpeak?(): boolean
 }
 
 declare global {

@@ -23,6 +23,7 @@ import {
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
 import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
+import type { SeDesk } from '../steugene/types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
 import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
@@ -424,6 +425,26 @@ export function subscribeEssays(cb: (v: EssayDesk) => void): () => void {
 export async function saveEssays(desk: EssayDesk): Promise<void> {
   await ensureAuth()
   await setDoc(essaysRef(), desk)
+}
+
+// --- 🏫 St. Eugene 7 (§24h): the AI desk ------------------------------------
+//
+// Two lists in one document. `requests` is Ben asking and Dad answering;
+// `generated` is what came back. Both sides watch it live, so his "waiting for
+// Dad…" turns into new questions the moment Dad taps Allow, wherever Dad is.
+
+const steugeneRef = () => doc(firestore, 'app', 'steugene')
+
+export function subscribeStEugene(cb: (v: SeDesk) => void): () => void {
+  return onSnapshot(steugeneRef(), (snap) => {
+    const data = snap.data() as Partial<SeDesk> | undefined
+    cb({ requests: data?.requests ?? [], generated: data?.generated ?? [] })
+  })
+}
+
+export async function saveStEugene(desk: SeDesk): Promise<void> {
+  await ensureAuth()
+  await setDoc(steugeneRef(), desk)
 }
 
 // --- market data (shared XGRO/QQQ return series, fetched monthly) -----------

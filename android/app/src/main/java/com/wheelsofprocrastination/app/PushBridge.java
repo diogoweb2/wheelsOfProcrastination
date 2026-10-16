@@ -36,6 +36,31 @@ public class PushBridge {
     }
 
     /**
+     * 🏫 St. Eugene 7 (§24c) — read a lesson card out loud with Android's own
+     * TextToSpeech engine.
+     *
+     * The site asks for this rather than using `speechSynthesis` because the
+     * WebView ships that API as an object that exists, reports no voices and
+     * says nothing at all: worse than missing, because feature detection
+     * passes. Nothing here costs a token — it is the device's voice.
+     */
+    @JavascriptInterface
+    public void speak(String text, double rate) {
+        activity.runOnUiThread(() -> activity.speakAloud(text, (float) rate));
+    }
+
+    @JavascriptInterface
+    public void stopSpeaking() {
+        activity.runOnUiThread(activity::stopSpeaking);
+    }
+
+    /** True once the engine is up and has an English voice. */
+    @JavascriptInterface
+    public boolean canSpeak() {
+        return activity.ttsReady();
+    }
+
+    /**
      * Asks Android for notification permission if needed, then fetches a token.
      * Answers back through window.__wheelsShellPush(token, error) — one of the
      * two is always null.

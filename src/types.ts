@@ -1655,6 +1655,80 @@ export interface EssayWordTest {
   coins: number
 }
 
+// --- 🏫 St. Eugene 7 (§24) — his actual school year -------------------------
+
+/** One answer, kept forever: the Report is nothing but a pile of these. */
+export interface SeAnswer {
+  /** The block id it came from. */
+  id: string
+  subtopicId: string
+  at: number
+  right: boolean
+  /** The question as he saw it — so the Report reads without the pack to hand. */
+  prompt: string
+  /** What he picked or built. */
+  given: string
+  /** What it should have been. */
+  expected: string
+}
+
+/** The running total for one subtopic. Rebuilt from answers, cached for speed. */
+export interface SeStat {
+  attempts: number
+  right: number
+  /** ACTIVE seconds, ever (§24d) — idle time was never counted. */
+  seconds: number
+  /** Finished lessons. */
+  lessons: number
+  lastAt: number
+  /** Block ids already served here, so a repeat deals different cards. */
+  seen: string[]
+}
+
+/**
+ * The mistakes from one finished lesson, sealed (§24f).
+ *
+ * He cannot re-answer them. Dad reads them, decides what needs explaining, and
+ * presses "Allow Ben to fix" — which is the only thing that sets `allowedAt`
+ * and lets those questions come round again.
+ */
+export interface SeFixLock {
+  id: string
+  subtopicId: string
+  at: number
+  mistakes: SeAnswer[]
+  /** Set by Dad. Until then, these questions are out of the deck. */
+  allowedAt?: number
+  /** He has since redone them. */
+  clearedAt?: number
+}
+
+/** The lesson in flight. Lives in the save so a reload or a phone call cannot lose it. */
+export interface SeRun {
+  subtopicId: string
+  startedAt: number
+  targetMinutes: number
+  /** Seconds of ACTIVE work so far. Never shown to him (§24d). */
+  activeSeconds: number
+  /** The dealt queue, by block id. Grows when he is ahead of the clock. */
+  blockIds: string[]
+  /** How far down the queue he is. */
+  pos: number
+  answers: SeAnswer[]
+}
+
+export interface StEugeneState {
+  run: SeRun | null
+  stats: Record<string, SeStat>
+  locks: SeFixLock[]
+  /** Every answer, newest last, capped — the Report's raw material. */
+  history: SeAnswer[]
+  /** Read-aloud (§24c): on by default for him, and how fast it talks. */
+  speak: { on: boolean; rate: number }
+  /** How long a lesson should run. One of SE_LENGTHS. */
+  minutes: number
+}
+
 export interface AppData {
   tasks: Task[]
   completions: Completion[]
@@ -1697,6 +1771,8 @@ export interface AppData {
   fcLock: FcLockState
   /** 🐦 Shangri-La Frontier (§22): the blade, the bag, the scars and the kills. */
   frontier: FrontierState
+  /** 🏫 St. Eugene 7 (§24): his grade-7 year — lessons, mistakes and the clock. */
+  steugene: StEugeneState
   pushTokens: PushToken[] // devices this profile has registered for web push
 }
 

@@ -51,6 +51,12 @@ import {
   seedProfiles,
   setActiveProfileId,
 } from './storage'
+import type { SeDesk, SeBlock } from '../steugene/types'
+import { packFor } from '../steugene/packs'
+import { seAvailable, sePlanLesson, seTopUp } from '../logic/steugeneLesson'
+import { seFind } from '../logic/steugene'
+import { generateSeBlocks } from '../logic/steugeneAi'
+import { SE_HISTORY_CAP } from './storage'
 import {
   loadQuizBank,
   loadRoster,
@@ -76,6 +82,8 @@ import {
   saveFinalTests,
   saveEssays,
   subscribeEssays,
+  subscribeStEugene,
+  saveStEugene,
   type EssayDesk,
   subscribeAiConfig,
   subscribeData,
@@ -389,6 +397,10 @@ interface StoreState {
    * not lose the essay you were holding.
    */
   essayDeskId: string | null
+  /** 🏫 St. Eugene 7 (§24h): Ben's "generate more" asks and what came back. */
+  seDesk: SeDesk
+  /** Which request Dad's device is generating for right now, if any. */
+  seBusy: string | null
   gymPlanning: boolean // the coach is thinking about today's session
   /** Why the last plan came from the offline planner instead of the coach; null when the coach built it. */
 
@@ -427,6 +439,30 @@ interface StoreState {
   slfForge: (id: string, kind: 'weapon' | 'armour') => boolean
   /** 🐦 Frontier: one Hound Fang, and the blade is whole again. */
   slfRepair: () => boolean
+
+  // --- 🏫 St. Eugene 7 (§24) ------------------------------------------------
+  /** Deal a lesson for a subtopic and make it the one in flight. */
+  seStart: (subtopicId: string) => void
+  /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
+  seTick: (seconds: number) => void
+  /** File one answer. There is no un-filing it (§24f). */
+  seRecord: (a: { id: string; right: boolean; prompt: string; given: string; expected: string }) => void
+  /** Move to the next block, topping the queue up if he is ahead of the clock. */
+  seAdvance: () => void
+  /** End the lesson: bank the stats and seal the mistakes. */
+  seFinish: () => void
+  /** Walk out. Nothing is banked and nothing is sealed. */
+  seAbandon: () => void
+  seSetMinutes: (minutes: number) => void
+  seSetSpeak: (on: boolean, rate?: number) => void
+  /** Ben asks Dad for more content on a subtopic (§24h). */
+  seAskAi: (subtopicId: string, want: 'questions' | 'explain') => void
+  /** Dad answers. `true` generates there and then, on his key. */
+  seDecideAi: (id: string, allow: boolean) => Promise<void>
+  /** Dad unseals a lesson's mistakes so Ben may try them again (§24f). */
+  seAllowFix: (lockId: string) => boolean
+  /** Ben has read the verdict on one of his asks. */
+  seSeenVerdict: (id: string) => void
   toggleIdea: (id: string) => void
   deleteIdea: (id: string) => void
   login: (profileId: string, pin: string) => Promise<boolean>
@@ -1110,11 +1146,31 @@ export const useStore = create<StoreState>((set, get) => {
         repairBlocks()
       })
       subscribeAiConfig((c) => set({ aiConfig: c }))
+      // 🏫 St. Eugene 7: Ben's asks for more content, and Dad's verdicts
+      subscribeStEugene((seDesk) => set({ seDesk }))
     } catch (err) {
       console.error('Firebase bootstrap failed', err)
       set({ ready: true, cloudError: (err as Error)?.message ?? 'Could not reach Firebase.' })
     }
   })()
+
+  /**
+   * Every block that may be dealt for a subtopic: the written pack, plus
+   * anything the AI added (§24h), minus the questions he got wrong and has
+   * not been allowed to fix (§24f).
+   *
+   * That last subtraction is the no-second-go rule, and it lives here rather
+   * than in the player so it holds for every route into a lesson.
+   */
+  function seBench(data: AppData, desk: SeDesk, subtopicId: string): SeBlock[] {
+    const generated = desk.generated.filter((g) => g.subtopicId === subtopicId).flatMap((g) => g.blocks)
+    const sealed = new Set(
+      data.steugene.locks
+        .filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
+        .flatMap((l) => l.mistakes.map((m) => m.id)),
+    )
+    return seAvailable(packFor(subtopicId), generated).filter((b) => !sealed.has(b.id))
+  }
 
   /** Clone-mutate-sync helper. Mutates a copy of the active profile's data and writes through to Firestore. */
   function commit(fn: (data: AppData, events: AppEvent[]) => void) {
@@ -1510,6 +1566,8 @@ export const useStore = create<StoreState>((set, get) => {
     essayError: null,
     essayCheck: null,
     essayDeskId: null,
+    seDesk: { requests: [], generated: [] },
+    seBusy: null,
     gymPlanning: false,
 
     activeProfile() {
@@ -3839,6 +3897,208 @@ export const useStore = create<StoreState>((set, get) => {
         d.frontier.dur = full
       })
       return true
+    },
+
+    // --- 🏫 St. Eugene 7 (§24) ---------------------------------------------
+
+    seStart(subtopicId) {
+      const { data, seDesk } = get()
+      const blocks = seBench(data, seDesk, subtopicId)
+      const seen = data.steugene.stats[subtopicId]?.seen ?? []
+      const minutes = data.steugene.minutes
+      const plan = sePlanLesson(blocks, seen, minutes * 60)
+      if (!plan.length) return
+      commit((d) => {
+        d.steugene.run = {
+          subtopicId,
+          startedAt: Date.now(),
+          targetMinutes: minutes,
+          activeSeconds: 0,
+          blockIds: plan.map((b) => b.id),
+          pos: 0,
+          answers: [],
+        }
+      })
+    },
+
+    seTick(seconds) {
+      if (seconds <= 0 || !get().data.steugene.run) return
+      commit((d) => {
+        if (d.steugene.run) d.steugene.run.activeSeconds += seconds
+      })
+    },
+
+    seRecord(a) {
+      const run = get().data.steugene.run
+      if (!run) return
+      const answer = { ...a, subtopicId: run.subtopicId, at: Date.now() }
+      commit((d) => {
+        d.steugene.run?.answers.push(answer)
+        d.steugene.history.push(answer)
+        if (d.steugene.history.length > SE_HISTORY_CAP) {
+          d.steugene.history = d.steugene.history.slice(-SE_HISTORY_CAP)
+        }
+        const stat = (d.steugene.stats[answer.subtopicId] ??= {
+          attempts: 0,
+          right: 0,
+          seconds: 0,
+          lessons: 0,
+          lastAt: 0,
+          seen: [],
+        })
+        stat.attempts += 1
+        if (answer.right) stat.right += 1
+        stat.lastAt = answer.at
+      })
+    },
+
+    seAdvance() {
+      const { data, seDesk } = get()
+      const run = data.steugene.run
+      if (!run) return
+      // Ahead of the clock and running out of cards: deal another one (§24d).
+      // Two blocks of lookahead, so the next card is always already there.
+      const needMore = run.pos >= run.blockIds.length - 2 && run.activeSeconds < run.targetMinutes * 60
+      const extra = needMore
+        ? seTopUp(seBench(data, seDesk, run.subtopicId), run.blockIds)
+        : null
+      commit((d) => {
+        if (!d.steugene.run) return
+        if (extra) d.steugene.run.blockIds.push(extra.id)
+        d.steugene.run.pos += 1
+      })
+    },
+
+    seFinish() {
+      const run = get().data.steugene.run
+      if (!run) return
+      const wrong = run.answers.filter((a) => !a.right)
+      commit((d) => {
+        const stat = (d.steugene.stats[run.subtopicId] ??= {
+          attempts: 0,
+          right: 0,
+          seconds: 0,
+          lessons: 0,
+          lastAt: 0,
+          seen: [],
+        })
+        stat.lessons += 1
+        stat.seconds += run.activeSeconds
+        stat.lastAt = Date.now()
+        // Every card he was dealt is now "seen", so a repeat of this subtopic
+        // reaches for the bench before it reaches for these again.
+        stat.seen = [...new Set([...stat.seen, ...run.blockIds])]
+        if (wrong.length) {
+          d.steugene.locks.push({
+            id: `lock-${Date.now().toString(36)}`,
+            subtopicId: run.subtopicId,
+            at: Date.now(),
+            mistakes: wrong,
+          })
+        }
+        d.steugene.run = null
+      })
+    },
+
+    seAbandon() {
+      commit((d) => {
+        d.steugene.run = null
+      })
+    },
+
+    seSetMinutes(minutes) {
+      commit((d) => {
+        d.steugene.minutes = minutes
+      })
+    },
+
+    seSetSpeak(on, rate) {
+      commit((d) => {
+        d.steugene.speak = { on, rate: rate ?? d.steugene.speak.rate }
+      })
+    },
+
+    seAskAi(subtopicId, want) {
+      const { seDesk } = get()
+      // One open ask per subtopic per kind — the button is not a doorbell.
+      if (seDesk.requests.some((r) => r.status === 'pending' && r.subtopicId === subtopicId && r.want === want)) return
+      const next: SeDesk = {
+        ...seDesk,
+        requests: [
+          ...seDesk.requests,
+          {
+            id: `ask-${Date.now().toString(36)}`,
+            subtopicId,
+            subtopicTitle: seFind(subtopicId)?.subtopic.title ?? subtopicId,
+            want,
+            at: Date.now(),
+            status: 'pending' as const,
+          },
+        ].slice(-60),
+      }
+      set({ seDesk: next })
+      fireAndForget(saveStEugene(next))
+    },
+
+    async seDecideAi(id, allow) {
+      const { seDesk, aiConfig } = get()
+      const req = seDesk.requests.find((r) => r.id === id)
+      if (!req || req.status !== 'pending') return
+
+      const write = (desk: SeDesk) => {
+        set({ seDesk: desk })
+        fireAndForget(saveStEugene(desk))
+      }
+      const patch = (fields: Partial<typeof req>, desk = get().seDesk): SeDesk => ({
+        ...desk,
+        requests: desk.requests.map((r) => (r.id === id ? { ...r, ...fields } : r)),
+      })
+
+      if (!allow) {
+        write(patch({ status: 'denied', decidedAt: Date.now() }))
+        return
+      }
+      if (!aiConfig?.openrouterKey?.trim()) {
+        write(patch({ status: 'failed', decidedAt: Date.now(), error: 'No OpenRouter key — Settings → API key.' }))
+        return
+      }
+
+      set({ seBusy: id })
+      try {
+        const bench = seBench(get().data, get().seDesk, req.subtopicId)
+        const blocks = await generateSeBlocks({
+          ai: aiConfig,
+          subtopicId: req.subtopicId,
+          want: req.want,
+          existing: bench.map((b) => (b.kind === 'explain' ? b.title : 'prompt' in b ? b.prompt : '')).filter(Boolean),
+        })
+        const desk = get().seDesk
+        write({
+          ...patch({ status: 'approved', decidedAt: Date.now(), made: blocks.length }, desk),
+          generated: [
+            ...desk.generated,
+            { id: `gen-${Date.now().toString(36)}`, subtopicId: req.subtopicId, at: Date.now(), blocks },
+          ].slice(-40),
+        })
+      } catch (e) {
+        write(patch({ status: 'failed', decidedAt: Date.now(), error: (e as Error)?.message?.slice(0, 300) ?? 'failed' }))
+      } finally {
+        set({ seBusy: null })
+      }
+    },
+
+    seAllowFix(lockId) {
+      return commitFor(KID_ID, (d) => {
+        const lock = d.steugene.locks.find((l) => l.id === lockId)
+        if (lock) lock.allowedAt = Date.now()
+      })
+    },
+
+    seSeenVerdict(id) {
+      const desk = get().seDesk
+      const next: SeDesk = { ...desk, requests: desk.requests.map((r) => (r.id === id ? { ...r, seen: true } : r)) }
+      set({ seDesk: next })
+      fireAndForget(saveStEugene(next))
     },
 
     buyBackground() {
