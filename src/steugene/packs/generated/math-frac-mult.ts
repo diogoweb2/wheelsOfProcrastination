@@ -20,8 +20,8 @@ export const pack: SePack = {
         "How many 1/4-size pieces fit into 3/5?"
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Blue Lock: Isagi has 3/5 of his energy left. Each shot costs 1/4."
+        "flavour": "key",
+        "text": "Fortnite: 3/5 of your wood is left. Each wall costs 1/4 of your wood."
       },
       "art": {
         "art": "bar",
@@ -34,7 +34,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-basics-0",
-      "prompt": "Isagi trains for ¾ of an hour. He spends ⅔ of that time on shots. How much of an hour is shots?",
+      "prompt": "Your Minecraft session lasted ¾ of an hour. ⅔ of it was mining. How much of an hour was mining?",
       "options": [
         "1/2 of an hour",
         "3/2 of an hour",
@@ -50,7 +50,7 @@ export const pack: SePack = {
           "text": "Multiply the tops: 2 × 3. Multiply the bottoms: 3 × 4."
         },
         {
-          "text": "Try 3/5 × 1/2 the same way. Tops 3, bottoms 10, so 3/10. Then simplify if you can."
+          "text": "Try ½ of ⅗ of a stack: tops 1 × 3, bottoms 2 × 5, so 3/10."
         }
       ],
       "art": {
@@ -64,7 +64,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-basics-1",
-      "prompt": "Sanji has ⅔ of a pizza. He splits his piece into 3 equal parts. How much of the whole pizza is one part?",
+      "prompt": "You have ⅔ of a large pizza. You split that piece into 3 equal parts. How much of the whole pizza is one part?",
       "options": [
         "2/3 of the pizza",
         "3/2 of the pizza",
@@ -74,7 +74,7 @@ export const pack: SePack = {
       "why": "Splitting a piece into 3 equal parts means each part is one third of that piece.",
       "steps": [
         {
-          "text": "Write it as 5/6 ÷ 2, which is splitting 5/6 into 2 equal parts."
+          "text": "Write a slice test: 5/6 of a pizza split into 2 equal parts is 5/6 ÷ 2."
         },
         {
           "text": "Dividing by 2 is the same as multiplying by ½. So write 5/6 × 1/2."
@@ -145,41 +145,18 @@ export const pack: SePack = {
     },
     {
       "kind": "choice",
-      "id": "math-frac-mult-basics-2",
-      "prompt": "Which statement is true?",
-      "options": [
-        "Dividing by ¼ means multiplying by 4",
-        "Dividing by ¼ means multiplying by ¼",
-        "Dividing by 4 means multiplying by 4"
-      ],
-      "answer": 0,
-      "why": "Each whole holds four quarters, so dividing by a quarter gives four times as many pieces.",
-      "steps": [
-        {
-          "text": "Ask how many thirds fit in 2 wholes. Each whole holds 3 thirds."
-        },
-        {
-          "text": "So 2 wholes hold 2 × 3 = 6 thirds. Dividing by ⅓ gave 6."
-        },
-        {
-          "text": "Dividing by ⅓ is the same as multiplying by 3, the flip of the fraction."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
       "id": "math-frac-mult-basics-3",
-      "prompt": "Bachira has ⅚ of a litre of juice. Each cup holds ⅙ of a litre. How many cups can he fill?",
+      "prompt": "A Pokémon Center jug holds 5/6 of a litre. Each cup holds 1/6 of a litre. How many cups can you fill?",
       "options": [
-        "1/5 of a cup",
         "5 cups",
+        "1/5 of a cup",
         "5/36 of a cup"
       ],
-      "answer": 1,
+      "answer": 0,
       "why": "Dividing asks how many of one amount fit into another, so the answer is a count.",
       "steps": [
         {
-          "text": "Ask how many eighths fit in ¾. Write it as 3/4 ÷ 1/8."
+          "text": "Ask how many eighths fit in ¾ of a jug. Write it as 3/4 ÷ 1/8."
         },
         {
           "text": "Flip the second fraction: 1/8 becomes 8. Change ÷ to ×."
@@ -207,13 +184,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "One Piece: Luffy's crew splits a treasure into fraction-sized shares. Counting the shares is division."
+        "text": "One Piece: Luffy's crew splits a treasure into quarter shares. Counting the shares is division."
       }
     },
     {
       "kind": "build",
       "id": "math-frac-mult-build-0",
-      "prompt": "Isagi has ½ of a match left. Each shot takes ¼ of a match. How many shots fit? Build your answer.",
+      "prompt": "You have ½ of a 64-block stack left. Each wall takes ¼ of a stack. How many walls can you build?",
       "answer": "2",
       "decoys": [
         "4",
@@ -223,36 +200,36 @@ export const pack: SePack = {
       "why": "Dividing asks how many times one amount fits in another, and flipping and multiplying gives that same count.",
       "steps": [
         {
-          "text": "Example: ⅔ ÷ ⅕. Keep the first fraction. Flip the second: ⅕ becomes 5/1."
+          "text": "Example: ⅔ ÷ ⅕ of a stack. Keep ⅔. Flip ⅕ to 5/1."
         },
         {
-          "text": "Multiply top by top and bottom by bottom: ⅔ × 5/1 = 10/3."
+          "text": "Multiply across: ⅔ × 5/1 = 10/3, so 3⅓ walls fit."
         },
         {
-          "text": "Now yours: ½ ÷ ¼. Flip ¼ to 4/1, then multiply. Check: how many quarters fit in a half?"
+          "text": "Now yours: ½ ÷ ¼. Flip ¼ to 4/1 and multiply. How many quarter-stacks fit in a half?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-basics-4",
-      "prompt": "Zoro's bounty is 2¼ million berries. He gets ⅔ of it. How much does he get?",
+      "prompt": "Your game pass earns 2¼ thousand Robux. You keep ⅔ of it. How much is yours?",
       "options": [
-        "1 1/8 million berries",
-        "1 1/2 million berries",
-        "4 1/2 million berries"
+        "1,125 Robux",
+        "1,500 Robux",
+        "4,500 Robux"
       ],
       "answer": 1,
       "why": "Taking a fraction of an amount means multiplying the amount by that fraction.",
       "steps": [
         {
-          "text": "Change the mixed number to an improper fraction. 3 1/2 becomes 7/2."
+          "text": "Change 3 1/2 thousand Robux to an improper fraction: 7/2."
         },
         {
-          "text": "Multiply 7/2 × 3/4 across the tops and the bottoms."
+          "text": "Multiply 7/2 × 3/4 across the tops and the bottoms: 21/8."
         },
         {
-          "text": "Simplify the answer, then change it back to a mixed number."
+          "text": "21/8 is 2 5/8, so change it back to a mixed number to check."
         }
       ]
     },
@@ -262,34 +239,34 @@ export const pack: SePack = {
       "prompt": "Why does ½ × ½ give a smaller answer than ½?",
       "options": [
         "Multiplying always makes numbers bigger",
-        "Fractions only get bigger when multiplied",
+        "Fractions only grow when multiplied",
         "Half of a half is a smaller piece"
       ],
       "answer": 2,
       "why": "Multiplying by a fraction less than one takes a part of the number, so the answer shrinks.",
       "steps": [
         {
-          "text": "Take ¾ of a pizza. Then take half of that slice."
+          "text": "Take ¾ of a 40-minute half: that is 30 minutes. Then take half of that."
         },
         {
-          "text": "Half of that slice is smaller than the slice. Picture it on paper."
+          "text": "Half of 30 minutes is 15 minutes, which is smaller than 30. Picture it on a bar."
         },
         {
-          "text": "Try ⅓ × ⅓ on a grid. One square out of nine is left. Check your picture."
+          "text": "Try ⅓ × ⅓ on a 3 × 3 grid. One square out of nine is shaded. Check your picture."
         }
       ],
       "art": {
         "art": "bar",
-        "parts": 8,
-        "filled": 4,
-        "label": "1/2",
-        "tone": "calm"
+        "parts": 4,
+        "filled": 1,
+        "label": "1/4",
+        "tone": "good"
       }
     },
     {
       "kind": "game",
       "id": "math-frac-mult-games-0",
-      "title": "Bounty Board Sort",
+      "title": "Storm Circle Sort",
       "game": {
         "mode": "order",
         "values": [
@@ -320,9 +297,9 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-frac-mult-teach-2",
-      "title": "The method: keep, change, flip",
+      "title": "Roblox splits: keep, change, flip",
       "lines": [
-        "Keep the first fraction the same.",
+        "Keep the first fraction the same: ¾ of the bundle.",
         "Change the division sign to multiplication.",
         "Flip the second fraction: top becomes bottom."
       ],
@@ -334,11 +311,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-basics-6",
-      "prompt": "Isagi has 6 litres of water. Each bottle holds ⅔ of a litre. How many bottles can he fill?",
+      "prompt": "You have 6 L of apple juice. Each cup holds ⅔ of a litre. How many cups can you fill?",
       "options": [
-        "9 bottles",
-        "4 bottles",
-        "12 bottles"
+        "9 cups",
+        "4 cups",
+        "12 cups"
       ],
       "answer": 0,
       "why": "Dividing asks how many of one amount fit into another, and dividing by a fraction gives a bigger count.",
@@ -350,30 +327,30 @@ export const pack: SePack = {
           "text": "Flip 2/5 to 5/2. Change ÷ to ×. Write 4 × 5/2."
         },
         {
-          "text": "Multiply and simplify. Check the answer by multiplying it back by 2/5."
+          "text": "Multiply and simplify to get 10 cups. Check: 10 × 2/5 = 4 litres."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-basics-7",
-      "prompt": "Without working it out fully, is 4/5 ÷ 1/2 bigger or smaller than 4/5?",
+      "prompt": "4/5 of a pizza is left. You cut it into 1/2-pizza portions. Is the number of portions bigger or smaller than 4/5?",
       "options": [
-        "Exactly the same as 4/5",
+        "The same as 4/5",
         "Bigger than 4/5",
         "Smaller than 4/5"
       ],
       "answer": 1,
-      "why": "Dividing by a number less than one makes the answer bigger, because it asks how many pieces fit.",
+      "why": "Dividing by a number less than one makes the answer bigger, because more pieces fit.",
       "steps": [
         {
-          "text": "Try 3/4 ÷ 1/2. Flip the second fraction and multiply by 2."
+          "text": "Try 3/4 of a pizza in 1/2-pizza portions. Flip 1/2 to 2/1 and multiply by 2."
         },
         {
-          "text": "Compare 3/2 with 3/4. The answer is bigger because you fit more pieces."
+          "text": "You get 3/2, which is 1.5 portions. That is bigger than 3/4."
         },
         {
-          "text": "Try 2/3 ÷ 1/4 the same way. Check if the answer is bigger than 2/3."
+          "text": "Try 2/3 of a pizza in 1/4-pizza slices. Is the count bigger than 2/3?"
         }
       ],
       "art": {
@@ -397,7 +374,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-mult-build-1",
-      "prompt": "Zoro's crew has ¾ of a treasure map. Each island is ⅛ of the map. How many islands? Build your answer.",
+      "prompt": "Your squad has 3/4 of a stack of brick. Each wall takes 1/8 of a stack. How many walls? Build your answer.",
       "answer": "6",
       "decoys": [
         "3",
@@ -407,13 +384,13 @@ export const pack: SePack = {
       "why": "Dividing by a fraction gives the same answer as multiplying by its flip.",
       "steps": [
         {
-          "text": "Example: ⅘ ÷ ⅕. Flip ⅕ to 5/1, so the sum becomes ⅘ × 5/1."
+          "text": "Example: 4/5 ÷ 1/5. Flip 1/5 to 5/1 and multiply: 4/5 × 5/1."
         },
         {
-          "text": "Multiply across: ⅘ × 5/1 = 20/5. Simplify if you can."
+          "text": "Multiply across: 4/5 × 5/1 = 20/5 = 4 huts. Simplify if you can."
         },
         {
-          "text": "Now yours: ¾ ÷ ⅛. Flip ⅛ to 8/1 and multiply. Check: do 6 eighths make three quarters?"
+          "text": "Now yours: 3/4 ÷ 1/8. Flip 1/8 to 8/1 and multiply. Check: do 6 eighths make 3/4?"
         }
       ]
     }
@@ -430,7 +407,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Blue Lock: a striker who flips the wrong player loses the whole play."
+        "text": "Fortnite: flip the wrong fraction and your whole plan lands in the storm."
       }
     },
     {
@@ -444,7 +421,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Think of it as a pass: keep your position, switch the play, flip the angle."
+        "text": "Minecraft: keep your chest, switch to ×, then flip the second fraction."
       }
     },
     {
@@ -472,7 +449,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Matching bottoms is only for adding and subtracting."
+        "text": "Fortnite: a third of your 500 wood, then half of that, is 1/6 of it."
       }
     },
     {
@@ -480,8 +457,8 @@ export const pack: SePack = {
       "id": "math-frac-mult-deeper-1",
       "title": "Dividing asks how many fit",
       "lines": [
-        "6 ÷ ½ asks: how many halves fit inside 6?",
-        "Answer: 12. That is bigger than 6.",
+        "A slab is half a block. How many slabs fit in 6 blocks?",
+        "6 ÷ ½ = 12. Twelve slabs, and that is more than 6.",
         "Dividing by a small piece gives a big number."
       ],
       "callout": {
@@ -500,7 +477,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Only the bounty after the ÷ sign changes hands."
+        "text": "Fortnite rule: only the fraction after the ÷ sign flips."
       }
     },
     {
@@ -514,7 +491,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Picture a striker who only switches sides on a divide."
+        "text": "A striker only switches flank when the sign is a divide."
       }
     },
     {
@@ -522,13 +499,13 @@ export const pack: SePack = {
       "id": "math-frac-mult-deeper-4",
       "title": "Mixed numbers change first",
       "lines": [
-        "2½ is a mixed number. Change it before you flip.",
-        "2½ becomes 5/2. Now you can flip safely.",
+        "2½ pizzas is 5 halves, so write it as 5/2.",
+        "Now 5/2 can be flipped safely for dividing.",
         "Flipping 2½ straight away gives a wrong answer."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Convert mixed numbers to improper fractions first."
+        "text": "Turn mixed numbers into improper fractions first."
       }
     },
     {
@@ -542,7 +519,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Cancel across, not down. Top of one with bottom of the other."
+        "text": "Roblox tip: cancel across, not down. Top of one with bottom of the other."
       }
     },
     {
@@ -558,20 +535,20 @@ export const pack: SePack = {
       "why": "Dividing by a fraction asks how many of that fraction fit, so the count can be a whole number.",
       "steps": [
         {
-          "text": "Write 2½ ÷ 5/6. Change the mixed number to 5/2 first."
+          "text": "A 2½ m sail, flags of 5/6 m. Change 2½ to 5/2 first."
         },
         {
           "text": "Flip 5/6 to 6/5. Change ÷ to ×. Write 5/2 × 6/5."
         },
         {
-          "text": "Simplify before you multiply. Cancel the 5s, then finish the sum."
+          "text": "Cancel the 5s, leaving 6/2. So 3 flags fit."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-mult-basics-9",
-      "prompt": "Find ⅖ × ⅚. Build the answer from the tiles.",
+      "prompt": "Your chest is 5/6 full. You use 2/5 of that space. Build the fraction.",
       "answer": "1/3",
       "decoys": [
         "2",
@@ -581,20 +558,20 @@ export const pack: SePack = {
       "why": "Multiplying fractions means multiplying the tops and the bottoms, then simplifying.",
       "steps": [
         {
-          "text": "Try 3/4 × 2/5 the same way. Tops 3 × 2, bottoms 4 × 5."
+          "text": "A furnace has 3/4 of its fuel left. You use 2/5 of that. Tops: 3 × 2 = 6."
         },
         {
-          "text": "That gives 6/20. Both parts divide by 2, so simplify."
+          "text": "Bottoms: 4 × 5 = 20, so 3/4 × 2/5 = 6/20."
         },
         {
-          "text": "Simplify 6/20 by dividing the top and bottom by 2. Check your answer again."
+          "text": "Divide top and bottom by 2: 6/20 becomes 3/10. Simplify before you stop."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-0",
-      "prompt": "Isagi has ⅗ of the match left. He spends ½ of that on one sprint. What fraction of the match is the sprint?",
+      "prompt": "Isagi has 3/5 of the match left. He spends 1/2 of that on one sprint. What fraction of the match is the sprint?",
       "options": [
         "6/5",
         "5/8",
@@ -604,13 +581,13 @@ export const pack: SePack = {
       "why": "Of means multiply, so half of three-fifths is three-tenths.",
       "steps": [
         {
-          "text": "Step 1: 'Of' means multiply. Write ⅔ of ¾ as ⅔ × ¾."
+          "text": "Step 1: 'Of' means multiply. Write 1/2 of 3/5 as 1/2 × 3/5."
         },
         {
-          "text": "Step 2: Multiply the tops, then the bottoms: 2 × 3 = 6 and 3 × 4 = 12."
+          "text": "Step 2: Multiply the tops: 1 × 3 = 3. Multiply the bottoms: 2 × 5 = 10."
         },
         {
-          "text": "Step 3: Simplify 6/12 by dividing top and bottom by 6. You get ½."
+          "text": "Step 3: Try 2/3 of 3/4: 2/3 × 3/4 = 6/12, which simplifies to 1/2."
         }
       ],
       "art": {
@@ -624,69 +601,69 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-1",
-      "prompt": "Zoro finds ⅘ of a treasure chest. He shares it equally between 2 crew. What fraction does each one get?",
+      "prompt": "A large pizza has 4/5 left. You split it equally between 2 friends. What fraction does each friend get?",
       "options": [
         "2/5",
         "8/5",
         "3/7"
       ],
       "answer": 0,
-      "why": "Sharing equally is dividing, and dividing by 2 is the same as taking half.",
+      "why": "Sharing equally is dividing, and sharing with 2 people means dividing by 2.",
       "steps": [
         {
-          "text": "Step 1: Share means divide. Write ⅔ ÷ 4."
+          "text": "Step 1: Sharing means divide. Try 3/4 shared by 3: write 3/4 ÷ 3."
         },
         {
-          "text": "Step 2: Flip the second number. 4 becomes ¼. Change ÷ to ×."
+          "text": "Step 2: Flip the 3 to 1/3 and change ÷ to ×."
         },
         {
-          "text": "Step 3: Multiply: 2/3 × 1/4 = 2/12. Simplify to 1/6."
+          "text": "Step 3: Multiply: 3/4 × 1/3 = 3/12, which simplifies to 1/4."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-2",
-      "prompt": "A rooftop garden on Queen Street is ⅘ m wide. Each planter is ⅔ m wide. How many planter-widths long is the garden?",
+      "prompt": "Your Roblox part is 4/5 m long. One plank part is 2/3 m long. How many planks fit end to end?",
       "options": [
         "6/5",
         "8/15",
         "5/6"
       ],
       "answer": 0,
-      "why": "Finding how many times one length fits in another is dividing those lengths.",
+      "why": "Finding how many of one length fit in another is dividing those lengths.",
       "steps": [
         {
-          "text": "Step 1: How many times does a planter fit? That means divide: ¾ ÷ ⅗."
+          "text": "Step 1: How many fit? Try 3/4 m ÷ 1/3 m: how many 1/3s fit in 3/4?"
         },
         {
-          "text": "Step 2: Flip ⅗ to 5/3 and change ÷ to ×."
+          "text": "Step 2: Flip 1/3 to 3 and change ÷ to ×."
         },
         {
-          "text": "Step 3: Multiply: 3/4 × 5/3 = 15/12. Simplify to 5/4, which is 1¼ planters."
+          "text": "Step 3: Multiply: 3/4 × 3 = 9/4, which is 2¼ planks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-3",
-      "prompt": "Nagi runs ⅖ of a lap. Then he runs ⅗ of that distance again. What fraction of the lap is that second run?",
+      "prompt": "The storm circle covers 2/5 of the map. It shrinks to 3/5 of that. What fraction of the map is the new circle?",
       "options": [
         "25/6",
         "6/25",
         "5/12"
       ],
       "answer": 1,
-      "why": "A fraction of a fraction is smaller, and you get it by multiplying the two fractions.",
+      "why": "A fraction of a fraction is smaller, so you get it by multiplying the two fractions.",
       "steps": [
         {
-          "text": "Step 1: 'Of' means multiply. Write ¾ of ⅖ as ¾ × ⅖."
+          "text": "Step 1: 'Of' means multiply. Write 1/2 of 3/4 as 1/2 × 3/4."
         },
         {
-          "text": "Step 2: Multiply the tops: 3 × 2 = 6. Multiply the bottoms: 4 × 5 = 20."
+          "text": "Step 2: Multiply the tops: 1 × 3 = 3. Multiply the bottoms: 2 × 4 = 8."
         },
         {
-          "text": "Step 3: The answer is 6/20. Simplify it to 3/10."
+          "text": "Step 3: Try 2/3 of 3/4: 2/3 × 3/4 = 6/12, which simplifies to 1/2."
         }
       ]
     },
@@ -703,13 +680,13 @@ export const pack: SePack = {
       "why": "Filling containers of one size from a bigger amount is dividing the amount by the size of one container.",
       "steps": [
         {
-          "text": "Step 1: Write the question as a division. Keep the first number: 2 ÷ ⅔."
+          "text": "Step 1: Filling bottles means divide. Try 2 barrels into 1/2-barrel bottles: 2 ÷ 1/2."
         },
         {
-          "text": "Step 2: Flip ⅔ to 3/2 and change ÷ to ×."
+          "text": "Step 2: Flip 1/2 to 2 and change ÷ to ×: 2 × 2."
         },
         {
-          "text": "Step 3: Multiply: 2 × 3/2 = 6/2 = 3. So 3 bottles fit."
+          "text": "Step 3: Multiply: 2 × 2 = 4, so 4 bottles fit."
         }
       ]
     },
@@ -726,20 +703,20 @@ export const pack: SePack = {
       "why": "Taking a fraction of a whole is multiplying the whole by the fraction.",
       "steps": [
         {
-          "text": "Step 1: 'Of' means multiply. Write 90 × ⅔."
+          "text": "Step 1: 'Of' means multiply. Write 60 × ⅗."
         },
         {
-          "text": "Step 2: Divide 90 by 3 first. That gives 30."
+          "text": "Step 2: Divide 60 by 5 first. That gives 12."
         },
         {
-          "text": "Step 3: Multiply by 2. 30 × 2 = 60 m."
+          "text": "Step 3: Multiply by 3. 12 × 3 = 36 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-mult-applied-6",
-      "prompt": "Sanji splits ¾ of a cake equally between 2 crew. Each one gets ___ of the whole cake.",
+      "prompt": "Two friends split ¾ of a pizza equally. Each gets ___ of the whole pizza.",
       "answer": "3/8",
       "decoys": [
         "4",
@@ -748,20 +725,20 @@ export const pack: SePack = {
       "why": "Splitting a fraction into equal parts is dividing it by the number of parts.",
       "steps": [
         {
-          "text": "Step 1: Share means divide. Write ⅗ ÷ 3."
+          "text": "Step 1: Sharing means divide. Write ⅘ ÷ 2."
         },
         {
-          "text": "Step 2: Flip 3 to ⅓ and change ÷ to ×."
+          "text": "Step 2: Flip 2 to ½ and change ÷ to ×."
         },
         {
-          "text": "Step 3: Multiply 3/5 × 1/3 = 3/15. Simplify to 1/5."
+          "text": "Step 3: 4/5 × 1/2 = 4/10, which simplifies to 2/5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-7",
-      "prompt": "Chigiri runs 2⅓ km in one drill. He repeats ⅗ of that drill. How far does he run in the repeat?",
+      "prompt": "Your egg route is 2⅓ km. You walk ⅗ of the route. How far did you walk?",
       "options": [
         "2 1/5 km",
         "1 3/5 km",
@@ -771,24 +748,24 @@ export const pack: SePack = {
       "why": "Mixed numbers must become improper fractions before you multiply them.",
       "steps": [
         {
-          "text": "Step 1: Change 1⅔ to 5/3, because 1 × 3 + 2 = 5."
+          "text": "Step 1: Change 2⅓ to 7/3, because 2 × 3 + 1 = 7."
         },
         {
-          "text": "Step 2: Multiply 5/3 × 4/5 = 20/15."
+          "text": "Step 2: Multiply 7/3 × 3/5 = 21/15."
         },
         {
-          "text": "Step 3: Simplify 20/15 to 4/3, which is 1⅓."
+          "text": "Step 3: Simplify 21/15 to 7/5, which is 1⅖."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-applied-8",
-      "prompt": "A crew has 5 barrels of rum. Each bottle holds ⅔ of a barrel. How many bottles can they fill?",
+      "prompt": "You mine 5 stacks of sand. Each cart holds ⅔ of a stack. How many carts can you fill?",
       "options": [
-        "7½ bottles",
-        "3⅓ bottles",
-        "10/3 bottles"
+        "7½ carts",
+        "3⅓ carts",
+        "10/3 carts"
       ],
       "answer": 0,
       "why": "Dividing a whole number by a fraction gives a bigger answer, because the pieces are small.",
@@ -800,7 +777,7 @@ export const pack: SePack = {
           "text": "Step 2: Flip ⅗ to 5/3 and change ÷ to ×. You get 4 × 5/3."
         },
         {
-          "text": "Step 3: Multiply: 20/3 = 6⅔. Count the part-bottle as a half, so about 7 bottles."
+          "text": "Step 3: 20/3 = 6⅔ carts. Dividing by a fraction gives more than the whole number."
         }
       ]
     },
@@ -817,47 +794,47 @@ export const pack: SePack = {
       "why": "A fraction of a fraction comes from multiplying tops together and bottoms together.",
       "steps": [
         {
-          "text": "Step 1: Multiply the tops: 3 × 4 = 12."
+          "text": "Step 1: Multiply the tops. For ¾ × ⅘, 3 × 4 = 12."
         },
         {
-          "text": "Step 2: Multiply the bottoms: 5 × 5 = 25."
+          "text": "Step 2: Multiply the bottoms. For ¾ × ⅘, 4 × 5 = 20."
         },
         {
-          "text": "Step 3: The answer is 12/25 km. Check it is smaller than ⅗."
+          "text": "Step 3: 12/20 simplifies to 3/5. Check it is smaller than ¾."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-deeper-6",
-      "prompt": "What is the first step for ¾ ÷ ⅖?",
+      "prompt": "A chest holds ⅖ of a stack. You have ¾ of a stack. What is the first step for ¾ ÷ ⅖?",
       "options": [
-        "Flip ¾ and keep ⅖ as it is",
-        "Keep ¾ as it is and flip ⅖",
-        "Flip both fractions at the same time"
+        "Flip ¾ to 4/3, keep ⅖",
+        "Keep ¾, flip ⅖ to 5/2",
+        "Flip both, then multiply"
       ],
       "answer": 1,
       "why": "Only the fraction after the ÷ sign gets flipped, and the first one stays the same.",
       "steps": [
         {
-          "text": "Look at the sign. It is ÷, so this is a divide question."
+          "text": "Step 1: The ÷ sign means split. Keep the first fraction: ⅚ stays ⅚."
         },
         {
-          "text": "Keep the first fraction: ⅚ stays ⅚ in ⅚ ÷ ⅓."
+          "text": "Step 2: Flip the second one: ⅓ becomes 3/1."
         },
         {
-          "text": "Flip the second one: ⅓ becomes 3/1, so ⅚ × 3/1 = 15/6."
+          "text": "Step 3: ⅚ × 3/1 = 15/6, which is 2½ chests."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-mult-deeper-8",
-      "prompt": "Luffy eats ¾ of a 20-piece meat pile. How many pieces does he eat?",
+      "prompt": "You mine 20 blocks of stone. ¾ of them go into a wall.\nHow many blocks are in the wall?",
       "options": [
-        "15 pieces",
-        "5 pieces",
-        "23 pieces"
+        "15 blocks",
+        "5 blocks",
+        "23 blocks"
       ],
       "answer": 0,
       "why": "Finding a fraction of a number is multiplication, so there is no flip.",
@@ -869,7 +846,7 @@ export const pack: SePack = {
           "text": "Multiply the tops, then the bottoms: 3 × 20 = 60, and 60 ÷ 4 = 15."
         },
         {
-          "text": "Try it again: ⅖ of 30 is 2 × 30 ÷ 5 = 12 pieces."
+          "text": "Try it again: ⅖ of 30 blocks is 2 × 30 ÷ 5 = 12 blocks."
         }
       ],
       "art": {
@@ -883,7 +860,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-deeper-9",
-      "prompt": "Which one is the same as ⅘ ÷ ⅔?",
+      "prompt": "Your squad has ⅘ of a full 500-brick stack.\nEach wall uses ⅔ of a stack. Which sum counts the walls?",
       "options": [
         "⅘ × 3/2",
         "⅘ × 2/3",
@@ -906,7 +883,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-deeper-10",
-      "prompt": "What is the first step for 1½ ÷ ½?",
+      "prompt": "A 90-minute match is 1½ hours of play.\nYou count it in ½-hour blocks. What is the first step for 1½ ÷ ½?",
       "options": [
         "Change 1½ to 3/2 first",
         "Flip ½ and keep 1 as it is",
@@ -929,7 +906,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-mult-deeper-11",
-      "prompt": "Which is 4/9 × 3/8 in simplest form?",
+      "prompt": "Sam eats 3/8 of a 4/9 pizza slice.\nWhich fraction of the whole pizza is that?",
       "options": [
         "1/6",
         "12/17",
@@ -939,20 +916,20 @@ export const pack: SePack = {
       "why": "Cancelling a shared factor before multiplying keeps the numbers small and the answer simple.",
       "steps": [
         {
-          "text": "Look for a shared factor across the diagonal: 3 and 9 both divide by 3."
+          "text": "Look for shared factors: 3 on top and 9 on the bottom both divide by 3."
         },
         {
-          "text": "Divide the 3 and the 9 by 3, so 4/3 and 3/8 becomes 4/1 and 1/8."
+          "text": "Divide them: 3 becomes 1 and 9 becomes 3. Also 4 and 8 share 4, so they become 1 and 2."
         },
         {
-          "text": "Multiply: 4 × 1 = 4 and 1 × 8 = 8, so the answer is 4/8 = 1/2."
+          "text": "Multiply: 1 × 1 = 1 and 3 × 2 = 6. Try 2/3 of ¾ pizza: cancel to get 1/2."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-mult-build-2",
-      "prompt": "Ryo has 2/5 of a cup of flour left. A batch needs ½ cup. How many batches? Build your answer.",
+      "prompt": "You have 2/5 of a Robux gift card left.\nA game pass costs ½ of a card. How much of a pass can you buy? Build your answer.",
       "answer": "4/5",
       "decoys": [
         "2",
@@ -995,7 +972,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-mult-build-4",
-      "prompt": "A pass covers 7/8 of the pitch. Each run covers ¼ of the pitch. How many runs? Write it as a decimal. Build your answer.",
+      "prompt": "Your Minecraft wall is 7/8 of a chunk long. Each torch section is ¼ of a chunk. How many sections? Write it as a decimal. Build your answer.",
       "answer": "3.5",
       "decoys": [
         "7",
@@ -1018,7 +995,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-mult-build-5",
-      "prompt": "Sanji shares ⅔ of a cake equally among 4 crew. What fraction does each person get? Build your answer.",
+      "prompt": "Your team splits 2/3 of a large pizza equally among 4 people. What fraction does each get? Build your answer.",
       "answer": "1/6",
       "decoys": [
         "2",
@@ -1028,20 +1005,20 @@ export const pack: SePack = {
       "why": "Sharing among 4 people takes ¼ of the amount, which is why dividing by 4 means multiplying by 1/4.",
       "steps": [
         {
-          "text": "Example: ¾ ÷ 3. Write 3 as 3/1, flip it to 1/3, then multiply: ¾ × 1/3."
+          "text": "Example: ¾ of a pizza shared by 3. Write 3 as 3/1, flip it to 1/3, then multiply: ¾ × 1/3."
         },
         {
           "text": "Multiply across: ¾ × 1/3 = 3/12, which simplifies to 1/4."
         },
         {
-          "text": "Now yours: ⅔ ÷ 4. Write 4 as 4/1, flip it, multiply, then simplify 2/12."
+          "text": "Now yours: ⅔ of a pizza shared by 4. Write 4 as 4/1, flip it, multiply, then simplify 2/12."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-mult-build-6",
-      "prompt": "Coach Ego spaces cones one ninth of a field apart. The lane is 5/6 of a field long. How many gaps? Write it as a decimal. Build your answer.",
+      "prompt": "Your storm circle has 5/6 of the map left. Each phase shrinks it by 1/9. How many phases? Write it as a decimal. Build your answer.",
       "answer": "7.5",
       "decoys": [
         "1",
@@ -1063,7 +1040,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-mult-build-7",
-      "prompt": "Franky needs 3/5 of a metre of wood per shelf. He has 3/10 of a metre left. How many shelves can he make? Build your answer.",
+      "prompt": "Each Roblox wall panel is 3/5 of a stud wide. You have 3/10 of a stud left. How many panels can you make? Build your answer.",
       "answer": "1/2",
       "decoys": [
         "3",
@@ -1086,7 +1063,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-frac-mult-games-1",
-      "title": "Crew Match-Up",
+      "title": "Team of 6 Match-Up",
       "game": {
         "mode": "pair",
         "pairs": [

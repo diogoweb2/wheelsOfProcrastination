@@ -22,6 +22,7 @@ import { doc, getDoc, getFirestore } from 'firebase/firestore'
 import { loadTs } from './lib/se-bundle.mjs'
 import { pickVideos } from './lib/se-youtube.mjs'
 import { ask, cleanBlock, sliceJson, GAME_SHAPE, SEED_MODEL, SHAPES, STYLE } from './lib/se-generate.mjs'
+import { SUB_WORLDS, WORLD_KIT, WORLD_RULES } from './lib/se-world.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const OUT_DIR = join(ROOT, 'src/steugene/packs/generated')
@@ -79,6 +80,20 @@ const failures = []
  * one failed call then costs the whole subtopic instead of a sixth of it.
  * Each angle is deliberately different so the six do not collide.
  */
+/**
+ * The system prompt for one subtopic.
+ *
+ * Maths gets the world brief (§24m) bolted on, because a generic maths
+ * question is exactly the thing that taught him to push numbers around
+ * without picturing anything. History and science do not: a real date does
+ * not get clearer for happening in Minecraft.
+ */
+function systemFor(s, tail) {
+  const base = tail ? `${STYLE}\n\n${tail}` : STYLE
+  const world = SUB_WORLDS[s.id]
+  return world ? `${base}\n\n${WORLD_KIT}\n\n${WORLD_RULES}\n\nWHERE THIS ONE LIVES: ${world}` : base
+}
+
 function batches(s) {
   const who = `Subject: ${s.subject}. Strand: ${s.strand}.\nTopic: ${s.title} — ${s.plain}\nWhat it looks like on the page: ${s.sample}`
   const skin = s.skin === 'bluelock' ? 'Blue Lock (football) first, One Piece second' : 'One Piece first, Blue Lock second'
@@ -112,7 +127,7 @@ function batches(s) {
       tag: 'deeper',
       prompt: `${who}\n\nFlavour: ${skin}.\n\nWrite 6 "explain" cards and 6 "choice" questions on the parts of this topic people get WRONG — the exceptions, the confusions, the two things that look alike. Come at it from a different angle than a textbook would.\n\n${SHAPES}`,
     },
-    { tag: 'games', prompt: `${who}\n\nWrite 2 minigames for this topic.\n\n${GAME_SHAPE}`, system: STYLE },
+    { tag: 'games', prompt: `${who}\n\nWrite 2 minigames for this topic.\n\n${GAME_SHAPE}`, system: systemFor(s, '') },
   ]
 }
 
@@ -123,7 +138,7 @@ async function generate(s) {
         const { text, usage } = await ask({
           key,
           model,
-          system: b.system ?? `${STYLE}\n\n${SHAPES}`,
+          system: b.system ?? systemFor(s, SHAPES),
           prompt: b.prompt,
           title: `St. Eugene seed · ${s.id}`,
           temperature: 0.8,
@@ -179,7 +194,7 @@ async function videosFor(s) {
     const { text, usage } = await ask({
       key,
       model,
-      system: `${STYLE}\n\n${SHAPES}`,
+      system: systemFor(s, SHAPES),
       prompt: `Subject: ${s.subject}. Topic: ${s.title} — ${s.plain}\n\nA student has just finished watching each of these videos:\n${list}\n\nFor EACH video in order, write exactly 2 "choice" questions about the idea that video teaches — answerable by someone who just watched it and paid attention, not by someone guessing. Return one flat JSON array of ${found.length * 2} choice questions, in video order, 2 per video.\n\n${SHAPES}`,
       title: `St. Eugene seed · ${s.id} · video checks`,
       temperature: 0.7,

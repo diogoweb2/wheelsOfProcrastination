@@ -20,14 +20,14 @@ export const pack: SePack = {
         "Compound interest adds interest on the interest too."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Think of Isagi's bonus for each goal. Every goal stacks on the last one."
+        "flavour": "key",
+        "text": "Saved V-Bucks earn a bonus, and that bonus starts earning its own bonus."
       }
     },
     {
       "kind": "choice",
       "id": "fin-interest-basics-0",
-      "prompt": "Isagi saves $200 at 4% simple interest a year. How much interest does he earn after 2 years?",
+      "prompt": "Kai saves $200 for a Minecraft Realms plan at 4% simple interest a year. Interest after 2 years?",
       "options": [
         "$8.00",
         "$16.00",
@@ -50,7 +50,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-1",
-      "prompt": "Bachira puts $100 in an account that pays 10% compound interest a year. What is the balance after 1 year?",
+      "prompt": "Bachira puts $100 of match-fee money in a bank at 10% compound interest a year. Balance after 1 year?",
       "options": [
         "$101.00",
         "$120.00",
@@ -60,13 +60,13 @@ export const pack: SePack = {
       "why": "After one year, compound and simple interest give the same result.",
       "steps": [
         {
-          "text": "Find 10% of $100. $100 × 0.10 = $10 of interest."
+          "text": "Find 10% of $50. $50 × 0.10 = $5 of interest."
         },
         {
-          "text": "Add the interest to the starting money. $200 at 5%: $200 + $10 is not right here, so use $200 × 0.05 = $10, then $200 + $10 = $210."
+          "text": "Add the interest to the starting money. $50 + $5 = $55."
         },
         {
-          "text": "Multiplying by 1.05 does the same job in one step. $200 × 1.05 = $210."
+          "text": "Multiplying by 1.10 does the same job in one step. $50 × 1.10 = $55."
         }
       ]
     },
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-2",
-      "prompt": "Zoro puts $100 in an account at 10% compound interest a year. What is the balance after 2 years?",
+      "prompt": "A food truck banks $100 at 10% compound interest a year. Balance after 2 years?",
       "options": [
         "$120.00",
         "$121.00",
@@ -135,10 +135,10 @@ export const pack: SePack = {
       "why": "In year 2, interest is paid on the $110 balance, so it grows faster than simple interest.",
       "steps": [
         {
-          "text": "Year 1: $200 at 5% gives $210. Year 2 starts from $210, not $200."
+          "text": "Year 1: $50 at 10% gives $55. Year 2 starts from $55, not $50."
         },
         {
-          "text": "Year 2: $210 × 1.05 = $220.50. The interest was $10.50, not $10."
+          "text": "Year 2: $55 × 1.10 = $60.50. The interest was $5.50, not $5."
         },
         {
           "text": "The extra 50 cents is interest earned on the first year's interest. That is what compound means."
@@ -148,7 +148,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-3",
-      "prompt": "After 3 years on $1000 at 5% a year, which account earns more interest?",
+      "prompt": "Your game earns $1000. Put it in a bank at 5% for 3 years. Which account earns more?",
       "options": [
         "Simple: $150 interest",
         "Compound: $157.63 interest",
@@ -185,7 +185,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-interest-build-0",
-      "prompt": "Isagi saves $200 at 4% simple interest for 2 years. How much interest does he earn? Build the answer.",
+      "prompt": "Isagi saves $200 at 4% simple interest for 2 years.\nHow much interest does he earn? Build the answer.",
       "answer": "16",
       "decoys": [
         "8",
@@ -208,7 +208,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-4",
-      "prompt": "In the formula A = P(1 + r)ⁿ, what does A stand for?",
+      "prompt": "Your Fortnite skin fund starts at $500 and earns 2% a year.\nIn A = P(1 + r)ⁿ, what does A stand for?",
       "options": [
         "The amount in the account at the end",
         "The annual rate written as a decimal",
@@ -231,7 +231,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-5",
-      "prompt": "A bank pays 3.5% interest a year. Which number do you multiply a balance by to find next year's total?",
+      "prompt": "Your skin fund pays 3.5% a year.\nWhich number do you multiply the balance by to find next year's total?",
       "options": [
         "0.35",
         "1.035",
@@ -254,7 +254,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "fin-interest-games-0",
-      "title": "Pirate Bank Words",
+      "title": "Savings Words",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -287,7 +287,7 @@ export const pack: SePack = {
       "id": "fin-interest-teach-2",
       "title": "The method",
       "lines": [
-        "Simple: 5% of $100 is $5. Add $5 each year.",
+        "Your skin fund: $100 at 5% a year. Simple adds $5 each year.",
         "Compound: each year, find 5% of the new total.",
         "Year 1: $105. Year 2: $110.25. Year 3: $115.76."
       ]
@@ -295,7 +295,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-interest-basics-6",
-      "prompt": "Simple interest: $300 at 2% a year for 5 years. Build the interest earned.",
+      "prompt": "Your $300 savings earns 2% a year for 5 years.\nBuild the simple interest earned.",
       "answer": "30",
       "decoys": [
         "6"
@@ -316,7 +316,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-7",
-      "prompt": "Luffy saves $800 at 5% simple interest a year for 6 years. What is his total balance at the end?",
+      "prompt": "Mateo saves $800 in an account at 5% simple interest a year for 6 years. What is his balance at the end?",
       "options": [
         "$1240",
         "$1004",
@@ -339,7 +339,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-interest-build-1",
-      "prompt": "Rin puts $100 in an account at 10% compound interest. After 2 years, how much does he have? Build the answer.",
+      "prompt": "Sana puts $100 in a savings account at 10% compound interest. After 2 years, how much is in it? Build the answer.",
       "answer": "121",
       "decoys": [
         "0"
@@ -370,7 +370,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Like Isagi's chain of passes: each one builds on the last."
+        "text": "Like a wheat farm: each harvest is replanted and grows more next time."
       }
     },
     {
@@ -390,7 +390,7 @@ export const pack: SePack = {
       "lines": [
         "Interest is a percent of your money, paid to you or by you.",
         "Simple adds the same amount. Compound adds on the new total.",
-        "Compound grows faster, and the gap gets bigger over time."
+        "Borrowed money charges interest the same way, so it grows against you."
       ],
       "callout": {
         "flavour": "key",
@@ -404,7 +404,7 @@ export const pack: SePack = {
       "lines": [
         "Simple interest is paid only on the money you started with.",
         "The same amount is added every year. The rate never grows.",
-        "Isagi's deal pays a flat $10 a goal, no matter how many he has."
+        "The bank pays $10 each year on $200 at 5%, every year the same."
       ],
       "callout": {
         "flavour": "key",
@@ -418,11 +418,11 @@ export const pack: SePack = {
       "lines": [
         "Compound interest is paid on the money AND on last year's interest.",
         "The pile gets bigger, so each year's interest is bigger too.",
-        "Rin's ego grows the same way: each win makes the next one count more."
+        "Your saved Robux grow the same way: each year adds to the pile."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "A snowball rolling down a hill picks up more snow as it goes."
+        "flavour": "key",
+        "text": "Like a Minecraft snow golem rolling downhill: it gets bigger faster the further it goes."
       }
     },
     {
@@ -430,13 +430,13 @@ export const pack: SePack = {
       "id": "fin-interest-deeper-2",
       "title": "Per year is not per month",
       "lines": [
-        "A rate of 6% a year, compounded monthly, is not 6% a month.",
+        "A rate of 6% a year, added monthly, is not 6% a month.",
         "Split the yearly rate across 12 months: 6% ÷ 12 = 0.5%.",
-        "Count 12 compounding periods for each year, not 1."
+        "Count 12 interest payments per year, not 1."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Always check how often the interest is added before you multiply."
+        "text": "Check how often the interest is added before you multiply."
       }
     },
     {
@@ -446,7 +446,7 @@ export const pack: SePack = {
       "lines": [
         "Simple interest adds the same amount every year.",
         "Compound interest adds more each year than the year before.",
-        "So the gap between the two keeps getting wider over time."
+        "So the gap between the two keeps widening over time."
       ]
     },
     {
@@ -460,7 +460,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro never leaves a treasure with a wrong share. Convert first, then count."
+        "text": "Like a Pokémon type chart: convert the multiplier first, then count the damage."
       }
     },
     {
@@ -468,8 +468,8 @@ export const pack: SePack = {
       "id": "fin-interest-deeper-5",
       "title": "Debt grows too",
       "lines": [
-        "Interest on a loan or a credit card works the same way.",
-        "If you do not pay it off, the amount you owe keeps growing.",
+        "Borrow $200 for V-Bucks and leave it unpaid? It grows.",
+        "Interest on a loan or credit card works the same way.",
         "Compound interest works against you when you owe money."
       ],
       "callout": {
@@ -490,7 +490,7 @@ export const pack: SePack = {
       "why": "Each year the interest is added to the balance, and next year's interest is calculated on the larger amount.",
       "steps": [
         {
-          "text": "Start with $50 at 20% compound. Year 1: $50 × 1.20 = $60."
+          "text": "Your Ultimate Team fund starts at $50 and earns 20%. Year 1: $50 × 1.20 = $60."
         },
         {
           "text": "Year 2: $60 × 1.20 = $72. Year 3: $72 × 1.20 = $86.40."
@@ -503,7 +503,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-basics-9",
-      "prompt": "Nagi puts $1000 at 10% compound interest a year. What is the balance after 3 years?",
+      "prompt": "Nagi saves $1000 for a skin. The bank pays 10% compound interest a year. Balance after 3 years?",
       "options": [
         "$1300",
         "$1331",
@@ -526,7 +526,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-0",
-      "prompt": "Isagi's club puts $400 in a savings account. It earns 3% simple interest per year for 5 years. How much interest does it earn?",
+      "prompt": "Your Roblox group puts $400 in a savings account. It earns 3% simple interest a year for 5 years. Interest earned?",
       "options": [
         "$60.00",
         "$63.70",
@@ -536,20 +536,20 @@ export const pack: SePack = {
       "why": "Simple interest is paid only on the original amount, so it stays the same every year.",
       "steps": [
         {
-          "text": "Find the yearly interest: $250 × 4% = $250 × 0.04 = $10."
+          "text": "Find the yearly interest: $400 × 3% = $400 × 0.03 = $12."
         },
         {
-          "text": "Multiply by the number of years: $10 × 3 = $30 total interest."
+          "text": "Multiply by the number of years: $12 × 5 = $60 total interest."
         },
         {
-          "text": "Check: simple interest is always the rate × principal × years, here $250 × 0.04 × 3 = $30."
+          "text": "Check: simple interest is rate × principal × years, so $400 × 0.03 × 5 = $60."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-interest-applied-1",
-      "prompt": "Luffy's crew saves $1000 at 5% interest, compounded yearly, for 2 years. What is the balance at the end?",
+      "prompt": "Your Minecraft server keeps $1000 in a bank paying 5% compound a year. Balance after 2 years?",
       "options": [
         "$1100.00",
         "$1050.00",
@@ -559,20 +559,20 @@ export const pack: SePack = {
       "why": "Compound interest is paid on the balance, including last year's interest, so the money grows faster.",
       "steps": [
         {
-          "text": "Year 1: $500 × 4% = $20 interest, so the balance is $520."
+          "text": "Year 1: $1000 × 5% = $50 interest, so the balance is $1050."
         },
         {
-          "text": "Year 2: $520 × 4% = $20.80 interest, so the balance is $540.80."
+          "text": "Year 2: $1050 × 5% = $52.50 interest, so the balance is $1102.50."
         },
         {
-          "text": "Use the growth factor: $1000 × 1.05 × 1.05 = $1000 × 1.1025 = $1102.50."
+          "text": "Growth factor check: $1000 × 1.05 × 1.05 = $1000 × 1.1025 = $1102.50."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-interest-applied-2",
-      "prompt": "Two strikers each save $800 for 3 years at 6%. One account is simple interest, the other is compound. How much more does the compound account earn?",
+      "prompt": "Two trainers each save $800 for 3 years at 6%. One is simple, one is compound. How much more does compound earn?",
       "options": [
         "$9.60",
         "$8.81",
@@ -595,7 +595,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-3",
-      "prompt": "Zoro's crew wants $300 of simple interest in 4 years at 5% per year. How much money must go into the account at the start?",
+      "prompt": "Your FC club wants $300 of simple interest in 4 years at 5% a year. How much must go in at the start?",
       "options": [
         "$1200",
         "$1500",
@@ -618,7 +618,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-4",
-      "prompt": "A Toronto school trip fund holds $2000 at 2% compounded yearly for 3 years. What is the balance after 3 years?",
+      "prompt": "Your class Timbits fund holds $2000 at 2% compounded yearly for 3 years. Balance after 3 years?",
       "options": [
         "$2120.00",
         "$2160.00",
@@ -641,7 +641,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-6",
-      "prompt": "After 2 years at 10% compounded yearly, a savings account has $1210. What was the starting amount?",
+      "prompt": "Your Fortnite skin fund grows to $1210 after 2 years at 10%, compounded yearly. What did you start with?",
       "options": [
         "$1100",
         "$1200",
@@ -651,10 +651,10 @@ export const pack: SePack = {
       "why": "To undo compound growth, divide the final balance by the growth factor once for each year.",
       "steps": [
         {
-          "text": "Example: $882 after 2 years at 5% compounded. Growth factor is 1.05 × 1.05 = 1.1025."
+          "text": "Example: skin fund is $882 after 2 years at 5%. Growth factor is 1.05 × 1.05 = 1.1025."
         },
         {
-          "text": "Divide: $882 ÷ 1.1025 = $800, so the start was $800."
+          "text": "Divide: $882 ÷ 1.1025 = $800, so the fund started at $800."
         },
         {
           "text": "Check: $800 × 1.1025 = $882. The method works."
@@ -664,7 +664,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-7",
-      "prompt": "A Blue Lock club account grows from $200 to $260 with simple interest over 4 years. What is the yearly interest rate?",
+      "prompt": "Your football club's savings grow from $200 to $260 with simple interest over 4 years. What is the yearly rate?",
       "options": [
         "7.5%",
         "3%",
@@ -674,7 +674,7 @@ export const pack: SePack = {
       "why": "Simple interest adds the same amount each year, so the rate is the yearly interest divided by the start.",
       "steps": [
         {
-          "text": "Example: $300 grows to $345 in 3 years. Interest is $45 in total."
+          "text": "Example: a $300 transfer fund grows to $345 in 3 years. Interest is $45 in total."
         },
         {
           "text": "Per year: $45 ÷ 3 = $15. Rate: $15 ÷ $300 = 0.05, which is 5%."
@@ -687,7 +687,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-8",
-      "prompt": "Luffy puts $1000 in an account at 6% for 2 years. One account is simple, the other compounded. How much more does compound earn?",
+      "prompt": "Luffy puts $1000 in a bounty fund at 6% for 2 years. One account is simple, one is compounded. How much more does compound earn?",
       "options": [
         "$6.00",
         "$3.60",
@@ -710,7 +710,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-applied-9",
-      "prompt": "A $1000 deposit earns 5% compounded yearly. How much interest is earned in year 2 only?",
+      "prompt": "Your Toronto pizza-party fund of $1000 earns 5% compounded yearly. How much interest is earned in year 2 only?",
       "options": [
         "$50.00",
         "$55.00",
@@ -733,7 +733,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-deeper-6",
-      "prompt": "Sanji puts $100 in a savings account. It pays 5% simple interest for 3 years. How much interest does he earn?",
+      "prompt": "A Roblox creator puts $100 in savings at 5% simple interest for 3 years. How much interest is earned?",
       "options": [
         "$15.00",
         "$15.76",
@@ -756,7 +756,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-deeper-7",
-      "prompt": "A bank pays 6% a year, compounded monthly. What rate does it use each month?",
+      "prompt": "Your Minecraft village bank pays 6% a year, compounded monthly. What rate does it use each month?",
       "options": [
         "0.50% a month",
         "6.00% a month",
@@ -769,17 +769,17 @@ export const pack: SePack = {
           "text": "Count the periods: there are 12 months in one year."
         },
         {
-          "text": "Divide the yearly rate: 12% ÷ 12 = 1% each month."
+          "text": "Example: 12% a year ÷ 12 = 1% each month."
         },
         {
-          "text": "Check: 12 months of 1% add up to about 12%, the yearly rate."
+          "text": "Here: 6% a year ÷ 12 = 0.5% a month. Check: 12 × 0.5% = 6%."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-interest-deeper-8",
-      "prompt": "Bachira puts $100 at 10% compound interest. How much interest does he earn in year 2 alone?",
+      "prompt": "Saving for a $100 skin, you put $100 in an account at 10% compound interest.\nHow much interest do you earn in year 2 alone?",
       "options": [
         "$10.00",
         "$11.00",
@@ -789,13 +789,13 @@ export const pack: SePack = {
       "why": "Year 2 earns 10% of $110, because year 1's $10 was added to the pile.",
       "steps": [
         {
-          "text": "Year 1: 20% of $50 = $10. The pile is now $60."
+          "text": "Year 1: 10% of $100 = $10. The pile is now $110."
         },
         {
-          "text": "Year 2: 20% of $60 = $12, not $10."
+          "text": "Year 2: 10% of $110 = $11, not $10."
         },
         {
-          "text": "The extra $2 is interest earned on the $10 from year 1."
+          "text": "The extra $1 is interest earned on the $10 from year 1."
         }
       ],
       "art": {
@@ -817,7 +817,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-interest-deeper-9",
-      "prompt": "You owe $500 on a card at 2% a month, compounded. How much do you owe after 2 months?",
+      "prompt": "You owe $500 on a card you used to buy Robux, at 2% a month.\nHow much do you owe after 2 months, compounded?",
       "options": [
         "$520.00",
         "$520.20",
@@ -827,20 +827,20 @@ export const pack: SePack = {
       "why": "Month 2 charges 2% on $510, which is $10.20, not $10.",
       "steps": [
         {
-          "text": "Month 1: 3% of $200 = $6. You now owe $206."
+          "text": "Month 1: 2% of $500 = $10. You now owe $510."
         },
         {
-          "text": "Month 2: 3% of $206 = $6.18, not $6.00."
+          "text": "Month 2: 2% of $510 = $10.20, not $10.00."
         },
         {
-          "text": "Total owed: $206 + $6.18 = $212.18."
+          "text": "Total owed: $510 + $10.20 = $520.20."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-interest-deeper-10",
-      "prompt": "Ryan has $300 in a account paying 4% simple interest for 1 year. How much interest does he earn?",
+      "prompt": "Saving for an EA FC pack, you keep $300 at 4% simple interest for 1 year.\nHow much interest do you earn?",
       "options": [
         "$12.00",
         "$1.20",
@@ -850,20 +850,20 @@ export const pack: SePack = {
       "why": "4% means 4 ÷ 100 = 0.04, so $300 × 0.04 = $12.00.",
       "steps": [
         {
-          "text": "Turn 6% into a decimal: 6 ÷ 100 = 0.06."
+          "text": "Turn 4% into a decimal: 4 ÷ 100 = 0.04."
         },
         {
-          "text": "Multiply: $450 × 0.06 = $27.00."
+          "text": "Multiply: $300 × 0.04 = $12.00."
         },
         {
-          "text": "Sense check: 6% is more than 5%, so the answer must be more than $22.50."
+          "text": "Sense check: 1% of $300 is $3, so 4% must be $12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-interest-deeper-11",
-      "prompt": "You put $1000 at 10% for 3 years. Which earns more, simple or compound, and by how much?",
+      "prompt": "Your Minecraft bank pays 10% a year on $1000 for 3 years.\nWhich earns more, simple or compound, and by how much?",
       "options": [
         "Compound, by $31.00",
         "Simple, by $31.00",
@@ -873,13 +873,13 @@ export const pack: SePack = {
       "why": "Compound adds interest on the interest, so the pile grows faster after year 1.",
       "steps": [
         {
-          "text": "Simple: $200 × 0.10 = $20 each year, so $40 in 2 years."
+          "text": "Simple: 10% of $1000 = $100 each year, so $300 in 3 years."
         },
         {
-          "text": "Compound: year 1 is $20, then year 2 is 10% of $220 = $22, total $42."
+          "text": "Compound: $100, then 10% of $1100 = $110, then 10% of $1210 = $121."
         },
         {
-          "text": "Difference: $42 − $40 = $2 in compound's favour."
+          "text": "Difference: $331 − $300 = $31 in compound's favour."
         }
       ],
       "art": {
@@ -901,7 +901,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-interest-build-2",
-      "prompt": "Kaiser's savings grow by $100 at 5% compound for 3 years. How much does he have at the end? Build the answer to the cent.",
+      "prompt": "Kaiser puts $100 at 5% compound for 3 years.\nHow much does he have at the end? Build the answer to the cent.",
       "answer": "115.76",
       "decoys": [
         "0",
@@ -911,20 +911,20 @@ export const pack: SePack = {
       "why": "Each year's interest is added to the balance before the next year's interest is worked out.",
       "steps": [
         {
-          "text": "Year 1: 20% of $50 is $10. The balance becomes $60."
+          "text": "Year 1: 5% of $100 is $5. The balance becomes $105."
         },
         {
-          "text": "Year 2: 20% of $60 is $12. The balance becomes $72."
+          "text": "Year 2: 5% of $105 is $5.25. The balance becomes $110.25."
         },
         {
-          "text": "Total interest: 72 − 50 = $22. Check: that is more than simple interest."
+          "text": "Year 3: 5% of $110.25 is $5.51, so the balance is $115.76."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-interest-build-3",
-      "prompt": "Luffy keeps $1000 at 2% for 2 years. Compound interest earns how much more than simple interest? Build the answer.",
+      "prompt": "Your $1000 Pokémon card fund earns 2% for 2 years.\nCompound interest earns how much more than simple? Build the answer.",
       "answer": "0.40",
       "decoys": [
         "9",
@@ -940,55 +940,55 @@ export const pack: SePack = {
           "text": "Compound: year 2 earns 2% of $1020, which is $20.40."
         },
         {
-          "text": "Extra: 20.40 − 20 = $0.40 more than simple interest."
+          "text": "Extra: $20.40 − $20 = $0.40 more than simple interest."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-interest-build-4",
-      "prompt": "Bachira saves $50 and earns $4 interest in 1 year. Write the rate as a decimal. Build the answer.",
+      "prompt": "Your squad saves $50 and earns $4 interest in 1 year.\nWrite the rate as a decimal. Build the answer.",
       "answer": "0.08",
       "decoys": [
         "5",
         "1"
       ],
-      "why": "The rate is the interest divided by the starting amount, so the rate has no units.",
+      "why": "The rate is the interest divided by the starting amount, so it has no units.",
       "steps": [
         {
-          "text": "Rate means the share of the starting money you earn."
+          "text": "A rate is the share of the starting money you earn."
         },
         {
-          "text": "Divide the interest by the starting amount: 4 ÷ 50."
+          "text": "Divide the interest by the starting money: 4 ÷ 50."
         },
         {
-          "text": "Divide by 50 and check: 0.08 is the same as 8%."
+          "text": "Check on a new case: $30 earning $3 is 3 ÷ 30 = 0.1."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-interest-build-5",
-      "prompt": "Nagi puts $500 in an account at 10% compound interest for 2 years. How much does he have at the end? Build the answer.",
+      "prompt": "Your Roblox creator account banks $500 at 10% compound interest for 2 years.\nHow much is in it at the end? Build the answer.",
       "answer": "605",
       "decoys": [],
-      "why": "Compound interest grows the balance faster each year because each year's interest is added to the balance.",
+      "why": "Compound interest grows faster because each year's interest is added to the balance and earns interest too.",
       "steps": [
         {
-          "text": "Each year, find the interest on the balance you have now."
+          "text": "Each year, find 10% of the balance you have now."
         },
         {
-          "text": "10% of $500 is $50. The balance becomes $550."
+          "text": "10% of $200 is $20. The balance becomes $220."
         },
         {
-          "text": "Next year: 10% of $550 is $55. The balance becomes $605."
+          "text": "Next year: 10% of $220 is $22. The balance becomes $242."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-interest-build-7",
-      "prompt": "Isagi's savings earn 6% simple interest on $1000 for 5 years. How much interest does he earn? Build the answer.",
+      "prompt": "You save $1000 for an EA FC pack fund.\nIt earns 6% simple interest for 5 years. How much interest? Build the answer.",
       "answer": "300",
       "decoys": [
         "6"
@@ -996,20 +996,20 @@ export const pack: SePack = {
       "why": "Simple interest is calculated on the original amount, so each year gives the same interest.",
       "steps": [
         {
-          "text": "3% of $400 is $12 each year."
+          "text": "2% of $400 is $8 each year."
         },
         {
-          "text": "Simple interest is worked on $400 every time, not on a new balance."
+          "text": "Simple interest is always worked on the starting $400, never a new balance."
         },
         {
-          "text": "4 years × $12 = $48 of interest."
+          "text": "3 years × $8 = $24 of interest."
         }
       ]
     },
     {
       "kind": "game",
       "id": "fin-interest-games-1",
-      "title": "Who Has the Biggest Bounty?",
+      "title": "Luffy's Savings Race: Lowest to Highest",
       "game": {
         "mode": "order",
         "values": [

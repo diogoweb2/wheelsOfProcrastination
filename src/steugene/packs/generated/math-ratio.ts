@@ -27,7 +27,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-basics-0",
-      "prompt": "Isagi takes 10 shots in a match and scores 5 goals. What is the goals to shots ratio, simplified?",
+      "prompt": "Your squad gets 5 eliminations and 10 deaths in a Fortnite match. What is the K/D ratio, simplified?",
       "options": [
         "5 : 10",
         "1 : 2",
@@ -37,13 +37,13 @@ export const pack: SePack = {
       "why": "A ratio is simplified when the only number that divides both sides evenly is 1.",
       "steps": [
         {
-          "text": "Write the ratio in the same order as the question: goals first, then shots. That gives 5 : 10."
+          "text": "Write the ratio in the same order as the question: eliminations first, then deaths. That gives 5 : 10."
         },
         {
           "text": "Find a number that divides both 5 and 10. Here it is 5, so divide both sides by 5."
         },
         {
-          "text": "Check: 5 ÷ 5 = 1 and 10 ÷ 5 = 2, so the answer is 1 : 2. Try it with 8 shots and 2 goals: 2 : 8 becomes 1 : 4."
+          "text": "Check: 5 ÷ 5 = 1 and 10 ÷ 5 = 2, so the answer is 1 : 2. Try 8 eliminations and 2 deaths: 8 : 2 becomes 4 : 1."
         }
       ],
       "art": {
@@ -57,23 +57,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-basics-1",
-      "prompt": "Sanji's soup uses 2 cups of rice for every 3 cups of water. How much rice for 6 cups of water?",
+      "prompt": "A shawarma marinade uses 2 spoons of lemon for every 3 spoons of yogurt. How much lemon for 6 spoons of yogurt?",
       "options": [
-        "3 cups of rice",
-        "5 cups of rice",
-        "4 cups of rice"
+        "3 spoons of lemon",
+        "5 spoons of lemon",
+        "4 spoons of lemon"
       ],
       "answer": 2,
       "why": "To keep a recipe tasting the same, every amount must be multiplied by the same number.",
       "steps": [
         {
-          "text": "Find the scale factor: 6 cups of water is 2 times the 3 cups in the recipe."
+          "text": "Find the scale factor: 6 spoons of yogurt is 2 times the 3 spoons in the marinade."
         },
         {
-          "text": "Multiply the rice by the same factor: 2 cups × 2 = 4 cups."
+          "text": "Multiply the lemon by the same factor: 2 spoons × 2 = 4 spoons of lemon."
         },
         {
-          "text": "Try it with 5 rice to 10 water: 10 is 2 times 5, so the scale factor is 2. Water 10 means rice 5 × 2 = 10 water, 5 × 2 = 10 rice wait, no: you scale only the 5 part by 2 for 10 water, giving 5 × 2 = 10."
+          "text": "Try 9 spoons of yogurt: 9 is 3 times 3, so the lemon is 2 × 3 = 6 spoons."
         }
       ]
     },
@@ -132,30 +132,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-basics-2",
-      "prompt": "A GO train travels 300 km in 2 hours. What is its speed in km/h?",
+      "prompt": "Your Roblox obby earns 300 Robux in 2 hours of building. How many Robux per hour?",
       "options": [
-        "150 km/h",
-        "120 km/h",
-        "600 km/h"
+        "150 Robux per hour",
+        "120 Robux per hour",
+        "600 Robux per hour"
       ],
       "answer": 0,
-      "why": "Speed is distance divided by time, so this is a rate with one unit per hour.",
+      "why": "A rate is one amount divided by another, so this gives one unit per hour.",
       "steps": [
         {
-          "text": "Speed = distance ÷ time. Write it as 300 ÷ 2."
+          "text": "Rate = Robux ÷ hours. Write it as 300 ÷ 2."
         },
         {
-          "text": "Do the division: 300 ÷ 2 = 150, so the speed is 150 km/h."
+          "text": "Do the division: 300 ÷ 2 = 150, so you earn 150 Robux per hour."
         },
         {
-          "text": "Try it on 360 km in 4 hours: 360 ÷ 4 = 90, so the speed is 90 km/h."
+          "text": "Try 360 Robux in 4 hours: 360 ÷ 4 = 90, so you earn 90 Robux per hour."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-basics-3",
-      "prompt": "Which is the better buy: a 750 g bag for $4.80, or a 1 kg bag for $6.00?",
+      "prompt": "Which is the better buy: a 750 g bag of chips for $4.80, or a 1 kg bag for $6.00?",
       "options": [
         "The 750 g bag for $4.80",
         "The 1 kg bag for $6.00",
@@ -171,7 +171,7 @@ export const pack: SePack = {
           "text": "$4.80 ÷ 0.75 = $6.40 per kg. The 1 kg bag costs $6.00 per kg, which is less."
         },
         {
-          "text": "Try 500 g for $3.50: double it to 1 kg for $7.00. Then compare with 2 kg for $12, which is $6.00 per kg."
+          "text": "Try 500 g for $3.50: double it to 1 kg for $7.00, so it costs $7.00 per kg."
         }
       ]
     },
@@ -181,18 +181,18 @@ export const pack: SePack = {
       "title": "Why ratios matter",
       "lines": [
         "Ratios let you compare fairly, even when totals are different.",
-        "Striker A: 3 goals from 5 shots. Striker B: 4 goals from 10 shots.",
-        "A is sharper: 3 ÷ 5 = 0.6 beats 4 ÷ 10 = 0.4."
+        "Miner A: 3 diamonds from 5 chunks. Miner B: 4 diamonds from 10 chunks.",
+        "A is richer: 3 ÷ 5 = 0.6 beats 4 ÷ 10 = 0.4."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "You are the coach. Who do you pick for the next match?"
+        "flavour": "key",
+        "text": "You are the team leader. Which miner do you send down to Y = −59?"
       }
     },
     {
       "kind": "build",
       "id": "math-ratio-build-0",
-      "prompt": "Isagi passes 12 times to the left. He passes 18 times to the right. Write left : right in simplest form.",
+      "prompt": "Your Fortnite K/D: 12 eliminations, 18 deaths.\nWrite eliminations : deaths in simplest form.",
       "answer": "2:3",
       "decoys": [
         "6",
@@ -202,20 +202,20 @@ export const pack: SePack = {
       "why": "A ratio is simplest when no number divides both sides evenly.",
       "steps": [
         {
-          "text": "Find a number that divides both 15 and 20. Try 5."
+          "text": "Find a number that divides both 12 and 18. Try 6."
         },
         {
-          "text": "15 ÷ 5 = 3 and 20 ÷ 5 = 4, so 15 : 20 becomes 3 : 4."
+          "text": "12 ÷ 6 = 2 and 18 ÷ 6 = 3, so 12 : 18 becomes 2 : 3."
         },
         {
-          "text": "Check again. No number bigger than 1 divides both 3 and 4. Stop."
+          "text": "Try 8 : 12 next. Divide both by 4 and you get 2 : 3 again."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-basics-4",
-      "prompt": "Team Blue Lock wins 4 out of every 5 matches. How many wins in 20 matches?",
+      "prompt": "Your EA FC team wins 4 of every 5 matches.\nHow many wins in 20 matches?",
       "options": [
         "15 wins",
         "18 wins",
@@ -231,7 +231,7 @@ export const pack: SePack = {
           "text": "Each group has 4 wins, so 4 groups × 4 wins = 16 wins."
         },
         {
-          "text": "Try 3 wins out of every 4 matches, for 16 matches: 16 ÷ 4 = 4 groups, and 4 × 3 = 12 wins."
+          "text": "Try 3 wins in every 4 games. For 16 games: 16 ÷ 4 = 4 groups, and 4 × 3 = 12 wins."
         }
       ],
       "art": {
@@ -245,7 +245,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-basics-5",
-      "prompt": "Luffy and Zoro share a bounty in the ratio 3 : 5. What fraction of the bounty does Luffy get?",
+      "prompt": "You and your brother share a pizza in the ratio 3 : 5.\nWhat fraction of the pizza is yours?",
       "options": [
         "3/5",
         "3/8",
@@ -258,10 +258,10 @@ export const pack: SePack = {
           "text": "Add the parts: 3 + 5 = 8 parts in total."
         },
         {
-          "text": "Luffy has 3 of those 8 parts, so his fraction is 3/8."
+          "text": "You have 3 of those 8 parts, so your fraction is 3/8."
         },
         {
-          "text": "Try a ratio of 2 : 7. Total is 9 parts, so the first person gets 2/9."
+          "text": "Try 2 : 7. Total is 9 parts, so your share is 2/9."
         }
       ],
       "art": {
@@ -292,8 +292,8 @@ export const pack: SePack = {
             "Two equal ratios"
           ],
           [
-            "90 km/h",
-            "90 km in 1 hour"
+            "12 blocks/min",
+            "12 blocks in 1 minute"
           ],
           [
             "Scale up",
@@ -309,76 +309,76 @@ export const pack: SePack = {
       "title": "The method",
       "lines": [
         "To scale a ratio, multiply both parts by the same number.",
-        "3 : 5 × 4 = 12 : 20. Same ratio, four times the games.",
+        "Your obby has 3 checkpoints for every 5 platforms. × 4 gives 12 : 20.",
         "A unit rate is the amount for ONE. Divide to find it."
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-basics-6",
-      "prompt": "A bounty of 1000 berries is split in the ratio 2 : 3. How many berries does the smaller share get?",
+      "prompt": "You and a friend split 1000 V-Bucks in the ratio 2 : 3.\nHow many V-Bucks does the smaller share get?",
       "options": [
-        "400 berries",
-        "600 berries",
-        "500 berries"
+        "400 V-Bucks",
+        "600 V-Bucks",
+        "500 V-Bucks"
       ],
       "answer": 0,
       "why": "Each part is worth the total divided by the number of parts, then multiplied by its own ratio number.",
       "steps": [
         {
-          "text": "Add the parts: 2 + 3 = 5 parts. Then 1000 ÷ 5 = 200 berries per part."
+          "text": "Add the parts: 2 + 3 = 5 parts. Then 1000 ÷ 5 = 200 V-Bucks per part."
         },
         {
-          "text": "The smaller share is 2 parts: 2 × 200 = 400 berries."
+          "text": "The smaller share is 2 parts: 2 × 200 = 400 V-Bucks."
         },
         {
-          "text": "Try 4000 berries split 1 : 3: total 4 parts, so 1000 per part. The smaller share is 1000 berries."
+          "text": "Try 4000 V-Bucks split 1 : 3: total 4 parts, so 1000 per part. The smaller share is 1000 V-Bucks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-basics-7",
-      "prompt": "Isagi runs 300 m in 40 s. Nagi runs 240 m in 30 s. Who is faster?",
+      "prompt": "Miner A mines 300 blocks in 40 min. Miner B mines 240 blocks in 30 min. Who is faster?",
       "options": [
-        "Isagi is faster",
-        "They are the same speed",
-        "Nagi is faster"
+        "Player A is faster",
+        "They are exactly equal",
+        "Player B is faster"
       ],
       "answer": 2,
-      "why": "Rates are compared fairly only after you find the distance covered in one second or metre.",
+      "why": "Rates are compared fairly only after you find the blocks mined in one minute.",
       "steps": [
         {
-          "text": "Divide each distance by its time. Isagi: 300 ÷ 40 = 7.5 m per second."
+          "text": "Divide each count by its time. A: 300 ÷ 40 = 7.5 blocks per minute."
         },
         {
-          "text": "Nagi: 240 ÷ 30 = 8 m per second. Now both are in the same unit, so compare: 8 is bigger than 7.5."
+          "text": "B: 240 ÷ 30 = 8 blocks per minute. Both are now per minute, so compare: 8 is bigger than 7.5."
         },
         {
-          "text": "Try two runners: 150 m in 25 s is 6 m/s, and 120 m in 15 s is 8 m/s. The second runner is faster."
+          "text": "Try two miners: 150 blocks in 25 min is 6 per minute, and 120 blocks in 15 min is 8 per minute. The second miner is faster."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-1",
-      "prompt": "Isagi runs 9 km in 45 minutes. How many km per minute? Write a decimal.",
+      "prompt": "Your obby earns 9 Robux in 45 minutes. Robux per minute? Write a decimal.",
       "answer": "0.2",
       "decoys": [
         "4",
         "5",
         "3"
       ],
-      "why": "A unit rate is the amount for exactly one unit, so you divide by the time.",
+      "why": "A unit rate is the amount for exactly one minute, so you divide by the time.",
       "steps": [
         {
-          "text": "Example: a striker runs 6 km in 20 minutes. Divide 6 by 20."
+          "text": "Example: a game earns 6 Robux in 20 minutes. Divide 6 by 20."
         },
         {
-          "text": "6 ÷ 20 = 0.3, so the rate is 0.3 km per minute."
+          "text": "6 ÷ 20 = 0.3, so the game earns 0.3 Robux per minute."
         },
         {
-          "text": "Now divide the distance by the time for Isagi: 9 ÷ 45."
+          "text": "Now divide the Robux by the time for your obby: 9 ÷ 45."
         }
       ]
     }
@@ -389,9 +389,9 @@ export const pack: SePack = {
       "id": "math-ratio-teach-3",
       "title": "The common trap",
       "lines": [
-        "3 : 5 does not mean 3 out of 5.",
+        "Eliminations : deaths of 3 : 5 is not 3 out of 5.",
         "The total is 3 + 5 = 8 parts, not 5.",
-        "Goals are 3 parts. Shots are 5 parts. Keep them separate."
+        "Eliminations are 3 parts. Deaths are 5 parts. Keep them separate."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -403,29 +403,29 @@ export const pack: SePack = {
       "id": "math-ratio-teach-4",
       "title": "Worked example: a rate",
       "lines": [
-        "Sunny sails 90 km in 1 hour. Its rate is 90 km/h.",
-        "In 2.5 hours: 90 × 2.5 = 225 km.",
-        "Multiply the rate by the time. Keep the units: km/h × h = km."
+        "A winger runs 90 m in 1 minute. His rate is 90 m/min.",
+        "In 2.5 minutes: 90 × 2.5 = 225 m.",
+        "Multiply the rate by the time. Keep the units: m/min × min = m."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "The Straw Hat crew needs to know their speed. So do you."
+        "flavour": "key",
+        "text": "Sprint speed decides who reaches the ball first."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Sunny in 2.5 h",
+            "label": "Winger in 2.5 min",
             "value": 225,
             "tone": "good"
           },
           {
-            "label": "Rowboat in 2.5 h",
+            "label": "Keeper in 2.5 min",
             "value": 60,
             "tone": "calm"
           }
         ],
-        "unit": "km"
+        "unit": "m"
       }
     },
     {
@@ -433,13 +433,13 @@ export const pack: SePack = {
       "id": "math-ratio-teach-5",
       "title": "Recap: ratios and rates",
       "lines": [
-        "A ratio compares. Order matters: goals : shots.",
+        "A ratio compares. Order matters: wins : losses.",
         "Scale both parts by the same number.",
         "Unit rate: divide to get one. Watch the units."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Same ratio, bigger game. Same rate, longer trip."
+        "text": "Same ratio, more battles. Same rate, longer play."
       }
     },
     {
@@ -447,9 +447,9 @@ export const pack: SePack = {
       "id": "math-ratio-deeper-0",
       "title": "Ratio is not a fraction of the whole",
       "lines": [
-        "3 : 5 means 3 strikers for every 5 defenders.",
-        "Parts compare to parts. Not to the whole team.",
-        "8 players in total is not the same as 3 : 8."
+        "3 : 5 means 3 diamond blocks for every 5 iron blocks.",
+        "Parts compare to parts. Not to the whole stack.",
+        "8 blocks in total is not the same as 3 : 8."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -461,9 +461,9 @@ export const pack: SePack = {
       "id": "math-ratio-deeper-2",
       "title": "Order is everything",
       "lines": [
-        "2 : 7 and 7 : 2 are two different ratios.",
+        "2 kills : 7 deaths and 7 : 2 are different players.",
         "The first number matches the first thing named.",
-        "Read: for every 4 goals, 1 assist. Goals go first."
+        "Read: 4 kills for every 1 death. Kills go first."
       ],
       "callout": {
         "flavour": "key",
@@ -476,7 +476,7 @@ export const pack: SePack = {
       "title": "Scale both parts, not just one",
       "lines": [
         "Multiply both parts by the same number.",
-        "3 : 5 becomes 6 : 10. Same ratio, fair scaling.",
+        "3 stone : 5 dirt becomes 6 : 10. Same ratio, fair scaling.",
         "Adding 3 to both gives 6 : 8. Wrong ratio."
       ],
       "callout": {
@@ -489,13 +489,13 @@ export const pack: SePack = {
       "id": "math-ratio-deeper-6",
       "title": "The per-one number wins",
       "lines": [
-        "$4.50/kg means $4.50 for every 1 kg.",
+        "Bulk candy costs $4.50 per kg.",
         "A 3 kg bag costs 3 × $4.50 = $13.50.",
         "Find the 1-unit price before you compare."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Compare bounty per pirate, not the total bounty."
+        "text": "Compare the price per kg, not the bag total."
       }
     },
     {
@@ -529,7 +529,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-basics-8",
-      "prompt": "On a map of Ontario, 1 cm stands for 25 km. Two towns are 7 cm apart on the map. How far apart are they in real life?",
+      "prompt": "On the Kanto map, 1 cm stands for 25 km. Two towns are 7 cm apart on the map. How far apart are they in real life?",
       "options": [
         "280 km",
         "250 km",
@@ -545,14 +545,14 @@ export const pack: SePack = {
           "text": "Multiply: 7 cm × 25 km = 175 km."
         },
         {
-          "text": "Try 4 cm on a map with the scale 1 cm : 20 km: 4 × 20 = 80 km."
+          "text": "Try 4 cm on a Johto map with 1 cm : 20 km: 4 × 20 = 80 km."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-basics-9",
-      "prompt": "A striker makes 18 good passes out of 24 passes. Which ratio is the same as 18 : 24?",
+      "prompt": "Your squad has 18 eliminations and 24 deaths. Which ratio is the same as 18 : 24?",
       "options": [
         "3 : 4",
         "4 : 3",
@@ -562,88 +562,88 @@ export const pack: SePack = {
       "why": "Equivalent ratios are found by dividing both numbers by the same common factor.",
       "steps": [
         {
-          "text": "Find a common factor of 18 and 24. The number 6 works: 18 ÷ 6 = 3 and 24 ÷ 6 = 4."
+          "text": "Find a common factor. 6 works: 18 ÷ 6 = 3 and 24 ÷ 6 = 4."
         },
         {
-          "text": "So 18 : 24 simplifies to 3 : 4. The order matters, so the good passes stay first."
+          "text": "So 18 : 24 is 3 : 4. Eliminations stay first, so the K/D order is kept."
         },
         {
-          "text": "Try 30 : 45: divide both by 15 to get 2 : 3."
+          "text": "Try 30 kills to 45 deaths: divide both by 15 to get 2 : 3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-0",
-      "prompt": "Team A scored 12 goals in 4 matches. Team B scored 15 goals in 6 matches. Which team scores more per match?",
+      "prompt": "Player 1 mined 12 blocks in 4 minutes. Player 2 mined 15 blocks in 6 minutes. Who mines faster?",
       "options": [
-        "Team B, at 2.5 goals a match",
-        "Team A, at 3 goals a match",
-        "Both teams score at the same rate"
+        "Player 1, at 3 blocks a minute",
+        "Player 2, at 2.5 blocks a minute",
+        "Both players mine at the same rate"
       ],
-      "answer": 1,
-      "why": "A rate compares two amounts by dividing, so each team's goals are shared out over one match.",
+      "answer": 0,
+      "why": "A rate compares two amounts by dividing, so each player's blocks are shared out over one minute.",
       "steps": [
         {
-          "text": "Team C: 20 goals in 8 matches. 20 ÷ 8 = 2.5 goals per match."
+          "text": "Miner C: 20 blocks in 8 minutes. 20 ÷ 8 = 2.5 blocks per minute."
         },
         {
-          "text": "Team D: 18 goals in 6 matches. 18 ÷ 6 = 3 goals per match."
+          "text": "Miner D: 18 blocks in 6 minutes. 18 ÷ 6 = 3 blocks per minute."
         },
         {
-          "text": "Compare the two rates. 3 is more than 2.5, so Team D scores faster."
+          "text": "Compare the two. 3 is more than 2.5, so Miner D mines faster."
         }
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Team A",
+            "label": "Player 1",
             "value": 3,
             "tone": "good"
           },
           {
-            "label": "Team B",
+            "label": "Player 2",
             "value": 2.5,
             "tone": "focus"
           }
         ],
-        "unit": "goals a match"
+        "unit": "blocks a minute"
       }
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-1",
-      "prompt": "Isagi's goals-to-shots ratio is 2 : 5. He takes 35 shots. How many goals does he score?",
+      "prompt": "A Roblox obby gets 2 finishes for every 5 tries. There are 35 tries. How many finishes are there?",
       "options": [
-        "10 goals",
-        "14 goals",
-        "12 goals"
+        "10 finishes",
+        "12 finishes",
+        "14 finishes"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "A ratio stays the same when you scale both parts up by the same number.",
       "steps": [
         {
-          "text": "Example: the ratio is 3 : 4 and there are 28 shots. 28 ÷ 4 = 7 groups."
+          "text": "Example: a ratio of 3 : 4 with 28 tries. 28 ÷ 4 = 7 groups."
         },
         {
-          "text": "Each group gives 3 goals, so 7 × 3 = 21 goals from 28 shots."
+          "text": "Each group gives 3 finishes, so 7 × 3 = 21 finishes from 28 tries."
         },
         {
-          "text": "Now do the same here. 35 shots ÷ 5 = 7 groups, and 7 × 2 = 14 goals."
+          "text": "Now 35 tries ÷ 5 = 7 groups, and 7 × 2 = 14 finishes."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-2",
-      "prompt": "Isagi sprints 1.2 km in 8 minutes. What is his speed in km/h?",
+      "prompt": "A cyclist rides 1.2 km in 8 minutes on the Waterfront Trail. What is the speed in km/h?",
       "options": [
         "6.7 km/h",
-        "15 km/h",
-        "9 km/h"
+        "9 km/h",
+        "15 km/h"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "To change a per-minute rate to per-hour, you multiply by 60 because there are 60 minutes in an hour.",
       "steps": [
         {
@@ -653,67 +653,67 @@ export const pack: SePack = {
           "text": "Multiply by 60 to get per hour: 0.2 × 60 = 12 km/h."
         },
         {
-          "text": "Now the same method here. 1.2 ÷ 8 = 0.15 km per minute, and 0.15 × 60 = 9 km/h."
+          "text": "Now the same method. 1.2 ÷ 8 = 0.15 km per minute, and 0.15 × 60 = 9 km/h."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-3",
-      "prompt": "Isagi makes 48 dribbles in a match. He wins 3 for every 1 he loses. How many does he lose?",
+      "prompt": "Your squad plays 48 matches. The wins to losses ratio is 3 : 1. How many matches are lost?",
       "options": [
-        "36 lost",
-        "16 lost",
-        "12 lost"
+        "12 losses",
+        "36 losses",
+        "16 losses"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "In a part-to-part ratio, the total number of parts is the sum of the ratio numbers, not just the bigger one.",
       "steps": [
         {
-          "text": "Example: 5 won for every 2 lost, with 70 dribbles. Parts: 5 + 2 = 7."
+          "text": "Example: 5 wins for every 2 losses, in 70 matches. Parts: 5 + 2 = 7."
         },
         {
-          "text": "Each part is 70 ÷ 7 = 10. So 2 parts lost is 2 × 10 = 20."
+          "text": "Each part is 70 ÷ 7 = 10. So 2 parts of losses is 2 × 10 = 20."
         },
         {
-          "text": "Here: 3 + 1 = 4 parts. 48 ÷ 4 = 12 per part, so 1 part lost is 12."
+          "text": "Here: 3 + 1 = 4 parts. 48 ÷ 4 = 12 per part, so 1 part of losses is 12."
         }
       ],
       "art": {
         "art": "bar",
         "parts": 4,
         "filled": 3,
-        "label": "3/4 won",
+        "label": "3/4 wins",
         "tone": "calm"
       }
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-4",
-      "prompt": "Pack A is 400 g for $2.80. Pack B is 600 g for $3.90. Which pack is the better buy?",
+      "prompt": "Bundle A is 400 V-Bucks for $2.80. Bundle B is 600 V-Bucks for $3.90. Which is the better buy?",
       "options": [
-        "Pack A, the cheaper buy",
-        "Pack B, the cheaper buy",
-        "They cost the same per gram"
+        "Bundle A, the cheaper buy",
+        "Bundle B, the cheaper buy",
+        "They cost the same per V-Buck"
       ],
       "answer": 1,
-      "why": "A unit price divides the price by the amount, so you can compare two packs of different sizes fairly.",
+      "why": "A unit price divides the price by the amount, so you can compare two bundles of different sizes fairly.",
       "steps": [
         {
-          "text": "Example: 500 g for $3.50 is $3.50 ÷ 500 = $0.0070 per gram."
+          "text": "Example: 500 V-Bucks for $3.50. $3.50 ÷ 5 = $0.70 per 100 V-Bucks."
         },
         {
-          "text": "Use 100 g to make it easy: $0.70 per 100 g. Compare with 250 g for $1.60, which is $0.64 per 100 g."
+          "text": "Compare 250 V-Bucks for $1.60: $1.60 ÷ 2.5 = $0.64 per 100 V-Bucks, which is cheaper."
         },
         {
-          "text": "Here: Pack A is $2.80 ÷ 4 = $0.70 per 100 g. Pack B is $3.90 ÷ 6 = $0.65 per 100 g, so B is cheaper."
+          "text": "Here: Bundle A is $2.80 ÷ 4 = $0.70 per 100. Bundle B is $3.90 ÷ 6 = $0.65 per 100, so B is cheaper."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-6",
-      "prompt": "A Toronto map uses the scale 1 : 50 000. A park is 4 cm long on the map. How long is it in real life?",
+      "prompt": "Your bike route on a Toronto map uses 1 : 50 000.\nThe route is 4 cm long on the map. How far is it really?",
       "options": [
         "0.2 km",
         "2 km",
@@ -723,7 +723,7 @@ export const pack: SePack = {
       "why": "A map scale tells you how many real centimetres one map centimetre stands for, so you must convert to kilometres at the end.",
       "steps": [
         {
-          "text": "Example: 3 cm on a 1 : 25 000 map. 3 × 25 000 = 75 000 cm."
+          "text": "Example: a 3 cm trail on a 1 : 25 000 map. 3 × 25 000 = 75 000 cm."
         },
         {
           "text": "Change cm to m by dividing by 100: 75 000 ÷ 100 = 750 m."
@@ -736,60 +736,60 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-applied-7",
-      "prompt": "Sanji and Zoro share 1500 berries in the ratio 2 : 3. How much does Zoro get?",
+      "prompt": "Kai and Liam split 1500 V-Bucks in the ratio 2 : 3.\nHow many V-Bucks does Liam get?",
       "options": [
-        "600 berries",
-        "750 berries",
-        "900 berries"
+        "600 V-Bucks",
+        "750 V-Bucks",
+        "900 V-Bucks"
       ],
       "answer": 2,
       "why": "When you share in a ratio, each part is worth the total divided by the number of parts, and each person gets their own number of parts.",
       "steps": [
         {
-          "text": "Example: 1000 berries shared 3 : 2. Parts: 3 + 2 = 5, so each part is 200."
+          "text": "Example: 1000 V-Bucks shared 3 : 2. Parts: 3 + 2 = 5, so each part is 200."
         },
         {
           "text": "The first person gets 3 × 200 = 600. Check: 600 + 400 = 1000."
         },
         {
-          "text": "Here: 2 + 3 = 5 parts. 1500 ÷ 5 = 300 per part, so Zoro gets 3 × 300 = 900."
+          "text": "Here: 2 + 3 = 5 parts. 1500 ÷ 5 = 300 per part, so Liam gets 3 × 300 = 900."
         }
       ],
       "art": {
         "art": "pie",
         "parts": 5,
         "filled": 3,
-        "label": "3/5 to Zoro",
+        "label": "3/5 to Liam",
         "tone": "good"
       }
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-8",
-      "prompt": "St. Eugene is taking 90 students on a trip. The rule is 4 chaperones for every 30 students. How many chaperones are needed?",
+      "prompt": "Your coach runs 4 drills for every 30 minutes of practice.\nPractice is 90 minutes. How many drills?",
       "options": [
-        "10 chaperones",
-        "14 chaperones",
-        "12 chaperones"
+        "10 drills",
+        "14 drills",
+        "12 drills"
       ],
       "answer": 2,
       "why": "A ratio table finds the missing number by scaling both columns up by the same factor.",
       "steps": [
         {
-          "text": "Example: 3 chaperones for every 20 students, with 100 students. 100 ÷ 20 = 5 groups."
+          "text": "Example: 3 drills for every 20 minutes, with 100 minutes. 100 ÷ 20 = 5 blocks of time."
         },
         {
-          "text": "Each group needs 3 chaperones, so 5 × 3 = 15 chaperones."
+          "text": "Each block of time has 3 drills, so 5 × 3 = 15 drills."
         },
         {
-          "text": "Here: 90 ÷ 30 = 3 groups. Each group needs 4 chaperones, so 3 × 4 = 12."
+          "text": "Here: 90 ÷ 30 = 3 blocks of time. Each block has 4 drills, so 3 × 4 = 12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-applied-9",
-      "prompt": "The Thousand Sunny sails 45 km at a steady 18 km/h. How long does the trip take?",
+      "prompt": "The school bus route is 45 km long.\nThe bus averages 18 km/h. How long is the ride?",
       "options": [
         "2 h 15 min",
         "2 h 30 min",
@@ -805,14 +805,14 @@ export const pack: SePack = {
           "text": "Now try 0.5 hours. Multiply by 60 to get minutes: 0.5 × 60 = 30 minutes."
         },
         {
-          "text": "Here: 45 ÷ 18 = 2.5 hours. 0.5 h × 60 = 30 min, so the trip is 2 h 30 min."
+          "text": "Here: 45 ÷ 18 = 2.5 hours. 0.5 h × 60 = 30 min, so the ride is 2 h 30 min."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-deeper-3",
-      "prompt": "Isagi makes 6 goals for every 2 assists. Which ratio shows goals to assists?",
+      "prompt": "Ray gets 6 eliminations for every 2 deaths in a match.\nWhich ratio shows eliminations to deaths?",
       "options": [
         "2 : 6",
         "6 : 2",
@@ -822,10 +822,10 @@ export const pack: SePack = {
       "why": "In a ratio the numbers keep the order of the words, so the first number is the first thing named.",
       "steps": [
         {
-          "text": "The sentence names goals first, so goals go first in the ratio."
+          "text": "The sentence names eliminations first, so eliminations go first in the ratio."
         },
         {
-          "text": "Try another: 4 wins for every 1 loss is 4 : 1, not 1 : 4."
+          "text": "Try another: 9 eliminations for every 3 deaths is 9 : 3, not 3 : 9."
         },
         {
           "text": "Check: does your first number match the first word in the sentence?"
@@ -835,7 +835,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-deeper-5",
-      "prompt": "A recipe uses 2 cups flour to 3 cups water. You double it. Which is right?",
+      "prompt": "Your Minecraft wall uses 2 oak planks to 3 cobblestone.\nYou double the batch. Which mix is right?",
       "options": [
         "4 : 6",
         "4 : 5",
@@ -845,10 +845,10 @@ export const pack: SePack = {
       "why": "Multiplying both parts by the same number keeps the ratio the same, while adding changes it.",
       "steps": [
         {
-          "text": "Triple the ratio 1 : 4 by multiplying both: 3 : 12."
+          "text": "Example: a 1 : 4 chest mix, tripled, is 3 : 12 (multiply both parts by 3)."
         },
         {
-          "text": "Adding 2 to both sides of 1 : 4 gives 3 : 6, which is wrong."
+          "text": "Adding 2 to both parts of 1 : 4 gives 3 : 6, which changes the mix."
         },
         {
           "text": "Check: 3 : 12 and 1 : 4 both simplify to 1 : 4, so they match."
@@ -858,30 +858,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-ratio-deeper-7",
-      "prompt": "Two pizza deals: 2 pizzas for $18, or 3 pizzas for $24. Which is cheaper per pizza?",
+      "prompt": "Box A: 10 Timbits for $5. Box B: 20 Timbits for $8. Which is cheaper per Timbit?",
       "options": [
-        "The $18 deal is better.",
-        "The $24 deal is better.",
-        "The two deals are equal."
+        "Box A is cheaper per Timbit.",
+        "Box B is cheaper per Timbit.",
+        "They cost the same per Timbit."
       ],
       "answer": 1,
       "why": "Price per unit is the total divided by the count, so the lower one is cheaper per item.",
       "steps": [
         {
-          "text": "Divide the total by the count: 4 for $10 is $2.50 each."
+          "text": "Divide the total by the count: 4 for $2 is $0.50 each."
         },
         {
-          "text": "Do the other deal: 5 for $13 is $2.60 each."
+          "text": "Do the other box: 5 for $2.25 is $0.45 each."
         },
         {
-          "text": "The lower price per item wins, so the 4-for-$10 deal is cheaper."
+          "text": "The lower price per item wins, so the cheaper box is the better buy."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-deeper-9",
-      "prompt": "A shelf is 3 m long. A book is 60 cm wide. What is the ratio shelf : book?",
+      "prompt": "Your Roblox wall part is 3 m long. A door panel is 60 cm wide. What is the ratio wall : door?",
       "options": [
         "3 : 60",
         "5 : 1",
@@ -897,14 +897,14 @@ export const pack: SePack = {
           "text": "Write 300 : 60, then divide both parts by 60 to get 5 : 1."
         },
         {
-          "text": "Check: the shelf goes first, so it is the bigger number."
+          "text": "Check: the wall goes first, so it is the bigger number."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-ratio-deeper-11",
-      "prompt": "Isagi's shot travels at 72 km/h. What is that speed in metres per second?",
+      "prompt": "A real free kick travels at 72 km/h. What is that speed in metres per second?",
       "options": [
         "1.2 m/s",
         "20 m/s",
@@ -927,30 +927,30 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-ratio-build-2",
-      "prompt": "Zoro's crew needs 4 bags of rice for 6 people. How many bags for 15 people?",
+      "prompt": "Your squad of 6 eats 4 large pizzas. How many pizzas for 15 people?",
       "answer": "10",
       "decoys": [
         "5",
         "8",
         "9"
       ],
-      "why": "In a proportion, every person needs the same amount, so the rice scales with the crew.",
+      "why": "In a ratio, every person gets the same share, so the pizzas scale with the people.",
       "steps": [
         {
-          "text": "Example: 2 bags feed 8 people. Find one person's share: 2 ÷ 8 = 0.25."
+          "text": "Example: 2 pizzas feed 8 people. One person's share: 2 ÷ 8 = 0.25."
         },
         {
-          "text": "For 16 people: 16 × 0.25 = 4 bags. Check: 2 bags goes with 8, so double is 16 people."
+          "text": "For 16 people: 16 × 0.25 = 4 pizzas. Check: 2 pizzas for 8, so double for 16."
         },
         {
-          "text": "Now find one person's share for Zoro: 4 ÷ 6. Then multiply by 15."
+          "text": "Now find one person's share for your squad: 4 ÷ 6. Then multiply by 15."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-3",
-      "prompt": "A ball rolls at 25 m/s for 4 seconds. How far does it go in metres?",
+      "prompt": "Your Roblox car drives at 25 m/s for 4 seconds. How far does it go in metres?",
       "answer": "100",
       "decoys": [
         "5",
@@ -960,43 +960,43 @@ export const pack: SePack = {
       "why": "Distance equals speed times time, and the units cancel to give metres.",
       "steps": [
         {
-          "text": "Example: a shot moves at 12 m/s for 6 seconds."
+          "text": "Example: a kart drives at 12 m/s for 6 seconds."
         },
         {
-          "text": "Multiply: 12 × 6 = 72, so the shot covers 72 m."
+          "text": "Multiply: 12 × 6 = 72, so the kart covers 72 m."
         },
         {
-          "text": "Now multiply Isagi's ball: 25 × 4. Keep the metres."
+          "text": "Now multiply your car: 25 × 4. Keep the metres."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-4",
-      "prompt": "Luffy buys fish at $4.50 per kg. He buys 3 kg. What is the total in dollars?",
+      "prompt": "Robux cost $4.50 per 100 Robux. You buy 300 Robux. What is the total in dollars?",
       "answer": "13.50",
       "decoys": [
         "7",
         "9",
         "2"
       ],
-      "why": "Total cost equals price per kilogram times the number of kilograms.",
+      "why": "Total cost equals the price per 100 Robux times the number of 100s.",
       "steps": [
         {
-          "text": "Example: 2 kg at $3.25 per kg. Multiply 3.25 × 2."
+          "text": "Example: 200 Robux at $3.25 per 100 Robux. Multiply 3.25 × 2."
         },
         {
-          "text": "3.25 × 2 = 6.50, so 2 kg costs $6.50."
+          "text": "3.25 × 2 = 6.50, so 200 Robux costs $6.50."
         },
         {
-          "text": "Now multiply 4.50 × 3 and keep both decimal places."
+          "text": "Now multiply 4.50 × 3 for 300 Robux and keep both decimal places."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-5",
-      "prompt": "Isagi and Bachira split $500 in the ratio 2 : 3. How many dollars does the bigger share get?",
+      "prompt": "Your squad splits 500 V-Bucks in the ratio 2 : 3. How many V-Bucks does the bigger share get?",
       "answer": "300",
       "decoys": [
         "1",
@@ -1006,43 +1006,43 @@ export const pack: SePack = {
       "why": "A shared amount splits into parts that match the ratio, so add the parts first.",
       "steps": [
         {
-          "text": "Example: $120 split 3 : 5. Add the parts: 3 + 5 = 8."
+          "text": "Example: 120 wood split 3 : 5. Add the parts: 3 + 5 = 8."
         },
         {
           "text": "Share one part: 120 ÷ 8 = 15. Then the bigger share is 5 × 15 = 75."
         },
         {
-          "text": "Now for 2 : 3 and $500: add the parts, share one part, then multiply the bigger number."
+          "text": "Now for 2 : 3 and 500 V-Bucks: add the parts, share one part, then multiply the bigger number."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-6",
-      "prompt": "On a map, 1 cm = 25 km. Two crews are 6 cm apart on the map. How many km apart are they?",
+      "prompt": "Your build plan is drawn with 1 cm = 25 blocks. Two towers are 6 cm apart on the plan. How many blocks apart are they?",
       "answer": "150",
       "decoys": [
         "4",
         "2",
         "8"
       ],
-      "why": "A map scale turns map distance into real distance by multiplying.",
+      "why": "A map scale turns the distance on the drawing into real distance by multiplying.",
       "steps": [
         {
-          "text": "Example: on the same map, 4 cm is how far? Multiply 4 × 20 if 1 cm = 20 km."
+          "text": "Example: on the same plan, 4 cm is how far? If 1 cm = 20 blocks, then 4 × 20 = 80."
         },
         {
-          "text": "4 × 20 = 80, so 4 cm on the map means 80 km."
+          "text": "4 × 20 = 80, so 4 cm on the plan means 80 blocks."
         },
         {
-          "text": "Now multiply 6 cm by 25 km per cm."
+          "text": "Now multiply 6 cm by 25 blocks per cm."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-ratio-build-7",
-      "prompt": "Isagi's team has 11 players. 4 of them are forwards. What fraction are forwards?",
+      "prompt": "Your EA FC squad has 11 players. 4 of them are forwards. What fraction are forwards?",
       "answer": "4/11",
       "decoys": [
         "7",
@@ -1052,13 +1052,13 @@ export const pack: SePack = {
       "why": "A part-to-whole fraction puts the part on top and the whole on the bottom.",
       "steps": [
         {
-          "text": "Example: 3 of 7 players wear blue. Put 3 on top and 7 on the bottom."
+          "text": "Example: 3 of 7 Pokémon in your team are Fire type. Put 3 on top and 7 on the bottom."
         },
         {
           "text": "That gives 3/7, which cannot be simplified because 3 and 7 share no factor."
         },
         {
-          "text": "Now put the forwards on top and the whole team on the bottom."
+          "text": "Now put the forwards on top and the whole squad on the bottom."
         }
       ],
       "art": {
@@ -1072,33 +1072,33 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-ratio-games-1",
-      "title": "Cheapest Per Kilo",
+      "title": "Cheapest V-Bucks",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "$4.50/kg",
-            "value": 4.5
+            "label": "$9.90 per 1,000",
+            "value": 9.9
           },
           {
-            "label": "$3.80/kg",
-            "value": 3.8
+            "label": "$8.75 per 1,000",
+            "value": 8.75
           },
           {
-            "label": "$5.25/kg",
-            "value": 5.25
+            "label": "$10.50 per 1,000",
+            "value": 10.5
           },
           {
-            "label": "$4.10/kg",
-            "value": 4.1
+            "label": "$9.10 per 1,000",
+            "value": 9.1
           },
           {
-            "label": "$3.95/kg",
-            "value": 3.95
+            "label": "$8.95 per 1,000",
+            "value": 8.95
           }
         ]
       },
-      "why": "Comparing unit prices shows which deal is cheapest for each kilogram you buy."
+      "why": "Comparing price per 1,000 V-Bucks shows which bundle gives the most V-Bucks for your money."
     },
     {
       "kind": "video",

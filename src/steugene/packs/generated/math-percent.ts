@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Picture 100 penalty kicks. If Isagi scores 25, that is 25%."
+        "text": "Your Battle Pass has 100 tiers. At tier 25 the bar is 25% full."
       },
       "art": {
         "art": "pie",
@@ -34,7 +34,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-basics-0",
-      "prompt": "Isagi's Blue Lock jersey costs $60. It is 10% off. What is the sale price?",
+      "prompt": "Your EA FC game costs $60. It is on sale for 10% off. What is the sale price?",
       "options": [
         "$54",
         "$50",
@@ -44,13 +44,13 @@ export const pack: SePack = {
       "why": "A 10% discount means you pay 90% of the price.",
       "steps": [
         {
-          "text": "Find 10% of the price. Move the decimal one place left: 10% of $40 is $4."
+          "text": "Find 10% of $60. Move the decimal one place left: $6.00."
         },
         {
-          "text": "Take it off: $40 − $4 = $36. That is the sale price."
+          "text": "Take it off: $60 − $6 = $54. That is the sale price."
         },
         {
-          "text": "Check with 90%: 90% of $40 is 0.90 × 40 = $36. Same answer."
+          "text": "Check with 90%: 0.90 × 60 = $54. Same answer."
         }
       ],
       "art": {
@@ -64,7 +64,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-basics-1",
-      "prompt": "Luffy buys a $40 hat in Toronto. HST is 13%. What does he pay in total?",
+      "prompt": "A $40 Robux gift card in Toronto. HST is 13%. What do you pay in total?",
       "options": [
         "$52.00",
         "$45.20",
@@ -74,13 +74,13 @@ export const pack: SePack = {
       "why": "HST is 13% of the price, and you add it on top.",
       "steps": [
         {
-          "text": "Find 13% of $20. Find 10% first: $2. Then 3% is $0.60."
+          "text": "Find 10% of $40: $4. Find 3% of $40: $1.20."
         },
         {
-          "text": "Add them: $2 + $0.60 = $2.60. That is the HST on a $20 item."
+          "text": "Add them: $4 + $1.20 = $5.20. That is the HST."
         },
         {
-          "text": "Add HST to the price: $20 + $2.60 = $22.60. Work the same way for $40."
+          "text": "Same method on $20: 10% is $2, 3% is $0.60, HST is $2.60. Total $22.60."
         }
       ]
     },
@@ -149,13 +149,13 @@ export const pack: SePack = {
       "why": "A tip is worked out as a percent of the bill.",
       "steps": [
         {
-          "text": "Find 10% of $50 by moving the decimal left: $5.00."
+          "text": "Find 10% of $30 by moving the decimal left: $3.00."
         },
         {
-          "text": "Find 1% of $50 by dividing by 100: $0.50. Then 8% is 8 × $0.50 = $4."
+          "text": "5% is half of that: $1.50. Add them: $3.00 + $1.50 = $4.50 for 15%."
         },
         {
-          "text": "Add: $5 + $4 = $9. So 18% of $50 is $9. Use the same steps for 15% of $30."
+          "text": "Try 15% of $50: 10% is $5.00 and 5% is $2.50, so the tip is $7.50."
         }
       ]
     },
@@ -170,13 +170,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi is buying new boots for his team. He needs the real total at the till."
+        "text": "Your Minecraft server costs $20. The till adds 13% tax before you pay."
       }
     },
     {
       "kind": "build",
       "id": "math-percent-build-0",
-      "prompt": "Isagi wants a $80 pair of boots. The shop has 25% off. What is the sale price?",
+      "prompt": "A $80 Minecraft Marketplace bundle is on sale for 25% off. What is the sale price?",
       "answer": "60",
       "decoys": [
         "2",
@@ -186,31 +186,31 @@ export const pack: SePack = {
       "why": "To take off a percent, find that percent of the price, then subtract it.",
       "steps": [
         {
-          "text": "Find 10% of $120. That is $12."
+          "text": "Find 10% of $80. That is $8."
         },
         {
-          "text": "Find 5% of $120. Half of $12 is $6."
+          "text": "Find 5% of $80. Half of $8 is $4."
         },
         {
-          "text": "15% off means take $12 + $6 = $18 off. $120 − $18 = $102."
+          "text": "25% is 10 + 10 + 5: $8 + $8 + $4 = $20 off. $80 − $20 = $60."
         }
       ],
       "art": {
         "art": "bar",
         "parts": 4,
         "filled": 3,
-        "label": "25% off",
+        "label": "75% to pay",
         "tone": "focus"
       }
     },
     {
       "kind": "choice",
       "id": "math-percent-basics-4",
-      "prompt": "A Straw Hat jacket is 10% off. The sale price is $36. What was the original price?",
+      "prompt": "A Straw Hat skin is 10% off in the item shop. It costs 720 V-Bucks now. What was the original price?",
       "options": [
-        "$56",
-        "$32",
-        "$40"
+        "792 V-Bucks",
+        "640 V-Bucks",
+        "800 V-Bucks"
       ],
       "answer": 2,
       "why": "The sale price is a percent of the original, so you divide to go back.",
@@ -219,17 +219,17 @@ export const pack: SePack = {
           "text": "The sale price is 90% of the original, because 100% − 10% = 90%."
         },
         {
-          "text": "Divide the sale price by 0.90. Example: $36 ÷ 0.90 = $40."
+          "text": "Divide the sale price by 0.90. Example: 450 ÷ 0.90 = 500."
         },
         {
-          "text": "Check it: 90% of $40 is $36. It works, so the original was $40."
+          "text": "Check it: 90% of 800 is 720. It works, so the original was 800 V-Bucks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-basics-5",
-      "prompt": "A Blue Lock card pack goes from $50 to $60. What is the percent increase?",
+      "prompt": "Your game pass goes from 400 Robux to 480 Robux. What is the percent increase?",
       "options": [
         "5%",
         "20%",
@@ -239,29 +239,29 @@ export const pack: SePack = {
       "why": "Percent change is the change divided by the starting amount, then times 100.",
       "steps": [
         {
-          "text": "Find the change: $40 to $50 is $10 more."
+          "text": "Find the change: 200 to 250 is 50 more."
         },
         {
-          "text": "Divide the change by the starting amount: 10 ÷ 40 = 0.25."
+          "text": "Divide the change by the starting amount: 50 ÷ 200 = 0.25."
         },
         {
-          "text": "Times 100 to get a percent: 0.25 × 100 = 25%. Do the same with $50 to $60."
+          "text": "Times 100 to get a percent: 0.25 × 100 = 25%. Do the same with 300 to 360."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-percent-games-0",
-      "title": "Crew Shopping Trip",
+      "title": "Toronto Shop Run",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "Cap, 50% off",
+            "label": "Toque, 50% off",
             "value": 11.3
           },
           {
-            "label": "Hat, 10% off",
+            "label": "Toque, 10% off",
             "value": 40.68
           },
           {
@@ -285,9 +285,9 @@ export const pack: SePack = {
       "id": "math-percent-teach-2",
       "title": "Finding a percent of a number",
       "lines": [
-        "Change the percent to a decimal first. 25% becomes 0.25.",
-        "Then multiply. 0.25 × 80 = 20.",
-        "10% of $80 is $8. Half of that is $4."
+        "Change the percent to a decimal first. 70% becomes 0.70.",
+        "Then multiply: 0.70 × 950 = 665 V-Bucks.",
+        "10% of 950 is 95. Double it: 190 is 20%."
       ],
       "callout": {
         "flavour": "key",
@@ -320,7 +320,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-basics-7",
-      "prompt": "A ball costs $30. Which deal saves you more money: 20% off, or $7 off?",
+      "prompt": "A football costs $30. Which deal saves you more money: 20% off, or $7 off?",
       "options": [
         "$7 off saves more",
         "Both save the same",
@@ -343,7 +343,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-1",
-      "prompt": "A snack costs $60 before tax. Ontario HST is 13%. What is the total with tax?",
+      "prompt": "A $60 Robux gift card. Ontario HST is 13%. What do you pay in total?",
       "answer": "67.80",
       "decoys": [
         "3"
@@ -351,13 +351,13 @@ export const pack: SePack = {
       "why": "HST is charged on the price, so tax is 13% of the price, then you add it on.",
       "steps": [
         {
-          "text": "Find 10% of $40. That is $4.00."
+          "text": "Practice: 10% of a $40 Robux card is $4.00."
         },
         {
-          "text": "Find 3% of $40. 1% is $0.40, so 3% is $1.20."
+          "text": "1% of $40 is $0.40, so 3% is $1.20."
         },
         {
-          "text": "Tax is $4.00 + $1.20 = $5.20. Total is $40 + $5.20 = $45.20."
+          "text": "Tax is $4.00 + $1.20 = $5.20. Total is $45.20."
         }
       ]
     }
@@ -368,7 +368,7 @@ export const pack: SePack = {
       "id": "math-percent-teach-3",
       "title": "The trap: percents do not simply add",
       "lines": [
-        "Take the sale off first. Tax goes on the sale price.",
+        "Take the Fortnite sale off first. Tax goes on the sale price.",
         "Do not add 25% and 13% to get 38%.",
         "Each percent works on a different amount."
       ],
@@ -380,15 +380,15 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-percent-teach-4",
-      "title": "Worked example: the $80 shirt",
+      "title": "Worked example: the $80 plush",
       "lines": [
         "Step 1: 25% of $80 is $20. Sale price: $60.",
         "Step 2: 13% of $60 is $7.80. That is the tax.",
         "Step 3: $60 + $7.80 = $67.80. That is the total."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's crew has $80 in berries. Sale first, then tax, then pay."
+        "flavour": "key",
+        "text": "Ash's Pokémon Center bill: sale first, then tax, then pay."
       },
       "art": {
         "art": "bars",
@@ -422,7 +422,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Zoro always checks a bounty twice before he trusts it."
+        "text": "70% pass accuracy means 7 of every 10 passes land on a teammate."
       }
     },
     {
@@ -430,13 +430,13 @@ export const pack: SePack = {
       "id": "math-percent-deeper-0",
       "title": "Two discounts do not add up",
       "lines": [
-        "20% off, then 20% off again is NOT 40% off.",
+        "20% off a Minecraft skin pack, then 20% off again is NOT 40% off.",
         "The second 20% comes off the smaller price.",
         "So multiply: ×0.8 then ×0.8 = ×0.64, which is 36% off."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Like Isagi's shot hitting the post twice. The second hit comes from what is left."
+        "text": "Like a chest you empty twice: the second 20% only sees what is left."
       }
     },
     {
@@ -444,8 +444,8 @@ export const pack: SePack = {
       "id": "math-percent-deeper-1",
       "title": "Up 20%, then down 20%: you do not get back",
       "lines": [
-        "$100 up 20% is $120.",
-        "$120 down 20% is $96, not $100.",
+        "A striker has 100 ranking points. Up 20% is 120.",
+        "120 down 20% is 96, not 100.",
         "The 20% down is taken from a bigger number, so it bites more."
       ],
       "callout": {
@@ -459,12 +459,12 @@ export const pack: SePack = {
       "title": "HST is added on top",
       "lines": [
         "HST is 13% of the price before tax.",
-        "$80 × 0.13 = $10.40, so the total is $90.40.",
+        "An $80 Roblox gift card gets $10.40 HST, so you pay $90.40.",
         "Quick way: multiply the price by 1.13."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Tax is a bounty the government collects on top of every sale."
+        "text": "HST is a toll the government adds on top of every Robux card."
       }
     },
     {
@@ -472,8 +472,8 @@ export const pack: SePack = {
       "id": "math-percent-deeper-3",
       "title": "Percentage points are not percents",
       "lines": [
-        "A rate going from 12% to 15% rose by 3 percentage points.",
-        "That is a rise of 3 out of 100 on the scale.",
+        "Your conversion rate went from 12% to 15%.",
+        "That rate rose by 3 percentage points, not 3 percent.",
         "As a percent of the old rate, it is a 25% increase."
       ],
       "callout": {
@@ -488,7 +488,7 @@ export const pack: SePack = {
       "lines": [
         "A sale price is 75% of the original after 25% off.",
         "To go back, divide by 0.75. Do not multiply by 1.25.",
-        "$60 ÷ 0.75 = $80. Multiplying gives $75, which is wrong."
+        "600 ÷ 0.75 = 800. Multiplying gives 750, which is wrong."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -501,8 +501,8 @@ export const pack: SePack = {
       "title": "Tips are usually worked out before tax",
       "lines": [
         "Tip is usually a percent of the bill before HST.",
-        "15% of $50 is $7.50.",
-        "15% of $56.50 with tax is $8.48, a bit more."
+        "15% of a $50 shawarma bill is $7.50.",
+        "15% of $56.50 with HST is $8.48, a bit more."
       ],
       "callout": {
         "flavour": "key",
@@ -512,7 +512,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-basics-8",
-      "prompt": "Isagi scored 6 goals from 20 shots. What percent of his shots were goals?",
+      "prompt": "Isagi took 20 shots and scored 6 goals. What percent were goals?",
       "options": [
         "12%",
         "30%",
@@ -542,43 +542,43 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-basics-9",
-      "prompt": "Zoro's crew sells flags for $20. One flag is 15% off. How much does the customer save?",
+      "prompt": "A 20-emerald enchanted book is 15% off. How many emeralds does a player save?",
       "options": [
-        "$3.00",
-        "$17.00",
-        "$5.00"
+        "3 emeralds",
+        "17 emeralds",
+        "5 emeralds"
       ],
       "answer": 0,
       "why": "The saving is the discount, which is a percent of the price.",
       "steps": [
         {
-          "text": "Find 10% of $30: $3. Then 5% is half of that, $1.50."
+          "text": "Find 10% of 40 emeralds: 4 emeralds. Then 5% is half, 2 emeralds."
         },
         {
-          "text": "Add them: $3 + $1.50 = $4.50. That is 15% of $30, the saving."
+          "text": "Add them: 4 + 2 = 6 emeralds. That is 15% of 40, the saving."
         },
         {
-          "text": "Check: the sale price would be $30 − $4.50 = $25.50. Use the same steps on $20."
+          "text": "Check: 40 − 6 = 34 left. Use the same steps on 20 emeralds."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-0",
-      "prompt": "Blue Lock team shop: a jersey costs $80. It is 25% off. Then add 13% HST. What do you pay?",
+      "prompt": "A $80 Roblox gift card is 25% off. Then add 13% HST. What do you pay?",
       "options": [
         "$68.40",
-        "$69.20",
-        "$67.80"
+        "$67.80",
+        "$69.20"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "HST is charged on the price after the discount, so the discount comes first.",
       "steps": [
         {
-          "text": "Discount first: keep 80% of the price. 0.80 × $120 = $96."
+          "text": "Discount first: keep 75% of $100. 0.75 × $100 = $75."
         },
         {
-          "text": "Add HST to the sale price: 1.13 × $96 = $108.48."
+          "text": "Add HST to the sale price: 1.13 × $75 = $84.75."
         },
         {
           "text": "Tax goes on the lower price, so the discount always comes first."
@@ -588,76 +588,76 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-applied-1",
-      "prompt": "Two boot stores. Boots cost $200. Store A: 40% off, then 10% more off. Store B: 45% off. Which pays less?",
+      "prompt": "Two football shops. Boots cost $200. Store A: 40% off, then 10% more off. Store B: 45% off. Which pays less?",
       "options": [
-        "Store B: $110",
         "Store A: $108",
+        "Store B: $110",
         "Both pay: $109"
       ],
-      "answer": 1,
+      "answer": 0,
       "why": "Each discount is taken off the price left after the one before.",
       "steps": [
         {
-          "text": "Store X: 10% off, then 10% off. $50 × 0.9 = $45, then $45 × 0.9 = $40.50."
+          "text": "Store A, $100: 40% off leaves $60. Then 10% off: $60 × 0.9 = $54."
         },
         {
-          "text": "Store Y: 20% off once. $50 × 0.8 = $40."
+          "text": "Store B, $100: 45% off. $100 × 0.55 = $55."
         },
         {
-          "text": "Compare the final prices. $40 is cheaper, so do not add the percents."
+          "text": "Compare: $54 is less than $55, so Store A is cheaper."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-2",
-      "prompt": "A goalkeeper's gloves cost $67.80 with 13% HST. What was the price before tax?",
+      "prompt": "Your family's Toronto food order totals $90.40 with 13% HST. What was the price before tax?",
       "options": [
-        "$54.80",
-        "$60.00",
-        "$58.99"
+        "$70.40",
+        "$80.00",
+        "$82.30"
       ],
       "answer": 1,
       "why": "HST adds 13% on top, so the total is 113% of the price before tax.",
       "steps": [
         {
-          "text": "The total is 113% of the price, so the price × 1.13 = $90.40."
+          "text": "The total is 113% of the price: $113 = 1.13 × price."
         },
         {
-          "text": "Divide to undo the tax: $90.40 ÷ 1.13 = $80."
+          "text": "Divide to undo the tax: $113 ÷ 1.13 = $100."
         },
         {
-          "text": "Check it: $80 × 1.13 = $90.40, so the answer is right."
+          "text": "Check it: $100 × 1.13 = $113, so the answer is right."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-3",
-      "prompt": "Isagi's striker scored 12 goals last season and 15 this season. By what percent did his goals rise?",
+      "prompt": "Your Fortnite kills went from 12 to 15 this week. By what percent did they rise?",
       "options": [
-        "25%",
         "20%",
+        "25%",
         "3%"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Percent change is the change divided by the starting amount, not the new amount.",
       "steps": [
         {
-          "text": "Find the change: 46 − 40 = 6 points."
+          "text": "Find the change: 14 − 10 = 4 kills."
         },
         {
-          "text": "Divide by the starting amount: 6 ÷ 40 = 0.15."
+          "text": "Divide by the starting amount: 4 ÷ 10 = 0.4."
         },
         {
-          "text": "Change to a percent: 0.15 × 100 = 15%."
+          "text": "Change to a percent: 0.4 × 100 = 40%."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-4",
-      "prompt": "A football costs $50 in a Blue Lock store. It is 20% off, then 20% more off the new price. What is the total discount?",
+      "prompt": "A $50 Pokémon booster box is 20% off. Then 20% off the new price. What is the total discount?",
       "options": [
         "34%",
         "40%",
@@ -667,13 +667,13 @@ export const pack: SePack = {
       "why": "The second discount works on the lower price, so the total is less than adding the two percents.",
       "steps": [
         {
-          "text": "First 10% off $100: $100 × 0.9 = $90."
+          "text": "First 10% off $200: $200 × 0.9 = $180."
         },
         {
-          "text": "Second 10% off the new price: $90 × 0.9 = $81."
+          "text": "Second 10% off the new price: $180 × 0.9 = $162."
         },
         {
-          "text": "Total off is $100 − $81 = $19, so 19%, not 20%."
+          "text": "Total off is $200 − $162 = $38, so 19%, not 20%."
         }
       ]
     },
@@ -690,89 +690,89 @@ export const pack: SePack = {
       "why": "Find the part kept first, then share it: percent first, then division.",
       "steps": [
         {
-          "text": "Captain: 20% of $1,000 = $200."
+          "text": "Captain takes 25% of $400 = $100."
         },
         {
-          "text": "Left over: $1,000 − $200 = $800."
+          "text": "Left over: $400 − $100 = $300."
         },
         {
-          "text": "Split it: $800 ÷ 5 = $160 each."
+          "text": "Split among 3 crewmates: $300 ÷ 3 = $100 each."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-7",
-      "prompt": "Sea water is about 3.5% salt. How many grams of salt are in 2 kg of sea water?",
+      "prompt": "Your brine is 3.5% salt. How many grams of salt are in 2 kg of brine?",
       "options": [
         "35 g",
         "70 g",
-        "7 g"
+        "700 g"
       ],
       "answer": 1,
-      "why": "Sea water is about 3.5% salt by mass, which is why it tastes so salty.",
+      "why": "3.5% means 3.5 grams of salt in every 100 grams, so it is 0.035 of the mass.",
       "steps": [
         {
-          "text": "Change units: 5 kg = 5000 g."
+          "text": "Change units: 3 kg = 3000 g."
         },
         {
           "text": "Change the percent: 2% = 0.02."
         },
         {
-          "text": "Multiply: 5000 × 0.02 = 100 g."
+          "text": "Multiply: 3000 × 0.02 = 60 g."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-8",
-      "prompt": "Usopp raises the price of a sea map by 15%. The new price is $69.00. What was the price before?",
+      "prompt": "A Fortnite skin rises 15% in the shop. It now costs 1,380 V-Bucks. What was the price before?",
       "options": [
-        "$58.65",
-        "$54.00",
-        "$60.00"
+        "1,173 V-Bucks",
+        "1,380 V-Bucks",
+        "1,200 V-Bucks"
       ],
       "answer": 2,
-      "why": "Prices go up by a percent of the old price, so divide by 1.15 to undo it.",
+      "why": "A 15% rise adds 15% of the old price, so the new price is 1.15 times the old.",
       "steps": [
         {
           "text": "The new price is 115% of the old, so old × 1.15 = new."
         },
         {
-          "text": "Divide to undo the rise: $92 ÷ 1.15 = $80."
+          "text": "Divide to undo the rise: 1,035 ÷ 1.15 = 900 V-Bucks."
         },
         {
-          "text": "Check it: $80 × 1.15 = $92, so the answer is right."
+          "text": "Check it: 900 × 1.15 = 1,035, so the answer is right."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-applied-9",
-      "prompt": "A Blue Lock jersey costs $200. The shop raises it 10%, then cuts it 10%. What is the new price?",
+      "prompt": "A Roblox game pass costs 200 Robux. The price goes up 10%, then down 10%. What is it now?",
       "options": [
-        "$200.00",
-        "$198.00",
-        "$202.00"
+        "200 Robux",
+        "198 Robux",
+        "202 Robux"
       ],
       "answer": 1,
       "why": "A percent change is taken from the price it starts at, so up then down is not back to start.",
       "steps": [
         {
-          "text": "A $50 ball goes up 20%: $50 × 1.2 = $60."
+          "text": "A 500 Robux item goes up 20%: 500 × 1.2 = 600 Robux."
         },
         {
-          "text": "Then it goes down 20%: $60 × 0.8 = $48."
+          "text": "Then it goes down 20%: 600 × 0.8 = 480 Robux."
         },
         {
-          "text": "$48 is below $50, because the cut comes off a bigger price."
+          "text": "480 is below 500, because the drop comes off a bigger price."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-deeper-6",
-      "prompt": "A $80 shirt is 25% off. Then 13% HST is added. What is the final price?",
+      "prompt": "A $80 pizza party order is 25% off. Then 13% HST is added. What is the final price?",
       "options": [
         "$49.60",
         "$67.80",
@@ -802,20 +802,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-deeper-7",
-      "prompt": "A $100 jersey is 20% off, then 20% off again. What is the final price?",
+      "prompt": "A 2,000 V-Bucks skin is 20% off, then 20% off again. What is the final price?",
       "options": [
-        "$60.00",
-        "$64.00",
-        "$56.00"
+        "1,200 V-Bucks",
+        "1,280 V-Bucks",
+        "1,120 V-Bucks"
       ],
       "answer": 1,
-      "why": "The second 20% is taken from $80, so the price is $100 × 0.8 × 0.8 = $64.",
+      "why": "The second 20% comes off the already-cut price, so 2,000 × 0.8 × 0.8 = 1,280.",
       "steps": [
         {
-          "text": "Take 10% off $250: $250 × 0.9 = $225."
+          "text": "Take 10% off 2,500 V-Bucks: 2,500 × 0.9 = 2,250."
         },
         {
-          "text": "Take 10% off $225 again: $225 × 0.9 = $202.50."
+          "text": "Take 10% off 2,250 again: 2,250 × 0.9 = 2,025."
         },
         {
           "text": "Two 10% cuts are not 20% off. The second cut comes from the smaller price."
@@ -825,30 +825,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-deeper-8",
-      "prompt": "A stock goes up 20%, then down 20%. Compared to the start, what is it now?",
+      "prompt": "A Minecraft villager trade costs 500 emeralds. The price goes up 20%, then down 20%. What is it now?",
       "options": [
-        "$104",
-        "$96",
-        "$100"
+        "600 emeralds",
+        "480 emeralds",
+        "500 emeralds"
       ],
       "answer": 1,
-      "why": "After up 20% and down 20%, $100 becomes $120 then $96, so it is worth less.",
+      "why": "The down cut is 20% of the higher price, so it takes back more than the rise added.",
       "steps": [
         {
-          "text": "Start with $50. Up 10% gives $55."
+          "text": "Start with 200 emeralds. Up 20% gives 240."
         },
         {
-          "text": "Now down 10% of $55: $55 × 0.9 = $49.50."
+          "text": "Down 20%: 240 × 0.8 = 192 emeralds."
         },
         {
-          "text": "$49.50 is less than $50, so it does not get back to the start."
+          "text": "192 is less than 200, so it does not get back to the start."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-deeper-9",
-      "prompt": "A team's shot rate goes from 12% to 15%. How much did it rise in percentage points?",
+      "prompt": "Your striker's shot rate goes from 12% to 15%. How much did it rise in percentage points?",
       "options": [
         "3 percentage points",
         "27 percentage points",
@@ -893,30 +893,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-percent-deeper-10",
-      "prompt": "A sale price is $60 after 25% off. What was the original price?",
+      "prompt": "A skin is 600 V-Bucks after 25% off. What was the original price?",
       "options": [
-        "$75.00",
-        "$80.00",
-        "$45.00"
+        "750 V-Bucks",
+        "800 V-Bucks",
+        "450 V-Bucks"
       ],
       "answer": 1,
-      "why": "The sale price is 75% of the original, so divide $60 by 0.75 to get $80.",
+      "why": "The sale price is 75% of the original, so divide 600 by 0.75 to get 800.",
       "steps": [
         {
-          "text": "A $45 sale after 10% off: the sale is 90% of the original."
+          "text": "A skin is 450 V-Bucks after 10% off: the sale is 90% of the original."
         },
         {
-          "text": "Divide by 0.9: $45 ÷ 0.9 = $50."
+          "text": "Divide by 0.9: 450 ÷ 0.9 = 500."
         },
         {
-          "text": "Multiplying by 1.1 gives $49.50, which is not the original. Divide instead."
+          "text": "Multiplying by 1.1 gives 495, not 500. Divide instead."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-percent-deeper-11",
-      "prompt": "A $90 meal has 13% HST added. What is the total?",
+      "prompt": "A $90 Roblox gift card has 13% HST added. What is the total?",
       "options": [
         "$45.20",
         "$53.00",
@@ -929,7 +929,7 @@ export const pack: SePack = {
           "text": "Find 13% of $60: $60 × 0.13 = $7.80."
         },
         {
-          "text": "Add it to the meal: $60 + $7.80 = $67.80."
+          "text": "Add it to the card: $60 + $7.80 = $67.80."
         },
         {
           "text": "Adding 13 dollars to $60 is wrong. The 13% is a fraction of the price."
@@ -939,7 +939,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-2",
-      "prompt": "A team dinner costs $45. You leave a 15% tip. What is the tip in dollars?",
+      "prompt": "A shawarma order costs $45. You leave a 15% tip. What is the tip in dollars?",
       "answer": "6.75",
       "decoys": [
         "0"
@@ -960,7 +960,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-3",
-      "prompt": "A $150 jacket is 20% off. What is the new price in dollars?",
+      "prompt": "A $150 One Piece box set is 20% off. What is the new price in dollars?",
       "answer": "120",
       "decoys": [
         "3"
@@ -981,7 +981,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-4",
-      "prompt": "Isagi took 8 shots. 6 were on target. What percent were on target?",
+      "prompt": "Your furnace finished 6 of 8 items. What percent were finished?",
       "answer": "75",
       "decoys": [
         "6",
@@ -990,10 +990,10 @@ export const pack: SePack = {
       "why": "A percent is out of 100, so divide the part by the whole, then times by 100.",
       "steps": [
         {
-          "text": "Try 5 shots, 4 on target. 4 ÷ 5 = 0.8."
+          "text": "Try 5 items, 4 done. 4 ÷ 5 = 0.8."
         },
         {
-          "text": "0.8 × 100 = 80. So 80% were on target."
+          "text": "0.8 × 100 = 80. So 80% were done."
         },
         {
           "text": "For 6 of 8: 6 ÷ 8 = 0.75, and 0.75 × 100 = 75%."
@@ -1010,7 +1010,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-5",
-      "prompt": "After 40% off, a jersey costs $42. What was the price before the sale?",
+      "prompt": "A Roblox shirt is 40% off and now costs 42 Robux. What was the price before the sale?",
       "answer": "70",
       "decoys": [
         "5",
@@ -1019,20 +1019,20 @@ export const pack: SePack = {
       "why": "If 40% is off, you paid 60% of the price, so work back from the 60%.",
       "steps": [
         {
-          "text": "You paid 60%, which is $42. So 10% is $7."
+          "text": "Your 60% is 42 Robux. So 10% is 7 Robux."
         },
         {
-          "text": "100% is 10 lots of $7, which is $70."
+          "text": "100% is ten lots of 7, which is 70 Robux."
         },
         {
-          "text": "Check: 40% of $70 is $28. $70 − $28 = $42. It works."
+          "text": "Check: 40% of 70 is 28. 70 − 28 = 42. It works."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-percent-build-6",
-      "prompt": "A pirate's bounty went from 80 million to 100 million berries. What was the percent increase?",
+      "prompt": "Luffy's bounty rose from 80 million to 100 million Berries. What was the percent increase?",
       "answer": "25",
       "decoys": [
         "0"
@@ -1040,7 +1040,7 @@ export const pack: SePack = {
       "why": "Percent change is the change divided by the starting amount, then times 100.",
       "steps": [
         {
-          "text": "Try 60 to 90 million. The change is 30 million."
+          "text": "Try 60 to 90 million Berries. The change is 30 million."
         },
         {
           "text": "30 ÷ 60 = 0.5. Then 0.5 × 100 = 50%."
@@ -1053,7 +1053,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-percent-build-7",
-      "prompt": "A team dinner bill is $50. The tip is $7.50. What percent tip was that?",
+      "prompt": "Your table's bill at the poutine place is $50. The tip is $7.50. What percent tip was that?",
       "answer": "15",
       "decoys": [
         "7",
@@ -1075,25 +1075,25 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-percent-games-1",
-      "title": "Bounty Board Words",
+      "title": "Item Shop Words",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "HST",
-            "13% tax in Ontario"
+            "13% tax on Ontario purchases"
           ],
           [
             "Discount",
-            "Amount taken off"
+            "Amount taken off the price"
           ],
           [
             "Tip",
-            "Extra for the server"
+            "Extra paid for good service"
           ],
           [
             "Sale price",
-            "Price after discount"
+            "Price after the discount"
           ],
           [
             "Total",

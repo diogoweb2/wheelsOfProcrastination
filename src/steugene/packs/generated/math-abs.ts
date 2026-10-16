@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi kicks from the centre spot. A ball 20 m left or 20 m right is still 20 m away."
+        "text": "Spawn is X = 0. A chest at X = −5 and one at X = 5 are both 5 blocks away."
       },
       "art": {
         "art": "numberline",
@@ -49,23 +49,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-0",
-      "prompt": "Bachira stands at −6 on the number line. Zero is the centre spot. How far is he from zero?",
+      "prompt": "Bachira stands at −6 m. The centre spot is 0. How far is he from the spot?",
       "options": [
-        "−6",
-        "12",
-        "6"
+        "−6 m",
+        "12 m",
+        "6 m"
       ],
       "answer": 2,
       "why": "Absolute value is the distance from zero, so it is never negative.",
       "steps": [
         {
-          "text": "Find the side: −9 is on the left of zero."
+          "text": "Find the side: a striker at −9 m is left of the centre spot."
         },
         {
-          "text": "Count the steps from −9 to zero. There are 9."
+          "text": "Count the metres from −9 back to the spot. There are 9."
         },
         {
-          "text": "Drop the minus sign. The distance is 9, not −9."
+          "text": "Drop the minus sign. The distance is 9 m, not −9 m."
         }
       ],
       "art": {
@@ -89,7 +89,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-1",
-      "prompt": "What is the opposite of −12?",
+      "prompt": "In Roblox Studio, a part sits at X = −12. Its mirror spot is at what X?",
       "options": [
         "−12",
         "12",
@@ -99,13 +99,13 @@ export const pack: SePack = {
       "why": "The opposite of a number is the same distance from zero, on the other side.",
       "steps": [
         {
-          "text": "Check the sign. Here it is negative, so the opposite is positive."
+          "text": "Check the sign. −12 is negative, so its opposite is positive."
         },
         {
-          "text": "Flip the sign. The opposite of −8 is 8, and the opposite of 5 is −5."
+          "text": "Flip the sign. A part at X = −8 mirrors to 8. A part at 5 mirrors to −5."
         },
         {
-          "text": "Both numbers sit the same distance from zero, on opposite sides."
+          "text": "Both parts sit the same distance from X = 0, on opposite sides."
         }
       ]
     },
@@ -186,20 +186,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-2",
-      "prompt": "Which number has the greater absolute value?",
+      "prompt": "The storm centre is at 0. Which spot is farthest from the centre?",
       "options": [
-        "−14",
-        "11",
-        "0"
+        "−14 m",
+        "11 m",
+        "0 m"
       ],
       "answer": 0,
       "why": "Absolute value measures distance from zero, so compare the distances, not the signs.",
       "steps": [
         {
-          "text": "Turn each number into its absolute value first."
+          "text": "Turn each spot into its distance from the storm centre."
         },
         {
-          "text": "Example: |−2| is 2 and |6| is 6, so 6 is greater."
+          "text": "Example: −2 m is 2 m away and 6 m is 6 m away. So 6 m is farther."
         },
         {
           "text": "Compare the distances. Here 14 beats 11, so the minus sign does not matter."
@@ -209,7 +209,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-3",
-      "prompt": "Isagi makes two passes: one goes −7 m, one goes 3 m. What is |−7| + |3|?",
+      "prompt": "You dig down 7 blocks (−7), then climb 3 blocks (3). What is |−7| + |3|?",
       "options": [
         "4",
         "10",
@@ -219,13 +219,13 @@ export const pack: SePack = {
       "why": "Absolute value turns each distance positive first, and only then do you add.",
       "steps": [
         {
-          "text": "Work out each absolute value on its own. Example: |−2| is 2 and |5| is 5."
+          "text": "Find each distance alone. Dig 2 down, climb 5: |−2| is 2, |5| is 5."
         },
         {
-          "text": "Add the two distances. Example: 2 + 5 is 7."
+          "text": "Add the two distances. 2 + 5 is 7 blocks moved."
         },
         {
-          "text": "Never add the signs first. Here the answer is positive, so do the same with −7 and 3."
+          "text": "Never add the signs first. Now do the same with −7 and 3."
         }
       ]
     },
@@ -234,9 +234,9 @@ export const pack: SePack = {
       "id": "math-abs-teach-1",
       "title": "Why size matters more than side",
       "lines": [
-        "Some questions only ask how big a difference is.",
-        "Toronto can drop to −15 °C. That is 15 degrees below zero.",
-        "Later you will compare distances, depths and changes the same way."
+        "Some questions only ask how big a gap is.",
+        "A Battle Pass costs 950 V-Bucks. You have 900.",
+        "Short by 50, or 50 over with 1,000. Both are 50 off."
       ],
       "callout": {
         "flavour": "key",
@@ -246,7 +246,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-abs-build-0",
-      "prompt": "Isagi's shot lands 8 m left of the centre spot. Build the distance from centre: |−8|",
+      "prompt": "F3 shows X = −8. Spawn is X = 0. Build the distance in blocks: |−8|",
       "answer": "8",
       "decoys": [
         "-",
@@ -256,10 +256,10 @@ export const pack: SePack = {
       "why": "Absolute value is the distance from zero, so the sign is dropped and only the size stays.",
       "steps": [
         {
-          "text": "Absolute value asks one thing: how far is the number from zero?"
+          "text": "Absolute value asks one thing: how many blocks from zero?"
         },
         {
-          "text": "Worked example: |−12|. Start at zero, walk 12 steps left. You are 12 away."
+          "text": "Example: F3 shows X = −12. Walk east 12 blocks to reach spawn at 0."
         },
         {
           "text": "So |−12| = 12. Direction does not count, only the distance. Now try |−31|."
@@ -286,7 +286,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-4",
-      "prompt": "Isagi is at −4 and Nagi is at 3 on the pitch line. How far apart are they?",
+      "prompt": "Your striker is 4 m left of the centre spot (−4). The defender is 3 m right (3). How far apart?",
       "options": [
         "1",
         "−7",
@@ -296,13 +296,13 @@ export const pack: SePack = {
       "why": "When two numbers sit on opposite sides of zero, add their distances from zero.",
       "steps": [
         {
-          "text": "Find each distance from zero. Example: −6 is 6 away, and 4 is 4 away."
+          "text": "Find each distance from the centre spot. Example: a winger 6 m left and a keeper 4 m right."
         },
         {
-          "text": "They are on opposite sides, so add. Example: 6 + 4 is 10."
+          "text": "They are on opposite sides, so add. Example: 6 + 4 = 10 m apart."
         },
         {
-          "text": "Check the other way: count the steps across zero. You should get the same number."
+          "text": "Check by counting metres across the spot. You get the same number."
         }
       ],
       "art": {
@@ -313,12 +313,12 @@ export const pack: SePack = {
         "points": [
           {
             "at": -4,
-            "label": "Isagi −4",
+            "label": "Striker −4",
             "tone": "focus"
           },
           {
             "at": 3,
-            "label": "Nagi 3",
+            "label": "Defender 3",
             "tone": "good"
           }
         ],
@@ -354,7 +354,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-abs-games-0",
-      "title": "Bounty Distance Race",
+      "title": "Storm Distance Race",
       "game": {
         "mode": "order",
         "values": [
@@ -384,7 +384,7 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "Absolute value is how far a number is from zero, so |−20| and 20 are both 20 steps away."
+      "why": "Absolute value is how far a number is from zero, so |−20| is 20 away, the same as 20."
     },
     {
       "kind": "explain",
@@ -425,7 +425,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-6",
-      "prompt": "Which statement is true?",
+      "prompt": "Roblox Studio shows a part at X = −8. Which statement is true?",
       "options": [
         "|8| = −8",
         "|−8| = 8",
@@ -435,7 +435,7 @@ export const pack: SePack = {
       "why": "Absolute value is never negative, so |−8| must come out positive.",
       "steps": [
         {
-          "text": "Work out each side. Example: |−3| is 3, so |−3| = 3 is true."
+          "text": "Work out each side. Example: a part at X = −3 is 3 studs from zero, so |−3| = 3."
         },
         {
           "text": "Check if the answer side is negative. If it is, the statement is false."
@@ -448,20 +448,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-basics-7",
-      "prompt": "Can |x| ever be negative?",
+      "prompt": "Distance from spawn is |X|. Can it ever be negative?",
       "options": [
-        "Yes, if x is −6",
-        "No, never",
-        "Yes, if x is 6"
+        "Yes, when X = −6",
+        "Yes, when X = 6",
+        "No, never below 0"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Distance from zero can never be below zero, so |x| is always zero or positive.",
       "steps": [
         {
-          "text": "Test a negative number. Example: |−5| is 5, which is positive."
+          "text": "Test a negative X. At X = −5 you are 5 blocks west of spawn. |−5| = 5."
         },
         {
-          "text": "Test a positive number. Example: |5| is also 5."
+          "text": "Test a positive X. At X = 5 you are 5 blocks east. |5| = 5."
         },
         {
           "text": "Both give a positive answer, so the bars never make a negative result."
@@ -471,20 +471,20 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-abs-build-1",
-      "prompt": "Luffy dives to −37 m on the Grand Line seabed. Build his depth as a distance: |−37|",
+      "prompt": "Your Studio part sits at X = −37 studs. Build its distance from the origin: |−37|",
       "answer": "37",
       "decoys": [
         "5",
         "-",
         "0"
       ],
-      "why": "A depth below sea level is a negative number, but the distance you swim is always positive.",
+      "why": "A position left of zero is negative, but the distance from zero is always positive.",
       "steps": [
         {
-          "text": "Write the sea as a number line. Sea level is 0. Below it is negative."
+          "text": "The origin is X = 0. Anything left of it has a negative X."
         },
         {
-          "text": "Worked example: a diver at −15 m is 15 m from the surface. So |−15| = 15."
+          "text": "Worked example: a part at X = −15 is 15 studs from the origin. So |−15| = 15."
         },
         {
           "text": "Ignore the minus sign on −37 and keep the size. Build the answer tiles now."
@@ -504,7 +504,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A striker cannot score −1 goals. Distance from zero is never below zero."
+        "text": "You have 900 V-Bucks for a 950 pass. You are −50 short, but 50 away: |−50| = 50."
       }
     },
     {
@@ -519,7 +519,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Zoro is 9 steps left of the mast. Sanji is 4 steps right. Together they are 13 steps apart."
+        "text": "Your house is at X = −9. The mine is at X = 4. They are 13 blocks apart."
       }
     },
     {
@@ -527,9 +527,9 @@ export const pack: SePack = {
       "id": "math-abs-teach-5",
       "title": "Recap: opposites share a size",
       "lines": [
-        "Opposites are two numbers, same distance from zero, opposite sides.",
-        "Example: 5 and −5. So |5| = |−5| = 5.",
-        "Absolute value keeps the size and drops the side."
+        "Opposites: same distance from zero, opposite sides.",
+        "Checkpoints at X = −5 and X = 5 are both 5 studs from spawn.",
+        "So |5| = |−5| = 5. The bars keep the size and drop the side."
       ],
       "callout": {
         "flavour": "key",
@@ -564,7 +564,8 @@ export const pack: SePack = {
       "title": "Distance never goes negative",
       "lines": [
         "|−20| asks: how far is −20 from zero?",
-        "Distance is a length. A pass can't travel −20 metres.",
+        "The halfway line is 0. A player at −20 m is 20 m back.",
+        "Distance is a length. Nobody runs −20 metres.",
         "So |−20| = 20. Absolute value is never negative."
       ],
       "callout": {
@@ -594,9 +595,9 @@ export const pack: SePack = {
       "id": "math-abs-deeper-2",
       "title": "Opposite flips, absolute drops",
       "lines": [
-        "Opposite: change the sign. The opposite of −7 is 7.",
-        "Absolute value: drop the sign. |−7| is 7.",
-        "For 7: the opposite is −7, but |7| is still 7."
+        "Opposite flips the sign. The opposite of −7 is 7.",
+        "Absolute value is distance from spawn. At X = −7, |−7| = 7 blocks.",
+        "At X = 7: the opposite is −7, but |7| is still 7."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -608,13 +609,13 @@ export const pack: SePack = {
       "id": "math-abs-deeper-4",
       "title": "Bars first, minus last",
       "lines": [
-        "Work inside the bars first: |−7| = 7.",
-        "Then take the minus outside: −(7) = −7.",
+        "A storm hit is −7 health. Bars first: |−7| = 7.",
+        "Then the outside minus: −(7) = −7.",
         "So −|−7| is −7. The outside minus comes last."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Break the bars first, like cracking a shield before the boss."
+        "text": "Crack the bars first, like breaking a shield before the health."
       }
     },
     {
@@ -622,7 +623,7 @@ export const pack: SePack = {
       "id": "math-abs-deeper-6",
       "title": "A letter can hold a negative",
       "lines": [
-        "x is just a number. It can be −4.",
+        "In Studio, x is a part's position. It can be −4.",
         "If x = −4, then −x = −(−4) = 4.",
         "So −x is not always negative. It depends on x."
       ],
@@ -636,13 +637,13 @@ export const pack: SePack = {
       "id": "math-abs-deeper-8",
       "title": "Distance between two numbers",
       "lines": [
-        "Distance from −3 to 5 is not 5 − 3.",
+        "Climb from Y = −3 to Y = 5. It is not 5 − 3.",
         "Subtract the first from the second, then take the absolute value.",
-        "|5 − (−3)| = |8| = 8. The line shows 3 + 5 steps."
+        "|5 − (−3)| = |8| = 8. The line shows 3 + 5 blocks."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Picture a through-ball from −3 to 5. How far does it travel?"
+        "text": "Y = −3 is a cave floor. Y = 5 is above it. 8 blocks to climb."
       },
       "art": {
         "art": "numberline",
@@ -672,8 +673,8 @@ export const pack: SePack = {
       "id": "math-abs-deeper-10",
       "title": "Two spots for |x| = 5",
       "lines": [
-        "|x| = 5 asks: which numbers are 5 away from zero?",
-        "5 is 5 away from zero. So is −5.",
+        "|x| = 5 asks: which goal differences are 5 from zero?",
+        "+5 is 5 from zero. So is −5.",
         "So x can be 5 or −5. Both are solutions."
       ],
       "callout": {
@@ -684,7 +685,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-abs-basics-8",
-      "prompt": "Build |−15| with the tiles.",
+      "prompt": "F3 shows X = −15. Build its distance from spawn: |−15|.",
       "answer": "15",
       "decoys": [
         "-",
@@ -693,59 +694,59 @@ export const pack: SePack = {
       "why": "The bars around a number mean take its distance from zero, which is never negative.",
       "steps": [
         {
-          "text": "Look inside the bars. The number is −48 in the example."
+          "text": "Example: the F3 screen shows X = −48. Look inside the bars."
         },
         {
-          "text": "Drop the minus sign. The example answer is 48."
+          "text": "Drop the minus sign. You are 48 blocks from spawn."
         },
         {
-          "text": "Check the result is positive, then build your tiles with the same steps."
+          "text": "Check the result is positive. Then build your own tiles the same way."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-abs-basics-9",
-      "prompt": "Build the opposite of 33 with the tiles.",
+      "prompt": "Your base is at X = 33. Build the opposite X for its mirror base.",
       "answer": "-33",
       "decoys": [
         "9",
         "+",
         "0"
       ],
-      "why": "The opposite flips the sign and keeps the same distance from zero.",
+      "why": "The opposite flips the sign and keeps the same distance from spawn.",
       "steps": [
         {
-          "text": "Example: the opposite of 8 is −8, and the opposite of −5 is 5."
+          "text": "A base at X = 8 has its mirror at X = −8. A base at X = −5 has its mirror at X = 5."
         },
         {
-          "text": "Check the sign of 33. It is positive, so the opposite needs a minus."
+          "text": "Check the sign of 33. It is positive, so the mirror needs a minus."
         },
         {
-          "text": "Put the minus in front, and check both 3s are still there."
+          "text": "Put the minus in front, then check both 3s are still there."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-applied-0",
-      "prompt": "Isagi stands at −6 on the pitch line. A pass goes to 2. How far does the ball travel?",
+      "prompt": "A Studio part sits at X = −6. You slide it to X = 2. How far does it move?",
       "options": [
-        "8 m",
-        "4 m",
-        "12 m"
+        "4 studs",
+        "8 studs",
+        "12 studs"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Distance between two points is the larger number minus the smaller, so subtracting a negative means adding.",
       "steps": [
         {
-          "text": "Pick the two spots. Bachira is at −3 and Nagi is at 7."
+          "text": "Pick the two spots. A checkpoint is at X = −3 and a ramp is at X = 7."
         },
         {
           "text": "Subtract the smaller from the larger: 7 − (−3)."
         },
         {
-          "text": "Subtracting −3 is the same as adding 3, so 7 + 3 = 10 m."
+          "text": "Subtracting −3 is the same as adding 3, so 7 + 3 = 10 studs."
         }
       ],
       "art": {
@@ -756,12 +757,12 @@ export const pack: SePack = {
         "points": [
           {
             "at": -6,
-            "label": "Isagi",
+            "label": "start",
             "tone": "focus"
           },
           {
             "at": 2,
-            "label": "pass",
+            "label": "end",
             "tone": "good"
           }
         ],
@@ -774,20 +775,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-applied-1",
-      "prompt": "A striker's goal difference is 5 away from zero. Which number could it be?",
+      "prompt": "A team's goal difference is 5 away from zero. Which number could it be?",
       "options": [
-        "5 or −5",
         "5 only",
-        "−5 only"
+        "−5 only",
+        "5 or −5"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Both +5 and −5 sit exactly 5 steps from zero, so both answers are correct.",
       "steps": [
         {
-          "text": "Find the number that is 12 away from zero: it is 12 or −12."
+          "text": "Another table: a team is 12 goals from zero. It is +12 or −12."
         },
         {
-          "text": "Check 12: the distance from zero is 12, so it works."
+          "text": "Check +12: the distance from zero is 12, so it works."
         },
         {
           "text": "Check −12: the distance from zero is also 12, so it works too."
@@ -797,23 +798,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-applied-2",
-      "prompt": "A striker stands at 3 on the line. The ball is exactly 4 m away from him. Where could the ball be?",
+      "prompt": "You stand at X = 3. A chest is exactly 4 blocks away. Where could it be?",
       "options": [
-        "7 or −1",
         "7 or 1",
+        "7 or −1",
         "−7 or 1"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Two spots can be the same distance from one point: one on each side.",
       "steps": [
         {
-          "text": "Write the distance as a gap: |x − 3| = 4."
+          "text": "Your base is at X = 5. A chest is 2 blocks away. Write |x − 5| = 2."
         },
         {
-          "text": "The gap is 4, so x − 3 = 4 or x − 3 = −4."
+          "text": "The gap is 2, so x − 5 = 2 or x − 5 = −2."
         },
         {
-          "text": "Solve each: x = 7 or x = −1. Check 7 − 3 = 4, yes."
+          "text": "Solve each: x = 7 or x = 3. Both are 2 blocks from 5."
         }
       ],
       "art": {
@@ -829,7 +830,7 @@ export const pack: SePack = {
           },
           {
             "at": 3,
-            "label": "striker",
+            "label": "you",
             "tone": "calm"
           },
           {
@@ -847,13 +848,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-applied-3",
-      "prompt": "Three strikers stand at −12, 10 and 9 on the line. Who is farthest from the centre?",
+      "prompt": "Three squads land at X = −12, 10 and 9 from the storm centre. Who is farthest out?",
       "options": [
-        "−12",
         "10",
+        "−12",
         "9"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Farthest from zero means the largest absolute value, and the sign does not change that.",
       "steps": [
         {
@@ -863,21 +864,21 @@ export const pack: SePack = {
           "text": "Compare the sizes: 12 is the biggest."
         },
         {
-          "text": "Try another set: −4, 6 and 5. The absolute values are 4, 6 and 5, so 6 wins."
+          "text": "Try another drop: −4, 6 and 5. The absolute values are 4, 6 and 5, so 6 wins."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-applied-4",
-      "prompt": "A striker runs 6 m back, then 4 m forward. How far is he from his start?",
+      "prompt": "A defender drops 6 m back, then steps 4 m forward. How far is he from where he began?",
       "options": [
-        "2 m",
         "10 m",
-        "−2 m"
+        "−2 m",
+        "2 m"
       ],
-      "answer": 0,
-      "why": "Distance from the start is the final position's absolute value, not the total path walked.",
+      "answer": 2,
+      "why": "Distance from the start is the final position's absolute value, not the total path run.",
       "steps": [
         {
           "text": "Write the moves as numbers: back is −6, forward is +4. Add them: −6 + 4 = −2."
@@ -893,69 +894,69 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-applied-5",
-      "prompt": "The opposite of −3 + 9 is which number?",
+      "prompt": "You stand at Y = −3. You climb 9 blocks. What is the opposite of your new Y?",
       "options": [
         "−6",
         "6",
         "12"
       ],
       "answer": 0,
-      "why": "Find the sum first, then change its sign to get the opposite.",
+      "why": "Find the new Y first, then flip its sign to get the opposite.",
       "steps": [
         {
-          "text": "Add first: −3 + 9 = 6."
+          "text": "Climb first: Y = −3 + 9 = 6."
         },
         {
-          "text": "Find the opposite of 6: it is −6."
+          "text": "The opposite of Y = 6 is −6."
         },
         {
-          "text": "Try the same method on −2 + 7: sum is 5, so the opposite is −5."
+          "text": "Try Y = −2 and climb 7: new Y is 5, so the opposite is −5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-applied-6",
-      "prompt": "Which pair of depths is the same distance from sea level?",
+      "prompt": "Which pair of goal differences is equally far from level (0)?",
       "options": [
-        "−9 and 9",
         "−9 and 7",
+        "−9 and 9",
         "−7 and 8"
       ],
-      "answer": 0,
-      "why": "Two numbers match in absolute value only when they are opposites, like −9 and 9.",
+      "answer": 1,
+      "why": "Two numbers are equally far from 0 only when they are opposites, like −9 and 9.",
       "steps": [
         {
-          "text": "Find each absolute value: |−9| = 9 and |9| = 9. They match."
+          "text": "A goal difference of −9 is 9 away from 0. A +9 is also 9 away."
         },
         {
-          "text": "Check the second pair: |−9| = 9 and |7| = 7. They do not match."
+          "text": "Check −9 and 7: they are 9 away and 7 away. No match."
         },
         {
-          "text": "Try −5 and 5: both give 5, so that pair matches too."
+          "text": "Try −5 and 5: both are 5 away from 0, so that pair matches."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-applied-7",
-      "prompt": "A pirate says a bounty is less than 0 and has absolute value 4. Which number is it?",
+      "prompt": "Your health change is below 0. Its absolute value is 4. Which is it?",
       "options": [
-        "−4",
         "4",
+        "−4",
         "−2"
       ],
-      "answer": 0,
-      "why": "A negative number with absolute value 4 must be −4, since 4 itself is positive.",
+      "answer": 1,
+      "why": "A number below 0 with absolute value 4 must be −4, since 4 itself is positive.",
       "steps": [
         {
-          "text": "Absolute value 4 means the number is 4 or −4."
+          "text": "Absolute value 4 means the change is 4 or −4."
         },
         {
-          "text": "The number must be less than 0, so only −4 works."
+          "text": "Storm damage is below 0, so only −4 works."
         },
         {
-          "text": "Try absolute value 9 and less than 0: the answer is −9."
+          "text": "Try absolute value 9 and below 0: the change is −9."
         }
       ]
     },
@@ -964,11 +965,11 @@ export const pack: SePack = {
       "id": "math-abs-applied-8",
       "prompt": "What does |−15| + |4| − |−3| equal?",
       "options": [
-        "16",
         "22",
-        "8"
+        "8",
+        "16"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Each absolute value is taken first, then the sums and differences are done in order.",
       "steps": [
         {
@@ -985,30 +986,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-applied-9",
-      "prompt": "What is −|−8|?",
+      "prompt": "You stand at X = −8. What is −|−8|?",
       "options": [
-        "−8",
         "8",
-        "0"
+        "0",
+        "−8"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Absolute value comes first, and the minus sign outside makes the final answer negative.",
       "steps": [
         {
-          "text": "Work out the inside first: |−8| = 8."
+          "text": "Inside first: X = −8 is |−8| = 8 blocks from spawn."
         },
         {
-          "text": "Now take the opposite of that: the opposite of 8 is −8."
+          "text": "Now the minus in front flips it: the opposite of 8 is −8."
         },
         {
-          "text": "Try −|−5|: the absolute value is 5, so the answer is −5."
+          "text": "Try X = −5: |−5| = 5, so −|−5| = −5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-deeper-3",
-      "prompt": "Take the number −7. Which pair is correct?",
+      "prompt": "A Roblox part sits at X = −7. Which pair is correct?",
       "options": [
         "Opposite −7, absolute value 7",
         "Opposite 7, absolute value −7",
@@ -1018,13 +1019,13 @@ export const pack: SePack = {
       "why": "The opposite flips the sign and the absolute value removes it, so both are 7 here.",
       "steps": [
         {
-          "text": "Opposite: flip the sign. So 9 becomes −9."
+          "text": "Opposite: flip the sign. A part at X = 9 mirrors to −9."
         },
         {
-          "text": "Absolute value: drop the sign. |9| is 9, not −9."
+          "text": "Absolute value: studs from 0, so no sign. |9| is 9, not −9."
         },
         {
-          "text": "Try −10 next: opposite is 10, absolute value is 10."
+          "text": "Try X = −10: the opposite is 10 and the absolute value is 10."
         }
       ]
     },
@@ -1041,20 +1042,20 @@ export const pack: SePack = {
       "why": "The bars turn −7 into 7, then the outside minus makes it −7.",
       "steps": [
         {
-          "text": "Work inside the bars first: |−7| = 7."
+          "text": "Bars first. Spawn is 0, so |−7| = 7 blocks away."
         },
         {
           "text": "Now apply the outside minus: −(7) = −7."
         },
         {
-          "text": "Try −|−12| the same way: bars give 12, then the minus gives −12."
+          "text": "Try −|−12|: bars give 12, then the minus gives −12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-deeper-7",
-      "prompt": "If x = −4, what is −x?",
+      "prompt": "In Roblox Studio, a part sits at x = −4. Its mirror part sits at −x. Where is it?",
       "options": [
         "−4",
         "0",
@@ -1064,20 +1065,20 @@ export const pack: SePack = {
       "why": "Two minus signs in a row make a plus, so −(−4) is 4.",
       "steps": [
         {
-          "text": "Replace x with −4: −x becomes −(−4)."
+          "text": "A part sits at x = −9. Its mirror is −x = −(−9)."
         },
         {
-          "text": "Two minus signs side by side make a plus: −(−4) = +4."
+          "text": "Two minus signs side by side make a plus: −(−9) = 9."
         },
         {
-          "text": "Try x = −9: then −x = 9, positive again."
+          "text": "Try x = −20: the mirror part sits at 20."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-abs-deeper-9",
-      "prompt": "How far apart are −3 and 5 on the number line?",
+      "prompt": "Arsenal are −3 on goal difference. City are +5. How many goals apart?",
       "options": [
         "2",
         "−8",
@@ -1087,13 +1088,13 @@ export const pack: SePack = {
       "why": "Subtract to find the gap, then take the absolute value so the distance is positive.",
       "steps": [
         {
-          "text": "Pick the two numbers: −4 and 1."
+          "text": "Spurs are −4 on the table. Villa are +1."
         },
         {
           "text": "Subtract: 1 − (−4) = 1 + 4 = 5."
         },
         {
-          "text": "Take the absolute value: |5| = 5. Check the line: 4 left of zero plus 1 right of zero is 5."
+          "text": "Distance is |5| = 5 goals. Check: 4 below zero plus 1 above zero is 5."
         }
       ],
       "art": {
@@ -1122,7 +1123,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-abs-deeper-11",
-      "prompt": "If |x| = 5, which is true?",
+      "prompt": "You stand 5 blocks from spawn on the X axis. So |x| = 5. Which is true?",
       "options": [
         "x = 5 or −5",
         "x = 5 only",
@@ -1132,20 +1133,20 @@ export const pack: SePack = {
       "why": "Both 5 and −5 sit exactly 5 away from zero, so both work.",
       "steps": [
         {
-          "text": "Walk 5 steps right from zero: you land on 5."
+          "text": "Walk 5 blocks east of spawn: you are at X = 5."
         },
         {
-          "text": "Walk 5 steps left from zero: you land on −5."
+          "text": "Walk 5 blocks west of spawn: you are at X = −5."
         },
         {
-          "text": "Repeat with |y| = 3: y could be 3 or −3, so two answers again."
+          "text": "Try |y| = 3 blocks: y could be 3 or −3, so two answers again."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-abs-build-2",
-      "prompt": "Build the opposite of −6. Opposites sit the same distance from zero, on opposite sides.",
+      "prompt": "A Roblox part sits at X = −6. Build its mirror spot across the origin.",
       "answer": "6",
       "decoys": [
         "-",
@@ -1155,20 +1156,20 @@ export const pack: SePack = {
       "why": "The opposite of a number flips its sign, so −6 becomes 6.",
       "steps": [
         {
-          "text": "The opposite is the mirror image across zero. Same distance, other side."
+          "text": "The mirror spot is the same distance from 0, on the other side."
         },
         {
-          "text": "Worked example: the opposite of 4 is −4. Flip the sign, keep the size."
+          "text": "Example: a part at 4 has its mirror at −4. Flip the sign, keep the size."
         },
         {
-          "text": "Flip −6 the same way. Build the tiles for the mirror number."
+          "text": "Flip −6 the same way. Build the tiles for the mirror spot."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-abs-build-3",
-      "prompt": "Bachira sprints 3/4 of a lap behind the leader. Build the distance: |−3/4|",
+      "prompt": "Bachira trails the leader by 3/4 of a lap: −3/4. Build his distance: |−3/4|",
       "answer": "3/4",
       "decoys": [
         "1"
@@ -1176,13 +1177,13 @@ export const pack: SePack = {
       "why": "A fraction with a minus sign has the same distance from zero as the positive fraction.",
       "steps": [
         {
-          "text": "Absolute value works with fractions too. Drop the sign and keep the fraction."
+          "text": "Distance ignores the sign. Drop the minus and keep the fraction."
         },
         {
-          "text": "Worked example: |−2/5| = 2/5. Two fifths of a unit, either side of zero."
+          "text": "Example: a pizza cut in 5, 2 slices behind is −2/5. |−2/5| = 2/5."
         },
         {
-          "text": "Now the same method on −3/4. Build the answer tiles."
+          "text": "Do the same with −3/4. Build the answer tiles."
         }
       ],
       "art": {
@@ -1196,7 +1197,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-abs-build-4",
-      "prompt": "Sanji's cook sits −0.6 m below the deck. Build how far he is from the deck: |−0.6|",
+      "prompt": "A Roblox part sits at Y = −0.6, under the baseplate. Build its distance from the baseplate: |−0.6|",
       "answer": "0.6",
       "decoys": [
         "-"
@@ -1204,36 +1205,36 @@ export const pack: SePack = {
       "why": "Decimals work like whole numbers: drop the sign, keep the digits and the decimal point.",
       "steps": [
         {
-          "text": "The deck is zero. Sanji is below it, so the number is negative."
+          "text": "The baseplate is Y = 0. The part is below it, so its Y is negative."
         },
         {
-          "text": "Worked example: |−1.8| = 1.8. The decimal point stays where it was."
+          "text": "Worked example: a part at Y = −1.8 is |−1.8| = 1.8 studs away. The decimal point stays put."
         },
         {
-          "text": "Apply the same method to −0.6. Build the tiles for the distance."
+          "text": "Do the same for Y = −0.6. Build the tiles for the distance."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-abs-build-5",
-      "prompt": "Which is further from zero: −9 or 7? Build the bigger distance.",
+      "prompt": "Spawn is X = 0. Your base is at X = −9, a village at X = 7. Build the bigger distance from spawn.",
       "answer": "9",
       "decoys": [
         "7",
         "-",
         "0"
       ],
-      "why": "Compare the distances, not the signs, because −9 is 9 away and 7 is 7 away.",
+      "why": "Compare the distances, not the signs, because −9 is 9 blocks away and 7 is 7 blocks away.",
       "steps": [
         {
-          "text": "Find the distance of each number first. Ignore the signs."
+          "text": "Find how many blocks each place is from spawn. Ignore the signs."
         },
         {
-          "text": "Worked example: −4 is 4 away. 6 is 6 away. So 6 is further."
+          "text": "Worked example: a chest at X = −4 is 4 blocks away. A farm at X = 6 is 6 away. The farm is further."
         },
         {
-          "text": "For −9 and 7: distances are 9 and 7. Build the bigger one."
+          "text": "For X = −9 and X = 7, the distances are 9 and 7. Build the bigger one."
         }
       ],
       "art": {
@@ -1284,7 +1285,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-abs-build-7",
-      "prompt": "The opposite of |−7| is ___. Build the number.",
+      "prompt": "A team's goal difference is −7. Build the opposite of |−7|.",
       "answer": "-7",
       "decoys": [
         "0",
@@ -1293,20 +1294,20 @@ export const pack: SePack = {
       "why": "The absolute value is 7, and its opposite is −7, so the sign comes back.",
       "steps": [
         {
-          "text": "Work the inside first: |−7| is the distance, which is 7."
+          "text": "Work the inside first: |−7| is the distance from level, which is 7."
         },
         {
-          "text": "Worked example: the opposite of |−5| is −5. Distance 5, then flip it."
+          "text": "Worked example: a team on −5 is 5 goals from level. The opposite of 5 is −5."
         },
         {
-          "text": "Now the opposite of |−7|. Distance 7, then flip to the other side. Build −7."
+          "text": "Now |−7|. Distance 7, then flip to the other side. Build −7."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-abs-games-1",
-      "title": "Opposite Crew Match",
+      "title": "Mirror Match",
       "game": {
         "mode": "pair",
         "pairs": [

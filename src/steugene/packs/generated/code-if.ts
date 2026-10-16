@@ -17,46 +17,46 @@ export const pack: SePack = {
       "lines": [
         "An if-statement asks a question. The answer is yes or no.",
         "The question is the condition. The code after 'then' is the action.",
-        "if score > 10 then ... means: only do the action when the question says yes."
+        "if health < 20 then heal: the heal runs only when the test says yes."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's team scores. The program asks: is the score above 10? Yes means celebrate."
+        "flavour": "key",
+        "text": "Your health drops to 15. Is it below 20? Yes, so the heal runs."
       }
     },
     {
       "kind": "choice",
       "id": "code-if-basics-0",
-      "prompt": "Isagi has 6 goals.\nCode:\nif goals > 5 then\n  say \"Star striker\"\nWhat does the program say?",
+      "prompt": "Your shield is 60.\nCode:\nif shield > 50 then\n  say \"Shield strong\"\nWhat does the program say?",
       "options": [
-        "Star striker is said",
         "Nothing is said",
-        "Goals becomes 5"
+        "Shield strong is said",
+        "Shield becomes 50"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "An if block runs only when its test is true.",
       "steps": [
         {
-          "text": "Find the value. Goals is 6."
+          "text": "Find the value. Shield is 60."
         },
         {
-          "text": "Check the test. Is 6 > 5? Yes, so the block runs."
+          "text": "Check the test. Is 60 > 50? Yes, so the block runs."
         },
         {
-          "text": "Try goals = 3. Is 3 > 5? No, so the line is skipped."
+          "text": "Try shield = 40. Is 40 > 50? No, so the line is skipped."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-basics-1",
-      "prompt": "Rin's team has 2 goals.\nThe rival has 3.\nif my_goals > their_goals then\n  say \"Win\"\nelse\n  say \"Not a win\"\nWhat is said?",
+      "prompt": "Your obby has 2 checkpoints.\nThe rival obby has 3.\nif my_checkpoints > their_checkpoints then\n  say \"Win\"\nelse\n  say \"Not a win\"\nWhat is said?",
       "options": [
         "Win is said",
-        "Not a win is said",
-        "Nothing is said"
+        "Nothing is said",
+        "Not a win is said"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "An else block runs when the if test is false.",
       "steps": [
         {
@@ -125,23 +125,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-if-basics-2",
-      "prompt": "The goal difference is 0.\nCode:\nif goal_diff > 0 then\n  say \"Ahead\"\nWhat happens?",
+      "prompt": "Your Pikachu has 0 HP left.\nCode:\nif hp > 0 then\n  say \"Still fighting\"\nWhat happens?",
       "options": [
-        "Ahead is said",
-        "Ahead is skipped",
-        "Ahead is said twice"
+        "Still fighting is said",
+        "Still fighting is skipped",
+        "Still fighting is said twice"
       ],
       "answer": 1,
       "why": "0 is not greater than 0, so a > test fails when the numbers are equal.",
       "steps": [
         {
-          "text": "The goal difference is 0. Test: is 0 > 0? No."
+          "text": "The HP is 0. Test: is 0 > 0? No."
         },
         {
           "text": "So the block is skipped and nothing is said."
         },
         {
-          "text": "Try a difference of 3. Is 3 > 0? Yes, so Ahead is said."
+          "text": "Try HP 35. Is 35 > 0? Yes, so Still fighting is said."
         },
         {
           "text": "Greater than means strictly bigger. Equal does not count."
@@ -151,13 +151,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-if-basics-3",
-      "prompt": "Which symbol means \"at least 5\"?",
+      "prompt": "Which symbol checks \"at least 5 hearts\" before a safe spawn?",
       "options": [
-        ">= 5",
         "<= 5",
+        ">= 5",
         "== 4"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "The symbol >= means greater than or equal to.",
       "steps": [
         {
@@ -167,7 +167,7 @@ export const pack: SePack = {
           "text": "So >= 5 means 5, or any number bigger than 5."
         },
         {
-          "text": "Check 9. Is 9 >= 5? Yes. Check 4. Is 4 >= 5? No."
+          "text": "Check 9 hearts. Is 9 >= 5? Yes. Check 4 hearts. Is 4 >= 5? No."
         }
       ]
     },
@@ -177,18 +177,18 @@ export const pack: SePack = {
       "title": "Why programs need choices",
       "lines": [
         "Without choices, a program does the same steps every time.",
-        "Games, apps and traffic lights all use conditions to decide.",
-        "A program that always celebrates would be wrong half the time."
+        "Roblox obbys, Pokémon and traffic lights all use conditions to decide.",
+        "A program that always heals would waste potions half the time."
       ],
       "callout": {
         "flavour": "key",
-        "text": "A condition lets one program act differently for different inputs."
+        "text": "Hunger below 10 drumsticks? Then eat. Same code, different results."
       }
     },
     {
       "kind": "build",
       "id": "code-if-build-0",
-      "prompt": "Isagi has 9 shots this match. The code says: if shots > 5 then bonus = shots − 5. Build the value of bonus.",
+      "prompt": "Your squad has 9 eliminations this match.\nCode: if eliminations > 5 then bonus = eliminations − 5\nBuild the value of bonus.",
       "answer": "4",
       "decoys": [
         "9",
@@ -198,36 +198,36 @@ export const pack: SePack = {
       "why": "A line after 'then' only runs when the condition is true; otherwise it is skipped.",
       "steps": [
         {
-          "text": "First ask: is the condition true? For shots = 9, 9 > 5 is true, so the line runs."
+          "text": "First ask: is the condition true? For 9 eliminations, 9 > 5 is true, so the line runs."
         },
         {
           "text": "Run the line: 9 − 5 = 4. Bonus becomes 4."
         },
         {
-          "text": "Now try shots = 3. 3 > 5 is false, so the line is skipped and bonus stays 0."
+          "text": "Now try 3 eliminations. 3 > 5 is false, so the line is skipped and bonus stays 0."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-basics-4",
-      "prompt": "Zoro's bounty is 120.\nCode:\nif bounty >= 100 then\n  say \"Wanted\"\nWhat happens?",
+      "prompt": "Your Charizard has 120 HP.\nCode:\nif hp >= 100 then\n  say \"Tough\"\nWhat happens?",
       "options": [
-        "The word Wanted prints",
-        "The word Wanted is skipped",
-        "The bounty becomes 100"
+        "The word Tough prints",
+        "The word Tough is skipped",
+        "The hp becomes 100"
       ],
       "answer": 0,
       "why": "Only the block after a true test runs; the rest is skipped.",
       "steps": [
         {
-          "text": "Find bounty: 120. Test: is 120 >= 100? Yes."
+          "text": "Find hp: 120. Test: is 120 >= 100? Yes."
         },
         {
-          "text": "The block runs, so Wanted prints."
+          "text": "The block runs, so Tough prints."
         },
         {
-          "text": "Try bounty 90. Is 90 >= 100? No, so nothing prints."
+          "text": "Try hp 90. Is 90 >= 100? No, so nothing prints."
         }
       ]
     },
@@ -257,7 +257,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "code-if-games-0",
-      "title": "Bounty Board: if and else",
+      "title": "Studio Board: if and else",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -290,9 +290,9 @@ export const pack: SePack = {
       "id": "code-if-teach-2",
       "title": "The method: three steps",
       "lines": [
-        "1. Find the condition. It must give only yes or no.",
-        "2. Put the real number in. Check the question.",
-        "3. If yes, run the 'then' part. If no, skip it."
+        "1. Find the condition. Only yes or no is allowed.",
+        "2. Put the real number in, like score = 12.",
+        "3. If yes, run the then part. If no, skip it."
       ],
       "art": {
         "art": "numberline",
@@ -315,7 +315,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-if-basics-6",
-      "prompt": "Usopp has score = 12.\nCode:\nif score > 10 then\n  score = score − 5\nWhat is score now?",
+      "prompt": "Your bag has 12 Timbits.\nCode:\nif timbits > 10 then\n  timbits = timbits − 5\nWhat is timbits now?",
       "options": [
         "7",
         "12",
@@ -328,40 +328,40 @@ export const pack: SePack = {
           "text": "Test: is 12 > 10? Yes, so the block runs."
         },
         {
-          "text": "Block: 12 − 5 is 7, so score becomes 7."
+          "text": "Block: 12 − 5 is 7, so timbits becomes 7."
         },
         {
-          "text": "Try score = 8. Is 8 > 10? No, so score stays 8."
+          "text": "Try 8 Timbits. Is 8 > 10? No, so timbits stays 8."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-basics-7",
-      "prompt": "Bachira has 6 shots on target and 1 goal.\nCode:\nif shots > 4 and goals > 1 then\n  say \"Striker\"\nWhat is said?",
+      "prompt": "Kai has 6 eliminations and 1 Victory Royale.\nCode:\nif eliminations > 4 and wins > 1 then\n  say \"Sweaty\"\nWhat is said?",
       "options": [
-        "Striker is said",
-        "Nothing is said",
+        "Sweaty is shown",
+        "Nothing is shown",
         "An error is shown"
       ],
       "answer": 1,
       "why": "An and test needs both parts true before the block runs.",
       "steps": [
         {
-          "text": "Shots part: is 6 > 4? True."
+          "text": "Eliminations part: is 6 > 4? True."
         },
         {
-          "text": "Goals part: is 1 > 1? False, so the whole and test is false."
+          "text": "Wins part: is 1 > 1? False, so the whole and test is false."
         },
         {
-          "text": "Try goals = 2. Is 2 > 1? True. Both true, so Striker is said."
+          "text": "Try wins = 2. Is 2 > 1? True. Both true, so Sweaty is shown."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-if-build-1",
-      "prompt": "Blue Lock team scored 4 goals and conceded 4. The code: if scored > conceded then points = 3 else points = 1. Build points.",
+      "prompt": "Your server gave 4 diamonds. A rival got 4.\nCode: if mine > rival then coins = 3 else coins = 1. Build coins.",
       "answer": "1",
       "decoys": [
         "3",
@@ -374,10 +374,10 @@ export const pack: SePack = {
           "text": "Check the condition: is 4 > 4? No. Equal is not greater."
         },
         {
-          "text": "So the 'else' line runs: points = 1."
+          "text": "So the 'else' line runs: coins = 1."
         },
         {
-          "text": "Try scored = 5, conceded = 2. 5 > 2 is true, so points = 3 instead."
+          "text": "Try mine = 5, rival = 2. 5 > 2 is true, so coins = 3 instead."
         }
       ]
     }
@@ -388,28 +388,24 @@ export const pack: SePack = {
       "id": "code-if-teach-3",
       "title": "The common trap: the edge number",
       "lines": [
-        "Score > 10 does NOT include 10. A score of exactly 10 says no.",
-        "Score ≥ 10 DOES include 10. The symbols are not the same.",
+        "Coins > 10 does NOT include 10. Exactly 10 says no.",
+        "Coins ≥ 10 DOES include 10. The symbols are not the same.",
         "Always check the edge number before you trust the answer."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Isagi needs 11 goals to beat the rule. Ten goals fails the test."
+        "text": "The obby door needs 11 coins. Ten coins fails the test."
       }
     },
     {
       "kind": "explain",
       "id": "code-if-teach-4",
-      "title": "Worked example: a bounty check",
+      "title": "Worked example: a CP check",
       "lines": [
-        "Rule: if bounty ≥ 100 000 000 then print 'Dangerous'.",
-        "Luffy's bounty in the program is 150 000 000. Is that at least 100 000 000? Yes.",
-        "So the 'then' line runs and the program prints 'Dangerous'."
-      ],
-      "callout": {
-        "flavour": "pirate",
-        "text": "A Marine checks the poster. Big bounty means the 'then' line fires."
-      }
+        "Rule: if CP ≥ 1 000 then print 'Strong'.",
+        "Your Dragonite has CP 1 500. Is that at least 1 000? Yes.",
+        "So the 'then' line runs and the program prints 'Strong'."
+      ]
     },
     {
       "kind": "explain",
@@ -417,7 +413,7 @@ export const pack: SePack = {
       "title": "Recap",
       "lines": [
         "An if-statement is: if condition then action.",
-        "The condition is a yes-or-no question about a value.",
+        "The condition is a yes-or-no question, like: are 8 slices left?",
         "Check the symbol carefully: > is not the same as ≥."
       ],
       "callout": {
@@ -444,8 +440,8 @@ export const pack: SePack = {
       "id": "code-if-deeper-1",
       "title": "More than is not at least",
       "lines": [
-        "score > 10 means 11 and up. Ten itself fails.",
-        "score ≥ 10 means 10 and up. Ten passes.",
+        "Goals > 10 means 11 and up. Ten itself fails.",
+        "Goals ≥ 10 means 10 and up. Ten passes.",
         "Find the edge number. Then ask: does the edge count?"
       ],
       "callout": {
@@ -481,7 +477,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy's rule: if the bounty is over 100 million, the Marines chase. Else, Luffy sleeps."
+        "text": "Else rule: if health < 20 then heal. Else, keep looting."
       }
     },
     {
@@ -495,7 +491,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Imagine Rin checks: is the ball near the goal? Yes, shoot. The other checks never run."
+        "text": "Your Pokémon checks: is HP below 20? Heal. The other checks never run."
       }
     },
     {
@@ -509,7 +505,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Two separate ifs can give Nagi two rewards. An if-else chain gives him only one."
+        "text": "Two separate ifs can pay a Roblox creator twice. An if-else chain pays once."
       }
     },
     {
@@ -519,40 +515,40 @@ export const pack: SePack = {
       "lines": [
         "and: both tests must be true for the block to run.",
         "or: one true test is enough to run the block.",
-        "Mixing them up gives a striker a bonus he did not earn."
+        "Mixing them up gives a builder a prize he did not earn."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Striker of the week: goals > 2 and assists > 1. Goals alone do not win it."
+        "text": "Build of the week: blocks > 500 and height > 60. Blocks alone do not win it."
       }
     },
     {
       "kind": "choice",
       "id": "code-if-basics-8",
-      "prompt": "A Toronto morning is −3 °C.\nCode:\nif temp < 0 then\n  say \"Bundle up\"\nWhat is said?",
+      "prompt": "Your part sits at Y = −3.\nCode:\nif Y < 0 then\n  say \"Under the map\"\nWhat is said?",
       "options": [
-        "Bundle up is said",
+        "Under the map is said",
         "Nothing is said",
-        "Temp becomes 0"
+        "Y becomes 0"
       ],
       "answer": 0,
       "why": "Negative numbers are less than zero, so this test is true.",
       "steps": [
         {
-          "text": "Temp is −3. Test: is −3 < 0? Yes."
+          "text": "Y is −3. Test: is −3 < 0? Yes."
         },
         {
-          "text": "So the block runs, and Bundle up is said."
+          "text": "So the block runs, and Under the map is said."
         },
         {
-          "text": "Try temp = 5. Is 5 < 0? No, so nothing is said."
+          "text": "Try Y = 5. Is 5 < 0? No, so nothing is said."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-basics-9",
-      "prompt": "Which temperature makes this test TRUE?\nif temp > −2 then\n  say \"Warm enough\"",
+      "prompt": "Your F3 screen shows the Y level. Which Y makes this test TRUE?\nif y > −2 then\n  say \"Above the caves\"",
       "options": [
         "−3",
         "−2",
@@ -562,7 +558,7 @@ export const pack: SePack = {
       "why": "On a number line, numbers to the right are bigger, so they pass a > test.",
       "steps": [
         {
-          "text": "The test is temp > −2. The boundary −2 is not greater than itself."
+          "text": "The test is y > −2. The boundary −2 is not greater than itself."
         },
         {
           "text": "Numbers to the right of −2 on the line are bigger."
@@ -595,34 +591,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-if-applied-0",
-      "prompt": "Isagi's code: if passes > 8 and shots > 3 then say 'Shoot now' else say 'Pass the ball'. Passes = 9, shots = 2. What is said?",
+      "prompt": "Your code: if health > 50 and shield > 30 then say 'Push now' else say 'Heal first'. Health = 60, shield = 20. What is said?",
       "options": [
-        "Shoot now",
-        "Pass the ball",
-        "Keep going"
+        "Push now",
+        "Heal first",
+        "Loot up"
       ],
       "answer": 1,
-      "why": "'and' needs both parts true, and 2 > 3 is false.",
+      "why": "'and' needs both parts true, and 20 > 30 is false.",
       "steps": [
         {
-          "text": "Step 1: Check passes > 8. Is 9 more than 8? Yes, true."
+          "text": "Step 1: Check health > 50. Is 60 more than 50? Yes, true."
         },
         {
-          "text": "Step 2: Check shots > 3. Is 2 more than 3? No, false."
+          "text": "Step 2: Check shield > 30. Is 20 more than 30? No, false."
         },
         {
-          "text": "Step 3: Try passes 10, shots 5. Both are true, so 'Shoot now' runs."
+          "text": "Step 3: Try health 70, shield 40. Both true, so 'Push now' runs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-applied-1",
-      "prompt": "Gold = 600. Code: if gold >= 200 then 'Boat' else if gold >= 500 then 'Ship' else 'Raft'. Which word prints?",
+      "prompt": "Robux balance = 600. Code: if robux >= 200 then 'Game pass' else if robux >= 500 then 'Hat bundle' else 'Plain tee'. Which word prints?",
       "options": [
-        "Boat",
-        "Ship",
-        "Raft"
+        "Game pass",
+        "Hat bundle",
+        "Plain tee"
       ],
       "answer": 0,
       "why": "The code checks tests from the top, and the first true one wins.",
@@ -631,21 +627,21 @@ export const pack: SePack = {
           "text": "Step 1: Test the first line. Is 600 at least 200? Yes. Stop."
         },
         {
-          "text": "Step 2: Once a test is true, the rest are skipped. 'Ship' is never checked."
+          "text": "Step 2: Once a test is true, the rest are skipped. 'Hat bundle' is never checked."
         },
         {
-          "text": "Step 3: Try gold = 120. Not at least 200, not at least 500. So 'Raft'."
+          "text": "Step 3: Try robux 120. Not at least 200, not at least 500. So 'Plain tee'."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-applied-2",
-      "prompt": "St. Eugene trip budget: if total > 40 then 'Cut a stop' else 'Keep all stops'. Total = $40.00. What is said?",
+      "prompt": "Timbit order total = $40.00. Code: if total > 40 then 'Cancel extra' else 'Keep order'. What is said?",
       "options": [
-        "Cut a stop",
-        "Keep all stops",
-        "Add a stop"
+        "Cancel extra",
+        "Keep order",
+        "Add a drink"
       ],
       "answer": 1,
       "why": "'>' means strictly more, so a total equal to 40 fails the test.",
@@ -657,82 +653,82 @@ export const pack: SePack = {
           "text": "Step 2: $40.00 equals 40. It is not more than 40, so false."
         },
         {
-          "text": "Step 3: Try $40.01. Now it is more than 40, so 'Cut a stop' runs."
+          "text": "Step 3: Try $40.01. Now it is more than 40, so 'Cancel extra' runs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-applied-3",
-      "prompt": "Sea depth is −350 m. Code: if depth < −200 then say 'Deep dive' else say 'Surface'. What is said?",
+      "prompt": "Your goal difference is −7. Code: if diff < −5 then say 'Sack coach' else say 'Keep coach'. What is said?",
       "options": [
-        "Deep dive",
-        "Surface",
-        "Reef walk"
+        "Sack coach",
+        "Keep coach",
+        "Buy a striker"
       ],
       "answer": 0,
-      "why": "On a number line, −350 sits left of −200, so it is the smaller number.",
+      "why": "On a number line, −7 sits left of −5, so it is the smaller number.",
       "steps": [
         {
-          "text": "Step 1: Find −200 on the line. Numbers left of it are smaller."
+          "text": "Step 1: Find −5 on the line. Numbers left of it are smaller."
         },
         {
-          "text": "Step 2: −350 is left of −200. So 'depth < −200' is true."
+          "text": "Step 2: −7 is left of −5. So 'diff < −5' is true."
         },
         {
-          "text": "Step 3: Try −150. It is right of −200, so 'Surface' runs instead."
+          "text": "Step 3: Try −3. It is right of −5, so 'Keep coach' runs instead."
         }
       ],
       "art": {
         "art": "numberline",
-        "from": -400,
+        "from": -10,
         "to": 0,
-        "step": 50,
+        "step": 1,
         "points": [
           {
-            "at": -350,
-            "label": "−350",
+            "at": -7,
+            "label": "−7",
             "tone": "bad"
           },
           {
-            "at": -200,
-            "label": "−200",
+            "at": -5,
+            "label": "−5",
             "tone": "focus"
           }
         ],
         "span": [
-          -400,
-          -200
+          -7,
+          -5
         ]
       }
     },
     {
       "kind": "choice",
       "id": "code-if-applied-4",
-      "prompt": "Blue Lock code: if goals > 1 or assists > 1 then say 'Good match' else say 'Train harder'. Goals = 0, assists = 2. What is said?",
+      "prompt": "Gym code: if badges > 1 or wins > 1 then say 'Gym ready' else say 'Train harder'. Badges = 0, wins = 2. What is said?",
       "options": [
-        "Good match",
+        "Gym ready",
         "Train harder",
-        "Train twice"
+        "Catch more"
       ],
       "answer": 0,
-      "why": "'or' needs only one part true, and assists = 2 is enough.",
+      "why": "'or' needs only one part true, and wins = 2 is enough.",
       "steps": [
         {
-          "text": "Step 1: Check goals > 1. 0 is not more than 1. False."
+          "text": "Step 1: Check badges > 1. 0 is not more than 1. False."
         },
         {
-          "text": "Step 2: Check assists > 1. 2 is more than 1. True, and 'or' only needs one."
+          "text": "Step 2: Check wins > 1. 2 is more than 1. True, and 'or' only needs one."
         },
         {
-          "text": "Step 3: Try goals 0, assists 1. Both false, so 'Train harder' runs."
+          "text": "Step 3: Try badges 0, wins 1. Both false, so 'Train harder' runs."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-if-applied-5",
-      "prompt": "Isagi's code: x = 7. If x × 2 > 12 then print x + 5, else print x − 5. Build the printed number.",
+      "prompt": "Shield code: s = 7. If s × 2 > 12 then print s + 5, else print s − 5. Build the printed number.",
       "answer": "12",
       "decoys": [
         "7",
@@ -745,17 +741,17 @@ export const pack: SePack = {
           "text": "Step 1: Test first. 7 × 2 = 14, and 14 > 12 is true."
         },
         {
-          "text": "Step 2: True means the first line runs. Use x + 5, not x − 5."
+          "text": "Step 2: True means the first line runs. Use s + 5, not s − 5."
         },
         {
-          "text": "Step 3: Try x = 3. 3 × 2 = 6, not > 12, so print 3 − 5 = −2."
+          "text": "Step 3: Try s = 3. 3 × 2 = 6, not > 12, so print 3 − 5 = −2."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-if-applied-6",
-      "prompt": "Pirate code: n = −4. If n < 0 then n = −n. Then print n. Build the printed number.",
+      "prompt": "Your F3 screen reads Y = −4. If Y < 0 then Y = −Y. Then print Y. Build the printed number.",
       "answer": "4",
       "decoys": [
         "-",
@@ -765,20 +761,20 @@ export const pack: SePack = {
       "why": "Taking the opposite of a negative number gives a positive number.",
       "steps": [
         {
-          "text": "Step 1: Is −4 < 0? Yes, so the line 'n = −n' runs."
+          "text": "Step 1: Is −4 < 0? Yes, so the line 'Y = −Y' runs."
         },
         {
           "text": "Step 2: The minus sign flips the value. −(−4) becomes 4."
         },
         {
-          "text": "Step 3: Try n = 9. 9 < 0 is false, so it is skipped. Print 9."
+          "text": "Step 3: Try Y = 9. 9 < 0 is false, so it is skipped. Print 9."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-applied-7",
-      "prompt": "Which condition means: the goal counts if the ball is in the net AND it was not out?",
+      "prompt": "Goal rule: which line counts the goal if the ball is in the net AND it was not out?",
       "options": [
         "if in_net and not out:",
         "if in_net or not out:",
@@ -801,99 +797,99 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-if-applied-8",
-      "prompt": "Bus rule: if students >= 30 then 2 buses else 1 bus. The class has exactly 30 students. How many buses?",
+      "prompt": "Server rule: if players >= 30 then 2 servers, else 1 server. The lobby has exactly 30 players. How many servers?",
       "options": [
-        "2 buses",
-        "1 bus",
-        "3 buses"
+        "2 servers",
+        "1 server",
+        "3 servers"
       ],
       "answer": 0,
-      "why": "'>=' includes the number itself, so exactly 30 passes the test.",
+      "why": "'>=' includes 30 itself, so exactly 30 passes the test.",
       "steps": [
         {
           "text": "Step 1: Read the sign. '>=' means more than OR equal to."
         },
         {
-          "text": "Step 2: 30 equals 30, so the test is true. Two buses."
+          "text": "Step 2: 30 equals 30, so the test is true. Two servers."
         },
         {
-          "text": "Step 3: Try 29 students. 29 is not >= 30, so the else line gives 1 bus."
+          "text": "Step 3: Try 29 players. 29 is not >= 30, so the else line gives 1 server."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-applied-9",
-      "prompt": "Crew rule: if crew >= 10 and food > 50 then 'Sail away' else 'Dock here'. Crew = 12, food = 40. What is said?",
+      "prompt": "Party rule: if guests >= 10 and slices > 50 then 'Order more', else 'Cook here'. Guests = 12, slices = 40. What is said?",
       "options": [
-        "Sail away",
-        "Dock here",
+        "Order more",
+        "Cook here",
         "Wait a day"
       ],
       "answer": 1,
       "why": "'and' fails as soon as one part is false, and 40 is not above 50.",
       "steps": [
         {
-          "text": "Step 1: Check crew >= 10. 12 is at least 10. True."
+          "text": "Step 1: Check guests >= 10. 12 is at least 10. True."
         },
         {
-          "text": "Step 2: Check food > 50. 40 is not more than 50. False."
+          "text": "Step 2: Check slices > 50. 40 is not more than 50. False."
         },
         {
-          "text": "Step 3: Try crew 4, food 90. Crew fails, so 'Dock here' runs."
+          "text": "Step 3: Try guests 4, slices 90. Guests fails, so 'Cook here' runs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-6",
-      "prompt": "The coach's rule says: if goals > 3, the team gets a bonus. When is the bonus paid?",
+      "prompt": "Trainer rule: if catches > 3, the trainer gets a Rare Candy. When is the reward paid?",
       "options": [
-        "At 4 goals or more.",
-        "At 3 goals or more.",
-        "At 2 goals or less."
+        "At 4 catches or more.",
+        "At 3 catches or more.",
+        "At 2 catches or less."
       ],
       "answer": 0,
-      "why": "> means strictly more than, so exactly 3 goals does not pass the test.",
+      "why": "> means strictly more than, so exactly 3 catches does not pass the test.",
       "steps": [
         {
           "text": "Find the edge number. Here it is 3, and 3 itself does not count."
         },
         {
-          "text": "Test 7 goals: is 7 > 3? Yes. The bonus is paid."
+          "text": "Test 7 catches: is 7 > 3? Yes. The reward is paid."
         },
         {
-          "text": "Test 2 goals: is 2 > 3? No. No bonus. Only numbers above the edge pass."
+          "text": "Test 2 catches: is 2 > 3? No. No reward. Only numbers above the edge pass."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-7",
-      "prompt": "Ego wants to check if Isagi has exactly 10 goals, without changing his score. Which line does that?",
+      "prompt": "Your squad wants to check if you have exactly 10 kills, without changing your count. Which line does that?",
       "options": [
-        "score == 10",
-        "score = 10",
-        "score = 9"
+        "kills == 10",
+        "kills = 10",
+        "kills = 9"
       ],
       "answer": 0,
       "why": "One = stores a value; two == asks whether two things are equal.",
       "steps": [
         {
-          "text": "A single = writes 10 into score. The score changes, so that is a set, not a check."
+          "text": "A single = writes 10 into kills. Your count changes, so that is a set, not a check."
         },
         {
-          "text": "A double == asks a question: is score equal to 10? It only answers yes or no."
+          "text": "A double == asks: are kills equal to 10? It only answers yes or no."
         },
         {
-          "text": "Try score == 9 when Isagi has 4. The answer is no, so the block is skipped."
+          "text": "Try kills == 9 when you have 4. The answer is no, so the block is skipped."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-8",
-      "prompt": "Isagi has 2 shots on target. The code says: if shots ≥ 3 then starter. else bench. Which happens?",
+      "prompt": "You have 2 hearts. Code: if hearts ≥ 3 then mine deeper. else retreat to base. Which happens?",
       "options": [
         "The if block runs, then stops.",
         "The else block runs, then stops.",
@@ -903,43 +899,43 @@ export const pack: SePack = {
       "why": "Only one branch runs, and else is used when the if test is false.",
       "steps": [
         {
-          "text": "Test 2 shots: is 2 ≥ 3? No. The if test is false, so else is next."
+          "text": "Test 2 hearts: is 2 ≥ 3? No. The if test is false, so else is next."
         },
         {
-          "text": "Test 5 shots: is 5 ≥ 3? Yes. The if block runs, and else is skipped."
+          "text": "Test 5 hearts: is 5 ≥ 3? Yes. The if block runs, and else is skipped."
         },
         {
-          "text": "Test 3 shots: 3 ≥ 3 is true, because ≥ includes 3. The if block runs."
+          "text": "Test 3 hearts: 3 ≥ 3 is true, because ≥ includes 3. The if block runs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-9",
-      "prompt": "Code: if bounty > 100 then print Rookie. else if bounty > 1000 then print Captain. The bounty is 1500. What prints?",
+      "prompt": "Code: if visits > 100 then show Popular. else if visits > 1000 then show Hit. Your obby has 1500 visits. What shows?",
       "options": [
-        "Rookie prints",
-        "Captain prints",
-        "Nothing prints"
+        "Popular shows",
+        "Hit shows",
+        "Nothing shows"
       ],
       "answer": 0,
       "why": "The chain checks from the top, and the first true test stops the rest.",
       "steps": [
         {
-          "text": "Check the top line first. Is 300 > 100? Yes. Rookie prints, and the rest is skipped."
+          "text": "Check the top line first. Is 1500 > 100? Yes. Popular shows, and the rest is skipped."
         },
         {
-          "text": "Now try 50. Is 50 > 100? No. Is 50 > 1000? No. Nothing prints."
+          "text": "Now try 50 visits. Is 50 > 100? No. Is 50 > 1000? No. Nothing shows."
         },
         {
-          "text": "So 1500 hits the top line first. It prints Rookie, even though Captain was meant for it."
+          "text": "Try 300 visits. Is 300 > 100? Yes. Popular shows, so Hit can never be reached first."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-10",
-      "prompt": "Ego's rule: if passes > 6 and shots > 4, Isagi is a starter. Passes are 9 and shots are 2. Is he a starter?",
+      "prompt": "Your EA FC player made 9 passes and 2 shots. Code: if passes > 6 and shots > 4 then Man of the Match. Does he win it?",
       "options": [
         "No, and needs both tests true.",
         "Yes, one true test is enough.",
@@ -955,37 +951,37 @@ export const pack: SePack = {
           "text": "Test shots: is 2 > 4? No. That test is false."
         },
         {
-          "text": "and needs both. Try passes 8 and shots 7: both are true, so he starts."
+          "text": "and needs both. Try 8 passes and 7 shots: both are true, so he wins it."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-if-deeper-11",
-      "prompt": "Which code means the same as 'not (score > 10)'?",
+      "prompt": "Which code means the same as 'not (HP > 10)' for your Pokémon?",
       "options": [
-        "score ≤ 10",
-        "score < 10",
-        "score ≥ 10"
+        "HP ≤ 10",
+        "HP < 10",
+        "HP ≥ 10"
       ],
       "answer": 0,
       "why": "not flips a test, so > 10 becomes ≤ 10, and 10 is included.",
       "steps": [
         {
-          "text": "Test 11: 11 > 10 is true, so not makes it false. The block is skipped."
+          "text": "Test HP 11: 11 > 10 is true, so not makes it false. The block is skipped."
         },
         {
-          "text": "Test 10: 10 > 10 is false, so not makes it true. Ten is included, so the block runs."
+          "text": "Test HP 10: 10 > 10 is false, so not makes it true. Ten is included, so the block runs."
         },
         {
-          "text": "Test 9: 9 > 10 is false, so not makes it true. Check score ≤ 10 too: 9 ≤ 10 is true."
+          "text": "Test HP 9: 9 > 10 is false, so not makes it true. Check HP ≤ 10 too: 9 ≤ 10 is true."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-if-build-2",
-      "prompt": "Nagi's time is 3/4. The code: if time < 1 then speed = time × 2. Build speed as a fraction.",
+      "prompt": "A Roblox Studio part is 3/4 of a metre wide. Code: if width < 1 then scale = width × 2. Build the scale.",
       "answer": "3/2",
       "decoys": [
         "4",
@@ -997,17 +993,17 @@ export const pack: SePack = {
           "text": "Check the condition: 3/4 is less than 1, so the line runs."
         },
         {
-          "text": "Try time = 5/8. It is less than 1, so speed = 5/8 × 2 = 10/8."
+          "text": "Try width = 5/8. It is less than 1, so scale = 5/8 × 2 = 10/8."
         },
         {
-          "text": "Simplify 10/8 by dividing top and bottom by 2. Speed is 5/4."
+          "text": "Simplify 10/8 by dividing top and bottom by 2. Scale is 5/4."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-if-build-3",
-      "prompt": "Rin's speed is 0.8. The code: if speed < 1 then speed = speed + 0.5. Build the new speed.",
+      "prompt": "Your Roblox walk speed is 0.8.\nif speed < 1 then speed = speed + 0.5. Build the new speed.",
       "answer": "1.3",
       "decoys": [
         "2",
@@ -1030,7 +1026,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-if-build-4",
-      "prompt": "Team goal difference is −4. The code: if diff < 0 then bonus = diff × 2. Build bonus.",
+      "prompt": "Your football team's goal difference is −4.\nif diff < 0 then bonus = diff × 2. Build bonus.",
       "answer": "-8",
       "decoys": [
         "4",
@@ -1052,7 +1048,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-if-build-5",
-      "prompt": "Luffy has 1200 berries. The code: if berries > 1000 then fee = berries ÷ 100. Build fee.",
+      "prompt": "Your Minecraft storage holds 1200 items.\nif items > 1000 then extra = items ÷ 100. Build extra.",
       "answer": "12",
       "decoys": [
         "0"
@@ -1063,61 +1059,38 @@ export const pack: SePack = {
           "text": "Check the condition: 1200 > 1000 is true, so the line runs."
         },
         {
-          "text": "Try berries = 1500. 1500 ÷ 100 = 15, so fee = 15."
+          "text": "Try items = 1500. 1500 ÷ 100 = 15, so extra = 15."
         },
         {
-          "text": "Try berries = 800. 800 > 1000 is false, so the fee line is skipped."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "code-if-build-7",
-      "prompt": "Treasure is 36 berries. Crew has 4 pirates. The code: if crew ≥ 4 then share = treasure ÷ crew. Build share.",
-      "answer": "9",
-      "decoys": [
-        "3",
-        "6",
-        "4"
-      ],
-      "why": "The sign ≥ means 'greater than or equal to', so equal numbers still make the condition true.",
-      "steps": [
-        {
-          "text": "Check the condition: 4 ≥ 4 is true, because equal counts as yes."
-        },
-        {
-          "text": "Try treasure = 50, crew = 5. Then share = 50 ÷ 5 = 10."
-        },
-        {
-          "text": "Try crew = 3. 3 ≥ 4 is false, so the share line is skipped."
+          "text": "Try items = 800. 800 > 1000 is false, so the extra line is skipped."
         }
       ]
     },
     {
       "kind": "game",
       "id": "code-if-games-1",
-      "title": "Score Check: > and >=",
+      "title": "Trainer Check: > and >=",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "score > 10",
+            "hp > 10",
             "true at 11 and above"
           ],
           [
-            "score >= 10",
+            "hp >= 10",
             "true at 10 and above"
           ],
           [
-            "age < 12",
-            "true for ages 0 to 11"
+            "level < 12",
+            "true for levels 0 to 11"
           ],
           [
-            "lives == 0",
-            "true when lives is 0"
+            "badges == 0",
+            "true when badges is 0"
           ],
           [
-            "coins > 50",
+            "Poké Dollars > 50",
             "true at 51 and above"
           ]
         ]

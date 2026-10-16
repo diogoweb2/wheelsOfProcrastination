@@ -20,18 +20,18 @@ export const pack: SePack = {
         "Perimeter is a length. Area is a count of squares."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi walks the touchline. That walk is perimeter. The grass he runs on is area."
+        "flavour": "key",
+        "text": "Walking the wall of your Minecraft base is perimeter. The floor you stand on is area."
       }
     },
     {
       "kind": "choice",
       "id": "math-area-basics-0",
-      "prompt": "Isagi runs once around the edge of a pitch. It is 12 m long and 8 m wide. How far does he run?",
+      "prompt": "Your Minecraft base floor is 12 blocks long and 8 blocks wide. You walk once around the outside wall. How far is that?",
       "options": [
-        "40 m",
-        "96 m",
-        "20 m"
+        "40 blocks",
+        "96 blocks",
+        "20 blocks"
       ],
       "answer": 0,
       "why": "Perimeter is the distance around the outside edge, so you add all four sides.",
@@ -40,33 +40,33 @@ export const pack: SePack = {
           "text": "Perimeter means all four sides added together."
         },
         {
-          "text": "Try a 9 m by 5 m pitch. Two long sides: 9 + 9 = 18 m."
+          "text": "Try a 9 by 5 base. Two long sides: 9 + 9 = 18 blocks."
         },
         {
-          "text": "Two short sides: 5 + 5 = 10 m. Total: 18 + 10 = 28 m."
+          "text": "Two short sides: 5 + 5 = 10 blocks. Total: 18 + 10 = 28 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-basics-1",
-      "prompt": "The same pitch is 12 m by 8 m. How much grass covers the whole pitch?",
+      "prompt": "Your Roblox obby platform is 12 studs by 8 studs. How many square studs does the whole platform cover?",
       "options": [
-        "40 m²",
-        "20 m²",
-        "96 m²"
+        "40 square studs",
+        "20 square studs",
+        "96 square studs"
       ],
       "answer": 2,
-      "why": "Area counts how many 1 m by 1 m squares fit inside the shape.",
+      "why": "Area counts how many 1 stud by 1 stud squares fit inside the shape.",
       "steps": [
         {
           "text": "Area is the space inside, so you multiply length by width."
         },
         {
-          "text": "Try a 9 m by 5 m pitch: 9 × 5 = 45."
+          "text": "Try a 9 by 5 platform: 9 × 5 = 45."
         },
         {
-          "text": "The answer is 45 m². The little 2 means square metres, not metres."
+          "text": "The answer is 45 square studs. The little 2 means the space is in squares."
         }
       ]
     },
@@ -125,11 +125,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-basics-2",
-      "prompt": "A triangle has a base of 10 cm and a height of 6 cm. What is its area?",
+      "prompt": "A Minecraft roof gable is a triangle. Its base is 10 blocks and its height is 6 blocks. What is its area?",
       "options": [
-        "30 cm²",
-        "60 cm²",
-        "16 cm²"
+        "30 square blocks",
+        "60 square blocks",
+        "16 square blocks"
       ],
       "answer": 0,
       "why": "A triangle is exactly half of the rectangle that surrounds it.",
@@ -138,33 +138,10 @@ export const pack: SePack = {
           "text": "First, find the rectangle around it: base × height."
         },
         {
-          "text": "Try a base of 8 cm and a height of 5 cm: 8 × 5 = 40."
+          "text": "Try a base of 8 blocks and a height of 5 blocks: 8 × 5 = 40."
         },
         {
-          "text": "Halve it: 40 ÷ 2 = 20 cm²."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-area-basics-3",
-      "prompt": "A rectangle has a perimeter of 26 cm. One side is 5 cm. What is the length of the side next to it?",
-      "options": [
-        "13 cm",
-        "8 cm",
-        "21 cm"
-      ],
-      "answer": 1,
-      "why": "A rectangle's perimeter is two lengths plus two widths, so half of it is one length plus one width.",
-      "steps": [
-        {
-          "text": "Half the perimeter is one long side plus one short side."
-        },
-        {
-          "text": "Try a perimeter of 30 cm with a side of 4 cm. Half is 15 cm."
-        },
-        {
-          "text": "Subtract the known side: 15 − 4 = 11 cm. That is the other side."
+          "text": "Halve it: 40 ÷ 2 = 20 square blocks."
         }
       ]
     },
@@ -173,46 +150,46 @@ export const pack: SePack = {
       "id": "math-area-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Fencing a pitch needs perimeter. Covering it with turf needs area.",
+        "A fence around a build needs perimeter. Carpet for a floor needs area.",
         "Builders, painters and tilers all use these two numbers.",
         "Use the wrong one and you buy the wrong amount."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro cuts rope for a ship's railing by perimeter. He paints the deck by area."
+        "flavour": "key",
+        "text": "Fencing a Minecraft room is perimeter. Covering its floor with carpet blocks is area."
       }
     },
     {
       "kind": "build",
       "id": "math-area-build-0",
-      "prompt": "Isagi's training pitch is 60 m long and 40 m wide. What is its area in square metres?",
+      "prompt": "Your Minecraft base floor is 60 blocks long and 40 blocks wide. How many blocks cover it?",
       "answer": "2400",
       "decoys": [
         "6",
         "8",
         "3"
       ],
-      "why": "Area is length times width, so the answer is measured in square metres (m²).",
+      "why": "Each block covers 1 m², so the area is length times width.",
       "steps": [
         {
-          "text": "Area = base × height. Write the formula first."
+          "text": "Floor area = length × width. Write the formula first."
         },
         {
-          "text": "Example: a 12 m by 5 m pitch. 12 × 5 = 60 m²."
+          "text": "Example: a 12 × 9 floor. 12 × 9 = 108 blocks."
         },
         {
-          "text": "Multiply the numbers first. Then add back the zeros you left out."
+          "text": "Try 30 × 20: 30 × 20 = 600 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-basics-4",
-      "prompt": "A parallelogram has a base of 7 cm and a height of 4 cm. What is its area?",
+      "prompt": "Your obby platform is a parallelogram. Base 7 studs, height 4 studs. What is its area?",
       "options": [
-        "22 cm²",
-        "11 cm²",
-        "28 cm²"
+        "22 square studs",
+        "11 square studs",
+        "28 square studs"
       ],
       "answer": 2,
       "why": "A parallelogram can be cut and moved into a rectangle with the same base and height.",
@@ -221,10 +198,10 @@ export const pack: SePack = {
           "text": "Area is base × height, the same as a rectangle."
         },
         {
-          "text": "Try a base of 9 cm and a height of 3 cm: 9 × 3 = 27 cm²."
+          "text": "Try base 9 studs, height 3 studs: 9 × 3 = 27 square studs."
         },
         {
-          "text": "Use the straight up height, not the slanted side."
+          "text": "Use the straight up height, not the slanted edge."
         }
       ]
     },
@@ -254,46 +231,46 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-area-games-0",
-      "title": "Boat Deck Sizes",
+      "title": "Room Floor Sizes",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "Boat A: 5 × 3",
+            "label": "Room A: 5 × 3",
             "value": 15
           },
           {
-            "label": "Boat B: 4 × 4",
+            "label": "Room B: 4 × 4",
             "value": 16
           },
           {
-            "label": "Boat C: 6 × 2",
+            "label": "Room C: 6 × 2",
             "value": 12
           },
           {
-            "label": "Boat D: 7 × 2",
+            "label": "Room D: 7 × 2",
             "value": 14
           },
           {
-            "label": "Boat E: 3 × 3",
+            "label": "Room E: 3 × 3",
             "value": 9
           },
           {
-            "label": "Boat F: 8 × 1",
+            "label": "Room F: 8 × 1",
             "value": 8
           }
         ]
       },
-      "why": "Area is base times height, and the answer is always in square units."
+      "why": "Area is length times width, and the answer is always in square blocks."
     },
     {
       "kind": "explain",
       "id": "math-area-teach-2",
       "title": "The method",
       "lines": [
-        "Rectangle area: A = b × h. Base times height.",
-        "Rectangle perimeter: add all four sides together.",
-        "Shortcut for perimeter: P = 2 × (b + h). Same answer."
+        "Baseplate area: A = b × h. Length times width.",
+        "Fence around the edge: add all four sides.",
+        "Shortcut for the fence: P = 2 × (b + h). Same answer."
       ],
       "callout": {
         "flavour": "key",
@@ -303,7 +280,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-basics-6",
-      "prompt": "Each side of a square penalty box is 6 m long. What is the perimeter?",
+      "prompt": "Your squad builds a square fort. Each wall is 6 m long. What is the total length of the walls?",
       "options": [
         "12 m",
         "24 m",
@@ -316,7 +293,7 @@ export const pack: SePack = {
           "text": "Four equal sides means perimeter = 4 × side."
         },
         {
-          "text": "Try a side of 7 m: 4 × 7 = 28 m."
+          "text": "Try a wall of 7 m: 4 × 7 = 28 m."
         },
         {
           "text": "Check by adding: 7 + 7 + 7 + 7 = 28 m. It matches."
@@ -326,23 +303,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-basics-7",
-      "prompt": "Each shape has a perimeter of 20 cm. Which one has the biggest area?",
+      "prompt": "Your fence budget is 20 blocks of fence. Which pen fits the most floor?",
       "options": [
-        "A 6 cm by 4 cm rectangle",
-        "A 5 cm by 5 cm square",
-        "A 8 cm by 2 cm rectangle"
+        "A 6 × 4 block pen",
+        "A 5 × 5 block pen",
+        "A 8 × 2 block pen"
       ],
       "answer": 1,
-      "why": "For a fixed perimeter, a square encloses more area than any other rectangle.",
+      "why": "For a fixed fence length, a square encloses more area than any other rectangle.",
       "steps": [
         {
-          "text": "Check the perimeter first: 7 + 3 + 7 + 3 = 20 cm. It works."
+          "text": "Check the fence: 7 + 3 + 7 + 3 = 20 blocks. It fits the budget."
         },
         {
-          "text": "Try a 7 cm by 3 cm shape: area is 21 cm². Try a 4 cm by 6 cm shape: 24 cm²."
+          "text": "Try a 7 × 3 pen: 21 blocks of floor. Try a 4 × 6 pen: 24 blocks."
         },
         {
-          "text": "Compare the areas: the square gives 5 × 5 = 25 cm²."
+          "text": "Now the 5 × 5 pen: 5 × 5 = 25 blocks of floor. That is the most."
         }
       ]
     }
@@ -353,13 +330,13 @@ export const pack: SePack = {
       "id": "math-area-teach-3",
       "title": "The common trap",
       "lines": [
-        "Perimeter is in metres (m). Area is in square metres (m²).",
-        "Never add a perimeter to an area. They measure different things.",
+        "Fence length is in metres (m). Floor is in square metres (m²).",
+        "Never add a length to an area. They measure different things.",
         "Check the unit before you write your answer."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Your coach says: check your units before you celebrate the goal."
+        "text": "A football pitch is 7,140 m² of grass, not 7,140 m of touchline."
       }
     },
     {
@@ -367,13 +344,13 @@ export const pack: SePack = {
       "id": "math-area-teach-4",
       "title": "Worked example",
       "lines": [
-        "A pitch is 40 m long and 20 m wide.",
+        "A five-a-side pitch is 40 m long and 20 m wide.",
         "Area: 40 × 20 = 800. The area is 800 m².",
         "Perimeter: 40 + 20 + 40 + 20 = 120. The perimeter is 120 m."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Same shape, two questions. Each question needs its own method."
+        "text": "Same pitch, two questions. Each question needs its own method."
       }
     },
     {
@@ -387,7 +364,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "A striker counts shots on target, not shots in the air. Pick the right number."
+        "text": "Fencing the base? That is perimeter. Carpeting the floor? That is area."
       }
     },
     {
@@ -401,7 +378,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi runs the whole touchline. That walk is the perimeter, not the grass."
+        "text": "Steve walks the whole fence. That walk is the perimeter, not the grass."
       }
     },
     {
@@ -411,11 +388,11 @@ export const pack: SePack = {
       "lines": [
         "Area counts how many unit squares fit inside a shape.",
         "Its unit is squared: cm², m², km².",
-        "A perimeter of 20 cm says nothing about the area."
+        "A fence of 20 blocks says nothing about the area."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A pirate crew wants the island's land, not the coastline. Land is area."
+        "text": "Your Fortnite build needs its floor counted, not its walls. Floor is area."
       }
     },
     {
@@ -423,9 +400,9 @@ export const pack: SePack = {
       "id": "math-area-deeper-2",
       "title": "A triangle is half a rectangle",
       "lines": [
-        "Cut a rectangle corner to corner. You get two matching triangles.",
-        "So a triangle's area is half of base × height.",
-        "Height goes straight up, not along a slanted side."
+        "Cut a Roblox platform corner to corner.",
+        "You get two matching triangles.",
+        "So a triangle's area is half of base × height."
       ],
       "callout": {
         "flavour": "key",
@@ -437,13 +414,13 @@ export const pack: SePack = {
       "id": "math-area-deeper-3",
       "title": "The slanted side is not the height",
       "lines": [
-        "A parallelogram leans. Its slanted side is longer than its height.",
+        "A sloped Minecraft wall leans. Its slanted side is longer than its height.",
         "Area = base × perpendicular height. Use the straight-up measure.",
         "Multiplying by the slanted side gives a wrong, too-big answer."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A slanted shot is longer than the goal is high. Measure the height straight up."
+        "text": "A slanted ladder is longer than the wall is high. Measure the height straight up."
       }
     },
     {
@@ -451,13 +428,13 @@ export const pack: SePack = {
       "id": "math-area-deeper-4",
       "title": "Same perimeter, different area",
       "lines": [
-        "Two shapes can have the same perimeter.",
-        "A long thin shape can have much less area than a square.",
-        "To get the most area for a fixed fence, make it a square."
+        "Two pitches can use the same 40 m of rope.",
+        "A long thin one marks much less grass than a square.",
+        "For the most area, make it a square."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Two crews with the same length of rope can fence very different amounts of sand."
+        "text": "Two coaches with the same length of rope can mark very different amounts of grass."
       }
     },
     {
@@ -465,9 +442,9 @@ export const pack: SePack = {
       "id": "math-area-deeper-5",
       "title": "Double the sides, quadruple the area",
       "lines": [
+        "Your obby platform is 4 m by 4 m.",
         "If you double every side, the perimeter doubles.",
-        "The area does not double. It gets four times as big.",
-        "Doubling makes a 2 by 2 grid of the old square."
+        "The area does not double. It gets four times as big."
       ],
       "callout": {
         "flavour": "key",
@@ -477,34 +454,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-basics-8",
-      "prompt": "Zoro's training dojo floor is 9 m by 6 m. How much floor needs mats?",
+      "prompt": "A carpet room is 9 blocks by 6 blocks. How many blocks of carpet cover the floor?",
       "options": [
-        "54 m²",
-        "30 m²",
-        "15 m²"
+        "54 blocks",
+        "30 blocks",
+        "15 blocks"
       ],
       "answer": 0,
-      "why": "Covering a floor with mats means counting the square metres inside its edges.",
+      "why": "Covering a floor with carpet means counting the square blocks inside its edges.",
       "steps": [
         {
           "text": "Covering a floor means area, so multiply length by width."
         },
         {
-          "text": "Try a floor of 7 m by 4 m: 7 × 4 = 28 m²."
+          "text": "Try a room of 7 by 4 blocks: 7 × 4 = 28 blocks."
         },
         {
-          "text": "So 9 × 6 = 54 m² of mats are needed."
+          "text": "So 9 × 6 = 54 blocks of carpet for the room."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-basics-9",
-      "prompt": "A pirate treasure map shows a triangle island with sides 5 cm, 6 cm and 7 cm. What is the walk around its edge?",
+      "prompt": "Walking the edge of a triangle-shaped Fortnite build platform: sides 5 m, 6 m and 7 m. How far is the walk?",
       "options": [
-        "15 cm",
-        "12 cm",
-        "18 cm"
+        "15 m",
+        "12 m",
+        "18 m"
       ],
       "answer": 2,
       "why": "The perimeter of any shape is the sum of all its sides.",
@@ -513,116 +490,63 @@ export const pack: SePack = {
           "text": "Walking around the edge means adding all three sides."
         },
         {
-          "text": "Try sides of 4 cm, 4 cm and 9 cm: 4 + 4 + 9 = 17 cm."
+          "text": "Try sides of 4 m, 4 m and 9 m: 4 + 4 + 9 = 17 m."
         },
         {
-          "text": "So 5 + 6 + 7 = 18 cm for the island."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-area-applied-0",
-      "prompt": "Coach Ego marks a practice pitch. It is 80 m long and 50 m wide. Isagi runs once around the edge. How far does he run?",
-      "options": [
-        "260 m",
-        "130 m",
-        "4000 m²"
-      ],
-      "answer": 0,
-      "why": "Perimeter is the total distance around the outside, so add all four sides.",
-      "steps": [
-        {
-          "text": "A rectangle has two long sides and two short sides."
-        },
-        {
-          "text": "Try 70 m by 30 m. Add 70 + 30 = 100."
-        },
-        {
-          "text": "Double it: 2 × 100 = 200 m. Units are metres, not square metres, because it is a distance."
-        }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
-    },
-    {
-      "kind": "choice",
-      "id": "math-area-applied-1",
-      "prompt": "A slanted training mat is a parallelogram. Its base is 12 m. Its perpendicular height is 5 m. Its slanted side is 6 m. What is its area?",
-      "options": [
-        "60 m²",
-        "72 m²",
-        "30 m²"
-      ],
-      "answer": 0,
-      "why": "Parallelogram area uses the straight-up height, not the slanted side.",
-      "steps": [
-        {
-          "text": "Use A = b × h, with the height that is at a right angle to the base."
-        },
-        {
-          "text": "Try base 9 m, height 4 m, slanted side 5 m. Then 9 × 4 = 36 m²."
-        },
-        {
-          "text": "The slanted side of 5 m was not used, because it is not the height."
+          "text": "So 5 + 6 + 7 = 18 m around the platform."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-2",
-      "prompt": "Luffy finds a triangular treasure map on Little Garden. The base is 14 cm. The height is 6 cm. What is the area of the map?",
+      "prompt": "A triangular practice zone on the EA FC pitch has base 14 m and height 6 m. What is its area?",
       "options": [
-        "42 cm²",
-        "84 cm²",
-        "28 cm²"
+        "42 m²",
+        "84 m²",
+        "28 m²"
       ],
       "answer": 0,
       "why": "A triangle is exactly half of the rectangle with the same base and height.",
       "steps": [
         {
-          "text": "First find the rectangle: base × height."
+          "text": "First find the full box: base × height."
         },
         {
-          "text": "Try base 10 cm, height 8 cm. The rectangle is 80 cm²."
+          "text": "Try base 10 m, height 8 m. The box is 80 m², so half is 40 m²."
         },
         {
-          "text": "Take half: 80 ÷ 2 = 40 cm². A triangle is half of its rectangle."
+          "text": "For 14 m by 6 m: 14 × 6 = 84, then 84 ÷ 2 = 42 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-3",
-      "prompt": "A bounty poster is 30 cm by 20 cm. The photo sits 2 cm in from every edge. What is the area of the photo?",
+      "prompt": "You carpet a 30 × 20 block room with wool. A 2-block stone border stays on every wall. How many wool blocks?",
       "options": [
-        "416 cm²",
-        "384 cm²",
-        "600 cm²"
+        "416 blocks",
+        "384 blocks",
+        "600 blocks"
       ],
       "answer": 0,
-      "why": "Each side loses 2 cm on both ends, so subtract 4 cm from each measurement.",
+      "why": "Each edge loses 2 blocks at both ends, so subtract 4 blocks from each length.",
       "steps": [
         {
-          "text": "Take away 2 cm on the left and 2 cm on the right: 4 cm total."
+          "text": "Take away 2 blocks on the left and 2 on the right: 4 blocks total."
         },
         {
-          "text": "Try a poster 25 cm by 15 cm with a 1 cm margin. Photo is 23 cm by 13 cm."
+          "text": "Try a 25 × 15 room with a 1-block border. The wool area is 23 × 13 = 299 blocks."
         },
         {
-          "text": "Area is 23 × 13 = 299 cm². Subtract the margin twice from each side, not once."
+          "text": "Take the border off both ends of each side, not just one end."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-4",
-      "prompt": "Blue Lock draws an L-shaped warm-up zone. Its outside box is 12 m by 9 m, with a 5 m by 4 m corner cut out. What is the perimeter?",
+      "prompt": "The coach fences the outside edge of a 12 m by 9 m training zone. A 5 m by 4 m corner is cut out for cones. How much fence?",
       "options": [
         "42 m",
         "54 m",
@@ -645,7 +569,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-applied-5",
-      "prompt": "Zoro's practice mat is 5 m by 3 m. The coach doubles both sides. How many times bigger is the new area?",
+      "prompt": "A Roblox obby platform is 5 studs by 3 studs. The builder doubles both sides. How many times bigger is the new area?",
       "options": [
         "4 times",
         "2 times",
@@ -655,10 +579,10 @@ export const pack: SePack = {
       "why": "Doubling both sides multiplies the area by 2 × 2, which is 4.",
       "steps": [
         {
-          "text": "Find the old area: 5 × 3 = 15 m²."
+          "text": "Find the old area: 5 × 3 = 15 studs²."
         },
         {
-          "text": "Try 4 m by 2 m, which is 8 m². Double both: 8 by 4 is 32 m²."
+          "text": "Try 4 by 2, which is 8 studs². Double both: 8 by 4 is 32 studs²."
         },
         {
           "text": "32 ÷ 8 = 4. Both sides doubled, so the area is four times bigger."
@@ -668,53 +592,53 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-area-applied-6",
-      "prompt": "Zoro's sail is a parallelogram. Its area is 96 cm². Its base is 12 cm. Build the height in cm.",
+      "prompt": "Your Roblox obby platform covers 96 square studs. It is 12 studs wide. Build its length in studs.",
       "answer": "8",
       "decoys": [
         "6",
         "9",
         "4"
       ],
-      "why": "Area is base × height, so height is the area divided by the base.",
+      "why": "Area is length × width, so the missing side is the area divided by the known side.",
       "steps": [
         {
-          "text": "Start with A = b × h. Rearrange to h = A ÷ b."
+          "text": "Start with A = l × w. Rearrange to l = A ÷ w."
         },
         {
-          "text": "Try area 60 cm², base 10 cm. Then 60 ÷ 10 = 6 cm."
+          "text": "Try a platform of 60 studs², width 10 studs. Then 60 ÷ 10 = 6 studs."
         },
         {
-          "text": "Now use 96 ÷ 12 = 8 cm for the sail."
+          "text": "Now use 96 ÷ 12 = 8 studs for your platform."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-7",
-      "prompt": "Pitch A is 90 m by 50 m. Pitch B is 80 m by 55 m. Which pitch has more grass, and by how much?",
+      "prompt": "Floor A is 90 by 50 blocks. Floor B is 80 by 55 blocks. Which floor has more blocks, and by how much?",
       "options": [
-        "Pitch A, by 100 m²",
-        "Pitch B, by 100 m²",
-        "Pitch A, by 50 m²"
+        "Floor A, by 100 blocks",
+        "Floor B, by 100 blocks",
+        "Floor A, by 50 blocks"
       ],
       "answer": 0,
       "why": "Compare the two areas directly, then subtract the smaller from the larger.",
       "steps": [
         {
-          "text": "Area A: 90 × 50 = 4500 m². Area B: 80 × 55 = 4400 m²."
+          "text": "Floor A: 90 × 50 = 4500 blocks. Floor B: 80 × 55 = 4400 blocks."
         },
         {
-          "text": "Try two pitches: 60 by 40 (2400) and 50 by 45 (2250). Difference 150 m²."
+          "text": "Try two floors: 60 by 40 (2400) and 50 by 45 (2250). Difference 150 blocks."
         },
         {
-          "text": "4500 − 4400 = 100 m². Pitch A has the bigger area by 100 m²."
+          "text": "4500 − 4400 = 100 blocks. Floor A is bigger by 100 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-8",
-      "prompt": "The Sunny Go deck is 4.5 m by 2.4 m. Each square tile is 30 cm by 30 cm. How many tiles cover the deck?",
+      "prompt": "Your bedroom floor is 4.5 m by 2.4 m. Each carpet tile is 30 cm by 30 cm. How many tiles cover the floor?",
       "options": [
         "120 tiles",
         "12 tiles",
@@ -727,17 +651,17 @@ export const pack: SePack = {
           "text": "Change to cm: 4.5 m = 450 cm, and 2.4 m = 240 cm."
         },
         {
-          "text": "Try a 3 m by 1.5 m deck: 300 cm by 150 cm. Area 45000 cm²."
+          "text": "Try a 3 m by 1.5 m floor: 300 cm by 150 cm. Area 45000 cm²."
         },
         {
-          "text": "Deck area 450 × 240 = 108000 cm². Tile area 900 cm². 108000 ÷ 900 = 120."
+          "text": "Floor area 450 × 240 = 108000 cm². Tile area 900 cm². 108000 ÷ 900 = 120."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-applied-9",
-      "prompt": "Isagi needs a rectangular fence around a 36 m² area. He wants the least fencing. Which rectangle should he use?",
+      "prompt": "Isagi needs a rectangular fence around a 36 m² training area. He wants the least fencing. Which rectangle should he use?",
       "options": [
         "6 m by 6 m",
         "4 m by 9 m",
@@ -760,7 +684,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-deeper-6",
-      "prompt": "Tsubasa's team draws a 12 cm by 9 cm card. What is its perimeter?",
+      "prompt": "Your Pokémon binder page is 12 cm by 9 cm. What is its perimeter?",
       "options": [
         "42 cm",
         "108 cm²",
@@ -783,20 +707,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-area-deeper-7",
-      "prompt": "A triangle has base 10 cm and height 6 cm. What is its area?",
+      "prompt": "A Minecraft roof end is a triangle. Its base is 10 blocks and its height is 6 blocks. What is its area?",
       "options": [
-        "30 cm²",
-        "60 cm²",
-        "16 cm²"
+        "30 blocks²",
+        "60 blocks²",
+        "16 blocks²"
       ],
       "answer": 0,
       "why": "A triangle covers half of its base times height, so the rectangle is cut in two.",
       "steps": [
         {
-          "text": "Try base 8 cm and height 5 cm. Multiply: 8 × 5 = 40 cm²."
+          "text": "Try base 8 blocks and height 5 blocks. Multiply: 8 × 5 = 40 blocks²."
         },
         {
-          "text": "A triangle is half its rectangle. Divide 40 by 2 to get 20 cm²."
+          "text": "A triangle is half its rectangle. Divide 40 by 2 to get 20 blocks²."
         },
         {
           "text": "Forgetting the ÷ 2 gives the full rectangle, which is double the area."
@@ -805,100 +729,77 @@ export const pack: SePack = {
     },
     {
       "kind": "choice",
-      "id": "math-area-deeper-8",
-      "prompt": "A parallelogram has base 10 cm, slanted side 8 cm and height 5 cm. What is its area?",
-      "options": [
-        "80 cm²",
-        "50 cm²",
-        "40 cm²"
-      ],
-      "answer": 1,
-      "why": "Area uses the perpendicular height, not the slanted side, which is longer.",
-      "steps": [
-        {
-          "text": "Try base 6 cm, slanted side 9 cm, height 4 cm. Use the height: 6 × 4 = 24 cm²."
-        },
-        {
-          "text": "Using the slanted side gives 6 × 9 = 54 cm². That is the trap."
-        },
-        {
-          "text": "The height is the straight-up measure, so only the height goes into the multiply."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
       "id": "math-area-deeper-9",
-      "prompt": "Three fields all have perimeter 24 m. Which one has the biggest area?",
+      "prompt": "You have 24 fence blocks to wall a pen. Which pen gives the most floor inside?",
       "options": [
-        "10 m by 2 m",
-        "8 m by 4 m",
-        "6 m by 6 m"
+        "10 by 2 blocks",
+        "8 by 4 blocks",
+        "6 by 6 blocks"
       ],
       "answer": 2,
       "why": "For a fixed perimeter, the more square the shape, the bigger the area.",
       "steps": [
         {
-          "text": "Try a field 7 m by 1 m. Its perimeter is 7 + 1 + 7 + 1 = 16 m."
+          "text": "Try a pen 7 by 1. Its fence is 7 + 1 + 7 + 1 = 16 blocks."
         },
         {
-          "text": "Its area is 7 × 1 = 7 m². Now try a squarer one: 4 m by 4 m."
+          "text": "Its floor is 7 × 1 = 7 blocks. Now try a squarer one: 4 by 4."
         },
         {
-          "text": "The 4 m by 4 m square has perimeter 16 m and area 16 m². The square wins."
+          "text": "The 4 by 4 pen has 16 blocks of fence and 16 floor blocks. The square wins."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-deeper-10",
-      "prompt": "A square has sides of 3 cm. Each side is doubled to 6 cm. What is the new area?",
+      "prompt": "A square build zone is 3 m on each side. Each side doubles to 6 m. What is the new area?",
       "options": [
-        "18 cm²",
-        "36 cm²",
-        "12 cm²"
+        "18 m²",
+        "36 m²",
+        "12 m²"
       ],
       "answer": 1,
       "why": "Doubling the sides makes the area four times as big, not two times.",
       "steps": [
         {
-          "text": "Try a square with sides 4 cm. Its area is 4 × 4 = 16 cm²."
+          "text": "Try a square 4 m by 4 m. Its area is 4 × 4 = 16 m²."
         },
         {
-          "text": "Double to 8 cm. The new area is 8 × 8 = 64 cm². That is 4 times 16."
+          "text": "Double to 8 m. The new area is 8 × 8 = 64 m². That is 4 times 16."
         },
         {
-          "text": "Doubling the sides multiplies the area by 4, so 9 cm² becomes 36 cm²."
+          "text": "Doubling the sides multiplies the area by 4, so a 9 m² zone becomes 36 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-area-deeper-11",
-      "prompt": "A rectangle is 10 cm by 6 cm. A 2 cm square is cut from one corner. What is the new perimeter?",
+      "prompt": "Your obby platform is 10 m by 6 m. A 2 m square corner is cut away for a pit. What is the new perimeter?",
       "options": [
-        "28 cm",
-        "32 cm",
-        "36 cm"
+        "28 m",
+        "32 m",
+        "36 m"
       ],
       "answer": 1,
-      "why": "The cut removes 2 cm from one edge but adds 2 cm back along the notch, so the perimeter stays the same.",
+      "why": "The cut removes 2 m from one edge but adds 2 m back along the notch, so the perimeter stays the same.",
       "steps": [
         {
-          "text": "Try a rectangle 8 cm by 5 cm. Its perimeter is 8 + 5 + 8 + 5 = 26 cm."
+          "text": "Try a rectangle 8 m by 5 m. Its perimeter is 8 + 5 + 8 + 5 = 26 m."
         },
         {
-          "text": "Cut a 3 cm corner square. Two edges shrink by 3 cm each, which is 6 cm less."
+          "text": "Cut a 3 m corner square. Two edges shrink by 3 m each, which is 6 m less."
         },
         {
-          "text": "But the notch adds two new 3 cm sides, which is 6 cm back. The total is still 26 cm."
+          "text": "But the notch adds two new 3 m sides, which is 6 m back. The total is still 26 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-area-build-2",
-      "prompt": "A pitch mat is 3.5 m long and 2.4 m wide. What is its area in m²?",
+      "prompt": "Keeper training mat: 3.5 m long, 2.4 m wide. Area in m²?",
       "answer": "8.4",
       "decoys": [
         "1",
@@ -921,7 +822,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-area-build-3",
-      "prompt": "A tactics board is 1/2 m wide and 3/4 m tall. Area in m² as a fraction?",
+      "prompt": "Blue Lock poster: 1/2 m wide, 3/4 m tall. Area in m² as a fraction?",
       "answer": "3/8",
       "decoys": [
         "2",
@@ -931,7 +832,7 @@ export const pack: SePack = {
       "why": "To multiply fractions, multiply the tops together and the bottoms together.",
       "steps": [
         {
-          "text": "Area = base × height. Write it with the fractions."
+          "text": "Area = width × height. Write it with the fractions."
         },
         {
           "text": "Example: 2/3 × 1/4. Tops 2 × 1 = 2. Bottoms 3 × 4 = 12. So 2/12."
@@ -944,12 +845,12 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-area-build-4",
-      "prompt": "A Blue Lock pitch is 30 m long and 20 m wide. What is the perimeter in metres?",
-      "answer": "100",
+      "prompt": "Your base floor is 12 blocks by 9 blocks. How many fence blocks go all the way around?",
+      "answer": "42",
       "decoys": [
-        "5",
-        "2",
-        "6"
+        "1",
+        "6",
+        "0"
       ],
       "why": "Perimeter is the distance all the way around, so every side gets added.",
       "steps": [
@@ -957,40 +858,40 @@ export const pack: SePack = {
           "text": "Perimeter means the edge. Add all four sides."
         },
         {
-          "text": "Example: 9 m by 4 m. 9 + 4 + 9 + 4 = 26 m."
+          "text": "Example: 6 by 5. 6 + 5 + 6 + 5 = 22 blocks."
         },
         {
-          "text": "Faster way: 2 × (length + width). Here 2 × (9 + 4) = 26."
+          "text": "Faster way: 2 × (length + width). Here 2 × (7 + 3) = 20."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-area-build-5",
-      "prompt": "Luffy's crew sail is 7 m by 5 m. What is its area in m²?",
+      "prompt": "Your Roblox obby platform is 7 studs by 5 studs. How many square studs is it?",
       "answer": "35",
       "decoys": [
         "2",
         "8",
         "0"
       ],
-      "why": "Area counts the squares inside a shape, so it uses base times height.",
+      "why": "Area counts the squares inside a shape, so it uses length times width.",
       "steps": [
         {
-          "text": "Area = base × height. Same formula as any rectangle."
+          "text": "Area = length × width. Count the squares inside."
         },
         {
-          "text": "Example: a flag 8 m by 3 m. 8 × 3 = 24 m²."
+          "text": "Example: 9 by 4. 9 × 4 = 36 square studs."
         },
         {
-          "text": "Multiply the two side lengths. Your answer is always in square units."
+          "text": "Multiply the two sides. Your answer is always in square units."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-area-build-6",
-      "prompt": "Nami's treasure map shows a rectangle island, 40 km long and 20 km wide. Area in km²?",
+      "prompt": "The Fortnite island is 40 km long and 20 km wide. What is its area in km²?",
       "answer": "800",
       "decoys": [
         "4",
@@ -1013,7 +914,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-area-build-7",
-      "prompt": "A pirate ship's deck has area 60 m² and width 5 m. What is its length in metres?",
+      "prompt": "A football training grid has area 60 m² and width 5 m. What is its length in metres?",
       "answer": "12",
       "decoys": [
         "3",
@@ -1036,16 +937,16 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-area-games-1",
-      "title": "Fence or Grass?",
+      "title": "Fence or Turf?",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "Perimeter",
+            "Fence length",
             "Total distance around"
           ],
           [
-            "Area",
+            "Turf space",
             "Space inside a shape"
           ],
           [

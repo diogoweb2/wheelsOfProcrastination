@@ -16,51 +16,51 @@ export const pack: SePack = {
       "title": "What is debugging?",
       "lines": [
         "Debugging means finding the one line that makes a program act wrong.",
-        "A program never guesses. It obeys every line, even the wrong one.",
-        "Your job is to find the gap between what you wrote and what you meant."
+        "The program never guesses. It obeys every line, even the wrong one.",
+        "Your job is to find the gap between what you meant and what you wrote."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi is sure he scored three goals. The board says two. Something in the count is wrong."
+        "flavour": "key",
+        "text": "Your wall should be 10 blocks long. The code builds 11."
       }
     },
     {
       "kind": "choice",
       "id": "code-debug-basics-0",
-      "prompt": "Isagi's coach writes: for i in range(11). Why does this loop run 11 times?",
+      "prompt": "Coach's sprint drill is: for i in range(11). Why does it run 11 times?",
       "options": [
+        "It counts 1 to 10, so it runs 10 times.",
         "It counts 0 to 10, which is 11 numbers.",
-        "It counts 1 to 11, so it runs 11 times.",
-        "It counts 1 to 10, so it runs 10 times."
+        "It counts 1 to 11, so it runs 11 times."
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "range starts at 0 and stops before the number you give it.",
       "steps": [
         {
-          "text": "range(5) gives 0, 1, 2, 3, 4. That is 5 numbers."
+          "text": "range(5) gives 0, 1, 2, 3, 4. That is 5 sprints."
         },
         {
           "text": "So the loop starts at 0 and stops before the given number."
         },
         {
-          "text": "range(3) runs 3 times. range(11) runs 11 times."
+          "text": "range(3) makes 3 passes. range(11) makes 11 passes."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-basics-1",
-      "prompt": "Mikami adds up goals. Which line is the bug?\n1  total = 0\n2  for g in goals:\n3      total = 0\n4      total = total + g",
+      "prompt": "Your obby counts coins. Which line is the bug?\n1  total = 0\n2  for c in coins:\n3      total = 0\n4      total = total + c",
       "options": [
+        "Line 4 adds each coin in.",
         "Line 1 starts total at zero.",
-        "Line 3 resets total every loop.",
-        "Line 4 adds each goal in."
+        "Line 3 resets total every loop."
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Line 3 sits inside the loop, so it wipes the total on every round.",
       "steps": [
         {
-          "text": "Try goals = [2, 1]. Line 1 sets total to 0."
+          "text": "Try coins = [2, 1]. Line 1 sets total to 0."
         },
         {
           "text": "Round 1: line 3 sets total to 0, then line 4 makes it 2."
@@ -125,13 +125,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-basics-2",
-      "prompt": "Coach checks the same stat 500 times inside a loop. The stat never changes. Where should that line go?",
+      "prompt": "Your squad checks the storm size 500 times inside a loop. It never changes. Where should that line go?",
       "options": [
         "Inside the loop, so it updates.",
-        "Above the loop, so it runs once.",
-        "Deleted, since loops never need stats."
+        "Deleted, since loops never need stats.",
+        "Above the loop, so it runs once."
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Work done once outside a loop saves time, because the loop repeats only what is inside it.",
       "steps": [
         {
@@ -141,30 +141,30 @@ export const pack: SePack = {
           "text": "If a line always gives the same answer, it needs only one go."
         },
         {
-          "text": "Put total = len(team) above the loop: 1 call. Inside: 500 calls."
+          "text": "Put size = storm_size above the loop: 1 call. Inside: 500 calls."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-basics-3",
-      "prompt": "Luffy wants 3 crew. Why does this loop never stop?\ncrew = 0\nwhile crew < 3:\n    print(crew)",
+      "prompt": "Ash wants 3 catches. Why does this loop never stop?\ncatches = 0\nwhile catches < 3:\n    print(catches)",
       "options": [
-        "crew never goes up inside the loop.",
         "The number 3 is too small for a loop.",
-        "while loops cannot use the less-than sign."
+        "while loops cannot use the less-than sign.",
+        "catches never goes up inside the loop."
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "A while loop repeats until its test is false, so something inside must change the test.",
       "steps": [
         {
-          "text": "The test is crew < 3. It stays true while crew stays at 0."
+          "text": "The test is catches < 3. It stays true while catches stays at 0."
         },
         {
-          "text": "Fix: add crew = crew + 1 inside the loop."
+          "text": "Fix: add catches = catches + 1 inside the loop."
         },
         {
-          "text": "Now crew goes 0, 1, 2, then 3, and the loop stops."
+          "text": "Now catches goes 0, 1, 2, then 3, and the loop stops."
         }
       ]
     },
@@ -179,28 +179,28 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "One off-by-one error can add a goal that never happened."
+        "text": "Your loop adds one extra Timbit every trip. A box of 10 counts as 11."
       }
     },
     {
       "kind": "build",
       "id": "code-debug-build-0",
-      "prompt": "Isagi runs this drill: for i in range(4, 9): print('Shot'). How many shots print?",
+      "prompt": "Your wall script: for b in range(4, 9): place 1 block. How many blocks get placed?",
       "answer": "5",
       "decoys": [
         "4",
         "9"
       ],
-      "why": "A range stops one number before its end, so range(4, 9) counts 4, 5, 6, 7, 8.",
+      "why": "A range stops one number before its end, so range(4, 9) places blocks 4, 5, 6, 7, 8.",
       "steps": [
         {
-          "text": "The loop starts at 4 and stops before 9. The 9 is never used."
+          "text": "The script starts at block 4 and stops before 9. The 9 is never placed."
         },
         {
-          "text": "Count the passes with end minus start: 9 − 4 = 5."
+          "text": "Count the blocks with 9 − 4 = 5."
         },
         {
-          "text": "Check with range(2, 7): 7 − 2 = 5, and the passes are 2, 3, 4, 5, 6."
+          "text": "Check range(2, 7): 7 − 2 = 5 blocks, at 2, 3, 4, 5, 6."
         }
       ],
       "art": {
@@ -229,30 +229,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-basics-4",
-      "prompt": "Brook doubles a bounty each round. Start with x = 2 and run the loop 3 times, doubling x. What does x end as?",
+      "prompt": "The storm doubles its damage each phase. Start at 2 damage and double it 3 times. What is it?",
       "options": [
         "16",
         "8",
         "12"
       ],
       "answer": 0,
-      "why": "Each round uses the answer from the round before, so the numbers multiply.",
+      "why": "Each phase starts from the damage the phase before left, so the numbers multiply.",
       "steps": [
         {
-          "text": "Start with x = 5 and run 2 rounds."
+          "text": "Start at 5 damage and double it 2 times."
         },
         {
-          "text": "Round 1: 5 × 2 = 10. Round 2: 10 × 2 = 20."
+          "text": "Phase 1: 5 × 2 = 10. Phase 2: 10 × 2 = 20."
         },
         {
-          "text": "So 5 doubled twice is 20. Doubling 3 times from 2 gives 16."
+          "text": "So 2 doubled 3 times is 16. Each doubling multiplies by 2 again."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-basics-5",
-      "prompt": "How many lines print?\nfor a in range(3):\n    for b in range(4):\n        print(a, b)",
+      "prompt": "Your football drill:\nfor a in range(3):\n    for b in range(4):\n        print(a, b)\nHow many lines print?",
       "options": [
         "7",
         "12",
@@ -262,20 +262,20 @@ export const pack: SePack = {
       "why": "The inner loop finishes fully each time the outer loop goes round once.",
       "steps": [
         {
-          "text": "Try 2 outer and 5 inner. The inner loop runs 5 times for each outer round."
+          "text": "Try 2 rounds of 5 passes. The inner loop runs 5 times per round."
         },
         {
           "text": "2 × 5 = 10 lines printed."
         },
         {
-          "text": "So 3 outer and 4 inner is 3 × 4 = 12 lines."
+          "text": "So 3 rounds of 4 passes is 3 × 4 = 12 lines."
         }
       ]
     },
     {
       "kind": "game",
       "id": "code-debug-games-0",
-      "title": "Bug Hunt Pairs",
+      "title": "Obby Bug Pairs",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -308,8 +308,8 @@ export const pack: SePack = {
       "id": "code-debug-teach-2",
       "title": "The method: predict, trace, compare",
       "lines": [
-        "Step 1: Predict. Write down what each line should do, before you run it.",
-        "Step 2: Trace. Walk through the code by hand and track the counter.",
+        "Step 1: Predict. Write what each line should do before you press run.",
+        "Step 2: Trace. Walk the obby code by hand and track the counter.",
         "Step 3: Compare. Find the first line where your trace and the output differ."
       ],
       "callout": {
@@ -320,7 +320,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-basics-6",
-      "prompt": "Sanji's coach writes: for n in range(4, 15). How many times does this loop run?",
+      "prompt": "Your Pokédex script: for n in range(4, 15): show a Pokémon. How many show?",
       "options": [
         "11 times",
         "10 times",
@@ -343,45 +343,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-basics-7",
-      "prompt": "Zoro prints each crew name.\nnames = [A, B, C]\nfor i in range(len(names) + 1):\n    print(names[i])\nWhat is the bug?",
+      "prompt": "Your squad prints each player's name.\nsquad = [Ace, Bolt, Cody]\nfor i in range(len(squad) + 1):\n    print(squad[i])\nWhat is the bug?",
       "options": [
-        "range should stop at len(names), not plus 1.",
         "print should run before the loop starts.",
-        "names needs a fourth name in the list."
+        "range should stop at len(squad), not plus 1.",
+        "squad needs a fourth player in the list."
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "A list of 3 items has positions 0, 1, 2, so the loop must stop before 3.",
       "steps": [
         {
-          "text": "A list of 2 names has positions 0 and 1 only."
+          "text": "A squad of 2 players has slots 0 and 1 only."
         },
         {
-          "text": "range(len + 1) for 2 names gives 0, 1, 2, so position 2 is missing."
+          "text": "range(len + 1) for 2 players gives 0, 1, 2, so slot 2 breaks."
         },
         {
-          "text": "range(len) for 3 names gives 0, 1, 2, which is safe."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "code-debug-build-1",
-      "prompt": "Isagi's score code: goals = 0 sits inside the loop. The loop runs 4 times and adds 1 goal each pass. What does print(goals) show?",
-      "answer": "1",
-      "decoys": [
-        "0",
-        "4"
-      ],
-      "why": "Setting a variable inside a loop resets it on every pass, so only the last pass's change survives.",
-      "steps": [
-        {
-          "text": "Each pass sets goals to 0 first, which wipes the last pass's work."
-        },
-        {
-          "text": "Example: points = 100 inside a loop, then points = points + 3. The final value is 103, not 109."
-        },
-        {
-          "text": "So the 4 passes leave only the last +1 on goals, and the answer is 1."
+          "text": "range(len) for 3 players gives 0, 1, 2, which is safe."
         }
       ]
     }
@@ -393,28 +371,28 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "The bug often sits at the start or end of a loop, not in the middle.",
-        "Counting from 1 to 10 with a ≤ check runs the loop 10 times, not 11.",
+        "Counting from 1 with a ≤ 10 check runs the loop 10 times, not 11.",
         "Watch the boundary: is the last value included, or does it stop before it?"
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro counts the crew twice at the gangplank. Count the edges first."
+        "flavour": "key",
+        "text": "Check the boundary of an obby before you touch the rest of the code."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Should run",
+            "label": "Should save",
             "value": 10,
             "tone": "good"
           },
           {
-            "label": "Actually ran",
+            "label": "Actually saved",
             "value": 11,
             "tone": "bad"
           }
         ],
-        "unit": "runs"
+        "unit": "checkpoints"
       }
     },
     {
@@ -423,12 +401,12 @@ export const pack: SePack = {
       "title": "Worked example: why 11 runs?",
       "lines": [
         "Training shots are numbered 1 to 10. The code repeats while shot ≤ 11.",
-        "Shot 1 runs, shot 2 runs, all the way up. Shot 11 runs too, by mistake.",
-        "Change ≤ 11 to < 11. Now it stops at 10, and the count matches the training."
+        "Shot 1 runs, shot 2 runs, all the way up. Shot 11 runs too.",
+        "Change ≤ 11 to < 11, so it stops at 10 shots."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "The coach says ten shots. The striker takes an eleventh, because the whistle is late."
+        "flavour": "key",
+        "text": "The coach says ten shots. The striker takes an eleventh because the whistle was late."
       },
       "art": {
         "art": "bars",
@@ -449,7 +427,7 @@ export const pack: SePack = {
             "tone": "focus"
           }
         ],
-        "unit": "runs"
+        "unit": "shots"
       }
     },
     {
@@ -457,7 +435,7 @@ export const pack: SePack = {
       "id": "code-debug-teach-5",
       "title": "Recap: find it, then make it lean",
       "lines": [
-        "Predict, trace, compare. Then find the first line that breaks.",
+        "Predict, trace, compare, like checking your team of 6 before a gym.",
         "Loops often run one time too many. Check the end number first.",
         "Efficiency means removing work the loop repeats for no reason."
       ],
@@ -476,8 +454,8 @@ export const pack: SePack = {
         "Forgetting the + 1 is the most common off-by-one."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi must take 10 shots, numbered 1 to 10. That is ten shots, not nine."
+        "flavour": "key",
+        "text": "A box of 10 Timbits numbered 1 to 10 gives ten grabs, not nine."
       },
       "art": {
         "art": "numberline",
@@ -507,10 +485,14 @@ export const pack: SePack = {
       "id": "code-debug-deeper-2",
       "title": "Start at 0 or start at 1?",
       "lines": [
-        "Many coders start counting at 0, not 1.",
-        "Counting 0 to 9 gives ten passes, same as 1 to 10.",
+        "Coders number the blocks in a wall starting from 0.",
+        "Blocks 0 to 9 make a wall of 10 blocks.",
         "Check the first number before you trust the last."
       ],
+      "callout": {
+        "flavour": "key",
+        "text": "A 10-block wall has its last block at number 9, not 10."
+      },
       "art": {
         "art": "numberline",
         "from": 0,
@@ -544,8 +526,8 @@ export const pack: SePack = {
         "Adding the two numbers is the usual slip. Multiply."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Each training round, Bachira runs the whole dribble drill again from the start."
+        "flavour": "key",
+        "text": "Each storm phase, your squad loots all 4 chests in the same house, 3 phases in a row."
       }
     },
     {
@@ -558,8 +540,8 @@ export const pack: SePack = {
         "Then the loop only adds to the total, never erases it."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "If Zoro's bounty reset to zero on every island, nobody would ever get paid."
+        "flavour": "gotcha",
+        "text": "If your Pokédex count reset to 0 after every catch, you would never reach 151."
       }
     },
     {
@@ -573,7 +555,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Zero passes is a real answer. Do not assume a loop always runs at least once."
+        "text": "In Roblox, zero passes is a real answer when the door is already open."
       }
     },
     {
@@ -582,12 +564,12 @@ export const pack: SePack = {
       "title": "Same answer, less work",
       "lines": [
         "Work inside a loop repeats on every single pass.",
-        "Move any fixed calculation outside the loop.",
+        "Move the storm-distance maths outside the loop.",
         "The output stays the same. The computer does fewer steps."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Efficiency means fewer repeated steps, not a shorter program."
+        "text": "Efficiency means fewer repeated steps, not fewer lines of code."
       },
       "art": {
         "art": "bars",
@@ -609,40 +591,40 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-basics-8",
-      "prompt": "Mikami's loop runs for n in range(1, 21, 2). How many times does it run?",
+      "prompt": "Isagi's drill runs for n in range(1, 21, 2). How many reps does it run?",
       "options": [
-        "9 times",
-        "11 times",
-        "10 times"
+        "10 reps",
+        "9 reps",
+        "11 reps"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "Each step jumps 2, so the loop lands on 10 numbers before the stop of 21.",
       "steps": [
         {
-          "text": "Try range(0, 10, 5). It gives 0 and 5, which is 2 runs."
+          "text": "Try range(0, 10, 5). It gives 0 and 5, so 2 runs."
         },
         {
           "text": "Method: (stop − start) ÷ step. Here (10 − 0) ÷ 5 = 2."
         },
         {
-          "text": "For range(1, 21, 2): (21 − 1) ÷ 2 = 10 runs."
+          "text": "Your drill: (21 − 1) ÷ 2 = 10 reps."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-basics-9",
-      "prompt": "total = 0\nfor n in [4, 5, 6]:\n    total = total + n\nWhat does total end as?",
+      "prompt": "Mine run: blocks = 0\nfor n in [4, 5, 6]:\n    blocks = blocks + n\nHow many blocks at the end?",
       "options": [
         "10",
         "21",
         "15"
       ],
       "answer": 2,
-      "why": "The loop adds one number per round, and total keeps the running sum.",
+      "why": "The loop adds one number per round, and blocks keeps the running sum.",
       "steps": [
         {
-          "text": "Try [2, 7, 1]. Start at 0. Add 2 to get 2, add 7 to get 9, add 1 to get 10."
+          "text": "Mine run with [2, 7, 1]. Start at 0. Add 2 to get 2, add 7 to get 9, add 1 to get 10."
         },
         {
           "text": "So each round adds the next number to the running total."
@@ -655,7 +637,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-applied-0",
-      "prompt": "Isagi's pass drill should run 10 times. Its loop is written as: for i = ? to 10. Which start value gives exactly 10 runs?",
+      "prompt": "Your obby needs 10 checkpoints. The loop is: for i = ? to 10. Which start value gives exactly 10 checkpoints?",
       "options": [
         "for i = 0 to 10",
         "for i = 1 to 10",
@@ -665,13 +647,13 @@ export const pack: SePack = {
       "why": "A counting loop that includes both ends runs end − start + 1 times.",
       "steps": [
         {
-          "text": "Try a different loop: for i = 3 to 7. The values are 3, 4, 5, 6, 7."
+          "text": "Try for i = 3 to 7 on a new obby. The values are 3, 4, 5, 6, 7."
         },
         {
           "text": "That is 5 values. Check with the rule: 7 − 3 + 1 = 5. The rule works."
         },
         {
-          "text": "Now test your answer the same way. Count the values, then compare with 10."
+          "text": "Now test your answer the same way. Count the checkpoints, then compare with 10."
         }
       ],
       "art": {
@@ -700,20 +682,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-applied-1",
-      "prompt": "The coach's minute checks run: for minute = 1 to 90 step 15. How many checks happen in total?",
+      "prompt": "Storm alarm loop: for t = 1 to 90 step 15. How many alarms ring in total?",
       "options": [
-        "6 checks",
-        "15 checks",
-        "90 checks"
+        "6 alarms",
+        "15 alarms",
+        "90 alarms"
       ],
       "answer": 0,
       "why": "A stepped loop only runs while the next value still fits before the end.",
       "steps": [
         {
-          "text": "Try a different clock: for minute = 1 to 20 step 4. Values: 1, 5, 9, 13, 17."
+          "text": "Try for t = 1 to 20 step 4. Values: 1, 5, 9, 13, 17."
         },
         {
-          "text": "The next value, 21, is past 20, so the loop stops. That gives 5 checks."
+          "text": "The next value, 21, is past 20, so the loop stops. That gives 5 alarms."
         },
         {
           "text": "Method: count the values that land on or before the end. Then check the last value is not past the end."
@@ -723,7 +705,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-applied-2",
-      "prompt": "Nagi's shooting grid: for row = 1 to 3, then for col = 1 to 4, score goes up by 1. How many times does score go up?",
+      "prompt": "Pizza boxes: for box = 1 to 3, then for slice = 1 to 4, slices goes up by 1. How many times does slices go up?",
       "options": [
         "7 times",
         "4 times",
@@ -733,7 +715,7 @@ export const pack: SePack = {
       "why": "Nested loops multiply, because the inner loop runs in full for every outer run.",
       "steps": [
         {
-          "text": "Try a new grid: rows 1 to 2, columns 1 to 5. Outer loop has 2 runs."
+          "text": "Try 2 pizzas with 5 slices each. The outer loop has 2 runs."
         },
         {
           "text": "Each outer run does the whole inner loop, which has 5 runs. So the total is 2 × 5."
@@ -746,11 +728,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-applied-3",
-      "prompt": "Isagi's shot counter: while shots < 10: shots = shots + 0. Which change stops this loop from running forever?",
+      "prompt": "Ball counter: balls = 0. while balls < 10: balls = balls + 0. Which change stops this loop from running forever?",
       "options": [
-        "shots = shots + 1",
-        "shots = shots + 0",
-        "shots = shots * 1"
+        "balls = balls + 1",
+        "balls = balls + 0",
+        "balls = balls * 1"
       ],
       "answer": 0,
       "why": "A loop ends only when its test value moves toward the limit each run.",
@@ -762,14 +744,14 @@ export const pack: SePack = {
           "text": "After 3 runs x is 6, so the test fails and the loop stops."
         },
         {
-          "text": "If the step adds 0, x never changes, so the test stays true. That is the forever loop."
+          "text": "If the step adds 0, the count never moves, so the test stays true. That is the forever loop."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-applied-4",
-      "prompt": "Team passes: total = 4 × 5. A loop adds 4 five times. Which code gets the total of 20 in the fewest runs?",
+      "prompt": "Squad eliminations: total = 4 × 5. A loop adds 4 five times. Which code gets the total of 20 in the fewest runs?",
       "options": [
         "add 4 in a loop of 5",
         "total = 4 * 5",
@@ -779,7 +761,7 @@ export const pack: SePack = {
       "why": "Multiplying replaces repeated adding, so the computer does one step instead of many.",
       "steps": [
         {
-          "text": "Try 6 games with 3 shots each. The loop adds 3 six times, so 6 runs."
+          "text": "Try 6 drops with 3 eliminations each. The loop adds 3 six times, so 6 runs."
         },
         {
           "text": "Multiplication does 6 × 3 in one step, giving 18 with 1 run."
@@ -787,72 +769,65 @@ export const pack: SePack = {
         {
           "text": "Same answer, far fewer runs. Efficient code finds the shortcut."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "code-debug-applied-5",
-      "prompt": "Zoro's sword drill: for swing = 1 to 20 step 2. How many swings happen?",
+      "prompt": "Minecraft wall builder: for block = 1 to 20 step 2. How many blocks get placed?",
       "options": [
-        "20 swings",
-        "10 swings",
-        "11 swings"
+        "20 blocks",
+        "10 blocks",
+        "11 blocks"
       ],
       "answer": 1,
-      "why": "Stepping by 2 skips every second value, so the loop runs about half as often.",
+      "why": "Stepping by 2 skips every second value, so the loop places about half as many blocks.",
       "steps": [
         {
-          "text": "Try for swing = 2 to 8 step 2. Values are 2, 4, 6, 8."
+          "text": "Try for block = 2 to 8 step 2. The values are 2, 4, 6, 8."
         },
         {
-          "text": "That is 4 swings. The jumps are 3, plus the first value, so 3 + 1 = 4."
+          "text": "That is 4 blocks. Check with the rule: (8 − 2) ÷ 2 + 1 = 4."
         },
         {
-          "text": "Now the real drill: values 1, 3, 5 up to 19. Count the odd numbers from 1 to 19."
+          "text": "Now the real wall: values 1, 3, 5 up to 19. Count the odd numbers from 1 to 19."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-applied-6",
-      "prompt": "Luffy's hp = 30. The code is: while hp >= 0: hp = hp − 3. How many times does the body run?",
+      "prompt": "Fortnite fall damage: health = 30. While health >= 0: health = health − 3. How many ticks hit?",
       "options": [
-        "10 times",
-        "9 times",
-        "11 times"
+        "10 ticks",
+        "9 ticks",
+        "11 ticks"
       ],
       "answer": 2,
       "why": "A test that includes the end value adds one extra run before it fails.",
       "steps": [
         {
-          "text": "Try hp = 20 with hp = hp − 5. The test passes at 20, 15, 10, 5, and 0."
+          "text": "Try health = 20 with health = health − 5. Ticks land at 20, 15, 10, 5, and 0."
         },
         {
-          "text": "That is 5 runs. The test still passes at 0, so one more run happens."
+          "text": "That is 5 ticks. 20 ÷ 5 = 4 steps down, plus the 0 tick, gives 5."
         },
         {
-          "text": "Change >= to > and 30 gives 10 runs. Count the passing values to check."
+          "text": "Change >= to > and 30 gives 10 ticks. Count the passing values to check."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-applied-7",
-      "prompt": "Kaito adds his goals: total = 0. Then for b in [2, 4, 6]: total = b. Which line is the bug?",
+      "prompt": "Blue Lock goals: total = 0. Then for g in [2, 4, 6]: total = g. Which line is the bug?",
       "options": [
         "total = 0",
-        "total = b",
+        "total = g",
         "print(total)"
       ],
       "answer": 1,
-      "why": "Assigning b throws away the old total, so only the last value remains.",
+      "why": "Assigning g throws away the old total, so only the last value remains.",
       "steps": [
         {
           "text": "Try the list [3, 1, 5]. Each run puts a new value in total."
@@ -861,47 +836,24 @@ export const pack: SePack = {
           "text": "The final total is 5, not 9. Only the last value survives."
         },
         {
-          "text": "The fix is total = total + b. Now each run keeps the old total and adds to it."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "code-debug-applied-8",
-      "prompt": "The list has 4 bounties but count says 5. Which count gives the right average of 250?",
-      "options": [
-        "count = 3",
-        "count = 5",
-        "count = 4"
-      ],
-      "answer": 2,
-      "why": "Dividing by the wrong count changes the average, even when the total is correct.",
-      "steps": [
-        {
-          "text": "Try a list of 3 bounties with a total of 60. The average must be 60 ÷ 3 = 20."
-        },
-        {
-          "text": "If count is 5 instead, 60 ÷ 5 = 12, which is too small."
-        },
-        {
-          "text": "Count the items in the list, not the lines of code. The count must match the items."
+          "text": "The fix is total = total + g. Now each run keeps the old total and adds to it."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-applied-9",
-      "prompt": "Shanks' crew: for i = ? to 5, each run is one crew member checked. Which start gives 5 checks?",
+      "prompt": "Roblox obby checkpoints: for c = ? to 5, each run checks one checkpoint. Which start gives 5 checks?",
       "options": [
-        "for i = 1 to 5",
-        "for i = 5 to 1",
-        "for i = 0 to 5"
+        "for c = 1 to 5",
+        "for c = 5 to 1",
+        "for c = 0 to 5"
       ],
       "answer": 0,
       "why": "A counting loop with both ends included runs end − start + 1 times.",
       "steps": [
         {
-          "text": "Try for i = 3 to 8. The values are 3, 4, 5, 6, 7, 8."
+          "text": "Try for c = 3 to 8. The values are 3, 4, 5, 6, 7, 8."
         },
         {
           "text": "That is 6 values. Check with the rule: 8 − 3 + 1 = 6."
@@ -914,11 +866,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-deeper-1",
-      "prompt": "A loop counts from 1 to 10. How many times does it run?",
+      "prompt": "Pokéball loop: for ball = 1 to 10. How many throws does it run?",
       "options": [
-        "9 times",
-        "10 times",
-        "11 times"
+        "9 throws",
+        "10 throws",
+        "11 throws"
       ],
       "answer": 1,
       "why": "Both ends count, so the number of passes is last − first + 1.",
@@ -959,17 +911,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-deeper-3",
-      "prompt": "The program should print 5 but prints 1. Which line is the bug?\n1 goals = 0\n2 repeat 5 times:\n3   goals = 0\n4   goals = goals + 1\n5 say goals",
+      "prompt": "Your obby counts coins. It should print 5 but prints 1. Which line is the bug?\n1 coins = 0\n2 repeat 5 times:\n3   coins = 0\n4   coins = coins + 1\n5 say coins",
       "options": [
-        "Line 1 starts goals at zero",
-        "Line 3 resets goals each pass",
+        "Line 1 starts coins at zero",
+        "Line 3 resets coins each pass",
         "Line 4 adds one each pass"
       ],
       "answer": 1,
       "why": "Setting a total to zero inside the loop wipes out every earlier pass.",
       "steps": [
         {
-          "text": "Trace goals before the loop starts. It is 0."
+          "text": "Trace coins before the loop starts. It is 0."
         },
         {
           "text": "Trace pass one: line 3 sets 0, line 4 makes it 1."
@@ -982,7 +934,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-deeper-5",
-      "prompt": "Each of 3 rounds has 4 shots. How many shots in all?",
+      "prompt": "Your striker does 3 rounds of 4 shots in training. How many shots in all?",
       "options": [
         "7 shots",
         "12 shots",
@@ -992,20 +944,20 @@ export const pack: SePack = {
       "why": "Each outer pass runs the whole inner loop, so the counts multiply.",
       "steps": [
         {
-          "text": "Outer loop: 5 rounds. Inner loop: 6 shots each round."
+          "text": "Outer loop: 3 rounds. Inner loop: 4 shots each round."
         },
         {
-          "text": "Multiply: 5 × 6 = 30 shots in all."
+          "text": "Multiply: 3 × 4 = 12 shots in all."
         },
         {
-          "text": "Check by adding six, five times: 6 + 6 + 6 + 6 + 6 = 30."
+          "text": "Check by adding four, three times: 4 + 4 + 4 = 12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-debug-deeper-7",
-      "prompt": "A loop runs 1000 times. Inside, it works out 3 × 7 every pass. What is the best fix?",
+      "prompt": "Your Minecraft farm loop runs 1000 times. Each pass works out 3 × 7. What is the best fix?",
       "options": [
         "Do 3 × 7 once, before the loop",
         "Do 3 × 7 again on every single pass",
@@ -1044,7 +996,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-deeper-9",
-      "prompt": "Code: while lives > 0, lose one life. Lives start at 0. How many times does the loop run?",
+      "prompt": "Code: while shield > 0, lose one shield. Shield starts at 0. How many times does the loop run?",
       "options": [
         "0 times",
         "1 time",
@@ -1054,10 +1006,10 @@ export const pack: SePack = {
       "why": "A while loop checks first, so a false start means zero passes.",
       "steps": [
         {
-          "text": "Try lives at 2. Check 2 > 0: yes, lose one, lives is now 1."
+          "text": "Try shield at 2. Check 2 > 0: yes, lose one, shield is now 1."
         },
         {
-          "text": "Check 1 > 0: yes, lose one, lives is now 0. That is 2 passes."
+          "text": "Check 1 > 0: yes, lose one, shield is now 0. That is 2 passes."
         },
         {
           "text": "Check 0 > 0: no, so it stops. Start at 0 means the check fails first."
@@ -1067,7 +1019,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-debug-deeper-11",
-      "prompt": "The loop should run 5 times. It starts at 0 and goes while i ≤ 5, adding 1 each pass. What fixes it?",
+      "prompt": "Your gym run should battle 5 trainers. It starts at 0 and goes while i ≤ 5, adding 1 each pass. What fixes it?",
       "options": [
         "Change the step to add 2 each pass",
         "Change ≤ 5 to < 5 in the check",
@@ -1090,7 +1042,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-debug-build-2",
-      "prompt": "Blue Lock's loop: for i in range(0, 11): print(i). It prints a line each time. How many lines print?",
+      "prompt": "Blue Lock's loop: for i in range(0, 11): print(i). It prints a line for each striker. How many lines print?",
       "answer": "11",
       "decoys": [],
       "why": "Starting at 0 and stopping before 11 gives 11 passes, because 0 counts as one of them.",
@@ -1109,7 +1061,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-debug-build-3",
-      "prompt": "Blue Lock's stats: the team scored 6 goals and conceded 9. What is the goal difference?",
+      "prompt": "Arsenal scored 6 goals and conceded 9. What is the goal difference?",
       "answer": "-3",
       "decoys": [
         "+"
@@ -1147,7 +1099,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-debug-build-4",
-      "prompt": "Isagi takes 12 shots and scores 3 goals. Write goals per shot as a fraction in simplest form.",
+      "prompt": "Your squad drops 12 times and wins 3 Victory Royales. Write wins per drop as a fraction in simplest form.",
       "answer": "1/4",
       "decoys": [
         "2",
@@ -1156,10 +1108,10 @@ export const pack: SePack = {
       "why": "A fraction is in simplest form when the top and bottom share no common factor left to divide out.",
       "steps": [
         {
-          "text": "Write the fraction: 3 goals out of 12 shots is 3/12."
+          "text": "Write the fraction: 3 wins out of 12 drops is 3/12."
         },
         {
-          "text": "Example: 6 goals from 8 shots is 6/8. Divide both by 2 to get 3/4."
+          "text": "Example: 6 wins from 8 drops is 6/8. Divide both by 2 to get 3/4."
         },
         {
           "text": "For 3/12, divide top and bottom by 3. That gives 1/4."
@@ -1176,7 +1128,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-debug-build-5",
-      "prompt": "Luffy's bounty starts at 100. The loop adds 50 three times. What is the final bounty?",
+      "prompt": "You start with 100 Robux. Your game pass earns 50 Robux a day for 3 days. What is your final Robux?",
       "answer": "250",
       "decoys": [
         "1",
@@ -1185,10 +1137,10 @@ export const pack: SePack = {
       "why": "A loop repeats the same change each pass, so the total added is the change times the number of passes.",
       "steps": [
         {
-          "text": "Start with 100. Each pass adds 50, and there are 3 passes."
+          "text": "Start with 100 Robux. Each pass adds 50, and there are 3 passes."
         },
         {
-          "text": "Example: start at 40 and add 25 four times. 25 × 4 = 100, so 40 + 100 = 140."
+          "text": "Example: start with 40 and earn 25 four times. 25 × 4 = 100, so 40 + 100 = 140."
         },
         {
           "text": "Here 50 × 3 = 150. Then 100 + 150 = 250."
@@ -1198,7 +1150,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-debug-build-6",
-      "prompt": "The crew counts sea depth down by 3: 12, 9, 6, 3, then the loop stops before 0. How many lines print?",
+      "prompt": "Your drill prints layer Y: 12, 9, 6, 3, then stops before 0. How many layers print?",
       "answer": "4",
       "decoys": [
         "3",
@@ -1210,59 +1162,38 @@ export const pack: SePack = {
           "text": "Find the distance from 12 down to 0: 12 − 0 = 12."
         },
         {
-          "text": "Example: from 15 down to 0 by steps of 5 gives 15 ÷ 5 = 3 lines: 15, 10, 5."
+          "text": "Example: from 15 down to 0 by steps of 5 gives 15 ÷ 5 = 3 layers: 15, 10, 5."
         },
         {
-          "text": "Here 12 ÷ 3 = 4 lines. The 0 is not printed because the loop stops before it."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "code-debug-build-7",
-      "prompt": "A loop adds 0.25 each pass, for 3 passes, starting at 0. What is the final total?",
-      "answer": "0.75",
-      "decoys": [
-        "2"
-      ],
-      "why": "Quarters add up in steps of 0.25, so four quarters make one whole, which is 1.00.",
-      "steps": [
-        {
-          "text": "Each pass adds one quarter, which is 0.25."
-        },
-        {
-          "text": "Example: 0.25 added 5 times is 1.25, since five quarters are one dollar and a quarter."
-        },
-        {
-          "text": "Here 0.25 + 0.25 + 0.25 = 0.75."
+          "text": "Here 12 ÷ 3 = 4 layers. The 0 is not printed because the loop stops before it."
         }
       ]
     },
     {
       "kind": "game",
       "id": "code-debug-games-1",
-      "title": "Count the Runs",
+      "title": "Count the Drops",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "range(3)",
+            "label": "drop(3)",
             "value": 3
           },
           {
-            "label": "range(5)",
+            "label": "drop(5)",
             "value": 5
           },
           {
-            "label": "range(2, 9)",
+            "label": "drop(2, 9)",
             "value": 7
           },
           {
-            "label": "range(10)",
+            "label": "drop(10)",
             "value": 10
           },
           {
-            "label": "range(1, 12)",
+            "label": "drop(1, 12)",
             "value": 11
           }
         ]

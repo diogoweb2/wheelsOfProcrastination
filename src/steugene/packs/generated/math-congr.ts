@@ -15,19 +15,19 @@ export const pack: SePack = {
       "id": "math-congr-teach-0",
       "title": "Twins: same or scaled?",
       "lines": [
-        "Isagi and his clone stand side by side. Same boots, same height, same kit.",
-        "That is congruent: the same shape and the same size.",
-        "Scaled-up twins look the same but one is bigger. That is similar."
+        "Two Minecraft houses from the same blueprint. Same blocks, same roof, same size.",
+        "That is congruent: same shape, same size.",
+        "Scale one up to 200% and it is similar: same shape, bigger size."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Two identical strikers in a Blue Lock drill. Same size, same shape."
+        "flavour": "key",
+        "text": "Two identical Minecraft houses are congruent. A 200% copy is similar."
       }
     },
     {
       "kind": "choice",
       "id": "math-congr-basics-0",
-      "prompt": "Blue Lock: two shapes are congruent. What must be true about them?",
+      "prompt": "Minecraft: two houses are congruent. What must be true about them?",
       "options": [
         "Same shape and exactly the same size.",
         "Same shape, but the size can be different.",
@@ -37,20 +37,20 @@ export const pack: SePack = {
       "why": "Congruent shapes match in both shape and size, so every side and every angle is equal.",
       "steps": [
         {
-          "text": "Start with a photocopy printed at 100%. Every side and angle copies exactly."
+          "text": "Copy a 4-block-wide wall at 100%. It is still 4 blocks wide, an exact match."
         },
         {
-          "text": "Now print it at 150%. The shape still looks the same, but every side is longer, so it is not congruent."
+          "text": "Scale that wall to 150%. Now it is 6 blocks wide, so the sides changed and it is not congruent."
         },
         {
-          "text": "Hook: a striker's shot that is copied and flipped is still the same shot, so congruent means a perfect copy."
+          "text": "Hook: a house copied and flipped still fits the same plot, so congruent means a perfect copy."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-congr-basics-1",
-      "prompt": "One Piece: Zoro's wanted poster is 5 cm tall. The copy on the ship's log is 12 cm tall. What is the scale factor from the small poster to the big one?",
+      "prompt": "Pokémon: a 5 cm Pikachu card is printed as a 12 cm poster. What is the scale factor from card to poster?",
       "options": [
         "0.4",
         "2.4",
@@ -63,7 +63,7 @@ export const pack: SePack = {
           "text": "Scale factor = new length ÷ old length."
         },
         {
-          "text": "Try a different pair: a 4 cm card enlarged to 10 cm. Then 10 ÷ 4 = 2.5."
+          "text": "Try a different pair: a 4 cm Poké Ball sticker grown to 10 cm. Then 10 ÷ 4 = 2.5."
         },
         {
           "text": "Check it: 4 × 2.5 = 10, so the scale factor is right."
@@ -125,11 +125,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-basics-2",
-      "prompt": "Blue Lock: two similar rectangles on the pitch. The small one is 3 m wide and 5 m long. The big one is 6 m wide. How long is the big one?",
+      "prompt": "Roblox: an obby platform is 3 studs wide and 5 studs long. The scaled copy is 6 studs wide. How long is the copy?",
       "options": [
-        "8 m",
-        "11 m",
-        "10 m"
+        "8 studs",
+        "11 studs",
+        "10 studs"
       ],
       "answer": 2,
       "why": "Similar shapes grow by the same scale factor on every side, so the long side must be multiplied by the same number as the short side.",
@@ -138,7 +138,7 @@ export const pack: SePack = {
           "text": "Find the scale factor from the matching sides: new width ÷ old width."
         },
         {
-          "text": "Try different numbers: a 2 m side becomes 6 m, so the factor is 3. A 7 m side then becomes 7 × 3 = 21 m."
+          "text": "Try different numbers: a 2-stud side becomes 6 studs, so the factor is 3. A 7-stud side then becomes 7 × 3 = 21 studs."
         },
         {
           "text": "Apply the same factor to the length you need, not to a different side."
@@ -148,7 +148,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-basics-3",
-      "prompt": "One Piece: Luffy's triangle flag is copied. Which copy is congruent to the original?",
+      "prompt": "Food: a triangle pizza slice with sides 3 cm, 4 cm, 5 cm is copied. Which copy is congruent?",
       "options": [
         "A copy that is twice as tall",
         "A copy that is turned and flipped over",
@@ -161,10 +161,10 @@ export const pack: SePack = {
           "text": "Congruent means every side and every angle matches exactly."
         },
         {
-          "text": "Turn a sticker 90° and flip it over. Its sides are still the same lengths."
+          "text": "Turn a 3 cm, 4 cm, 5 cm slice 90° and flip it. Its sides are still 3, 4 and 5 cm."
         },
         {
-          "text": "Hook: a sticker that is flipped is still the same sticker, so a flip counts as a perfect copy."
+          "text": "Hook: a flipped slice is still the same slice, so a flip is a perfect copy."
         }
       ]
     },
@@ -173,49 +173,42 @@ export const pack: SePack = {
       "id": "math-congr-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Factories copy parts that must fit exactly, like a bolt in a nut.",
+        "Parts that must fit, like a bolt and a nut, are copied exactly.",
         "Maps and model ships use similar shapes to show big things small.",
-        "A scale model of the Going Merry is similar to the real ship."
+        "A 1:100 model of the Going Merry is similar to the real ship."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy's crew builds a model ship. Every part is scaled from the real one, so the shape stays the same."
+        "text": "Luffy's crew builds a model ship. Every part is scaled, so the shape stays the same."
       }
     },
     {
       "kind": "build",
       "id": "math-congr-build-0",
-      "prompt": "Isagi's training pitch is a similar copy of the match pitch. The small one is 40 m long. The big one is 60 m long. What is the scale factor from small to big?",
+      "prompt": "Your Roblox part is 8 studs long.\nIts similar copy is 12 studs long.\nWhat is the scale factor from small to big?",
       "answer": "3/2",
       "decoys": [
         "5",
         "4",
         "0"
       ],
-      "why": "A scale factor is the big length divided by the small length, and it works the same for every side.",
+      "why": "A scale factor is the new length divided by the old length, and it is the same for every side.",
       "steps": [
         {
-          "text": "Divide the big length by the small length. Example: small 8 m, big 20 m, so 20 ÷ 8 = 2.5."
+          "text": "Divide the big length by the small length. Example: small 5 studs, big 20 studs, so 20 ÷ 5 = 4."
         },
         {
           "text": "Write it as a fraction and simplify. Example: 20/8 = 5/2 after dividing top and bottom by 4."
         },
         {
-          "text": "Try it here: 60/40 ÷ 20 on top and bottom gives 3/2. Every side of the big pitch uses this same factor."
+          "text": "Try it here: 12 ÷ 8 = 1.5, which is 3/2 as a fraction. Every side of the copy uses this factor."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 2,
-        "filled": 1,
-        "label": "1/2",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-congr-basics-4",
-      "prompt": "Blue Lock: triangle A has angles 40°, 60° and 80°. Triangle B is similar to A. Its angles are 60°, 80° and ?. What is the missing angle?",
+      "prompt": "Minecraft roof: triangle A has angles 40°, 60° and 80°.\nA similar roof triangle has angles 60°, 80° and ?.\nWhat is the missing angle?",
       "options": [
         "40°",
         "60°",
@@ -238,7 +231,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-basics-5",
-      "prompt": "One Piece: which pair of rectangles is similar?",
+      "prompt": "Food: which pair of baking trays is similar?",
       "options": [
         "2 by 3 and 4 by 5",
         "2 by 3 and 3 by 4",
@@ -261,7 +254,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-congr-games-0",
-      "title": "Twin Crews or Scaled Crews",
+      "title": "Twin Houses or Scaled Models",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -275,7 +268,7 @@ export const pack: SePack = {
           ],
           [
             "Scale factor",
-            "Ratio of new to old"
+            "New ÷ old"
           ],
           [
             "Corresponding",
@@ -294,23 +287,23 @@ export const pack: SePack = {
       "id": "math-congr-teach-2",
       "title": "The method",
       "lines": [
-        "Congruent: check every side and every angle. All must match.",
+        "Congruent: two identical Minecraft houses match every side and angle.",
         "Similar: check the angles match first. Then check the sides.",
         "Each side pair must have the same ratio: new side ÷ old side."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Congruent is a special case of similar. The ratio is 1 when sides match."
+        "text": "Two identical houses have a ratio of 1, so congruent is a special case of similar."
       }
     },
     {
       "kind": "choice",
       "id": "math-congr-basics-6",
-      "prompt": "Blue Lock: triangle ABC is congruent to triangle DEF, with A matching D, B matching E and C matching F. Side BC is 4 cm. How long is side EF?",
+      "prompt": "Your squad builds two identical wall ramps, ABC and DEF.\nA matches D, B matches E, C matches F.\nSide BC is 4 m. How long is side EF?",
       "options": [
-        "7 cm",
-        "4 cm",
-        "9 cm"
+        "7 m",
+        "4 m",
+        "9 m"
       ],
       "answer": 1,
       "why": "In congruent triangles, matching sides are equal, and side EF joins the corners that match B and C.",
@@ -319,7 +312,7 @@ export const pack: SePack = {
           "text": "Match the corners first: A to D, B to E, C to F."
         },
         {
-          "text": "Try different numbers: if QR is 9 cm in triangle PQR, and Q matches Y, R matches Z, then YZ is also 9 cm."
+          "text": "Try different numbers: if QR is 9 m in triangle PQR, and Q matches Y, R matches Z, then YZ is also 9 m."
         },
         {
           "text": "Find which two corners side EF joins, then look for the matching side in the first triangle."
@@ -329,30 +322,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-basics-7",
-      "prompt": "One Piece: every side of a square is doubled. Is the new square similar, congruent or neither?",
+      "prompt": "A Minecraft floor is a square. Every side is doubled. Is the new square similar, congruent or neither?",
       "options": [
-        "Similar, but not congruent",
         "Congruent, the same size",
+        "Similar, but not congruent",
         "Neither, because the angles changed"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Doubling every side keeps all the angles at 90° and changes the size, so the new square is similar but not congruent.",
       "steps": [
         {
-          "text": "Start with a 1 cm square. Double each side, so it becomes 2 cm."
+          "text": "Start with a 1 m square floor. Double each side, so it becomes 2 m."
         },
         {
           "text": "Check each corner. Still 90°, so the angles did not change."
         },
         {
-          "text": "Hook: a photo enlarged to 200% has the same shape but a bigger size, like a boss copied into a bigger poster."
+          "text": "Hook: a 16 × 16 block floor doubled is 32 × 32. Same shape, bigger size."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-congr-build-1",
-      "prompt": "Two triangles have the same shape. One corner of the triangle is 40° and another is 75°. What is the third corner? Type the number of degrees.",
+      "prompt": "A Minecraft roof is a triangle. Two corners are 40° and 75°. Type the third corner in degrees.",
       "answer": "65",
       "decoys": [
         "4",
@@ -368,7 +361,7 @@ export const pack: SePack = {
           "text": "Subtract that from 180. Example: 180 − 110 = 70, so the third corner is 70°."
         },
         {
-          "text": "Try it here: 180 − 40 − 75. Angles stay the same when a triangle is scaled, so this works for both twins."
+          "text": "Try it on your roof: 180 − 40 − 75. Angles stay the same when the roof is scaled up."
         }
       ]
     }
@@ -380,12 +373,12 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Same shape does not always mean same size.",
-        "A shape can look alike but be stretched. Stretched shapes are not similar.",
+        "A stretched shape is not similar, even if it looks alike.",
         "Check the sides in pairs. Do the ratios stay the same?"
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Two rectangles can look alike. Check each pair of sides before you decide."
+        "text": "Two Roblox parts can look alike. One may be stretched. Check each pair of sides."
       }
     },
     {
@@ -393,25 +386,25 @@ export const pack: SePack = {
       "id": "math-congr-teach-4",
       "title": "Worked example",
       "lines": [
-        "Small triangle: sides 3 cm, 4 cm, 5 cm. Big triangle: 6 cm, 8 cm, 10 cm.",
+        "Small ramp: 3 m, 4 m, 5 m. Big ramp: 6 m, 8 m, 10 m.",
         "Pairs: 6 ÷ 3 = 2, 8 ÷ 4 = 2, 10 ÷ 5 = 2. Every ratio is 2.",
-        "Same angles and same ratio, so the triangles are similar. Scale factor 2."
+        "Same angles and same ratio, so the ramps are similar. Scale factor 2."
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Small triangle, longest side",
+            "label": "Small ramp, longest side",
             "value": 5,
             "tone": "focus"
           },
           {
-            "label": "Big triangle, longest side",
+            "label": "Big ramp, longest side",
             "value": 10,
             "tone": "good"
           }
         ],
-        "unit": "cm"
+        "unit": "m"
       }
     },
     {
@@ -419,13 +412,13 @@ export const pack: SePack = {
       "id": "math-congr-teach-5",
       "title": "Recap",
       "lines": [
-        "Congruent: same shape, same size. All sides and angles match.",
-        "Similar: same shape, different size. Sides share one ratio.",
+        "Congruent: two identical Pokémon cards. Same shape, same size.",
+        "Similar: one card blown up to 200%. Same shape, bigger size.",
         "Check the angles first. Then check the ratio of each pair of sides."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Twins that match exactly are congruent. Scaled-up twins are similar."
+        "text": "Identical cards are congruent. Scaled-up cards are similar."
       }
     },
     {
@@ -434,12 +427,12 @@ export const pack: SePack = {
       "title": "Same shape is not enough",
       "lines": [
         "Same shape does not mean same size.",
-        "A tiny penalty kick and a huge one can look alike.",
+        "A half-size goal and a full-size goal can look alike.",
         "Matching shape, different size: that is similar, not congruent."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Two copies of a striker's shot map, one blown up. Same shape, so similar."
+        "text": "A 7.32 m goal and a 3.66 m goal: same shape, so similar, not congruent."
       }
     },
     {
@@ -448,12 +441,12 @@ export const pack: SePack = {
       "title": "Congruent: same shape AND same size",
       "lines": [
         "Congruent shapes match exactly. Every side and angle is equal.",
-        "You can slide, turn or flip one to fit on the other.",
+        "You can slide, turn or flip one to fit exactly on the other.",
         "If it will not fit exactly, it is not congruent."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Two copies of a bounty poster, one flipped. Same size, so congruent."
+        "text": "Two copies of the same 7 by 7 block house, one flipped. Same size, so congruent."
       }
     },
     {
@@ -467,7 +460,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "A pitch with every side doubled is still the same shape."
+        "text": "A Roblox model scaled to 200% keeps its shape, with every side doubled."
       }
     },
     {
@@ -481,7 +474,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A pitch twice as long has four times the grass to mow."
+        "text": "A 10 by 10 floor is 100 blocks. Doubled to 20 by 20, it needs 400."
       }
     },
     {
@@ -489,7 +482,7 @@ export const pack: SePack = {
       "id": "math-congr-deeper-4",
       "title": "Same area does not mean same shape",
       "lines": [
-        "A 2 by 8 rectangle and a 4 by 4 square both have 16 cm².",
+        "A 2 by 8 cutting board and a 4 by 4 board both have 16 cm².",
         "Equal area tells you nothing about congruence.",
         "Check the sides, not the area."
       ],
@@ -509,7 +502,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Matching angles tell you the shape. Only matching sides prove congruent."
+        "text": "Two Roblox ramps with matching angles are similar. Only matching sides prove congruent."
       }
     },
     {
@@ -538,7 +531,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-basics-9",
-      "prompt": "One Piece: two triangles both have sides 5 cm, 6 cm and 7 cm. What can you say about them?",
+      "prompt": "Two Minecraft roof triangles each have sides 5, 6 and 7 blocks. What can you say?",
       "options": [
         "They are similar but not congruent",
         "They are congruent, all sides match",
@@ -561,7 +554,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-0",
-      "prompt": "Isagi's team sign is 6 cm by 4 cm. A bigger copy uses scale factor 3. What are the new sides?",
+      "prompt": "A Roblox game thumbnail is 6 cm by 4 cm. A bigger print uses scale factor 3. What are the new sides?",
       "options": [
         "9 cm by 7 cm",
         "18 cm by 4 cm",
@@ -571,20 +564,20 @@ export const pack: SePack = {
       "why": "A scale factor multiplies every side by the same number, so the shape keeps its proportions.",
       "steps": [
         {
-          "text": "Take a different sign: 5 cm by 2 cm, scale factor 4."
+          "text": "Take a different card: a Pokédex card 5 cm by 2 cm, scale factor 4."
         },
         {
           "text": "Multiply each side by 4: 5 × 4 = 20 and 2 × 4 = 8, so 20 cm by 8 cm."
         },
         {
-          "text": "Adding 3 to each side gives a new shape with different proportions. Multiplying keeps it similar."
+          "text": "Adding 3 to each side would change the proportions, so multiplying is what keeps it similar."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-congr-applied-1",
-      "prompt": "A wanted poster is 3 cm wide. A bigger copy is 9 cm wide. What is the scale factor from small to big?",
+      "prompt": "A Minecraft block texture print is 3 cm wide. The big poster is 9 cm wide. What is the scale factor from small to big?",
       "options": [
         "×3",
         "×9",
@@ -607,7 +600,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-2",
-      "prompt": "Two triangles have sides 5, 7, 9 cm and 10, 14, 18 cm. Which description is correct?",
+      "prompt": "Two Blue Lock badges are triangles with sides 5, 7, 9 cm and 10, 14, 18 cm. Which description is correct?",
       "options": [
         "Similar, scale factor 2",
         "Congruent, same size",
@@ -630,12 +623,12 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Small triangle",
+            "label": "Small badge",
             "value": 9,
             "tone": "calm"
           },
           {
-            "label": "Big triangle",
+            "label": "Big badge",
             "value": 18,
             "tone": "focus"
           }
@@ -646,7 +639,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-3",
-      "prompt": "Two crew flags are triangles with sides 3, 4, 5 cm and 9, 12, 15 cm. How are they related?",
+      "prompt": "Two Pokémon gym pennants are triangles with sides 3, 4, 5 cm and 9, 12, 15 cm. How are they related?",
       "options": [
         "Congruent, same sides",
         "Similar, factor 4",
@@ -669,20 +662,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-4",
-      "prompt": "A school field plan uses 1 cm for every 5 m. A drawn width is 12 cm. What is the real width?",
+      "prompt": "A Minecraft build map uses 1 cm for every 5 blocks. A drawn wall is 12 cm. What is the real width?",
       "options": [
-        "48 metres",
-        "60 metres",
-        "17 metres"
+        "48 blocks",
+        "60 blocks",
+        "17 blocks"
       ],
       "answer": 1,
-      "why": "A scale drawing is similar to the real field, so each drawn centimetre stands for the same real distance.",
+      "why": "A scale drawing is similar to the real build, so each drawn centimetre stands for the same real distance.",
       "steps": [
         {
-          "text": "Try a different line: 7 cm drawn at 1 cm for 4 m."
+          "text": "Try a different line: 7 cm drawn at 1 cm for 4 blocks."
         },
         {
-          "text": "Multiply the drawn length by the real amount per centimetre: 7 × 4 = 28 m."
+          "text": "Multiply the drawn length by the real amount per centimetre: 7 × 4 = 28 blocks."
         },
         {
           "text": "A longer drawn line means a longer real one, so multiply and do not divide."
@@ -692,7 +685,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-5",
-      "prompt": "Two triangles have all three sides equal. Which rule proves they are congruent?",
+      "prompt": "Two Minecraft houses have walls 4, 5 and 6 blocks long. Which rule proves they are congruent?",
       "options": [
         "SSS",
         "AAA",
@@ -702,20 +695,20 @@ export const pack: SePack = {
       "why": "Matching all three sides fixes the triangle, so the two triangles must be the same size and shape.",
       "steps": [
         {
-          "text": "Look at two triangles with sides 4, 5, 6 cm and 4, 5, 6 cm. All three pairs match."
+          "text": "Check two roof triangles: sides 4, 5, 6 blocks and 4, 5, 6 blocks. All three pairs match."
         },
         {
-          "text": "Now consider 2, 3, 4 cm and 6, 9, 12 cm. Matching angles only would not prove the size."
+          "text": "Now compare 2, 3, 4 blocks with 6, 9, 12 blocks. Matching angles alone cannot prove the size."
         },
         {
-          "text": "Matching three sides leaves no room to change shape, so congruence follows."
+          "text": "Matching three sides leaves no room to change shape, so the houses are congruent."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-congr-applied-7",
-      "prompt": "A treasure map square is scaled up by factor 5. How many times bigger is its area?",
+      "prompt": "A Roblox floor tile is 2 studs square. Scale it by 5. How many times bigger is its area?",
       "options": [
         "5 times",
         "10 times",
@@ -725,33 +718,33 @@ export const pack: SePack = {
       "why": "Area is two-dimensional, so scaling each side by 5 multiplies the area by 5 × 5.",
       "steps": [
         {
-          "text": "Try a 2 cm square: its area is 4 cm²."
+          "text": "Try a 3-stud tile: its area is 9 square studs."
         },
         {
-          "text": "Scale it by 5, so the new side is 10 cm and the area is 100 cm²."
+          "text": "Scale it by 5, so the new side is 15 studs and the area is 225 square studs."
         },
         {
-          "text": "100 ÷ 4 = 25, so area grows by the square of the factor, not the factor."
+          "text": "225 ÷ 9 = 25, so area grows by the square of the factor, not the factor itself."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-congr-applied-8",
-      "prompt": "A rectangle is 6 cm by 4 cm. A similar rectangle is 15 cm wide. How tall is it?",
+      "prompt": "A Fortnite build wall is 6 tiles wide and 4 tiles tall. A similar wall is 15 tiles wide. How tall is it?",
       "options": [
-        "9 cm",
-        "12 cm",
-        "10 cm"
+        "9 tiles",
+        "12 tiles",
+        "10 tiles"
       ],
       "answer": 2,
       "why": "Similar rectangles keep the same ratio of width to height, so you scale both sides by the same factor.",
       "steps": [
         {
-          "text": "Try a different rectangle: 5 cm by 3 cm, and a new width of 20 cm."
+          "text": "Try a 5 by 3 tile wall widened to 20 tiles."
         },
         {
-          "text": "Find the factor: 20 ÷ 5 = 4, so the height is 3 × 4 = 12 cm."
+          "text": "Find the factor: 20 ÷ 5 = 4, so the height is 3 × 4 = 12 tiles."
         },
         {
           "text": "Apply the same factor to the height that you used for the width."
@@ -761,7 +754,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-applied-9",
-      "prompt": "Which change keeps a shape congruent to the original?",
+      "prompt": "A paper triangle for a shawarma wrap has sides 3, 4 and 5 cm. Which change keeps it congruent?",
       "options": [
         "Turning it 90°",
         "Doubling each side",
@@ -771,7 +764,7 @@ export const pack: SePack = {
       "why": "Turning, sliding and flipping move a shape without changing its size, so it stays congruent.",
       "steps": [
         {
-          "text": "Try a 3, 4, 5 cm triangle. Slide it across the page. Its sides are still 3, 4 and 5 cm."
+          "text": "Slide the 3, 4, 5 cm triangle across the table. Its sides are still 3, 4 and 5 cm."
         },
         {
           "text": "Now double the sides to 6, 8, 10 cm. The size has changed, so it is no longer congruent."
@@ -806,44 +799,21 @@ export const pack: SePack = {
     },
     {
       "kind": "choice",
-      "id": "math-congr-deeper-7",
-      "prompt": "Luffy's treasure triangle has sides 3 cm, 4 cm and 5 cm. A copy is turned upside down, same size. What is the relationship?",
-      "options": [
-        "Congruent, because the copy is the same size and shape.",
-        "Similar, because only the position has changed.",
-        "Neither, because turning the copy changes its sides."
-      ],
-      "answer": 0,
-      "why": "Turning or flipping a shape never changes its side lengths, so it still fits exactly.",
-      "steps": [
-        {
-          "text": "Try a triangle with sides 6 cm, 8 cm and 10 cm, turned around."
-        },
-        {
-          "text": "Its sides are still 6, 8 and 10 after turning. Nothing was resized."
-        },
-        {
-          "text": "A copy scaled up to 6, 8, 10 would be similar, not congruent. Turning is different."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
       "id": "math-congr-deeper-8",
-      "prompt": "A square has sides of 3 cm. Its sides are scaled up by 3. What is the new area?",
+      "prompt": "Your 3 m by 3 m Minecraft platform is scaled up by 3. What is the new floor area?",
       "options": [
-        "27 cm², because the sides were tripled.",
-        "81 cm², because the area goes up by 3 squared.",
-        "9 cm², because the shape is still a square."
+        "27 m², because the sides were tripled.",
+        "81 m², because the area goes up by 3 squared.",
+        "9 m², because the shape is still a square."
       ],
       "answer": 1,
       "why": "Area is length times length, so scaling every side by 3 multiplies the area by 3 × 3.",
       "steps": [
         {
-          "text": "Try a 5 cm square scaled by 2. Old area: 5 × 5 = 25 cm²."
+          "text": "Try a 5 m by 5 m platform scaled by 2. Old area: 5 × 5 = 25 m²."
         },
         {
-          "text": "New side: 5 × 2 = 10 cm. New area: 10 × 10 = 100 cm²."
+          "text": "New side: 5 × 2 = 10 m. New area: 10 × 10 = 100 m²."
         },
         {
           "text": "100 ÷ 25 = 4, which is 2 squared. Area multiplies by the scale factor squared."
@@ -853,23 +823,23 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Old square",
+            "label": "Old platform",
             "value": 9,
             "tone": "calm"
           },
           {
-            "label": "New square",
+            "label": "New platform",
             "value": 81,
             "tone": "good"
           }
         ],
-        "unit": "cm²"
+        "unit": "m²"
       }
     },
     {
       "kind": "choice",
       "id": "math-congr-deeper-9",
-      "prompt": "A 1 by 8 rectangle and a 2 by 4 rectangle both have an area of 8 cm². Are they congruent?",
+      "prompt": "Two Roblox parts: one 1 by 8 studs, one 2 by 4 studs. Both cover 8 square studs. Congruent?",
       "options": [
         "Yes, because their areas are the same.",
         "No, because their sides are not the same lengths.",
@@ -879,7 +849,7 @@ export const pack: SePack = {
       "why": "Congruent shapes need every matching side equal, and equal area does not guarantee that.",
       "steps": [
         {
-          "text": "Try a 2 by 5 rectangle and a second 2 by 5 rectangle, turned sideways."
+          "text": "Try two 2 by 5 wall pieces, and turn the second one sideways."
         },
         {
           "text": "Their sides match one to one, so the second fits exactly over the first."
@@ -892,7 +862,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-deeper-10",
-      "prompt": "Triangle X has angles 35° and 80°. Triangle Y has the same two angles, 35° and 80°. What is the relationship?",
+      "prompt": "Two Fortnite ramps, seen from the side, have angles 35° and 80°. What is the relationship?",
       "options": [
         "Congruent, because two angles match.",
         "Neither, because angles do not show sides.",
@@ -902,10 +872,10 @@ export const pack: SePack = {
       "why": "Triangle angles add to 180°, so two matching angles force the third to match, which means similar.",
       "steps": [
         {
-          "text": "Try two triangles with angles 40° and 70°. Third angle: 180 − 40 − 70 = 70°."
+          "text": "Try two roof sections with angles 40° and 70°. Third angle: 180 − 40 − 70 = 70°."
         },
         {
-          "text": "Both triangles now have angles 40°, 70°, 70°. All three match."
+          "text": "Both sections now have angles 40°, 70°, 70°. All three match."
         },
         {
           "text": "Matching angles means similar. Only matching sides would make them congruent."
@@ -915,7 +885,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-congr-deeper-11",
-      "prompt": "Zoro's cannonball is a circle with radius 2 cm. Another has radius 6 cm. Are the two circles similar?",
+      "prompt": "A Roblox round platform has radius 2 studs. Another has radius 6 studs. Are they similar?",
       "options": [
         "No, because the two radii are different sizes.",
         "No, because circles have no sides to scale.",
@@ -925,10 +895,10 @@ export const pack: SePack = {
       "why": "Every circle has the same shape, so any two circles are similar, with the scale factor given by their radii.",
       "steps": [
         {
-          "text": "Scale factor: 6 ÷ 2 = 3. Each radius is 3 times bigger in the larger circle."
+          "text": "Scale factor: 6 ÷ 2 = 3. Each radius is 3 times bigger on the larger platform."
         },
         {
-          "text": "Try radius 1 cm and radius 4 cm: 4 ÷ 1 = 4, so the scale factor is 4."
+          "text": "Try radius 1 stud and radius 4 studs: 4 ÷ 1 = 4, so the scale factor is 4."
         },
         {
           "text": "Circles only differ in size, so they are always similar. Congruent would need equal radii."
@@ -938,7 +908,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-congr-build-2",
-      "prompt": "Blue Lock's ball is drawn small on paper. A side is 4 cm. The matching side on the big drawing is 10 cm. What is the scale factor, small to big?",
+      "prompt": "On the tactics board, a line is 4 cm. On the big board, the same line is 10 cm. What is the scale factor, small to big?",
       "answer": "2.5",
       "decoys": [
         "1",
@@ -948,13 +918,13 @@ export const pack: SePack = {
       "why": "Scale factor is the big length divided by the matching small length, and it can be a decimal.",
       "steps": [
         {
-          "text": "Divide the big side by the small side. Example: small 3 cm, big 12 cm, so 12 ÷ 3 = 4."
+          "text": "Divide the big length by the small length. Example: a 3 cm pass arrow becomes 12 cm, so 12 ÷ 3 = 4."
         },
         {
-          "text": "If it does not divide evenly, keep going with decimals. Example: 7 ÷ 2 = 3.5."
+          "text": "If it does not divide evenly, keep going with decimals. Example: a 2 cm marker becomes 7 cm, so 7 ÷ 2 = 3.5."
         },
         {
-          "text": "Try it here: 10 ÷ 4. Two and a half is written 2.5, so the big drawing is 2.5 times bigger."
+          "text": "Try it here: 10 ÷ 4. Two and a half is written 2.5, so the big board is 2.5 times bigger."
         }
       ],
       "art": {
@@ -978,7 +948,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-congr-build-3",
-      "prompt": "Isagi's goal poster is 24 cm tall. A small copy is 0.4 times the size of the poster. How tall is the small copy in cm?",
+      "prompt": "A One Piece poster is 24 cm tall. A small copy is 0.4 times as tall. How tall is the small copy in cm?",
       "answer": "9.6",
       "decoys": [
         "0",
@@ -987,10 +957,10 @@ export const pack: SePack = {
       "why": "Multiplying by a decimal under 1 makes the shape smaller, so the answer must be shorter than the original.",
       "steps": [
         {
-          "text": "Multiply the original length by the decimal. Example: 30 cm × 0.5 = 15 cm, because 0.5 is half."
+          "text": "Multiply the original length by the decimal. Example: a 30 cm pizza box × 0.5 = 15 cm, because 0.5 is half."
         },
         {
-          "text": "Work it out carefully with place value. Example: 12 × 0.5 = 6.0, so 6."
+          "text": "Work it out carefully with place value. Example: a 12 cm Timbit tray × 0.5 = 6.0, so 6 cm."
         },
         {
           "text": "Try it here: 24 × 0.4. Check the answer is smaller than 24, which it is."
@@ -1000,7 +970,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-congr-build-4",
-      "prompt": "A One Piece bounty poster has a perimeter of 14 cm. A copy is scaled up 3 times. What is the new perimeter in cm?",
+      "prompt": "A Minecraft house floor plan has a perimeter of 14 blocks. A copy is built 3 times as big. What is the new perimeter in blocks?",
       "answer": "42",
       "decoys": [
         "7",
@@ -1009,20 +979,20 @@ export const pack: SePack = {
       "why": "Perimeter grows by the same scale factor as the lengths, because every side grows together.",
       "steps": [
         {
-          "text": "Multiply the old perimeter by the scale factor. Example: perimeter 10 cm × 4 = 40 cm."
+          "text": "Multiply the old perimeter by the scale factor. Example: a 10-block wall loop × 4 = 40 blocks."
         },
         {
-          "text": "Do not square the factor for perimeter. Only area uses the square."
+          "text": "Do not square the factor for perimeter. Only the floor area squares."
         },
         {
-          "text": "Try it here: 14 × 3. The new perimeter is 42 cm."
+          "text": "Try it here: a 14-block loop × 3 = 42 blocks."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-congr-build-5",
-      "prompt": "A One Piece wanted poster has an area of 12 cm². It is scaled up so every side is 3 times longer. What is the new area in cm²?",
+      "prompt": "A Roblox game icon has an area of 12 cm². It is scaled so every side is 3 times longer. What is the new area in cm²?",
       "answer": "108",
       "decoys": [
         "3",
@@ -1035,7 +1005,7 @@ export const pack: SePack = {
           "text": "Square the scale factor. Example: factor 2 gives 2 × 2 = 4."
         },
         {
-          "text": "Multiply the old area by that number. Example: 5 cm² × 4 = 20 cm²."
+          "text": "Multiply the old area by that number. Example: a 5 cm² sticker × 4 = 20 cm²."
         },
         {
           "text": "Try it here: factor 3 gives 9, and 12 × 9 = 108 cm²."
@@ -1055,7 +1025,7 @@ export const pack: SePack = {
       "why": "When the sides are scaled by a factor, the area is scaled by that factor multiplied by itself.",
       "steps": [
         {
-          "text": "Find the scale factor from the sides. Example: sides 1 m and 4 m give factor 4."
+          "text": "Find the scale factor from the sides. Example: sides 1 block and 4 blocks give factor 4."
         },
         {
           "text": "Square it for the area. Example: 4 × 4 = 16, so the area is 16 times bigger."

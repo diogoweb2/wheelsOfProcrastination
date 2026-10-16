@@ -15,13 +15,13 @@ export const pack: SePack = {
       "id": "math-fdp-teach-0",
       "title": "Same number, three shirts",
       "lines": [
-        "A fraction, a decimal and a percent can name the same amount.",
-        "¾ means 3 parts out of 4 equal parts.",
-        "0.75 and 75% are just other ways to write it."
+        "A fraction, a decimal and a percent can name one amount.",
+        "¾ means 3 equal parts out of 4.",
+        "0.75 and 75% are other ways to write it."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi scores 3 goals in 4 shots. That is ¾ of his shots, or 75%."
+        "flavour": "key",
+        "text": "75 HP out of 100 is 3/4 of your health bar, or 75%."
       },
       "art": {
         "art": "pie",
@@ -34,7 +34,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-0",
-      "prompt": "Isagi's team won 3 of 4 games. What is 3/4 as a decimal?",
+      "prompt": "Ash's team won 3 of 4 gym battles. What is 3/4 as a decimal?",
       "options": [
         "0.34",
         "0.75",
@@ -44,7 +44,7 @@ export const pack: SePack = {
       "why": "A fraction bar means divide, so 3/4 is 3 ÷ 4 = 0.75.",
       "steps": [
         {
-          "text": "A fraction means top ÷ bottom. So 3/5 means 3 ÷ 5."
+          "text": "Your team has 3 of 5 Pokémon left. That is 3/5, so 3 ÷ 5."
         },
         {
           "text": "Add a decimal point and zeros: 3 ÷ 5 = 0.6."
@@ -64,7 +64,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-1",
-      "prompt": "A striker scores on 0.6 of his shots. What percent is that?",
+      "prompt": "A creeper misses 0.6 of its shots. What percent is that?",
       "options": [
         "6%",
         "60%",
@@ -74,7 +74,7 @@ export const pack: SePack = {
       "why": "Percent means out of 100, so you move the decimal point two places right.",
       "steps": [
         {
-          "text": "Percent means out of 100. So 0.07 means 7 out of 100."
+          "text": "Percent means out of 100. So 0.07 means 7 out of 100 blocks."
         },
         {
           "text": "Move the decimal point two places to the right: 0.07 becomes 7."
@@ -139,7 +139,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-2",
-      "prompt": "Luffy's crew wins 25% of their fights. What is that as a fraction in simplest form?",
+      "prompt": "Your team has 25% possession. What is that as a fraction in simplest form?",
       "options": [
         "1/4",
         "1/5",
@@ -149,7 +149,7 @@ export const pack: SePack = {
       "why": "25% means 25 out of 100, and 25/100 simplifies to 1/4.",
       "steps": [
         {
-          "text": "Percent means out of 100. So 40% is 40/100."
+          "text": "Possession of 40% means 40 out of 100. So 40% is 40/100."
         },
         {
           "text": "Divide top and bottom by the same number: 40 and 100 both ÷ 20."
@@ -169,7 +169,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-3",
-      "prompt": "Which fraction is equal to 2/3?",
+      "prompt": "Your party pizza has 2/3 of its slices left. Which fraction is equal to 2/3?",
       "options": [
         "3/5",
         "6/8",
@@ -179,13 +179,13 @@ export const pack: SePack = {
       "why": "Multiply the top and bottom by the same number, and the value does not change.",
       "steps": [
         {
-          "text": "To make an equal fraction, multiply top and bottom by the same number."
+          "text": "A 12-slice pizza cut into 4 pieces: multiply top and bottom by the same number."
         },
         {
           "text": "Try 3/4 × 2 = 6/8. Both top and bottom doubled, so the value stayed the same."
         },
         {
-          "text": "Now try 2/3 × 2 = 4/6. Same idea, so 4/6 is equal to 2/3."
+          "text": "Try 1/2 × 3 = 3/6. All three parts changed, and the value is still the same."
         }
       ]
     },
@@ -194,19 +194,19 @@ export const pack: SePack = {
       "id": "math-fdp-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Football stats use all three forms, so you must read them all.",
-        "A coach may say 0.6 and a report may say 60%.",
-        "Matching the forms lets you compare two players fairly."
+        "Blue Lock stats use all three forms, so read every one.",
+        "A ranking may show 0.6 and a report may show 60%.",
+        "Matching the forms lets you compare strikers fairly."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Same number, different shirt. Spot it and the stats make sense."
+        "text": "Same number, different shirt. Spot it and the rankings make sense."
       }
     },
     {
       "kind": "build",
       "id": "math-fdp-build-0",
-      "prompt": "Bachira takes 5 penalties. He scores 4. Build the fraction of penalties he scored.",
+      "prompt": "Your Battle Pass has 5 tiers. You have cleared 4. Build the fraction cleared.",
       "answer": "4/5",
       "decoys": [
         "3"
@@ -217,10 +217,10 @@ export const pack: SePack = {
           "text": "A fraction is the part you got over the whole you tried."
         },
         {
-          "text": "Top number: goals scored. Bottom number: penalties taken."
+          "text": "Top number: tiers cleared. Bottom number: tiers in the pass."
         },
         {
-          "text": "Example: 2 goals from 8 penalties is 2/8. Divide top and bottom by 2 to get 1/4."
+          "text": "Example: 2 tiers cleared out of 8 is 2/8. Divide top and bottom by 2 to get 1/4."
         }
       ],
       "art": {
@@ -234,7 +234,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-4",
-      "prompt": "Which number is the biggest?",
+      "prompt": "Which catch chance is the biggest?",
       "options": [
         "0.4",
         "0.45",
@@ -244,20 +244,20 @@ export const pack: SePack = {
       "why": "Pad with zeros so each has the same digits, then compare from the left.",
       "steps": [
         {
-          "text": "Line up the decimal points and add zeros: 0.70 and 0.65."
+          "text": "Line up the decimal points and add zeros: 0.60 and 0.55."
         },
         {
-          "text": "Compare tenths first: 7 tenths is more than 6 tenths, so 0.7 is bigger."
+          "text": "Compare tenths first: 6 tenths is more than 5 tenths, so 0.6 is bigger."
         },
         {
-          "text": "Now compare 0.400, 0.450 and 0.382. The tenths are 4, 4 and 3. Look at hundredths next."
+          "text": "Now try 0.71, 0.7 and 0.705. The tenths are 7, 7 and 7. Look at hundredths next."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-basics-5",
-      "prompt": "Isagi takes 40 shots. 30% are on target. How many shots are on target?",
+      "prompt": "Your party order has 40 Timbits. 30% are chocolate. How many are chocolate?",
       "options": [
         "10",
         "12",
@@ -267,20 +267,20 @@ export const pack: SePack = {
       "why": "Find 10% first, then multiply by 3 to get 30%.",
       "steps": [
         {
-          "text": "Find 10% of 50 first: 50 ÷ 10 = 5."
+          "text": "Find 10% of 80 first: 80 ÷ 10 = 8."
         },
         {
-          "text": "Then 30% is three times that: 5 × 3 = 15."
+          "text": "Then 30% is three times that: 8 × 3 = 24."
         },
         {
-          "text": "Now try 20% of 50: 10% is 5, so 20% is 5 × 2 = 10."
+          "text": "Now try 20% of 80: 10% is 8, so 20% is 8 × 2 = 16."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-fdp-games-0",
-      "title": "Striker Shirt Line-Up",
+      "title": "Health Bar Line-Up",
       "game": {
         "mode": "order",
         "values": [
@@ -310,49 +310,49 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "A fraction, a decimal and a percent can all name the same amount, so compare them by converting each one to a decimal."
+      "why": "A fraction, a decimal and a percent can all show the same amount, so turn each into a decimal to compare."
     },
     {
       "kind": "explain",
       "id": "math-fdp-teach-2",
       "title": "The method",
       "lines": [
-        "Fraction to decimal: divide the top number by the bottom.",
-        "Decimal to percent: multiply by 100, or move the point two places right.",
-        "Percent means out of 100, so 75% is 75 over 100."
+        "Fraction to decimal: divide the top by the bottom.",
+        "Your shield bar at 3/4: 3 ÷ 4 = 0.75.",
+        "Decimal to percent: move the point two places right, so 75%."
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-basics-6",
-      "prompt": "In the number 3.407, which digit is in the hundredths place?",
+      "prompt": "A Roblox game rating reads 4.075. Which digit is in the hundredths place?",
       "options": [
         "0",
         "4",
         "7"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "The first digit after the point is tenths, the second is hundredths, the third is thousandths.",
       "steps": [
         {
           "text": "After the decimal point, the places are tenths, hundredths, thousandths."
         },
         {
-          "text": "In 2.682, the digits after the point are 6, 8 and 2."
+          "text": "In 9.248, the digits after the point are 2, 4 and 8."
         },
         {
-          "text": "So 6 is in tenths, 8 is in hundredths, and 2 is in thousandths."
+          "text": "So 2 is in tenths, 4 is in hundredths, and 8 is in thousandths."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-basics-7",
-      "prompt": "A keeper saves 3 of 8 shots. What percent is that?",
+      "prompt": "Your keeper saves 3 of 8 shots. What percent is that?",
       "options": [
         "37.5%",
-        "38%",
-        "3.8%"
+        "38.5%",
+        "3.75%"
       ],
       "answer": 0,
       "why": "Divide top by bottom to get a decimal, then multiply by 100 for a percent.",
@@ -364,14 +364,14 @@ export const pack: SePack = {
           "text": "Multiply by 100 to get a percent: 0.2 × 100 = 20%."
         },
         {
-          "text": "So 1/5 is 20%. Use the same two steps for 3/8."
+          "text": "So 1/5 is 20%. Try 5 saves of 8: 5 ÷ 8 = 0.625, then × 100 = 62.5%."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-fdp-build-1",
-      "prompt": "Write 0.5 as a fraction in lowest terms.",
+      "prompt": "Your Fortnite shield reads 0.5 of full. Write it as a fraction in lowest terms.",
       "answer": "1/2",
       "decoys": [
         "5",
@@ -397,13 +397,13 @@ export const pack: SePack = {
       "id": "math-fdp-teach-3",
       "title": "The common trap",
       "lines": [
-        "Trap: 0.4 is not 4%. Move the point two places: 40%.",
-        "Percent is always out of 100, so 0.4 means 40 hundredths.",
-        "Check your answer: 40% should look bigger than 4% on a scale."
+        "0.4 is not 4%. Move the point two places: 40%.",
+        "Percent means out of 100, so 0.4 is 40 hundredths.",
+        "Check it: 40% should look far bigger than 4% on a bar."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Blue Lock tip: a shot rate of 0.5 is 50%, not 5%."
+        "text": "Pokémon tip: a 0.5 HP bar is 50%, not 5%."
       }
     },
     {
@@ -411,9 +411,10 @@ export const pack: SePack = {
       "id": "math-fdp-teach-4",
       "title": "Worked example: 3/8",
       "lines": [
+        "Your squad has cleared 3 of the 8 storm phases.",
         "Start with 3/8. Divide the top by the bottom: 3 ÷ 8 = 0.375.",
-        "Now multiply by 100 to get the percent: 0.375 × 100 = 37.5%.",
-        "So 3/8 = 0.375 = 37.5%. Three shirts, one number."
+        "Multiply by 100: 0.375 × 100 = 37.5%.",
+        "So 3/8 = 0.375 = 37.5%. Three phases, one number."
       ],
       "art": {
         "art": "bar",
@@ -433,8 +434,8 @@ export const pack: SePack = {
         "Convert with ÷ for fraction to decimal, × 100 for decimal to percent."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's crew wins 3 of 4 battles. That is 75% of the fights, one treasure."
+        "flavour": "key",
+        "text": "Your hearts sit at 3/4 full: 15 of 20 health points, 75%."
       },
       "art": {
         "art": "numberline",
@@ -459,13 +460,13 @@ export const pack: SePack = {
       "id": "math-fdp-deeper-0",
       "title": "Long decimals are not big decimals",
       "lines": [
-        "0.35 looks bigger than 0.4. It is not.",
+        "Striker A has 0.35 pass accuracy. Striker B has 0.4.",
         "Tenths come first. 0.4 is four tenths.",
-        "0.35 is three tenths and five hundredths."
+        "0.35 is three tenths and five hundredths, so B is better."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Blue Lock tip: a 0.35 striker is not better than a 0.4 striker. Check the tenths first."
+        "text": "Blue Lock tip: 0.35 is less than 0.4. Check the tenths first."
       }
     },
     {
@@ -473,9 +474,9 @@ export const pack: SePack = {
       "id": "math-fdp-deeper-1",
       "title": "Percent means out of 100",
       "lines": [
-        "50% means 50 out of every 100.",
-        "So 50% is the same as 0.5.",
-        "And 0.5 is the same as one half."
+        "Your shield bar says 50%.",
+        "That means 50 out of every 100.",
+        "So 50% is the same as 0.5, which is one half."
       ],
       "callout": {
         "flavour": "key",
@@ -493,7 +494,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Eight teammates share one pass. Each one gets less than if only five shared it."
+        "text": "Eight friends share one box of Timbits. Each gets less than if only five shared it."
       }
     },
     {
@@ -515,8 +516,8 @@ export const pack: SePack = {
       "id": "math-fdp-deeper-4",
       "title": "Taking a part can make it smaller",
       "lines": [
-        "Multiplying by 2 doubles a number.",
-        "Multiplying by 1/2 cuts it in half.",
+        "Times 2 on 80 HP gives 160 HP.",
+        "Times 1/2 on 80 HP gives 40 HP.",
         "A fraction less than 1 makes the number shrink."
       ],
       "callout": {
@@ -529,9 +530,9 @@ export const pack: SePack = {
       "id": "math-fdp-deeper-5",
       "title": "0.5% is not 50%",
       "lines": [
-        "50% means half of the whole.",
-        "0.5% means half of one percent.",
-        "That is only 0.005 of the whole."
+        "A 50% pack chance means half of all packs.",
+        "A 0.5% walkout chance means half of one percent.",
+        "That is only 0.005 of the packs."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -541,34 +542,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-basics-8",
-      "prompt": "Which is bigger: 5/8 or 3/5?",
+      "prompt": "Your XP bar is 5/8 full. Your friend's is 3/5 full. Whose is fuller?",
       "options": [
         "3/5",
-        "They are equal",
+        "1/2",
         "5/8"
       ],
       "answer": 2,
       "why": "Change both fractions to the same bottom number, then compare the tops.",
       "steps": [
         {
-          "text": "Find a common bottom number: 10 works for 1/2 and 2/5."
+          "text": "Use 10 as the bottom number for 1/2 and 2/5."
         },
         {
           "text": "1/2 becomes 5/10, and 2/5 becomes 4/10."
         },
         {
-          "text": "5/10 is bigger than 4/10, so 1/2 is bigger than 2/5."
+          "text": "5/10 is bigger than 4/10, so 1/2 beats 2/5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-basics-9",
-      "prompt": "Zoro writes 0.35 as a fraction. Which is it in simplest form?",
+      "prompt": "Your shield bar reads 0.35 full. Write 0.35 as a fraction in simplest form.",
       "options": [
-        "35/10",
+        "3/20",
         "7/20",
-        "3/5"
+        "7/10"
       ],
       "answer": 1,
       "why": "Two decimal places means hundredths, so 0.35 is 35/100, which simplifies to 7/20.",
@@ -580,14 +581,14 @@ export const pack: SePack = {
           "text": "Simplify 6/10 by dividing top and bottom by 2: that gives 3/5."
         },
         {
-          "text": "Try 0.25: that is 25/100, which simplifies to 1/4."
+          "text": "Try 0.25: a health bar at 0.25 is 25/100, which simplifies to 1/4."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-0",
-      "prompt": "Three strikers. Shots on target rate. Which is the biggest?",
+      "prompt": "Three Blue Lock strikers. Shots on target rate. Which is the biggest?",
       "options": [
         "0.4",
         "3/8",
@@ -622,35 +623,35 @@ export const pack: SePack = {
       "id": "math-fdp-applied-1",
       "prompt": "A stadium stand has 240 seats. 35% are sold to students. How many seats is that?",
       "options": [
+        "48",
         "76",
-        "8.4",
         "84"
       ],
       "answer": 2,
       "why": "Percent means out of 100, so 35% of 240 is 35 hundredths of 240.",
       "steps": [
         {
-          "text": "10% of 240 is 24. Divide by 10."
+          "text": "10% of 240 seats is 24 seats. Divide by 10."
         },
         {
-          "text": "30% is three of those, so 72."
+          "text": "30% is three of those, so 72 seats."
         },
         {
-          "text": "5% is half of 10%, so 12. Add 72 + 12 = 84."
+          "text": "5% is half of 10%, so 12 seats. Add 72 + 12 = 84."
         },
         {
-          "text": "Try it: 15% of 320. 10% is 32, 5% is 16, total 48."
+          "text": "Try it: 15% of 320 seats. 10% is 32, 5% is 16, total 48."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-2",
-      "prompt": "A striker hits the target 2 times in 3 shots. Write 2/3 to two decimal places.",
+      "prompt": "Your duo wins 2 of every 3 matches. Write 2/3 to two decimal places.",
       "options": [
-        "0.6",
+        "0.66",
         "0.67",
-        "0.66"
+        "0.68"
       ],
       "answer": 1,
       "why": "Two-thirds never ends, so you must round it to get a clean decimal.",
@@ -665,16 +666,16 @@ export const pack: SePack = {
           "text": "A 6 rounds up, so the second digit becomes 7: 0.67."
         },
         {
-          "text": "Try it: 3/7 is 0.4285… The third digit is 8, so the answer is 0.43."
+          "text": "Try it: 3 wins in 7 matches is 3/7 = 0.4285… so 0.43."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-3",
-      "prompt": "A One Piece crew's bounty went from 40 million to 46 million berries. What was the percent increase?",
+      "prompt": "A Roblox game earned 40,000 Robux a day. Now it earns 46,000. Percent increase?",
       "options": [
-        "6%",
+        "10%",
         "15%",
         "46%"
       ],
@@ -682,10 +683,10 @@ export const pack: SePack = {
       "why": "Percent change compares the amount of change to the original amount, not the new amount.",
       "steps": [
         {
-          "text": "Find the change: 46 − 40 = 6 million."
+          "text": "Find the change: 46,000 − 40,000 = 6,000 Robux."
         },
         {
-          "text": "Divide the change by the original: 6 ÷ 40 = 0.15."
+          "text": "Divide the change by the original: 6,000 ÷ 40,000 = 0.15."
         },
         {
           "text": "Multiply by 100 to get a percent: 15%."
@@ -698,7 +699,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-applied-4",
-      "prompt": "Isagi spends 3/4 of practice on drills. 2/3 of that time is shooting. What fraction of practice is shooting?",
+      "prompt": "Your pizza has 3/4 left. You eat 2/3 of what is left. What fraction did you eat?",
       "options": [
         "5/12",
         "3/7",
@@ -717,14 +718,14 @@ export const pack: SePack = {
           "text": "Simplify: 6/12 = 1/2."
         },
         {
-          "text": "Try it: 4/5 of 3/8. That is 12/40, which simplifies to 3/10."
+          "text": "Try it: 4/5 of 3/8 of a pizza. That is 12/40, which simplifies to 3/10."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-5",
-      "prompt": "A jersey costs $85 before tax. Ontario HST is 13%. What is the HST?",
+      "prompt": "A Pokémon plush costs $85 before tax. Ontario HST is 13%. What is the HST?",
       "options": [
         "$110.50",
         "$11.05",
@@ -743,14 +744,14 @@ export const pack: SePack = {
           "text": "Check: $11.05 is a little more than 10% of $85, so it makes sense."
         },
         {
-          "text": "Try it: 13% of $60 is 0.13 × 60 = $7.80."
+          "text": "Try it: a $60 Roblox gift card gets 13% HST. 0.13 × 60 = $7.80."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-6",
-      "prompt": "Which fraction is between 0.3 and 0.4?",
+      "prompt": "A Pokémon's HP bar sits between 0.3 and 0.4 full. Which fraction fits?",
       "options": [
         "3/8",
         "1/2",
@@ -769,14 +770,14 @@ export const pack: SePack = {
           "text": "3/8 is 3 ÷ 8 = 0.375, which is inside the range."
         },
         {
-          "text": "Try it: which fraction is between 0.7 and 0.8? 3/4 is 0.75, so yes."
+          "text": "Try it: Battle Pass progress is between 0.7 and 0.8. 3/4 is 0.75, so it fits."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-7",
-      "prompt": "Write 0.35 as a fraction in lowest terms.",
+      "prompt": "An Ultimate Team pack has a 0.35 chance of a gold player. Write 0.35 as a fraction in lowest terms.",
       "options": [
         "3/5",
         "35/10",
@@ -795,14 +796,14 @@ export const pack: SePack = {
           "text": "Divide top and bottom by 5: 7/20."
         },
         {
-          "text": "Try it: 0.44 is 44/100. Divide by 4 to get 11/25."
+          "text": "Try it: a pack odds of 0.44 is 44/100. Divide by 4 to get 11/25."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-applied-8",
-      "prompt": "A One Piece crew holds 3/8 of the treasure. What percent is that?",
+      "prompt": "Your Battle Pass is 3/8 done. What percent is that?",
       "options": [
         "38%",
         "37.5%",
@@ -821,7 +822,7 @@ export const pack: SePack = {
           "text": "That gives 37.5%."
         },
         {
-          "text": "Try it: 5/16 is 0.3125, so 31.25%."
+          "text": "Try it: 5/16 of the pass is 0.3125, so 31.25% done."
         }
       ],
       "art": {
@@ -835,7 +836,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-applied-9",
-      "prompt": "What percent of 80 is 24?",
+      "prompt": "Your team completed 24 of its 80 passes. What is the pass accuracy?",
       "options": [
         "3%",
         "24%",
@@ -854,14 +855,14 @@ export const pack: SePack = {
           "text": "Check: 30% of 80 should be 24. It is."
         },
         {
-          "text": "Try it: 14 out of 50 is 14 ÷ 50 = 0.28, so 28%."
+          "text": "Try it: 14 completed passes out of 50 is 14 ÷ 50 = 0.28, so 28%."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-deeper-6",
-      "prompt": "Which decimal is the biggest?",
+      "prompt": "Which health bar is the fullest: 0.35, 0.4, or 0.39?",
       "options": [
         "0.35",
         "0.4",
@@ -904,20 +905,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-deeper-7",
-      "prompt": "A Blue Lock jersey costs $80. It is 25% off. What is the sale price?",
+      "prompt": "A skin costs 800 V-Bucks. It is 25% off. What is the sale price?",
       "options": [
-        "$20",
-        "$55",
-        "$60"
+        "200 V-Bucks",
+        "600 V-Bucks",
+        "550 V-Bucks"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "25% off means you take away one quarter of the price, leaving three quarters.",
       "steps": [
         {
-          "text": "Try $48 at 25% off. 25% means one quarter, so 48 ÷ 4 = 12 off."
+          "text": "Try 400 V-Bucks at 25% off. 25% means one quarter, so 400 ÷ 4 = 100 off."
         },
         {
-          "text": "Take the discount away: 48 − 12 = 36. The sale price is $36."
+          "text": "Take the discount away: 400 − 100 = 300. The sale price is 300 V-Bucks."
         },
         {
           "text": "Always find the discount first, then take it away from the price."
@@ -927,7 +928,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-deeper-8",
-      "prompt": "Shop A takes 20% off, then 20% off again. Shop B takes 40% off once. Which is cheaper?",
+      "prompt": "A Roblox game pass costs 500 Robux. Shop A takes 20% off, then 20% off again. Shop B takes 40% off once. Which is cheaper?",
       "options": [
         "Shop A is cheaper",
         "Shop B is cheaper",
@@ -937,20 +938,20 @@ export const pack: SePack = {
       "why": "The second 20% works on a smaller price, so it takes less off than the first.",
       "steps": [
         {
-          "text": "Shop A on a $50 item: 20% off is $10, so $40. Then 20% off $40 is $8, so $32."
+          "text": "Shop A on 500 Robux: 20% off is 100, so 400. Then 20% off 400 is 80, so 320."
         },
         {
-          "text": "Shop B on the same $50 item: 40% off is $20, so $30."
+          "text": "Shop B on the same 500 Robux: 40% off is 200, so 300."
         },
         {
-          "text": "$30 is less than $32, so Shop B wins. Two 20% discounts do not add to 40%."
+          "text": "300 is less than 320, so Shop B wins. Two 20% discounts do not add to 40%."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-fdp-deeper-9",
-      "prompt": "What is 3/8 as a decimal?",
+      "prompt": "Your Pokémon has 3/8 of its HP left. What is 3/8 as a decimal?",
       "options": [
         "0.83",
         "0.38",
@@ -980,7 +981,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-deeper-10",
-      "prompt": "Which is bigger: 1/3 or 0.3?",
+      "prompt": "Pass accuracy: player A completes 1/3 of passes, player B completes 0.3. Which is bigger?",
       "options": [
         "1/3 is bigger",
         "0.3 is bigger",
@@ -1003,7 +1004,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-fdp-deeper-11",
-      "prompt": "Is 2/3 of 9 bigger or smaller than 9?",
+      "prompt": "You mine 2/3 of a 9-block row of stone. Is that more or less than 9 blocks?",
       "options": [
         "It is smaller",
         "It is bigger",
@@ -1013,10 +1014,10 @@ export const pack: SePack = {
       "why": "Multiplying by a fraction less than 1 always gives a smaller answer.",
       "steps": [
         {
-          "text": "Find 3/4 of 12. Split 12 into 4 equal parts: 12 ÷ 4 = 3."
+          "text": "Find 3/4 of a 12-block wall. Split 12 into 4 equal parts: 12 ÷ 4 = 3."
         },
         {
-          "text": "Take 3 of those parts: 3 × 3 = 9. So 3/4 of 12 is 9."
+          "text": "Take 3 of those parts: 3 × 3 = 9. So 3/4 of 12 blocks is 9 blocks."
         },
         {
           "text": "9 is less than 12. Multiplying by 1 keeps the number the same. Multiplying by 2 makes it bigger."
@@ -1026,7 +1027,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-fdp-build-2",
-      "prompt": "Write 3/4 as a decimal.",
+      "prompt": "Your Battle Pass is 3/4 done. Write 3/4 as a decimal.",
       "answer": "0.75",
       "decoys": [],
       "why": "A fraction bar means divide, so 3/4 is the same as 3 divided by 4.",
@@ -1052,7 +1053,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-fdp-build-3",
-      "prompt": "Write 0.8 as a percent.",
+      "prompt": "Your shield bar is at 0.8 of full. Build it as a percent.",
       "answer": "80%",
       "decoys": [],
       "why": "Percent means out of 100, so the decimal moves two places to the right.",
@@ -1064,14 +1065,14 @@ export const pack: SePack = {
           "text": "Multiply by 100 by moving the decimal point two places right."
         },
         {
-          "text": "Example: 0.07 becomes 7 percent, because 0.07 × 100 = 7."
+          "text": "Example: a Minecraft hunger bar at 0.07 is 7%, because 0.07 × 100 = 7."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-fdp-build-4",
-      "prompt": "Write 25% as a fraction in lowest terms.",
+      "prompt": "Your Battle Pass is 25% done. Build that as a fraction in lowest terms.",
       "answer": "1/4",
       "decoys": [
         "2",
@@ -1086,14 +1087,14 @@ export const pack: SePack = {
           "text": "Find the biggest number that divides both top and bottom."
         },
         {
-          "text": "Example: 40% is 40/100. Divide both by 20 to get 2/5."
+          "text": "Example: a Pokémon team 40% healed is 40/100. Divide both by 20 to get 2/5."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-fdp-build-5",
-      "prompt": "Luffy's crew has 40 treasure chests. 25% of them hold gold. Build how many chests hold gold.",
+      "prompt": "A box of 40 Timbits has 25% with sprinkles. Build how many have sprinkles.",
       "answer": "10",
       "decoys": [
         "4"
@@ -1104,7 +1105,7 @@ export const pack: SePack = {
           "text": "25% is the same as one quarter, so divide the total by 4."
         },
         {
-          "text": "Example: 30% of 60. 10% of 60 is 6, so 30% is 6 × 3 = 18."
+          "text": "Example: 30% of 60 players. 10% of 60 is 6, so 30% is 6 × 3 = 18."
         },
         {
           "text": "Make sure your answer is smaller than the total, because you took only part of it."
@@ -1114,7 +1115,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-fdp-build-6",
-      "prompt": "Write 1/5 as a percent.",
+      "prompt": "You scored on 1 of your 5 shots. Build that as a percent.",
       "answer": "20%",
       "decoys": [],
       "why": "A fraction becomes a percent by first making a decimal, then multiplying by 100.",
@@ -1126,14 +1127,14 @@ export const pack: SePack = {
           "text": "Multiply your decimal by 100 to get a percent."
         },
         {
-          "text": "Example: 3/8 is 3 ÷ 8 = 0.375. Times 100 gives 37.5%."
+          "text": "Example: 3 wins in 8 Fortnite matches is 3 ÷ 8 = 0.375. Times 100 gives 37.5%."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-fdp-build-7",
-      "prompt": "Write 0.125 as a fraction in lowest terms.",
+      "prompt": "A walkout pack has a 0.125 chance. Write that as a fraction in lowest terms.",
       "answer": "1/8",
       "decoys": [
         "5",
@@ -1148,14 +1149,14 @@ export const pack: SePack = {
           "text": "Simplify by dividing top and bottom by the same number."
         },
         {
-          "text": "Example: 0.35 has two digits, so it is 35/100. Divide both by 5 to get 7/20."
+          "text": "Example: a pack with 0.35 odds is 35/100. Divide both by 5 to get 7/20."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-fdp-games-1",
-      "title": "Same Number, New Shirt",
+      "title": "Same Health, New Look",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -1181,7 +1182,7 @@ export const pack: SePack = {
           ]
         ]
       },
-      "why": "Percent means out of 100, so 75% is 75 out of 100, which is the same as 0.75."
+      "why": "75% means 75 out of 100, which is the same as 3/4 and 0.75."
     },
     {
       "kind": "video",

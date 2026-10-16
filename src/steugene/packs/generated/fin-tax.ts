@@ -20,14 +20,14 @@ export const pack: SePack = {
         "It is added at the till, after the sticker price."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi sees a $100 boot. The till wants $113. Where did the $13 go?"
+        "flavour": "key",
+        "text": "A $100 V-Bucks card rings up at $113. Where did the $13 go?"
       }
     },
     {
       "kind": "choice",
       "id": "fin-tax-basics-0",
-      "prompt": "Isagi buys a boot for $20.00 before tax. What is the total with 13% HST?",
+      "prompt": "A $20.00 Roblox gift card costs $20.00 before tax. What is the total with 13% HST?",
       "options": [
         "$22.60",
         "$22.13",
@@ -37,20 +37,20 @@ export const pack: SePack = {
       "why": "HST is 13% of the price, and the till adds it on top of the sticker.",
       "steps": [
         {
-          "text": "Find the HST. 13% of $50.00 is 0.13 × 50 = $6.50."
+          "text": "Find the HST on a $50.00 Robux card: 0.13 × 50 = $6.50."
         },
         {
-          "text": "Use the same method on a $50.00 boot: the HST is $6.50."
+          "text": "Same method on a $30.00 card: 10% is 3.00, and 3% is 0.90, so HST is $3.90."
         },
         {
-          "text": "Add it on: $50.00 + $6.50 = $56.50 at the till."
+          "text": "Add HST to the sticker: $50.00 + $6.50 = $56.50 at the till."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-basics-1",
-      "prompt": "Hiori's team buys $80.00 of training bibs before tax. How much is the HST?",
+      "prompt": "A football club buys $80.00 of training bibs before tax. How much is the HST?",
       "options": [
         "$10.40",
         "$1.04",
@@ -155,7 +155,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-basics-3",
-      "prompt": "Ren orders a $40.00 meal. He tips 15% on the price before tax. What is the tip?",
+      "prompt": "Ren orders a $40.00 shawarma combo. He tips 15% on the price before tax. What is the tip?",
       "options": [
         "$6.00",
         "$4.00",
@@ -185,14 +185,14 @@ export const pack: SePack = {
         "HST pays for roads, schools and hospitals."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "A crew with a bad budget runs out of food at sea. Count the tax first."
+        "flavour": "key",
+        "text": "Your Minecraft cart says $60. Check the till total before you tap pay."
       }
     },
     {
       "kind": "build",
       "id": "fin-tax-build-0",
-      "prompt": "Isagi buys a Blue Lock jersey. The sticker says $40.00. HST is 13%. What does he pay?",
+      "prompt": "Your Roblox gift card is $40.00 at the sticker. HST is 13%. What does the till charge?",
       "answer": "45.20",
       "decoys": [
         "3",
@@ -202,20 +202,20 @@ export const pack: SePack = {
       "why": "HST is added on top of the sticker price, so the till always asks for more.",
       "steps": [
         {
-          "text": "Worked example, not Isagi's: a $50.00 ball. 10% of 50.00 is 5.00."
+          "text": "Worked example: a $50.00 Pokémon box. 10% of 50.00 is 5.00."
         },
         {
-          "text": "3% of 50.00 is 1.50. Add: 5.00 + 1.50 = 6.50 of HST."
+          "text": "3% of 50.00 is 1.50. So 5.00 + 1.50 = 6.50 of HST."
         },
         {
-          "text": "Now the same way: find 10% and 3% of 40.00, add them, then add the tax to 40.00."
+          "text": "Now the $40.00 gift card: find 10% and 3%, add them, then add to 40.00."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-basics-5",
-      "prompt": "Zoro buys a $200.00 sword belt. Does the order of 25% off and HST change the total?",
+      "prompt": "Zoro's $200.00 gaming chair is on 25% off. Does the order of discount and HST change the total?",
       "options": [
         "No, both orders give the same total",
         "Yes, tax first always costs less",
@@ -225,7 +225,7 @@ export const pack: SePack = {
       "why": "Multiplying numbers in a different order gives the same answer.",
       "steps": [
         {
-          "text": "Discount first: 10% off 80 is 72. Then 72 × 1.13 = $81.36."
+          "text": "Discount first, an $80 Fortnite skin: 10% off is 72. Then 72 × 1.13 = $81.36."
         },
         {
           "text": "Tax first: 80 × 1.13 = $90.40. Then 90.40 × 0.90 = $81.36."
@@ -243,23 +243,23 @@ export const pack: SePack = {
         "mode": "order",
         "values": [
           {
-            "label": "$9 + HST",
+            "label": "Timbits $9 + HST",
             "value": 10.17
           },
           {
-            "label": "$15 + HST",
+            "label": "Shawarma $15 + HST",
             "value": 16.95
           },
           {
-            "label": "$19 + HST",
+            "label": "Gift card $19 + HST",
             "value": 21.47
           },
           {
-            "label": "$24 + HST",
+            "label": "Skin $24 + HST",
             "value": 27.12
           },
           {
-            "label": "$40 + HST",
+            "label": "Jersey $40 + HST",
             "value": 45.2
           }
         ]
@@ -277,13 +277,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "$100 × 0.13 = $13. Then $100 + $13 = $113."
+        "text": "A $50 Roblox gift card: $50 × 0.13 = $6.50. At the till, $56.50."
       }
     },
     {
       "kind": "choice",
       "id": "fin-tax-basics-6",
-      "prompt": "Sanji pays $67.80 at the till, with HST included. What was the price before tax?",
+      "prompt": "A Pokémon hoodie costs $67.80 at the till, with HST included. What was the price before tax?",
       "options": [
         "$60.00",
         "$58.99",
@@ -296,17 +296,17 @@ export const pack: SePack = {
           "text": "Total = price × 1.13. So price = total ÷ 1.13."
         },
         {
-          "text": "Try a $90.40 total: 90.40 ÷ 1.13 = $80.00."
+          "text": "A $90.40 Pokémon box total: 90.40 ÷ 1.13 = $80.00."
         },
         {
-          "text": "Check it: 80 × 1.13 = 90.40. It matches, so the method works."
+          "text": "Check: 80 × 1.13 = 90.40. It matches, so the method works."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-basics-7",
-      "prompt": "A shirt was $50.00 and is now $35.00. What percent off is it?",
+      "prompt": "A football jersey was $50.00 and is now $35.00. What percent off is it?",
       "options": [
         "30%",
         "25%",
@@ -316,7 +316,7 @@ export const pack: SePack = {
       "why": "Percent off is the drop divided by the original price, then times 100.",
       "steps": [
         {
-          "text": "Try $80.00 down to $60.00. The drop is 80 − 60 = $20.00."
+          "text": "A $80.00 Minecraft skin drops to $60.00. The drop is 80 − 60 = $20.00."
         },
         {
           "text": "Divide the drop by the original: 20 ÷ 80 = 0.25."
@@ -345,7 +345,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-1",
-      "prompt": "Luffy buys a straw hat replica. The sticker says $25.00. Add 13% HST. Total?",
+      "prompt": "Your Roblox gift card is $25.00. Add 13% HST. Total at the till?",
       "answer": "28.25",
       "decoys": [
         "3",
@@ -355,13 +355,13 @@ export const pack: SePack = {
       "why": "Tax is worked out on the sticker price, then added to it.",
       "steps": [
         {
-          "text": "Worked example: a $60.00 cap. 10% of 60.00 is 6.00."
+          "text": "Worked example: a $60.00 Blue Lock jersey. 10% of 60.00 is 6.00."
         },
         {
           "text": "3% of 60.00 is 1.80. HST is 6.00 + 1.80 = 7.80."
         },
         {
-          "text": "Total is 60.00 + 7.80. Do the same steps with 25.00."
+          "text": "Total is 60.00 + 7.80. Do the same with the $25.00 gift card."
         }
       ]
     }
@@ -372,21 +372,21 @@ export const pack: SePack = {
       "id": "fin-tax-teach-3",
       "title": "The trap: a flat guess",
       "lines": [
-        "Some people think 13% always means $13.",
+        "Some people think 13% always means $13 tax.",
         "The tax grows when the price grows.",
-        "$40 × 0.13 = $5.20, not $13."
+        "A $40 gift card: $40 × 0.13 = $5.20, not $13."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Use the price in the question. Do not guess the tax."
+        "text": "Use the price on the sticker. Do not guess the tax."
       }
     },
     {
       "kind": "explain",
       "id": "fin-tax-teach-4",
-      "title": "Worked example: a $60 jersey",
+      "title": "Worked example: a $60 hoodie",
       "lines": [
-        "A jersey has a sticker price of $60.",
+        "A Fortnite hoodie has a sticker price of $60.",
         "Find the tax: $60 × 0.13 = $7.80.",
         "Add it on: $60 + $7.80 = $67.80."
       ],
@@ -426,7 +426,7 @@ export const pack: SePack = {
       "id": "fin-tax-deeper-0",
       "title": "Tax goes on top",
       "lines": [
-        "The sticker price is always before tax.",
+        "A poutine's sticker price is always before tax.",
         "HST is 13% of the sticker, added on top.",
         "So the total is price × 1.13, never price − 13%."
       ],
@@ -440,7 +440,7 @@ export const pack: SePack = {
       "id": "fin-tax-deeper-1",
       "title": "Two discounts don't add up",
       "lines": [
-        "20% off, then 10% off the new price.",
+        "A Pokémon plush is 20% off, then 10% off the new price.",
         "That is not 30% off in total.",
         "Use 0.8 × 0.9 = 0.72, so 28% off."
       ],
@@ -454,7 +454,7 @@ export const pack: SePack = {
       "id": "fin-tax-deeper-2",
       "title": "Up, then down, is not back to start",
       "lines": [
-        "A $100 ball goes up 10%: now $110.",
+        "Your Roblox game pass costs $100. The price goes up 10%: now $110.",
         "Down 10% from $110 is $99, not $100.",
         "The second 10% is taken from a bigger number."
       ],
@@ -474,7 +474,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Your team wins. You pick how much to thank the cook."
+        "text": "Your shawarma is $20. You pick the tip for the cook."
       }
     },
     {
@@ -482,7 +482,7 @@ export const pack: SePack = {
       "id": "fin-tax-deeper-4",
       "title": "Going backwards from the total",
       "lines": [
-        "A total of $113 already includes 13% HST.",
+        "Your Ultimate Team pack total is $113, and that includes 13% HST.",
         "So $113 is 113% of the price before tax.",
         "Divide by 1.13 to get the price back: $100."
       ],
@@ -496,7 +496,7 @@ export const pack: SePack = {
       "id": "fin-tax-deeper-5",
       "title": "Discount first, then tax",
       "lines": [
-        "Take the discount off the sticker first.",
+        "Take 30% off the skin sticker first.",
         "Then add HST to the new, lower price.",
         "Multiply the two: 0.7 × 1.13 is the same either way."
       ],
@@ -508,17 +508,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-basics-8",
-      "prompt": "Store A has $40.00 items at 20% off. Store B has the same item at $36.00. Which is cheaper before tax?",
+      "prompt": "Shop A has a $40.00 Timbits box at 20% off. Shop B sells the same box for $36.00. Which is cheaper before tax?",
       "options": [
-        "Store A, at $32.00 before tax",
-        "Store B, at $36.00 before tax",
+        "Shop A, at $32.00 before tax",
+        "Shop B, at $36.00 before tax",
         "Both are $36.00 before tax"
       ],
       "answer": 0,
       "why": "A discount must be worked out before you compare two prices.",
       "steps": [
         {
-          "text": "Try $60.00 at 10% off. 10% of 60 is $6.00."
+          "text": "Try a $60.00 Timbits box at 10% off. 10% of 60 is $6.00."
         },
         {
           "text": "Sale price: 60 − 6 = $54.00."
@@ -531,12 +531,12 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Store A",
+            "label": "Shop A",
             "value": 32,
             "tone": "good"
           },
           {
-            "label": "Store B",
+            "label": "Shop B",
             "value": 36,
             "tone": "bad"
           }
@@ -547,7 +547,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-basics-9",
-      "prompt": "A sticker says $25.00. What does the till charge with 13% HST?",
+      "prompt": "A Minecraft texture pack has a sticker of $25.00. What does the till charge with 13% HST?",
       "options": [
         "$28.25",
         "$27.50",
@@ -557,7 +557,7 @@ export const pack: SePack = {
       "why": "HST is added at the till, so the sticker is never the final price.",
       "steps": [
         {
-          "text": "Try a $25.00 sticker. 13% of 25 is 0.13 × 25 = $3.25."
+          "text": "Try a $25.00 pack. 13% of 25 is 0.13 × 25 = $3.25."
         },
         {
           "text": "Add it on: 25.00 + 3.25 = $28.25."
@@ -570,7 +570,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-applied-0",
-      "prompt": "Isagi buys a Blue Lock jersey. The sticker says $80, before tax. What is the total with 13% HST?",
+      "prompt": "A Roblox gift card has a $80 sticker, before tax. What is the total with 13% HST?",
       "options": [
         "$93.20",
         "$90.40",
@@ -586,21 +586,14 @@ export const pack: SePack = {
           "text": "Add the tax to the price: $80.00 + $10.40 = $90.40."
         },
         {
-          "text": "Try $50 with the same method: 13% of $50 is $6.50, so the total is $56.50."
+          "text": "Try a $50 Robux card: 13% of $50 is $6.50, so the total is $56.50."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-1",
-      "prompt": "A One Piece crew buys a treasure chest. The sticker is $250, with 20% off. Then 13% HST is added. What do they pay?",
+      "prompt": "A Fortnite bundle has a $250 sticker. It is 20% off, then 13% HST is added. What do you pay?",
       "options": [
         "$226.00",
         "$282.50",
@@ -616,14 +609,14 @@ export const pack: SePack = {
           "text": "13% HST on $200 is $26. Add it: $200 + $26 = $226."
         },
         {
-          "text": "Try $300 at 20% off: $240, then tax $31.20, total $271.20."
+          "text": "Try a $300 bundle at 20% off: $240, then tax $31.20, total $271.20."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-2",
-      "prompt": "Coach says: a jersey is 25% off, then 13% HST. Is it the same total if the HST comes first, then the 25% off?",
+      "prompt": "A Pokémon plush is 25% off, then 13% HST. Does the order of the two changes matter?",
       "options": [
         "Same total, either order",
         "HST first is always cheaper",
@@ -633,20 +626,20 @@ export const pack: SePack = {
       "why": "Both changes multiply the price, and multiplying in any order gives the same result.",
       "steps": [
         {
-          "text": "Discount first, $100: $75 after 25% off, then × 1.13 = $84.75."
+          "text": "Discount first, $100 plush: $75 after 25% off, then × 1.13 = $84.75."
         },
         {
-          "text": "HST first, $100: $113 after tax, then 25% off ($28.25) = $84.75."
+          "text": "HST first: $113 after tax, then 25% off ($28.25) = $84.75."
         },
         {
-          "text": "Try $40 at 10% off: 36 × 1.13 = $40.68, and 45.20 × 0.90 = $40.68."
+          "text": "Try a $40 keychain at 10% off: 36 × 1.13 = $40.68, and 45.20 × 0.90 = $40.68."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-3",
-      "prompt": "Luffy's crew eats in Kensington Market. The food is $60 before tax. They tip 15% of the pre-tax bill. What is the total?",
+      "prompt": "Your crew eats in Kensington Market. The food is $60 before tax. They tip 15% of the pre-tax bill. What is the total?",
       "options": [
         "$77.97",
         "$67.80",
@@ -665,14 +658,14 @@ export const pack: SePack = {
           "text": "Add them: $60.00 + $7.80 + $9.00 = $76.80."
         },
         {
-          "text": "Try $40 with a 10% tip: tax $5.20, tip $4.00, total $49.20."
+          "text": "Try a $40 shawarma bill with a 10% tip: tax $5.20, tip $4.00, total $49.20."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-5",
-      "prompt": "A Toronto shop's receipt shows $113.00 total, including 13% HST. What was the price before tax?",
+      "prompt": "A Minecraft merch receipt shows $113.00, including 13% HST. What was the price before tax?",
       "options": [
         "$98.31",
         "$100.00",
@@ -691,14 +684,14 @@ export const pack: SePack = {
           "text": "Subtracting 13% of $113 gives $98.31, which is wrong. The tax was on $100, not $113."
         },
         {
-          "text": "Try $56.50: $56.50 ÷ 1.13 = $50.00."
+          "text": "Try a $56.50 total: $56.50 ÷ 1.13 = $50.00."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-6",
-      "prompt": "Deal A: 15% off a $200 bat. Deal B: 10% off a $180 bat. Both are before HST. Which is cheaper?",
+      "prompt": "Deal A: 15% off $200 boots. Deal B: 10% off $180 boots. Both before HST. Which is cheaper?",
       "options": [
         "Deal A saves more",
         "Deal B is cheaper by $8.00",
@@ -717,14 +710,14 @@ export const pack: SePack = {
           "text": "$170 − $162 = $8. Deal B is cheaper, even with the smaller percent."
         },
         {
-          "text": "Try $120 at 25% off: $90. Then $90 at 30% off: $63."
+          "text": "Try $120 boots at 25% off: $90. Then $90 at 30% off: $63."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-applied-7",
-      "prompt": "Four friends split a $113.00 bill, which includes HST. How much does each person pay?",
+      "prompt": "Four friends split a $113.00 pizza bill, HST included. What does each pay?",
       "options": [
         "$29.25",
         "$28.25",
@@ -747,7 +740,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-applied-8",
-      "prompt": "Store A sells a jacket for $120 plus 13% HST. Store B sells the same jacket for $130, with tax included. Which is cheaper?",
+      "prompt": "Store A: $120 Roblox card, plus 13% HST. Store B: $130, tax included. Which is cheaper?",
       "options": [
         "Store A, by $5.60",
         "Store B, by $5.60",
@@ -773,7 +766,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-applied-9",
-      "prompt": "A One Piece crew uses two 20% coupons on a $100 sword. The coupons are used one after the other. What do they pay before HST?",
+      "prompt": "Two 20% coupons go on a $100 plush, one after the other. Price before HST?",
       "options": [
         "$64.00",
         "$60.00",
@@ -796,7 +789,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-deeper-6",
-      "prompt": "Isagi's boots cost $80 before tax. What is the total with 13% HST?",
+      "prompt": "A pair of football boots costs $80 before tax. What is the total with 13% HST?",
       "options": [
         "$89.60",
         "$90.40",
@@ -819,7 +812,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-deeper-7",
-      "prompt": "A Blue Lock ball is $50 with 20% off, then 10% off the new price. What is the total discount?",
+      "prompt": "A $50 Blue Lock ball gets 20% off, then 10% off the new price. Total discount?",
       "options": [
         "30% off in total",
         "28% off in total",
@@ -842,7 +835,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-deeper-8",
-      "prompt": "Ego's jersey costs $200. Its price goes up 10%, then down 10%. What is the price now?",
+      "prompt": "A $200 Fortnite skin goes up 10%, then down 10%. What is the price now?",
       "options": [
         "$200.00",
         "$198.00",
@@ -852,20 +845,20 @@ export const pack: SePack = {
       "why": "The second 10% is taken from the higher price, so it removes more money than the first added.",
       "steps": [
         {
-          "text": "Up 20% on $500: 1.2 × 500 = $600."
+          "text": "Up 10% on $500: 1.1 × 500 = $550."
         },
         {
-          "text": "Down 20% from $600: 0.8 × 600 = $480."
+          "text": "Down 10% from $550: 0.9 × 550 = $495."
         },
         {
-          "text": "$480 is not $500, so the change did not undo itself."
+          "text": "$495 is not $500, so the change did not undo itself."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-tax-deeper-9",
-      "prompt": "A meal costs $30 before tax. Which part of the bill is set by law?",
+      "prompt": "Your pizza is $30 before tax. Which part of the bill is set by law?",
       "options": [
         "The 15% tip",
         "The 13% HST",
@@ -875,10 +868,10 @@ export const pack: SePack = {
       "why": "HST is a fixed tax rate set by the government, while a tip is a choice the customer makes.",
       "steps": [
         {
-          "text": "Find the tax on $40: 0.13 × 40 = $5.20, so HST is $5.20."
+          "text": "Find the tax on $30: 0.13 × 30 = $3.90, so HST is $3.90."
         },
         {
-          "text": "Find an 18% tip on $40: 0.18 × 40 = $7.20, which is a choice."
+          "text": "Find an 18% tip on $30: 0.18 × 30 = $5.40, which is a choice."
         },
         {
           "text": "Only the first number is fixed by law. The tip changes with the customer."
@@ -888,7 +881,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-tax-deeper-10",
-      "prompt": "A $100 sword is 25% off, then HST is added to the sale price. What is the total?",
+      "prompt": "A $100 Fortnite bundle is 25% off, then HST is added. Total?",
       "options": [
         "$84.75",
         "$88.00",
@@ -904,14 +897,14 @@ export const pack: SePack = {
           "text": "Add 13% HST to $28: 1.13 × 28 = $31.64."
         },
         {
-          "text": "Adding the percents, 30% + 13%, gives the wrong total of $43.20 — not the right method."
+          "text": "Adding 25% and 13% to get 38% off gives the wrong answer. Apply each one in turn."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-tax-build-2",
-      "prompt": "Bachira pays for new boots. The sticker says $80.00. Add 13% HST. What does he pay?",
+      "prompt": "Bachira buys football boots. The sticker says $80.00. Add 13% HST. What does he pay?",
       "answer": "90.40",
       "decoys": [
         "8",
@@ -934,7 +927,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-3",
-      "prompt": "Zoro's bill says $67.80 total, with 13% HST added. What was the price before tax?",
+      "prompt": "Zoro's shawarma bill says $67.80 total, with 13% HST. What was the price before tax?",
       "answer": "60.00",
       "decoys": [
         "7",
@@ -957,7 +950,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-4",
-      "prompt": "A jersey sticker says $60.00. It is 20% off in a sale. Then add 13% HST on the new price. Total?",
+      "prompt": "A Roblox hoodie sticker says $60.00. It is 20% off. Add 13% HST to the new price. Total?",
       "answer": "54.24",
       "decoys": [
         "7",
@@ -967,7 +960,7 @@ export const pack: SePack = {
       "why": "Tax is charged on the price after the discount, not the sticker price.",
       "steps": [
         {
-          "text": "Worked example: a $50.00 scarf, 10% off. New price is 45.00."
+          "text": "Worked example: a $50.00 Pokémon plush, 10% off. New price is 45.00."
         },
         {
           "text": "HST on 45.00: 10% is 4.50, 3% is 1.35, total tax 5.85. Total 50.85."
@@ -980,7 +973,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-5",
-      "prompt": "Franky sells a ship part for $200.00. How much HST (the tax only) is charged?",
+      "prompt": "A $200.00 Minecraft gift card. How much HST (the tax only) is charged?",
       "answer": "26.00",
       "decoys": [
         "3",
@@ -990,7 +983,7 @@ export const pack: SePack = {
       "why": "HST is a percentage of the price, so you can find it with 10% and 3%.",
       "steps": [
         {
-          "text": "Worked example: a $150.00 part. 10% is 15.00, 3% is 4.50."
+          "text": "Worked example: a $150.00 Minecraft gift card. 10% is 15.00, 3% is 4.50."
         },
         {
           "text": "Add them: 15.00 + 4.50 = 19.50 of HST."
@@ -1003,7 +996,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-6",
-      "prompt": "Two items: $12.50 and $7.50. Add 13% HST to the total. What is the final bill?",
+      "prompt": "Poutine $12.50 and a 2 L pop $7.50 at the till. Add 13% HST. What is the final bill?",
       "answer": "22.60",
       "decoys": [
         "5",
@@ -1013,10 +1006,10 @@ export const pack: SePack = {
       "why": "Add the prices first, then work out the tax on the whole amount.",
       "steps": [
         {
-          "text": "Worked example: $6.00 and $4.00 make 10.00. Tax is 1.30."
+          "text": "Worked example: shawarma $5.00 and pop $3.00 make 8.00. Tax is 1.04."
         },
         {
-          "text": "Final bill: 10.00 + 1.30 = 11.30."
+          "text": "Final bill: 8.00 + 1.04 = 9.04."
         },
         {
           "text": "Now add the two prices first, then do the same 13% steps on that total."
@@ -1026,7 +1019,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-tax-build-7",
-      "prompt": "A bounty board sign: a $45.00 sticker drops to $36.00 in a sale. What percent off is that?",
+      "prompt": "A Blue Lock jersey has a $45.00 price tag. The sale price is $36.00. What percent off is that?",
       "answer": "20%",
       "decoys": [
         "5",
@@ -1049,28 +1042,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "fin-tax-games-1",
-      "title": "Till Talk",
+      "title": "Till Words",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "HST",
-            "13% in Ontario"
+            "13% tax added in Ontario"
           ],
           [
-            "Sticker price",
+            "Price tag",
             "Price before tax"
           ],
           [
-            "Tip",
-            "Extra for the server"
+            "Server tip",
+            "Extra for the cook"
           ],
           [
-            "Discount",
-            "Money knocked off"
+            "Sale",
+            "Money knocked off the price"
           ],
           [
-            "Total",
+            "Till total",
             "Price after tax"
           ]
         ]

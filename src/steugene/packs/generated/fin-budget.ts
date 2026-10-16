@@ -15,13 +15,13 @@ export const pack: SePack = {
       "id": "fin-budget-teach-0",
       "title": "What a budget is",
       "lines": [
-        "A budget is a plan for your money.",
-        "Write down what comes in.",
-        "Write down what goes out. Then see what is left."
+        "A budget is a plan for your V-Bucks.",
+        "Write down what comes in: a 60 V-Bucks allowance.",
+        "Write down what goes out, then see what is left."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Think of Isagi reading the pitch before kickoff. He plans every pass first."
+        "flavour": "key",
+        "text": "Your squad leader plans every purchase before the match starts."
       },
       "art": {
         "art": "bars",
@@ -41,13 +41,14 @@ export const pack: SePack = {
             "value": 13,
             "tone": "focus"
           }
-        ]
+        ],
+        "unit": "V-Bucks"
       }
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-0",
-      "prompt": "Isagi gets $80 this month from his team. He spends $55 on new boots. How much is left?",
+      "prompt": "Your allowance is $80 this month. You spend $55 on a new controller. How much is left?",
       "options": [
         "$35 left",
         "$25 left",
@@ -57,7 +58,7 @@ export const pack: SePack = {
       "why": "Money left is what remains after you take the money out from the money in.",
       "steps": [
         {
-          "text": "Luffy's crew has $64 in. They spend $29 on rope."
+          "text": "Your lemonade stand takes in $64. It spends $29 on cups."
         },
         {
           "text": "Subtract the money out from the money in: 64 − 29 = 35."
@@ -70,7 +71,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-basics-1",
-      "prompt": "Zoro buys a $12 whetstone to sharpen his swords. Which column does it go in?",
+      "prompt": "You buy a $12 Roblox gift card with your own cash. Which column does it go in?",
       "options": [
         "Money in",
         "Money out",
@@ -80,13 +81,13 @@ export const pack: SePack = {
       "why": "Any cash that leaves your wallet goes in the money out column.",
       "steps": [
         {
-          "text": "Nami sells a treasure map for $30. Money came in, so it goes in the money in column."
+          "text": "Your grandma sends you $30 for your birthday. Money came in, so it goes in the money in column."
         },
         {
           "text": "Ask one question: did money leave my wallet, or arrive in it?"
         },
         {
-          "text": "The whetstone left the wallet, so it goes in money out."
+          "text": "The gift card left the wallet, so it goes in money out."
         }
       ]
     },
@@ -161,13 +162,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-basics-2",
-      "prompt": "The team bus plan says: money in $40, money out $52. What goes on the money left line?",
+      "prompt": "Your Fortnite budget says money in $40, money out $52. What goes on the money left line?",
       "options": [
-        "−$12",
         "$12",
+        "−$12",
         "$92"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "When money out is bigger than money in, the left amount is negative, which means you are short.",
       "steps": [
         {
@@ -177,14 +178,14 @@ export const pack: SePack = {
           "text": "Subtract: 30 − 41 = −11. You are $11 short."
         },
         {
-          "text": "A negative sign means you owe money. It is below zero, like the sea floor below sea level."
+          "text": "A negative sign means you owe money. It is below zero, like Y = −64 on the Minecraft bedrock layer."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-3",
-      "prompt": "Coach's budget is $200. He spends $50 on food. What fraction of the budget is food?",
+      "prompt": "Your Roblox budget is 200 Robux. You spend 50 Robux on a game pass. What fraction of the budget is spent?",
       "options": [
         "1/5",
         "1/4",
@@ -194,13 +195,13 @@ export const pack: SePack = {
       "why": "A fraction is the part spent over the whole budget, and you can simplify it by dividing top and bottom.",
       "steps": [
         {
-          "text": "Example: budget $300, gear costs $60. The fraction is 60/300."
+          "text": "Example: budget $300 for the party, Timbits cost $60. The fraction is 60/300."
         },
         {
           "text": "Divide top and bottom by 60: 60 ÷ 60 = 1 and 300 ÷ 60 = 5."
         },
         {
-          "text": "So gear is 1/5 of the budget. Simplify until neither number divides again."
+          "text": "So the Timbits are 1/5 of the budget. Simplify until neither number divides again."
         }
       ]
     },
@@ -209,9 +210,9 @@ export const pack: SePack = {
       "id": "fin-budget-teach-1",
       "title": "Why it matters",
       "lines": [
-        "You cannot spend money you have not counted.",
-        "A written plan stops you running out before payday.",
-        "It also shows you where your money really goes."
+        "You cannot spend V-Bucks you have not counted.",
+        "A written plan stops you short before the Battle Pass sale.",
+        "It also shows where your money really goes."
       ],
       "callout": {
         "flavour": "key",
@@ -221,7 +222,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-budget-build-0",
-      "prompt": "Blue Lock team fund: $80 in. They spent $52 on new balls. How much is left?",
+      "prompt": "Your Fortnite allowance: $80 in. You spent $52 on V-Bucks. How much is left?",
       "answer": "28",
       "decoys": [
         "3",
@@ -231,13 +232,13 @@ export const pack: SePack = {
       "why": "Money left is what comes in minus what goes out, so you subtract.",
       "steps": [
         {
-          "text": "Write the plan: in $90, out $35. Left = 90 − 35."
+          "text": "Pokémon fund: $90 in, $35 out. Left = 90 − 35."
         },
         {
           "text": "Subtract: 90 − 35 = 55. Check it: 35 + 55 = 90, so it balances."
         },
         {
-          "text": "Try the same thing with $64 in and $19 out. Your left is 45."
+          "text": "Try $64 in and $19 out. Your left is 45."
         }
       ],
       "art": {
@@ -260,7 +261,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-basics-4",
-      "prompt": "Isagi earns $400 pay and saves $80 of it. What percent did he save?",
+      "prompt": "Your Roblox game made $400. You saved $80 of it. What percent did you save?",
       "options": [
         "40%",
         "20%",
@@ -270,20 +271,20 @@ export const pack: SePack = {
       "why": "To find a percent, divide the part by the whole, then multiply by 100.",
       "steps": [
         {
-          "text": "Example: pay $200, saved $50. Divide: 50 ÷ 200 = 0.25."
+          "text": "Pokémon trainer earns $200 and saves $50. Divide: 50 ÷ 200 = 0.25."
         },
         {
           "text": "Multiply by 100: 0.25 × 100 = 25. So 25% was saved."
         },
         {
-          "text": "Always divide the saved part by the whole pay, not the other way round."
+          "text": "Always divide the saved part by the whole, not the other way round."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-5",
-      "prompt": "Money in is $75. The money left is $18. How much money went out?",
+      "prompt": "Your club's kit fund has $75 in and $18 left. How much went out?",
       "options": [
         "$63",
         "$93",
@@ -293,7 +294,7 @@ export const pack: SePack = {
       "why": "If you know the total and what remains, subtract the remainder from the total to find what was spent.",
       "steps": [
         {
-          "text": "Example: money in $90, money left $35."
+          "text": "Example: a team fund has $90 in and $35 left."
         },
         {
           "text": "Subtract the left from the in: 90 − 35 = 55. So $55 went out."
@@ -306,7 +307,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "fin-budget-games-0",
-      "title": "Crew Money Words",
+      "title": "Server Money Words",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -324,7 +325,7 @@ export const pack: SePack = {
           ],
           [
             "Budget",
-            "Plan before spending"
+            "Plan before you spend"
           ],
           [
             "Deficit",
@@ -339,7 +340,7 @@ export const pack: SePack = {
       "id": "fin-budget-teach-2",
       "title": "The method",
       "lines": [
-        "Step 1: add up all the money coming in.",
+        "Step 1: add up all the money coming in, like prize money.",
         "Step 2: add up all the money going out.",
         "Step 3: subtract. Money in − money out = money left."
       ],
@@ -353,7 +354,7 @@ export const pack: SePack = {
       "id": "fin-budget-basics-6",
       "prompt": "Which entry belongs in the money out column?",
       "options": [
-        "Bus fare to practice",
+        "Shawarma and pop after school",
         "Gift money from Gran",
         "Allowance from Mom"
       ],
@@ -367,52 +368,52 @@ export const pack: SePack = {
           "text": "Gift money and allowance both put cash into your pocket, so they are money in."
         },
         {
-          "text": "Bus fare takes cash out, so it belongs in money out."
+          "text": "Shawarma and pop take cash out, so they belong in money out."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-7",
-      "prompt": "Ren buys a $25 jersey, $48 boots and $3 water. What is the total money out?",
+      "prompt": "Kai buys a skin for 800 V-Bucks, an emote for 150 and a wrap for 25. Total V-Bucks out?",
       "options": [
-        "$66",
-        "$86",
-        "$76"
+        "965 V-Bucks",
+        "975 V-Bucks",
+        "985 V-Bucks"
       ],
-      "answer": 2,
-      "why": "A total is found by adding every money out entry together.",
+      "answer": 1,
+      "why": "A total is found by adding every V-Bucks spend together.",
       "steps": [
         {
-          "text": "Example: $14 for a ball, $29 for socks, $5 for a snack."
+          "text": "Example: 300 for a glider, 90 for a pickaxe, 40 for a pet."
         },
         {
-          "text": "Add them: 14 + 29 + 5 = 48. Total money out is $48."
+          "text": "Add them: 300 + 90 + 40 = 430. Total V-Bucks out is 430."
         },
         {
-          "text": "Add each item one at a time, so no entry gets missed."
+          "text": "Add each spend one at a time, so no purchase gets missed."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-budget-build-1",
-      "prompt": "One Piece ship budget: Sanji has $100. He spends $64 on food. How much is left?",
+      "prompt": "Ren has 100 V-Bucks. He spends 64 on an emote. How many V-Bucks are left?",
       "answer": "36",
       "decoys": [
         "4",
         "7"
       ],
-      "why": "Every dollar that goes out is taken away from the money you started with.",
+      "why": "Every V-Buck spent is taken away from the balance you started with.",
       "steps": [
         {
-          "text": "Write the plan: in $90, out $20 and $15. Total out is 35."
+          "text": "Write the plan: 90 in, 20 on a wrap, 15 on a pickaxe. Total out is 35."
         },
         {
           "text": "Left = 90 − 35 = 55. Check: 35 + 55 = 90."
         },
         {
-          "text": "Now try $100 in and $64 out. The answer is 36 again, so check it the same way."
+          "text": "Now try 100 in and 64 out. The answer is 36 again, so check it the same way."
         }
       ]
     }
@@ -423,9 +424,10 @@ export const pack: SePack = {
       "id": "fin-budget-teach-3",
       "title": "The common trap",
       "lines": [
-        "Small costs add up fast. A $4 snack counts as money out.",
+        "Saving for a 950 V-Bucks pass? Small spends add up fast.",
+        "A $4 snack still counts as money out.",
         "Money you plan to save is also money out.",
-        "Check that every amount is written in the same unit, dollars."
+        "Check every amount is in the same unit, dollars."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -437,9 +439,9 @@ export const pack: SePack = {
       "id": "fin-budget-teach-4",
       "title": "Worked example",
       "lines": [
-        "Isagi gets $40 from his gran and $15 for chores.",
+        "Kai gets $40 from his gran and $15 for chores.",
         "Money in is $40 + $15 = $55.",
-        "He spends $22 on a boot charm and $9 on snacks.",
+        "He spends $22 on a wrap and $9 on snacks.",
         "Money out is $22 + $9 = $31.",
         "Money left is $55 − $31 = $24."
       ],
@@ -461,7 +463,8 @@ export const pack: SePack = {
             "value": 24,
             "tone": "focus"
           }
-        ]
+        ],
+        "unit": "$"
       }
     },
     {
@@ -475,7 +478,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A crew that counts its treasure before sailing keeps its ship afloat."
+        "text": "A squad that counts its V-Bucks before buying lasts the whole season."
       }
     },
     {
@@ -489,7 +492,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock: Isagi counts goals scored minus goals let in. Same idea."
+        "text": "Kai spends 13 more V-Bucks than he has, so his left is −13."
       },
       "art": {
         "art": "numberline",
@@ -514,9 +517,9 @@ export const pack: SePack = {
       "id": "fin-budget-deeper-1",
       "title": "Save first, not last",
       "lines": [
-        "Most people save what is left at month end.",
-        "Usually nothing is left. So nothing gets saved.",
-        "Set the savings amount first. Spend the rest."
+        "Most players spend their V-Bucks, then save what is left.",
+        "Usually nothing is left, so the pass never gets bought.",
+        "Set aside 950 V-Bucks first. Spend the rest."
       ],
       "callout": {
         "flavour": "pirate",
@@ -534,7 +537,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A $120 yearly fee is $10 a month, not $120 a month."
+        "text": "A $96 yearly fee is $8 a month, not $96 a month."
       }
     },
     {
@@ -542,13 +545,13 @@ export const pack: SePack = {
       "id": "fin-budget-deeper-3",
       "title": "Plan is not actual",
       "lines": [
-        "The plan is what you think will happen.",
-        "The actual is what really happened.",
+        "The plan is what you expect to spend.",
+        "The actual is what you really spent.",
         "Actual minus plan shows where the money drifted."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Imagine a striker's expected goals against the goals he really scores."
+        "text": "Like xG: a striker expects 1.37 goals, but scores 3 in the match."
       }
     },
     {
@@ -556,13 +559,13 @@ export const pack: SePack = {
       "id": "fin-budget-deeper-4",
       "title": "Income is not your balance",
       "lines": [
-        "Income is money that comes in this month.",
-        "Your bank balance also holds old money.",
+        "Income is what comes in this month.",
+        "Your balance also holds Robux from before.",
         "Use income for the budget, not the total in the account."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A $500 balance with $80 pay means income is $80."
+        "text": "A 500 Robux balance with 80 Robux earned this week means income is 80."
       }
     },
     {
@@ -570,42 +573,42 @@ export const pack: SePack = {
       "id": "fin-budget-deeper-5",
       "title": "Negative left is a deficit",
       "lines": [
-        "A negative left number means overspending.",
-        "It tells you how much money you are short.",
+        "A negative left number means you spent more V-Bucks than you have.",
+        "It tells you how many V-Bucks you are short.",
         "Cut that amount, or move money from another line."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "One Piece: a crew that owes more than its treasure must sell something."
+        "text": "One Piece: a crew that owes more Berries than it has must sell something."
       }
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-8",
-      "prompt": "Why should you write the budget down before you spend the money?",
+      "prompt": "Why should you write your V-Bucks budget before the shop opens?",
       "options": [
-        "So you can see what is left before it is gone",
-        "So the bank has to pay you more interest",
-        "So your coach can check your sprint times"
+        "So you see what is left before it is spent",
+        "So the shop gives you a discount on skins",
+        "So your squad can check your elimination count"
       ],
       "answer": 0,
-      "why": "A written budget shows the gap between money in and money out before the money is spent.",
+      "why": "A written budget shows the gap between money in and money out before you spend it.",
       "steps": [
         {
-          "text": "Example: a family plans $340 of spending with only $300 coming in."
+          "text": "Your plan spends 1,100 V-Bucks, but only 950 V-Bucks come in."
         },
         {
-          "text": "Writing it down shows the gap of $40 in week one, while there is still time to fix it."
+          "text": "Written down, the gap shows you are 150 V-Bucks short this week."
         },
         {
-          "text": "A budget is a plan you can see, so spending stays inside what you have."
+          "text": "Cut 150 V-Bucks from the plan now, while the money is still in your account."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-basics-9",
-      "prompt": "Which sentence is correct for money in $60, money out $47, money left $13?",
+      "prompt": "Allowance $60 in, $47 spent on V-Bucks, $13 left. Which sentence is correct?",
       "options": [
         "60 − 47 = 13, so $13 is left",
         "60 + 47 = 13, so $13 is left",
@@ -615,7 +618,7 @@ export const pack: SePack = {
       "why": "Money left comes from subtracting money out from money in, never the other way round.",
       "steps": [
         {
-          "text": "Example: money in $50, money out $32."
+          "text": "Example: $50 in, $32 spent on a skin."
         },
         {
           "text": "Subtract money out from money in: 50 − 32 = 18."
@@ -628,7 +631,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-applied-0",
-      "prompt": "Bachira's team has $120 in. They spend $68 on the bus and $27 on pitch hire. How much is left?",
+      "prompt": "Your allowance is $120. You spend $68 on V-Bucks and $27 at the tuck shop. What is left?",
       "options": [
         "$52",
         "$93",
@@ -638,7 +641,7 @@ export const pack: SePack = {
       "why": "Money left is what comes in, minus every amount that goes out.",
       "steps": [
         {
-          "text": "Start with $90 in. Spend $35 on jerseys and $22 on snacks."
+          "text": "Start with $90 in. Spend $35 on a skin and $22 on Timbits."
         },
         {
           "text": "Add the spending first: $35 + $22 = $57 out."
@@ -646,19 +649,12 @@ export const pack: SePack = {
         {
           "text": "Subtract from the start: $90 − $57 = $33 left."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "$120 in",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-applied-1",
-      "prompt": "Zoro says the crew has $240 left after spending $185 on food. How much money came in?",
+      "prompt": "You have $240 left after spending $185 at the Minecraft shop. How much money came in?",
       "options": [
         "$55",
         "$425",
@@ -668,7 +664,7 @@ export const pack: SePack = {
       "why": "To find money in, add the money left to the money that went out.",
       "steps": [
         {
-          "text": "Try a new crew: $70 is left after spending $40 on meat."
+          "text": "Try a new budget: $70 is left after spending $40 on iron."
         },
         {
           "text": "Add them: $70 + $40 = $110 came in."
@@ -681,7 +677,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-applied-2",
-      "prompt": "Rin sells 40 team scarves at $12 each. The scarves cost $280 to make. What is the profit?",
+      "prompt": "You sell 40 Roblox shirts at $12 each. Making them costs $280. What is the profit?",
       "options": [
         "$200",
         "$760",
@@ -704,7 +700,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-applied-3",
-      "prompt": "Coach Ego's budget is $800. He puts 25% of it on pitch hire. How much is that?",
+      "prompt": "Your skin savings goal is $800. You have saved 25% of it. How much is saved?",
       "options": [
         "$200",
         "$80",
@@ -714,7 +710,7 @@ export const pack: SePack = {
       "why": "Finding a percent means dividing the total by 100, then multiplying by the percent.",
       "steps": [
         {
-          "text": "Try a budget of $600 with 50% for training gear."
+          "text": "Try a goal of $600, with 50% saved."
         },
         {
           "text": "50% means half: $600 ÷ 2 = $300."
@@ -727,7 +723,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-applied-4",
-      "prompt": "A jersey costs $60 before HST. Ontario HST is 13%. What is the total price?",
+      "prompt": "A $60 Fortnite bundle costs $60 before HST. Ontario HST is 13%. What is the total price?",
       "options": [
         "$67.80",
         "$66.00",
@@ -737,7 +733,7 @@ export const pack: SePack = {
       "why": "HST is added on top of the price, so the total is the price plus 13% of it.",
       "steps": [
         {
-          "text": "Try a scarf at $40 before HST."
+          "text": "Try poutine at $40 before HST."
         },
         {
           "text": "HST: $40 × 0.13 = $5.20."
@@ -750,99 +746,99 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-applied-5",
-      "prompt": "Sanji buys food for 6 days at $38 each day. He starts with $300. How much money is left?",
+      "prompt": "Your squad has 300 V-Bucks. It spends 38 a day for 6 days. How many are left?",
       "options": [
-        "$262",
-        "$72",
-        "$338"
+        "262 V-Bucks",
+        "72 V-Bucks",
+        "338 V-Bucks"
       ],
       "answer": 1,
       "why": "Multiply the daily cost by the number of days, then subtract that from the money you started with.",
       "steps": [
         {
-          "text": "Try 4 days at $25 each, starting with $150."
+          "text": "Try 4 days at 25 V-Bucks each, starting with 150."
         },
         {
-          "text": "Spending: 4 × $25 = $100."
+          "text": "Spending: 4 × 25 = 100 V-Bucks."
         },
         {
-          "text": "Left: $150 − $100 = $50."
+          "text": "Left: 150 − 100 = 50 V-Bucks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-applied-6",
-      "prompt": "The crew has $400. They spend 60% of it on supplies. How much is left?",
+      "prompt": "You have 400 iron. You use 60% of it on tools. How much iron is left?",
       "options": [
-        "$240",
-        "$140",
-        "$160"
+        "240 iron",
+        "140 iron",
+        "160 iron"
       ],
       "answer": 2,
       "why": "If you spend a percent, the money left is the rest, which is 100% minus that percent.",
       "steps": [
         {
-          "text": "Try $500 with 30% spent on rope."
+          "text": "Try 500 iron with 30% used on rails."
         },
         {
-          "text": "Spent: 30% of $500 = $150. Left is 70%."
+          "text": "Used: 30% of 500 = 150. Left is 70%."
         },
         {
-          "text": "70% of $500 = $350 left."
+          "text": "70% of 500 = 350 iron left."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-applied-7",
-      "prompt": "Team budget: $45 in, $52 out. What is the money left?",
+      "prompt": "Club budget: 45 in, 52 out, in millions. What is left?",
       "options": [
-        "−$7",
-        "$7",
-        "$97"
+        "−7 million",
+        "7 million",
+        "97 million"
       ],
       "answer": 0,
       "why": "A negative left means the team spent more than it had, so it is short by that amount.",
       "steps": [
         {
-          "text": "Try $30 in and $41 out."
+          "text": "Try 30 in and 41 out."
         },
         {
-          "text": "Left: $30 − $41 = −$11."
+          "text": "Left: 30 − 41 = −11."
         },
         {
-          "text": "The minus sign means $11 short."
+          "text": "The minus sign means 11 million short."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-applied-8",
-      "prompt": "A school trip has a $360 budget. Food takes 1/4 of it and buses take 1/2 of it. How much is left?",
+      "prompt": "Your team has 360 Robux. 1/4 goes to a hat and 1/2 to a game pass. How much is left?",
       "options": [
-        "$180",
-        "$270",
-        "$90"
+        "180 Robux",
+        "270 Robux",
+        "90 Robux"
       ],
       "answer": 2,
       "why": "Fractions of the total are spent first, then the rest is what is left over.",
       "steps": [
         {
-          "text": "Try $200 with 1/5 on food and 1/2 on buses."
+          "text": "Try 200 Robux with 1/5 on a hat and 1/2 on a pass."
         },
         {
-          "text": "Food: $200 ÷ 5 = $40. Buses: $200 ÷ 2 = $100."
+          "text": "Hat: 200 ÷ 5 = 40. Pass: 200 ÷ 2 = 100."
         },
         {
-          "text": "Left: $200 − $40 − $100 = $60."
+          "text": "Left: 200 − 40 − 100 = 60 Robux."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-applied-9",
-      "prompt": "Usopp gets $25 a week. He spends 40% on snacks and 35% on cards. How much is left?",
+      "prompt": "You get $25 a week. 40% goes on Timbits and 35% on poutine. How much is left?",
       "options": [
         "$8.75",
         "$6.25",
@@ -852,7 +848,7 @@ export const pack: SePack = {
       "why": "Add the percents spent, then take that total off 100% to find the share left.",
       "steps": [
         {
-          "text": "Try $20 a week with 30% on games and 50% on comics."
+          "text": "Try $20 a week with 30% on shawarma and 50% on pop."
         },
         {
           "text": "Spent: 30% + 50% = 80%. Left is 20%."
@@ -865,7 +861,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-budget-applied-10",
-      "prompt": "The team had $85 in. They have $29 left. How much went out? Build the number.",
+      "prompt": "Your stash had 85 Berries in. You have 29 left. How many Berries went out? Build the number.",
       "answer": "56",
       "decoys": [
         "9"
@@ -873,103 +869,96 @@ export const pack: SePack = {
       "why": "Money out is money in minus money left.",
       "steps": [
         {
-          "text": "Try $70 in and $18 left."
+          "text": "Try 70 in and 18 left."
         },
         {
-          "text": "Out: $70 − $18 = $52."
+          "text": "Out: 70 − 18 = 52."
         },
         {
-          "text": "Check: $52 + $18 = $70, which matches."
+          "text": "Check: 52 + 18 = 70, which matches."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-deeper-6",
-      "prompt": "Which plan is most likely to actually save money?",
+      "prompt": "Which plan will actually leave you V-Bucks for a skin?",
       "options": [
-        "Spend first, then save what is left",
-        "Save a set amount first, then spend",
-        "Save whatever feels right at month end"
+        "Spend V-Bucks first, save what is left",
+        "Save a set amount of V-Bucks first",
+        "Save whatever feels right at the end"
       ],
       "answer": 1,
-      "why": "Saving first makes the savings happen before the spending can use up the money.",
+      "why": "Saving first means the savings happen before spending can use up the money.",
       "steps": [
         {
-          "text": "Lina earns $90. She sets $10 aside first."
+          "text": "Kai gets 90 V-Bucks a week. He sets 10 aside first."
         },
         {
-          "text": "Money to spend is $90 − $10 = $80."
+          "text": "V-Bucks to spend: 90 − 10 = 80."
         },
         {
-          "text": "Max earns $120 and saves $15 first. He has $120 − $15 = $105 to spend."
+          "text": "Max gets 120 and saves 15 first. He has 120 − 15 = 105 to spend."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "save first",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-deeper-7",
-      "prompt": "A gym costs $240 a year. What goes in a monthly budget?",
+      "prompt": "A yearly Roblox plan costs 240 Robux. What goes in a monthly budget?",
       "options": [
-        "$20 a month",
-        "$240 a month",
-        "$24 a month"
+        "20 Robux a month",
+        "240 Robux a month",
+        "24 Robux a month"
       ],
       "answer": 0,
-      "why": "A yearly cost is split across 12 months, so $240 ÷ 12 = $20 each month.",
+      "why": "A yearly cost is split across 12 months, so 240 ÷ 12 = 20 Robux each month.",
       "steps": [
         {
-          "text": "The yearly cost is $240."
+          "text": "The yearly cost is 240 Robux."
         },
         {
-          "text": "Divide by 12 months: $240 ÷ 12 = $20."
+          "text": "Divide by 12 months: 240 ÷ 12 = 20."
         },
         {
-          "text": "Check with $300 a year: $300 ÷ 12 = $25 a month."
+          "text": "Check 300 a year: 300 ÷ 12 = 25 Robux a month."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-deeper-8",
-      "prompt": "Ayaan has $500 in his bank. His pay this month is $80. What is his income?",
+      "prompt": "Your account has 500 V-Bucks. You earned 80 V-Bucks from chores this month. What is your income?",
       "options": [
-        "$580",
-        "$80",
-        "$500"
+        "580 V-Bucks",
+        "80 V-Bucks",
+        "500 V-Bucks"
       ],
       "answer": 1,
-      "why": "Income is the money that came in this month, not the total already sitting in the account.",
+      "why": "Income is the money that came in this month, not the total already in the account.",
       "steps": [
         {
-          "text": "The bank has $500, but that was already there."
+          "text": "The account holds 500 V-Bucks, but that was already there."
         },
         {
-          "text": "The new money this month is the $80 pay."
+          "text": "The new money this month is the 80 from chores."
         },
         {
-          "text": "Try $300 in the bank and $60 pay: the income is still $60."
+          "text": "Try 300 in the account and 60 from chores: income is still 60."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-budget-deeper-9",
-      "prompt": "Money in is $45. Money out is $58. What is left?",
+      "prompt": "Villager trades: 45 emeralds in. 58 emeralds out. What is left?",
       "options": [
-        "−$13 left",
-        "$103 left",
-        "$13 left"
+        "−13 emeralds left",
+        "103 emeralds left",
+        "13 emeralds left"
       ],
       "answer": 0,
-      "why": "Left = in − out, and 45 − 58 is negative, so the budget is $13 short.",
+      "why": "Left = in − out, and 45 − 58 is negative, so you are 13 emeralds short.",
       "steps": [
         {
           "text": "Left = in − out = 45 − 58."
@@ -978,7 +967,7 @@ export const pack: SePack = {
           "text": "Since 58 is bigger, the answer is negative."
         },
         {
-          "text": "Try in $30, out $41: 30 − 41 = −$11 left."
+          "text": "Try in 30, out 41: 30 − 41 = −11 left."
         }
       ],
       "art": {
@@ -1002,7 +991,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-budget-deeper-10",
-      "prompt": "You planned $25 for snacks. You actually spent $19. What is the difference from plan?",
+      "prompt": "Your Timbits run had a plan of $25. You spent $19 at the shop. What is the difference from plan?",
       "options": [
         "$6 under plan",
         "$6 over plan",
@@ -1025,7 +1014,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-budget-build-2",
-      "prompt": "Blue Lock: the club has $75 at the start. Left at the end is $19. How much was spent?",
+      "prompt": "Roblox: you start with 75 Robux. You end with 19 Robux. How much was spent?",
       "answer": "56",
       "decoys": [
         "4",
@@ -1034,20 +1023,20 @@ export const pack: SePack = {
       "why": "If you know the money in and the money left, the money spent is the gap between them.",
       "steps": [
         {
-          "text": "Example: in $60, left $17. Spent = 60 − 17."
+          "text": "Example: start 60 Robux, left 17. Spent = 60 − 17."
         },
         {
           "text": "60 − 17 = 43. Check: 43 + 17 = 60, so it fits."
         },
         {
-          "text": "Now use in $75, left $19. Subtract 19 from 75 to get the spent amount."
+          "text": "Now use start 75, left 19. Subtract 19 from 75."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-budget-build-3",
-      "prompt": "One Piece crew: they spent $38 and have $24 left. How much did they start with?",
+      "prompt": "Your Fortnite allowance: you spent $38 on V-Bucks and have $24 left. How much did you start with?",
       "answer": "62",
       "decoys": [
         "8",
@@ -1056,20 +1045,20 @@ export const pack: SePack = {
       "why": "Start money is the money spent plus the money left, so you add them.",
       "steps": [
         {
-          "text": "Example: out $45, left $12. Start = 45 + 12."
+          "text": "Example: Minecraft, you spent $45 and have $12 left. Start = 45 + 12."
         },
         {
           "text": "45 + 12 = 57. Check: 57 − 45 = 12, so it works."
         },
         {
-          "text": "Now use out $38 and left $24. Add them to find the start."
+          "text": "Now your Fortnite money: out $38, left $24. Add them to find the start."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-budget-build-4",
-      "prompt": "Blue Lock: the team had $30 in and spent $41. What is the left-over money as a negative number?",
+      "prompt": "Roblox: you have $30 and spend $41 on Robux. What is your balance as a negative number?",
       "answer": "-11",
       "decoys": [
         "5",
@@ -1078,13 +1067,13 @@ export const pack: SePack = {
       "why": "When you spend more than you have, the balance drops below zero, so the answer is negative.",
       "steps": [
         {
-          "text": "Example: in $20, out $27. Left = 20 − 27."
+          "text": "Example: Minecraft, in $20, out $27. Left = 20 − 27."
         },
         {
           "text": "You are $7 short, so the answer is −7. Check: 20 − 27 is below zero."
         },
         {
-          "text": "Now do in $30 and out $41. Use the minus sign, −, for the answer."
+          "text": "Now your Roblox money: in $30, out $41. Use the minus sign, −, for the answer."
         }
       ],
       "art": {
@@ -1108,26 +1097,26 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-budget-build-5",
-      "prompt": "One Piece: the crew has $50.00. They spend $36.75 on supplies. How much is left, in dollars?",
+      "prompt": "Pokémon card night: you have $50.00 and buy a pack for $36.75. How much is left, in dollars?",
       "answer": "13.25",
       "decoys": [],
       "why": "Money with cents lines up on the decimal point, so subtract the cents the same way as whole dollars.",
       "steps": [
         {
-          "text": "Example: $20.00 in, $14.40 out. Line up the decimal points."
+          "text": "Example: Timbits, $20.00 in, $14.40 out. Line up the decimal points."
         },
         {
           "text": "20.00 − 14.40 = 5.60. Check: 14.40 + 5.60 = 20.00."
         },
         {
-          "text": "Now do $50.00 − $36.75. Borrow from the dollars if the cents are too small."
+          "text": "Now your Pokémon money: $50.00 − $36.75. Borrow from the dollars if the cents are too small."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-budget-build-6",
-      "prompt": "Blue Lock: the fund is $200. They spend 1/4 of it on training kits. How much is left?",
+      "prompt": "EA FC: your coin fund is $200. You spend 1/4 of it on packs. How much is left?",
       "answer": "150",
       "decoys": [
         "3",
@@ -1136,20 +1125,20 @@ export const pack: SePack = {
       "why": "A fraction of a total is found by dividing the total by the bottom number, then multiplying by the top.",
       "steps": [
         {
-          "text": "Example: $120 fund, spent 1/4. One quarter of 120 is 120 ÷ 4 = 30."
+          "text": "Example: Minecraft, $120 fund, spent 1/4. One quarter of 120 is 120 ÷ 4 = 30."
         },
         {
           "text": "Left = 120 − 30 = 90. Check: 30 + 90 = 120."
         },
         {
-          "text": "Now the fund is $200 and 1/4 goes out. Find one quarter of 200 first."
+          "text": "Now the EA FC fund is $200 and 1/4 goes out. Find one quarter of 200 first."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-budget-build-7",
-      "prompt": "One Piece: the crew starts with $100. They spend $35 on food and $28 on repairs. How much is left?",
+      "prompt": "Pizza night: you start with $100. Pizza costs $35 and drinks cost $28. How much is left?",
       "answer": "37",
       "decoys": [
         "8",
@@ -1159,20 +1148,20 @@ export const pack: SePack = {
       "why": "With more than one thing bought, you add all the spending first, then subtract the total once.",
       "steps": [
         {
-          "text": "Example: in $90, out $20 and $15. Add the spending: 20 + 15 = 35."
+          "text": "Example: Timbits, in $90, out $20 and $15. Add the spending: 20 + 15 = 35."
         },
         {
           "text": "Left = 90 − 35 = 55. Check: 35 + 55 = 90."
         },
         {
-          "text": "Now add $35 and $28 first. Then take that total away from $100."
+          "text": "Now add pizza $35 and drinks $28 first. Then take that total away from $100."
         }
       ]
     },
     {
       "kind": "game",
       "id": "fin-budget-games-1",
-      "title": "Treasure Sort",
+      "title": "Chest Sort",
       "game": {
         "mode": "order",
         "values": [
@@ -1181,7 +1170,7 @@ export const pack: SePack = {
             "value": 13
           },
           {
-            "label": "$47 out",
+            "label": "$47 spent",
             "value": 47
           },
           {
@@ -1189,15 +1178,15 @@ export const pack: SePack = {
             "value": 60
           },
           {
-            "label": "$8 bounty",
+            "label": "$8 tip",
             "value": 8
           },
           {
-            "label": "$25 food",
+            "label": "$25 snacks",
             "value": 25
           },
           {
-            "label": "$102 ship",
+            "label": "$102 gift card",
             "value": 102
           }
         ]

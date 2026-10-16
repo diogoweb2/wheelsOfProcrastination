@@ -20,8 +20,8 @@ export const pack: SePack = {
         "0 means impossible. 1 means certain."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi lines up a shot. Will it go in? Probability puts a number on that guess."
+        "flavour": "key",
+        "text": "Your kickoff coin toss is a 1/2 chance. Probability puts a number on it."
       },
       "art": {
         "art": "numberline",
@@ -45,7 +45,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-0",
-      "prompt": "Isagi takes a penalty. His chance of scoring is 3/4. What is the chance he misses?",
+      "prompt": "Your Poké Ball catches the Pokémon with a 3/4 chance. What is the chance it fails?",
       "options": [
         "3/4",
         "4/3",
@@ -55,10 +55,10 @@ export const pack: SePack = {
       "why": "The chance of an event and its opposite always add up to 1.",
       "steps": [
         {
-          "text": "Scoring or missing covers every outcome. Together they make the whole, which is 1."
+          "text": "Catching or failing covers every outcome. Together they make the whole, which is 1."
         },
         {
-          "text": "Try it on new numbers. A rain chance of 2/5 means no rain is 1 − 2/5."
+          "text": "Try it on new numbers. A Ball with a 2/5 catch chance fails with 1 − 2/5."
         },
         {
           "text": "1 is 5/5, so 5/5 − 2/5 = 3/5. Check: 2/5 + 3/5 = 5/5 = 1."
@@ -75,7 +75,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-1",
-      "prompt": "Which chance means the event is almost certain?",
+      "prompt": "Which chance means the chest will almost certainly spawn?",
       "options": [
         "0.05",
         "0.95",
@@ -88,7 +88,7 @@ export const pack: SePack = {
           "text": "0 means never happens. 1 means always happens. Everything else sits in between."
         },
         {
-          "text": "Try a new number. 0.12 is close to 0, so it is very unlikely."
+          "text": "Try a new number. 0.12 is close to 0, so a chest spawn that rare is unlikely."
         },
         {
           "text": "0.9 is close to 1, so it is almost certain. The same rule works for 0.95."
@@ -167,30 +167,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-2",
-      "prompt": "A die is rolled. Which chance is for rolling a 7?",
+      "prompt": "The original Kanto Pokédex is numbered 1 to 151. What is the chance you pull a Pokémon numbered 152?",
       "options": [
         "0",
-        "1/6",
+        "1/151",
         "1"
       ],
       "answer": 0,
       "why": "An impossible event has zero favourable outcomes, so its probability is 0.",
       "steps": [
         {
-          "text": "A die has faces 1, 2, 3, 4, 5 and 6. There is no 7 on it."
+          "text": "The original Kanto Pokédex stops at 151. There is no 152 in it."
         },
         {
-          "text": "Try a new event. Rolling an even number gives 3 favourable faces out of 6, so 3/6 = 1/2."
+          "text": "Try a new event. Picking a Water type from a team of 6 with 3 Water gives 3/6 = 1/2."
         },
         {
-          "text": "A 7 gives 0 favourable faces out of 6, so the chance is 0/6 = 0."
+          "text": "A 152 gives 0 favourable Pokémon out of 151, so the chance is 0/151 = 0."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-prob-basics-3",
-      "prompt": "A bag has 3 red and 2 blue balls. You pull one out without looking. What is P(red)?",
+      "prompt": "A chest holds 3 diamonds and 2 coal. You grab one without looking. What is P(diamond)?",
       "options": [
         "2/5",
         "3/5",
@@ -200,13 +200,13 @@ export const pack: SePack = {
       "why": "Probability is favourable outcomes divided by total outcomes.",
       "steps": [
         {
-          "text": "Find the total number of balls. 3 + 2 = 5 balls in the bag."
+          "text": "Find the total number of items. 3 + 2 = 5 items in the chest."
         },
         {
-          "text": "Count the favourable ones. There are 3 red balls, so 3 is the top number."
+          "text": "Count the favourable ones. There are 3 diamonds, so 3 is the top number."
         },
         {
-          "text": "Try a new bag: 4 green and 6 white. P(green) = 4/10, which simplifies to 2/5."
+          "text": "Try a new chest: 4 iron and 6 gold. P(iron) = 4/10, which simplifies to 2/5."
         }
       ]
     },
@@ -215,13 +215,13 @@ export const pack: SePack = {
       "id": "math-prob-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Weather forecasts, sports stats and games all use probability.",
+        "Games, sport and Pokémon catches all use probability.",
         "It lets you compare chances fairly.",
-        "A coach can choose the better play from the numbers."
+        "Published pack odds let you compare your options."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock strikers count their chances. Good players know their odds."
+        "text": "Ultimate Team publishes its pack odds. Check them before you spend."
       }
     },
     {
@@ -257,7 +257,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-4",
-      "prompt": "Zoro's chance of winning a duel is 65%. Which fraction is that?",
+      "prompt": "Your squad wins 65% of its Fortnite matches. Which fraction is that?",
       "options": [
         "5/13",
         "20/13",
@@ -273,14 +273,14 @@ export const pack: SePack = {
           "text": "Divide top and bottom by 5 to simplify. 65 ÷ 5 = 13, and 100 ÷ 5 = 20."
         },
         {
-          "text": "Try a new number: 40% = 40/100. Divide by 20 to get 2/5."
+          "text": "Try a new number: 40% of 100 blocks is 40/100. Divide by 20 to get 2/5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-prob-basics-5",
-      "prompt": "Which decimal matches 3/4?",
+      "prompt": "A 2 L bottle is 3/4 full. Which decimal matches 3/4?",
       "options": [
         "0.75",
         "0.34",
@@ -293,7 +293,7 @@ export const pack: SePack = {
           "text": "A fraction bar means divide. So 3/4 means 3 ÷ 4."
         },
         {
-          "text": "Try a new fraction: 2/5 means 2 ÷ 5, which gives 0.4."
+          "text": "Try a new fraction: 2 of 5 Timbits eaten is 2/5, which means 2 ÷ 5 = 0.4."
         },
         {
           "text": "Check it: 0.75 means 75/100. Divide top and bottom by 25 and you get 3/4."
@@ -303,7 +303,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-prob-games-0",
-      "title": "Odds Ladder",
+      "title": "Catch Odds Ladder",
       "game": {
         "mode": "order",
         "values": [
@@ -336,8 +336,8 @@ export const pack: SePack = {
       "id": "math-prob-teach-2",
       "title": "The method",
       "lines": [
-        "Count the outcomes you want.",
-        "Count all the outcomes that could happen.",
+        "Count the outcomes you want: 1 spot holds the chest.",
+        "Count all the outcomes that could happen: 6 equal spots.",
         "Divide the first number by the second."
       ],
       "callout": {
@@ -355,7 +355,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-6",
-      "prompt": "A coin is flipped 10 times. It lands heads 7 times. What is the experimental P(heads)?",
+      "prompt": "The kickoff coin toss: heads came up 7 times in 10 flips. What is the experimental P(heads)?",
       "options": [
         "10/7",
         "7/10",
@@ -368,10 +368,10 @@ export const pack: SePack = {
           "text": "Experimental probability = times it happened ÷ times you tried."
         },
         {
-          "text": "Try a new spin: a spinner landed red 5 times in 20 spins. That is 5/20 = 1/4."
+          "text": "Try a new one: a Poké Ball caught 5 of 20 Pokémon. That is 5/20 = 1/4."
         },
         {
-          "text": "The theoretical chance for a coin is 1/2. Experimental results can be different from this."
+          "text": "The theoretical chance for a fair coin is 1/2. Experimental results can be different from this."
         }
       ],
       "art": {
@@ -385,7 +385,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-basics-7",
-      "prompt": "A spinner has 4 equal parts. Add the probabilities of all 4 outcomes. What is the total?",
+      "prompt": "A chest spawns in 1 of 4 equal spots. Add the chances of all 4 spots. What is the total?",
       "options": [
         "4",
         "0",
@@ -395,10 +395,10 @@ export const pack: SePack = {
       "why": "Every possible outcome together covers everything, so the total chance is 1.",
       "steps": [
         {
-          "text": "Each of the 4 equal parts has probability 1/4."
+          "text": "Each of the 4 equal spots has probability 1/4."
         },
         {
-          "text": "Try 3 equal parts. Each has 1/3, and 1/3 + 1/3 + 1/3 = 3/3."
+          "text": "Try 3 equal spots. Each has 1/3, and 1/3 + 1/3 + 1/3 = 3/3."
         },
         {
           "text": "3/3 is the whole, which is 1. Something must happen, so the total is 1."
@@ -408,7 +408,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-prob-build-1",
-      "prompt": "Luffy rolls a die. What is the chance of a number bigger than 4? Write it as a fraction.",
+      "prompt": "Your Minecraft loot roll is a 6-sided die. What is the chance of a number bigger than 4? Write it as a fraction.",
       "answer": "1/3",
       "decoys": [
         "2",
@@ -424,7 +424,7 @@ export const pack: SePack = {
           "text": "A die has 6 faces in total. So the chance is 2/6."
         },
         {
-          "text": "Example: odd numbers on a die are 1, 3 and 5. That is 3 out of 6, which is 3/6 = 1/2."
+          "text": "Example: a roll of 1 to 3 is 3 of 6 faces, which is 3/6 = 1/2."
         }
       ]
     }
@@ -436,12 +436,12 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Trap: thinking two outcomes means a 1 in 2 chance.",
-        "A die has six equally likely faces, not two.",
-        "Count the real outcomes before you divide."
+        "Shiny or not is two outcomes, but the odds are 1 in 4,096.",
+        "Count the real chances before you divide."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Goal or no goal is two outcomes. That does not mean it is 50-50."
+        "text": "Shiny or not is two outcomes. It is nowhere near 50-50."
       }
     },
     {
@@ -449,14 +449,14 @@ export const pack: SePack = {
       "id": "math-prob-teach-4",
       "title": "Worked example",
       "lines": [
-        "A treasure wheel has 8 equal slots.",
-        "3 of the slots hold gold.",
+        "A gold chest can spawn in 8 equal spots.",
+        "3 of the 8 spots are in Tilted Towers.",
         "Wanted outcomes: 3. All outcomes: 8.",
-        "So P(gold) = 3/8."
+        "So P(Tilted Towers) = 3/8."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy spins the wheel. 3 of 8 slots hold gold. Nice odds for a pirate."
+        "text": "Tilted Towers holds 3 of the 8 gold chest spots. Good odds for your squad."
       },
       "art": {
         "art": "bar",
@@ -477,7 +477,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "P(six) = 1/6. One good face out of six equal faces."
+        "text": "A Poké Ball roll has 6 equal results. 1 of them catches it. P = 1/6."
       },
       "art": {
         "art": "numberline",
@@ -504,7 +504,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Isagi's shot is a sure goal? P = 1. Never scores? P = 0."
+        "text": "A chest that always spawns: P = 1. One that never spawns: P = 0."
       },
       "art": {
         "art": "numberline",
@@ -535,12 +535,12 @@ export const pack: SePack = {
       "title": "Two outcomes is not 50-50",
       "lines": [
         "'Two outcomes' does not mean a 50-50 chance.",
-        "Win or lose: two outcomes, but not equal chances.",
+        "A pack either has a walkout or it does not.",
         "Count all the ways each result can happen."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Isagi's shot: goal or no goal. Still not automatically 1/2."
+        "text": "Walkout or no walkout? The odds are not even."
       }
     },
     {
@@ -548,13 +548,13 @@ export const pack: SePack = {
       "id": "math-prob-deeper-4",
       "title": "Theory and experiment do not always match",
       "lines": [
-        "Theory: P(six) = 1/6 on paper.",
-        "Experiment: 12 rolls might give you four sixes.",
-        "Small samples wobble. Big samples settle near 1/6."
+        "Theory: a kickoff coin toss is 1/2 on paper.",
+        "Experiment: 10 tosses might give you 7 heads.",
+        "Small samples wobble. Big samples settle near 1/2."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Four goals in ten shots? That is bad luck, not a broken striker."
+        "text": "Seven heads in ten tosses? That is luck, not a rigged coin."
       }
     },
     {
@@ -564,11 +564,11 @@ export const pack: SePack = {
       "lines": [
         "Unlikely means small, but still greater than 0.",
         "Impossible means P = 0. It never happens.",
-        "A hat-trick from a free kick is unlikely, not impossible."
+        "A shiny on your first Poké Ball is unlikely, not impossible."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "A wild goal from the halfway line still has a chance. Small, but real."
+        "text": "A shiny at about 1 in 4,096 still has a chance. Tiny, but real."
       }
     },
     {
@@ -582,7 +582,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Chance of at least one goal = 1 − chance of no goals at all."
+        "text": "Chance of at least one chest in three spawns = 1 − chance of none."
       }
     },
     {
@@ -596,13 +596,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A crew must win two fights to take the treasure? The odds shrink."
+        "text": "Clear two hard obby stages, each a coin flip? The odds shrink."
       }
     },
     {
       "kind": "choice",
       "id": "math-prob-basics-8",
-      "prompt": "Two coins are flipped. What is P(two heads)?",
+      "prompt": "Your team calls heads on two kickoff tosses. P(heads both times)?",
       "options": [
         "1/3",
         "1/2",
@@ -625,20 +625,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-0",
-      "prompt": "Isagi takes 20 shots in training. 8 hit the target. What is the chance a shot hits?",
+      "prompt": "Your Poké Ball catches on 8 of 20 throws. What is the chance a throw catches?",
       "options": [
         "5/2",
         "3/8",
         "2/5"
       ],
       "answer": 2,
-      "why": "Probability is favourable outcomes divided by all possible outcomes, so 8 out of 20.",
+      "why": "Chance is the outcomes you want over all outcomes, so 8 out of 20.",
       "steps": [
         {
-          "text": "Chance = hits ÷ total shots."
+          "text": "Chance = catches ÷ total throws."
         },
         {
-          "text": "Try it: 3 goals from 12 shots. 3/12 becomes 1/4 when simplified."
+          "text": "Try it: 3 catches from 12 throws. 3/12 becomes 1/4."
         },
         {
           "text": "A chance can never be bigger than 1. Check your fraction against that."
@@ -648,23 +648,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-1",
-      "prompt": "Nami shuffles 12 sea charts into a bag. 7 show the Grand Line. What is the chance she pulls a Grand Line chart?",
+      "prompt": "A chest spawns with 12 items. 7 of them are iron ingots. What is the chance a random pull is iron?",
       "options": [
         "12/7",
         "7/12",
         "5/12"
       ],
       "answer": 1,
-      "why": "The favourable outcomes go on top, and all the charts go on the bottom.",
+      "why": "The wanted items go on top, and all the items go on the bottom.",
       "steps": [
         {
-          "text": "Count the charts you want, then count all the charts."
+          "text": "Count the items you want, then count all the items."
         },
         {
-          "text": "Try it: a bag of 9 charts with 4 Grand Line. The chance is 4/9."
+          "text": "Try it: a chest of 9 items with 4 bread. The chance is 4/9."
         },
         {
-          "text": "5/12 is the chance of NOT getting a Grand Line chart. Read the question carefully."
+          "text": "5/12 is the chance of NOT pulling iron. Read the question carefully."
         }
       ],
       "art": {
@@ -678,7 +678,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-2",
-      "prompt": "Isagi's chance of missing a penalty is 0.3. What is the chance he scores?",
+      "prompt": "Your EA FC striker misses a penalty 0.3 of the time. What is the chance he scores?",
       "options": [
         "0.7",
         "0.3",
@@ -688,10 +688,10 @@ export const pack: SePack = {
       "why": "The chance of an event and the chance it does not happen always add up to 1.",
       "steps": [
         {
-          "text": "Scoring + missing = 1. So scoring = 1 − missing."
+          "text": "Scores + misses = 1. So scores = 1 − misses."
         },
         {
-          "text": "Try it: P(rain) = 0.45. P(no rain) = 1 − 0.45 = 0.55."
+          "text": "Try it: P(storm hits) = 0.45. P(safe) = 1 − 0.45 = 0.55."
         },
         {
           "text": "Your answer must stay between 0 and 1. Check it."
@@ -701,7 +701,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-3",
-      "prompt": "A Toronto weather app says there is an 80% chance of snow. Write that as a decimal.",
+      "prompt": "Your Battle Pass is 80% done. Write that as a decimal.",
       "options": [
         "8.0",
         "0.8",
@@ -724,20 +724,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-4",
-      "prompt": "Luffy rolls a die 180 times. About how many sixes should he expect?",
+      "prompt": "A Minecraft loot roll has a 1 in 6 chance of a diamond. You roll 180 times. About how many diamonds?",
       "options": [
         "30",
         "36",
         "25"
       ],
       "answer": 0,
-      "why": "Expected results are the number of trials multiplied by the probability of the outcome.",
+      "why": "Expected count is the number of trials multiplied by the chance of the outcome.",
       "steps": [
         {
-          "text": "Expected count = total rolls × chance of a six."
+          "text": "Expected count = total rolls × chance of a diamond."
         },
         {
-          "text": "Try it: 60 rolls × 1/6 = 10 sixes."
+          "text": "Try it: 60 rolls × 1/6 = 10 diamonds."
         },
         {
           "text": "Expected means 'on average'. Real results will vary a little."
@@ -754,7 +754,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-5",
-      "prompt": "Two dice are rolled. What is the chance the total is 7?",
+      "prompt": "Two dice decide which team goes first in your Roblox obby. What is the chance the total is 7?",
       "options": [
         "1/7",
         "1/12",
@@ -777,7 +777,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-6",
-      "prompt": "Zoro flips a coin 3 times. What is the chance all three are heads?",
+      "prompt": "The ref flips the kickoff coin 3 times. What is the chance all three are heads?",
       "options": [
         "1/8",
         "3/8",
@@ -800,7 +800,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-7",
-      "prompt": "Zoro's crew spins a wheel 50 times. Red lands 18 times. Which is the experimental chance of red?",
+      "prompt": "Chests spawn in 50 matches at Tilted Towers. A gold chest shows up 18 times. What is the experimental chance?",
       "options": [
         "1/4",
         "18/50",
@@ -810,24 +810,24 @@ export const pack: SePack = {
       "why": "Experimental probability uses the results you actually got, while theoretical uses the equal parts.",
       "steps": [
         {
-          "text": "Experimental = times it happened ÷ total spins."
+          "text": "Experimental = times it happened ÷ total tries."
         },
         {
-          "text": "Try it: 7 heads in 20 flips gives 7/20 experimentally. Theory says 1/2."
+          "text": "Try it: 7 chests in 20 drops gives 7/20 experimentally."
         },
         {
-          "text": "More trials usually move the experimental result closer to the theoretical one."
+          "text": "More tries usually move the experimental result closer to the true chance."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-prob-applied-8",
-      "prompt": "Isagi's shot chance is 3/8. A rival's shot chance is 0.3. Which is more likely?",
+      "prompt": "Pack A has a walkout chance of 3/8. Pack B has 0.3. Which is more likely?",
       "options": [
-        "0.3 is more likely",
-        "Both are equally likely",
-        "3/8 is more likely"
+        "Pack B is more likely",
+        "Both packs are equally likely",
+        "Pack A is more likely"
       ],
       "answer": 2,
       "why": "3/8 equals 0.375, which is bigger than 0.3.",
@@ -836,7 +836,7 @@ export const pack: SePack = {
           "text": "Change both into decimals so you can compare them."
         },
         {
-          "text": "Try it: 2/5 = 0.4, and 0.35 is smaller, so 2/5 is more likely."
+          "text": "Try it: a Poké Ball catch of 2/5 is 0.4, and 0.35 is smaller."
         },
         {
           "text": "Compare digit by digit, starting from the tenths place."
@@ -846,23 +846,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-applied-9",
-      "prompt": "A Blue Lock card bag has 4 blue cards and 6 yellow cards. What is the chance of NOT picking a blue card?",
+      "prompt": "A chest has 10 slots: 4 hold diamonds, 6 hold dirt. What is the chance of NOT picking diamonds?",
       "options": [
         "6/4",
         "3/5",
         "2/5"
       ],
       "answer": 1,
-      "why": "Not blue means the favourable cards are the other colour, so 6 out of all 10 cards.",
+      "why": "Not diamonds means the favourable slots are the other items, so 6 out of all 10 slots.",
       "steps": [
         {
-          "text": "Count the cards you want. Count all the cards. Divide."
+          "text": "Count the slots you want. Count all the slots. Divide."
         },
         {
-          "text": "Try it: 2 red and 7 green. Not red is 7/9."
+          "text": "Try it: 2 iron and 7 wood. Not iron is 7/9."
         },
         {
-          "text": "Check: favourable + the opposite must equal the total."
+          "text": "Check: wanted plus not-wanted must equal all 10 slots."
         }
       ],
       "art": {
@@ -876,20 +876,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-deeper-1",
-      "prompt": "Isagi misses 4 penalties in a row. The coach says the next one is 'due' to score. Is that true?",
+      "prompt": "You have not got a shiny in 4 encounters. Your friend says the next one is due. Is that true?",
       "options": [
-        "Yes, a goal is more likely after four misses.",
-        "No, each penalty still has the same chance.",
-        "Yes, if the keeper is tired from all the saves."
+        "Yes, a shiny is more likely after four misses.",
+        "No, each encounter still has the same chance.",
+        "Yes, the game saves up shinies for later."
       ],
       "answer": 1,
-      "why": "Each kick is a fresh event, so past misses do not change the next one.",
+      "why": "Each encounter is a fresh event, so past misses do not change the next one.",
       "steps": [
         {
-          "text": "Coins and dice have no memory. Penalty kicks do not either."
+          "text": "Coins, dice and encounters have no memory."
         },
         {
-          "text": "Example: a coin lands heads 5 times. Tails is still 1/2 on toss six."
+          "text": "Example: a Poké Ball fails 6 times; the 7th throw has the same catch chance."
         },
         {
           "text": "The 'due' feeling is called the gambler's fallacy. Casinos count on it."
@@ -899,7 +899,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-deeper-3",
-      "prompt": "Two dice are rolled and their numbers are added. Which total is most likely?",
+      "prompt": "Your obby uses two dice, and you add their numbers. Which total is most likely?",
       "options": [
         "2, because it is the smallest total.",
         "7, because six different pairs make it.",
@@ -912,7 +912,7 @@ export const pack: SePack = {
           "text": "List all 36 pairs, from (1,1) up to (6,6). That is every outcome."
         },
         {
-          "text": "Example: total 5 comes from (1,4), (2,3), (3,2), (4,1). That is 4 of 36, so 4/36."
+          "text": "Example: total 4 comes from (1,3), (2,2), (3,1). That is 3 of 36."
         },
         {
           "text": "Count the pairs for each total. The total with the biggest count is the most likely."
@@ -921,35 +921,12 @@ export const pack: SePack = {
     },
     {
       "kind": "choice",
-      "id": "math-prob-deeper-5",
-      "prompt": "The chance of rolling a six is 1/6. Written as odds, for and against, what is it?",
-      "options": [
-        "1 to 5, one win against five non-wins.",
-        "1 to 6, one win out of six faces.",
-        "5 to 1, five wins against one loss."
-      ],
-      "answer": 0,
-      "why": "Odds compare wins to non-wins, but probability compares wins to all outcomes.",
-      "steps": [
-        {
-          "text": "Odds: count the wins first, then the non-wins. Probability: wins over everything."
-        },
-        {
-          "text": "Example: P = 2/5. Wins are 2, non-wins are 3, so the odds are 2 to 3."
-        },
-        {
-          "text": "Bookies and betting slips use odds, so you will see 'to 1' there a lot."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
       "id": "math-prob-deeper-7",
-      "prompt": "One die is rolled. Which event is certain to happen?",
+      "prompt": "The kickoff coin toss is flipped. Which result is certain to happen?",
       "options": [
-        "Rolling a 7 on the die.",
-        "Rolling a 1 to 6 on the die.",
-        "Rolling a 6 on the die."
+        "The coin lands on heads.",
+        "The coin lands on heads or tails.",
+        "The coin lands on the sun."
       ],
       "answer": 1,
       "why": "A certain event has probability 1, so it always happens.",
@@ -958,17 +935,17 @@ export const pack: SePack = {
           "text": "Certain means every possible outcome is in the event. Then P = 1."
         },
         {
-          "text": "Example: a number under 9 on one die. Every face counts, so P = 1."
+          "text": "Example: a Blue Lock striker either scores or does not. Both outcomes are covered, so P = 1."
         },
         {
-          "text": "A die only has faces 1 to 6, so 1 to 6 covers the whole die."
+          "text": "A coin only has two sides, so heads or tails covers the whole coin."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-prob-deeper-9",
-      "prompt": "Isagi takes 3 penalties. Each has a 1/2 chance to score. What is the chance of at least one goal?",
+      "prompt": "You throw 3 Poké Balls. Each has a 1/2 chance to catch. What is the chance of catching at least one?",
       "options": [
         "3/8",
         "7/8",
@@ -981,7 +958,7 @@ export const pack: SePack = {
           "text": "All three miss: 1/2 × 1/2 × 1/2 = 1/8."
         },
         {
-          "text": "Example: 2 kicks at 1/3 each. Both miss: 2/3 × 2/3 = 4/9, so at least one is 5/9."
+          "text": "Example: 2 throws at 1/3 each. Both miss: 2/3 × 2/3 = 4/9, so at least one catch is 5/9."
         },
         {
           "text": "Subtract the 'all miss' case from 1. That is the whole method."
@@ -991,30 +968,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-prob-deeper-11",
-      "prompt": "A bag has 2 red and 2 blue balls. Two are drawn, and the first is not put back. What is the chance both are red?",
+      "prompt": "A Minecraft barrel has 2 diamonds and 2 iron. You take 2 items and do not put the first back. What is the chance both are diamonds?",
       "options": [
-        "1/4, the same as putting the ball back.",
-        "1/6, one red is gone after the first draw.",
-        "1/2, because half the balls are red."
+        "1/4, the same as putting the item back.",
+        "1/6, one diamond is gone after the first pick.",
+        "1/2, because half the items are diamonds."
       ],
       "answer": 1,
-      "why": "Removing a ball changes what is left, so the second draw has a different chance.",
+      "why": "Removing an item changes what is left, so the second pick has a different chance.",
       "steps": [
         {
-          "text": "Find the first chance using the full bag. Then find the second using what is left."
+          "text": "Find the first chance using the full barrel. Then find the second using what is left."
         },
         {
-          "text": "Example: 3 red and 1 blue. P(both red) = 3/4 × 2/3 = 1/2."
+          "text": "Example: 3 diamonds and 1 coal. P(both diamonds) = 3/4 × 2/3 = 1/2."
         },
         {
-          "text": "Multiply the two chances, but use the smaller bag for the second draw."
+          "text": "Multiply the two chances, but use the smaller pile for the second pick."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-prob-build-2",
-      "prompt": "Isagi scored 14 goals from 20 penalties. Write his chance as a decimal.",
+      "prompt": "Your squad wins 14 of its 20 Fortnite games. Write the win chance as a decimal.",
       "answer": "0.7",
       "decoys": [
         "5",
@@ -1030,37 +1007,37 @@ export const pack: SePack = {
           "text": "Change the bottom to 100: 14/20 = 70/100. That is 70 hundredths."
         },
         {
-          "text": "Example: Rin scored 9 out of 10 penalties. 9/10 = 0.9."
+          "text": "Example: your squad wins 9 of 10 games. 9/10 = 0.9."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-prob-build-3",
-      "prompt": "Usopp's bag has 10 coins. 4 are gold. What fraction of the coins are NOT gold?",
+      "prompt": "A box has 10 Timbits. 4 are chocolate. What fraction of the Timbits are NOT chocolate?",
       "answer": "3/5",
       "decoys": [
         "4",
         "7",
         "2"
       ],
-      "why": "The chances of all outcomes add up to 1, so the not-gold chance is what is left over.",
+      "why": "The chances of all outcomes add up to 1, so the not-chocolate chance is what is left over.",
       "steps": [
         {
-          "text": "Find the coins that are not gold: 10 − 4 = 6."
+          "text": "Find the Timbits that are not chocolate: 10 − 4 = 6."
         },
         {
-          "text": "Write the chance as 6/10, with 10 coins as the total."
+          "text": "Write the chance as 6/10, with 10 Timbits as the total."
         },
         {
-          "text": "Example: a bag of 12 coins, 5 red. Not red = 12 − 5 = 7, so 7/12. Now simplify 6/10 to 3/5."
+          "text": "Example: a box of 12 Timbits, 5 glazed. Not glazed = 12 − 5 = 7, so 7/12. Now simplify 6/10 to 3/5."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-prob-build-4",
-      "prompt": "A striker scored 15 times in 60 drills. Write his chance as a fraction in simplest form.",
+      "prompt": "Your squad won 15 of 60 matches. Write the win chance as a fraction in simplest form.",
       "answer": "1/4",
       "decoys": [
         "6",
@@ -1070,20 +1047,20 @@ export const pack: SePack = {
       "why": "Fractions are in simplest form when the top and bottom share no factor except 1.",
       "steps": [
         {
-          "text": "Write the chance as 15/60, scored over total drills."
+          "text": "Write it as 15/60: 15 wins out of 60 games."
         },
         {
-          "text": "Find a number that divides 15 and 60: 15 works. 15 ÷ 15 = 1, and 60 ÷ 15 = 4."
+          "text": "15 ÷ 15 = 1 and 60 ÷ 15 = 4, so 15/60 = 1/4."
         },
         {
-          "text": "Example: 12 out of 36 is 12/36. Divide both by 12 to get 1/3."
+          "text": "Example: 12 wins out of 36 is 12/36. Divide both by 12 to get 1/3."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-prob-build-5",
-      "prompt": "A wheel has 4 equal parts. One part has the Straw Hat symbol. Write the chance as a decimal.",
+      "prompt": "Your chest spawns in one of 4 equal rooms. One room has diamonds. Write the chance as a decimal.",
       "answer": "0.25",
       "decoys": [
         "3",
@@ -1093,13 +1070,13 @@ export const pack: SePack = {
       "why": "Dividing the top by the bottom turns any fraction into a decimal.",
       "steps": [
         {
-          "text": "The chance is 1 part out of 4, so 1/4."
+          "text": "The chance is 1 room out of 4, so 1/4."
         },
         {
           "text": "Divide 1 by 4 to get the decimal: 1 ÷ 4 = 0.25."
         },
         {
-          "text": "Example: 3 out of 5 is 3/5. Then 3 ÷ 5 = 0.6."
+          "text": "Example: 3 chests out of 5 hold iron. 3 ÷ 5 = 0.6."
         }
       ],
       "art": {
@@ -1113,7 +1090,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-prob-build-6",
-      "prompt": "Isagi scored 9 of 15 penalties. Write his chance as a percent.",
+      "prompt": "Your Poké Ball caught Pikachu 9 times in 15 throws. Write the catch chance as a percent.",
       "answer": "60%",
       "decoys": [
         "4",
@@ -1129,30 +1106,30 @@ export const pack: SePack = {
           "text": "Multiply by 100 to get percent: 0.6 × 100 = 60. Add the % sign."
         },
         {
-          "text": "Example: 7 out of 20 is 7 ÷ 20 = 0.35. Then 0.35 × 100 = 35%."
+          "text": "Example: your Ball caught 7 of 20 Pokémon. 7 ÷ 20 = 0.35, so 35%."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-prob-build-7",
-      "prompt": "The chance of rain in Toronto today is 0.8. What is the chance of NO rain? Write it as a decimal.",
+      "prompt": "A pack has a 0.8 chance of a common card. What is the chance it is NOT common? Write a decimal.",
       "answer": "0.2",
       "decoys": [
         "8",
         "1",
         "9"
       ],
-      "why": "The chance of rain and the chance of no rain add up to 1, because one of them must happen.",
+      "why": "Common and not common cover every pack, so the two chances add up to 1.",
       "steps": [
         {
           "text": "The total chance of everything is 1."
         },
         {
-          "text": "Subtract the rain chance from 1: 1 − 0.8 = 0.2."
+          "text": "Subtract the common chance from 1: 1 − 0.8 = 0.2."
         },
         {
-          "text": "Example: if the chance of rain is 0.3, then no rain is 1 − 0.3 = 0.7."
+          "text": "Example: if a pack has a 0.3 chance of gold, not gold is 1 − 0.3 = 0.7."
         }
       ]
     },
@@ -1165,23 +1142,23 @@ export const pack: SePack = {
         "pairs": [
           [
             "P(E) = 0",
-            "Never happens"
+            "Diamond ore above Y = 320"
           ],
           [
             "P(E) = 1",
-            "Always happens"
+            "Outside the storm at the end"
           ],
           [
             "P(E) = 1/2",
-            "A 50-50 chance"
+            "Kickoff coin toss"
           ],
           [
             "P(six) = 1/6",
-            "1 chance in 6"
+            "Rolling a 6 on a die"
           ],
           [
             "P(E) = 0.9",
-            "Very likely"
+            "Poké Ball catching a Pokémon"
           ]
         ]
       },

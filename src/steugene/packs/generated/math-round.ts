@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi needs to know the shot was close, not the exact distance in millimetres."
+        "text": "Your obby got 1 043 221 visits. Say about one million."
       },
       "art": {
         "art": "numberline",
@@ -54,7 +54,7 @@ export const pack: SePack = {
       "why": "When the digit after the rounding place is 5 or more, you round up.",
       "steps": [
         {
-          "text": "Find the hundreds digit. In 3 262 it is 2."
+          "text": "Find the hundreds digit. In a crowd of 3 262 it is 2."
         },
         {
           "text": "Look at the tens digit next to it. In 3 262 it is 6."
@@ -67,7 +67,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-basics-1",
-      "prompt": "A One Piece crew's bounty is 4 762 000 Berries. Rounded to the nearest hundred thousand, what is it?",
+      "prompt": "Luffy's crew has a bounty of 4 762 000 Berries. Rounded to the nearest hundred thousand, what is it?",
       "options": [
         "4 700 000",
         "4 800 000",
@@ -159,7 +159,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-basics-2",
-      "prompt": "Isagi's team sold 2 318 tickets in one match and 4 905 in another. About how many tickets is that, rounding each to the nearest thousand?",
+      "prompt": "Your squad bought 2 318 V-Bucks on Monday and 4 905 on Friday. About how many in total, rounding each to the nearest thousand?",
       "options": [
         "6 000",
         "8 000",
@@ -169,10 +169,10 @@ export const pack: SePack = {
       "why": "Estimating a sum means rounding each number first, then adding the rounded numbers.",
       "steps": [
         {
-          "text": "Round 3 418 to the nearest thousand. The hundreds digit is 4, so it goes down to 3 000."
+          "text": "Round 3 418 V-Bucks to the nearest thousand. The hundreds digit is 4, so it goes down to 3 000."
         },
         {
-          "text": "Round 6 102 to the nearest thousand. The hundreds digit is 1, so it stays 6 000."
+          "text": "Round 6 102 V-Bucks to the nearest thousand. The hundreds digit is 1, so it stays 6 000."
         },
         {
           "text": "Add the rounded numbers: 3 000 + 6 000 = 9 000. Your estimate is 9 000."
@@ -182,11 +182,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-basics-3",
-      "prompt": "A ship sails 58 km every day for 9 days. About how far does it sail in total? Round 58 to the nearest ten first.",
+      "prompt": "Your minecart runs 58 blocks every minute for 9 minutes. About how far is that? Round 58 to the nearest ten first.",
       "options": [
-        "540 km",
-        "480 km",
-        "600 km"
+        "540 blocks",
+        "480 blocks",
+        "600 blocks"
       ],
       "answer": 0,
       "why": "Rounding before you multiply gives a quick estimate that is close to the real answer.",
@@ -195,7 +195,7 @@ export const pack: SePack = {
           "text": "Round 58 to the nearest ten. It becomes 60, because 8 is 5 or more."
         },
         {
-          "text": "Multiply the rounded number by the days: 60 × 9."
+          "text": "Multiply the rounded number by the minutes: 60 × 9."
         },
         {
           "text": "60 × 9 = 540. The real answer is 522, so 540 is a good estimate."
@@ -213,29 +213,29 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Newspapers round a crew's bounty too. Nobody reads out every digit."
+        "text": "Luffy's bounty is 3 000 000 000 Berries. Newspapers just say three billion."
       }
     },
     {
       "kind": "choice",
       "id": "math-round-basics-4",
-      "prompt": "Isagi ran 10.46 km in one match. How far is that to the nearest tenth of a kilometre?",
+      "prompt": "Your obby got 10.46 million visits. Rounded to the nearest tenth of a million?",
       "options": [
-        "10.4 km",
-        "10.5 km",
-        "10.6 km"
+        "10.4 million",
+        "10.5 million",
+        "10.6 million"
       ],
       "answer": 1,
       "why": "Rounding to the nearest tenth looks at the hundredths digit to decide.",
       "steps": [
         {
-          "text": "The tenths digit in 6.73 is 7. The hundredths digit is 3."
+          "text": "Your obby has 6.73 million visits. The tenths digit is 7. The hundredths digit is 3."
         },
         {
-          "text": "3 is less than 5, so the tenths digit stays 7. Answer: 6.7."
+          "text": "3 is less than 5, so the 7 stays. 6.73 million rounds to 6.7 million."
         },
         {
-          "text": "Now try 10.46. The hundredths digit is 6, so 4 goes up to 5. Answer: 10.5."
+          "text": "Now your 10.46 million visits. The hundredths digit is 6, so 4 goes up to 5. Answer: 10.5 million."
         }
       ],
       "art": {
@@ -259,7 +259,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-basics-5",
-      "prompt": "Bachira took 65 shots in a training drill. About how many is that to the nearest ten?",
+      "prompt": "Your squad got 65 eliminations in one match. About how many is that to the nearest ten?",
       "options": [
         "60",
         "70",
@@ -269,13 +269,13 @@ export const pack: SePack = {
       "why": "A 5 in the ones place means you round up to the next ten.",
       "steps": [
         {
-          "text": "Look at the ones digit. In 65 it is 5, which is 5 or more."
+          "text": "Your squad got 65 eliminations. The ones digit is 5, which is 5 or more."
         },
         {
           "text": "Round the tens digit up: 6 becomes 7."
         },
         {
-          "text": "Change the ones digit to 0. The answer is 70."
+          "text": "Now try 43 eliminations. The ones digit is 3, so the 4 tens stay. Answer: 40."
         }
       ],
       "art": {
@@ -348,7 +348,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-basics-6",
-      "prompt": "A bounty is 2 871 000 Berries. Rounded to the nearest million, what is it?",
+      "prompt": "Fortnite players spent 2 871 000 V-Bucks in one week. Rounded to the nearest million?",
       "options": [
         "2 000 000",
         "3 000 000",
@@ -358,13 +358,13 @@ export const pack: SePack = {
       "why": "To round to the nearest million, look at the hundred thousands digit.",
       "steps": [
         {
-          "text": "The hundred thousands digit in 4 258 000 is 2. That is less than 5."
+          "text": "Your squad spent 4 258 000 V-Bucks. The hundred thousands digit is 2, under 5."
         },
         {
-          "text": "So the millions digit stays 4. Answer: 4 000 000."
+          "text": "So the millions digit stays 4. Answer: 4 000 000 V-Bucks."
         },
         {
-          "text": "Now try 2 871 000. The hundred thousands digit is 8, so round up the 2 to 3."
+          "text": "Now 2 871 000 V-Bucks. The hundred thousands digit is 8, so the 2 goes up to 3. Answer: 3 000 000."
         }
       ]
     },
@@ -384,7 +384,7 @@ export const pack: SePack = {
           "text": "Look at the hundred thousands digit in 4 500 000. It is 5."
         },
         {
-          "text": "A 5 means round up, so the millions digit 4 becomes 5."
+          "text": "A 5 means round up, so the millions digit 4 becomes 5. Answer: 5 000 000."
         },
         {
           "text": "Try 7 500 000 the same way. It rounds up to 8 000 000."
@@ -394,7 +394,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-round-build-1",
-      "prompt": "A crowd of 58 213 cheers for a Blue Lock match. Round it to the nearest ten thousand.",
+      "prompt": "A stadium crowd of 58 213 cheers. Round it to the nearest ten thousand.",
       "answer": "60000",
       "decoys": [
         "5",
@@ -404,13 +404,13 @@ export const pack: SePack = {
       "why": "Rounding to a place value keeps only that place and zeros after it, so 58 213 sits between 50 000 and 60 000.",
       "steps": [
         {
-          "text": "Look at the thousands digit of 14 876. It is 4."
+          "text": "Look at the thousands digit of 143 876. It is 3."
         },
         {
-          "text": "4 is less than 5, so keep the ten-thousands digit the same."
+          "text": "3 is less than 5, so the ten-thousands digit stays 4."
         },
         {
-          "text": "Write the ten-thousands digit then zeros: 14 876 becomes 10 000."
+          "text": "Write 4 then zeros: 143 876 becomes 140 000."
         }
       ]
     }
@@ -422,8 +422,8 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Do not check the wrong digit.",
-        "Round 1 043 221 to the nearest million. The million digit is 1.",
-        "Check the digit to its right: 0, so it stays 1 million."
+        "Round this Roblox visit count to the nearest million: 1 043 221.",
+        "The million digit is 1. The digit to its right is 0, so it stays 1 million."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -435,7 +435,7 @@ export const pack: SePack = {
       "id": "math-round-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "Round 6 482 700 to the nearest thousand.",
+        "Round a One Piece bounty of 6 482 700 Berries to the nearest thousand.",
         "The thousands digit is 2. The digit to its right is 7.",
         "7 is 5 or more, so 2 goes up to 3.",
         "Everything after the thousands becomes zero: 6 483 000."
@@ -450,7 +450,7 @@ export const pack: SePack = {
       "id": "math-round-teach-5",
       "title": "Recap",
       "lines": [
-        "Rounding gives a close number you can say fast.",
+        "A V-Bucks total rounded is a number you can say fast.",
         "Find the place, check the digit just right of it.",
         "5 or more goes up. 4 or less stays. Zeros fill in after."
       ]
@@ -462,7 +462,7 @@ export const pack: SePack = {
       "lines": [
         "To round to the nearest ten, look at the ones digit.",
         "Ones digit 0 to 4: round down. Ones digit 5 to 9: round up.",
-        "A 5 always rounds up. Like a striker who never leaves a ball behind."
+        "Your wall is 46 blocks long. It rounds to 50 blocks."
       ],
       "callout": {
         "flavour": "key",
@@ -492,8 +492,8 @@ export const pack: SePack = {
       "title": "Round Once, Not Twice",
       "lines": [
         "Round from the original number, not from a rounded one.",
-        "2.449 to the nearest tenth: look at the 4 in hundredths. Down to 2.4.",
-        "Rounding 2.449 to 2.45 first, then to 2.5, gives the wrong answer."
+        "A player's xG is 2.449. To the nearest tenth: look at the 4 in hundredths.",
+        "It goes down to 2.4. Rounding 2.449 to 2.45, then to 2.5, is wrong."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -505,9 +505,9 @@ export const pack: SePack = {
       "id": "math-round-deeper-2",
       "title": "Estimate Is Not Round Off",
       "lines": [
-        "Rounding changes a number to an easier one, then you work with it.",
+        "Rounding swaps a number for an easier one, then you calculate with it.",
         "Estimating uses rounded numbers to check if an answer is sensible.",
-        "If 49 × 21 is about 1 000, an answer of 10 000 is wrong."
+        "49 chests with 21 wood each is about 1 000 wood. 10 000 is wrong."
       ],
       "callout": {
         "flavour": "key",
@@ -520,7 +520,7 @@ export const pack: SePack = {
       "title": "Sometimes You Round Up Anyway",
       "lines": [
         "Nearest rounding does not always fit real life.",
-        "41 players, vans take 10 each. Nearest ten says 40, but 4 vans leave one out.",
+        "41 Timbits, boxes hold 10 each. Nearest ten says 40, but 4 boxes leave one out.",
         "Ask: do I need the whole group? If yes, round up."
       ],
       "callout": {
@@ -531,7 +531,7 @@ export const pack: SePack = {
         "art": "bar",
         "parts": 10,
         "filled": 10,
-        "label": "10 per van",
+        "label": "10 per box",
         "tone": "focus"
       }
     },
@@ -540,13 +540,13 @@ export const pack: SePack = {
       "id": "math-round-deeper-4",
       "title": "Zeros After the Point Matter",
       "lines": [
-        "3.1 and 3.10 look the same, but they tell different stories.",
-        "3.10 means the answer was checked to hundredths.",
+        "An xG of 1.4 and 1.40 look the same.",
+        "1.40 means the chance was measured to hundredths.",
         "Keep the zero when the question asks for hundredths."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "A goal counted to the tenth of a second is not a goal counted to the second."
+        "text": "A stat rounded to a tenth is not one rounded to a hundredth."
       }
     },
     {
@@ -560,13 +560,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A treasure of 999 600 berries becomes a whole million on the map."
+        "text": "A bounty of 999 600 Berries becomes a whole million on the wanted poster."
       }
     },
     {
       "kind": "choice",
       "id": "math-round-basics-8",
-      "prompt": "Two stadiums hold 42 318 and 19 764 seats. Estimate how many more seats the bigger one has, rounding both to the nearest thousand.",
+      "prompt": "Two Roblox obbys got 42 318 and 19 764 visits. Estimate how many more visits the bigger one got, rounding both to the nearest thousand.",
       "options": [
         "21 000",
         "22 000",
@@ -576,20 +576,20 @@ export const pack: SePack = {
       "why": "Estimating a difference means rounding both numbers first, then subtracting.",
       "steps": [
         {
-          "text": "Round 42 318 to the nearest thousand. It becomes 42 000."
+          "text": "Round Obby A's 42 318 visits to the nearest thousand. It becomes 42 000."
         },
         {
-          "text": "Round 19 764 to the nearest thousand. It becomes 20 000, because 764 is more than 500."
+          "text": "Round Obby B's 19 764 visits to the nearest thousand. It becomes 20 000, because 764 is more than 500."
         },
         {
-          "text": "Subtract: 42 000 − 20 000 = 22 000."
+          "text": "Subtract: 42 000 − 20 000 = 22 000 more visits."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-basics-9",
-      "prompt": "Estimate 39 × 4 by rounding 39 to the nearest ten first. What do you get?",
+      "prompt": "Your Minecraft farm makes 39 wheat per trip, and you run 4 trips. Round 39 to the nearest ten first. What is the estimate?",
       "options": [
         "120",
         "160",
@@ -599,36 +599,36 @@ export const pack: SePack = {
       "why": "Rounding a number before you multiply makes the calculation quick and close to the real answer.",
       "steps": [
         {
-          "text": "Round 39 to the nearest ten. It becomes 40, since 9 is 5 or more."
+          "text": "Round 39 wheat to the nearest ten. It becomes 40, since 9 is 5 or more."
         },
         {
-          "text": "Multiply the rounded number by 4: 40 × 4."
+          "text": "Multiply the rounded number by 4 trips: 40 × 4."
         },
         {
-          "text": "40 × 4 = 160. The real answer is 156, which is very close."
+          "text": "40 × 4 = 160 wheat. The real total is 156, which is very close."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-applied-0",
-      "prompt": "Isagi's match draws 48 673 fans. Round the crowd to the nearest thousand.",
+      "prompt": "Your Roblox obby has 48 673 visits. Round the visits to the nearest thousand.",
       "options": [
-        "48 000",
-        "49 000",
-        "50 000"
+        "48 000 visits",
+        "50 000 visits",
+        "49 000 visits"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "The digit after the thousands is 6, which is 5 or more, so the thousands digit rounds up.",
       "steps": [
         {
-          "text": "Find the thousands digit. In 23 518 it is the 3."
+          "text": "Find the thousands digit. In 37 915 visits it is the 7."
         },
         {
-          "text": "Look at the digit to its right. It is 5, so round up."
+          "text": "Look at the digit to its right. It is 9, so round up."
         },
         {
-          "text": "Round up: 3 becomes 4, and the last three digits become 000. Answer: 24 000."
+          "text": "Round up: 7 becomes 8, and the last three digits become 000. Answer: 38 000 visits."
         }
       ],
       "art": {
@@ -648,92 +648,92 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-applied-1",
-      "prompt": "Two Blue Lock stadiums sell 47 891 and 52 310 tickets. About how many tickets is that in total?",
+      "prompt": "Two Blue Lock stadiums sell 47 891 and 52 310 tickets. About how many in total?",
       "options": [
+        "about 100 000",
         "about 99 000",
-        "about 101 000",
-        "about 100 000"
+        "about 101 000"
       ],
-      "answer": 2,
-      "why": "Rounding each number first gives an estimate that is close to the exact total, but never exact.",
+      "answer": 0,
+      "why": "Rounding each number first gives an estimate that is close to the exact total, but rarely exact.",
       "steps": [
         {
-          "text": "Round each number to the nearest thousand: 31 740 becomes 32 000, and 18 265 becomes 18 000."
+          "text": "Round each to the nearest thousand: 47 891 becomes 48 000, and 52 310 becomes 52 000."
         },
         {
-          "text": "Add the rounded numbers: 32 000 + 18 000 = 50 000."
+          "text": "Add the rounded numbers: 48 000 + 52 000 = 100 000."
         },
         {
-          "text": "The exact sum is 50 005, so 50 000 is a very close estimate."
+          "text": "The exact total is 100 201, so 100 000 is a very close estimate."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-applied-4",
-      "prompt": "A pirate ship dives to 10 935 m in the Mariana Trench. Round the depth to the nearest hundred metres.",
+      "prompt": "Your Minecraft base is 10 935 blocks from spawn. Round to the nearest hundred blocks.",
       "options": [
-        "10 900 m",
-        "11 000 m",
-        "10 000 m"
+        "11 000 blocks",
+        "10 900 blocks",
+        "10 000 blocks"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "The tens digit is 3, which is less than 5, so the hundreds digit stays the same.",
       "steps": [
         {
-          "text": "Find the hundreds digit. In 7 468 it is the 4."
+          "text": "Find the hundreds digit. In 6 482 blocks it is the 4."
         },
         {
-          "text": "Look at the tens digit next to it. It is 6, so round up."
+          "text": "Look at the tens digit next to it. It is 8, so round up."
         },
         {
-          "text": "Round the hundreds up: 4 becomes 5, and the rest become 0. Answer: 7 500 m."
+          "text": "Round the hundreds up: 4 becomes 5, and the rest become 0. Answer: 6 500 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-applied-5",
-      "prompt": "The Sunny sails 412 km a day for 6 days. About how far is that in total?",
+      "prompt": "Your Fortnite quests pay 412 V-Bucks a day for 6 days. About how many in total?",
       "options": [
-        "about 2 000 km",
-        "about 2 800 km",
-        "about 2 400 km"
+        "about 2 400 V-Bucks",
+        "about 2 000 V-Bucks",
+        "about 2 800 V-Bucks"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "Rounding each number first is a fast way to estimate a total, and it is close when the rounding is small.",
       "steps": [
         {
-          "text": "Round 289 km to the nearest hundred: 300 km."
+          "text": "Round 289 V-Bucks a day to the nearest hundred: 300."
         },
         {
-          "text": "Multiply by 5 days: 300 × 5 = 1 500 km."
+          "text": "Multiply by 5 days: 300 × 5 = 1 500 V-Bucks."
         },
         {
-          "text": "The exact distance is 1 445 km, so 1 500 km is a fair estimate."
+          "text": "The exact total is 1 445 V-Bucks, so 1 500 is a fair estimate."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-applied-6",
-      "prompt": "A Queen Street streetcar stretch is 4.87 km long. Round the length to the nearest tenth of a kilometre.",
+      "prompt": "Your Minecraft railway is 4.87 km long. Round the length to the nearest tenth of a km.",
       "options": [
         "4.8 km",
-        "4.9 km",
-        "5.0 km"
+        "5.0 km",
+        "4.9 km"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "The hundredths digit is 7, so the tenths digit goes up from 8 to 9.",
       "steps": [
         {
-          "text": "Look at the hundredths digit: 3.46 has a 6 there."
+          "text": "Look at the hundredths digit in 6.38 km: it is 8."
         },
         {
-          "text": "6 is 5 or more, so round the tenths digit up: 4 becomes 5."
+          "text": "8 is 5 or more, so round the tenths digit up: 3 becomes 4."
         },
         {
-          "text": "3.46 km rounds to 3.5 km."
+          "text": "6.38 km rounds to 6.4 km."
         }
       ],
       "art": {
@@ -753,23 +753,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-applied-7",
-      "prompt": "Toronto had 2 794 356 people in the 2021 census. Round the population to the nearest million.",
+      "prompt": "Usopp's One Piece bounty is 2 794 356 Berries. Round it to the nearest million.",
       "options": [
-        "2 000 000",
-        "2 800 000",
-        "3 000 000"
+        "2 000 000 Berries",
+        "3 000 000 Berries",
+        "2 800 000 Berries"
       ],
-      "answer": 2,
-      "why": "The digit after the millions is 7, which is 5 or more, so the 2 rounds up to 3.",
+      "answer": 1,
+      "why": "The hundred-thousands digit is 7, which is 5 or more, so the 2 rounds up to 3.",
       "steps": [
         {
-          "text": "Look at the digit in the hundred-thousands place. Ottawa's 1 017 449 has 0 there."
+          "text": "Look at the digit after the millions. In 5 362 880 it is the 3."
         },
         {
-          "text": "0 is less than 5, so the millions digit stays the same."
+          "text": "3 is less than 5, so the millions digit stays the same."
         },
         {
-          "text": "Ottawa's population rounds to 1 000 000."
+          "text": "Replace the digits after it with zeros. Answer: 5 000 000 Berries."
         }
       ]
     },
@@ -783,53 +783,53 @@ export const pack: SePack = {
         "about 120 m"
       ],
       "answer": 1,
-      "why": "Rounding a decimal to a whole number makes the mental maths fast, but the estimate is slightly off.",
+      "why": "Rounding 9.58 up to 10 makes the mental maths quick, but the estimate is slightly high.",
       "steps": [
         {
-          "text": "Round 7.36 to the nearest whole number: 7, since 0.36 is less than 0.5."
+          "text": "Round 9.58 to the nearest whole number: 10, since 0.58 is 0.5 or more."
         },
         {
-          "text": "Multiply by 10 seconds: 7 × 10 = 70 m."
+          "text": "Multiply by 10 seconds: 10 × 10 = 100 m."
         },
         {
-          "text": "The exact distance is 73.6 m, so 70 m is a rough low guess."
+          "text": "The exact distance is 95.8 m, so 100 m is a close high estimate."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-applied-9",
-      "prompt": "A pirate crew adds 4 812 gold coins and 2 397 silver coins. Which estimate is closest to the true total?",
+      "prompt": "Your locker has 4 812 V-Bucks. A gift adds 2 397 more. Which estimate is closest?",
       "options": [
         "7 000",
         "7 200",
         "7 300"
       ],
       "answer": 1,
-      "why": "Smaller rounding steps move each number less, so the total is usually closer to the exact answer.",
+      "why": "Rounding to the nearest hundred moves each number less, so the estimate lands closer to the exact total.",
       "steps": [
         {
-          "text": "Round each number to the nearest thousand: 3 621 becomes 4 000, and 1 488 becomes 1 000."
+          "text": "Round to the nearest thousand: 4 812 becomes 5 000, and 2 397 becomes 2 000."
         },
         {
-          "text": "Add: 4 000 + 1 000 = 5 000."
+          "text": "Add: 5 000 + 2 000 = 7 000."
         },
         {
-          "text": "Round to the nearest hundred instead: 3 600 + 1 500 = 5 100, which is much closer to 5 109."
+          "text": "Round to the nearest hundred instead: 4 800 + 2 400 = 7 200, much closer to 7 209."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-deeper-6",
-      "prompt": "Isagi ran 6 847 m in a season. Round it to the nearest hundred metres.",
+      "prompt": "Your Minecraft railway is 6 847 blocks long. Round it to the nearest hundred blocks.",
       "options": [
-        "6 800 m",
-        "6 900 m",
-        "6 850 m"
+        "6 800 blocks",
+        "6 900 blocks",
+        "6 850 blocks"
       ],
       "answer": 0,
-      "why": "Round to the hundred by looking at the tens and ones, 47, which is under 50.",
+      "why": "Look at the tens and ones, 47, which is under 50, so the hundreds digit stays.",
       "steps": [
         {
           "text": "Find the hundreds digit: 6 847 has 8 in the hundreds place."
@@ -838,7 +838,7 @@ export const pack: SePack = {
           "text": "Look at the tens and ones: 47 is less than 50, so the 8 stays."
         },
         {
-          "text": "Try 3 268: the tens and ones are 68, which is 50 or more, so the answer is 3 300."
+          "text": "Try 3 268 blocks: the tens and ones are 68, which is 50 or more, so it rounds to 3 300."
         }
       ],
       "art": {
@@ -862,7 +862,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-deeper-7",
-      "prompt": "Blue Lock's Chigiri is estimating 49 × 21. Which is the best estimate?",
+      "prompt": "The away stand has 49 rows with 21 seats each. About how many seats in total?",
       "options": [
         "about 1 000",
         "about 800",
@@ -878,7 +878,7 @@ export const pack: SePack = {
           "text": "Round 21 down to 20, because 21 is close to 20."
         },
         {
-          "text": "Try 38 × 12: round to 40 × 10, which gives an estimate of 400. The real answer is 456."
+          "text": "Try 38 rows of 12 seats: round to 40 × 10, which gives an estimate of 400. The real answer is 456."
         }
       ],
       "art": {
@@ -900,30 +900,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-deeper-8",
-      "prompt": "43 Blue Lock players need rides. Each van seats 10. How many vans are needed?",
+      "prompt": "43 Timbits need packing. Each box holds 10. How many boxes do you need?",
       "options": [
-        "4 vans",
-        "5 vans",
-        "6 vans"
+        "4 boxes",
+        "5 boxes",
+        "6 boxes"
       ],
       "answer": 1,
-      "why": "Nearest rounding gives 4, but 4 vans only seat 40, so you need a fifth van.",
+      "why": "Dividing gives 4 with 3 left over, but 4 boxes only hold 40 Timbits, so you need a fifth box.",
       "steps": [
         {
           "text": "Divide: 43 ÷ 10 is 4 with 3 left over."
         },
         {
-          "text": "The 3 players still need a seat, so you need one more van."
+          "text": "The 3 leftover Timbits still need a box, so add one more box."
         },
         {
-          "text": "Try 27 players with 10 seats each: 2 vans with 7 left over, so you need 3 vans."
+          "text": "Try 27 Timbits in boxes of 10: 2 boxes with 7 left over, so you need 3 boxes."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-deeper-9",
-      "prompt": "A scout measures 2.449 kg of rock. Round it to the nearest tenth of a kilogram.",
+      "prompt": "A Pokédex says this Pokémon weighs 2.449 kg. Round it to the nearest tenth.",
       "options": [
         "2.4 kg",
         "2.5 kg",
@@ -946,11 +946,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-round-deeper-10",
-      "prompt": "Luffy finds a pirate's bounty of 1 450 000 berries. Round it to the nearest hundred thousand.",
+      "prompt": "Luffy's bounty is 1 450 000 Berries.\nRound it to the nearest hundred thousand.",
       "options": [
-        "1 400 000 berries",
-        "1 500 000 berries",
-        "1 450 000 berries"
+        "1 400 000 Berries",
+        "1 500 000 Berries",
+        "1 450 000 Berries"
       ],
       "answer": 1,
       "why": "The digit after the hundred-thousands place is 5, so it rounds up.",
@@ -962,18 +962,18 @@ export const pack: SePack = {
           "text": "Look at the digit after it: 5. A 5 means round up, so the 4 becomes 5."
         },
         {
-          "text": "Try 2 350 000: the next digit is 5, so it rounds up to 2 400 000."
+          "text": "A bounty of 2 350 000 Berries rounds up to 2 400 000 Berries."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-round-deeper-11",
-      "prompt": "A One Piece treasure holds 999 600 berries. Round it to the nearest thousand.",
+      "prompt": "A Roblox obby has 999 600 visits.\nRound it to the nearest thousand.",
       "options": [
-        "999 000 berries",
-        "1 000 000 berries",
-        "990 000 berries"
+        "999 000 visits",
+        "1 000 000 visits",
+        "990 000 visits"
       ],
       "answer": 1,
       "why": "When the 9s round up, each 9 becomes 0 and the next digit goes up one.",
@@ -982,40 +982,40 @@ export const pack: SePack = {
           "text": "Look at the last three digits: 600 is more than half of 1 000, so round up."
         },
         {
-          "text": "Round up 999 to 1 000, so the nines turn to zeros and carry one into the millions."
+          "text": "Round 999 up to 1 000, so the nines turn to zeros and carry one into the millions."
         },
         {
-          "text": "Try 7 996 to the nearest hundred: 96 is 50 or more, so the answer is 8 000."
+          "text": "A game with 7 996 visits rounds to 8 000 visits, since 96 is 50 or more."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-round-build-2",
-      "prompt": "Isagi scores in a striker drill. Estimate 487 + 312 by rounding each number to the nearest hundred.",
+      "prompt": "You have 487 V-Bucks and get 312 more.\nEstimate the total by rounding each to the nearest hundred.",
       "answer": "800",
       "decoys": [
         "7",
         "9",
         "1"
       ],
-      "why": "Estimating with rounded numbers gives a close answer quickly, and the real sum is 799.",
+      "why": "Estimating with rounded numbers gives a close answer quickly, and the real total is 799 V-Bucks.",
       "steps": [
         {
-          "text": "Round 236 to the nearest hundred. The tens digit is 3, so it becomes 200."
+          "text": "Round 236 V-Bucks to the nearest hundred. The tens digit is 3, so it becomes 200."
         },
         {
-          "text": "Round 719 to the nearest hundred. The tens digit is 1, so it becomes 700."
+          "text": "Round 719 V-Bucks to the nearest hundred. The tens digit is 1, so it becomes 700."
         },
         {
-          "text": "Add the rounded numbers: 200 + 700 = 900. So 236 + 719 is about 900."
+          "text": "Add the rounded numbers: 200 + 700 = 900. So 236 + 719 is about 900 V-Bucks."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-round-build-3",
-      "prompt": "Six Blue Lock strikers each take 48 shots. Estimate 6 × 48 by rounding 48 to the nearest ten.",
+      "prompt": "Six Blue Lock strikers take 48 shots each in a drill.\nEstimate 6 × 48 by rounding 48 to the nearest ten.",
       "answer": "300",
       "decoys": [
         "2",
@@ -1025,20 +1025,20 @@ export const pack: SePack = {
       "why": "Rounding 48 up to 50 makes the multiplying easy, and the real answer 288 is close to 300.",
       "steps": [
         {
-          "text": "Round 32 to the nearest ten. It is 30, because the ones digit 2 is less than 5."
+          "text": "Round 32 shots to the nearest ten. It is 30, because the ones digit 2 is less than 5."
         },
         {
           "text": "Multiply the rounded number: 7 × 30 = 210."
         },
         {
-          "text": "So 7 × 32 is about 210. The exact answer is 224, which is close."
+          "text": "So 7 strikers at 32 shots each is about 210 shots. The exact total is 224."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-round-build-4",
-      "prompt": "Round 8.152 to the nearest tenth. Write the answer as a decimal.",
+      "prompt": "Your Roblox Studio part has X = 8.152.\nRound X to the nearest tenth. Write the answer as a decimal.",
       "answer": "8.2",
       "decoys": [
         "6",
@@ -1048,13 +1048,13 @@ export const pack: SePack = {
       "why": "A decimal rounds the same way as whole numbers, just to a decimal place value like tenths.",
       "steps": [
         {
-          "text": "Look at the tenths digit of 2.36. It is 3, and the digit after it is 6."
+          "text": "A part at X = 2.36: the tenths digit is 3, and the digit after it is 6."
         },
         {
           "text": "6 is 5 or more, so the 3 rounds up to 4. Answer: 2.4."
         },
         {
-          "text": "Try 8.152 the same way: tenths digit 1, next digit 5, so 1 goes up to 2."
+          "text": "Now X = 8.152: tenths digit 1, next digit 5, so 1 goes up to 2."
         }
       ],
       "art": {
@@ -1078,7 +1078,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-round-build-5",
-      "prompt": "Luffy's bounty is 1 743 000 berries. Round it to the nearest hundred thousand.",
+      "prompt": "Luffy's bounty is 1 743 000 Berries.\nRound it to the nearest hundred thousand.",
       "answer": "1700000",
       "decoys": [
         "5",
@@ -1088,10 +1088,10 @@ export const pack: SePack = {
       "why": "A bounty printed with lots of digits is easier to compare when you round it to the nearest hundred thousand.",
       "steps": [
         {
-          "text": "Find the hundred thousands digit of 3 652 000. It is 6, and the next digit is 5."
+          "text": "Find the hundred-thousands digit of 3 652 000 Berries. It is 6, and the next digit is 5."
         },
         {
-          "text": "The 5 means round up, so 6 becomes 7 and the number is 3 700 000."
+          "text": "The 5 means round up, so 6 becomes 7 and the bounty is 3 700 000 Berries."
         },
         {
           "text": "Zeros fill the places after the rounded digit, so 3 652 000 rounds to 3 700 000."
@@ -1101,7 +1101,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-round-build-6",
-      "prompt": "A city has 2 764 000 people. Round it to the nearest million.",
+      "prompt": "A Roblox obby has 2 764 000 visits. Round it to the nearest million.",
       "answer": "3000000",
       "decoys": [
         "2",
@@ -1111,20 +1111,20 @@ export const pack: SePack = {
       "why": "Rounding to the nearest million looks at the hundred thousands digit, and 764 000 is more than halfway to 1 000 000.",
       "steps": [
         {
-          "text": "Look at the hundred thousands digit of 4 218 000. It is 2, which is less than 5."
+          "text": "Your game has 4 218 000 visits. Look at the hundred thousands digit: it is 2."
         },
         {
-          "text": "Keep the millions digit as 4 and write zeros after it: 4 000 000."
+          "text": "Since 2 is less than 5, keep the millions digit 4 and write zeros: 4 000 000."
         },
         {
-          "text": "So 4 218 000 is about 4 million. The exact number is a bit more than that."
+          "text": "So 4 218 000 visits is about 4 million. The exact count is a bit more."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-round-build-7",
-      "prompt": "Estimate 5 120 − 2 891 by rounding each number to the nearest thousand.",
+      "prompt": "Estimate 5 120 − 2 891 Robux by rounding each number to the nearest thousand.",
       "answer": "2000",
       "decoys": [
         "3",
@@ -1134,13 +1134,13 @@ export const pack: SePack = {
       "why": "Rounding before subtracting gives a quick guess, and the exact difference here is 2 229.",
       "steps": [
         {
-          "text": "Round 8 214 to the nearest thousand. The hundreds digit is 2, so it becomes 8 000."
+          "text": "Your Robux balance is 8 214. The hundreds digit is 2, so round it to 8 000."
         },
         {
-          "text": "Round 3 960 to the nearest thousand. The hundreds digit is 9, so it becomes 4 000."
+          "text": "A game pass costs 3 960 Robux. The hundreds digit is 9, so round it to 4 000."
         },
         {
-          "text": "Subtract the rounded numbers: 8 000 − 4 000 = 4 000. So the answer is about 4 000."
+          "text": "Subtract the rounded numbers: 8 000 − 4 000 = 4 000. So the answer is about 4 000 Robux."
         }
       ]
     },

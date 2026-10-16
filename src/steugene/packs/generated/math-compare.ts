@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Blue Lock: Isagi's team goal difference is −2. Rivals are at +3. Right wins."
+        "text": "Your F3 screen says Y = −2. Y = −3 is deeper. Further left means lower."
       },
       "art": {
         "art": "numberline",
@@ -59,23 +59,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-basics-0",
-      "prompt": "Team A has a goal difference of −4. Team B has −1. Which team is ahead on goal difference?",
+      "prompt": "League table: Team A is on −4 goal difference. Team B is on −1. Who ranks higher?",
       "options": [
         "Team A, because −4 is further from zero",
         "Team B, because −1 is closer to zero",
-        "Both teams are level on goals"
+        "Both teams are level on goal difference"
       ],
       "answer": 1,
-      "why": "On a number line, a negative number closer to zero is always bigger than one further left.",
+      "why": "On a number line, a negative number closer to zero is bigger than one further left.",
       "steps": [
         {
-          "text": "Put the numbers on a line: −6 and −2. Zero is on the right side."
+          "text": "Two clubs sit on −6 and −2. Put both on a line. Zero is on the right."
         },
         {
           "text": "−2 is closer to zero than −6, so −2 sits further right."
         },
         {
-          "text": "Further right means bigger. So −2 is bigger than −6, and the team at −2 is ahead."
+          "text": "Further right means bigger. So −2 beats −6, and that club ranks higher."
         }
       ],
       "art": {
@@ -100,7 +100,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-basics-1",
-      "prompt": "Three pirate bounty scores are 0.3, 0.27 and 0.035. Which one is the biggest?",
+      "prompt": "Three Pokémon have catch chances of 0.3, 0.27 and 0.035. Which is easiest to catch?",
       "options": [
         "0.27, because it has more digits",
         "0.035, because it has the most zeros",
@@ -110,13 +110,13 @@ export const pack: SePack = {
       "why": "When comparing decimals, line up the decimal points and compare the tenths first, then the hundredths.",
       "steps": [
         {
-          "text": "Try 0.6, 0.55 and 0.062. Look at the tenths digit first: 6, 5 and 0."
+          "text": "Try catch chances 0.6, 0.55 and 0.062. Look at the tenths digit first: 6, 5 and 0."
         },
         {
-          "text": "6 tenths is the most, so 0.6 is the biggest. The number with 0 tenths is the smallest."
+          "text": "6 tenths is the most, so 0.6 is the easiest catch. The one with 0 tenths is the hardest."
         },
         {
-          "text": "Digits after the decimal point do not make a number bigger. Only place value does."
+          "text": "Extra digits after the decimal point do not make a number bigger. Only place value does."
         }
       ]
     },
@@ -197,23 +197,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-basics-2",
-      "prompt": "Which is bigger: ¾ or 0.7?",
+      "prompt": "You ate ¾ of a pizza. Your mate ate 0.7 of one. Who ate more?",
       "options": [
-        "¾ is bigger, because ¾ equals 0.75",
-        "0.7 is bigger, because 7 is bigger than 3",
-        "They are exactly the same size"
+        "You did, because ¾ equals 0.75",
+        "Your mate, because 7 is bigger than 3",
+        "You both ate exactly the same amount"
       ],
       "answer": 0,
       "why": "To compare a fraction and a decimal, change one into the other, then compare.",
       "steps": [
         {
-          "text": "Try ⅘ and 0.75. Change ⅘ to a decimal: 4 ÷ 5 = 0.8."
+          "text": "Try ⅘ of a pizza and 0.75 of a pizza. Change ⅘ to a decimal: 4 ÷ 5 = 0.8."
         },
         {
           "text": "Now compare 0.8 and 0.75. Tenths first: 8 tenths beats 7 tenths."
         },
         {
-          "text": "So ⅘ is bigger than 0.75. Always change to the same form first."
+          "text": "So ⅘ is more pizza than 0.75. Always change to the same form first."
         }
       ]
     },
@@ -227,7 +227,7 @@ export const pack: SePack = {
         "−2.5, −2, −¾, 0.3"
       ],
       "answer": 2,
-      "why": "Negative numbers get smaller as the number further from zero gets bigger, and every negative is smaller than every positive.",
+      "why": "Among negatives, the one furthest from zero is smallest, and every negative is smaller than every positive.",
       "steps": [
         {
           "text": "Try −1.5, −1, −½, 0.2. Start with the negatives only."
@@ -245,19 +245,19 @@ export const pack: SePack = {
       "id": "math-compare-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Goal difference decides league tables when teams have equal points.",
+        "Goal difference splits teams that are level on points.",
         "A team on −2 ranks below a team on −1.",
-        "Bank balances and freezing temperatures use negatives too."
+        "Minecraft depths below zero are negative too."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Negative numbers are real. You meet them in sport, money and weather."
+        "text": "Diamonds sit near Y = −59. Bedrock is Y = −64. Lower number means deeper."
       }
     },
     {
       "kind": "build",
       "id": "math-compare-build-0",
-      "prompt": "Isagi's team has goal difference −2. The rival team has −7. Build the LOWER number.",
+      "prompt": "Two teams in the table. One has goal difference −2, the other −7. Build the LOWER goal difference.",
       "answer": "-7",
       "decoys": [
         "3",
@@ -267,13 +267,13 @@ export const pack: SePack = {
       "why": "The further a negative number is from zero, the lower it sits.",
       "steps": [
         {
-          "text": "Put −2 and −7 on a number line. Both are left of zero."
+          "text": "A table shows −3 and −9. Both teams concede more than they score."
         },
         {
-          "text": "Compare with −9 and −3. −9 is 9 below zero, so it is lower than −3."
+          "text": "−9 means 9 goals below zero. −3 is only 3 below zero."
         },
         {
-          "text": "So the bigger digit after the minus means the lower number. −7 is lower than −2."
+          "text": "So −9 is the lower team. The bigger digit after the minus is lower. Here, −7 beats −2 for lowest."
         }
       ],
       "art": {
@@ -312,43 +312,49 @@ export const pack: SePack = {
       "why": "For negative numbers, the one closer to zero is the bigger one.",
       "steps": [
         {
-          "text": "Try −⅓ and −⅝. Change them to decimals: 1 ÷ 3 is about 0.33, and 5 ÷ 8 is 0.625."
+          "text": "You owe a friend ⅓ of a pizza. Another friend is owed ⅝."
         },
         {
-          "text": "0.33 is closer to zero than 0.625. So −⅓ is further from zero on the negative side? No: −⅓ is closer to zero."
+          "text": "As decimals: 1 ÷ 3 is about 0.33, and 5 ÷ 8 is 0.625."
         },
         {
-          "text": "So −⅓ is bigger than −⅝. The one with the smaller size after the minus sign wins."
+          "text": "Owing 0.33 is a smaller debt than owing 0.625. So −⅓ is closer to zero."
+        },
+        {
+          "text": "−⅓ is bigger than −⅝. The smaller size after the minus wins."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-basics-5",
-      "prompt": "The lowest places on Earth include the Dead Sea shore at −430 m and Death Valley at −86 m. Which one is lower?",
+      "prompt": "F3 shows two spots. Diamonds at Y = −59. A cave floor at Y = −12. Which is lower?",
       "options": [
-        "Death Valley, at −86 m",
-        "Both are at sea level",
-        "The Dead Sea shore, at −430 m"
+        "The cave floor, at Y = −12",
+        "Both are at the same height",
+        "The diamonds, at Y = −59"
       ],
       "answer": 2,
-      "why": "A bigger number below zero means you are deeper below sea level, so it is lower.",
+      "why": "A bigger number below zero means you are deeper down, so it is lower.",
       "steps": [
         {
-          "text": "Try −120 m and −60 m. Both are below sea level."
+          "text": "Your base is at Y = −40. A lava pool is at Y = −10."
         },
         {
-          "text": "−120 m is further from zero, so it is further below sea level."
+          "text": "Sea level is Y = 62. Zero is far above bedrock at −64."
         },
         {
-          "text": "That makes −120 m the lower place. The number that is smaller is the one that is lower."
+          "text": "−40 is 40 blocks below zero. −10 is only 10 below zero."
+        },
+        {
+          "text": "So Y = −40 is the lower spot. The bigger digit after the minus is deeper."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-compare-games-0",
-      "title": "Bounties Below Zero",
+      "title": "Studio Part Positions",
       "game": {
         "mode": "order",
         "values": [
@@ -385,9 +391,9 @@ export const pack: SePack = {
       "id": "math-compare-teach-2",
       "title": "The method",
       "lines": [
-        "Step 1: Ignore the minus signs. Compare the sizes.",
-        "Step 2: For negatives, the bigger size is the smaller number.",
-        "Step 3: Check your order on a number line."
+        "Step 1: Ignore the minus signs. Compare the sizes. Y = −48 and −12 become 48 and 12.",
+        "Step 2: Bigger size below zero means deeper. So it is the smaller number.",
+        "Step 3: Check on a number line. Left is lower."
       ],
       "callout": {
         "flavour": "key",
@@ -397,46 +403,49 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-basics-6",
-      "prompt": "Which is bigger: the absolute value of −7 or the absolute value of 5?",
+      "prompt": "Team A is −7 on goal difference. Team B is +5. Which is bigger: |−7| or |5|?",
       "options": [
-        "|−7| is bigger, because 7 is bigger than 5",
+        "|−7| is bigger, because 7 is more than 5",
         "|5| is bigger, because it is positive",
-        "They are equal, because both are five"
+        "They are equal, because the signs cancel"
       ],
       "answer": 0,
       "why": "Absolute value is the distance from zero, and it ignores the minus sign.",
       "steps": [
         {
-          "text": "Try |−9| and |4|. |−9| is the distance from zero to −9, which is 9."
+          "text": "Another table shows a team at −9 and one at +4."
         },
         {
-          "text": "|4| is the distance from zero to 4, which is 4."
+          "text": "|−9| is the distance from zero to −9. That is 9 goals."
         },
         {
-          "text": "9 is bigger than 4. So |−9| is bigger, even though the minus sign is there."
+          "text": "|4| is the distance from zero to +4. That is 4 goals."
+        },
+        {
+          "text": "9 is more than 4. So |−9| is bigger, even with the minus sign."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-basics-7",
-      "prompt": "It is −12 °C in Toronto in the morning and −4 °C at noon. Which time is colder?",
+      "prompt": "F3 shows you at Y = −12. Your friend is at Y = −4. Who is deeper?",
       "options": [
-        "Noon, because −4 is closer to zero",
-        "The morning, because −12 is further below zero",
-        "They are the same temperature"
+        "Friend: −4 is closer to zero",
+        "You: −12 is further below zero",
+        "Same depth: both are below zero"
       ],
       "answer": 1,
-      "why": "On a thermometer, a lower number below zero means a colder temperature.",
+      "why": "On the number line, −12 is further below zero than −4, so it is deeper.",
       "steps": [
         {
-          "text": "Try −15 °C and −9 °C on a thermometer. Start at zero and count down."
+          "text": "Try Y = −15 and Y = −9 on the F3 screen. Start at zero and count down."
         },
         {
-          "text": "−15 is 15 steps below zero. −9 is 9 steps below zero."
+          "text": "Y = −15 is 15 blocks below zero. Y = −9 is 9 blocks below zero."
         },
         {
-          "text": "More steps below zero means colder. So −15 °C is colder than −9 °C."
+          "text": "More blocks below zero means deeper. So Y = −15 is deeper than Y = −9."
         }
       ],
       "art": {
@@ -447,12 +456,12 @@ export const pack: SePack = {
         "points": [
           {
             "at": -12,
-            "label": "−12 °C",
+            "label": "Y = −12",
             "tone": "bad"
           },
           {
             "at": -4,
-            "label": "−4 °C",
+            "label": "Y = −4",
             "tone": "calm"
           }
         ]
@@ -461,23 +470,23 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-compare-build-1",
-      "prompt": "Fill the gap with a whole number: −5 < ___ < −3. Build the number.",
+      "prompt": "League table: Spurs −5 GD, Villa −3 GD. Brighton sits between. Build Brighton's GD.",
       "answer": "-4",
       "decoys": [
         "6",
         "2",
         "1"
       ],
-      "why": "Whole numbers between two negatives are the ones in the middle, closer to zero than the first.",
+      "why": "The whole number between −5 and −3 is the one in the middle, −4.",
       "steps": [
         {
-          "text": "List the whole numbers from −5 up to −3: −5, −4, −3."
+          "text": "Say Wolves are on −8 GD and Leeds on −6 GD. List the goal differences from −8 up to −6."
         },
         {
-          "text": "Try −8 < ___ < −6 the same way. Between them: −7."
+          "text": "The list is −8, −7, −6. The only one in the middle is −7."
         },
         {
-          "text": "Only −4 sits strictly between −5 and −3, so −4 is the gap."
+          "text": "Now list −5, −4, −3. The only one between Spurs and Villa is −4."
         }
       ],
       "art": {
@@ -512,11 +521,11 @@ export const pack: SePack = {
       "lines": [
         "−5 looks bigger than −2, because 5 is bigger than 2.",
         "But −5 sits further left on the number line.",
-        "So −5 is smaller. Always read the position, not the digit."
+        "So −5 is smaller. Read the position, not the digit."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Blue Lock trap: a striker on −5 is worse off than one on −2."
+        "text": "Roblox Studio: a part at X = −5 sits left of one at X = −2."
       },
       "art": {
         "art": "numberline",
@@ -546,14 +555,15 @@ export const pack: SePack = {
       "id": "math-compare-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "Put −3, −½ and −1.2 in order, smallest first.",
-        "Write −½ as −0.5, so every number is a decimal.",
-        "Sizes are 3, 1.2 and 0.5. Biggest size gives the smallest number.",
+        "Three crews have balances in billions of Berries: −3, −½, −1.2.",
+        "Put them in order, smallest first.",
+        "Write −½ as −0.5, so all are decimals.",
+        "Sizes are 3, 1.2 and 0.5. Biggest size is the smallest number.",
         "Order: −3, then −1.2, then −0.5."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Two pirate crews owe debts. The one owing 3 berries is worse off than 1.2."
+        "text": "A crew owing 3 billion Berries is worse off than one owing 1.2 billion."
       }
     },
     {
@@ -567,7 +577,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Your turn in the match: check the number line before you call the order."
+        "text": "League table check: a −7 goal difference ranks below a −2, and both rank below 0."
       }
     },
     {
@@ -581,7 +591,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "−9 looks big. It is actually the smallest one here."
+        "text": "Y = −3 looks bigger than Y = −1. It is deeper, so it is smaller."
       },
       "art": {
         "art": "numberline",
@@ -611,13 +621,13 @@ export const pack: SePack = {
       "id": "math-compare-deeper-1",
       "title": "Digits lie about distance",
       "lines": [
-        "Compare −2.5 and −2.",
-        "2.5 is bigger than 2, so −2.5 sits further left.",
-        "That makes −2.5 the smaller of the two."
+        "F3 shows Y = −2.5 and Y = −2.",
+        "2.5 is more than 2, so −2.5 is deeper down.",
+        "Deeper means further left, so −2.5 is the smaller number."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Bigger digits after the minus sign mean smaller numbers."
+        "text": "Bigger digits after the minus sign mean a smaller number."
       }
     },
     {
@@ -626,12 +636,12 @@ export const pack: SePack = {
       "title": "Zero is the wall",
       "lines": [
         "Every positive number is bigger than every negative one.",
-        "Even 0.1 beats −1000.",
-        "Negatives sit below the wall, so compare them first, then the positives."
+        "In a league table, +1 always sits above −20.",
+        "Even 0.1 beats −1000. Sort the negatives first, then the positives."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zero is sea level. The deeper you dive, the smaller the number."
+        "text": "Goal difference 0 is mid-table. The deeper the minus, the lower you sit."
       }
     },
     {
@@ -640,8 +650,8 @@ export const pack: SePack = {
       "title": "Line up the decimals",
       "lines": [
         "Give every number the same number of decimal places.",
-        "−0.5 becomes −0.50, so both have two places.",
-        "Now compare 50 and 45 hundredths, not 5 and 45."
+        "Goal difference per game: −0.5 and −0.45.",
+        "−0.5 becomes −0.50. Now compare 50 and 45 hundredths, not 5 and 45."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -653,8 +663,8 @@ export const pack: SePack = {
       "id": "math-compare-deeper-4",
       "title": "Fractions into decimals",
       "lines": [
-        "You cannot compare −3/4 with −0.7 straight across.",
-        "Divide the top by the bottom: 3 ÷ 4 = 0.75.",
+        "One team is −3 over 4 games: −3/4 a game. Another averages −0.7.",
+        "You cannot compare them straight across. Divide: 3 ÷ 4 = 0.75.",
         "Now you have −0.75 and −0.7, easy to line up."
       ],
       "callout": {
@@ -674,13 +684,13 @@ export const pack: SePack = {
       "id": "math-compare-deeper-5",
       "title": "Same pitch, same scale",
       "lines": [
-        "Fractions, decimals and whole numbers can show up together.",
+        "A Blue Lock ranking can mix fractions, decimals and whole numbers.",
         "Turn every number into a decimal first.",
         "Then place them on one number line and read left to right."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Every striker gets measured on the same pitch map, same scale."
+        "text": "Every striker is measured on the same scale. Same ruler, fair ranking."
       },
       "art": {
         "art": "numberline",
@@ -699,83 +709,83 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-basics-8",
-      "prompt": "Isagi has a shots-on-target rate of 0.4. Another striker's rate is ⅜. Which rate is bigger?",
+      "prompt": "In EA FC, your striker scores on 3/8 of his shots. Mine scores on 0.4. Whose rate is bigger?",
       "options": [
-        "0.4 is bigger than ⅜",
-        "⅜ is bigger than 0.4",
-        "They are exactly the same"
+        "Your striker: 3/8 is bigger",
+        "My striker: 0.4 is bigger",
+        "Both strikers: they're equal"
       ],
-      "answer": 0,
-      "why": "⅜ is about 0.375, which is a little less than 0.4.",
+      "answer": 1,
+      "why": "3/8 is 0.375, which is a little less than 0.4.",
       "steps": [
         {
-          "text": "Try 0.6 and ⅝. Change ⅝ to a decimal: 5 ÷ 8 = 0.625."
+          "text": "A winger hits 5 of 8 shots. Another hits 0.6. Change 5/8: 5 ÷ 8 = 0.625."
         },
         {
           "text": "Now compare 0.6 and 0.625. The tenths are both 6, so look at the hundredths."
         },
         {
-          "text": "0.625 has 2 hundredths and 0.6 has 0, so ⅝ is bigger. Change the fraction first, then compare."
+          "text": "0.625 has 2 hundredths and 0.6 has 0, so 5/8 is bigger. Change the fraction first, then compare."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-0",
-      "prompt": "Coach Ego scores his players after training. Isagi has −2.5. Kunigami has −2. Chigiri has −3/4. Who has the highest score?",
+      "prompt": "xG difference per game this season. Club A: −2.5. Club B: −2. Club C: −3/4. Which club is best?",
       "options": [
-        "Isagi has the highest",
-        "Kunigami has the highest",
-        "Chigiri has the highest"
+        "Club A is the best",
+        "Club B is the best",
+        "Club C is the best"
       ],
       "answer": 2,
-      "why": "A negative number with a smaller distance from zero is always greater than one that is further away.",
+      "why": "−3/4 is only 0.75 below zero, so it is closest to zero and the greatest of the three.",
       "steps": [
         {
-          "text": "Negatives flip. −7 is less than −5, because 7 is further from zero."
+          "text": "A table shows −7 and −5 goal difference. −5 is better, because 5 is nearer zero."
         },
         {
-          "text": "Change the fraction to a decimal. 3 ÷ 4 = 0.75, so −3/4 = −0.75."
+          "text": "Change a fraction to a decimal. 1 ÷ 2 = 0.5, so −1/2 = −0.5."
         },
         {
-          "text": "Compare −3.6 and −3.45. 3.6 is further from zero, so −3.6 is the smallest of the two."
+          "text": "Compare −3.6 and −3.45. 3.6 is further below zero, so −3.6 is the worse one."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-1",
-      "prompt": "Luffy's crew dives to check the sea floor. Ship A is at −120 m. Ship B is at −85.5 m. Ship C is at −120.4 m. Which ship is highest?",
+      "prompt": "Three F3 screens show Y = −60, Y = −45.5 and Y = −60.4. Who is highest?",
       "options": [
-        "Ship A, at −120 m",
-        "Ship B, at −85.5 m",
-        "Ship C, at −120.4 m"
+        "Player A, at Y = −60",
+        "Player B, at Y = −45.5",
+        "Player C, at Y = −60.4"
       ],
       "answer": 1,
-      "why": "Depth below sea level is written as a negative, so the number closest to zero is the highest point.",
+      "why": "The biggest Y is the highest, and −45.5 is the nearest to zero of the three.",
       "steps": [
         {
-          "text": "Look at how far each depth is from zero. Smaller distance means higher up."
+          "text": "A bigger Y means higher up. Y = 62 is sea level, and Y = −64 is bedrock."
         },
         {
-          "text": "Example: −300 m and −295 m. −295 m is closer to zero, so it is higher."
+          "text": "Example: Y = −50 and Y = −49.5. −49.5 is nearer zero, so it is higher."
         },
         {
-          "text": "Now check −120, −85.5 and −120.4. Which one is closest to zero?"
+          "text": "Example: Y = −59 and Y = −59.8. 59.8 is further below zero, so −59.8 is deeper."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-2",
-      "prompt": "Put the three numbers in order from smallest to biggest: −3/4, −0.8, −2/3. Which one is the biggest?",
+      "prompt": "Which number is the biggest: −3/4, −0.8 or −2/3?",
       "options": [
         "−3/4",
         "−0.8",
         "−2/3"
       ],
       "answer": 2,
-      "why": "When the fractions are changed to decimals, −2/3 is the number closest to zero, so it is the biggest.",
+      "why": "As decimals they are −0.75, −0.8 and about −0.67, so −2/3 is closest to zero.",
       "steps": [
         {
           "text": "Change fractions to decimals by dividing the top by the bottom."
@@ -784,76 +794,76 @@ export const pack: SePack = {
           "text": "Example: −5/8. 5 ÷ 8 = 0.625, which is bigger than 0.6, so −5/8 is smaller than −0.6."
         },
         {
-          "text": "Now change −3/4 and −2/3 to decimals and compare them to −0.8."
+          "text": "Example: −1/4 and −0.3. 1 ÷ 4 = 0.25, which is less than 0.3, so −1/4 is bigger."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-3",
-      "prompt": "Blue Lock training: three players drop to −1.2, −1¼ and −1.09 points. Which list puts them from least to greatest?",
+      "prompt": "Average goal difference per game: −1.2, −1¼ and −1.09. Which list goes worst to best?",
       "options": [
         "−1.25, −1.2, −1.09",
         "−1.2, −1.25, −1.09",
         "−1.09, −1.2, −1.25"
       ],
       "answer": 0,
-      "why": "On a number line, the numbers get bigger as you move right, so the most negative number is the least.",
+      "why": "The worst is the most negative, so −1.25 comes first and −1.09 comes last.",
       "steps": [
         {
-          "text": "Change 1¼ to a decimal. 1¼ = 1.25, so the number is −1.25."
+          "text": "Change a mixed number to a decimal. 3¾ = 3.75, so −3¾ = −3.75."
         },
         {
-          "text": "Example: put −7.5, −7.25 and −7.9 in order. −7.9 is least, then −7.5, then −7.25."
+          "text": "Example: −7.5, −7.25 and −7.9. Worst to best is −7.9, then −7.5, then −7.25."
         },
         {
-          "text": "Now put −1.25, −1.2 and −1.09 in order. Which one has the most digits after 1?"
+          "text": "Now write −1.2 as −1.20 so the digits line up. Which is furthest below zero?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-4",
-      "prompt": "A pirate crew checks the coins in their shared treasure chest. Crew X has −7 coins. Crew Y has −0.7 coins. Which crew is richer?",
+      "prompt": "Two obby checkpoints in Roblox Studio sit at Y = −7 and Y = −0.7. Which is higher?",
       "options": [
-        "Crew X is richer",
-        "Crew Y is richer",
-        "They have the same amount"
+        "Y = −7 is higher",
+        "Y = −0.7 is higher",
+        "Both are the same height"
       ],
       "answer": 1,
-      "why": "A bigger digit in front of a negative sign means the number is further below zero, so it is smaller.",
+      "why": "−0.7 is only 0.7 below zero while −7 is 7 below, so −0.7 is greater.",
       "steps": [
         {
-          "text": "Look at the sizes: −7 is 7 steps below zero. −0.7 is only 0.7 steps below zero."
+          "text": "Y = −7 is 7 studs below zero. Y = −0.7 is only 0.7 studs below."
         },
         {
-          "text": "Example: −9 and −0.9. −0.9 is closer to zero, so −0.9 is bigger."
+          "text": "Example: Y = −9 and Y = −0.9. −0.9 is nearer zero, so it is higher."
         },
         {
-          "text": "Now compare −3 and −0.3. Which one is closer to zero?"
+          "text": "Now try Y = −3 and Y = −0.3. Which one is nearer zero?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-applied-5",
-      "prompt": "On a number line, which number is exactly halfway between −3 and 1?",
+      "prompt": "A mineshaft runs from Y = −3 up to Y = 1. A torch goes halfway. Which Y?",
       "options": [
-        "−2",
-        "−1",
-        "0"
+        "Y = −2",
+        "Y = −1",
+        "Y = 0"
       ],
       "answer": 1,
-      "why": "The midpoint between two numbers is the average of them, found by adding them and dividing by 2.",
+      "why": "The halfway point is the average: (−3 + 1) ÷ 2 = −1.",
       "steps": [
         {
-          "text": "Add the two numbers, including the negative sign."
+          "text": "Add the two Y levels, keeping the negative sign."
         },
         {
-          "text": "Example: halfway between −8 and 4. −8 + 4 = −4, then divide by 2 to get −2."
+          "text": "Example: halfway between Y = −6 and Y = 2. −6 + 2 = −4, then ÷ 2 = −2."
         },
         {
-          "text": "Now do the same with −3 and 1. What do you get after dividing by 2?"
+          "text": "Check by counting blocks. From −6 to −2 is 4 blocks, and −2 to 2 is 4 blocks."
         }
       ],
       "art": {
@@ -877,20 +887,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-applied-6",
-      "prompt": "Toronto parking garage levels. P1 is at −1.5 m. P2 is at −1.75 m. P3 is at −1.2 m. Which level is the lowest?",
+      "prompt": "F3 shows three feet heights. Steve: Y = −1.5. Alex: Y = −1.75. Husk: Y = −1.2. Who is lowest?",
       "options": [
-        "P2 at −1.75 m",
-        "P1 at −1.5 m",
-        "P3 at −1.2 m"
+        "Steve, Y = −1.5",
+        "Alex, Y = −1.75",
+        "Husk, Y = −1.2"
       ],
-      "answer": 0,
-      "why": "The lowest level is the one furthest from the surface, which is the most negative number.",
+      "answer": 1,
+      "why": "The lowest player is furthest below zero, which is the most negative Y.",
       "steps": [
         {
-          "text": "Find the number furthest from zero. That one is the lowest."
+          "text": "Lowest means furthest below zero. Find the Y that is furthest from zero."
         },
         {
-          "text": "Example: −2.8 m and −2.75 m. −2.8 m is further down, so it is lower."
+          "text": "Example: a miner at Y = −2.8 and one at Y = −2.75. −2.8 is further down, so it is lower."
         },
         {
           "text": "Now compare −1.5, −1.75 and −1.2. Which one is furthest from zero?"
@@ -900,20 +910,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-applied-7",
-      "prompt": "Blue Lock's new scores are −5/8, −0.6 and −0.55. Which one is the smallest?",
+      "prompt": "Which is the smallest: −5/8, −0.6 or −0.55?",
       "options": [
-        "−5/8",
         "−0.6",
+        "−5/8",
         "−0.55"
       ],
-      "answer": 0,
-      "why": "Smaller numbers are further left on the number line, so the most negative value is the smallest.",
+      "answer": 1,
+      "why": "Smaller numbers sit further left on the number line, so the most negative value is the smallest.",
       "steps": [
         {
           "text": "Change the fraction to a decimal: 5 ÷ 8 = 0.625."
         },
         {
-          "text": "Example: −2/5 and −0.35. 2 ÷ 5 = 0.4, so −2/5 is smaller than −0.35."
+          "text": "Example: −3/4 and −0.8. 3 ÷ 4 = 0.75, so −0.8 is further from zero and smaller."
         },
         {
           "text": "Now compare −0.625, −0.6 and −0.55. Which one is furthest from zero?"
@@ -923,46 +933,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-applied-8",
-      "prompt": "Three sea marks are at −0.095 km, −0.85 km and −0.9 km. Which one is the deepest?",
+      "prompt": "In Studio, three parts sit at Y = −0.85, −0.9 and −0.095 studs. Which part is lowest?",
       "options": [
-        "−0.095 km",
-        "−0.85 km",
-        "−0.9 km"
+        "Part A, −0.85 studs",
+        "Part B, −0.9 studs",
+        "Part C, −0.095 studs"
       ],
-      "answer": 2,
-      "why": "Depth is measured below sea level, so the deepest point is the most negative value.",
+      "answer": 1,
+      "why": "The lowest part is furthest below zero, so it has the most negative Y.",
       "steps": [
         {
           "text": "Compare the digits after the decimal point, starting from the left."
         },
         {
-          "text": "Example: −0.4 km and −0.35 km. 0.4 is further from zero, so −0.4 is deeper."
+          "text": "Example: Y = −0.7 and Y = −0.65. 0.7 is further from zero, so −0.7 is lower."
         },
         {
-          "text": "Now compare −0.095, −0.85 and −0.9. Which one is furthest from zero?"
+          "text": "Now compare −0.85, −0.9 and −0.095. Which one is furthest from zero?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-deeper-6",
-      "prompt": "Blue Lock league table. Goal difference: −1, −3 and −4. Which team is in the worst spot?",
+      "prompt": "Three bottom clubs have goal differences −3, −4 and −1. Which club is in the worst spot?",
       "options": [
-        "−1",
         "−3",
-        "−4"
+        "−4",
+        "−1"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "A negative number with a bigger digit sits further below zero, so it is smaller.",
       "steps": [
         {
-          "text": "Ignore the minus signs for a second. Compare 6, 2 and 9."
+          "text": "Ignore the minus signs for a second. Example: a table shows −6, −2 and −9. Compare 6, 2 and 9."
         },
         {
           "text": "9 is the biggest digit, so −9 sits furthest left on the line."
         },
         {
-          "text": "Furthest left means smallest, so −9 is the lowest number."
+          "text": "Furthest left means smallest, so −9 is the worst goal difference."
         }
       ],
       "art": {
@@ -987,69 +997,69 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-deeper-7",
-      "prompt": "Luffy's dive log: Zoro is at −35.5 m, Usopp at −35.25 m. Who is deeper?",
+      "prompt": "Luffy's crew dives. Zoro: −35.5 m. Usopp: −35.25 m. Sanji: −34.75 m. Who is deepest?",
       "options": [
-        "Zoro, at −35.5 m",
-        "Usopp, at −35.25 m",
-        "Sanji, at −34.75 m"
+        "Sanji, −34.75 m",
+        "Zoro, −35.5 m",
+        "Usopp, −35.25 m"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Deeper means further below zero, which is a smaller number.",
       "steps": [
         {
-          "text": "Make both the same length: −12.40 and −12.04."
+          "text": "Another dive: −12.4 m and −12.04 m. Make them the same length: −12.40 and −12.04."
         },
         {
           "text": "Ignore the minus: 12.40 is bigger than 12.04."
         },
         {
-          "text": "A bigger distance below zero means deeper, so −12.40 is the deeper one."
+          "text": "A bigger distance below zero means deeper, so −12.40 is the deeper dive."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-deeper-8",
-      "prompt": "Which is the biggest number: −0.3, −0.1 or 0.05?",
+      "prompt": "Goals minus xG for three strikers: −0.3, −0.1 and 0.05. Which is the biggest?",
       "options": [
+        "0.05",
         "−0.3",
-        "−0.1",
-        "0.05"
+        "−0.1"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "Every positive number sits above zero, so it beats every negative number.",
       "steps": [
         {
           "text": "Split them: any positive sits above every negative."
         },
         {
-          "text": "Among the negatives, −0.2 is closer to zero than −0.7, so −0.2 is bigger."
+          "text": "Among negatives, −0.2 is closer to zero than −0.7, so −0.2 is bigger."
         },
         {
-          "text": "Check the positive 0.01 against −0.2: the positive wins, so 0.01 is the biggest."
+          "text": "Check a positive 0.01 against −0.2: the positive wins, so 0.01 is the biggest."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-deeper-9",
-      "prompt": "Blue Lock form scores: −0.45, −0.5 and −0.55. Which is the highest?",
+      "prompt": "Blue Lock strikers' goals minus xG per game: −0.45, −0.5, −0.55. Which is highest?",
       "options": [
-        "−0.50",
+        "−0.55",
         "−0.45",
-        "−0.55"
+        "−0.50"
       ],
       "answer": 1,
-      "why": "A minus number with more hundredths is further below zero, so it is smaller.",
+      "why": "−0.45 is the closest to zero, so it is the highest of the three.",
       "steps": [
         {
-          "text": "Write each with two decimal places: −0.60, −0.62 and −0.70."
+          "text": "Another set: −0.6, −0.62 and −0.7. Write two decimal places: −0.60, −0.62, −0.70."
         },
         {
-          "text": "Compare the hundredths: 60, 62 and 70. The biggest distance is 70."
+          "text": "Compare the hundredths: 60, 62 and 70. The biggest distance below zero is 70."
         },
         {
-          "text": "So −0.70 is the lowest, and the highest is −0.60, the smallest distance."
+          "text": "So −0.70 is the lowest. The highest is −0.60, the smallest distance."
         }
       ],
       "art": {
@@ -1064,6 +1074,11 @@ export const pack: SePack = {
             "tone": "good"
           },
           {
+            "at": -0.5,
+            "label": "−0.5",
+            "tone": "focus"
+          },
+          {
             "at": -0.55,
             "label": "−0.55",
             "tone": "bad"
@@ -1074,30 +1089,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-compare-deeper-10",
-      "prompt": "Which is the smallest: −0.7, −2/3 or −3/4?",
+      "prompt": "Roblox Studio: three parts sit at Y = −0.7, −2/3 and −3/4. Which is lowest?",
       "options": [
         "−0.7",
         "−2/3",
         "−3/4"
       ],
       "answer": 2,
-      "why": "Three quarters is 0.75, which is further from zero than 0.7.",
+      "why": "Three quarters is 0.75, which is further below zero than 0.7 or 0.67.",
       "steps": [
         {
-          "text": "Turn the fractions into decimals: 1 ÷ 4 = 0.25 and 2 ÷ 5 = 0.4."
+          "text": "Another set: Y = −1/4, −2/5 and −0.3. Fractions to decimals: 1 ÷ 4 = 0.25, 2 ÷ 5 = 0.4."
         },
         {
-          "text": "Now compare −0.25, −0.4 and −0.3 with the same place value."
+          "text": "Now compare −0.25, −0.4 and −0.3 using the same place value."
         },
         {
-          "text": "The biggest distance from zero is 0.4, so −2/5 is the smallest of those three."
+          "text": "The biggest distance below zero is 0.4, so −2/5 is the lowest part."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-compare-deeper-11",
-      "prompt": "Sea depths in metres: −2, −1.5 and −1. Put them from deepest to shallowest.",
+      "prompt": "Three mobs float below sea level at −2, −1.5 and −1 blocks. Order them deepest to shallowest.",
       "options": [
         "−1.5, −2, −1",
         "−1, −2, −1.5",
@@ -1107,13 +1122,13 @@ export const pack: SePack = {
       "why": "Deepest is the smallest number, so the list runs from smallest to largest.",
       "steps": [
         {
-          "text": "Make the decimals match: −4.0, −3.5 and −0.5."
+          "text": "Another set: −4, −3.5 and −0.5 blocks. Make the decimals match: −4.0, −3.5, −0.5."
         },
         {
           "text": "Deepest means furthest below zero, so the biggest distance comes first: −4.0."
         },
         {
-          "text": "Next is −3.5, then −0.5, so the full order is −4, −3.5, −0.5."
+          "text": "Next is −3.5, then −0.5. The full order is −4, −3.5, −0.5."
         }
       ],
       "art": {
@@ -1128,6 +1143,11 @@ export const pack: SePack = {
             "tone": "bad"
           },
           {
+            "at": -1.5,
+            "label": "−1.5",
+            "tone": "calm"
+          },
+          {
             "at": -1,
             "label": "−1",
             "tone": "focus"
@@ -1138,7 +1158,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-compare-build-2",
-      "prompt": "Which is BIGGER: −3/4 or −0.8? Build the bigger one.",
+      "prompt": "Fortnite elims minus deaths per match: you −3/4, your duo −0.8. Build the higher one.",
       "answer": "-3/4",
       "decoys": [
         "8",
@@ -1148,20 +1168,20 @@ export const pack: SePack = {
       "why": "With negatives, the number with the smaller size after the minus is the bigger one.",
       "steps": [
         {
-          "text": "Change 2/5 into a decimal: 2 ÷ 5 = 0.4."
+          "text": "Another pair: −1/4 and −0.3. Change 1/4 to a decimal: 1 ÷ 4 = 0.25."
         },
         {
-          "text": "Compare −2/5 and −0.6. 0.4 is smaller than 0.6, so −2/5 is bigger."
+          "text": "Compare 0.25 and 0.3. 0.25 is smaller, so −1/4 is closer to zero and bigger."
         },
         {
-          "text": "Now compare −3/4 and −0.8. Since 3/4 = 0.75, and 0.75 is less than 0.8, −3/4 wins."
+          "text": "Same rule for −2/5 and −0.6: 2/5 = 0.4, which is less than 0.6, so −2/5 is bigger."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-compare-build-3",
-      "prompt": "Which is the BIGGEST of these: −2.5, −2, −3/4? Build it.",
+      "prompt": "League goal difference per game: −2.5, −2, −3/4. Which is BEST? Build it.",
       "answer": "-3/4",
       "decoys": [
         "7",
@@ -1170,36 +1190,36 @@ export const pack: SePack = {
       "why": "−3/4 is closest to zero, so it is the largest of the three negatives.",
       "steps": [
         {
-          "text": "Turn −3/4 into a decimal: −0.75. Now all are decimals."
+          "text": "Another table: −3.5, −3 and −1/2. Turn −1/2 into a decimal: −0.5."
         },
         {
-          "text": "Compare −5.5, −4.0, −2.0. −2.0 is closest to zero, so it is biggest."
+          "text": "Now compare −3.5, −3.0 and −0.5. The closest to zero is −0.5."
         },
         {
-          "text": "So the closest to zero wins. Here that is −0.75, which is −3/4."
+          "text": "Closest to zero wins, so −1/2 is the best. Do the same with −3/4 = −0.75."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-compare-build-4",
-      "prompt": "Luffy dives to −12 m. Zoro dives to −9.5 m. Who is DEEPER? Build the deeper depth.",
+      "prompt": "Luffy sinks to −12 m. Zoro sinks to −9.5 m. Who is deeper? Build that depth.",
       "answer": "-12",
       "decoys": [
         "9",
         "5",
         "."
       ],
-      "why": "Depth below sea level is a negative number, and the more negative it is, the deeper it goes.",
+      "why": "Depth below the surface is negative, and the more negative it is, the deeper it goes.",
       "steps": [
         {
           "text": "Depth below the surface is written as a negative. Lower number means deeper."
         },
         {
-          "text": "Example: −30 m and −18 m. −30 is lower, so −30 m is deeper."
+          "text": "Another pair: Sanji at −30 m, Nami at −18 m. −30 is lower, so Sanji is deeper."
         },
         {
-          "text": "So −12 is lower than −9.5. The deeper dive is −12 m."
+          "text": "Now −12 is lower than −9.5. The deeper dive is −12 m."
         }
       ],
       "art": {
@@ -1222,28 +1242,28 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-compare-build-6",
-      "prompt": "Toronto's coldest night was −18°C. Winnipeg's was −25°C. Which is COLDER? Build the colder temperature.",
+      "prompt": "You mine at Y = −18. Your friend digs to Y = −25. Who is DEEPER? Build the deeper Y.",
       "answer": "-25",
       "decoys": [
         "8"
       ],
-      "why": "Colder temperatures are lower on the thermometer, so they are the more negative numbers.",
+      "why": "A deeper level is a lower Y, so it is the more negative number.",
       "steps": [
         {
-          "text": "Put the two on a thermometer. Lower on the scale means colder."
+          "text": "Read both Y levels off the F3 screen. Lower Y means deeper."
         },
         {
-          "text": "Example: −4°C and −11°C. −11°C is lower, so it is colder."
+          "text": "Example: Y = −4 and Y = −11. −11 is lower, so it is deeper."
         },
         {
-          "text": "Compare −18 and −25. −25 is lower, so Winnipeg was colder that night."
+          "text": "Now compare −18 and −25 the same way. Which one is lower?"
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-compare-build-7",
-      "prompt": "Which is the BIGGEST of these: −3, −2.5, −0.5? Build it.",
+      "prompt": "Three teams' xG difference: −3, −2.5, −0.5. Which is the BIGGEST? Build it.",
       "answer": "-0.5",
       "decoys": [
         "3",
@@ -1252,29 +1272,32 @@ export const pack: SePack = {
       "why": "The number closest to zero is the biggest, even when all of them are negative.",
       "steps": [
         {
-          "text": "Turn each into a decimal: −3.0, −2.5, −0.5. Now compare the same way."
+          "text": "Write each as a decimal: −3.0, −2.5, −0.5. Now compare them."
         },
         {
-          "text": "Example: −6 and −1. −1 is closer to zero, so −1 is bigger."
+          "text": "Example: −6 and −1 in a league table. −1 is closer to zero, so it is bigger."
         },
         {
-          "text": "So −0.5 is the closest to zero. It is the biggest of the three."
+          "text": "Example: −5, −3.5, −1.5. −1.5 is closest to zero, so it is the biggest."
+        },
+        {
+          "text": "Now find which of your three is closest to zero."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-compare-games-1",
-      "title": "Who Owes Less?",
+      "title": "Closer to Zero Wins",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "−8 and −3",
+            "GD −8 and −3",
             "−3 is bigger"
           ],
           [
-            "−1.5 and −1.2",
+            "xG diff −1.5 and −1.2",
             "−1.2 is bigger"
           ],
           [
@@ -1282,11 +1305,11 @@ export const pack: SePack = {
             "−½ is bigger"
           ],
           [
-            "0.4 and −0.4",
+            "GD 0.4 and −0.4",
             "0.4 is bigger"
           ],
           [
-            "−10 and −9",
+            "Y −10 and −9",
             "−9 is bigger"
           ]
         ]

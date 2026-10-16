@@ -13,15 +13,15 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-cart-teach-0",
-      "title": "The pitch has an address",
+      "title": "Your F3 numbers are an address",
       "lines": [
-        "A football pitch is a grid. Every spot has an address.",
-        "The address is two numbers, like (3, 4).",
-        "This grid is called the Cartesian plane."
+        "Minecraft's F3 screen shows where you stand as two numbers.",
+        "The first is X, the second is Z, like (3, 4).",
+        "Each number counts blocks from spawn. Negatives count the other way."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi calls a spot by its numbers. No guessing where the ball goes."
+        "flavour": "key",
+        "text": "One block is 1 metre, so X and Z tell you exactly where you are."
       },
       "art": {
         "art": "numberline",
@@ -44,7 +44,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-0",
-      "prompt": "Isagi's shot lands at (−3, 4). Which quadrant is it in?",
+      "prompt": "Your Fortnite pin sits at (−3, 4) on the map grid. Which quadrant?",
       "options": [
         "Quadrant I",
         "Quadrant II",
@@ -54,20 +54,20 @@ export const pack: SePack = {
       "why": "A negative x-value is left of the y-axis, and a positive y-value is above the x-axis.",
       "steps": [
         {
-          "text": "Look at x first. It is −3, so the point is left of the y-axis."
+          "text": "Look at x first. It is −3, so the pin is left of the centre line."
         },
         {
-          "text": "Now look at y. It is 4, so the point is above the x-axis."
+          "text": "Now y. It is 4, so the pin is above the centre line."
         },
         {
-          "text": "Left and above is Quadrant II. Try (−1, 3): x is negative, y is positive, so II again."
+          "text": "Left and above is Quadrant II. Try (−1, 3): x negative, y positive, so II again."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-basics-1",
-      "prompt": "Zoro's map marks the treasure at (2, −6). Which quadrant is it in?",
+      "prompt": "You died at X 2, Z −6 in Minecraft. Which quadrant is that?",
       "options": [
         "Quadrant I",
         "Quadrant III",
@@ -77,13 +77,13 @@ export const pack: SePack = {
       "why": "A positive x-value is right of the y-axis, and a negative y-value is below the x-axis.",
       "steps": [
         {
-          "text": "Look at x first. It is 2, so the point is right of the y-axis."
+          "text": "X is 2, so you died east of spawn."
         },
         {
-          "text": "Now look at y. It is −6, so the point is below the x-axis."
+          "text": "Z is −6, so you died north of spawn."
         },
         {
-          "text": "Right and below is Quadrant IV. Try (−4, 1): left and above, so that one is Quadrant II."
+          "text": "East and north is Quadrant IV. Try (−4, 1): west and south, so Quadrant II."
         }
       ]
     },
@@ -142,7 +142,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-2",
-      "prompt": "In Quadrant I, what are the signs of x and y?",
+      "prompt": "Your Roblox part sits in Quadrant I. What are the signs of x and y?",
       "options": [
         "Both are positive",
         "Both are negative",
@@ -152,20 +152,20 @@ export const pack: SePack = {
       "why": "Quadrant I is the top right, where you move right and up from the origin.",
       "steps": [
         {
-          "text": "The quadrants are numbered like a lap, going anticlockwise from the top right."
+          "text": "Quadrants go round like a lap, anticlockwise from the top right."
         },
         {
-          "text": "Going round: I is top right, II is top left, III is bottom left, IV is bottom right."
+          "text": "Going round: I is top right, II top left, III bottom left, IV bottom right."
         },
         {
-          "text": "Hook: you start your lap in I, so both signs are positive there."
+          "text": "You start your lap in I, so both signs are positive there."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-basics-3",
-      "prompt": "A point is 5 right and 1 up from the origin. Which pair is it?",
+      "prompt": "Your striker's run goes 5 right and 1 up from the centre spot. Which pair?",
       "options": [
         "(1, 5)",
         "(−5, 1)",
@@ -181,7 +181,7 @@ export const pack: SePack = {
           "text": "Write x first, then y. So 3 left and 4 down is (−3, −4)."
         },
         {
-          "text": "Check your pair: the first number must be the sideways move, not the height."
+          "text": "Check: the first number must be the sideways move, not the height."
         }
       ]
     },
@@ -190,28 +190,28 @@ export const pack: SePack = {
       "id": "math-cart-teach-1",
       "title": "Why coordinates matter",
       "lines": [
-        "Maps, video games and graphs all use coordinates.",
-        "Your phone's GPS works on the same idea.",
-        "One wrong number and you land in the wrong place."
+        "Fortnite's map is a grid, and every pin is two numbers.",
+        "Maps, video games and GPS all use this same idea.",
+        "One wrong number and your squad lands in the wrong place."
       ]
     },
     {
       "kind": "build",
       "id": "math-cart-build-0",
-      "prompt": "Isagi shoots from the point (5, 3). Which quadrant is he in? Build the Roman numeral.",
+      "prompt": "F3 says X 5, Z 3. Which quadrant of the map are you in? Build the Roman numeral.",
       "answer": "I",
       "decoys": [
         "V",
         "X",
         "2"
       ],
-      "why": "Quadrant I is the top right part of the grid, where both x and y are positive.",
+      "why": "Quadrant I is the top right part of the grid, where both numbers are positive.",
       "steps": [
         {
-          "text": "Try (−4, 6). x is −4, so move left of the centre."
+          "text": "Try X −4, Z 6. X is −4, so you are left of spawn."
         },
         {
-          "text": "y is 6, so move up. Left and up is the top left."
+          "text": "Z is 6, so move up the grid. Left and up is the top left."
         },
         {
           "text": "Quadrants run anticlockwise from the top right: I, II, III, IV. The top left is II."
@@ -221,7 +221,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-4",
-      "prompt": "Which point lies on the x-axis?",
+      "prompt": "Which drop spot sits on the flat line across the map?",
       "options": [
         "(4, 0)",
         "(0, −4)",
@@ -231,20 +231,37 @@ export const pack: SePack = {
       "why": "Any point on the x-axis has a y-value of zero.",
       "steps": [
         {
-          "text": "The x-axis is the flat line across the middle. Height from it is zero."
+          "text": "The flat line across the map is the x-axis. Height from it is zero."
         },
         {
-          "text": "Check (0, −4): x is zero, so that point sits on the y-axis instead."
+          "text": "Check (0, −4): x is zero, so that spot sits on the vertical line instead."
         },
         {
           "text": "Try (−9, 0): y is zero, so it is on the x-axis."
         }
-      ]
+      ],
+      "art": {
+        "art": "numberline",
+        "from": -5,
+        "to": 5,
+        "step": 1,
+        "points": [
+          {
+            "at": -2.5,
+            "label": "−2.5",
+            "tone": "bad"
+          }
+        ],
+        "span": [
+          -2,
+          3
+        ]
+      }
     },
     {
       "kind": "choice",
       "id": "math-cart-basics-5",
-      "prompt": "Which quadrant is (−7, −2) in?",
+      "prompt": "A striker stands at (−7, −2) from the centre spot. Which quadrant is he in?",
       "options": [
         "Quadrant II",
         "Quadrant III",
@@ -254,10 +271,10 @@ export const pack: SePack = {
       "why": "Both negative means left and below the origin, which is Quadrant III.",
       "steps": [
         {
-          "text": "Look at x. It is −7, so the point is left of the y-axis."
+          "text": "Look at x. It is −7, so he is left of the centre line."
         },
         {
-          "text": "Look at y. It is −2, so the point is below the x-axis."
+          "text": "Look at y. It is −2, so he is below the halfway line."
         },
         {
           "text": "Left and below is Quadrant III. Try (−1, 3): that is left and above, so II."
@@ -267,7 +284,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-cart-games-0",
-      "title": "Map the Grid",
+      "title": "Map the Baseplate",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -277,11 +294,11 @@ export const pack: SePack = {
           ],
           [
             "x-axis",
-            "Flat, across the page"
+            "Flat, across the baseplate"
           ],
           [
             "y-axis",
-            "Tall, up and down"
+            "Tall, up and down the grid"
           ],
           [
             "(−3, 4)",
@@ -300,9 +317,9 @@ export const pack: SePack = {
       "id": "math-cart-teach-2",
       "title": "The method: across, then up",
       "lines": [
-        "Start at the centre. This is the origin, (0, 0).",
-        "The first number tells you how far to go across.",
-        "The second number tells you how far to go up or down."
+        "Start at spawn. This is the origin, (0, 0).",
+        "The first number, X, tells you how far to go across.",
+        "The second number, Z, tells you how far to go up or down."
       ],
       "art": {
         "art": "numberline",
@@ -325,7 +342,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-6",
-      "prompt": "Which quadrant is the bottom right?",
+      "prompt": "Your drop spot is bottom right of the map grid. Which quadrant is it?",
       "options": [
         "Quadrant IV",
         "Quadrant I",
@@ -348,46 +365,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-7",
-      "prompt": "Which point lies in Quadrant II?",
+      "prompt": "Your F3 screen reads one of these. Which spot is in Quadrant II?",
       "options": [
         "(3, 2)",
         "(−3, 2)",
         "(3, −2)"
       ],
       "answer": 1,
-      "why": "Quadrant II has a negative x-value and a positive y-value.",
+      "why": "Quadrant II has a negative X and a positive Z.",
       "steps": [
         {
-          "text": "Test x first. Only (−3, 2) has a negative x-value."
+          "text": "Test X first. Only (−3, 2) has a negative X."
         },
         {
-          "text": "Check y. It is 2, which is positive, so the point is above the x-axis."
+          "text": "Check Z. It is 2, which is positive, so the spot is above the middle line."
         },
         {
-          "text": "Try (−6, −1): x is negative but y is too, so that is Quadrant III."
+          "text": "Try (−6, −1): X is negative and Z is too, so that is Quadrant III."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-cart-build-1",
-      "prompt": "Luffy's log pose points to (−3, −5). Which quadrant? Build the Roman numeral.",
+      "prompt": "The storm centre sits at (−3, −5). Which quadrant? Build the Roman numeral.",
       "answer": "III",
       "decoys": [
         "V",
         "X",
         "4"
       ],
-      "why": "Quadrant III is the bottom left, where both x and y are negative.",
+      "why": "Quadrant III is bottom left, where both numbers are negative.",
       "steps": [
         {
-          "text": "Try (6, −3). x is 6, so move right of the centre."
+          "text": "Try (6, −3). X is 6, so move right of the centre."
         },
         {
-          "text": "y is −3, so move down. Right and down is the bottom right."
+          "text": "Z is −3, so move down. Right and down is the bottom right."
         },
         {
-          "text": "Going anticlockwise from I, the order is II, III, IV. The bottom right is IV, so bottom left comes before it."
+          "text": "Going anticlockwise from I: II, III, IV. Bottom right is IV, so bottom left is III."
         }
       ]
     }
@@ -398,9 +415,9 @@ export const pack: SePack = {
       "id": "math-cart-teach-3",
       "title": "The four quadrants",
       "lines": [
-        "Two lines cross at the origin. They split the grid into four.",
+        "Two lines cross at the origin, (0, 0). They split the grid into four.",
         "Quadrant I is top right. Both numbers are positive.",
-        "Quadrants II, III and IV go round anti-clockwise from there."
+        "Quadrants II, III and IV go round anticlockwise from there."
       ]
     },
     {
@@ -414,7 +431,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A striker who passes to the wrong spot loses the goal. Same with coordinates."
+        "text": "A pass to the wrong spot on the pitch goes out for a throw-in."
       }
     },
     {
@@ -422,13 +439,13 @@ export const pack: SePack = {
       "id": "math-cart-teach-5",
       "title": "Worked example: (−3, 4)",
       "lines": [
-        "Start at the origin, (0, 0). Your first number is −3. Move 3 left.",
-        "Your second number is 4. Move 4 up from there.",
+        "Start at spawn, (0, 0). Your first number is −3. Walk 3 blocks left.",
+        "Your second number is 4. Walk 4 blocks up the map from there.",
         "You land in Quadrant II, top left. That is the spot."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "On a One Piece treasure map, the X is marked (−3, 4). Dig where you land."
+        "text": "A buried chest is marked at (−3, 4) on your map. Dig where you land."
       }
     },
     {
@@ -436,13 +453,13 @@ export const pack: SePack = {
       "id": "math-cart-deeper-0",
       "title": "Walk, then climb",
       "lines": [
-        "A point is two numbers in brackets: (x, y).",
-        "The first number is x. Move sideways first.",
-        "The second number is y. Then move up or down."
+        "On the Fortnite grid, a spot is two numbers: (x, y).",
+        "The first number is across. Move sideways first.",
+        "The second number is up or down. Then move there."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Sideways first. Then up or down. Always in that order."
+        "text": "Across first. Then up or down. Every time."
       }
     },
     {
@@ -450,13 +467,13 @@ export const pack: SePack = {
       "id": "math-cart-deeper-1",
       "title": "Quadrants go anticlockwise",
       "lines": [
-        "Quadrant I is the top right corner.",
-        "Go anticlockwise: top left is quadrant II.",
+        "On the Fortnite map grid, Quadrant I is top right.",
+        "Go anticlockwise: top left is Quadrant II.",
         "Then bottom left is III, and bottom right is IV."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Many people start at the bottom. Always start at the top right."
+        "text": "Many players start at the bottom. Always start at the top right."
       }
     },
     {
@@ -469,8 +486,8 @@ export const pack: SePack = {
         "Points on either line are in no quadrant at all."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "A ball sitting exactly on the white line is in neither box."
+        "flavour": "key",
+        "text": "A chicken standing exactly on the line is in neither box."
       }
     },
     {
@@ -478,7 +495,7 @@ export const pack: SePack = {
       "id": "math-cart-deeper-3",
       "title": "The signs pick the side",
       "lines": [
-        "A negative x means left of the centre spot.",
+        "On the Fortnite map, negative x is left of the centre spot.",
         "A negative y means below the centre spot.",
         "Check each sign on its own, then pick the corner."
       ]
@@ -489,12 +506,12 @@ export const pack: SePack = {
       "title": "Flip one sign, jump across",
       "lines": [
         "Change the sign of x and the point jumps across the y-axis.",
-        "(−3, 4) becomes (3, 4). That moves it from II to I.",
+        "A winger at (−3, 4) cuts to (3, 4). That moves it from II to I.",
         "One flipped sign can move a point into another quadrant."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Like Zoro crossing the ship to the other side of the deck."
+        "flavour": "key",
+        "text": "Like a winger cutting across the box to the far post."
       }
     },
     {
@@ -502,32 +519,32 @@ export const pack: SePack = {
       "id": "math-cart-deeper-5",
       "title": "Order matters",
       "lines": [
-        "(4, −3) and (−3, 4) are two different points.",
+        "(4, −3) and (−3, 4) are two different spots.",
         "The first number always goes sideways, and that is x.",
         "Swap them and you change where the point lands."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Reading (4, −3) as (−3, 4) puts the shot in the wrong corner."
+        "text": "Swapping the two numbers on F3 walks you to the wrong chest."
       }
     },
     {
       "kind": "choice",
       "id": "math-cart-basics-8",
-      "prompt": "Which point lies on the y-axis?",
+      "prompt": "Which Kanto grid spot sits on the y-axis?",
       "options": [
         "(−7, 7)",
-        "(7, 0)",
-        "(0, −7)"
+        "(0, −7)",
+        "(7, 0)"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "Any point on the y-axis has an x-value of zero.",
       "steps": [
         {
-          "text": "The y-axis is the up-and-down line through the middle of the graph."
+          "text": "The y-axis is the up-and-down line through the middle of the grid."
         },
         {
-          "text": "Check (7, 0): x is 7, so that point sits on the x-axis."
+          "text": "Check (7, 0): x is 7, so that spot sits on the x-axis."
         },
         {
           "text": "Try (0, 12): x is zero, so it is on the y-axis."
@@ -537,30 +554,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-basics-9",
-      "prompt": "A point moves from Quadrant II to Quadrant III. Which coordinate changes sign?",
+      "prompt": "Your F3 shows X −40, Z 25. You walk to Z −30. Which number changes sign?",
       "options": [
-        "Both coordinates",
-        "The y-coordinate",
-        "The x-coordinate"
+        "Both numbers",
+        "The Z number",
+        "The X number"
       ],
       "answer": 1,
-      "why": "Moving from II to III crosses the x-axis, so only the y-value changes sign.",
+      "why": "Z goes from positive to negative, so you crossed Z = 0, and X stays −40.",
       "steps": [
         {
-          "text": "Quadrant II is top left. Quadrant III is bottom left. You cross the x-axis."
+          "text": "F3 gives X first, then Z. X −40, Z 25 sits top left on the map."
         },
         {
-          "text": "Crossing the x-axis changes the height, so the y-value goes from positive to negative."
+          "text": "Z goes from 25 to −30. It crossed 0, so only Z changes sign."
         },
         {
-          "text": "Try I to II: you cross the y-axis, so only the x-value changes sign."
+          "text": "Try X 12, Z 9 walking to X −5. Z stays 9, and only X changes sign."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-applied-0",
-      "prompt": "Isagi's pass lands at (−3, 4) on the pitch map. Which quadrant is the ball in?",
+      "prompt": "Your storm centre is at (−3, 4) on the map grid. Which quadrant is it in?",
       "options": [
         "Quadrant I",
         "Quadrant II",
@@ -570,7 +587,7 @@ export const pack: SePack = {
       "why": "A negative x and a positive y put a point in Quadrant II.",
       "steps": [
         {
-          "text": "The first number is x. Its sign says left (−) or right (+) of the centre spot."
+          "text": "The first number is x. Its sign says left (−) or right (+) of the centre."
         },
         {
           "text": "Try (5, −2). x is +5, so right. y is −2, so down. That is Quadrant IV."
@@ -583,7 +600,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-applied-1",
-      "prompt": "Zoro's rope is tied at (−8, −3) on the sea chart. Which quadrant is that?",
+      "prompt": "Your Roblox part sits at (−8, −3) in Studio. Which quadrant is it in?",
       "options": [
         "Quadrant III",
         "Quadrant II",
@@ -596,17 +613,17 @@ export const pack: SePack = {
           "text": "Read x first. Negative x means left of the origin."
         },
         {
-          "text": "Try (3, −9). x is +3, right. y is −9, down. That is Quadrant IV."
+          "text": "Try a part at (3, −9). x is +3, right. y is −9, down. That is Quadrant IV."
         },
         {
-          "text": "Try (−1, 2). x is −1, left. y is +2, up. That is Quadrant II."
+          "text": "Try a part at (−1, 2). x is −1, left. y is +2, up. That is Quadrant II."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-applied-2",
-      "prompt": "Which point sits on an axis, so it is in no quadrant at all?",
+      "prompt": "Which death spot sits on an axis, so it is in no quadrant at all?",
       "options": [
         "(0, −5)",
         "(−5, −5)",
@@ -619,53 +636,30 @@ export const pack: SePack = {
           "text": "A quadrant needs x ≠ 0 and y ≠ 0. A zero anywhere means the point is on an axis."
         },
         {
-          "text": "Check (−4, 0). y is 0, so it sits on the x-axis, not in a quadrant."
+          "text": "Check X −4, Z 0. Z is 0, so you died on the X line, not in a quadrant."
         },
         {
-          "text": "Check (7, 2). Both are non-zero, so it is in Quadrant I."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-cart-applied-3",
-      "prompt": "Isagi's shot is at (−3, 4). The keeper's reflection across the y-axis is the mirror point. Where is it?",
-      "options": [
-        "(−3, −4)",
-        "(3, −4)",
-        "(3, 4)"
-      ],
-      "answer": 2,
-      "why": "A reflection across the y-axis flips only the sign of x, so y stays the same.",
-      "steps": [
-        {
-          "text": "Across the y-axis, flip the sign of x. Keep y exactly as it is."
-        },
-        {
-          "text": "Try (5, −2). Flip x to −5. The mirror is (−5, −2)."
-        },
-        {
-          "text": "Try (−1, 6). Flip x to 1. The mirror is (1, 6), which moves it from Quadrant II to Quadrant I."
+          "text": "Check X 7, Z 2. Both are non-zero, so it is in Quadrant I."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-applied-4",
-      "prompt": "You are at (−2, −5) on a Toronto grid. You walk 4 units right. Which quadrant are you in now?",
+      "prompt": "Your storm centre is at (−2, −5). You move 4 units right. Which quadrant now?",
       "options": [
         "Quadrant IV",
         "Quadrant I",
         "Quadrant III"
       ],
       "answer": 0,
-      "why": "Walking right adds to x, so x goes from −2 to +2 and you cross the y-axis.",
+      "why": "Moving right adds to x, so x goes from −2 to +2 and you cross the y-axis.",
       "steps": [
         {
-          "text": "Walking right adds to x. Start with x = −2 and add 4."
+          "text": "Moving right adds to x. Start with x = −2 and add 4."
         },
         {
-          "text": "Try (−5, 3) walking 8 right. x becomes −5 + 8 = 3, so the point is (3, 3), in Quadrant I."
+          "text": "Try (−5, 3) moving 8 right. x becomes −5 + 8 = 3, so the point is (3, 3), in Quadrant I."
         },
         {
           "text": "Your y stays the same. For (2, −5), y is still −5, so the point is in Quadrant IV."
@@ -675,66 +669,66 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-applied-5",
-      "prompt": "Which point is in Quadrant III and also has x greater than y?",
+      "prompt": "Your F3 screen shows X and Z. Which spot is in Quadrant III, with X greater than Z?",
       "options": [
         "(−9, −3)",
         "(−2, −7)",
         "(4, −1)"
       ],
       "answer": 1,
-      "why": "(−2, −7) is in Quadrant III, and −2 is greater than −7.",
+      "why": "(−2, −7) has both X and Z negative, and −2 is greater than −7.",
       "steps": [
         {
-          "text": "First check the quadrant. Both x and y must be negative for Quadrant III."
+          "text": "Quadrant III needs X negative and Z negative. Check both signs first."
         },
         {
-          "text": "Try (−5, −1). Both negative, so Quadrant III. But −5 is less than −1, so it fails."
+          "text": "Try (−5, −1). Both negative, but −5 is less than −1, so it fails."
         },
         {
-          "text": "Try (−1, −6). Both negative, and −1 is greater than −6, so it passes both checks."
+          "text": "Try (−1, −6). Both negative, and −1 is greater than −6, so it passes."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-applied-6",
-      "prompt": "Point P is (−3, 4). Point Q has the same x as P, but its y is the opposite sign. Which quadrant is Q in?",
+      "prompt": "Your base is at X −3, Z 4. A friend's base has the same X, but Z has the opposite sign. Which quadrant is the friend in?",
       "options": [
         "Quadrant III",
         "Quadrant I",
         "Quadrant IV"
       ],
       "answer": 0,
-      "why": "Q is (−3, −4), which has both coordinates negative.",
+      "why": "The friend's spot is (−3, −4), with both coordinates negative.",
       "steps": [
         {
-          "text": "Keep x the same. Flip the sign of y only."
+          "text": "Keep X the same. Flip the sign of Z only."
         },
         {
-          "text": "Try P = (2, −5). Q is (2, 5), which is in Quadrant I."
+          "text": "Try your base at (2, −5). The friend is at (2, 5), in Quadrant I."
         },
         {
-          "text": "Try P = (−6, −1). Q is (−6, 1), which is in Quadrant II."
+          "text": "Try your base at (−6, −1). The friend is at (−6, 1), in Quadrant II."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-applied-7",
-      "prompt": "Two strikers stand at (−3, 4) and (3, 4) on the pitch grid. How far apart are they, in metres?",
+      "prompt": "You died at X −3, Z 4. Your squadmate died at X 3, Z 4. How far apart are the two deaths, in blocks?",
       "options": [
-        "8 m",
-        "6 m",
-        "1 m"
+        "8 blocks",
+        "6 blocks",
+        "1 block"
       ],
       "answer": 1,
-      "why": "Points with the same y are apart by the difference of their x values, 3 − (−3) = 6.",
+      "why": "Two spots with the same Z are apart by the difference of their X values, 3 − (−3) = 6.",
       "steps": [
         {
-          "text": "Same y means a flat line. Only the x values change."
+          "text": "Same Z means both deaths are on one line. Only the X values change."
         },
         {
-          "text": "Try (−7, 2) and (−2, 2). The gap is −2 − (−7) = −2 + 7 = 5 m."
+          "text": "Try X −7 and X −2 at Z 2. The gap is −2 − (−7) = −2 + 7 = 5 blocks."
         },
         {
           "text": "Subtracting a negative is the same as adding. So 3 − (−3) = 3 + 3 = 6."
@@ -744,17 +738,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-applied-8",
-      "prompt": "Which pair of points are BOTH in the same quadrant?",
+      "prompt": "Roblox Studio parts sit at (X, Z). Which pair of parts are BOTH in the same quadrant?",
       "options": [
         "(3, −1) and (−3, 1)",
         "(5, 5) and (−5, −5)",
         "(−2, 5) and (−6, 1)"
       ],
       "answer": 2,
-      "why": "(−2, 5) and (−6, 1) both have a negative x and a positive y, so both are in Quadrant II.",
+      "why": "(−2, 5) and (−6, 1) both have a negative X and a positive Z, so both are in Quadrant II.",
       "steps": [
         {
-          "text": "Find the quadrant of each point first. Use the sign of x, then the sign of y."
+          "text": "Find each part's quadrant first. Use the sign of X, then the sign of Z."
         },
         {
           "text": "Try (−4, 2) and (1, −3). One is in Quadrant II, the other in IV, so they fail."
@@ -767,99 +761,76 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-applied-9",
-      "prompt": "Point (a, b) is in Quadrant III. Which quadrant is (−a, b) in?",
+      "prompt": "Your squad lands at (a, b) in Quadrant III of the Fortnite grid. Which quadrant is (−a, b) in?",
       "options": [
         "Quadrant I",
         "Quadrant IV",
         "Quadrant II"
       ],
       "answer": 1,
-      "why": "In Quadrant III, a and b are both negative, so −a is positive and b is still negative.",
+      "why": "In Quadrant III, a and b are both negative, so −a is positive and b stays negative.",
       "steps": [
         {
           "text": "Quadrant III means a is negative and b is negative."
         },
         {
-          "text": "Try (−2, −3). Then (−a, b) = (2, −3), which is in Quadrant IV."
+          "text": "Try a = −2, b = −3. Then (−a, b) = (2, −3), which is in Quadrant IV."
         },
         {
-          "text": "Try (−5, −1). Then (−a, b) = (5, −1), which is again in Quadrant IV."
+          "text": "Try a = −5, b = −1. Then (−a, b) = (5, −1), which is again in Quadrant IV."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-deeper-6",
-      "prompt": "Isagi's shot starts at (−3, 4). Which quadrant is it in?",
+      "prompt": "Isagi's shot starts at (−3, 4) on the pitch grid. Which quadrant is the shot in?",
       "options": [
         "Quadrant I",
         "Quadrant II",
         "Quadrant IV"
       ],
       "answer": 1,
-      "why": "A negative x and a positive y put the point in the top left, which is quadrant II.",
+      "why": "A negative x and a positive y put the point in the top left, which is Quadrant II.",
       "steps": [
         {
-          "text": "Try (5, −1) first. The x is 5, so move 5 to the right."
+          "text": "Try (5, −1) first. The x is positive, so go right. The y is negative, so go down."
         },
         {
-          "text": "The y is −1, so move 1 down. Right and down is the bottom right."
+          "text": "Right and down is the bottom right, which is Quadrant IV."
         },
         {
-          "text": "Bottom right is quadrant IV. Now read (−3, 4) the same way: left, then up."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-cart-deeper-7",
-      "prompt": "Going round the plane, which corner is quadrant II?",
-      "options": [
-        "The top left corner",
-        "The bottom left corner",
-        "The bottom right corner"
-      ],
-      "answer": 0,
-      "why": "The quadrants are numbered anticlockwise from the top right, so II comes straight after I at the top left.",
-      "steps": [
-        {
-          "text": "Start at quadrant I, the top right, where x and y are both positive."
-        },
-        {
-          "text": "Turn anticlockwise, the way a clock hand runs backwards, across the top."
-        },
-        {
-          "text": "The next corner is II. Quadrant III then comes at the bottom left."
+          "text": "Now read (−3, 4) the same way. Left, because x is negative. Up, because y is positive."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-deeper-8",
-      "prompt": "Which point lies on an axis, so it is in no quadrant?",
+      "prompt": "Which F3 spot sits on an axis, so it is in no quadrant?",
       "options": [
-        "(0, 5)",
-        "(5, 5)",
-        "(−5, −5)"
+        "(0, 12)",
+        "(5, 12)",
+        "(−5, −12)"
       ],
       "answer": 0,
       "why": "When x is 0 the point sits on the y-axis, so it belongs to no quadrant.",
       "steps": [
         {
-          "text": "Check (−4, 0). The y is 0, so it sits on the x-axis."
+          "text": "Check (−9, 0) on your F3 screen. The second number is 0."
         },
         {
-          "text": "A point on the x-axis has no up or down, so it is in no quadrant."
+          "text": "A 0 there means no step north or south, so it sits on the x-axis line."
         },
         {
-          "text": "Now check the options: is there a 0 in both places, or just one?"
+          "text": "Now check the options: which one has a 0 in the first spot?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-cart-deeper-9",
-      "prompt": "Which point is in quadrant IV, the bottom right?",
+      "prompt": "Your obby checkpoint lands at one of these. Which point is in quadrant IV, bottom right?",
       "options": [
         "(−7, −1)",
         "(3, −2)",
@@ -869,7 +840,7 @@ export const pack: SePack = {
       "why": "Quadrant IV needs a positive x for right and a negative y for down.",
       "steps": [
         {
-          "text": "Take (6, −4). The x is positive, so go right."
+          "text": "Try the checkpoint (5, −8). The x is positive, so go right."
         },
         {
           "text": "The y is negative, so go down. Right and down is quadrant IV."
@@ -882,7 +853,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-deeper-10",
-      "prompt": "The point (−3, 4) is flipped across the y-axis. Where is it now?",
+      "prompt": "Your mirror tool flips (−3, 4) across the y-axis. Where is it now?",
       "options": [
         "(3, 4) in quadrant I",
         "(3, −4) in quadrant IV",
@@ -892,7 +863,7 @@ export const pack: SePack = {
       "why": "Flipping across the y-axis changes only the sign of x, so y stays at 4.",
       "steps": [
         {
-          "text": "Try (2, −5). Flip across the y-axis, and only the x changes sign."
+          "text": "Try (2, −5) in your build. Flip across the y-axis, so only x changes sign."
         },
         {
           "text": "That gives (−2, −5). Left and down is quadrant III."
@@ -905,7 +876,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-cart-deeper-11",
-      "prompt": "A pass is written as (4, −3). Which quadrant is it in?",
+      "prompt": "A pass lands at (4, −3) on the pitch grid. Which quadrant is it in?",
       "options": [
         "Quadrant II",
         "Quadrant IV",
@@ -915,7 +886,7 @@ export const pack: SePack = {
       "why": "The x is 4 so the point goes right, and the y is −3 so it goes down, which is quadrant IV.",
       "steps": [
         {
-          "text": "Try (1, −6). The x is 1, so move right."
+          "text": "Try (1, −6) on the pitch. The x is 1, so move right."
         },
         {
           "text": "The y is −6, so move down. Right and down is the bottom right."
@@ -928,7 +899,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-cart-build-2",
-      "prompt": "A penalty kick lands at (7, −2). Which quadrant? Build the Roman numeral.",
+      "prompt": "Your drop spot is (7, −2) on the map. Which quadrant? Build the Roman numeral.",
       "answer": "IV",
       "decoys": [
         "X",
@@ -938,20 +909,20 @@ export const pack: SePack = {
       "why": "Quadrant IV is the bottom right, where x is positive and y is negative.",
       "steps": [
         {
-          "text": "Try (−8, 5). x is −8, so move left of the centre."
+          "text": "Try (−6, 3). x is −6, so move left of the centre."
         },
         {
-          "text": "y is 5, so move up. Left and up is quadrant II."
+          "text": "y is 3, so move up. Left and up is quadrant II."
         },
         {
-          "text": "Now change only the sign of y: (−8, −5) is bottom left, which is quadrant III."
+          "text": "Now change only the sign of y: (−6, −3) is bottom left, quadrant III."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-cart-build-3",
-      "prompt": "The penalty spot is at (−3, 0). Which axis is it sitting on? Build the name.",
+      "prompt": "Your death marker is at (−3, 0) on the map grid. Which axis is it sitting on? Build the name.",
       "answer": "x-axis",
       "decoys": [
         "y",
@@ -961,20 +932,20 @@ export const pack: SePack = {
       "why": "Any point with y equal to 0 sits on the horizontal line, which is the x-axis.",
       "steps": [
         {
-          "text": "Try (0, 7). x is 0, so there is no left or right move. The point is on the vertical line."
+          "text": "Try a drop at (0, 7). X is 0, so there is no left or right move. You are on the vertical line."
         },
         {
           "text": "That vertical line is the y-axis. So a zero x means the point is on the y-axis."
         },
         {
-          "text": "Hook: x goes across the pitch and y goes up. Ask which number is zero in (−3, 0)."
+          "text": "Hook: x goes across the map and y goes up. Ask which number is zero in (−3, 0)."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-cart-build-4",
-      "prompt": "Luffy's treasure is 4 steps right and 2 steps down from the centre. Build the point.",
+      "prompt": "The storm centre is 4 tiles right and 2 tiles down from the map middle. Build the point.",
       "answer": "(4,-2)",
       "decoys": [
         "3",
@@ -984,7 +955,7 @@ export const pack: SePack = {
       "why": "Coordinates always go in the order (x, y): across first, then up or down.",
       "steps": [
         {
-          "text": "Worked example: 3 left and 6 up is (−3, 6). Left gives a minus on x."
+          "text": "Worked example: 3 tiles left and 6 up is (−3, 6). Left gives a minus on x."
         },
         {
           "text": "Up is positive, so y has no minus sign there. Down would give a minus on y."
@@ -997,7 +968,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-cart-build-5",
-      "prompt": "A striker moves from (3, 5) to (−3, 5), crossing the y-axis. Which quadrant is he in now? Build the Roman numeral.",
+      "prompt": "You die at (3, 5), then run to (−3, 5), crossing the y-axis. Which quadrant are you in now? Build the Roman numeral.",
       "answer": "II",
       "decoys": [
         "V",
@@ -1007,7 +978,7 @@ export const pack: SePack = {
       "why": "Quadrant II is the top left, where x is negative and y is positive.",
       "steps": [
         {
-          "text": "Try (2, −6). Flip only x: (−2, −6). Both numbers are negative, so it is bottom left."
+          "text": "Try a death at (2, −6). Flip only x: (−2, −6). Both numbers are negative, so it is bottom left."
         },
         {
           "text": "Bottom left, where both are negative, is quadrant III."
@@ -1020,20 +991,20 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-cart-build-6",
-      "prompt": "A point is at (−0.5, 3). Build its x-coordinate.",
+      "prompt": "Your F3 screen reads X: −0.5 and Z: 3. Build the X-coordinate.",
       "answer": "-0.5",
       "decoys": [
         "3",
         "+",
         "2"
       ],
-      "why": "The x-coordinate is the first number in the pair, and a minus sign means left of the y-axis.",
+      "why": "The X-coordinate is the first number, and a minus sign means west of spawn.",
       "steps": [
         {
-          "text": "Worked example: (−2.5, 4). The x-coordinate is −2.5, the first number."
+          "text": "Worked example: F3 reads X −2.5 and Z 4. The X-coordinate is −2.5, the first number."
         },
         {
-          "text": "The minus sign means it is left of the y-axis, so you move 2.5 steps left."
+          "text": "The minus sign means it is west of spawn, so you are 2.5 blocks west."
         },
         {
           "text": "A decimal like 0.5 sits halfway between 0 and 1. Keep the minus sign in front of it."
@@ -1043,7 +1014,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-cart-build-7",
-      "prompt": "Zoro's marker at (−6, −2) is flipped through the centre. Build its new point.",
+      "prompt": "Your marker at (−6, −2) gets mirrored through the map centre. Build its new point.",
       "answer": "(6,2)",
       "decoys": [
         "-",

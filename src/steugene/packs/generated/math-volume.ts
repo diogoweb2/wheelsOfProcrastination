@@ -16,54 +16,54 @@ export const pack: SePack = {
       "title": "What volume means",
       "lines": [
         "Volume is how much space fits inside a shape.",
-        "Think of a water bottle, a fish tank, or a cereal box.",
-        "We measure volume in cubic units, like cm³."
+        "Think of a Minecraft pool, a fish tank, or a 2 L bottle.",
+        "We measure volume in cubic units, like m³ or cm³."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's training bag is full of balls. Volume tells you how many fit inside."
+        "flavour": "key",
+        "text": "Your Minecraft pool fills with water. Volume tells you how many blocks of water fit."
       }
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-0",
-      "prompt": "Isagi's training crate is 4 m long, 3 m wide and 2 m high. How much space is inside it?",
+      "prompt": "Your Roblox room is 5 m long, 3 m wide and 2 m high. How much space is inside?",
       "options": [
-        "24 m³",
-        "9 m³",
-        "12 m²"
+        "30 m³",
+        "10 m²",
+        "15 m³"
       ],
       "answer": 0,
       "why": "Volume is measured in cubic units because it counts the space in three directions.",
       "steps": [
         {
-          "text": "Find the base area first: length × width. Try 5 m × 2 m. That gives 10 m²."
+          "text": "Find the base area first: length × width. Try a 4 × 2 floor. That gives 8 m²."
         },
         {
-          "text": "Multiply the base area by the height. Try 10 m² × 6 m. That gives 60 m³."
+          "text": "Multiply the base area by the height. Try 8 m² × 3 m. That gives 24 m³."
         },
         {
-          "text": "Check the unit. Three measurements are multiplied, so the answer is cubic (³)."
+          "text": "Check the unit. Three lengths are multiplied, so the answer is cubic (³)."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-1",
-      "prompt": "Luffy wants to know how much water a barrel holds. Which unit should he use?",
+      "prompt": "A Minecraft chest sits in a 1-block space. Which unit measures that space?",
       "options": [
         "square metres (m²)",
         "cubic metres (m³)",
-        "kilometres (km)"
+        "metres (m)"
       ],
       "answer": 1,
-      "why": "Square units measure flat area, but a barrel holds water in three dimensions, so cubic units fit.",
+      "why": "A block is a cube, so it fills length, width and height, and only cubic units measure that.",
       "steps": [
         {
-          "text": "Square metres measure a flat floor, like the top of a table."
+          "text": "Square metres measure a flat floor, like the top of a crafting table."
         },
         {
-          "text": "A barrel is a shape with length, width and height, so it fills space."
+          "text": "A chest has length, width and height, so it fills space."
         },
         {
           "text": "Space in three directions uses cubic units, so the answer is m³."
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-basics-2",
-      "prompt": "A cylinder barrel has a radius of 3 cm and a height of 10 cm. About how much space is inside? Use π = 3.14.",
+      "prompt": "A round cake has a radius of 3 cm and is 10 cm tall. About how much cake is inside? Use π = 3.14.",
       "options": [
         "about 283 cm³",
         "about 188 cm³",
@@ -138,21 +138,21 @@ export const pack: SePack = {
           "text": "Square the radius first. Try r = 2 cm, so r² = 4 cm²."
         },
         {
-          "text": "Find the base area: 3.14 × 4 = 12.56 cm². Then multiply by height 5 cm to get 62.8 cm³."
+          "text": "Find the base area: 3.14 × 4 = 12.56 cm². Multiply by the height, 5 cm, to get 62.8 cm³."
         },
         {
-          "text": "For the barrel, 3.14 × 9 = 28.26 cm². Multiply by 10 cm to get the volume."
+          "text": "For the cake, 3.14 × 9 = 28.26 cm². Multiply by 10 cm to get the volume."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-3",
-      "prompt": "A prism has a volume of 120 cm³ and a base area of 24 cm². What is its height?",
+      "prompt": "Your Minecraft water column holds 120 m³ and its floor is 24 m². How tall is it?",
       "options": [
-        "4 cm",
-        "6 cm",
-        "5 cm"
+        "4 m",
+        "6 m",
+        "5 m"
       ],
       "answer": 2,
       "why": "Divide the volume by the base area to undo the multiplication.",
@@ -161,7 +161,7 @@ export const pack: SePack = {
           "text": "Write the rule: V = base area × height. So height = V ÷ base area."
         },
         {
-          "text": "Try V = 90 cm³ and base area = 15 cm². Then 90 ÷ 15 = 6 cm."
+          "text": "Try V = 90 m³ and base area = 15 m². Then 90 ÷ 15 = 6 m."
         },
         {
           "text": "Check by multiplying back: 15 × 6 = 90. The division is correct."
@@ -174,54 +174,54 @@ export const pack: SePack = {
       "title": "Why volume matters",
       "lines": [
         "Volume tells you how much a box or tank can hold.",
-        "Builders use it to know how much concrete to order.",
+        "Builders use it to work out how much material to order.",
         "Shipping companies use it to fit boxes into a truck."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro needs to know if the cargo hold fits all the barrels. That is volume."
+        "flavour": "key",
+        "text": "Your Roblox obby needs a 10 m × 4 m × 3 m box. Volume tells you how much space it has."
       }
     },
     {
       "kind": "build",
       "id": "math-volume-build-0",
-      "prompt": "A Blue Lock training crate is 8 cm long, 5 cm wide and 3 cm tall. What is its volume in cm³?",
+      "prompt": "A Minecraft pool is 8 blocks long, 5 blocks wide and 3 blocks deep. How many blocks of water fill it?",
       "answer": "120",
       "decoys": [
         "4",
         "9",
         "6"
       ],
-      "why": "Volume of a rectangular prism is length × width × height, and it is measured in cubic units.",
+      "why": "Each block is 1 m, so the pool's volume counts how many 1-block cubes fit inside it.",
       "steps": [
         {
-          "text": "Write the formula: V = length × width × height."
+          "text": "Write the formula: V = length × width × depth."
         },
         {
-          "text": "Example: 6 cm × 2 cm × 4 cm = 12 × 4 = 48 cm³."
+          "text": "Example: a 6 × 2 × 4 pool. 12 × 4 = 48 blocks."
         },
         {
-          "text": "Multiply two numbers first, then multiply by the third. Your crate: 8 × 5 × 3."
+          "text": "Multiply two numbers first, then the third. Your pool: 8 × 5 × 3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-4",
-      "prompt": "A triangular prism has a triangle base with a base of 6 cm and a height of 4 cm. The prism is 10 cm long. What is its volume?",
+      "prompt": "A Fortnite ramp has a triangle end 6 m wide and 4 m tall. It is 10 m long. What is its volume?",
       "options": [
-        "60 cm³",
-        "240 cm³",
-        "120 cm³"
+        "60 m³",
+        "240 m³",
+        "120 m³"
       ],
       "answer": 2,
-      "why": "The base is a triangle, so its area is half of base × height, then the prism's length multiplies that area.",
+      "why": "The end is a triangle, so its area is half of base × height, then the ramp's length multiplies that area.",
       "steps": [
         {
-          "text": "Find the triangle's area: ½ × base × height. Try base 10 cm and height 5 cm. That gives 25 cm²."
+          "text": "Find the triangle's area: ½ × base × height. Try base 10 m and height 5 m. That gives 25 m²."
         },
         {
-          "text": "Multiply by the prism's length. Try 25 cm² × 4 cm. That gives 100 cm³."
+          "text": "Multiply by the ramp's length. Try 25 m² × 4 m. That gives 100 m³."
         },
         {
           "text": "Remember the ½ step. Skipping it doubles the answer, so do it first."
@@ -231,20 +231,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-basics-5",
-      "prompt": "A box is 3 cm × 3 cm × 4 cm. Its height is doubled to 8 cm. What happens to the volume?",
+      "prompt": "A Roblox part is 3 × 3 × 4 studs. Its height is doubled to 8 studs. What happens to its volume?",
       "options": [
-        "It stays 36 cm³",
-        "It becomes 72 cm³",
-        "It becomes 144 cm³"
+        "It stays 36 studs³",
+        "It becomes 72 studs³",
+        "It becomes 144 studs³"
       ],
       "answer": 1,
       "why": "Volume is directly proportional to height, so doubling the height doubles the volume.",
       "steps": [
         {
-          "text": "Start with the first box: 3 × 3 = 9 cm² base, then 9 × 4 = 36 cm³."
+          "text": "Start with the first part: 3 × 3 = 9 studs² base, then 9 × 4 = 36 studs³."
         },
         {
-          "text": "Try a box 2 cm × 2 cm × 5 cm. Base is 4 cm², volume 20 cm³. Now double the height to 10 cm: 4 × 10 = 40 cm³."
+          "text": "Try a part 2 × 2 × 5 studs. Base is 4 studs², volume 20 studs³. Double the height to 10: 4 × 10 = 40 studs³."
         },
         {
           "text": "Compare: 20 became 40. The volume doubled, the same as the height did."
@@ -254,28 +254,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-volume-games-0",
-      "title": "Treasure chests, smallest first",
+      "title": "Stadium spaces, smallest first",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "Crate: 4 × 3 × 5 cm",
+            "label": "Dressing room: 4 × 3 × 5 m",
             "value": 60
           },
           {
-            "label": "Tent: triangle 8 × 5 cm, length 2 cm",
+            "label": "Tunnel: triangle 8 × 5 m, length 2 m",
             "value": 40
           },
           {
-            "label": "Chest: 5 × 5 × 2 cm",
+            "label": "Kit bag: 5 × 5 × 2 m",
             "value": 50
           },
           {
-            "label": "Wedge: triangle 6 × 3 cm, length 7 cm",
+            "label": "Stand wedge: triangle 6 × 3 m, length 7 m",
             "value": 63
           },
           {
-            "label": "Locker: 10 × 2 × 4 cm",
+            "label": "Locker: 10 × 2 × 4 m",
             "value": 80
           }
         ]
@@ -287,19 +287,19 @@ export const pack: SePack = {
       "id": "math-volume-teach-2",
       "title": "The method",
       "lines": [
-        "For a prism, first find the base area.",
-        "Then multiply the base area by the height.",
+        "A pool is a prism. Its floor is the base.",
+        "Find the floor area, then multiply by the depth.",
         "So V = base area × height."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Base area first. Then height. Always both."
+        "text": "Floor area first. Then depth. Always both."
       }
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-6",
-      "prompt": "A fish tank is 20 cm long, 10 cm wide and 30 cm high. How many litres of water does it hold? Remember 1 L = 1000 cm³.",
+      "prompt": "Your fish tank is 20 cm long, 10 cm wide and 30 cm high. How many litres does it hold? Remember 1 L = 1000 cm³.",
       "options": [
         "60 L",
         "6 L",
@@ -322,20 +322,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-basics-7",
-      "prompt": "Which pair of measurements do you multiply to find the volume of a cylinder?",
+      "prompt": "Which pair do you multiply to find the volume of a round cake?",
       "options": [
         "radius and height",
         "diameter and width",
         "base area and height"
       ],
       "answer": 2,
-      "why": "A cylinder is a stack of identical circles, so its volume is the circle's area times the height.",
+      "why": "A cake is a stack of identical circles, so its volume is the circle's area times the height.",
       "steps": [
         {
-          "text": "Picture a stack of coins. Each coin is a circle, and the stack is the height."
+          "text": "Picture the cake layers. Each layer is a circle, and the stack is the height."
         },
         {
-          "text": "Find the circle's area first. For a circle of radius 4 cm, the area is about 50.24 cm²."
+          "text": "Find the circle's area first. For a round cake of radius 4 cm, the area is about 50.24 cm²."
         },
         {
           "text": "Multiply that area by the height, for example 50.24 × 6 = 301.44 cm³."
@@ -345,7 +345,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-volume-build-1",
-      "prompt": "A water bottle at training is a cylinder. Radius 2 cm, height 5 cm. Use π ≈ 3.14. What is the volume in cm³?",
+      "prompt": "A chocolate milk cup is a cylinder. Radius 2 cm, height 5 cm. Use π ≈ 3.14. What is the volume in cm³?",
       "answer": "62.8",
       "decoys": [
         "5",
@@ -361,7 +361,7 @@ export const pack: SePack = {
           "text": "Example: r = 3, h = 2. 3.14 × 9 × 2 = 28.26 × 2 = 56.52 cm³."
         },
         {
-          "text": "Your bottle: 3.14 × 2² × 5 = 3.14 × 4 × 5. Multiply to finish."
+          "text": "Your cup: 3.14 × 2² × 5 = 3.14 × 4 × 5. Multiply to finish."
         }
       ]
     }
@@ -372,13 +372,13 @@ export const pack: SePack = {
       "id": "math-volume-teach-3",
       "title": "The common trap",
       "lines": [
-        "Many students multiply only the length and width.",
-        "That gives area, not volume. You forgot the height.",
-        "Also check your units. Change everything to cm first."
+        "Your pool is 5 blocks long and 3 blocks wide.",
+        "Length times width gives the floor, 15 m², not the water.",
+        "Multiply by the depth too: 15 × 2 = 30 m³."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Area is cm². Volume is cm³. Do not mix them up."
+        "text": "Floor is m². Water is m³. One block is one metre."
       }
     },
     {
@@ -386,26 +386,26 @@ export const pack: SePack = {
       "id": "math-volume-teach-4",
       "title": "Worked example",
       "lines": [
-        "A box is 6 cm long, 4 cm wide, and 10 cm tall.",
-        "Base area is 6 × 4 = 24 cm².",
-        "Volume is 24 × 10 = 240 cm³. Box A holds 240 cm³.",
-        "Box B holds 180 cm³, so Box A holds more."
+        "Pool A is 6 blocks long, 4 wide, and 10 deep.",
+        "Floor area is 6 × 4 = 24 m².",
+        "Water volume is 24 × 10 = 240 m³. Pool A holds 240 m³.",
+        "Pool B holds 180 m³, so Pool A holds more."
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Box A",
+            "label": "Pool A",
             "value": 240,
             "tone": "good"
           },
           {
-            "label": "Box B",
+            "label": "Pool B",
             "value": 180,
             "tone": "calm"
           }
         ],
-        "unit": "cm³"
+        "unit": "m³"
       }
     },
     {
@@ -413,14 +413,14 @@ export const pack: SePack = {
       "id": "math-volume-teach-5",
       "title": "Recap: prisms and cylinders",
       "lines": [
-        "Volume is how much fits inside. Use cubic units.",
+        "Volume is how much water fits inside. Use cubic units.",
         "Prism: V = base area × height.",
         "Cylinder: base is a circle, so V = πr² × h.",
         "Find the base first, then multiply by height."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Base first, height second. Get both right and the treasure is yours."
+        "text": "Base first, height second. Dig the pool right and the diamonds are yours."
       }
     },
     {
@@ -428,9 +428,9 @@ export const pack: SePack = {
       "id": "math-volume-deeper-0",
       "title": "Cubes, not squares",
       "lines": [
-        "Volume counts the little cubes that fill a shape.",
-        "So its unit is cubic: cm³, not cm² or cm.",
-        "Area is flat. Volume is the space inside."
+        "Volume counts the 1-block cubes that fill a space.",
+        "So its unit is cubic: m³, not m² or m.",
+        "Area is the flat floor. Volume is the water inside."
       ],
       "callout": {
         "flavour": "key",
@@ -440,15 +440,15 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-volume-deeper-2",
-      "title": "The base is the face you stand on",
+      "title": "The base is the floor you stand on",
       "lines": [
-        "A prism's base is the shape at the bottom.",
-        "Height is the straight distance up to the top.",
-        "A slanted side is longer, but it is not the height."
+        "The base of a pool is the floor at the bottom.",
+        "Depth is the straight drop from the top to the floor.",
+        "A sloped wall is longer, but it is not the depth."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "The slanted side looks like the height. It is not."
+        "text": "The sloped wall looks like the depth. It is not."
       }
     },
     {
@@ -458,11 +458,11 @@ export const pack: SePack = {
       "lines": [
         "The area of a circle needs the radius.",
         "The diameter goes straight across, and it is twice the radius.",
-        "If you are given the diameter, halve it first."
+        "Centre circle: diameter 18.3 m, so radius 9.15 m."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Your calculator does not know which one you typed."
+        "text": "The calculator will not know which one you typed."
       }
     },
     {
@@ -471,12 +471,12 @@ export const pack: SePack = {
       "title": "Doubling the radius",
       "lines": [
         "The radius is squared inside the volume formula.",
-        "Double the radius and the base area becomes 4 times bigger.",
-        "So the whole volume becomes 4 times bigger too."
+        "Double the radius and the cake's base is 4 times bigger.",
+        "So the whole cake is 4 times bigger too."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Doubling the height only doubles the volume."
+        "text": "Doubling the height only doubles the cake."
       }
     },
     {
@@ -484,13 +484,13 @@ export const pack: SePack = {
       "id": "math-volume-deeper-8",
       "title": "1 m³ is a lot of cm³",
       "lines": [
-        "1 m = 100 cm, so every side gets multiplied by 100.",
-        "A cube 1 m wide has 100 × 100 × 100 small cubes.",
+        "One Minecraft block is exactly 1 m, so each side is 100 cm.",
+        "That block fits 100 × 100 × 100 small 1 cm cubes.",
         "That is 1 000 000 cm³, not 100 cm³."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Picture a box 1 m wide. Each side fits 100 small cubes."
+        "flavour": "key",
+        "text": "One block is a million 1 cm³ cubes. Count the cubes, not the sides."
       }
     },
     {
@@ -500,40 +500,40 @@ export const pack: SePack = {
       "lines": [
         "1 cm³ holds exactly 1 mL of water.",
         "1 000 mL makes 1 L.",
-        "So a 2 000 cm³ tank holds 2 L."
+        "So a 2 000 cm³ bottle holds 2 L."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "A crew's rum barrel: count the cubes, then change to litres."
+        "flavour": "key",
+        "text": "A 2 L bottle is a 2 000 cm³ box of water."
       }
     },
     {
       "kind": "choice",
       "id": "math-volume-basics-9",
-      "prompt": "A prism has a base area of 9 cm² and a height of 7 cm. Another prism has a base area of 6 cm² and a height of 12 cm. Which holds more?",
+      "prompt": "Pool A has a 9-block floor and is 7 blocks deep. Pool B has a 6-block floor and is 12 blocks deep. Which holds more water?",
       "options": [
-        "The first, 63 cm³",
-        "The second, 72 cm³",
-        "They hold the same"
+        "Pool A, 63 blocks of water",
+        "Pool B, 72 blocks of water",
+        "Both hold the same water"
       ],
       "answer": 1,
-      "why": "Compare the volumes by working each one out, because a bigger height can make up for a smaller base.",
+      "why": "A deeper pool can make up for a smaller floor, so you must work out both volumes.",
       "steps": [
         {
-          "text": "Work out the first prism: 5 cm² base × 8 cm height = 40 cm³."
+          "text": "Pool C: 5 × 8 floor-and-depth gives 5 × 8 = 40 blocks."
         },
         {
-          "text": "Work out the second prism: 4 cm² base × 10 cm height = 40 cm³."
+          "text": "Pool D: 4 floor × 10 depth gives 4 × 10 = 40 blocks."
         },
         {
-          "text": "Both are 40 cm³ here, so the bigger number wins only when the product is larger."
+          "text": "Both are 40 blocks here, so compare the products to decide which holds more."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-volume-applied-0",
-      "prompt": "Blue Lock's water cooler is a box: 40 cm long, 30 cm wide, 20 cm tall. How much water fits inside?",
+      "prompt": "Your axolotl tank is 40 cm long, 30 cm wide, and 20 cm tall. How much water fits inside?",
       "options": [
         "24 000 cm³",
         "9 000 cm³",
@@ -543,7 +543,7 @@ export const pack: SePack = {
       "why": "Volume of a prism is the base area times the height, so length × width × height gives the answer.",
       "steps": [
         {
-          "text": "Try a new box: 50 cm long, 10 cm wide, 12 cm tall."
+          "text": "Try a new tank: 50 cm long, 10 cm wide, 12 cm tall."
         },
         {
           "text": "Base area first: 50 × 10 = 500 cm²."
@@ -556,7 +556,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-1",
-      "prompt": "Luffy finds a chest shaped like a triangular prism. The triangle end is 12 cm wide and 10 cm tall. The chest is 50 cm long. What is its volume?",
+      "prompt": "A giant chocolate bar is a triangular prism, 50 cm long. Its triangle end is 12 cm wide and 10 cm tall. What is its volume?",
       "options": [
         "600 cm³",
         "3 000 cm³",
@@ -566,7 +566,7 @@ export const pack: SePack = {
       "why": "A triangle's area is half of base times height, and that area is the base you multiply by the length.",
       "steps": [
         {
-          "text": "Try a new triangle: 8 cm base, 6 cm height, and a 20 cm length."
+          "text": "Try a new bar: 8 cm base, 6 cm high, 20 cm long."
         },
         {
           "text": "Triangle area: ½ × 8 × 6 = 24 cm²."
@@ -579,7 +579,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-2",
-      "prompt": "A Blue Lock training drum is a cylinder. Its radius is 5 cm and its height is 20 cm. Use π ≈ 3.14. What is its volume?",
+      "prompt": "A Pokémon candy tube is a cylinder. Radius 5 cm, height 20 cm. Use π ≈ 3.14. What is its volume?",
       "options": [
         "314 cm³",
         "3 140 cm³",
@@ -589,7 +589,7 @@ export const pack: SePack = {
       "why": "A cylinder is a prism with a circle base, so its volume is π × radius² × height.",
       "steps": [
         {
-          "text": "Try a new drum: radius 4 cm, height 10 cm."
+          "text": "Try a new tube: radius 4 cm, height 10 cm."
         },
         {
           "text": "Circle area: 3.14 × 4 × 4 = 50.24 cm²."
@@ -602,7 +602,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-3",
-      "prompt": "A ship's water barrel is a cylinder. Its radius is 20 cm and its height is 1.5 m. Use π ≈ 3.14. How many litres does it hold?",
+      "prompt": "The water barrel at the training ground is a cylinder. Radius 20 cm, height 1.5 m. Use π ≈ 3.14. How many litres does it hold?",
       "options": [
         "188.4 L",
         "18.84 L",
@@ -625,7 +625,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-4",
-      "prompt": "Coach Ego orders a sandbox for the pitch: 2 m long, 1.5 m wide, 0.4 m deep. How much sand fits?",
+      "prompt": "Your Roblox obby needs a sand pit: 2 m long, 1.5 m wide, 0.4 m deep. How much sand fits?",
       "options": [
         "0.6 m³",
         "1.2 m³",
@@ -635,7 +635,7 @@ export const pack: SePack = {
       "why": "Decimal lengths multiply the same way, so 2 × 1.5 × 0.4 gives the volume in cubic metres.",
       "steps": [
         {
-          "text": "Try a new box: 4 m long, 2 m wide, 0.5 m deep."
+          "text": "Try a new pit: 4 m long, 2 m wide, 0.5 m deep."
         },
         {
           "text": "Base area: 4 × 2 = 8 m²."
@@ -648,7 +648,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-5",
-      "prompt": "Two crates. Crate A is 8 cm × 5 cm × 6 cm. Crate B is 10 cm × 4 cm × 7 cm. Which crate holds more?",
+      "prompt": "Two Fortnite supply crates. Crate A is 8 cm × 5 cm × 6 cm. Crate B is 10 cm × 4 cm × 7 cm. Which crate holds more?",
       "options": [
         "Crate B holds more",
         "Crate A holds more",
@@ -687,7 +687,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-6",
-      "prompt": "A cylinder's radius doubles, but its height stays the same. How many times bigger is its volume?",
+      "prompt": "Your round cake's radius doubles, but its height stays the same. How many times more cake is there?",
       "options": [
         "2 times bigger",
         "4 times bigger",
@@ -697,10 +697,10 @@ export const pack: SePack = {
       "why": "Area of a circle depends on radius squared, so doubling the radius makes the area four times as big.",
       "steps": [
         {
-          "text": "Try a new cylinder: radius goes from 3 cm to 6 cm."
+          "text": "Try a new cake: radius goes from 3 cm to 6 cm."
         },
         {
-          "text": "Area goes from 9 to 36 cm², which is 4 times bigger."
+          "text": "Top area goes from 9 to 36 cm², which is 4 times bigger."
         },
         {
           "text": "Height doubles instead? Then volume only doubles, because height is not squared."
@@ -710,7 +710,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-7",
-      "prompt": "A water tank is a box: 20 cm long, 15 cm wide, 10 cm tall. How many litres does it hold?",
+      "prompt": "Your Minecraft fish tank is a box: 20 cm long, 15 cm wide, 10 cm tall. How many litres does it hold?",
       "options": [
         "3 L",
         "0.3 L",
@@ -720,7 +720,7 @@ export const pack: SePack = {
       "why": "Since 1 L equals 1 000 cm³, convert the volume in cm³ by dividing by 1 000.",
       "steps": [
         {
-          "text": "Try a new box: 25 cm long, 12 cm wide, 30 cm tall."
+          "text": "Try a new tank: 25 cm long, 12 cm wide, 30 cm tall."
         },
         {
           "text": "Volume: 25 × 12 × 30 = 9 000 cm³."
@@ -733,20 +733,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-applied-8",
-      "prompt": "A solid block is 10 cm × 10 cm × 10 cm. A 4 cm × 4 cm × 10 cm hole goes straight through it. What volume is left?",
+      "prompt": "A block of cheese is 10 cm × 10 cm × 10 cm. A 4 cm × 4 cm × 10 cm tunnel is cut straight through. What volume is left?",
       "options": [
         "600 cm³",
         "960 cm³",
         "840 cm³"
       ],
       "answer": 2,
-      "why": "Remove the hole's volume from the full block, because the hole takes up space that is no longer solid.",
+      "why": "Remove the tunnel's volume from the full block, because the tunnel takes up space that is no longer solid.",
       "steps": [
         {
-          "text": "Try a new block: 8 cm × 8 cm × 5 cm with a 2 cm × 2 cm × 5 cm hole."
+          "text": "Try a new block: 8 cm × 8 cm × 5 cm with a 2 cm × 2 cm × 5 cm tunnel."
         },
         {
-          "text": "Full block: 8 × 8 × 5 = 320 cm³. Hole: 2 × 2 × 5 = 20 cm³."
+          "text": "Full block: 8 × 8 × 5 = 320 cm³. Tunnel: 2 × 2 × 5 = 20 cm³."
         },
         {
           "text": "Left over: 320 − 20 = 300 cm³."
@@ -756,7 +756,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-deeper-1",
-      "prompt": "Isagi's shot box has a base of 12 cm² and a height of 5 cm. Its volume is:",
+      "prompt": "A Poké Ball box has a base of 12 cm² and a height of 5 cm. Its volume is:",
       "options": [
         "60 cm²",
         "60 cm³",
@@ -779,7 +779,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-deeper-3",
-      "prompt": "A prism has a triangle base 8 cm wide and 3 cm tall. Its length is 10 cm. Its volume is:",
+      "prompt": "A Fortnite ramp is a triangle prism: base 8 cm wide, 3 cm tall, and 10 cm long. Its volume is:",
       "options": [
         "240 cm³",
         "120 cm³",
@@ -802,7 +802,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-deeper-7",
-      "prompt": "Crew A's barrel has radius 2 cm and height 5 cm. Crew B's barrel has radius 4 cm and the same height. Crew B's volume is how many times bigger?",
+      "prompt": "Roblox part A is a cylinder: radius 2 cm, height 5 cm. Part B has radius 4 cm and the same height. Part B's volume is how many times bigger?",
       "options": [
         "4 times bigger",
         "2 times bigger",
@@ -825,7 +825,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-deeper-9",
-      "prompt": "A box is 1 m long, 1 m wide and 1 m tall. How many cubic centimetres fit inside?",
+      "prompt": "One Minecraft block is 1 m on every side. How many cubic centimetres fill it?",
       "options": [
         "100 cm³",
         "10 000 cm³",
@@ -838,7 +838,7 @@ export const pack: SePack = {
           "text": "Convert every side first. 1 m = 100 cm."
         },
         {
-          "text": "Try a box 2 m long, 1 m wide, 1 m tall: 200 cm × 100 cm × 100 cm."
+          "text": "Try a 2-block-long slab: 2 m × 1 m × 1 m, which is 200 cm × 100 cm × 100 cm."
         },
         {
           "text": "200 × 100 × 100 = 2 000 000 cm³. Each side is in cm before you multiply."
@@ -848,7 +848,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-volume-deeper-11",
-      "prompt": "A tank holds 2 000 cm³ of water. How many litres is that?",
+      "prompt": "Mum's lemonade pitcher holds 2 000 cm³. How many litres is that?",
       "options": [
         "2 L",
         "0.2 L",
@@ -858,10 +858,10 @@ export const pack: SePack = {
       "why": "Litres measure capacity, and 1 L is exactly 1 000 cm³.",
       "steps": [
         {
-          "text": "1 cm³ holds 1 mL, so 5 000 cm³ holds 5 000 mL."
+          "text": "1 000 cm³ holds exactly 1 L, so each 1 000 cm³ is one litre."
         },
         {
-          "text": "Try 5 000 cm³ as the new tank."
+          "text": "Try a 5 000 cm³ pitcher at the Timmies drink station."
         },
         {
           "text": "Divide by 1 000 to get litres: 5 000 ÷ 1 000 = 5 L."
@@ -871,7 +871,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-volume-build-2",
-      "prompt": "A ramp at the training ground is a triangular prism. The triangle has base 3 m and height 5 m. The ramp is 4 m long. What is its volume in m³?",
+      "prompt": "Your Roblox ramp is a triangular prism. The triangle has base 3 m and height 5 m. The ramp is 4 m long. What is its volume in m³?",
       "answer": "30",
       "decoys": [
         "9",
@@ -894,7 +894,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-volume-build-3",
-      "prompt": "Luffy's treasure chest is a box. It is ½ m wide, ½ m deep and 3 m long. What is its volume in m³? Write it as a fraction.",
+      "prompt": "A Pokémon Centre storage crate is ½ m wide, ½ m deep and 3 m long. What is its volume in m³? Write it as a fraction.",
       "answer": "3/4",
       "decoys": [
         "1",
@@ -910,7 +910,7 @@ export const pack: SePack = {
           "text": "Example: ⅓ × ⅓ × 2 = (1 × 1 × 2) ÷ (3 × 3 × 1) = 2/9 m³."
         },
         {
-          "text": "Your chest: ½ × ½ × 3 = 3/4. Check: 3 ÷ 4 is the same as 0.75."
+          "text": "Your crate: ½ × ½ × 3 = 3/4. Check: 3 ÷ 4 is the same as 0.75."
         }
       ]
     },
@@ -940,7 +940,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-volume-build-5",
-      "prompt": "A supply box at camp is 1.5 m long, 2 m wide and 4 m tall. What is its volume in m³?",
+      "prompt": "A Fortnite supply crate is 1.5 m long, 2 m wide and 4 m tall. What is its volume in m³?",
       "answer": "12",
       "decoys": [
         "3",
@@ -956,37 +956,14 @@ export const pack: SePack = {
           "text": "Example: 2.5 × 2 × 3 = 5 × 3 = 15 m³."
         },
         {
-          "text": "Your box: 1.5 × 2 = 3, then 3 × 4 = 12."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "math-volume-build-6",
-      "prompt": "A narrow shelf box at the dock is 0.2 m wide, 0.5 m deep and 6 m long. What is its volume in m³?",
-      "answer": "0.6",
-      "decoys": [
-        "2",
-        "4",
-        "8"
-      ],
-      "why": "When multiplying decimals, the answer has as many decimal places as all the numbers together.",
-      "steps": [
-        {
-          "text": "Multiply the two small numbers first: 0.2 × 0.5."
-        },
-        {
-          "text": "Example: 0.3 × 0.4 = 0.12, because 3 × 4 = 12 and there are 2 decimal places."
-        },
-        {
-          "text": "Your box: 0.2 × 0.5 = 0.1. Then multiply 0.1 × 6 = 0.6 m³."
+          "text": "Your crate: 1.5 × 2 = 3, then 3 × 4 = 12."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-volume-build-7",
-      "prompt": "A drinks cooler is a cylinder. Radius 5 cm, height 4 cm. Use π ≈ 3.14. What is the volume in cm³?",
+      "prompt": "A round cake is a cylinder. Radius 5 cm, height 4 cm.\nUse π ≈ 3.14. What is the volume in cm³?",
       "answer": "314",
       "decoys": [
         "7",
@@ -1002,7 +979,7 @@ export const pack: SePack = {
           "text": "Example: r = 1, h = 6. 3.14 × 1 × 6 = 18.84 cm³."
         },
         {
-          "text": "Your cooler: 3.14 × 5² × 4 = 3.14 × 25 × 4. Multiply in any order you like."
+          "text": "Your cake: 3.14 × 5² × 4 = 3.14 × 25 × 4. Multiply in any order you like."
         }
       ]
     },

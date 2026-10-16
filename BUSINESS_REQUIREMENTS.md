@@ -1806,6 +1806,7 @@ Writing 105 packs by hand is not a plan, so the rest of the year is generated, *
 - Six calls per subtopic, in parallel, each with a different angle — *teach · basics · applied · build · deeper · games* — because a model asked for fifty cards in one breath writes the last twenty carelessly, and one bad call then costs a sixth of a subtopic instead of all of it.
 - Plus one YouTube pass (§24g) and one call that writes two questions per video.
 - Everything goes through the **same validator** as the in-app generator (`scripts/lib/se-generate.mjs`), and anything that does not survive it is dropped.
+- A **maths** subtopic also gets the world brief (§24m) bolted onto the system prompt, so a re-seed never undoes it.
 - **Resumable**: a subtopic with a file is skipped, so a dropped connection costs nothing. `--force` rewrites, `HAND_WRITTEN` never is.
 - Seeded with `anthropic/claude-haiku-5.5` — chosen on price per quality (~US$0.02 a subtopic, about $2 for the year). The in-app "generate more" button (§24h) keeps using whatever model is set in `app/aiConfig`.
 - Packs **load on demand**. 105 of them is ~4 MB of lesson content; bundling it would quadruple everyone's download and push one asset past the service worker's 2 MiB per-file precache limit, costing the tablet its offline mode. Each pack is its own chunk instead (`import.meta.glob`), fetched the first time he opens that subtopic. `hasPack` answers "is there one" without fetching; `ensurePack` fetches.
@@ -1819,6 +1820,20 @@ Two passes, because "well formed" and "right" are different questions and only t
 **`se:verify`** is semantic, and it is not optional. A generator produces mis-keyed answers at a real rate — the first pack sampled had **4 wrong keys in 36 questions**, including one whose `why` sentence described a different option than the one marked correct. That is not a cosmetic bug here: §24f means he cannot re-answer, so a wrong key records his *correct* answer as a mistake, seals the question away, and puts it in front of me as something he needs help with. One bad key costs all three.
 
 So every question goes to the model a second time, cold, with an adversarial brief: is the marked answer factually right, is exactly one option defensibly correct, does `why` agree with the key, is the question coherent, does a `build` answer exactly answer its prompt. A sound question with the wrong key is **corrected**; anything ambiguous, incoherent or unconvincing is **deleted**. A batch the checker will not answer is split and retried down to single questions, and anything still unanswered is reported rather than quietly passed — "we could not look" must never become "it is fine". There are 5000 questions; losing the doubtful ones costs nothing and makes every survivor trustworthy.
+
+### 24m. The maths happens somewhere he lives — `npm run se:world`
+
+He can divide 4 by 2 and be certain he is right, and still read **2/4** as "4 ÷ 2". Told it is one pizza cut for four people, he gets it instantly and never gets it wrong again. The number was never the problem; the number had nowhere to stand. A correct, generic maths question is how you train a boy to push symbols around without picturing anything — which is exactly what he was doing.
+
+So **every maths card has a setting**, and the setting is one of the places he actually spends his attention: Fortnite, Minecraft, Roblox, Pokémon, football (the console one and the real one), food, and the manga he reads. The brief lives in `src/steugene/world.ts` — in `src/`, not in a script, because the in-app generator (§24h) writes cards too and must not hand back the textbook questions this pass took away.
+
+Three things make it teaching rather than decoration:
+
+- **The setting has to make the operation obvious.** "Cut one pizza between 4 people" explains 1/4. "Luffy has 24 apples, divide by 4" is the same bare sum with a name glued on, and that is explicitly forbidden in the brief.
+- **The pairings are decided by hand, per subtopic, in `SUB_WORLDS`** — fractions open on pizza, negative numbers on the Minecraft F3 screen (diamonds at Y = −59, sea level 62), circles on the Fortnite storm circle, ratios on K/D, probability on pack odds and shiny rates, unit price on which V-Bucks bundle is actually cheaper per V-Buck. A model working one card at a time does not find those; they are the whole point.
+- **The maths does not get easier.** Same skill, same size of number, same number of steps. And about one card in five stays plain, because a test will be plain.
+
+`npm run se:world` rewrites the 42 maths subtopics in place. The block **id never changes**, so his history and his report still point at something; a rewrite that fails the validator is discarded and the original kept; video blocks are skipped, since their questions are about the video. The keys move, so **`se:verify` (§24l) must be re-run over everything it touched** — that is printed at the end of the run, not left to memory.
 
 ### 24c. It reads to him
 

@@ -13,21 +13,21 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-trans-teach-0",
-      "title": "Same shape, new place",
+      "title": "Same part, new spot",
       "lines": [
-        "A transformation moves a shape to a new spot.",
-        "The shape stays the same. Its sides and angles do not change.",
-        "Only its position, direction or size can change."
+        "A transformation moves a part to a new spot in Studio.",
+        "The part keeps its size and shape. Only its position, turn or scale changes.",
+        "Move, rotate, mirror and scale are the four moves."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi runs the same play from the other side of the pitch. Same striker, new spot."
+        "text": "Copy a 4-stud wall and move it 10 studs right. Same wall, new spot."
       }
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-0",
-      "prompt": "Isagi slides the ball 5 m along the pitch. It does not turn or flip. What move is this?",
+      "prompt": "Your wedge slides 5 studs along the X axis. It does not turn or flip. What move is this?",
       "options": [
         "A slide, also called a translation.",
         "A flip, also called a reflection.",
@@ -37,20 +37,20 @@ export const pack: SePack = {
       "why": "A slide moves every point of a shape the same distance in the same direction.",
       "steps": [
         {
-          "text": "Picture a triangle on squared paper."
+          "text": "Picture a 4-stud wedge on the baseplate."
         },
         {
-          "text": "Slide it 3 squares right. Each corner moves exactly 3 squares right."
+          "text": "Slide it 3 studs right. Each corner moves exactly 3 studs in X."
         },
         {
-          "text": "Hook: a slide is the only move where the shape never turns over."
+          "text": "Hook: a slide never turns the part over."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-1",
-      "prompt": "Luffy's wanted poster is copied across a mirror line, so the copy faces the other way. What move is this?",
+      "prompt": "You copy half a castle wall and flip it across the centre line. What move is this?",
       "options": [
         "A slide, also called a translation.",
         "A flip, also called a reflection.",
@@ -60,13 +60,13 @@ export const pack: SePack = {
       "why": "A flip makes a mirror image, with each point the same distance from the mirror line on the other side.",
       "steps": [
         {
-          "text": "Picture a flag shape with a line down its middle."
+          "text": "Picture a wall 4 studs wide, centred on a line."
         },
         {
-          "text": "Each corner is 2 squares left of the line. Its image is 2 squares right."
+          "text": "Each corner is 2 studs left of the line. Its copy is 2 studs right."
         },
         {
-          "text": "Hook: the image is always backwards, like your face in a mirror."
+          "text": "Hook: the Mirror tool makes a backwards copy, like your face in a mirror."
         }
       ]
     },
@@ -131,7 +131,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-basics-2",
-      "prompt": "Blue Lock: a striker spins the whole shape around one fixed point. Which move needs a centre point?",
+      "prompt": "You rotate a block 90 degrees around one corner. Which move needs a centre point?",
       "options": [
         "A slide, which needs no centre point.",
         "A flip, which needs a mirror line.",
@@ -141,36 +141,36 @@ export const pack: SePack = {
       "why": "A turn (rotation) always happens about one fixed point called the centre of rotation.",
       "steps": [
         {
-          "text": "Put a pin in one corner of a square on graph paper. That corner stays still."
+          "text": "Pin one corner of a 2-stud block on the baseplate. That corner stays still."
         },
         {
-          "text": "Turn the square a quarter turn. Every other corner swings round the pin."
+          "text": "Rotate the block 90 degrees. Every other corner swings round the pin."
         },
         {
-          "text": "Hook: the pin is the centre, and the shape never leaves its circle."
+          "text": "Hook: the pin is the centre, and the block never leaves its circle."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-3",
-      "prompt": "A point is at (2, −1). It slides 3 right and 4 up. Where is the new point?",
+      "prompt": "A part is at (2, −1). It slides 3 studs in X and 4 studs up in Y. Where is it now?",
       "options": [
         "(5, 3)",
         "(−1, 3)",
         "(5, −5)"
       ],
       "answer": 0,
-      "why": "A slide adds the move to each coordinate: x goes right, y goes up.",
+      "why": "A slide adds the move to each coordinate: X changes by the X move and Y by the Y move.",
       "steps": [
         {
-          "text": "Start at (−3, 2). The slide is 1 right and 5 down."
+          "text": "Start at (−3, 2). The slide is 1 stud right in X and 5 studs down in Y."
         },
         {
-          "text": "Right 1 means x becomes −3 + 1, which is −2."
+          "text": "X becomes −3 + 1, which is −2."
         },
         {
-          "text": "Down 5 means y becomes 2 − 5, which is −3. So the new point is (−2, −3)."
+          "text": "Y becomes 2 − 5, which is −3. So the new position is (−2, −3)."
         }
       ]
     },
@@ -179,8 +179,8 @@ export const pack: SePack = {
       "id": "math-trans-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Maps, logos, video games and sports plays all use transformations.",
-        "Spotting them helps you read coordinates and symmetry later.",
+        "Every move you make with the Move, Rotate and Scale tools is a transformation.",
+        "Mirror copies half a build and flips it to match the other half.",
         "There are four moves: slide, flip, turn and resize."
       ],
       "callout": {
@@ -191,7 +191,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-trans-build-0",
-      "prompt": "Bachira is at (−5, 3) on the pitch grid. He slides 8 squares right. What is his new x-value?",
+      "prompt": "Your storm centre is at (−5, 3) on the map grid.\nIt slides 8 squares east. What is its new x-value?",
       "answer": "3",
       "decoys": [
         "8",
@@ -201,20 +201,20 @@ export const pack: SePack = {
       "why": "A slide moves every point the same distance, so the shape keeps its size and shape.",
       "steps": [
         {
-          "text": "Slide right means add to the x-value."
+          "text": "Slide east means add to the x-value."
         },
         {
-          "text": "Worked: (−1, 5) slides 3 right. −1 + 3 = 2."
+          "text": "Worked: (−1, 5) slides 3 east. −1 + 3 = 2."
         },
         {
-          "text": "So the new x is 2, and the y-value stays 5."
+          "text": "So the new x is 3, and the y-value stays 3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-4",
-      "prompt": "A point is at (4, 2). It is flipped over the y-axis. Where is the image?",
+      "prompt": "A wall block sits at (4, 2) in your Minecraft build.\nMirror it over the Y-axis. Where is the copy?",
       "options": [
         "(4, −2)",
         "(−2, 4)",
@@ -224,20 +224,20 @@ export const pack: SePack = {
       "why": "A flip over the y-axis changes the sign of x and keeps y the same.",
       "steps": [
         {
-          "text": "Start at (−5, 3). Flip it over the y-axis."
+          "text": "Start at (−6, 1). Mirror it over the Y-axis."
         },
         {
-          "text": "The y-axis is x = 0, so x changes sign: −5 becomes 5."
+          "text": "The Y-axis is x = 0, so x changes sign: −6 becomes 6."
         },
         {
-          "text": "y stays 3, so the image is (5, 3)."
+          "text": "y stays 1, so the copy is at (6, 1)."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-5",
-      "prompt": "A point at (3, 1) turns 90° clockwise about the origin. Where does it land?",
+      "prompt": "A Roblox part sits at (3, 1) in the top view.\nRotate it 90° clockwise around the origin. Where does it land?",
       "options": [
         "(−1, 3)",
         "(1, −3)",
@@ -253,7 +253,7 @@ export const pack: SePack = {
           "text": "New x is the old y, so new x is −4."
         },
         {
-          "text": "New y is the minus of old x, so new y is −2. The point lands at (−4, −2)."
+          "text": "New y is the minus of old x, so new y is −2. It lands at (−4, −2)."
         }
       ]
     },
@@ -293,9 +293,9 @@ export const pack: SePack = {
       "id": "math-trans-teach-2",
       "title": "The three moves that keep size",
       "lines": [
-        "Slide: every point moves the same distance, in the same direction.",
-        "Flip: the shape becomes its mirror image across a line.",
-        "Turn: the shape spins around one fixed centre by a set angle."
+        "Slide: every block moves the same distance, in the same direction.",
+        "Flip: the build becomes its mirror image across a line.",
+        "Turn: the build spins around one fixed point by a set angle."
       ],
       "art": {
         "art": "numberline",
@@ -323,46 +323,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-basics-6",
-      "prompt": "A square with sides of 4 cm is resized by a scale factor of 3. What is the new side length?",
+      "prompt": "A square mini-pitch has 4 m sides.\nScale it up by a factor of 3. What is the new side length?",
       "options": [
-        "7 cm",
-        "12 cm",
-        "15 cm"
+        "7 m",
+        "12 m",
+        "15 m"
       ],
       "answer": 1,
       "why": "A scale factor multiplies every side length by the same number, so 4 × 3 = 12.",
       "steps": [
         {
-          "text": "Take a triangle with sides of 2 cm. Use a scale factor of 5."
+          "text": "Take a square with 2 m sides. Use a scale factor of 5."
         },
         {
           "text": "Multiply each side: 2 × 5 = 10."
         },
         {
-          "text": "Every side gets the same 5 times bigger, so the new side is 10 cm."
+          "text": "Every side is 5 times bigger, so the new side is 10 m."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-7",
-      "prompt": "After a slide, a flip or a turn, what stays the same?",
+      "prompt": "After a move, a mirror or a rotate in Roblox Studio, what stays the same?",
       "options": [
-        "The position of the shape on the page.",
-        "The size, shape and angles of the shape.",
-        "The direction the shape is facing."
+        "The position of the part on the baseplate.",
+        "The size, shape and angles of the part.",
+        "The direction the part is facing."
       ],
       "answer": 1,
-      "why": "These three moves change where a shape is, but never its size, shape or angles.",
+      "why": "Moves change where a part sits, but never its size, shape or angles.",
       "steps": [
         {
-          "text": "Take a triangle. Slide it, then flip it, then turn it."
+          "text": "Take a wedge part. Move it, then mirror it, then rotate it 90 degrees."
         },
         {
-          "text": "Measure one side and one angle each time. They never change."
+          "text": "Check its Size in the Properties panel. The numbers never change."
         },
         {
-          "text": "Hook: the move changes where it sits, but it is still the same shape."
+          "text": "Hook: the move changes where it sits, but it is still the same part."
         }
       ]
     }
@@ -371,7 +371,7 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-trans-teach-3",
-      "title": "The trap: stretching one side",
+      "title": "The trap: stretching one wall",
       "lines": [
         "Stretching one side only makes a different shape, not a resize.",
         "Every side must be multiplied by the same number.",
@@ -379,17 +379,17 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A pirate flag stretched on one side is a new flag. Not the same one."
+        "text": "Stretch just one wall of a Minecraft house and you get a new house, not a bigger one."
       }
     },
     {
       "kind": "explain",
       "id": "math-trans-teach-4",
-      "title": "Worked example in words",
+      "title": "Worked example on the storm map",
       "lines": [
-        "Triangle A has corners at (1, 1), (3, 1) and (1, 4).",
-        "Slide it 4 units right. Add 4 to every x-value. The y-values stay the same.",
-        "New corners: (5, 1), (7, 1) and (5, 4). Same triangle, new place."
+        "Storm zone A has corners at (1, 1), (3, 1) and (1, 4).",
+        "Shift it 4 tiles right. Add 4 to every x-value. The y-values stay the same.",
+        "New corners: (5, 1), (7, 1) and (5, 4). Same zone, new place."
       ],
       "art": {
         "art": "numberline",
@@ -425,7 +425,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Change the place, the side or the size. Never change the shape."
+        "text": "Move it, turn it or mirror it. The pitch stays a pitch. Never change the shape."
       }
     },
     {
@@ -435,25 +435,25 @@ export const pack: SePack = {
       "lines": [
         "A slide moves every point the same distance, in the same direction.",
         "The shape does not turn or mirror. It just moves.",
-        "So lettering on a flag still reads the same way after a slide."
+        "So the writing on a Timbits box still reads the same way after a slide."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Like Isagi's run down the pitch: same direction, same way round."
+        "text": "Slide the Timbits tray along the counter and nothing flips over."
       }
     },
     {
       "kind": "explain",
       "id": "math-trans-deeper-1",
-      "title": "Flip makes a mirror image",
+      "title": "Mirror makes a reflection",
       "lines": [
-        "A flip is a reflection in a mirror line.",
+        "A mirror in Roblox Studio is a reflection across a line.",
         "Each point sits the same distance from the line, on the other side.",
-        "Left and right swap, like your reflection in a puddle."
+        "Left and right swap, so a half castle becomes a full one."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Picture the mirror line as the halfway wall between two identical goals."
+        "text": "The mirror line sits exactly halfway between the two copies, like the centre line between two goals."
       }
     },
     {
@@ -462,12 +462,12 @@ export const pack: SePack = {
       "title": "A turn needs three facts",
       "lines": [
         "A turn needs a centre, an angle and a direction.",
-        "Clockwise and anticlockwise send the shape to different places.",
+        "Clockwise and anticlockwise send the part to different places.",
         "A turn of 180° lands in the same spot either way."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Two crews circle one island. Clockwise or anticlockwise, the route matters."
+        "flavour": "key",
+        "text": "In Studio, rotate a part 90° about its centre. Clockwise and anticlockwise end in different spots."
       }
     },
     {
@@ -481,7 +481,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Double the sides, and the area is four times bigger."
+        "text": "Double every side of a 4 by 4 block floor, and it covers 64 blocks, four times as many."
       }
     },
     {
@@ -495,7 +495,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "A striker's photo next to a poster of the same striker: similar, not the same size."
+        "text": "A tactics board drawing and the real pitch match in shape, not in size: similar, not congruent."
       }
     },
     {
@@ -503,19 +503,19 @@ export const pack: SePack = {
       "id": "math-trans-deeper-5",
       "title": "Symmetry can hide a move",
       "lines": [
-        "A square turned 90° looks exactly the same as before.",
+        "A square supply drop turned 90° looks exactly the same as before.",
         "The only way to see the move: mark one corner first.",
         "Never decide nothing changed until you have checked a marked point."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Marking a corner is like tracking one player in a crowded match."
+        "text": "Mark one corner of the drop, like tracking one player in a crowded match."
       }
     },
     {
       "kind": "build",
       "id": "math-trans-basics-8",
-      "prompt": "The point (−2, 6) is flipped over the x-axis. What is the new y-value? Use the tiles.",
+      "prompt": "A Minecraft block sits at (−2, 6). Flip it over the x-axis. What is the new y-value?",
       "answer": "-6",
       "decoys": [
         "2"
@@ -529,14 +529,14 @@ export const pack: SePack = {
           "text": "x stays 5. The y changes sign: −3 becomes 3."
         },
         {
-          "text": "So the new point is (5, 3). Now do the same to (−2, 6)."
+          "text": "So the new block is at (5, 3). Now do the same to (−2, 6)."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-basics-9",
-      "prompt": "A point is 3 cm from a mirror line. Its flipped image is on the other side. How far apart are they?",
+      "prompt": "A Roblox part sits 3 cm from the mirror plane. Its mirror copy is on the far side. How far apart are they?",
       "options": [
         "3 cm",
         "5 cm",
@@ -559,53 +559,53 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-applied-0",
-      "prompt": "Isagi sketches a striker's run. Triangle corners: A(1, 2), B(3, 2), C(1, 5). It slides 4 right and 1 down. Where is C now?",
+      "prompt": "Your obby platform has corners A(1, 2), B(3, 2), C(1, 5).\nYou move the whole platform 4 right and 1 down.\nWhere is corner C now?",
       "options": [
         "(4, 5)",
         "(5, 4)",
         "(5, 6)"
       ],
       "answer": 1,
-      "why": "A slide moves every point by the same amount, so the shape keeps its size and angles.",
+      "why": "Every point moves by the same amount, so the platform keeps its size and shape.",
       "steps": [
         {
-          "text": "A slide changes x by the sideways move and y by the up or down move. Right adds to x. Down takes from y."
+          "text": "Moving a part: x changes by the sideways move, y by the up or down move. Right adds to x. Down takes from y."
         },
         {
-          "text": "Example: point (2, 3), slide 3 right and 2 down. x: 2 + 3 = 5. y: 3 − 2 = 1. Image: (5, 1)."
+          "text": "Example: a part at (2, 3), move 3 right and 2 down. x: 2 + 3 = 5. y: 3 − 2 = 1. New spot: (5, 1)."
         },
         {
-          "text": "Check: a slide keeps the sides the same length. Count the squares on the grid to test your answer."
+          "text": "Check: the platform keeps its size. Count the studs on the grid to test your answer."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-applied-1",
-      "prompt": "Point P(−3, 4) is reflected over the line x = 1. Where does the image go?",
+      "prompt": "Your Minecraft wall block sits at P(−3, 4).\nYou mirror the build over the line x = 1.\nWhere does the copy of P go?",
       "options": [
         "(−5, 4)",
         "(5, −4)",
         "(5, 4)"
       ],
       "answer": 2,
-      "why": "A reflection puts each point the same distance past the mirror line as it was before it.",
+      "why": "A mirror puts each point the same distance past the line as it was before.",
       "steps": [
         {
-          "text": "Find the distance from the point to the line first. Count across the grid, not up or down."
+          "text": "Find the distance from the block to the mirror line first. Count across, not up or down."
         },
         {
-          "text": "Example: point (2, −1), mirror line x = 3. It is 1 unit left of the line. Its image is 1 unit right: (4, −1)."
+          "text": "Example: block (2, −1), mirror line x = 3. It is 1 block left of the line. Its copy is 1 block right: (4, −1)."
         },
         {
-          "text": "A reflection over a vertical line changes only x. The y-value stays the same."
+          "text": "A mirror over a vertical line changes only x. The y-value stays the same."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-applied-2",
-      "prompt": "Nami's treasure is at (5, −2) on her map. The map turns 90° anticlockwise around the origin. Where is the treasure now?",
+      "prompt": "Your treasure chest is at (5, −2) on the Fortnite island map.\nThe map turns 90° anticlockwise around the origin.\nWhere is the chest now?",
       "options": [
         "(2, 5)",
         "(−2, −5)",
@@ -618,30 +618,30 @@ export const pack: SePack = {
           "text": "For an anticlockwise 90° turn about the origin: new x = −(old y), and new y = old x."
         },
         {
-          "text": "Example: (−3, 4). New x = −4. New y = −3. Image: (−4, −3)."
+          "text": "Example: a loot spot at (−3, 4). New x = −4. New y = −3. New spot: (−4, −3)."
         },
         {
-          "text": "Check: distance from origin must match. Use the Pythagorean idea: x² + y² stays the same."
+          "text": "Check: the distance from the origin must match. Use x² + y² and check it stays the same."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-applied-3",
-      "prompt": "Bachira copies a 4 cm by 2 cm rectangle onto a poster at scale factor 3. What is the new area?",
+      "prompt": "In Roblox Studio, a part is 4 studs by 2 studs.\nYou scale it by a factor of 3.\nWhat is the new area of its top face?",
       "options": [
-        "24 cm²",
-        "72 cm²",
-        "36 cm²"
+        "24 studs²",
+        "72 studs²",
+        "36 studs²"
       ],
       "answer": 1,
       "why": "Area uses two lengths, so a scale factor of 3 multiplies the area by 3 × 3.",
       "steps": [
         {
-          "text": "Scale each length by the factor first. Then multiply the new length by the new width."
+          "text": "Scale each side by the factor first. Then multiply the new length by the new width."
         },
         {
-          "text": "Example: 5 cm by 3 cm, scale factor 2. New sides 10 cm and 6 cm. Area 60 cm², which is 4 times the old 15 cm²."
+          "text": "Example: a 5 by 3 stud part, scale factor 2. New sides 10 and 6. Area 60, which is 4 times the old 15."
         },
         {
           "text": "Trap: a factor of 2 gives 4 times the area, not 2 times. Square the factor for area."
@@ -651,7 +651,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-applied-4",
-      "prompt": "Point (3, 1) on a Toronto street grid is reflected over the y-axis, then slid 2 right. Where does it end?",
+      "prompt": "A winger's marker sits at (3, 1) on the EA FC tactics board.\nYou flip the board over the y-axis, then slide the marker 2 right.\nWhere does it end?",
       "options": [
         "(−5, 1)",
         "(5, −1)",
@@ -664,17 +664,17 @@ export const pack: SePack = {
           "text": "Do the moves in the order given. Finish one move before you start the next."
         },
         {
-          "text": "Example: (2, 4). Reflect over the y-axis: (−2, 4). Then slide 3 left: (−5, 4)."
+          "text": "Example: marker at (2, 4). Flip over the y-axis: (−2, 4). Slide 3 left: (−5, 4)."
         },
         {
-          "text": "Test: slide first, then flip, on the same start point. Compare the two finish points."
+          "text": "Test: slide first, then flip, from the same start. Compare the two finish points."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-applied-5",
-      "prompt": "Yesterday Chopper's boat was at (−4, 6). Today it is at (1, 2). What single slide vector moved it?",
+      "prompt": "Your Pokémon walked a route at (−4, 6) yesterday.\nToday it stands at (1, 2).\nWhat single slide vector moved it?",
       "options": [
         "(−5, 4)",
         "(3, 8)",
@@ -697,7 +697,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-applied-6",
-      "prompt": "Coach Ego plans a pass that flips over the diagonal line y = x. Pass starts at (−2, 5). Where does it land?",
+      "prompt": "Roblox Studio: the Mirror tool flips a part over the diagonal line y = x.\nThe part sits at (−2, 5). Where is the mirrored copy?",
       "options": [
         "(2, −5)",
         "(5, −2)",
@@ -707,33 +707,33 @@ export const pack: SePack = {
       "why": "A reflection over y = x swaps x and y, because every point is mirrored across that diagonal.",
       "steps": [
         {
-          "text": "For a reflection over y = x, swap the two numbers in the brackets."
+          "text": "For a mirror over y = x, swap the two numbers in the brackets."
         },
         {
-          "text": "Example: (4, −1) becomes (−1, 4). The x and y positions trade places."
+          "text": "Example: a part at (4, −1) mirrors to (−1, 4). The x and y trade places."
         },
         {
-          "text": "Test: a point on the line, like (3, 3), stays where it is after the swap."
+          "text": "Test: a part at (3, 3) stays put after the swap, because it sits on the line."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-applied-7",
-      "prompt": "A pitch model is 4 cm wide and 6 cm tall. A copy is 10 cm wide, same shape. How tall is the copy?",
+      "prompt": "Your Minecraft house is 4 blocks wide and 6 blocks tall.\nA same-shape copy is 10 blocks wide. How tall is the copy?",
       "options": [
-        "15 cm",
-        "16 cm",
-        "60 cm"
+        "15 blocks",
+        "16 blocks",
+        "60 blocks"
       ],
       "answer": 0,
       "why": "A same-shape copy uses one scale factor for every length, so the height changes in the same ratio.",
       "steps": [
         {
-          "text": "Find the scale factor: new length divided by old length, using the width."
+          "text": "Find the scale factor: new width divided by old width."
         },
         {
-          "text": "Example: 5 cm wide, 3 cm tall, copy 10 cm wide. Factor 2. New height: 3 × 2 = 6 cm."
+          "text": "Example: a wall 5 blocks wide and 3 blocks tall, copied 10 blocks wide. Factor 2, so the height is 3 × 2 = 6 blocks."
         },
         {
           "text": "Use the factor on the height. Do not add it, and do not use the width again."
@@ -743,7 +743,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-applied-8",
-      "prompt": "Chopper's ship sits at (−3, 2) on a sea chart. The chart turns 90° clockwise about the origin. Which quadrant is the ship in now?",
+      "prompt": "The Fortnite storm centre sits at (−3, 2) on the map grid.\nThe whole map turns 90° clockwise about the origin. Which quadrant is the centre in now?",
       "options": [
         "Quadrant III",
         "Quadrant I",
@@ -756,7 +756,7 @@ export const pack: SePack = {
           "text": "For a clockwise 90° turn about the origin: new x = old y, and new y = −(old x)."
         },
         {
-          "text": "Example: (−1, −4). New x = −4. New y = −(−1) = 1. Point (−4, 1) is in Quadrant II."
+          "text": "Example: a storm centre at (−1, −4). New x = −4, new y = −(−1) = 1. The point (−4, 1) is in Quadrant II."
         },
         {
           "text": "Read the signs: positive x and positive y is Quadrant I. Check your signs after the turn."
@@ -766,7 +766,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-applied-9",
-      "prompt": "A rectangle has a perimeter of 14 cm. It is enlarged at scale factor 3. What is the new perimeter?",
+      "prompt": "A chocolate bar is a rectangle with a perimeter of 14 cm.\nA giant version is made at scale factor 3. What is its new perimeter?",
       "options": [
         "42 cm",
         "126 cm",
@@ -779,40 +779,40 @@ export const pack: SePack = {
           "text": "Perimeter adds every side, so multiply the total by the factor once."
         },
         {
-          "text": "Example: square with side 2 cm, perimeter 8 cm. Scale factor 4. New perimeter: 8 × 4 = 32 cm."
+          "text": "Example: a square tray with sides 2 cm has perimeter 8 cm. Scale factor 4 gives 8 × 4 = 32 cm."
         },
         {
-          "text": "Trap: area would be 9 times bigger, but perimeter is only 3 times bigger."
+          "text": "Trap: the area would be 9 times bigger, but the perimeter is only 3 times bigger."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-deeper-6",
-      "prompt": "Isagi slides a flag 4 cm to the right. What happens to the lettering on it?",
+      "prompt": "A Blue Lock banner with the word GOAL slides 4 cm to the right.\nWhat happens to the lettering?",
       "options": [
-        "The flag keeps its way round, so the lettering reads the same.",
-        "The flag turns over, so the lettering now reads backwards.",
-        "The flag splits in two and joins on the far side."
+        "The lettering keeps its way round and reads the same.",
+        "The lettering flips over and now reads backwards.",
+        "The banner splits in two and joins on the far side."
       ],
       "answer": 0,
       "why": "A slide moves every point the same way, so the shape never turns or mirrors.",
       "steps": [
         {
-          "text": "Mark corner A of a triangle with a dot, then slide the triangle 5 cm up."
+          "text": "Mark the bottom-left corner of a triangle with a dot, then slide the triangle 5 cm up."
         },
         {
           "text": "The dot moves 5 cm up. Every other point moves 5 cm up too."
         },
         {
-          "text": "A flip would swap left and right. A slide keeps the order, so the lettering stays readable."
+          "text": "A flip would swap left and right. A slide keeps the order, so the letters stay readable."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-deeper-7",
-      "prompt": "A point sits 3 cm to the left of a mirror line. Where is its flipped image?",
+      "prompt": "A Pokémon sprite sits 3 cm left of a mirror line on the test card.\nWhere is its flipped image?",
       "options": [
         "3 cm to the right of the line.",
         "3 cm to the left of the line.",
@@ -822,20 +822,20 @@ export const pack: SePack = {
       "why": "A reflection puts the image the same distance from the line, on the opposite side.",
       "steps": [
         {
-          "text": "Measure the distance from the point to the line. Say it is 5 cm."
+          "text": "Measure the distance from the sprite to the line. Say it is 5 cm."
         },
         {
           "text": "The image sits the same 5 cm from the line, but on the other side."
         },
         {
-          "text": "The gap between point and image is 10 cm, so the mirror line sits exactly halfway between them."
+          "text": "The gap between sprite and image is 10 cm, so the mirror line sits exactly halfway between them."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-trans-deeper-8",
-      "prompt": "A pass arrow points East. Isagi turns it 90° clockwise. Which way does it point now?",
+      "prompt": "Your spawn arrow in Studio faces East. You rotate it 90° clockwise. Which way does it face now?",
       "options": [
         "West",
         "South",
@@ -858,20 +858,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-deeper-9",
-      "prompt": "A square has sides 2 cm. It is resized by scale factor 3. What is the new area?",
+      "prompt": "A 2 by 2 block floor is scaled by 3 in your build. What is the new area?",
       "options": [
-        "6 cm²",
-        "12 cm²",
-        "36 cm²"
+        "6 m²",
+        "12 m²",
+        "36 m²"
       ],
       "answer": 2,
-      "why": "Each side becomes 6 cm, and area is side times side, so 6 × 6 = 36 cm².",
+      "why": "Each side becomes 6 m, and area is side times side, so 6 × 6 = 36 m².",
       "steps": [
         {
-          "text": "Try a square with sides 5 cm and scale factor 2. The new sides are 10 cm."
+          "text": "Try a 5 by 5 block floor scaled by 2. The new sides are 10 blocks."
         },
         {
-          "text": "The old area is 5 × 5 = 25 cm². The new area is 10 × 10 = 100 cm²."
+          "text": "The old area is 5 × 5 = 25 m². The new area is 10 × 10 = 100 m²."
         },
         {
           "text": "Notice 100 is four times 25, so area grows by the factor squared, not by the factor."
@@ -881,7 +881,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-trans-deeper-10",
-      "prompt": "Triangle A has sides 4, 6 and 8 cm. Triangle B has sides 6, 9 and 12 cm. What are they?",
+      "prompt": "Two triangles are marked on the pitch. A has sides 4, 6, 8 m. B has sides 6, 9, 12 m. What are they?",
       "options": [
         "Congruent: same size and shape.",
         "Similar: same shape, different size.",
@@ -902,32 +902,9 @@ export const pack: SePack = {
       ]
     },
     {
-      "kind": "choice",
-      "id": "math-trans-deeper-11",
-      "prompt": "A square is turned 90° about its centre. Which is true?",
-      "options": [
-        "It did not really move, because it still looks like a square.",
-        "It moved, even though it looks the same as before.",
-        "It is the same square, because all of its sides are equal."
-      ],
-      "answer": 1,
-      "why": "A square turned 90° looks identical, but its corners have moved to new places.",
-      "steps": [
-        {
-          "text": "Put a dot on the top-right corner of the square."
-        },
-        {
-          "text": "Turn the square 90° clockwise. The dot lands on the bottom-right corner."
-        },
-        {
-          "text": "The square looks the same, but the dot shows it moved. Marking a point is how you check."
-        }
-      ]
-    },
-    {
       "kind": "build",
       "id": "math-trans-build-2",
-      "prompt": "Isagi flips the point (4, 1) across the y-axis. What is the new x-value?",
+      "prompt": "Half a Minecraft build sits at (4, 1). Mirror it across the y-axis. What is the new x-value?",
       "answer": "-4",
       "decoys": [
         "0",
@@ -940,17 +917,17 @@ export const pack: SePack = {
           "text": "Flipping across the y-axis changes the sign of x."
         },
         {
-          "text": "Worked: (−7, 2) flips to (7, 2)."
+          "text": "Worked: a block at (−7, 2) mirrors to (7, 2)."
         },
         {
-          "text": "The y-value stays 2, because the flip is sideways, not up or down."
+          "text": "The y-value stays 2, because the mirror is sideways, not up or down."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-trans-build-3",
-      "prompt": "Rin flips the point (3, 5) across the x-axis. What is the new y-value?",
+      "prompt": "The storm centre is at (3, 5) on the map grid. Flip it across the x-axis. What is the new y-value?",
       "answer": "-5",
       "decoys": [
         "3",
@@ -973,7 +950,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-trans-build-4",
-      "prompt": "Luffy’s ship is at (2, 5). It turns 90° clockwise around (0, 0). What is the new x-value?",
+      "prompt": "Your Roblox part sits at (2, 5). Rotate it 90° clockwise around (0, 0). What is the new X?",
       "answer": "5",
       "decoys": [
         "2",
@@ -983,20 +960,20 @@ export const pack: SePack = {
       "why": "A 90° clockwise turn about the origin moves the old y-value into the x-position.",
       "steps": [
         {
-          "text": "For a 90° clockwise turn, the new x is the old y."
+          "text": "For a 90° clockwise turn, the new X is the old Y."
         },
         {
-          "text": "Worked: (−3, 4) turns to (4, 3). New x is 4, the old y."
+          "text": "Worked: a part at (−3, 4) turns to (4, 3). New X is 4, the old Y."
         },
         {
-          "text": "The new y is the opposite of the old x, which is 3."
+          "text": "The new Y is the opposite of the old X, which is 3."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-trans-build-5",
-      "prompt": "Zoro’s map triangle has sides 2 cm, 7 cm and 8 cm. He resizes it by a scale factor of 3. What is the new longest side in cm?",
+      "prompt": "Your Minecraft roof triangle has sides 2 m, 7 m and 8 m. Scale it by 3. What is the new longest side in metres?",
       "answer": "24",
       "decoys": [
         "6",
@@ -1018,7 +995,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-trans-build-6",
-      "prompt": "Sanji’s treasure map has a rectangle 3 cm by 5 cm. He resizes it by a scale factor of 3. What is the new area in cm²?",
+      "prompt": "Your Fortnite build wall is 3 m by 5 m. Scale it by 3. What is the new area in m²?",
       "answer": "135",
       "decoys": [
         "4"
@@ -1029,7 +1006,7 @@ export const pack: SePack = {
           "text": "Multiply each side by the scale factor, then find the area."
         },
         {
-          "text": "Worked: a 2 by 6 rectangle, scale 2, gives 4 by 12. 4 × 12 = 48 cm²."
+          "text": "Worked: a 2 by 6 wall, scale 2, gives 4 by 12. 4 × 12 = 48 m²."
         },
         {
           "text": "Check: 48 is 4 times the old area of 12, and 2 × 2 is 4."
@@ -1039,7 +1016,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-trans-build-7",
-      "prompt": "Chopper flips the point (1.6, 3) across the y-axis. What is the new x-value?",
+      "prompt": "Your Roblox part sits at X = 1.6, Y = 3. Mirror it across the Y-axis. What is the new X?",
       "answer": "-1.6",
       "decoys": [
         "0",
@@ -1049,7 +1026,7 @@ export const pack: SePack = {
       "why": "A flip across the y-axis changes only the sign of x, so the decimal digits stay the same.",
       "steps": [
         {
-          "text": "Flipping across the y-axis changes the sign of x only."
+          "text": "Flipping across the Y-axis changes the sign of X only."
         },
         {
           "text": "Worked: (0.4, −2) flips to (−0.4, −2)."
@@ -1062,7 +1039,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-trans-games-1",
-      "title": "Scale factors, small to big",
+      "title": "Pizza sizes, small to big",
       "game": {
         "mode": "order",
         "values": [
@@ -1088,7 +1065,7 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "A scale factor above 1 makes a shape bigger, and one below 1 makes it smaller."
+      "why": "A scale factor above 1 makes the pizza bigger, and one below 1 makes it smaller."
     },
     {
       "kind": "video",

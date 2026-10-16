@@ -20,8 +20,8 @@ export const pack: SePack = {
         "x is the mystery number. Our job is to find it."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's team has 14 goals. Some came from x, and 9 came from Bachira. Keep it balanced."
+        "flavour": "key",
+        "text": "Your squad has 14 kills in one match. You got 9. The rest are x."
       },
       "art": {
         "art": "scale",
@@ -33,7 +33,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-0",
-      "prompt": "Isagi scored 9 goals this season. The team has 14 goals. Let g be the goals from everyone else. g + 9 = 14. What is g?",
+      "prompt": "Your striker scored 9 goals this season. The team has 14 goals. Let g be the goals from everyone else. g + 9 = 14. What is g?",
       "options": [
         "g = 5",
         "g = 23",
@@ -62,7 +62,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-1",
-      "prompt": "Zoro owes Luffy some berries. He paid back 4 and still owes 10. Let x be the first amount. x − 4 = 10. What is x?",
+      "prompt": "You placed 4 blocks on your wall. 10 blocks are still left in your stack. Let x be the first amount. x − 4 = 10. What is x?",
       "options": [
         "x = 6",
         "x = 14",
@@ -149,7 +149,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-2",
-      "prompt": "Three strikers scored the same number of goals each. Together they scored 18. The equation is 3x = 18. What is x?",
+      "prompt": "Three Roblox obbys each have the same number of checkpoints. Together they have 18 checkpoints. The equation is 3x = 18. What is x?",
       "options": [
         "x = 15",
         "x = 54",
@@ -159,7 +159,7 @@ export const pack: SePack = {
       "why": "Dividing both sides by 3 undoes the multiply by 3, so x is left alone.",
       "steps": [
         {
-          "text": "Look at the equation 4y = 20. The y is multiplied by 4."
+          "text": "Look at the equation 4y = 20. Four obbys each have y checkpoints."
         },
         {
           "text": "To undo the multiply by 4, divide BOTH sides by 4: 4y ÷ 4 = 20 ÷ 4."
@@ -172,7 +172,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-3",
-      "prompt": "Sanji shares a bounty between 4 crew members. Each share is 7. Let x be the whole bounty. x ÷ 4 = 7. What is x?",
+      "prompt": "Four friends share one box of Timbits equally. Each friend gets 7 Timbits. Let x be the whole box. x ÷ 4 = 7. What is x?",
       "options": [
         "x = 28",
         "x = 11",
@@ -182,13 +182,13 @@ export const pack: SePack = {
       "why": "Multiplying both sides by 4 undoes the divide by 4, so x is left alone.",
       "steps": [
         {
-          "text": "Look at the equation n ÷ 5 = 6. The n is divided by 5."
+          "text": "Look at the equation n ÷ 5 = 6. The n Timbits are split into 5 boxes."
         },
         {
           "text": "To undo the divide by 5, multiply BOTH sides by 5: n ÷ 5 × 5 = 6 × 5."
         },
         {
-          "text": "So n = 30. Check: 30 ÷ 5 = 6, which is true."
+          "text": "So n = 30. Check: 30 ÷ 5 = 6 Timbits in each box, which is true."
         }
       ]
     },
@@ -202,14 +202,14 @@ export const pack: SePack = {
         "Once you can balance one, you can balance them all."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's bounty went up by some amount. The total is known. Find the missing amount."
+        "flavour": "key",
+        "text": "Your Minecraft build grew by some blocks. The total is known. Find the missing amount."
       }
     },
     {
       "kind": "build",
       "id": "math-eq1-build-0",
-      "prompt": "Isagi scored x goals. Then he scored 4 more. Now he has 11 goals. Build x.",
+      "prompt": "Your chest had x blocks. You added 4 more. Now it holds 11. Build x.",
       "answer": "7",
       "decoys": [
         "9",
@@ -219,13 +219,13 @@ export const pack: SePack = {
       "why": "Subtracting the same number from both sides keeps the equation balanced.",
       "steps": [
         {
-          "text": "Take y + 4 = 11. The +4 is stuck to y."
+          "text": "Your stack reads x + 6 = 15. The +6 is stuck to x."
         },
         {
-          "text": "Undo it. Take 4 from BOTH sides."
+          "text": "Undo it. Take 6 from BOTH sides."
         },
         {
-          "text": "Left: y = 7. Right: 11 − 4 = 7. Check: 7 + 4 = 11."
+          "text": "Left: x = 9. Right: 15 − 6 = 9. Check: 9 + 6 = 15."
         }
       ],
       "art": {
@@ -238,17 +238,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-4",
-      "prompt": "You want to solve x − 7 = 12. What do you do to both sides first?",
+      "prompt": "Your squad had x wood. You used 7. Now 12 is left. What do you do to both sides first?",
       "options": [
-        "Multiply both sides by 7",
+        "Times both sides by 7",
         "Add 7 to both sides",
-        "Subtract 7 from both sides"
+        "Take 7 from both sides"
       ],
       "answer": 1,
       "why": "Adding 7 undoes the subtract 7, and the balance stays even.",
       "steps": [
         {
-          "text": "Look at the equation a − 5 = 9. The 5 is being taken away."
+          "text": "Your pizza reads a − 5 = 9. The 5 eaten slices are taken from a."
         },
         {
           "text": "Undo it by doing the opposite to BOTH sides: add 5."
@@ -261,7 +261,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-5",
-      "prompt": "Solve this equation: x + 12 = 5. What is x?",
+      "prompt": "Your team's goal difference is x. After 12 more goals it reads +5. What is x?",
       "options": [
         "x = 17",
         "x = 7",
@@ -271,7 +271,7 @@ export const pack: SePack = {
       "why": "Subtracting 12 from both sides gives a negative answer, which sits left of zero.",
       "steps": [
         {
-          "text": "Look at the equation y + 15 = 4. The 15 is being added to y."
+          "text": "Your F3 Y reads y + 15 = 4. The 15 is being added to y."
         },
         {
           "text": "Subtract 15 from BOTH sides: y + 15 − 15 = 4 − 15."
@@ -297,7 +297,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-eq1-games-0",
-      "title": "Bounty Match",
+      "title": "Striker Sheet",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -328,21 +328,21 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-eq1-teach-2",
-      "title": "The method",
+      "title": "Undo the number",
       "lines": [
         "Find the number stuck to x.",
-        "Do the opposite operation to that number.",
+        "Do the opposite to that number.",
         "Do it to BOTH sides. Always."
       ],
       "callout": {
         "flavour": "key",
-        "text": "The opposite of +9 is −9. The opposite of −4 is +4."
+        "text": "A +9 Robux gift is undone by −9. The opposite of −4 is +4."
       }
     },
     {
       "kind": "choice",
       "id": "math-eq1-basics-6",
-      "prompt": "Solve this equation: x + 2.5 = 7. What is x?",
+      "prompt": "Your jug holds x L. You add 2.5 L. Now it holds 7 L. What is x?",
       "options": [
         "x = 9.5",
         "x = 4.5",
@@ -352,7 +352,7 @@ export const pack: SePack = {
       "why": "Subtracting 2.5 from both sides leaves x alone, and decimals work the same way.",
       "steps": [
         {
-          "text": "Look at the equation t − 1.2 = 3.8. The 1.2 is taken away from t."
+          "text": "Your milk jug reads t − 1.2 = 3.8. The 1.2 L is taken from t."
         },
         {
           "text": "Add 1.2 to BOTH sides: t − 1.2 + 1.2 = 3.8 + 1.2."
@@ -365,17 +365,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-basics-7",
-      "prompt": "Solve this equation: 4x = 3. What is x?",
+      "prompt": "Four friends eat x pizzas each. Together they eat 3 pizzas. Solve 4x = 3. What is x?",
       "options": [
         "x = 3/4",
         "x = 4/3",
         "x = 12"
       ],
       "answer": 0,
-      "why": "Dividing both sides by 4 leaves x alone as a fraction of 3.",
+      "why": "Sharing 3 pizzas between 4 people gives each person 3/4 of a pizza.",
       "steps": [
         {
-          "text": "Look at the equation 5x = 2. The x is multiplied by 5."
+          "text": "Look at 5x = 2. Five friends each eat x pizzas."
         },
         {
           "text": "Divide BOTH sides by 5: 5x ÷ 5 = 2 ÷ 5."
@@ -388,7 +388,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-build-1",
-      "prompt": "Zoro had x coins. He spent 5. Now he has 8 coins left. Build x.",
+      "prompt": "Your squad had x wood. You used 5 on a ramp. Now 8 wood is left. Build x.",
       "answer": "13",
       "decoys": [
         "0",
@@ -398,13 +398,13 @@ export const pack: SePack = {
       "why": "Adding the same number to both sides is how you undo a subtraction.",
       "steps": [
         {
-          "text": "Take n − 7 = 2. The −7 is stuck to n."
+          "text": "Take m − 4 = 6. The −4 is stuck to m."
         },
         {
-          "text": "Undo it. Add 7 to BOTH sides."
+          "text": "Undo it. Add 4 to BOTH sides."
         },
         {
-          "text": "Left: n = 9. Right: 2 + 7 = 9. Check: 9 − 7 = 2."
+          "text": "Left: m = 10. Right: 6 + 4 = 10. Check: 10 − 4 = 6."
         }
       ],
       "art": {
@@ -423,7 +423,7 @@ export const pack: SePack = {
       "lines": [
         "Trap: subtracting 9 from only one side.",
         "Then the scale tips, and the answer is wrong.",
-        "A foul called on one team only is not fair."
+        "Like a Roblox trade where only one side pays, the deal is wrong."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -435,14 +435,14 @@ export const pack: SePack = {
       "id": "math-eq1-teach-4",
       "title": "Worked example",
       "lines": [
-        "Solve y + 6 = 15.",
+        "Your chest has y blocks. You add 6 more. Now it holds 15.",
         "Step 1: 6 is added to y. Its opposite is −6.",
         "Step 2: take 6 from BOTH sides. 15 − 6 = 9, so y = 9.",
         "Check: 9 + 6 = 15. It balances."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro counts 15 coins. Six were added to y. Take 6 away from both sides."
+        "text": "Your chest has y blocks. You add 6 more. Take 6 away from both sides."
       },
       "art": {
         "art": "scale",
@@ -490,8 +490,8 @@ export const pack: SePack = {
       "id": "math-eq1-deeper-1",
       "title": "Undo, don't copy",
       "lines": [
-        "In x + 9 = 14, the 9 is added. Undo it by subtracting 9.",
-        "In x − 9 = 14, the 9 is taken away. Undo it by adding 9.",
+        "In x + 9 = 14, your squad gained 9 wood. Take 9 away to undo it.",
+        "In x − 9 = 14, your squad spent 9 wood. Add 9 back to undo it.",
         "Pick the operation that cancels the number out."
       ],
       "callout": {
@@ -504,13 +504,13 @@ export const pack: SePack = {
       "id": "math-eq1-deeper-2",
       "title": "Multiplying needs division",
       "lines": [
-        "In 3x = 12, the 3 is stuck to the x. It means 3 groups of x.",
+        "In 3x = 12, three chests each hold x ingots. That is 3 groups of x.",
         "Subtracting 3 does not undo a multiplication.",
         "Divide both sides by 3. Then x = 4."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Crew bounty math: 3 pirates share 12 gold coins. Each gets 4. That's the divide."
+        "flavour": "key",
+        "text": "3 chests hold 12 ingots in total. Each chest holds 4. That's the divide."
       }
     },
     {
@@ -528,13 +528,13 @@ export const pack: SePack = {
       "id": "math-eq1-deeper-4",
       "title": "Division undoes multiplication",
       "lines": [
-        "In x ÷ 4 = 6, the x is split into 4 equal parts.",
-        "Each part is 6. So the whole x is 6 times 4.",
+        "In x ÷ 4 = 6, the x goals are split between 4 players.",
+        "Each player scores 6. So the whole x is 6 times 4.",
         "Multiply both sides by 4. x = 24."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Imagine a team of 4 shares a total of x goals. Each player scores 6."
+        "flavour": "key",
+        "text": "4 players share x goals. Each scores 6, so the team total is 24."
       }
     },
     {
@@ -542,35 +542,35 @@ export const pack: SePack = {
       "id": "math-eq1-deeper-5",
       "title": "Check it by putting it back",
       "lines": [
-        "Once you find x, put it into the first equation.",
+        "Once you find x, put it back into the first equation.",
         "Work out the left side. Does it match the right side?",
         "If yes, you are right. If not, look for the mistake."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Checking takes 20 seconds. A wrong answer on a test costs the whole mark."
+        "text": "Checking takes 20 seconds. Like recounting your stack before a trade."
       }
     },
     {
       "kind": "choice",
       "id": "math-eq1-basics-8",
-      "prompt": "Ayaan solved x + 5 = 9. He wrote x = 14. What went wrong?",
+      "prompt": "Sam has x + 5 = 9 blocks. He wrote x = 14. What went wrong?",
       "options": [
-        "He added 5 instead of subtracting 5",
-        "He subtracted 9 instead of 5",
-        "He multiplied by 5 instead of dividing"
+        "He took 9 away where he should take 5",
+        "He added 5 where he should subtract 5",
+        "He multiplied by 5 where he should divide"
       ],
-      "answer": 0,
-      "why": "The opposite of add 5 is subtract 5, so he needed to take 5 away from 9.",
+      "answer": 1,
+      "why": "The opposite of adding 5 is taking 5 away, so x = 9 − 5.",
       "steps": [
         {
-          "text": "Look at the equation a + 4 = 10. A student wrote a = 14."
+          "text": "A player has a + 4 = 10 ingots. A friend wrote a = 14."
         },
         {
           "text": "Correct method: subtract 4 from BOTH sides. a + 4 − 4 = 10 − 4."
         },
         {
-          "text": "So a = 6. Check: 6 + 4 = 10, which is true. The wrong answer 14 fails the check."
+          "text": "So a = 6. Check: 6 + 4 = 10, which is true. The wrong 14 fails the check."
         }
       ],
       "art": {
@@ -583,7 +583,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-basics-9",
-      "prompt": "Solve this equation: x − 9 = −4. What is x?",
+      "prompt": "You dig 9 blocks straight down and stop at Y = −4.\nLet x be your start height. x − 9 = −4. What is x?",
       "answer": "5",
       "decoys": [
         "4",
@@ -592,7 +592,7 @@ export const pack: SePack = {
       "why": "Adding 9 to both sides undoes the subtract 9 and leaves x alone.",
       "steps": [
         {
-          "text": "Look at the equation w − 6 = −2. The 6 is taken away from w."
+          "text": "Look at w − 6 = −2. You dig 6 blocks down from w to reach Y = −2."
         },
         {
           "text": "Add 6 to BOTH sides: w − 6 + 6 = −2 + 6."
@@ -605,7 +605,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-0",
-      "prompt": "Isagi's shots minus 4 equals 9. Let s be his shots. s − 4 = 9. What is s?",
+      "prompt": "You had s V-Bucks, spent 4 on a skin, and 9 are left.\ns − 4 = 9. What is s?",
       "options": [
         "s = 13",
         "s = 5",
@@ -615,7 +615,7 @@ export const pack: SePack = {
       "why": "Adding 4 to both sides cancels the minus 4 on the left.",
       "steps": [
         {
-          "text": "Try a new one: m − 6 = 10."
+          "text": "Try a new one: you spend 6 V-Bucks and 10 are left. m − 6 = 10."
         },
         {
           "text": "Add 6 to both sides: m − 6 + 6 = 10 + 6."
@@ -634,7 +634,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-1",
-      "prompt": "Zoro's crew packs 4 equal bags of berries. There are 28 berries in total. Let b be berries per bag. 4b = 28. What is b?",
+      "prompt": "Four boxes hold 28 Timbits altogether.\nLet b be Timbits per box. 4b = 28. What is b?",
       "options": [
         "b = 24",
         "b = 7",
@@ -644,7 +644,7 @@ export const pack: SePack = {
       "why": "Dividing both sides by 4 leaves b alone on the left.",
       "steps": [
         {
-          "text": "Try a new one: 5c = 45."
+          "text": "Try a new one: five boxes hold 45 Timbits. 5c = 45."
         },
         {
           "text": "Divide both sides by 5: 5c ÷ 5 = 45 ÷ 5."
@@ -663,7 +663,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-2",
-      "prompt": "A Kensington Market cheese shop cuts a wheel into 4 equal pieces. Each piece is 3.5 kg. Let k be the total in kg. k ÷ 4 = 3.5. What is k?",
+      "prompt": "A Minecraft bridge of k blocks is cut into 4 equal parts.\nEach part is 3.5 blocks. k ÷ 4 = 3.5. What is k?",
       "options": [
         "k = 0.875",
         "k = 7.5",
@@ -673,7 +673,7 @@ export const pack: SePack = {
       "why": "Multiplying both sides by 4 undoes the division by 4.",
       "steps": [
         {
-          "text": "Try a new one: m ÷ 3 = 2.5."
+          "text": "Try a new one: a builder cuts m blocks into 3 equal parts of 2.5 each. m ÷ 3 = 2.5."
         },
         {
           "text": "Multiply both sides by 3: m ÷ 3 × 3 = 2.5 × 3."
@@ -686,7 +686,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-3",
-      "prompt": "After a match, Chigiri's team goal difference is −3. Let x be the difference before. x + 8 = −3. What is x?",
+      "prompt": "After a match, your EA FC club's goal difference is −3.\nLet x be the difference before. x + 8 = −3. What is x?",
       "options": [
         "x = 11",
         "x = −11",
@@ -696,7 +696,7 @@ export const pack: SePack = {
       "why": "Subtracting 8 from both sides cancels the plus 8 on the left.",
       "steps": [
         {
-          "text": "Try a new one: y + 6 = 2."
+          "text": "Try a new one: after 6 more goals, your difference reads 2. y + 6 = 2."
         },
         {
           "text": "Subtract 6 from both sides: y + 6 − 6 = 2 − 6."
@@ -709,7 +709,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-5",
-      "prompt": "Four teammates share x shots equally. Each gets 5 shots. x ÷ 4 = 5. What is x?",
+      "prompt": "Four Pokémon trainers share x Poké Balls equally.\nEach gets 5. x ÷ 4 = 5. What is x?",
       "options": [
         "x = 9",
         "x = 20",
@@ -719,7 +719,7 @@ export const pack: SePack = {
       "why": "Multiplying both sides by 4 undoes the division by 4.",
       "steps": [
         {
-          "text": "Try a new one: n ÷ 3 = 7."
+          "text": "Try a new one: three trainers share n potions equally. Each gets 7. n ÷ 3 = 7."
         },
         {
           "text": "Multiply both sides by 3: n ÷ 3 × 3 = 7 × 3."
@@ -732,7 +732,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-6",
-      "prompt": "Franky's bounty ledger says y − 2.7 = 5.1, in million berries. What is y?",
+      "prompt": "Your Minecraft tower is y metres tall. 2.7 m is cut off, leaving 5.1 m. y − 2.7 = 5.1. What is y?",
       "options": [
         "y = 2.4",
         "y = 3.3",
@@ -742,7 +742,7 @@ export const pack: SePack = {
       "why": "Adding 2.7 to both sides cancels the minus 2.7 on the left.",
       "steps": [
         {
-          "text": "Try a new one: z − 1.4 = 2.6."
+          "text": "Try a new one: a football pitch is z m long. Cut 1.4 m off it, leaving 2.6 m."
         },
         {
           "text": "Add 1.4 to both sides: z − 1.4 + 1.4 = 2.6 + 1.4."
@@ -755,7 +755,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-7",
-      "prompt": "On a St. Eugene school trip, k ÷ 6 = −4, where k is the change in pencils. What is k?",
+      "prompt": "Your 6 Pokémon share a total HP change of k, equally. k ÷ 6 = −4. What is k?",
       "options": [
         "k = −24",
         "k = 24",
@@ -765,7 +765,7 @@ export const pack: SePack = {
       "why": "Multiplying both sides by 6 undoes the division by 6.",
       "steps": [
         {
-          "text": "Try a new one: p ÷ 5 = −3."
+          "text": "Try a new one: 5 Pokémon share a change of p, equally. p ÷ 5 = −3."
         },
         {
           "text": "Multiply both sides by 5: p ÷ 5 × 5 = −3 × 5."
@@ -778,7 +778,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-8",
-      "prompt": "Bachira's team has 12 points. After losing n points, it has 7 left. 12 − n = 7. What is n?",
+      "prompt": "Your box had 12 Timbits. After you eat n, 7 are left. 12 − n = 7. What is n?",
       "options": [
         "n = −5",
         "n = 5",
@@ -788,7 +788,7 @@ export const pack: SePack = {
       "why": "Moving the variable to the side with a plus makes it easy to find, then you subtract the other number.",
       "steps": [
         {
-          "text": "Try a new one: 15 − m = 4."
+          "text": "Try a new one: a tray has 15 Timbits. After eating m, 4 remain. 15 − m = 4."
         },
         {
           "text": "Add m to both sides: 15 − m + m = 4 + m, so 15 = 4 + m."
@@ -801,7 +801,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-applied-9",
-      "prompt": "Sanji's pantry log says −x = 8. What is x?",
+      "prompt": "Your football club's goal difference changed by −x. The log says −x = 8. What is x?",
       "options": [
         "x = 0.125",
         "x = 8",
@@ -811,7 +811,7 @@ export const pack: SePack = {
       "why": "Multiplying both sides by −1 flips the sign on each side, so x itself is found.",
       "steps": [
         {
-          "text": "Try a new one: −m = −6."
+          "text": "Try a new one: a Roblox game's change is −m. The log says −m = −6."
         },
         {
           "text": "Multiply both sides by −1: −m × −1 = −6 × −1."
@@ -824,7 +824,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-6",
-      "prompt": "In x + 9 = 14, what is the first move to get x alone?",
+      "prompt": "Your squad has x wood. Gather 9 more and you have 14. x + 9 = 14. What is the first move?",
       "options": [
         "Subtract 9 from both sides.",
         "Add 9 to both sides.",
@@ -834,7 +834,7 @@ export const pack: SePack = {
       "why": "Subtraction is the opposite of addition, so it cancels the 9 on the left.",
       "steps": [
         {
-          "text": "Try x + 6 = 11. The 6 is added, so undo it with subtraction."
+          "text": "Try x + 6 = 11. Your Minecraft stack has x blocks, plus 6 more makes 11. The 6 is added, so undo it with subtraction."
         },
         {
           "text": "Subtract 6 from both sides. Left: x. Right: 11 − 6 = 5."
@@ -853,7 +853,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-7",
-      "prompt": "In x − 5 = 3, which move gets x alone?",
+      "prompt": "Your Roblox balance was x Robux. After spending 5, you have 3. x − 5 = 3. Which move gets x alone?",
       "options": [
         "Subtract 5 from both sides.",
         "Add 5 to both sides.",
@@ -863,7 +863,7 @@ export const pack: SePack = {
       "why": "Adding 5 cancels the −5, leaving x by itself.",
       "steps": [
         {
-          "text": "Try x − 4 = 10. The 4 is taken away, so undo it with addition."
+          "text": "Try x − 4 = 10. Your team had x points. After losing 4, 10 remain. The 4 is taken away, so undo it with addition."
         },
         {
           "text": "Add 4 to both sides. Left: x. Right: 10 + 4 = 14."
@@ -876,7 +876,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-8",
-      "prompt": "In 2x = 10, what should you do first?",
+      "prompt": "Two boxes of Timbits hold 10 Timbits in total. Each box holds x. What do you do first?",
       "options": [
         "Subtract 2 from both sides.",
         "Divide both sides by 2.",
@@ -886,7 +886,7 @@ export const pack: SePack = {
       "why": "The 2 is multiplying x, so dividing by 2 cancels it.",
       "steps": [
         {
-          "text": "Try 3x = 15. The 3 is multiplying x, so divide by 3."
+          "text": "Three chests hold 15 bricks in total. Each chest holds x. So 3x = 15."
         },
         {
           "text": "Divide both sides by 3. Left: x. Right: 15 ÷ 3 = 5."
@@ -899,7 +899,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-9",
-      "prompt": "Isagi solved x + 7 = 12 like this: x = 12 + 7, so x = 19. What went wrong?",
+      "prompt": "Your striker has x goals. After 7 more he has 12 in total. You wrote x = 12 + 7, so x = 19. What went wrong?",
       "options": [
         "He added when he should have subtracted 7 from both sides.",
         "He should have added 12 to both sides instead.",
@@ -922,7 +922,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-10",
-      "prompt": "In x ÷ 4 = 6, what undoes the division by 4?",
+      "prompt": "You split x blocks into 4 equal piles. Each pile has 6 blocks. What undoes the ÷ 4?",
       "options": [
         "Multiply both sides by 4.",
         "Subtract 4 from both sides.",
@@ -932,7 +932,7 @@ export const pack: SePack = {
       "why": "Multiplication is the opposite of division, so it cancels the ÷ 4.",
       "steps": [
         {
-          "text": "Try y ÷ 3 = 8. The division by 3 must be undone."
+          "text": "Three chests share y blocks equally. Each chest gets 8. So y ÷ 3 = 8."
         },
         {
           "text": "Multiply both sides by 3. Left: y. Right: 8 × 3 = 24."
@@ -945,7 +945,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq1-deeper-11",
-      "prompt": "In x − 3 = 8, which step keeps the balance?",
+      "prompt": "You had x Robux, spent 3, and now have 8. Which step keeps the balance?",
       "options": [
         "Add 3 to only the left side.",
         "Add 3 to both sides at once.",
@@ -955,7 +955,7 @@ export const pack: SePack = {
       "why": "Adding to both sides keeps them equal, so the scale stays level.",
       "steps": [
         {
-          "text": "Try x − 2 = 9. The scale starts level: both sides equal."
+          "text": "Try x − 2 = 9. You had x Robux, spent 2, and now have 9. Both sides are equal."
         },
         {
           "text": "Add 2 to both sides. Left: x. Right: 9 + 2 = 11."
@@ -968,7 +968,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-build-2",
-      "prompt": "Three crews share 24 treasure chests equally. Each crew gets m chests. Build m.",
+      "prompt": "Three trainers share 24 Poké Balls equally. Each trainer gets m Poké Balls. Build m.",
       "answer": "8",
       "decoys": [
         "4",
@@ -978,7 +978,7 @@ export const pack: SePack = {
       "why": "Multiplying or dividing both sides by the same number keeps the balance.",
       "steps": [
         {
-          "text": "Take 4k = 36. The 4 is multiplying k."
+          "text": "Take 4k = 36. Four trainers each hold k Poké Balls, 36 in total."
         },
         {
           "text": "Undo it. Divide BOTH sides by 4."
@@ -991,16 +991,16 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-build-3",
-      "prompt": "A bag of x coins is split into 3 equal shares. Each share has 5 coins. Build x.",
-      "answer": "15",
+      "prompt": "Your squad splits x V-Bucks equally between 2 players. Each player gets 6 V-Bucks. Build x.",
+      "answer": "12",
       "decoys": [
         "8",
         "0"
       ],
-      "why": "Dividing by 3 means the whole bag is three shares put back together.",
+      "why": "Dividing by 2 means the whole amount is two shares put back together.",
       "steps": [
         {
-          "text": "Take x ÷ 2 = 6. The ÷2 is splitting x in half."
+          "text": "Take x ÷ 2 = 6. The ÷ 2 is splitting x into two equal shares."
         },
         {
           "text": "Undo it. Multiply BOTH sides by 2."
@@ -1013,7 +1013,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-build-4",
-      "prompt": "Bachira dribbled x km, then 2.5 km more. In total he ran 7.1 km. Build x.",
+      "prompt": "Your striker ran x km in the first half, then 2.5 km more. In total he ran 7.1 km. Build x.",
       "answer": "4.6",
       "decoys": [
         "5",
@@ -1023,27 +1023,27 @@ export const pack: SePack = {
       "why": "Decimals follow the same rule as whole numbers: do the same thing to both sides.",
       "steps": [
         {
-          "text": "Take y − 1.2 = 3.5. The −1.2 is stuck to y."
+          "text": "Take x − 1.2 = 3.5 km. The −1.2 is stuck to x."
         },
         {
           "text": "Undo it. Add 1.2 to BOTH sides."
         },
         {
-          "text": "Left: y = 4.7. Right: 3.5 + 1.2 = 4.7. Check: 4.7 − 1.2 = 3.5."
+          "text": "Left: x = 4.7. Right: 3.5 + 1.2 = 4.7. Check: 4.7 − 1.2 = 3.5."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-eq1-build-5",
-      "prompt": "A submarine is at z metres. It rises 7 m and is now at 3 m. Build z.",
+      "prompt": "Your player is at Y = z. He climbs 7 blocks and stands at Y = 3. Build z.",
       "answer": "-4",
       "decoys": [
         "+",
         "9",
         "1"
       ],
-      "why": "A negative answer means the start was below zero, and adding 7 takes you up to 3.",
+      "why": "A negative Y is below zero, and climbing 7 blocks takes you up to Y = 3.",
       "steps": [
         {
           "text": "Take z + 9 = 2. The +9 is stuck to z."
@@ -1076,7 +1076,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq1-build-7",
-      "prompt": "Sanji pours 4 cups, each x litres. Together they hold 1.8 litres. Build x.",
+      "prompt": "Your 4 juice cups each hold x litres. Together they hold 1.8 litres. Build x.",
       "answer": "0.45",
       "decoys": [
         "9",
@@ -1085,45 +1085,45 @@ export const pack: SePack = {
       "why": "Dividing by a whole number splits a decimal into equal parts the same way.",
       "steps": [
         {
-          "text": "Take 5y = 2.5. The 5 is multiplying y."
+          "text": "Take 5x = 2.5 L. The 5 is multiplying x."
         },
         {
           "text": "Undo it. Divide BOTH sides by 5."
         },
         {
-          "text": "Left: y = 0.5. Right: 2.5 ÷ 5 = 0.5. Check: 5 × 0.5 = 2.5."
+          "text": "Left: x = 0.5 L. Right: 2.5 ÷ 5 = 0.5. Check: 5 × 0.5 = 2.5."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-eq1-games-1",
-      "title": "Crew Bounty Sort",
+      "title": "Wood Stack Sort",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "x + 8 = 12",
+            "label": "w + 8 = 12",
             "value": 4
           },
           {
-            "label": "x + 15 = 20",
+            "label": "w + 15 = 20",
             "value": 5
           },
           {
-            "label": "x − 5 = 1",
+            "label": "w − 5 = 1",
             "value": 6
           },
           {
-            "label": "x + 3 = 10",
+            "label": "w + 3 = 10",
             "value": 7
           },
           {
-            "label": "x − 4 = 6",
+            "label": "w − 4 = 6",
             "value": 10
           },
           {
-            "label": "x − 9 = 2",
+            "label": "w − 9 = 2",
             "value": 11
           }
         ]

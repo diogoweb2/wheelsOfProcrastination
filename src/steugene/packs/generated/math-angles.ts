@@ -20,14 +20,14 @@ export const pack: SePack = {
         "Together, they make a straight angle."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi and a defender stand on one straight touchline. The two angles they make add to 180°."
+        "flavour": "key",
+        "text": "Isagi's touchline is a straight line. The two angles either side of his run add to 180°."
       }
     },
     {
       "kind": "choice",
       "id": "math-angles-basics-0",
-      "prompt": "Isagi cuts the pitch in a straight line. One angle is 115°. What is the angle on the other side?",
+      "prompt": "A wedge sits flat on a 180° line. One side is 115°. What is the other side?",
       "options": [
         "65°",
         "75°",
@@ -37,10 +37,10 @@ export const pack: SePack = {
       "why": "Angles on a straight line always add up to 180°.",
       "steps": [
         {
-          "text": "A straight line makes 180°. Write 180 − the known angle."
+          "text": "A flat line is 180°. Write 180 − the known angle."
         },
         {
-          "text": "Try a different one: 180 − 120 = 60. So the other angle is 60°."
+          "text": "Try a different one: 180 − 120 = 60. So the other side is 60°."
         },
         {
           "text": "Check it: 60 + 120 = 180. It works."
@@ -50,7 +50,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-1",
-      "prompt": "Luffy's map has a square corner, 90°. One part of it is 38°. What is the other part?",
+      "prompt": "A Minecraft roof corner is a square 90°. One cut is 38°. What is the other cut?",
       "options": [
         "62°",
         "42°",
@@ -63,7 +63,7 @@ export const pack: SePack = {
           "text": "A square corner is 90°. Write 90 − the known angle."
         },
         {
-          "text": "Try a different one: 90 − 27 = 63. So the other part is 63°."
+          "text": "Try a different one: 90 − 27 = 63. So the other cut is 63°."
         },
         {
           "text": "Check it: 63 + 27 = 90. Correct."
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-2",
-      "prompt": "Four players stand around one point on the pitch. Three angles are 100°, 110° and 90°. What is the fourth?",
+      "prompt": "A pizza is cut from its centre into four slices. Three angles are 100°, 110° and 90°. What is the fourth?",
       "options": [
         "50°",
         "60°",
@@ -135,20 +135,20 @@ export const pack: SePack = {
       "why": "Angles around one point always add up to 360°.",
       "steps": [
         {
-          "text": "A full turn around a point is 360°. Add the three known angles first."
+          "text": "A full turn around the centre is 360°. Add the three known angles first."
         },
         {
           "text": "Try a different one: 80 + 120 + 70 = 270. Then 360 − 270 = 90."
         },
         {
-          "text": "Check it: 270 + 90 = 360. The fourth angle is 90°."
+          "text": "Check it: 270 + 90 = 360. The fourth slice is 90°."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-angles-basics-3",
-      "prompt": "Zoro draws a triangle on a log. Two angles are 70° and 45°. What is the third angle?",
+      "prompt": "Your Fortnite ramp is a triangle. Two corners are 70° and 45°. What is the third?",
       "options": [
         "75°",
         "55°",
@@ -158,7 +158,7 @@ export const pack: SePack = {
       "why": "The three angles in any triangle always add up to 180°.",
       "steps": [
         {
-          "text": "Add the two known angles. Then take that from 180°."
+          "text": "Add the two known corners. Then take that from 180°."
         },
         {
           "text": "Try a different one: 50 + 60 = 110. Then 180 − 110 = 70."
@@ -174,14 +174,14 @@ export const pack: SePack = {
       "title": "Why it matters",
       "lines": [
         "You can find a missing angle without a protractor.",
-        "A protractor can be off by a degree or two.",
-        "Straight lines show up everywhere, so this comes up a lot."
+        "Roblox Studio turns parts in degrees, so this comes up there too.",
+        "A protractor can be off by a degree or two."
       ]
     },
     {
       "kind": "build",
       "id": "math-angles-build-0",
-      "prompt": "Two angles sit side by side on a straight line. One angle is 115°. What is the other angle?",
+      "prompt": "You rotate a Roblox part. Two angles sit side by side on a straight line.\nOne angle is 115°. What is the other angle?",
       "answer": "65",
       "decoys": [
         "3",
@@ -204,7 +204,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-4",
-      "prompt": "Two lines cross at one point. One angle is 40°. What is the angle opposite it?",
+      "prompt": "Two Fortnite walls cross at one point, making an X.\nOne angle is 40°. What is the angle opposite it?",
       "options": [
         "50°",
         "40°",
@@ -227,7 +227,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-5",
-      "prompt": "A goal angle is split into two angles on a straight line. The big one is 3 times the small one. What is the big one?",
+      "prompt": "A shot angle at goal is split into two angles on a straight line.\nThe big one is 3 times the small one. What is the big one?",
       "options": [
         "45°",
         "90°",
@@ -255,23 +255,23 @@ export const pack: SePack = {
         "mode": "pair",
         "pairs": [
           [
-            "Partner of 115°",
+            "Roblox part turned 115°",
             "65°"
           ],
           [
-            "Partner of 40°",
+            "Minecraft wall at 40°",
             "140°"
           ],
           [
-            "Partner of 90°",
+            "Fortnite ramp at 90°",
             "90°"
           ],
           [
-            "Partner of 72°",
+            "Football shot angle 72°",
             "108°"
           ],
           [
-            "Partner of 150°",
+            "Roof edge at 150°",
             "30°"
           ]
         ]
@@ -283,9 +283,9 @@ export const pack: SePack = {
       "id": "math-angles-teach-2",
       "title": "The method",
       "lines": [
-        "Step 1: Know that the total is 180°.",
-        "Step 2: Subtract the angle you already know.",
-        "Step 3: The answer is the missing angle."
+        "Your Minecraft roof edge sits on a straight line.",
+        "That line is 180°. Subtract the angle you already know.",
+        "The answer is the missing angle."
       ],
       "callout": {
         "flavour": "key",
@@ -295,7 +295,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-6",
-      "prompt": "Two angles are complementary. One is twice the other. What is the bigger one?",
+      "prompt": "Two angles make one right angle at the corner of a pizza box.\nOne is twice the other. What is the bigger one?",
       "options": [
         "45°",
         "60°",
@@ -318,9 +318,9 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-7",
-      "prompt": "Which pair of angles is supplementary? Blue Lock tactics board, pick the pair.",
+      "prompt": "A Roblox Studio ramp meets a flat floor. Which pair makes a straight line?",
       "options": [
-        "40° and 50°",
+        "35° and 55°",
         "70° and 110°",
         "30° and 60°"
       ],
@@ -334,14 +334,14 @@ export const pack: SePack = {
           "text": "Try a different pair: 80° and 100° makes 180°, so it is supplementary."
         },
         {
-          "text": "Check it: 40 + 50 = 90, and 30 + 60 = 90. Those are not 180."
+          "text": "Check it: 35 + 55 = 90, and 30 + 60 = 90. Neither is 180."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-angles-build-1",
-      "prompt": "Two angles make a straight line. One angle is 38°. What is the other angle?",
+      "prompt": "A Minecraft roof slope is 38°. The other angle makes a straight line. What is it?",
       "answer": "142",
       "decoys": [
         "3",
@@ -368,13 +368,13 @@ export const pack: SePack = {
       "id": "math-angles-teach-3",
       "title": "The common trap",
       "lines": [
-        "Do not use 360°. That is for a full turn.",
+        "Do not use 360°. That is one full spin.",
         "Do not use 90°. That is for complementary angles.",
         "Supplementary always means 180°."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Zoro says 360° once and gets lost at sea. Use 180°."
+        "text": "Turn 360° and you are back where you began. Use 180° for a straight line."
       }
     },
     {
@@ -387,8 +387,8 @@ export const pack: SePack = {
         "Check: 140° + 40° = 180°. It works."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's crew splits a straight deck line. 140° and 40° make 180°."
+        "flavour": "key",
+        "text": "A Studio part turned 140° needs 40° more to lie flat."
       },
       "art": {
         "art": "bars",
@@ -418,7 +418,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Always finish with a check. Strikers do not guess their shots."
+        "text": "Always check the angle before the shot. A striker who guesses usually misses."
       }
     },
     {
@@ -431,8 +431,8 @@ export const pack: SePack = {
         "Mix up the two names and every answer goes wrong."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi needs a shot angle. Corner shot: 90°. Pitch line: 180°."
+        "flavour": "key",
+        "text": "Minecraft roof: corner 90°, flat ceiling line 180°, full turn 360°."
       },
       "art": {
         "art": "bars",
@@ -462,8 +462,8 @@ export const pack: SePack = {
       "title": "Angles on a straight line",
       "lines": [
         "A straight line is half a turn: 180°.",
-        "Angles sitting side by side on it add to 180°.",
-        "Find the missing one: 180° minus the known ones."
+        "Angles side by side on it add to 180°.",
+        "Missing one? Take the known ones from 180°."
       ],
       "callout": {
         "flavour": "pirate",
@@ -475,7 +475,7 @@ export const pack: SePack = {
       "id": "math-angles-deeper-2",
       "title": "Opposite is not next door",
       "lines": [
-        "Two lines cross and make four angles.",
+        "Two Minecraft beams cross and make four angles.",
         "Angles opposite each other are equal.",
         "Angles next door to each other add to 180°."
       ],
@@ -490,7 +490,7 @@ export const pack: SePack = {
       "title": "Angles don't have to touch",
       "lines": [
         "Supplementary angles only need to add to 180°.",
-        "They can sit on different parts of the page.",
+        "They can sit in different places on the page.",
         "Position does not matter. The total does."
       ]
     },
@@ -505,7 +505,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Half a turn is 180°. A full turn is 360°. Count the turns first."
+        "text": "A Minecraft compass spin is a full turn: 360°. Count the turns first."
       }
     },
     {
@@ -519,26 +519,26 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy's map has four corners. Its angles still make one full turn."
+        "text": "Luffy's treasure map has four corners. Its angles still make one full turn."
       }
     },
     {
       "kind": "choice",
       "id": "math-angles-basics-8",
-      "prompt": "Four equal angles meet at one point. What is each angle?",
+      "prompt": "Four equal slices meet at the centre of a pizza. What is each angle?",
       "options": [
         "80°",
         "90°",
         "100°"
       ],
       "answer": 1,
-      "why": "Four equal angles share the full 360° around one point, so each is 90°.",
+      "why": "Four equal slices share the full 360° around the centre, so each is 90°.",
       "steps": [
         {
-          "text": "Split the full turn of 360° into equal parts. Divide by 4."
+          "text": "Split the full 360° turn into 4 equal slices. Divide by 4."
         },
         {
-          "text": "Try a different one: 360 ÷ 3 = 120, so three equal angles are 120° each."
+          "text": "Try another: 360 ÷ 3 = 120, so 3 equal slices are 120° each."
         },
         {
           "text": "Check it: 90 + 90 + 90 + 90 = 360. It works."
@@ -548,7 +548,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-basics-9",
-      "prompt": "Three angles sit on a straight line: 35°, 80° and x. What is x?",
+      "prompt": "A Minecraft roof beam lies flat on a straight line. Its angles are 35°, 80° and x. What is x?",
       "options": [
         "55°",
         "65°",
@@ -571,7 +571,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-0",
-      "prompt": "Isagi's pass line crosses the touchline. One angle is 3x. The angle beside it is x + 20. They sit on a straight line. What is x?",
+      "prompt": "Isagi's pass line crosses the touchline. One angle is 3x, and the angle beside it is x + 20. What is x?",
       "options": [
         "35",
         "40",
@@ -584,10 +584,10 @@ export const pack: SePack = {
           "text": "Beside each other on a straight line means the two angles add to 180°."
         },
         {
-          "text": "Worked example: 2x and (x + 30) make 180. So 3x + 30 = 180, and 3x = 150."
+          "text": "Worked example: 2x and (x + 30) make 180. So 3x = 150, and x = 50."
         },
         {
-          "text": "Divide 150 by 3 to get x = 50. Check: 100 + 80 = 180, so it works."
+          "text": "Your angles: 3x + (x + 20) = 180, so 4x = 160 and x = 40. Check: 120 + 60 = 180."
         }
       ],
       "art": {
@@ -600,7 +600,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-1",
-      "prompt": "Zoro's sword cuts the corner of a right angle. One piece is 38°. What is the other piece?",
+      "prompt": "Zoro's sword slices a square corner. One piece is 38°. What is the other piece?",
       "options": [
         "52°",
         "142°",
@@ -623,7 +623,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-2",
-      "prompt": "Four angles meet at one point where three Toronto streets cross: 110°, 85°, 60° and x. What is x?",
+      "prompt": "Your Roblox part spins around one point. Its angles there are 110°, 85°, 60° and x. What is x?",
       "options": [
         "105°",
         "95°",
@@ -646,7 +646,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-3",
-      "prompt": "Three runs meet at the corner flag: 120°, 95° and x. Together they make a full turn. What is x?",
+      "prompt": "Three storm-edge ramps meet at one point: 120°, 95° and x. They make a full turn. What is x?",
       "options": [
         "135°",
         "155°",
@@ -669,7 +669,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-4",
-      "prompt": "Angle A is (2x + 15)°. Angle B is (3x − 5)°. They are supplementary. What is x?",
+      "prompt": "A Minecraft roof has two slopes. Angle A is (2x + 15)° and angle B is (3x − 5)°. They are supplementary. What is x?",
       "options": [
         "36",
         "32",
@@ -698,7 +698,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-5",
-      "prompt": "Luffy's two angles fill a right angle together. One is (x + 12)°. The other is (x + 18)°. What is the smaller angle?",
+      "prompt": "A Roblox part is turned in two pieces that fill a right corner. One piece is (x + 12)°. The other is (x + 18)°. What is the smaller angle?",
       "options": [
         "42°",
         "30°",
@@ -737,14 +737,14 @@ export const pack: SePack = {
           "text": "A full turn is 360°. A quarter of that is 90°, which is a right angle."
         },
         {
-          "text": "Hook: the corner of a football pitch is a right angle. Two angles that fill it share one 90°."
+          "text": "Hook: a block corner in Minecraft is a right angle. Two angles that fill it share one 90°."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-angles-applied-7",
-      "prompt": "At a corner flag, four runs meet at one point: x, 2x, 3x and 90°. Together they make a full turn. What is the largest angle?",
+      "prompt": "A pizza is cut at the centre. Four slices meet there: x, 2x, 3x and 90°. They make a full turn. What is the biggest slice angle?",
       "options": [
         "90°",
         "135°",
@@ -767,7 +767,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-8",
-      "prompt": "A skate ramp makes 27° with the ground. A sign post makes the other angle, and together they make a right angle. What is the other angle?",
+      "prompt": "Your build ramp sits at 27° to the ground. The wall beside it makes the other angle of a right corner. What is that angle?",
       "options": [
         "63°",
         "153°",
@@ -790,7 +790,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-applied-9",
-      "prompt": "Sanji's two angles sit on a straight line. The bigger angle is three times the smaller. What is the bigger angle?",
+      "prompt": "A free kick runs along a straight touchline. The bigger angle is three times the smaller. What is the bigger angle?",
       "options": [
         "145°",
         "135°",
@@ -813,7 +813,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-deeper-6",
-      "prompt": "Isagi needs a shot angle. Which pair is complementary, adding to 90°?",
+      "prompt": "A Pokémon's arm sits at 35° from the ground. Which partner angle makes a right corner?",
       "options": [
         "35° and 55°",
         "35° and 145°",
@@ -836,7 +836,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-deeper-7",
-      "prompt": "Two angles sit side by side on a straight line. One is 115°. What is x?",
+      "prompt": "A Roblox part sits on a straight edge. One side is 115°. What is x?",
       "options": [
         "x = 245°",
         "x = 75°",
@@ -846,10 +846,10 @@ export const pack: SePack = {
       "why": "Angles on a straight line always add to 180°, half a full turn.",
       "steps": [
         {
-          "text": "A straight line is 180°. Two angles on it add to 180°."
+          "text": "A straight edge is 180°. The two angles on it add to 180°."
         },
         {
-          "text": "Try 140° and x. So x = 180° − 140° = 40°."
+          "text": "Try a part at 140°. Other side: x = 180° − 140° = 40°."
         },
         {
           "text": "Check: 140° + 40° = 180°. Yes, it works."
@@ -865,7 +865,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-deeper-8",
-      "prompt": "Two lines cross. One angle is 62°. What is the angle opposite it?",
+      "prompt": "Two painted lines cross on the pitch. One angle is 62°. What is the angle opposite it?",
       "options": [
         "62°",
         "118°",
@@ -888,7 +888,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-angles-deeper-9",
-      "prompt": "Two angles are 125° and 55°. Are they supplementary, even if they are apart?",
+      "prompt": "Two Minecraft roof slopes are 125° and 55°, not touching. Are they supplementary?",
       "options": [
         "Yes, they still add to 180°.",
         "No, they must touch to count.",
@@ -901,17 +901,17 @@ export const pack: SePack = {
           "text": "Supplementary means the sum is 180°. Touching is not required."
         },
         {
-          "text": "Try 125° and 55°. Put them in different spots on a page."
+          "text": "Try 125° and 55° on two different beams."
         },
         {
-          "text": "125° + 55° = 180°. So they are supplementary, even apart."
+          "text": "125° + 55° = 180°. So yes, they are supplementary, even apart."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-angles-build-2",
-      "prompt": "A pass runs along a straight line. One angle on one side is 47.5°. What is the angle on the other side?",
+      "prompt": "Your glider turns along a straight line. One side is 47.5°. What is the other side?",
       "answer": "132.5",
       "decoys": [
         "4",
@@ -934,7 +934,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-angles-build-3",
-      "prompt": "One angle is 90°. What angle makes a straight line with it?",
+      "prompt": "A Minecraft wall meets the floor at 90°. What angle sits beside it on the straight line?",
       "answer": "90",
       "decoys": [
         "1",
@@ -946,7 +946,7 @@ export const pack: SePack = {
           "text": "A right angle is 90°. Two right angles make a straight line."
         },
         {
-          "text": "Example: one angle is 120°. Do 180 − 120 = 60. The other is 60°."
+          "text": "Example: a roof slope at 120°. Do 180 − 120 = 60. The other is 60°."
         },
         {
           "text": "Now use 90°. Do 180 − 90. Build the answer from the tiles."
@@ -979,7 +979,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-angles-build-5",
-      "prompt": "One angle is 73.6°. Find the angle that makes a straight line with it.",
+      "prompt": "Your Roblox wall sits flat on a floor line. One angle is 73.6°. What is the other angle?",
       "answer": "106.4",
       "decoys": [
         "9"
@@ -987,7 +987,7 @@ export const pack: SePack = {
       "why": "Angles on a straight line add to 180°, and decimal angles follow the same rule.",
       "steps": [
         {
-          "text": "Example: one angle is 58.5°. Do 180.0 − 58.5 = 121.5."
+          "text": "Example: a part sits at 58.5°. Do 180.0 − 58.5 = 121.5."
         },
         {
           "text": "Write 180 as 180.0 so the decimal places line up."
@@ -1000,7 +1000,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-angles-build-6",
-      "prompt": "Luffy's crew sets a sail at 80°. The other angle on the straight line is what?",
+      "prompt": "Your Minecraft roof slope meets a straight beam at 80°. What is the other angle on the beam?",
       "answer": "100",
       "decoys": [
         "3",
@@ -1010,7 +1010,7 @@ export const pack: SePack = {
       "why": "The two angles on a straight line must total 180°, so you subtract 80° from 180°.",
       "steps": [
         {
-          "text": "Example: one angle is 110°. Do 180 − 110 = 70. Check: 110 + 70 = 180."
+          "text": "Example: a roof meets the beam at 110°. Do 180 − 110 = 70. Check: 110 + 70 = 180."
         },
         {
           "text": "Now the known angle is 80°. Do 180 − 80."
@@ -1023,7 +1023,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-angles-build-7",
-      "prompt": "A shot line makes an angle of 152° on one side of a straight line. What is the angle on the other side?",
+      "prompt": "Your shot line makes 152° on one side of the goal line. What is the angle on the other side?",
       "answer": "28",
       "decoys": [
         "9",
@@ -1033,7 +1033,7 @@ export const pack: SePack = {
       "why": "Any two angles on a straight line add to 180°, so the missing angle is 180° minus the given one.",
       "steps": [
         {
-          "text": "Example: one angle is 35°. Do 180 − 35 = 145. Check: 35 + 145 = 180."
+          "text": "Example: a free kick line makes 35°. Do 180 − 35 = 145. Check: 35 + 145 = 180."
         },
         {
           "text": "Now the known angle is 152°. Do 180 − 152."
@@ -1046,7 +1046,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-angles-games-1",
-      "title": "Smallest Partner First",
+      "title": "Build Partners, Smallest First",
       "game": {
         "mode": "order",
         "values": [

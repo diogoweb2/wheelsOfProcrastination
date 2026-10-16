@@ -15,29 +15,30 @@ export const pack: SePack = {
       "id": "fin-unit-teach-0",
       "title": "What is unit price?",
       "lines": [
-        "Unit price tells you the cost of one unit.",
-        "For groceries, the unit is usually 100 g or 1 kg.",
-        "It is the price divided by the amount inside the box."
+        "Unit price is the cost of ONE unit.",
+        "In a shop, the unit is often 100 g or 1 kg.",
+        "For V-Bucks or Robux, use 100 of them.",
+        "Divide the price by how many units fit inside."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi doesn't judge a striker by one lucky goal. He counts goals per game."
+        "flavour": "key",
+        "text": "Fortnite sells 1,000 and 2,800 V-Buck bundles. Unit price compares them fairly."
       }
     },
     {
       "kind": "choice",
       "id": "fin-unit-basics-0",
-      "prompt": "Isagi buys two protein tubs. Tub A: $4.50 for 900 g. Tub B: $2.80 for 500 g. Which is cheaper per 100 g?",
+      "prompt": "Two bags of frozen fries. Bag A: $4.50 for 900 g. Bag B: $2.80 for 500 g. Which is cheaper per 100 g?",
       "options": [
-        "Tub A, at $0.50 per 100 g",
-        "Tub B, at $0.56 per 100 g",
-        "They cost the same per 100 g"
+        "Bag B, at $0.56 per 100 g",
+        "Bag A, at $0.50 per 100 g",
+        "Both cost same per 100 g"
       ],
-      "answer": 0,
-      "why": "The bigger tub looks dearer, but per 100 g it costs less.",
+      "answer": 1,
+      "why": "The bigger bag looks dearer, but per 100 g it costs less.",
       "steps": [
         {
-          "text": "Try a different tub first: $6.00 for 600 g."
+          "text": "Try a different bag first: $6.00 for 600 g."
         },
         {
           "text": "600 g is six lots of 100 g. So $6.00 ÷ 6 = $1.00 per 100 g."
@@ -50,12 +51,12 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Tub A, 900 g",
+            "label": "Bag A, 900 g",
             "value": 50,
             "tone": "good"
           },
           {
-            "label": "Tub B, 500 g",
+            "label": "Bag B, 500 g",
             "value": 56,
             "tone": "bad"
           }
@@ -66,23 +67,23 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-unit-basics-1",
-      "prompt": "Tub A: $4.50 for 900 g. Build the price per 100 g.",
-      "answer": "0.50",
+      "prompt": "A Roblox gift card gives 800 Robux for $10.00. Build the price per 100 Robux.",
+      "answer": "1.25",
       "decoys": [
-        "9",
-        "4",
-        "1"
+        "8",
+        "0",
+        "4"
       ],
-      "why": "Divide the price by how many 100 g lots fit in the weight.",
+      "why": "Divide the price by how many 100-Robux lots fit in the card.",
       "steps": [
         {
-          "text": "Try $6.00 for 600 g first."
+          "text": "Try 600 Robux for $9.00 first."
         },
         {
-          "text": "600 g holds six 100 g lots. So divide $6.00 by 6."
+          "text": "600 Robux holds six lots of 100. So divide $9.00 by 6."
         },
         {
-          "text": "6.00 ÷ 6 = 1.00. Check: six lots at $1.00 makes $6.00."
+          "text": "9.00 ÷ 6 = 1.50. Check: six lots at $1.50 makes $9.00."
         }
       ]
     },
@@ -114,57 +115,36 @@ export const pack: SePack = {
               "text": "So the unit rate is 35 km for every 1 hour. Check it: 35 × 6 = 210."
             }
           ]
-        },
-        {
-          "prompt": "Which one is a unit rate? Isagi scores 9 goals in a season.",
-          "options": [
-            "9 goals for every 1 game",
-            "9 goals for every 3 games",
-            "9 goals for every 2 games"
-          ],
-          "answer": 0,
-          "why": "A unit rate always has 1 in the second part, like 1 game or 1 hour.",
-          "steps": [
-            {
-              "text": "Look at the second number in each option."
-            },
-            {
-              "text": "Only one option has a 1 there, so it is a unit rate."
-            },
-            {
-              "text": "The other two still compare two amounts, but neither compares to exactly 1."
-            }
-          ]
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-basics-2",
-      "prompt": "A 1 kg bag costs $7.00. A 500 g bag costs $3.60. Which is cheaper per 100 g?",
+      "prompt": "A 1,000 V-Bucks pack costs $11.00. A 2,800 pack costs $28.00. Which is cheaper per 100 V-Bucks?",
       "options": [
-        "The 500 g bag, at $0.72 per 100 g",
-        "They cost the same per 100 g",
-        "The 1 kg bag, at $0.70 per 100 g"
+        "The 1,000 pack, at $1.10 per 100",
+        "The 2,800 pack, at $1.00 per 100",
+        "They cost the same per 100"
       ],
-      "answer": 2,
-      "why": "A bigger size is only a better buy if its unit price is lower.",
+      "answer": 1,
+      "why": "A bigger pack is only a better buy if its price per 100 is lower.",
       "steps": [
         {
-          "text": "Try $5.00 for 1 kg and $2.20 for 500 g."
+          "text": "Try 1,000 V-Bucks for $9.00 and 5,000 for $40.00."
         },
         {
-          "text": "1 kg is ten lots of 100 g, so $5.00 ÷ 10 = $0.50."
+          "text": "1,000 is ten lots of 100, so $9.00 ÷ 10 = $0.90."
         },
         {
-          "text": "500 g is five lots, so $2.20 ÷ 5 = $0.44. Size alone does not decide."
+          "text": "5,000 is fifty lots, so $40.00 ÷ 50 = $0.80. Size alone does not decide."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-basics-3",
-      "prompt": "Luffy's crew buys juice. A 1.5 L jug costs $3.00. A 2 L jug costs $3.80. Which is the better buy per litre?",
+      "prompt": "A 1.5 L jug costs $3.00. A 2 L jug costs $3.80. Which is the better buy per litre?",
       "options": [
         "The 1.5 L jug, at $2.00 per litre",
         "The 2 L jug, at $1.90 per litre",
@@ -174,10 +154,10 @@ export const pack: SePack = {
       "why": "Per litre is a fair test, because the jugs hold different amounts.",
       "steps": [
         {
-          "text": "Try 3 L for $4.80 and 2 L for $3.00 instead."
+          "text": "Try 3 L of pop for $4.80 and 2 L for $3.00 instead."
         },
         {
-          "text": "Divide each price by its litres, one jug at a time."
+          "text": "Divide each price by its litres, one bottle at a time."
         },
         {
           "text": "$4.80 ÷ 3 = $1.60 per litre. $3.00 ÷ 2 = $1.50 per litre. The 2 L wins."
@@ -189,58 +169,58 @@ export const pack: SePack = {
       "id": "fin-unit-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Stores print the total price in big letters.",
-        "A bigger box is not always cheaper per gram.",
-        "Unit price is the fair way to compare two boxes."
+        "Shops print the total price in big letters.",
+        "A bigger pack is not always cheaper per unit.",
+        "Unit price is the fair way to compare two packs."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's bounty and Zoro's bounty only compare fairly on one scale."
+        "flavour": "key",
+        "text": "4 goals in 20 games is worse than 3 goals in 10. Goals per game shows it."
       }
     },
     {
       "kind": "build",
       "id": "fin-unit-build-0",
-      "prompt": "Isagi's box is $4.50 for 900 g. What does 100 g cost? Build the price in dollars.",
+      "prompt": "A 900 g bag of frozen fries costs $4.50. What does 100 g cost? Build the price in dollars.",
       "answer": "0.50",
       "decoys": [
         "3",
         "7",
         "9"
       ],
-      "why": "Unit price is the cost of one standard amount, so boxes of different sizes can be compared fairly.",
+      "why": "Unit price is the cost of one standard amount, so bags of different sizes can be compared fairly.",
       "steps": [
         {
-          "text": "Count how many 100 g pieces fit in 900 g: 900 ÷ 100 = 9."
+          "text": "Count the 100 g lots in 900 g: 900 ÷ 100 = 9 lots."
         },
         {
-          "text": "Divide the price by that count: $4.50 ÷ 9."
+          "text": "Divide the price by the number of lots: $4.50 ÷ 9."
         },
         {
-          "text": "Worked example: $3.60 for 600 g. 600 ÷ 100 = 6, so $3.60 ÷ 6 = $0.60 per 100 g."
+          "text": "Try a 600 g bag of wings for $3.60. 600 ÷ 100 = 6 lots, so $3.60 ÷ 6 = $0.60 per 100 g."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-basics-4",
-      "prompt": "Four 125 g packs of chips cost $5.00 in total. One 250 g bag costs $2.25. Which is cheaper per 100 g?",
+      "prompt": "1,000 V-Bucks cost $11. 2,800 V-Bucks cost $28. Which is cheaper per 100 V-Bucks?",
       "options": [
-        "The four-pack, at $1.00 per 100 g",
-        "The 250 g bag, at $0.90 per 100 g",
-        "Both are the same per 100 g"
+        "The 2,800 pack, at $1.00 per 100",
+        "The 1,000 pack, at $1.10 per 100",
+        "Both packs, at $1.05 per 100"
       ],
-      "answer": 1,
-      "why": "A multipack only saves money if its total unit price is lower.",
+      "answer": 0,
+      "why": "Dividing by the number of 100s puts both packs on the same scale, and the bigger pack costs less per 100.",
       "steps": [
         {
-          "text": "Try three 200 g packs for $4.50 in total."
+          "text": "Try Robux: 400 Robux cost $5.00, and 2,000 Robux cost $24.00."
         },
         {
-          "text": "Total grams: 3 × 200 g = 600 g, which is six lots of 100 g."
+          "text": "400 is four lots of 100: $5.00 ÷ 4 = $1.25. 2,000 is twenty lots: $24.00 ÷ 20 = $1.20."
         },
         {
-          "text": "$4.50 ÷ 6 = $0.75 per 100 g. Add the grams first, then divide."
+          "text": "$1.20 is less than $1.25, so the 2,000 pack is cheaper per 100. Compare per 100, not the totals."
         }
       ]
     },
@@ -270,7 +250,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "fin-unit-games-0",
-      "title": "Luffy's Snack Run",
+      "title": "Matchday Snack Stand",
       "game": {
         "mode": "order",
         "values": [
@@ -296,32 +276,36 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "Unit price puts every box on the same scale, so the cheapest per gram wins even when box sizes differ."
+      "why": "Price per 100 g puts every bag on the same scale, so the cheapest per gram wins even when bag sizes differ."
     },
     {
       "kind": "explain",
       "id": "fin-unit-teach-2",
-      "title": "The method",
+      "title": "Compare per 100",
       "lines": [
-        "Step 1: divide the price by the amount inside.",
-        "Step 2: use the same unit for both boxes, like per 100 g.",
-        "Step 3: the smaller unit price is the better buy."
-      ]
+        "Divide the price by the amount inside.",
+        "Use the same amount for both: per 100 V-Bucks, per 100 g.",
+        "The smaller price per 100 is the better buy."
+      ],
+      "callout": {
+        "flavour": "key",
+        "text": "1,000 V-Bucks for $11 is $11 ÷ 10 = $1.10 per 100."
+      }
     },
     {
       "kind": "choice",
       "id": "fin-unit-basics-6",
-      "prompt": "A 750 mL bottle costs $5.25. What is the price per 100 mL?",
+      "prompt": "A 750 mL bottle of iced tea costs $5.25. What is the price per 100 mL?",
       "options": [
-        "$7.00 per 100 mL",
         "$0.07 per 100 mL",
-        "$0.70 per 100 mL"
+        "$0.70 per 100 mL",
+        "$7.00 per 100 mL"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "Per 100 mL gives every bottle size the same yardstick.",
       "steps": [
         {
-          "text": "Try a 400 mL bottle for $2.40."
+          "text": "Try a 400 mL bottle of juice for $2.40."
         },
         {
           "text": "400 mL is four lots of 100 mL, so divide $2.40 by 4."
@@ -334,30 +318,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-basics-7",
-      "prompt": "To find the unit price of an item, what do you do?",
+      "prompt": "A bundle is $11 for 1,000 V-Bucks. How do you find the price of one V-Buck?",
       "options": [
-        "Multiply the price by the quantity",
-        "Divide the quantity by the price",
-        "Divide the price by the quantity"
+        "Divide 1,000 by $11",
+        "Divide $11 by 1,000",
+        "Multiply $11 by 1,000"
       ],
-      "answer": 2,
-      "why": "Dividing gives the cost of one unit, which you can compare fairly.",
+      "answer": 1,
+      "why": "Dividing the price by the quantity gives the cost of one, which you can compare fairly.",
       "steps": [
         {
-          "text": "Try $6.00 for 4 cans."
+          "text": "Try a different deal: $6.00 for 4 chocolate bars."
         },
         {
-          "text": "Wrong way: 4 ÷ 6 gives 0.67 cans per dollar, which tells you nothing useful."
+          "text": "Wrong way: 4 ÷ 6 = 0.67 bars per dollar. That is not the price of one bar."
         },
         {
-          "text": "Right way: $6.00 ÷ 4 = $1.50 per can. That is the cost of one can."
+          "text": "Right way: $6.00 ÷ 4 = $1.50 per bar. That is the cost of one bar."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-unit-build-1",
-      "prompt": "Sakura's bag is $2.80 for 500 g. Build the price per 100 g.",
+      "prompt": "Cheese curds for poutine: $2.80 for 500 g. Build the price per 100 g.",
       "answer": "0.56",
       "decoys": [
         "8",
@@ -373,7 +357,7 @@ export const pack: SePack = {
           "text": "Divide the price by 5: $2.80 ÷ 5. Keep the decimal point in place."
         },
         {
-          "text": "Worked example: $3.20 for 400 g. 400 ÷ 100 = 4, so $3.20 ÷ 4 is the price per 100 g."
+          "text": "Worked example: $3.20 for 400 g of wings. 400 ÷ 100 = 4, so $3.20 ÷ 4 is the price per 100 g."
         }
       ]
     }
@@ -384,9 +368,10 @@ export const pack: SePack = {
       "id": "fin-unit-teach-3",
       "title": "The common trap",
       "lines": [
-        "Trap: picking the bigger box because it looks like more.",
-        "The bigger box can still cost more per gram.",
-        "Always divide. Never guess from size or total price."
+        "Trap: judging a V-Bucks bundle by its total price.",
+        "$28 looks dearer than $11.",
+        "But $28 buys 2,800 V-Bucks. $11 buys only 1,000.",
+        "Always divide. Never guess from the total."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -398,25 +383,25 @@ export const pack: SePack = {
       "id": "fin-unit-teach-4",
       "title": "Worked example",
       "lines": [
-        "Box A: $3.00 for 750 g. That is $0.40 per 100 g.",
-        "Box B: $2.40 for 400 g. That is $0.60 per 100 g.",
-        "Box A is the better buy, even though it costs more."
+        "Pack A: $24 for 2,000 Robux. That is $1.20 per 100 Robux.",
+        "Pack B: $10 for 800 Robux. That is $1.25 per 100 Robux.",
+        "Pack A is the better buy, even though it costs more."
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Box A",
-            "value": 40,
+            "label": "Pack A",
+            "value": 120,
             "tone": "good"
           },
           {
-            "label": "Box B",
-            "value": 60,
+            "label": "Pack B",
+            "value": 125,
             "tone": "bad"
           }
         ],
-        "unit": "¢ per 100 g"
+        "unit": "¢ per 100 Robux"
       }
     },
     {
@@ -426,7 +411,7 @@ export const pack: SePack = {
       "lines": [
         "Unit price = price ÷ amount, using one shared unit.",
         "The smaller unit price means the better value.",
-        "Check the unit: 100 g, 1 kg, or 1 L."
+        "Check the unit: per V-Buck, per 100 g, or per 1 L."
       ],
       "callout": {
         "flavour": "key",
@@ -438,43 +423,44 @@ export const pack: SePack = {
       "id": "fin-unit-deeper-0",
       "title": "Compare the same amount",
       "lines": [
-        "Unit price asks one question: what does 100 g cost?",
-        "Both boxes get measured the same way, so you can race them.",
-        "Blue Lock does this too: goals per game, not total goals."
+        "Unit rate asks one question: how much for one?",
+        "Every player gets measured the same way, so you can race them.",
+        "Blue Lock does this: goals per 100 minutes, not total goals."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Isagi with 10 goals in 1000 minutes vs 8 goals in 500 minutes. Who scores more?"
+        "text": "Isagi: 10 goals in 1,000 min is 1 per 100. Bachira: 8 in 500 min is 1.6 per 100."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "$4.50 / 900 g",
-            "value": 50,
-            "tone": "good"
+            "label": "Isagi",
+            "value": 1,
+            "tone": "bad"
           },
           {
-            "label": "$2.80 / 500 g",
-            "value": 56,
-            "tone": "bad"
+            "label": "Bachira",
+            "value": 1.6,
+            "tone": "good"
           }
         ],
-        "unit": "¢ per 100 g"
+        "unit": "goals per 100 min"
       }
     },
     {
       "kind": "explain",
       "id": "fin-unit-deeper-1",
-      "title": "Big box, big price, no promise",
+      "title": "Big bundle, big price, no promise",
       "lines": [
-        "A bigger box usually costs more in total.",
-        "That does not mean it costs more per gram.",
-        "Always check the unit price on the shelf tag."
+        "1,000 V-Bucks costs $11. 2,800 costs $28.",
+        "The big bundle costs more in total.",
+        "But per V-Buck it is 1 cent, not 1.1 cents.",
+        "Check the price per V-Buck, not the price tag."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A bigger bounty does not always mean the stronger crew. Check the real numbers."
+        "text": "A bigger bounty does not always mean a stronger pirate. Check the real numbers."
       }
     },
     {
@@ -482,13 +468,14 @@ export const pack: SePack = {
       "id": "fin-unit-deeper-2",
       "title": "Price ÷ amount, not amount ÷ price",
       "lines": [
-        "Divide the price by the amount to get cost per gram.",
-        "Flip it and you get grams per dollar, a different question.",
-        "Ask what you are looking for before you divide."
+        "$10 buys 800 Robux.",
+        "$10 ÷ 800 = about 1.25 cents for each Robux.",
+        "800 ÷ 10 = 80 Robux for each dollar.",
+        "Two different questions. Pick yours before you divide."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Dividing the wrong way gives a number that looks right but means nothing useful."
+        "text": "Divide the wrong way and you answer a question nobody asked."
       }
     },
     {
@@ -496,13 +483,14 @@ export const pack: SePack = {
       "id": "fin-unit-deeper-3",
       "title": "Same unit first",
       "lines": [
-        "Before comparing, make both boxes use the same unit.",
-        "1 kg = 1000 g. 1 L = 1000 mL.",
-        "A 2 L bottle and a 500 mL can cannot be compared until converted."
+        "Make both sizes use the same unit first.",
+        "1 kg = 1,000 g. 1 L = 1,000 mL.",
+        "A 2 L bottle and a 500 mL can?",
+        "Turn 2 L into 2,000 mL, then compare."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Two strikers, one counts minutes and the other counts seconds. Convert first."
+        "text": "One striker's time is in minutes, another's in seconds. Convert first."
       }
     },
     {
@@ -510,13 +498,13 @@ export const pack: SePack = {
       "id": "fin-unit-deeper-4",
       "title": "Count the pack",
       "lines": [
-        "A multipack has a price for several items.",
-        "Divide the total by how many items are in the pack.",
-        "Then you can compare one item with one item."
+        "A card box has one price for many packs.",
+        "Divide the total by the packs inside.",
+        "Then compare one pack with one pack."
       ],
       "callout": {
         "flavour": "key",
-        "text": "'2 for $5' is not the same as '$5 each'. Divide by 2 first."
+        "text": "'3 packs for $9' is not '$9 a pack'. Divide by 3 first: $3."
       }
     },
     {
@@ -524,9 +512,9 @@ export const pack: SePack = {
       "id": "fin-unit-deeper-5",
       "title": "Pick a friendly unit, keep the cents",
       "lines": [
-        "Cost per gram is a tiny decimal, like 0.0056. Hard to read.",
-        "Cost per 100 g gives an easy number, like 56 cents.",
-        "Keep your answer in cents to avoid decimal mistakes."
+        "Cost per V-Buck is a tiny decimal, like 0.011.",
+        "Cost per 100 V-Bucks is easier: $1.10.",
+        "Work in cents to avoid decimal slips."
       ],
       "callout": {
         "flavour": "imagine",
@@ -536,20 +524,20 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-unit-basics-8",
-      "prompt": "$9.00 for 1.5 kg. Build the price per 100 g.",
+      "prompt": "Cheese curds: $9.00 for 1.5 kg. Build the price per 100 g.",
       "answer": "0.60",
       "decoys": [
         "7",
         "2",
         "8"
       ],
-      "why": "Change kilograms to grams first, so the units match the 100 g label.",
+      "why": "1.5 kg is 1,500 g, which is fifteen lots of 100 g, and $9.00 ÷ 15 = $0.60.",
       "steps": [
         {
-          "text": "Try $4.00 for 2 kg first."
+          "text": "Try shawarma meat: $4.00 for 2 kg."
         },
         {
-          "text": "2 kg is 2000 g, which is twenty lots of 100 g."
+          "text": "2 kg is 2,000 g, which is twenty lots of 100 g."
         },
         {
           "text": "$4.00 ÷ 20 = $0.20 per 100 g. Convert kg to g before you divide."
@@ -559,36 +547,36 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-basics-9",
-      "prompt": "A shelf label says $0.56 per 100 g. What does the number mean?",
+      "prompt": "A Robux shop label says $1.25 per 100 Robux. What does the number mean?",
       "options": [
-        "The whole box costs $0.56",
-        "Each 100 g costs $0.56",
-        "Each gram costs $0.56"
+        "The whole pack costs $1.25",
+        "Each 100 Robux costs $1.25",
+        "Each Robux costs $1.25"
       ],
       "answer": 1,
       "why": "Unit prices are shown per a set amount so shoppers can compare.",
       "steps": [
         {
-          "text": "Try a label that says $0.80 per 100 g."
+          "text": "Try a label that says $1.50 per 100 Robux."
         },
         {
-          "text": "Buy 300 g: that is 3 lots × $0.80 = $2.40."
+          "text": "Buy 300 Robux: that is 3 lots × $1.50 = $4.50."
         },
         {
-          "text": "The label is per 100 g, not per box and not per gram."
+          "text": "The label is per 100 Robux, not per pack and not per Robux."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-applied-0",
-      "prompt": "Isagi's team needs sports drinks after training. Bottle A: $3.60 for 1.2 L. Bottle B: $2.40 for 0.75 L. Which is cheaper per litre?",
+      "prompt": "After Sunday's match, your team buys sports drinks. Bottle A: $3.60 for 1.2 L. Bottle B: $2.40 for 0.75 L. Which is cheaper per litre?",
       "options": [
-        "Bottle A, at $3.00 per litre",
         "Bottle B, at $3.20 per litre",
-        "They cost the same per litre"
+        "They cost the same per litre",
+        "Bottle A, at $3.00 per litre"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Unit price divides the total cost by the amount, so bottles of different sizes can be compared fairly.",
       "steps": [
         {
@@ -605,13 +593,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-applied-1",
-      "prompt": "Luffy's crew buys rice at a Toronto market. A 2 kg bag costs $7.00. A 750 g bag costs $2.40. Which is cheaper per 100 g?",
+      "prompt": "A Toronto market sells rice. A 2 kg bag costs $7.00. A 750 g bag costs $2.40. Which is cheaper per 100 g?",
       "options": [
-        "The 750 g bag, at 32¢ per 100 g",
         "The 2 kg bag, at 35¢ per 100 g",
-        "The 2 kg bag, at 36¢ per 100 g"
+        "The 2 kg bag, at 36¢ per 100 g",
+        "The 750 g bag, at 32¢ per 100 g"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Comparing per 100 g puts two bags on the same scale, even though their sizes differ.",
       "steps": [
         {
@@ -644,30 +632,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-applied-2",
-      "prompt": "Isagi's team orders training shirts. A 3-pack costs $27.00. A 5-pack costs $42.00. Which is cheaper per shirt?",
+      "prompt": "A card shop sells Pokémon booster packs in bundles. A 3-pack costs $27.00. A 5-pack costs $42.00. Which is cheaper per pack?",
       "options": [
+        "5-pack, at $8.40 each",
         "3-pack, at $9.00 each",
-        "Both cost about the same each",
-        "5-pack, at $8.40 each"
+        "Both cost about the same each"
       ],
-      "answer": 2,
-      "why": "Dividing by the number of items shows what each shirt really costs, however the pack is sold.",
+      "answer": 0,
+      "why": "Dividing by the number of packs shows what each booster really costs, however the bundle is sold.",
       "steps": [
         {
-          "text": "Per item: price ÷ number of items."
+          "text": "Per pack: price ÷ number of packs."
         },
         {
-          "text": "Example: 4 caps for $26.00. 4 × 6 = 24, left 2. 2 ÷ 4 = 0.50. So $6.50 each."
+          "text": "Example: 4 packs for $26.00. 4 × 6 = 24, left 2. 2 ÷ 4 = 0.50. So $6.50 each."
         },
         {
-          "text": "Divide both pack prices the same way, then compare the dollars and cents."
+          "text": "Divide both bundle prices the same way, then compare the dollars and cents."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-applied-3",
-      "prompt": "Zoro buys cheese for the ship. A 400 g block costs $3.20. A 1 kg block costs $7.60. Which is cheaper per 100 g?",
+      "prompt": "A deli sells cheese. A 400 g block costs $3.20. A 1 kg block costs $7.60. Which is cheaper per 100 g?",
       "options": [
         "The 400 g block, at 80¢ per 100 g",
         "The 1 kg block, at 76¢ per 100 g",
@@ -713,69 +701,53 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-applied-5",
-      "prompt": "Isagi's team buys cereal. Box A costs $5.40 for 600 g, now 20% off. Box B costs $3.90 for 450 g. Which is cheaper per 100 g?",
+      "prompt": "Fortnite shop: 600 V-Bucks cost $5.40, now 20% off. A 450 V-Bucks pack costs $3.90. Which is cheaper per 100 V-Bucks?",
       "options": [
-        "Box B, at 87¢ per 100 g",
-        "Box A at full price, at 90¢ per 100 g",
-        "Box A on sale, at 72¢ per 100 g"
+        "450 pack, at 87¢ per 100 V-Bucks",
+        "600 pack at full price, 90¢ per 100",
+        "600 pack on sale, at 72¢ per 100"
       ],
       "answer": 2,
-      "why": "A sale price is the number you pay, so take the discount off before you divide.",
+      "why": "A sale price is the number you actually pay, so take the discount off before you divide.",
       "steps": [
         {
-          "text": "10% off means take one tenth off. A quick check: $30 at 10% off is $3 less, so pay $27."
+          "text": "A 900 V-Bucks pack costs $30, now 10% off. Take off one tenth: $3 less, so pay $27."
         },
         {
-          "text": "Then divide the new price by the 100 g units. $27 for 900 g: nine units, 27 ÷ 9 = 3, so $3.00 per 100 g."
+          "text": "Count the units of 100 V-Bucks: 900 is nine units. 27 ÷ 9 = 3, so $3.00 per 100 V-Bucks."
         },
         {
-          "text": "Do the same for the other box, then compare the cents."
+          "text": "Do the same for the other pack: take the discount off first, then divide. Compare the cents."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-applied-6",
-      "prompt": "Luffy's crew needs bread flour. A 1.5 kg bag costs $2.70. A 2.5 kg bag costs $4.25. Which is cheaper per kg?",
+      "prompt": "Pizza night needs dough flour. A 1.5 kg bag costs $2.70. A 2.5 kg bag costs $4.25. Which is cheaper per kg?",
       "options": [
         "The 1.5 kg bag, at $1.80 per kg",
         "The 1.5 kg bag, at $1.90 per kg",
         "The 2.5 kg bag, at $1.70 per kg"
       ],
       "answer": 2,
-      "why": "Price per kilogram is the fairest way to compare flour bags of different weights.",
+      "why": "Price per kilogram puts both bags on the same weight, so the lower number is the better deal.",
       "steps": [
         {
           "text": "Price per kg = price ÷ kilograms."
         },
         {
-          "text": "Example: 3.5 kg for $7.70. 3.5 × 2 = 7, left 0.70. 0.70 ÷ 3.5 = 0.20. So $2.20 per kg."
+          "text": "Example: 3.5 kg of pizza flour for $7.70. 3.5 × 2 = 7, left 0.70. 0.70 ÷ 3.5 = 0.20. So $2.20 per kg."
         },
         {
-          "text": "Find both prices per kg, then compare. The lower number wins."
+          "text": "Find the price per kg for both bags. The lower number wins."
         }
-      ],
-      "art": {
-        "art": "bars",
-        "rows": [
-          {
-            "label": "1.5 kg bag",
-            "value": 1.8,
-            "tone": "bad"
-          },
-          {
-            "label": "2.5 kg bag",
-            "value": 1.7,
-            "tone": "good"
-          }
-        ],
-        "unit": "per kg"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-applied-7",
-      "prompt": "Isagi's team buys popcorn at the stadium. Small tub: 350 g for $6.30. Large tub: 900 g for $13.50. Which is cheaper per 100 g?",
+      "prompt": "Match day at the stadium. Small popcorn: 350 g for $6.30. Large: 900 g for $13.50. Which is cheaper per 100 g?",
       "options": [
         "The large tub, at $1.50 per 100 g",
         "The small tub, at $1.80 per 100 g",
@@ -788,17 +760,17 @@ export const pack: SePack = {
           "text": "350 g is 3.5 units of 100 g. Count the units first."
         },
         {
-          "text": "Example: 250 g for $4.50. 250 g is 2.5 units. 4.50 ÷ 2.5 = 1.80 per 100 g."
+          "text": "Example: a 250 g half-time snack for $3.50. That is 2.5 units. 3.50 ÷ 2.5 = 1.40 per 100 g."
         },
         {
-          "text": "Divide each price by its units, then compare. A bigger tub is not always cheaper."
+          "text": "Divide each tub's price by its units, then compare. The bigger tub is not always cheaper."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-applied-8",
-      "prompt": "Luffy's ship buys olive oil. A 750 mL bottle costs $5.25. A 1.5 L bottle costs $9.75. Which is cheaper per 100 mL?",
+      "prompt": "A poutine stand buys fryer oil. A 750 mL bottle costs $5.25. A 1.5 L bottle costs $9.75. Which is cheaper per 100 mL?",
       "options": [
         "The 750 mL bottle, at 70¢ per 100 mL",
         "The 1.5 L bottle, at 65¢ per 100 mL",
@@ -811,7 +783,7 @@ export const pack: SePack = {
           "text": "1 L is 1000 mL, so 1.5 L is 1500 mL. Change to mL first."
         },
         {
-          "text": "Example: 500 mL for $3.00. That is five units of 100 mL. 3.00 ÷ 5 = 0.60, so 60¢."
+          "text": "Example: 500 mL of oil for $3.00. That is five units of 100 mL. 3.00 ÷ 5 = 0.60, so 60¢."
         },
         {
           "text": "Convert both bottles to mL, divide by the 100 mL units, then compare the cents."
@@ -821,69 +793,69 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-applied-9",
-      "prompt": "Your class buys granola bars for a trip. A 6-pack costs $3.30. A 10-pack costs $5.40. Which is cheaper per bar?",
+      "prompt": "In the Roblox shop, 6 emotes cost 330 Robux. A set of 10 costs 540 Robux. Which is cheaper per emote?",
       "options": [
-        "The 6-pack, at 55¢ per bar",
-        "The 6-pack, at 56¢ per bar",
-        "The 10-pack, at 54¢ per bar"
+        "The 6-set, at 55 Robux per emote",
+        "The 6-set, at 56 Robux per emote",
+        "The 10-set, at 54 Robux per emote"
       ],
       "answer": 2,
-      "why": "Cents per bar matter more than the number of bars, since a 1¢ gap adds up on a whole trip.",
+      "why": "Robux per emote matter more than the set size, since a 1 Robux gap adds up over many emotes.",
       "steps": [
         {
-          "text": "Divide the pack price by the number of bars."
+          "text": "Divide the set price by the number of emotes."
         },
         {
-          "text": "Example: 8 bars for $4.40. 4.40 ÷ 8 = 0.55, so 55¢ per bar."
+          "text": "Example: 8 emotes for 400 Robux. 400 ÷ 8 = 50, so 50 Robux per emote."
         },
         {
-          "text": "Do the same for both packs, then compare the cents, not the pack size."
+          "text": "Do the same for both sets, then compare the Robux per emote, not the set size."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-deeper-6",
-      "prompt": "A student divides 750 g by $3.00 and gets 250. What does 250 mean?",
+      "prompt": "A bag of cheese curds is 750 g for $3.00. You work out 750 ÷ 3.00 = 250. What does 250 mean?",
       "options": [
         "250 grams you get for each dollar",
-        "250 cents for each gram in the box",
-        "$250 for every gram in the box"
+        "250 cents for each gram in the bag",
+        "$250 for every gram in the bag"
       ],
       "answer": 0,
-      "why": "Grams divided by dollars gives grams per dollar, which is not the unit price you need.",
+      "why": "Grams divided by dollars gives grams per dollar; flip it to get the price per gram.",
       "steps": [
         {
-          "text": "Write it as one division: 750 g ÷ $3.00 = 250."
+          "text": "Example: 600 g of curds for $4.00. Write one division: 600 g ÷ $4.00 = 150."
         },
         {
-          "text": "The unit is g per $, so 250 means how many grams one dollar buys."
+          "text": "The unit is g per $, so 150 means how many grams one dollar buys."
         },
         {
-          "text": "For a unit price, flip it: $3.00 ÷ 750 g, which gives dollars per gram."
+          "text": "For a price per gram, flip it: $4.00 ÷ 600 g gives dollars per gram."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-deeper-7",
-      "prompt": "Which costs less per 100 g: 750 g for $5.25, or 1.2 kg for $9.00?",
+      "prompt": "Poutine night. Cheese curds: 750 g for $5.25, or 1.2 kg for $9.00. Cheaper per 100 g?",
       "options": [
-        "The 1.2 kg box",
-        "The 750 g box",
-        "They cost exactly the same"
+        "The 1.2 kg bag",
+        "The 750 g bag",
+        "They cost the same"
       ],
       "answer": 1,
-      "why": "The 750 g box works out to 70 cents per 100 g, while the 1.2 kg box is 75 cents.",
+      "why": "The 750 g bag costs 70 cents per 100 g, while the 1.2 kg bag costs 75 cents.",
       "steps": [
         {
-          "text": "Put both in grams first. 1.5 kg = 1500 g, so compare 1500 g with 600 g."
+          "text": "Shawarma meat: 1.5 kg for $10.50 against 600 g for $4.50. Make both grams: 1500 g and 600 g."
         },
         {
-          "text": "Work out $10.50 ÷ 1500 g, then times 100. That gives 70 cents."
+          "text": "Price per 100 g for the big pack: $10.50 ÷ 1500 g, then × 100. That is 70 cents."
         },
         {
-          "text": "Do the same for $4.50 ÷ 600 g. That gives 75 cents, so pick the 1500 g box."
+          "text": "Small pack: $4.50 ÷ 600 g, then × 100, is 75 cents. The 1500 g pack is cheaper."
         }
       ],
       "art": {
@@ -906,20 +878,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-deeper-8",
-      "prompt": "Cola: 2 L for $3.20, or 500 mL for $0.90. What must you do to 2 L before comparing?",
+      "prompt": "Your squad needs pop. A 2 L bottle is $3.20. A 500 mL bottle is $0.90. What first?",
       "options": [
         "Change 2 L to 2000 mL first",
         "Divide 2 L by 1000 to get 0.2",
         "Nothing, it is already a number"
       ],
       "answer": 0,
-      "why": "You can only compare prices when both amounts use the same unit, such as millilitres.",
+      "why": "You can only compare prices when both sizes use the same unit, such as millilitres.",
       "steps": [
         {
-          "text": "1 L = 1000 mL, so 1.5 L = 1500 mL."
+          "text": "A 1.5 L bottle of iced tea: 1 L = 1000 mL, so 1.5 L = 1500 mL."
         },
         {
-          "text": "Divide the price by the mL: $2.40 ÷ 1500 mL."
+          "text": "It costs $2.40. Divide the price by the mL: $2.40 ÷ 1500 mL."
         },
         {
           "text": "Times 100 to get the price per 100 mL: $0.16, or 16 cents."
@@ -929,46 +901,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-unit-deeper-9",
-      "prompt": "A 4-pack of yogurt costs $6.20. A single one costs $1.75. Which is cheaper per yogurt?",
+      "prompt": "Pokémon booster packs: 4 for $6.20, or 1 for $1.75. Which is cheaper per pack?",
       "options": [
         "The single, at $1.75 each",
         "They cost the same each",
         "The 4-pack, at $1.55 each"
       ],
       "answer": 2,
-      "why": "Dividing the pack price by 4 gives $1.55 each, which is less than the single's $1.75.",
+      "why": "$6.20 ÷ 4 = $1.55 per pack, which is less than the single's $1.75.",
       "steps": [
         {
-          "text": "Find the count. The pack has 3 yogurts, so the count is 3."
+          "text": "Card sleeves: a bundle holds 3 packs of sleeves, so the count is 3."
         },
         {
-          "text": "Divide the pack price: $4.20 ÷ 3 = $1.40 each."
+          "text": "The bundle costs $4.20. Divide by the count: $4.20 ÷ 3 = $1.40 each."
         },
         {
-          "text": "Compare $1.40 with the single price of $1.60. The pack is cheaper."
+          "text": "One single pack of sleeves is $1.60. $1.40 is less, so the bundle is cheaper."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-unit-deeper-10",
-      "prompt": "Box A costs $4.00 for 400 g. Box B costs $6.00 for 900 g. Which is the better buy?",
+      "prompt": "V-Bucks: 400 for $4.00, or 900 for $6.00. Which is the better buy?",
       "options": [
-        "Box A, because it has the lower price tag",
-        "Box B, because it has the lower price per 100 g",
-        "Neither, they cost the same per gram"
+        "Bundle A, since its price tag is lower",
+        "Bundle B, since its price per 100 is lower",
+        "Neither, since both cost the same each"
       ],
       "answer": 1,
-      "why": "The lower price tag is not the same as the lower unit price, and Box B gives about 67 cents per 100 g.",
+      "why": "A lower price tag is not a lower unit price: Bundle B costs about 67 cents per 100 V-Bucks.",
       "steps": [
         {
-          "text": "Box C: $5.00 ÷ 250 g gives $0.02 per gram. That is $2.00 per 100 g."
+          "text": "Bundle C: $5.00 for 250 V-Bucks. That is $2.00 per 100 V-Bucks."
         },
         {
-          "text": "Box D: $8.00 ÷ 500 g gives $0.016 per gram. That is $1.60 per 100 g."
+          "text": "Bundle D: $8.00 for 500 V-Bucks. That is $1.60 per 100 V-Bucks."
         },
         {
-          "text": "The box with the bigger price tag, Box D, has the lower unit price."
+          "text": "Bundle D has the bigger price tag but the lower price per 100. It is the better buy."
         }
       ]
     },
@@ -982,13 +954,13 @@ export const pack: SePack = {
         "8",
         "4"
       ],
-      "why": "Dividing $2.80 by 500 g and times 100 gives 0.56 dollars, which is 56 cents.",
+      "why": "500 g is five lots of 100 g, so $2.80 ÷ 5 = $0.56, which is 56 cents.",
       "steps": [
         {
-          "text": "Divide the price by the grams: $3.40 ÷ 400 g = $0.0085 per gram."
+          "text": "A box costs $3.40 for 400 g. Divide the price by the grams: $3.40 ÷ 400 g = $0.0085 per gram."
         },
         {
-          "text": "Times 100 to get per 100 g: $0.85."
+          "text": "Times 100 to get the price per 100 g: $0.85."
         },
         {
           "text": "Write it in cents: $0.85 = 85 cents per 100 g."
@@ -998,69 +970,69 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-unit-build-3",
-      "prompt": "Luffy's crew buys a 750 mL bottle for $3.00. Build the price per 100 mL.",
+      "prompt": "Half-time. A 750 mL sports drink costs $3.00. Build the price per 100 mL, in dollars.",
       "answer": "0.40",
       "decoys": [
         "2",
         "5",
         "6"
       ],
-      "why": "Millilitres and grams both work the same way, so any unit size can be compared.",
+      "why": "750 mL is 7.5 lots of 100 mL, and $3.00 ÷ 7.5 = $0.40.",
       "steps": [
         {
-          "text": "Count the 100 mL pieces in 750 mL: 750 ÷ 100 = 7.5."
+          "text": "A 400 mL water costs $1.00. Count the 100 mL pieces: 400 ÷ 100 = 4."
         },
         {
-          "text": "Divide the price by 7.5: $3.00 ÷ 7.5. Think of it as 30 ÷ 75."
+          "text": "Divide the price by 4: $1.00 ÷ 4. Think of it as 100 cents ÷ 4."
         },
         {
-          "text": "Worked example: 400 mL for $1.00. 400 ÷ 100 = 4, so $1.00 ÷ 4 is the price per 100 mL."
+          "text": "That gives 25 cents per 100 mL, written $0.25."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-unit-build-4",
-      "prompt": "A 800 g bag costs $6.40. Build the price per 1 kg.",
+      "prompt": "Cheese curds for poutine: 800 g costs $6.40. Build the price per 1 kg.",
       "answer": "8.00",
       "decoys": [
         "4",
         "9",
         "5"
       ],
-      "why": "Price per kilogram is the standard way to compare big and small packs.",
+      "why": "Price per kilogram lets you compare a small bag and a big bag fairly.",
       "steps": [
         {
-          "text": "Write 1 kg as 1000 g so both amounts use grams."
+          "text": "1 kg is 1000 g. Put both amounts in grams."
         },
         {
-          "text": "Find how many 800 g bags fit in 1000 g: 1000 ÷ 800 = 1.25, then multiply the price by 1.25."
+          "text": "Example: 250 g of curds costs $1.50. 1000 ÷ 250 = 4 tubs."
         },
         {
-          "text": "Worked example: 250 g for $1.50. 1 kg is 4 times 250 g, so multiply $1.50 by 4."
+          "text": "4 tubs × $1.50 = $6.00 per kg. Now do the same with 800 g: 1000 ÷ 800 = 1.25 bags."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-unit-build-5",
-      "prompt": "Isagi has $1.00. The price is $0.50 per 100 g. Build how many grams he gets.",
+      "prompt": "Halftime orange slices cost $0.50 per 100 g. You have $1.00. Build the grams you get.",
       "answer": "200",
       "decoys": [
         "8",
         "4",
         "5"
       ],
-      "why": "Dividing the money by the unit price tells you how many 100 g portions you can buy.",
+      "why": "Dividing your money by the price of one 100 g scoop tells you how many scoops you get.",
       "steps": [
         {
-          "text": "Divide the money by the price per 100 g: $1.00 ÷ $0.50."
+          "text": "Divide your money by the price of one 100 g scoop."
         },
         {
-          "text": "That gives the number of 100 g portions. Multiply it by 100 to get grams."
+          "text": "Example: $1.00 at $0.40 per 100 g. 1 ÷ 0.4 = 2.5 scoops."
         },
         {
-          "text": "Worked example: $1.00 at $0.40 per 100 g. 1 ÷ 0.4 = 2.5 portions, so 2.5 × 100 g is the amount."
+          "text": "Each scoop is 100 g, so 2.5 × 100 = 250 g. Now try $1.00 at $0.50."
         }
       ]
     },
@@ -1076,61 +1048,61 @@ export const pack: SePack = {
       "why": "Changing kilograms to grams first keeps the units matching the per 100 g price.",
       "steps": [
         {
-          "text": "Change 1.2 kg into grams: 1.2 kg = 1200 g."
+          "text": "Change kilograms to grams: 1.2 kg = 1200 g."
         },
         {
           "text": "Count the 100 g pieces: 1200 ÷ 100 = 12. Divide the price by 12."
         },
         {
-          "text": "Worked example: 750 g for $5.25. 750 ÷ 100 = 7.5, so $5.25 ÷ 7.5 is the price per 100 g."
+          "text": "Example: 750 g for $5.25. 750 ÷ 100 = 7.5 pieces, so $5.25 ÷ 7.5 = $0.70 per 100 g."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-unit-build-7",
-      "prompt": "Isagi buys 300 g at $0.56 per 100 g. Build the total cost in dollars.",
+      "prompt": "Gummy bin: $0.56 per 100 g. You scoop 300 g. Build the total cost in dollars.",
       "answer": "1.68",
       "decoys": [
         "5",
         "4",
         "9"
       ],
-      "why": "Total cost is the number of units bought times the price for each unit.",
+      "why": "Total cost is the number of 100 g scoops times the price of one scoop.",
       "steps": [
         {
-          "text": "Count the 100 g pieces in 300 g: 300 ÷ 100 = 3."
+          "text": "Count the 100 g scoops in your bag: 300 ÷ 100 = 3."
         },
         {
-          "text": "Multiply the pieces by the price: 3 × $0.56. Keep two decimal places."
+          "text": "Example: 500 g at $0.30 per 100 g is 5 scoops."
         },
         {
-          "text": "Worked example: 300 g at $0.40 per 100 g. 3 × $0.40 gives the total cost."
+          "text": "5 × $0.30 = $1.50. Now multiply 3 × $0.56 and keep two decimal places."
         }
       ]
     },
     {
       "kind": "game",
       "id": "fin-unit-games-1",
-      "title": "Zoro's Bounty Board",
+      "title": "V-Bucks Shop Match",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "Total price",
-            "Money for whole box"
+            "Dollars for the whole bundle"
           ],
           [
-            "Net weight",
-            "Amount inside the box"
+            "Bundle size",
+            "V-Bucks inside the bundle"
           ],
           [
-            "Per 100 g",
+            "Per 100 V-Bucks",
             "Standard comparison"
           ],
           [
             "Unit price",
-            "Cost per 1 unit"
+            "Cost of 1 V-Buck"
           ],
           [
             "Best buy",
@@ -1138,7 +1110,7 @@ export const pack: SePack = {
           ]
         ]
       },
-      "why": "Stores print unit prices on shelf tags so shoppers can compare brands fairly."
+      "why": "Dividing price by amount gives a unit price, and the lowest unit price is the better deal."
     },
     {
       "kind": "video",

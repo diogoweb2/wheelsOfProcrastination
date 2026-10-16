@@ -15,19 +15,19 @@ export const pack: SePack = {
       "id": "fin-credit-teach-0",
       "title": "What borrowing really is",
       "lines": [
-        "Borrowing money means you rent it.",
+        "Borrowing money means renting it.",
         "You get to use the money now.",
         "You pay rent on it later. That rent is called interest."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi borrows a teammate's boots for one match. He pays rent each week. The boots never become his."
+        "text": "Your friend lends you 800 V-Bucks for a skin. You hand back 20 extra. That 20 is the rent."
       }
     },
     {
       "kind": "choice",
       "id": "fin-credit-basics-0",
-      "prompt": "Sota owes $600 on a card at 24% a year. He pays only the $30 minimum. How much interest is added this month?",
+      "prompt": "Sota owes $600 on his club store card at 24% a year. He pays only the $30 minimum. How much interest is added this month?",
       "options": [
         "$24",
         "$12",
@@ -50,7 +50,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-basics-1",
-      "prompt": "Isagi borrows $400 from his coach at 5% a year. How much interest after 2 years?",
+      "prompt": "Dad lends you $400 for a Battle Pass at 5% a year. How much interest after 2 years?",
       "options": [
         "$20",
         "$40",
@@ -141,7 +141,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-basics-2",
-      "prompt": "A $500 phone is bought on credit. Interest is 10% a year, paid after 1 year. What is the total you pay?",
+      "prompt": "You buy a $500 Pokémon booster box on credit. Interest is 10% a year, paid after 1 year. What is the total you pay?",
       "options": [
         "$50",
         "$550",
@@ -164,7 +164,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-credit-basics-3",
-      "prompt": "Ren borrows $800 at 3% a year, simple interest. How much interest after 2 years? Build the answer.",
+      "prompt": "Ren borrows $800 at 3% a year for a gaming PC, simple interest. How much interest after 2 years? Build the answer.",
       "answer": "48",
       "decoys": [
         "2"
@@ -193,13 +193,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Like a bounty on Luffy's head, interest grows while you sail on."
+        "text": "Like a Berry bounty, interest grows every day you sail on."
       }
     },
     {
       "kind": "build",
       "id": "fin-credit-build-0",
-      "prompt": "Isagi borrows $500 on a card. It charges 2% interest each month. How much interest in one month?",
+      "prompt": "Dad lends you $500 for the pass. He charges 2% interest a month. How much interest after one month?",
       "answer": "10",
       "decoys": [
         "5",
@@ -217,55 +217,48 @@ export const pack: SePack = {
         {
           "text": "Same method on $400 at 3%: 1% is $4, so 3% is 3 × $4 = $12."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 1,
-        "label": "1/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-basics-4",
-      "prompt": "Loan A: $100 at 6% for 2 years. Loan B: $100 at 5% for 3 years. Which costs less in interest?",
+      "prompt": "Game plan A: $100 at 6% for 2 years. Game plan B: $100 at 5% for 3 years. Which costs less in interest?",
       "options": [
-        "Loan A, $12 of interest",
-        "Loan B, $15 of interest",
-        "Both cost the same"
+        "Both cost the same",
+        "Plan B, $15 of interest",
+        "Plan A, $12 of interest"
       ],
-      "answer": 0,
+      "answer": 2,
       "why": "Compare the total rent paid, which is the rate times the years.",
       "steps": [
         {
-          "text": "Loan A: 6% of $100 is $6 a year. Times 2 years is $12."
+          "text": "Plan A: 6% of $100 is $6 a year. Times 2 years is $12."
         },
         {
-          "text": "Loan B: 5% of $100 is $5 a year. Times 3 years is $15."
+          "text": "Plan B: 5% of $100 is $5 a year. Times 3 years is $15."
         },
         {
-          "text": "The longer loan can cost more even with a lower rate. Always compare the totals."
+          "text": "The longer plan can cost more even with a lower rate. Always compare the totals."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-basics-5",
-      "prompt": "Why does a bank charge interest when it lends you money?",
+      "prompt": "Why does a pay-later app add a charge when you buy a game?",
       "options": [
-        "It is rent for using the money",
+        "It is rent for using its money",
         "It is a fee for opening the account",
-        "It is a gift the bank keeps"
+        "It is a gift the app keeps"
       ],
       "answer": 0,
       "why": "Interest is the lender's payment for letting you use its money for a while.",
       "steps": [
         {
-          "text": "When you borrow, the bank cannot spend or invest that money while you have it."
+          "text": "When you borrow, the app cannot spend or invest that money while you have it."
         },
         {
-          "text": "Some borrowers never pay back, so the bank needs extra to cover that risk."
+          "text": "Some borrowers never pay back, so the app needs extra to cover that risk."
         },
         {
           "text": "Hook: a landlord charges rent for a room. Interest is the rent on money."
@@ -275,7 +268,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "fin-credit-games-0",
-      "title": "Luffy's $1000 Rent Bill",
+      "title": "Sort the $1000 Pay-Later Bills",
       "game": {
         "mode": "order",
         "values": [
@@ -310,7 +303,7 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "fin-credit-teach-2",
-      "title": "The method",
+      "title": "Pay-later maths",
       "lines": [
         "Monthly interest = amount owed × yearly rate ÷ 12.",
         "Add the interest to what you owe.",
@@ -324,7 +317,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-basics-6",
-      "prompt": "Your credit card balance is −$300. You pay back $120. Where is the balance now?",
+      "prompt": "Your debt to Dad is −$300. You pay back $120. Where is the debt now?",
       "options": [
         "−$180",
         "−$420",
@@ -334,13 +327,13 @@ export const pack: SePack = {
       "why": "A balance you owe is negative, and a payment moves it back toward zero.",
       "steps": [
         {
-          "text": "Owing money is a negative number. Start at −$250."
+          "text": "Owing money is a negative number. Start at −$300."
         },
         {
-          "text": "A payment of $90 moves you 90 steps toward zero: −$250 + $90."
+          "text": "A payment of $120 moves you 120 steps toward zero: −$300 + $120."
         },
         {
-          "text": "250 − 90 = 160, so the balance is −$160. Less owed means less negative."
+          "text": "300 − 120 = 180, so the debt is −$180. Less owed means less negative."
         }
       ],
       "art": {
@@ -364,7 +357,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-credit-build-1",
-      "prompt": "Bachira borrows $200 and pays back $250 in total. How much did the borrowing cost him?",
+      "prompt": "Dad lends you $200 for a Battle Pass. You pay back $250 in total. What did borrowing cost?",
       "answer": "50",
       "decoys": [
         "2"
@@ -378,7 +371,7 @@ export const pack: SePack = {
           "text": "That is $50, so the borrowing cost $50."
         },
         {
-          "text": "Same method with $300 borrowed and $345 paid: $345 − $300 = $45."
+          "text": "Same method: $345 paid back on $300 borrowed. $345 − $300 = $45."
         }
       ]
     }
@@ -401,7 +394,7 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Borrowed",
+            "label": "Borrowed for Robux",
             "value": 1000,
             "tone": "calm"
           },
@@ -419,13 +412,13 @@ export const pack: SePack = {
       "id": "fin-credit-teach-4",
       "title": "Worked example",
       "lines": [
-        "You owe $500 at 18% a year.",
+        "Your buy-now-pay-later plan owes $500 at 18% a year.",
         "Monthly interest: 500 × 0.18 ÷ 12 = $7.50.",
         "You pay $50. $7.50 is rent. $42.50 cuts the debt."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Think of it like a striker who scores in one half and loses the lead in the next."
+        "text": "Interest is taken off your payment before anything touches the debt."
       }
     },
     {
@@ -453,7 +446,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi rents a pair of cleats for one season. He pays for every day he wears them."
+        "text": "Renting a Minecraft server slot for a month costs the rent every single day."
       }
     },
     {
@@ -467,7 +460,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Paying only the minimum is like Zoro training with weights that barely move."
+        "text": "Paying only the minimum is like mining with a wooden pickaxe: slow and barely moving."
       }
     },
     {
@@ -475,13 +468,13 @@ export const pack: SePack = {
       "id": "fin-credit-deeper-2",
       "title": "A yearly rate is split into 12",
       "lines": [
-        "A 20% yearly rate is not charged all at once.",
-        "Each month you pay about one-twelfth of it.",
+        "Dad's loan charges 20% a year, not all at once.",
+        "Each month you pay about one-twelfth of that.",
         "So $1,000 at 20% a year is about $16.67 a month."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Isagi's goals count per match. Card interest counts per month, so divide by 12."
+        "text": "A Battle Pass costs 950 V-Bucks. A yearly rate is charged in 12 monthly pieces."
       }
     },
     {
@@ -495,7 +488,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A pirate who keeps gold in a vault earns a little more each year. A pirate who borrows gold owes more."
+        "text": "Robux in your balance can earn nothing. A debt on a card always charges you."
       }
     },
     {
@@ -509,7 +502,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "The long route looks easier, but it takes longer and costs you more in the end."
+        "text": "Paying the minimum on a $900 FC Points debt can take years to clear."
       }
     },
     {
@@ -523,55 +516,55 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A bounty grows the same way. Every new win adds to the number on the poster."
+        "text": "A snowball rolled down a Minecraft hill picks up more snow with every block."
       }
     },
     {
       "kind": "choice",
       "id": "fin-credit-basics-8",
-      "prompt": "A credit card charges 18% a year. About how much interest is added each month?",
+      "prompt": "Dad's credit card charges 18% a year. About how much interest is added each month?",
       "options": [
-        "1.5%",
         "1.8%",
+        "1.5%",
         "18%"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "The monthly rate is the yearly rate split into 12 equal parts.",
       "steps": [
         {
-          "text": "Split the yearly rate into 12: 24% ÷ 12 = 2% a month."
+          "text": "Split the yearly rate into 12: 12% ÷ 12 = 1% a month."
         },
         {
-          "text": "Find the interest on $500 at 2%: $500 × 0.02 = $10 for the month."
+          "text": "Interest on $400 at 1%: $400 × 0.01 = $4 for the month."
         },
         {
-          "text": "Small monthly rents add up to a lot over a year. That is why debt grows."
+          "text": "Small monthly charges add up over a year. That is why card debt grows."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-credit-basics-9",
-      "prompt": "Ayaka borrows $1000 at 12% a year, simple interest, for 2 years. What total does she repay? Build it.",
+      "prompt": "Dad lends you $1000 at 12% a year, simple interest, for 2 years. What total do you repay? Build it.",
       "answer": "1240",
       "decoys": [],
       "why": "The total repaid is the price plus the simple interest over all the years.",
       "steps": [
         {
-          "text": "Try $500 at 10% for 2 years: interest is $50 a year, so $100 total."
+          "text": "Try $500 at 10% for 2 years: $50 a year, so $100 interest."
         },
         {
           "text": "So $500 becomes $600 in total. Price plus interest is the rule."
         },
         {
-          "text": "For $1000 at 12%: interest is $120 a year, $240 total. $1000 + $240 is 1240. Build it."
+          "text": "For $1000 at 12%: $120 a year, $240 total. $1000 + $240 is 1240."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-applied-0",
-      "prompt": "Isagi borrows $200 from his coach at 10% a year (simple interest). After 1 year, how much does he owe in total?",
+      "prompt": "Dad lends Isagi $200 for a Fortnite skin bundle at 10% a year. After 1 year, how much does he owe?",
       "options": [
         "$220 in total",
         "$202 in total",
@@ -584,7 +577,7 @@ export const pack: SePack = {
           "text": "Find the interest: 10% of $200 is 0.10 × 200 = $20."
         },
         {
-          "text": "Try new numbers: $500 at 6% a year is 0.06 × 500 = $30 of interest."
+          "text": "Try new numbers: Dad lends $500 at 6%: 0.06 × 500 = $30 of interest."
         },
         {
           "text": "Add the interest to the loan: $500 + $30 = $530 owed after 1 year."
@@ -601,7 +594,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-applied-1",
-      "prompt": "Rin's credit card balance is $800. The card charges 1.5% interest each month. How much interest is added in the first month?",
+      "prompt": "Rin owes $800 on a card she used to buy Robux. Interest is 1.5% a month. How much interest is added in the first month?",
       "options": [
         "$12",
         "$15",
@@ -617,14 +610,14 @@ export const pack: SePack = {
           "text": "Multiply by the balance: 0.015 × 800 = $12."
         },
         {
-          "text": "Try new numbers: 2% of $450 is 0.02 × 450 = $9 of interest."
+          "text": "Try new numbers: a friend owes $450 at 2%: 0.02 × 450 = $9 of interest."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-applied-2",
-      "prompt": "Luffy's crew owes $900 on a card. Interest is 2% a month. They pay only $18 each month. What happens to the balance after one month?",
+      "prompt": "Your squad owes $900 on a card. Interest is 2% a month. They pay $18 each month. What happens to the balance after one month?",
       "options": [
         "It stays at $900 still owed",
         "It drops to $882 still owed",
@@ -647,7 +640,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-applied-3",
-      "prompt": "Isagi owes $300 on a store card. Interest is 3% a month. He pays $20. What is the new balance after one month?",
+      "prompt": "Kenji owes $300 on a store card for a football jersey. Interest is 3% a month. He pays $20. What is the new balance?",
       "options": [
         "$289",
         "$291",
@@ -670,7 +663,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-applied-4",
-      "prompt": "A Toronto student borrows $400 on a loan at 15% a year (simple interest) for 2 years. How much does she owe at the end?",
+      "prompt": "Mia borrows $400 from Mum for a gaming chair at 15% a year. She owes it for 2 years. How much does she owe at the end?",
       "options": [
         "$520 in total",
         "$460 in total",
@@ -686,14 +679,14 @@ export const pack: SePack = {
           "text": "Multiply by 2 years: $60 × 2 = $120 of interest."
         },
         {
-          "text": "Try new numbers: $300 at 10% for 3 years is $90 of interest, so $390 in total."
+          "text": "Try new numbers: Dad lends $300 at 10% for 3 years: $90 of interest, so $390 in total."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-applied-5",
-      "prompt": "Zoro's card balance is $1200. The interest is 1.5% a month. How much interest is added in one month?",
+      "prompt": "Zoro owes $1200 on a card for a Minecraft server. Interest is 1.5% a month. How much interest is added in one month?",
       "options": [
         "$18",
         "$24",
@@ -709,14 +702,14 @@ export const pack: SePack = {
           "text": "Multiply: 0.015 × 1200 = $18."
         },
         {
-          "text": "Try new numbers: 2% of $1000 is 0.02 × 1000 = $20 of interest."
+          "text": "Try new numbers: a $1000 balance at 2% adds 0.02 × 1000 = $20 of interest."
         }
       ]
     },
     {
       "kind": "build",
       "id": "fin-credit-applied-6",
-      "prompt": "A balance is $600. Interest is 2% a month. You pay $12 each month. Build the balance after 1 month.",
+      "prompt": "Dad lends you $600 for a new console. He charges 2% a month. You pay $12 this month. Build the balance after 1 month.",
       "answer": "600",
       "decoys": [
         "2",
@@ -728,17 +721,17 @@ export const pack: SePack = {
           "text": "Find the interest: 2% of $600 = 0.02 × 600 = $12."
         },
         {
-          "text": "Subtract the interest from the payment: $12 − $12 = $0 paid down."
+          "text": "Subtract the interest from the payment: $12 − $12 = $0 off the balance."
         },
         {
-          "text": "Try new numbers: $900 at 2% has $18 interest, so a $18 payment keeps it at $900."
+          "text": "Try new numbers: $900 at 2% has $18 interest, so an $18 payment keeps it at $900."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-applied-7",
-      "prompt": "Ana buys a $2000 e-bike on a store card. The card charges 24% a year, which is 2% a month. How much interest is added in the first month?",
+      "prompt": "Ana owes $2000 on a store card for a Pokémon booster box. The card charges 24% a year, which is 2% a month. How much interest is added in the first month?",
       "options": [
         "$40 a month",
         "$400 a month",
@@ -761,7 +754,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-applied-8",
-      "prompt": "Isagi owes $1000 on a card with 2% interest a month. He pays $50 this month. How much of the balance does he actually pay off?",
+      "prompt": "Isagi owes $1000 on a store card for football boots. Interest is 2% a month. He pays $50 this month. How much of the balance does he actually pay off?",
       "options": [
         "$30",
         "$50",
@@ -784,7 +777,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-deeper-6",
-      "prompt": "Ayaan owes $1,000 on a card at 20% a year. This month's interest is $16.67. He pays the $30.00 minimum. How much does the balance really drop?",
+      "prompt": "Ayaan owes $1,000 on a card he used for Roblox gift cards. It charges 20% a year. This month's interest is $16.67. He pays the $30.00 minimum. How much does the balance really drop?",
       "options": [
         "$30.00 less",
         "$16.67 less",
@@ -794,20 +787,20 @@ export const pack: SePack = {
       "why": "The bank takes the interest first, so only the rest of the payment lowers the balance.",
       "steps": [
         {
-          "text": "Striker Reo owes $2,000 at 18% a year. Monthly interest: 2,000 × 0.18 ÷ 12 = 30."
+          "text": "Find the monthly rate: 20% ÷ 12 = 1.67% a month. Interest: 1.67% of $1,000 = $16.67."
         },
         {
-          "text": "He pays a $50 minimum. Interest comes first: 50 − 30 = 20 goes to the balance."
+          "text": "Subtract interest from the payment: $30.00 − $16.67 = $13.33 off the balance."
         },
         {
-          "text": "So the balance drops by $20, not by $50. The rest was rent."
+          "text": "Try new numbers: $2,000 at 20% a year has $33.33 interest, so a $50 payment drops it by $16.67."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "fin-credit-deeper-7",
-      "prompt": "A card charges 12% a year. What is the interest rate for one month?",
+      "prompt": "Dad lends you $950 for a Battle Pass at 12% a year. What is the interest rate for one month?",
       "options": [
         "12% each month",
         "1% each month",
@@ -830,7 +823,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-deeper-8",
-      "prompt": "Rania owes $1,000 on a card. She does not pay this month. Next month, why does the interest go up?",
+      "prompt": "Rania owes $1,000 on a card for Raptors tickets. She does not pay this month. Next month, why does the interest go up?",
       "options": [
         "Last month's interest is added to the balance",
         "The minimum payment gets bigger each month",
@@ -853,14 +846,14 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-deeper-9",
-      "prompt": "Ben can pay $30 a month for 10 months, or $20 a month for 20 months, on the same loan. Which plan costs more in total?",
+      "prompt": "Repay Dad for your Battle Pass two ways. $30 a month for 10 months, or $20 a month for 20 months. Which costs more in total?",
       "options": [
         "$30 a month for 10 months",
         "$20 a month for 20 months",
         "Both cost exactly the same"
       ],
       "answer": 1,
-      "why": "A smaller payment over a longer time gives interest more months to be added.",
+      "why": "A smaller payment over a longer time means more months of total payments, so the total is higher.",
       "steps": [
         {
           "text": "Find the total paid: payment × number of months."
@@ -876,7 +869,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-deeper-10",
-      "prompt": "You have $1,000 for one year. Saving pays 2% interest. Borrowing charges 20% interest. Which is correct?",
+      "prompt": "Your $1,000 emerald stash sits in a bank for one year. Saving pays 2%. Borrowing charges 20%. Which is correct?",
       "options": [
         "Saving earns $20. Borrowing costs $200.",
         "Saving earns $200. Borrowing costs $20.",
@@ -899,7 +892,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "fin-credit-deeper-11",
-      "prompt": "Ayaan's card limit is $5,000. He already owes $3,250. How much more can he borrow?",
+      "prompt": "Ayaan's team-store card limit is $5,000. He already owes $3,250. How much more can he borrow?",
       "options": [
         "$5,000",
         "$1,750",
@@ -922,7 +915,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-credit-build-2",
-      "prompt": "A loan charges 1.5% a month. Write 1.5% as a decimal.",
+      "prompt": "A shawarma-shop loan charges 1.5% a month. Write 1.5% as a decimal.",
       "answer": "0.015",
       "decoys": [],
       "why": "A percent means out of one hundred, so you divide by 100 to get the decimal.",
@@ -941,7 +934,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-credit-build-3",
-      "prompt": "Luffy's loan is 10 months long. He has made 5 of the 10 payments. What fraction of the loan is done?",
+      "prompt": "Your Robux loan from Dad is 10 payments long. You have paid 5 of them. What fraction of the loan is done?",
       "answer": "1/2",
       "decoys": [
         "5",
@@ -962,16 +955,16 @@ export const pack: SePack = {
       ],
       "art": {
         "art": "bar",
-        "parts": 4,
+        "parts": 2,
         "filled": 1,
-        "label": "1/4",
+        "label": "1/2",
         "tone": "calm"
       }
     },
     {
       "kind": "build",
       "id": "fin-credit-build-4",
-      "prompt": "Nami's minimum payment is $30 a month. The interest is $20 that month. How much of the payment reduces what she owes?",
+      "prompt": "Your Pokémon card-shop tab has a minimum of $30 a month. This month's interest is $20. How much of the payment reduces what you owe?",
       "answer": "10",
       "decoys": [
         "5",
@@ -993,50 +986,29 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "fin-credit-build-5",
-      "prompt": "Blue Lock's sponsor will lend $80 to Nami. Each month only $4 of her payment lowers the debt. How many months to clear it?",
+      "prompt": "Dad lends you $80 for a Battle Pass.\nYou pay him back $4 a week. How many weeks to clear it?",
       "answer": "20",
       "decoys": [
         "4",
         "6"
       ],
-      "why": "Dividing the debt by the amount paid off each month gives the number of months.",
+      "why": "Dividing the debt by the amount paid off each week gives the number of weeks.",
       "steps": [
         {
-          "text": "Months = debt ÷ amount off per month: $80 ÷ $4."
+          "text": "Weeks = debt ÷ amount paid per week: $80 ÷ $4."
         },
         {
-          "text": "$80 ÷ $4 = 20 months."
+          "text": "$80 ÷ $4 = 20 weeks."
         },
         {
-          "text": "Same method on $60 at $5 a month: $60 ÷ $5 = 12 months."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "fin-credit-build-6",
-      "prompt": "A loan costs 40 cents of interest for every $1 borrowed. Write the cost as a decimal of a dollar.",
-      "answer": "0.4",
-      "decoys": [
-        "1"
-      ],
-      "why": "Cents are hundredths of a dollar, so 40 cents is 0.40 dollars, which we write as 0.4.",
-      "steps": [
-        {
-          "text": "100 cents = $1, so 1 cent = $0.01."
-        },
-        {
-          "text": "40 cents = 40 × $0.01 = $0.40, written as 0.4."
-        },
-        {
-          "text": "Same method with 25 cents: 25 × $0.01 = $0.25."
+          "text": "Same method on $45 at $5 a week: $45 ÷ $5 = 9 weeks."
         }
       ]
     },
     {
       "kind": "game",
       "id": "fin-credit-games-1",
-      "title": "Borrowing Words Crew",
+      "title": "Loan Words Squad",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -1054,7 +1026,7 @@ export const pack: SePack = {
           ],
           [
             "Credit limit",
-            "Most you can borrow"
+            "Most a store lets you owe"
           ],
           [
             "Due date",

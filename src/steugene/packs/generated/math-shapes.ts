@@ -20,14 +20,14 @@ export const pack: SePack = {
         "A quadrilateral has 4 straight sides and 4 corners."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Three Blue Lock strikers in a triangle. Every pass has a clear line."
+        "flavour": "key",
+        "text": "A Minecraft roof is a triangle sitting on top of a rectangle wall."
       }
     },
     {
       "kind": "choice",
       "id": "math-shapes-basics-0",
-      "prompt": "Bachira draws a triangle. Two angles are 50° and 65°. What is the third angle?",
+      "prompt": "Your Minecraft gable roof has two corners at 50° and 65°. What is the third corner?",
       "options": [
         "45°",
         "55°",
@@ -56,7 +56,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-1",
-      "prompt": "Ego's coach paints a triangle with all three sides the same length. What type is it?",
+      "prompt": "Three corner flags sit 20 m apart on each side. What type of triangle is the pitch corner?",
       "options": [
         "Scalene",
         "Isosceles",
@@ -69,7 +69,7 @@ export const pack: SePack = {
           "text": "Look at the tick marks. The same number of ticks means equal sides."
         },
         {
-          "text": "Try sides 4 cm, 4 cm and 6 cm. Two sides match, so it is isosceles."
+          "text": "Try sides 20 m, 20 m and 30 m. Two sides match, so it is isosceles."
         },
         {
           "text": "Scalene has no matching sides. Equilateral has three matching sides."
@@ -131,7 +131,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-2",
-      "prompt": "Zoro's sword cuts a corner of exactly 90°. Which triangle is it?",
+      "prompt": "Your wood ramp in Fortnite has one corner at exactly 90°. Which triangle is it?",
       "options": [
         "Right",
         "Acute",
@@ -154,7 +154,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-3",
-      "prompt": "A shape on the whiteboard has only one pair of parallel sides. Which quadrilateral is it?",
+      "prompt": "Your Roblox obby platform has only one pair of parallel sides. Which quadrilateral is it?",
       "options": [
         "Parallelogram",
         "Trapezoid",
@@ -170,7 +170,7 @@ export const pack: SePack = {
           "text": "A rhombus is a parallelogram with four equal sides, so it also has two pairs."
         },
         {
-          "text": "A trapezoid has exactly one pair. Like a slice of pizza with a flat top and bottom."
+          "text": "A trapezoid has exactly one pair. Like a pizza slice with a flat top and bottom."
         }
       ]
     },
@@ -180,14 +180,14 @@ export const pack: SePack = {
       "title": "Why it matters",
       "lines": [
         "Sorting shapes starts with counting sides and corners.",
-        "Triangles are rigid. That is why bridges and roofs use them.",
+        "Minecraft builders use triangles for roofs because they hold their shape.",
         "Once you know the sides, you know which angle facts are true."
       ]
     },
     {
       "kind": "build",
       "id": "math-shapes-build-0",
-      "prompt": "Isagi's team plays a triangle pass. Two angles are 60° and 70°. Build the third angle.",
+      "prompt": "Your roof gable has two corners: 60° and 70°.\nBuild the third corner angle.",
       "answer": "50",
       "decoys": [
         "3",
@@ -197,10 +197,10 @@ export const pack: SePack = {
       "why": "The three angles of every triangle always add up to 180°.",
       "steps": [
         {
-          "text": "Try 40° and 65°. Add them: 40 + 65 = 105."
+          "text": "Try a gable with 40° and 65°. Add them: 40 + 65 = 105."
         },
         {
-          "text": "Take that from 180: 180 − 105 = 75. So the third angle is 75°."
+          "text": "Take that from 180: 180 − 105 = 75. So the third corner is 75°."
         },
         {
           "text": "Check it: 40 + 65 + 75 = 180. It fits."
@@ -210,7 +210,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-4",
-      "prompt": "Which quadrilateral has opposite sides equal and parallel, but no right angles?",
+      "prompt": "A supply drop floor leans over. Opposite sides match, but no corner is 90°.\nWhich shape is it?",
       "options": [
         "Rectangle",
         "Square",
@@ -220,7 +220,7 @@ export const pack: SePack = {
       "why": "A parallelogram has opposite sides equal and parallel, but its angles are not 90° unless it is a rectangle.",
       "steps": [
         {
-          "text": "Method: opposite sides match. Try sides 8 cm and 5 cm. The perimeter is 2 × (8 + 5) = 26 cm."
+          "text": "Method: opposite sides match. Try sides 7 cm and 3 cm. The perimeter is 2 × (7 + 3) = 20 cm."
         },
         {
           "text": "A rectangle and a square both have four right angles. So they are out."
@@ -233,7 +233,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-5",
-      "prompt": "A quadrilateral has four equal sides. Its angles are not all 90°. What is it?",
+      "prompt": "Your cracker tile has four equal sides. Its corners are not all 90°.\nWhat shape is it?",
       "options": [
         "Rhombus",
         "Rectangle",
@@ -243,10 +243,10 @@ export const pack: SePack = {
       "why": "A rhombus has four equal sides, but its angles can lean, so they are not all 90°.",
       "steps": [
         {
-          "text": "Try sides of 6 cm all the way round. The sides are equal."
+          "text": "Try sides of 4 cm all the way round. The sides are equal."
         },
         {
-          "text": "Lean the shape so the angles are 70°, 110°, 70° and 110°. They add to 360°. It is still a rhombus."
+          "text": "Lean the tile so the corners are 80°, 100°, 80° and 100°. They add to 360°. It is still a rhombus."
         },
         {
           "text": "A rectangle has right angles, but its sides are not always equal. A trapezoid has only one pair of parallel sides."
@@ -261,23 +261,23 @@ export const pack: SePack = {
         "mode": "pair",
         "pairs": [
           [
-            "Triangle angles",
+            "Triangle corners",
             "add to 180°"
           ],
           [
-            "Quadrilateral angles",
+            "Pitch quadrilateral",
             "add to 360°"
           ],
           [
-            "Right triangle",
+            "Roof corner",
             "one 90° angle"
           ],
           [
-            "Equilateral triangle",
+            "Equilateral tile",
             "3 equal sides"
           ],
           [
-            "Rhombus",
+            "Rhombus tile",
             "4 equal sides"
           ]
         ]
@@ -289,29 +289,29 @@ export const pack: SePack = {
       "id": "math-shapes-teach-2",
       "title": "The 180° rule",
       "lines": [
-        "The three angles inside any triangle add to 180°.",
-        "Know two angles? Missing angle = 180° − the two you know.",
-        "Quadrilateral angles add to 360°. Always check the shape first."
+        "Your roof triangle has three corners. They add to 180°.",
+        "Know two corners? Missing = 180° − the two you know.",
+        "Quadrilateral corners add to 360°. Check the shape first."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Angles in a triangle always share 180° between them."
+        "text": "Triangle corners always share 180° between them."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Angle A",
+            "label": "Left roof",
             "value": 70,
             "tone": "good"
           },
           {
-            "label": "Angle B",
+            "label": "Right roof",
             "value": 50,
             "tone": "focus"
           },
           {
-            "label": "Angle C",
+            "label": "Peak",
             "value": 60,
             "tone": "calm"
           }
@@ -322,7 +322,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-6",
-      "prompt": "A quadrilateral has two pairs of equal sides, but they touch each other, not opposite. Which shape?",
+      "prompt": "Two pairs of equal sides sit next to each other, not opposite.\nWhich shape is it?",
       "options": [
         "Parallelogram",
         "Kite",
@@ -332,20 +332,20 @@ export const pack: SePack = {
       "why": "A kite has two pairs of equal sides that sit next to each other, not opposite.",
       "steps": [
         {
-          "text": "Try sides 5 cm, 5 cm, 3 cm and 3 cm, with the 5s next to each other."
+          "text": "Try sides 6 cm, 6 cm, 2 cm and 2 cm, with the 6s next to each other."
         },
         {
           "text": "A parallelogram has equal sides opposite each other, not next to each other."
         },
         {
-          "text": "A rhombus has all four sides equal. So the 5s and 3s here do not fit it."
+          "text": "A rhombus has all four sides equal. So the 6s and 2s here do not fit it."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-shapes-basics-7",
-      "prompt": "Add up the four angles of any quadrilateral. What do you get?",
+      "prompt": "Your Minecraft wall has four corners. Add its four inside angles. What is the total?",
       "options": [
         "180°",
         "270°",
@@ -368,7 +368,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-build-1",
-      "prompt": "A Blue Lock coach draws an equilateral triangle on the pitch. Every angle is the same size. Build one angle.",
+      "prompt": "Your Fortnite ramp is a triangle with three equal angles. Build one angle.",
       "answer": "60",
       "decoys": [
         "3",
@@ -381,7 +381,7 @@ export const pack: SePack = {
           "text": "Try a triangle with equal angles that total 180°. Split 180 into 3 equal parts."
         },
         {
-          "text": "Try the same idea with 240 split into 4 equal parts: 240 ÷ 4 = 60."
+          "text": "Try 240 shared between 4 players: 240 ÷ 4 = 60."
         },
         {
           "text": "Check: 60 + 60 + 60 = 180. The idea works for any equal triangle."
@@ -395,8 +395,8 @@ export const pack: SePack = {
       "id": "math-shapes-teach-3",
       "title": "The common trap",
       "lines": [
-        "Trap: using 360° for a triangle. Triangles add to 180°.",
-        "Trap: calling a shape a square when only some sides match.",
+        "Trap: using 360° for a triangle roof. Triangles add to 180°.",
+        "Trap: calling a block a square when only some sides match.",
         "A square needs 4 equal sides AND 4 right angles."
       ],
       "callout": {
@@ -409,24 +409,24 @@ export const pack: SePack = {
       "id": "math-shapes-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "Two angles in a triangle: 35° and 85°.",
+        "A Minecraft roof has two known corners: 35° and 85°.",
         "Add them: 35 + 85 = 120°.",
         "Take that from 180: 180 − 120 = 60°. The missing angle is 60°."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "The map shares 180° between three crew members. Count the shares carefully."
+        "flavour": "key",
+        "text": "The three angles in a roof triangle share 180°. Count carefully."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Angle 1",
+            "label": "Corner A",
             "value": 35,
             "tone": "focus"
           },
           {
-            "label": "Angle 2",
+            "label": "Corner B",
             "value": 85,
             "tone": "good"
           },
@@ -450,7 +450,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Count the sides. Then pick the angle rule that matches."
+        "text": "Count the sides first, like counting tiles. Then pick the angle rule."
       }
     },
     {
@@ -472,9 +472,9 @@ export const pack: SePack = {
       "id": "math-shapes-deeper-2",
       "title": "Triangle angles: always 180°",
       "lines": [
-        "Tall, flat, pointy, lopsided: every triangle's angles add to 180°.",
-        "Add the three angles. You get 180° every time.",
-        "Use it to find a missing angle: subtract the two you know from 180°."
+        "Every gable on your roof is a triangle.",
+        "Its three angles always add up to 180°.",
+        "Missing one? Subtract the two you know from 180°."
       ],
       "callout": {
         "flavour": "key",
@@ -492,7 +492,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro cuts a four-sided sail along one diagonal. Two triangles, one shape."
+        "text": "Luffy's sail has four sides. One diagonal makes two triangles."
       }
     },
     {
@@ -506,7 +506,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Think of a family tree. Every equilateral is in the isosceles family."
+        "text": "Like an evolution line: every equilateral is in the isosceles family."
       }
     },
     {
@@ -520,7 +520,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Look at which sides match, not just how the shape looks."
+        "text": "Two wall tiles can look alike. Check which sides match, not the look."
       }
     },
     {
@@ -529,8 +529,8 @@ export const pack: SePack = {
       "title": "Can three sticks make a triangle?",
       "lines": [
         "The two shorter sides must reach past the longest side.",
-        "Add the two shortest sides. If the total is bigger than the longest, it works.",
-        "If not, the sides can't meet, so you get no triangle at all."
+        "Add the two shortest. If the total beats the longest, it works.",
+        "If not, the sides cannot meet, so no triangle exists."
       ],
       "callout": {
         "flavour": "imagine",
@@ -540,7 +540,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-basics-9",
-      "prompt": "Ramon's shot hits a triangle with one angle of 120°. Which type of triangle is it?",
+      "prompt": "A pizza slice has one corner of 120°. What kind of triangle is it?",
       "options": [
         "Acute",
         "Obtuse",
@@ -550,20 +550,20 @@ export const pack: SePack = {
       "why": "An obtuse triangle has one angle bigger than 90° but less than 180°.",
       "steps": [
         {
-          "text": "Acute: every angle is less than 90°. Try 60°, 60° and 60°."
+          "text": "Acute: every corner is under 90°. Three 60° corners, like an even slice."
         },
         {
-          "text": "Right: one angle is exactly 90°. Try 90°, 45° and 45°."
+          "text": "Right: one corner is exactly 90°. Try 90°, 45° and 45°, like a square cut."
         },
         {
-          "text": "Obtuse: one angle is between 90° and 180°. Try 100°, 50° and 30°. 100 + 50 + 30 = 180."
+          "text": "Obtuse: one corner is between 90° and 180°. Try 100°, 50° and 30°. 100 + 50 + 30 = 180."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-shapes-applied-0",
-      "prompt": "Isagi draws a triangle on the whiteboard. Two of its angles are 58° and 67°. How big is the third angle?",
+      "prompt": "Your Minecraft roof gable is a triangle. Two of its angles are 58° and 67°. How big is the third?",
       "options": [
         "55°",
         "65°",
@@ -576,17 +576,17 @@ export const pack: SePack = {
           "text": "Write the rule: angle A + angle B + angle C = 180°."
         },
         {
-          "text": "Try different numbers: 40° and 75° add to 115°."
+          "text": "Try a different roof: 40° and 75° add to 115°, so the third is 180 − 115 = 65°."
         },
         {
-          "text": "Subtract from 180: 180 − 115 = 65°. So the third angle is 65°."
+          "text": "Back to this roof: 58 + 67 = 125, so 180 − 125 = 55°. The third angle is 55°."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-shapes-applied-1",
-      "prompt": "Zoro finds a triangle sail. Its angles are x, 2x and 3x. What is the largest angle?",
+      "prompt": "A Roblox wedge part is a triangle. Its angles are x, 2x and 3x. What is the largest angle?",
       "options": [
         "90°",
         "60°",
@@ -599,10 +599,10 @@ export const pack: SePack = {
           "text": "Add the three angles: x + 2x + 3x = 180, so 6x = 180."
         },
         {
-          "text": "Try a different sail: y, 2y and 6y. Sum is 9y = 180, so y = 20. Angles are 20°, 40°, 120°."
+          "text": "Try a different wedge: y, 2y and 6y. Sum is 9y = 180, so y = 20. Angles are 20°, 40°, 120°."
         },
         {
-          "text": "Back to Zoro's sail: x = 30, so the largest angle is 3x = 90°."
+          "text": "Back to this wedge: x = 30, so the largest angle is 3x = 90°."
         }
       ]
     },
@@ -619,7 +619,7 @@ export const pack: SePack = {
       "why": "A trapezoid is the only one of these with exactly one pair of parallel sides.",
       "steps": [
         {
-          "text": "Parallel sides never meet, like two lanes of the 401 running side by side."
+          "text": "Parallel sides never meet, like the two touchlines on a football pitch."
         },
         {
           "text": "Worked example: a parallelogram has two pairs of parallel sides, so it is not the answer."
@@ -632,7 +632,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-applied-3",
-      "prompt": "The four angles of a quadrilateral are 95°, 80°, 110° and an unknown angle. What is the unknown angle?",
+      "prompt": "A Fortnite building floor is a quadrilateral. Its corners are 95°, 80°, 110° and one unknown. What is the unknown?",
       "options": [
         "65°",
         "75°",
@@ -655,7 +655,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-applied-4",
-      "prompt": "Isagi's team has an isosceles triangle on the pitch. The top angle is 40°. How big is each base angle?",
+      "prompt": "A Pokémon Gym banner is an isosceles triangle. Its top angle is 40°. How big is each base angle?",
       "options": [
         "60°",
         "70°",
@@ -678,7 +678,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-applied-5",
-      "prompt": "A triangle has angles of 25° and 80°. Build the missing angle, using digits only.",
+      "prompt": "A Minecraft roof triangle has angles of 25° and 80°. Build the missing angle, using digits only.",
       "answer": "75",
       "decoys": [
         "3",
@@ -700,7 +700,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-applied-6",
-      "prompt": "In a right-angled triangle, one acute angle is 4 times the other. How big is the larger acute angle?",
+      "prompt": "A Minecraft roof gable is a right-angled triangle. One acute angle is 4 times the other. Find the larger one.",
       "options": [
         "18°",
         "72°",
@@ -713,7 +713,7 @@ export const pack: SePack = {
           "text": "The right angle takes 90°, so the two acute angles add to 90°. Call the small one x and the big one 4x."
         },
         {
-          "text": "Different numbers: if one is 2 times the other, then x + 2x = 3x = 90, so x = 30 and the big one is 60°."
+          "text": "Different numbers: a roof corner where one angle is 2 times the other gives x + 2x = 3x = 90, so x = 30 and the big one is 60°."
         },
         {
           "text": "Apply it here: x + 4x = 5x = 90, so x = 18° and the large one is 4x = 72°."
@@ -723,7 +723,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-applied-7",
-      "prompt": "Which statement is always true about a rhombus?",
+      "prompt": "A Roblox floor tile is a rhombus. Which statement is always true?",
       "options": [
         "All four sides are equal in length.",
         "All four angles are right angles.",
@@ -739,14 +739,14 @@ export const pack: SePack = {
           "text": "Related fact: a rectangle is the opposite. Its corners are all 90°, but its sides are not always equal."
         },
         {
-          "text": "Hook: picture a square pushed over sideways. Every side still matches, so it is a rhombus."
+          "text": "Hook: a Roblox tile pushed sideways. Every edge still matches, so it is a rhombus."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-shapes-applied-8",
-      "prompt": "A triangle has an exterior angle of 125°. One of the two far-away interior angles is 55°. What is the other far-away interior angle?",
+      "prompt": "A triangular sign outside a Toronto poutine shop has an exterior angle of 125°. One far-away interior angle is 55°. Find the other far-away interior angle.",
       "options": [
         "70°",
         "125°",
@@ -769,7 +769,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-applied-9",
-      "prompt": "In a parallelogram, one angle is 65°. How big is the angle next to it along the same side?",
+      "prompt": "A parallelogram sign in your Fortnite lobby has one angle of 65°. How big is the angle next to it along the same side?",
       "options": [
         "25°",
         "115°",
@@ -792,7 +792,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-deeper-1",
-      "prompt": "Isagi draws shapes on the whiteboard. Which statement is always true?",
+      "prompt": "Your Minecraft build plan has squares and rectangles. Which statement is always true?",
       "options": [
         "Every rectangle is a square.",
         "Every square is a rectangle.",
@@ -805,17 +805,17 @@ export const pack: SePack = {
           "text": "Rectangle test: four right angles, and opposite sides equal."
         },
         {
-          "text": "Try a 6 cm by 4 cm rectangle. Its sides aren't all equal, so it isn't a square."
+          "text": "Try a 6 m by 4 m wall. Its sides aren't all equal, so it isn't a square."
         },
         {
-          "text": "Try a 5 cm square. Four right angles, opposite sides equal. It passes the rectangle test."
+          "text": "Try a 5 m square wall. Four right angles, opposite sides equal. It passes the rectangle test."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-shapes-deeper-3",
-      "prompt": "Bachira's tactics board has a triangle with angles 50°, 60° and ?°. Type the missing angle.",
+      "prompt": "A corner-kick triangle on your EA FC tactics board has angles 50°, 60° and ?°. Type the missing angle.",
       "answer": "70",
       "decoys": [
         "5",
@@ -825,7 +825,7 @@ export const pack: SePack = {
       "why": "All three angles of any triangle add to 180°, so the missing one is whatever is left over.",
       "steps": [
         {
-          "text": "Example: 30° and 85° are known. 30° + 85° = 115°."
+          "text": "Example: a Pokémon arena wedge has 30° and 85°. 30° + 85° = 115°."
         },
         {
           "text": "Then 180° − 115° = 65°. So the missing angle is 65°."
@@ -838,7 +838,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-deeper-5",
-      "prompt": "Zoro cuts a four-sided sail along one diagonal. The angles of the whole sail add to what?",
+      "prompt": "Cutting a Minecraft roof panel along one diagonal makes two triangles. Its four angles add to what?",
       "options": [
         "180°",
         "360°",
@@ -848,20 +848,20 @@ export const pack: SePack = {
       "why": "A quadrilateral splits into two triangles, and each triangle adds to 180°.",
       "steps": [
         {
-          "text": "Example: a pentagon (five sides), cut from one corner into three triangles."
+          "text": "Example: a pentagon roof piece, cut from one corner into three triangles."
         },
         {
           "text": "Three triangles give 3 × 180° = 540°. So a pentagon's angles add to 540°."
         },
         {
-          "text": "Same cut on a four-sided shape gives two triangles: 2 × 180° = 360°."
+          "text": "Same cut on a four-sided panel gives two triangles: 2 × 180° = 360°."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-shapes-deeper-7",
-      "prompt": "Which fact is true of every kite?",
+      "prompt": "Your Roblox obby has a kite-shaped platform. Which fact is always true?",
       "options": [
         "Two pairs of opposite sides are parallel.",
         "Two pairs of neighbouring sides are equal.",
@@ -884,7 +884,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-shapes-deeper-10",
-      "prompt": "Can sides of 3 cm, 4 cm and 8 cm make a triangle?",
+      "prompt": "Can three sticks of 3, 4 and 8 blocks make a triangle?",
       "options": [
         "Yes, because 8 is the longest.",
         "No, because 3 + 4 is less than 8.",
@@ -894,41 +894,41 @@ export const pack: SePack = {
       "why": "Two shorter sides must add to more than the longest side, or they can't close the shape.",
       "steps": [
         {
-          "text": "Example: 2 cm, 5 cm and 6 cm. Add the two shortest: 2 + 5 = 7."
+          "text": "Example: 2 blocks, 5 blocks and 6 blocks. Add the two shortest: 2 + 5 = 7."
         },
         {
-          "text": "7 is bigger than 6, so those three sides can make a triangle."
+          "text": "7 is bigger than 6, so those three sticks can make a triangle."
         },
         {
-          "text": "Your sides: 3 + 4 = 7, which is less than 8. They can't meet."
+          "text": "Your sticks: 3 + 4 = 7, which is less than 8. They can't meet."
         }
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Side A",
+            "label": "Stick A",
             "value": 3,
             "tone": "calm"
           },
           {
-            "label": "Side B",
+            "label": "Stick B",
             "value": 4,
             "tone": "focus"
           },
           {
-            "label": "Side C",
+            "label": "Stick C",
             "value": 8,
             "tone": "bad"
           }
         ],
-        "unit": "cm"
+        "unit": "blocks"
       }
     },
     {
       "kind": "choice",
       "id": "math-shapes-deeper-11",
-      "prompt": "Can a triangle have two right angles?",
+      "prompt": "A stadium roof truss is a triangle. Can it have two right angles?",
       "options": [
         "Yes, when the sides are very long.",
         "No, two right angles use up all 180°.",
@@ -951,7 +951,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-build-2",
-      "prompt": "A quadrilateral has angles 90°, 80° and 100°. Build the fourth angle.",
+      "prompt": "Your Roblox obby platform has corners of 90°, 80° and 100°. Build the fourth corner.",
       "answer": "90",
       "decoys": [
         "2",
@@ -961,20 +961,20 @@ export const pack: SePack = {
       "why": "The four angles of any quadrilateral always add up to 360°.",
       "steps": [
         {
-          "text": "Try 70°, 110° and 85°. Add them: 70 + 110 + 85 = 265."
+          "text": "Try a platform with corners of 70°, 110° and 85°. Add them: 70 + 110 + 85 = 265."
         },
         {
-          "text": "Take that from 360: 360 − 265 = 95. The fourth angle is 95°."
+          "text": "Take that from 360: 360 − 265 = 95. The fourth corner is 95°."
         },
         {
-          "text": "Check: 265 + 95 = 360. Every quadrilateral works this way."
+          "text": "Check: 265 + 95 = 360. Every four-cornered platform works this way."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-shapes-build-3",
-      "prompt": "An isosceles triangle has a top angle of 40°. The two base angles are equal. Build one base angle.",
+      "prompt": "A Fortnite ramp is an isosceles triangle with a top angle of 40°. Build one base angle.",
       "answer": "70",
       "decoys": [
         "2",
@@ -984,7 +984,7 @@ export const pack: SePack = {
       "why": "Equal base angles share what is left after the top angle is taken from 180°.",
       "steps": [
         {
-          "text": "Try a top angle of 50°. Take it from 180: 180 − 50 = 130."
+          "text": "Try a ramp with a top angle of 50°. Take it from 180: 180 − 50 = 130."
         },
         {
           "text": "Split 130 into 2 equal base angles: 130 ÷ 2 = 65 each."
@@ -997,7 +997,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-build-4",
-      "prompt": "A One Piece ship's sail is a right-angled triangle. One angle is 90° and another is 35°. Build the last angle.",
+      "prompt": "Your One Piece sail is a right triangle. One corner is 90° and another is 35°. Build the last corner.",
       "answer": "55",
       "decoys": [
         "4",
@@ -1020,7 +1020,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-build-5",
-      "prompt": "A parallelogram has one angle of 115°. Its opposite angle is also 115°. Build an angle next to it.",
+      "prompt": "Your Minecraft texture tile is a parallelogram. One corner is 115°. Build the corner next to it.",
       "answer": "65",
       "decoys": [
         "1",
@@ -1036,14 +1036,14 @@ export const pack: SePack = {
           "text": "Check the total: 120 + 60 + 120 + 60 = 360. Opposite angles match."
         },
         {
-          "text": "Now use 115° the same way: 180 − 115 gives the neighbour angle."
+          "text": "Now use 115° the same way: 180 − 115 gives the neighbour corner."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-shapes-build-6",
-      "prompt": "A triangle has angles 2x, 3x and 4x. Build the largest angle. Use the value of x.",
+      "prompt": "A Roblox ramp's triangle end has angles 2x, 3x and 4x. Build the largest angle. Use the value of x.",
       "answer": "80",
       "decoys": [
         "2",
@@ -1065,7 +1065,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-shapes-build-7",
-      "prompt": "A quadrilateral has angles 85°, 95° and 60°. Build the fourth angle.",
+      "prompt": "Your Fortnite wall panel has four corners: 85°, 95° and 60°. Build the fourth corner.",
       "answer": "120",
       "decoys": [
         "3",
@@ -1088,28 +1088,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-shapes-games-1",
-      "title": "Crew Sizes: Angle Sum Race",
+      "title": "Build Order: Angle Sum Race",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "Triangle 180°",
+            "label": "Triangle roof 180°",
             "value": 180
           },
           {
-            "label": "Quadrilateral 360°",
+            "label": "Square tile 360°",
             "value": 360
           },
           {
-            "label": "Pentagon 540°",
+            "label": "Pentagon ramp 540°",
             "value": 540
           },
           {
-            "label": "Hexagon 720°",
+            "label": "Hexagon texture 720°",
             "value": 720
           },
           {
-            "label": "Octagon 1080°",
+            "label": "Octagon tower 1080°",
             "value": 1080
           }
         ]
@@ -1176,27 +1176,6 @@ export const pack: SePack = {
       "by": "Math with Mr. J",
       "seconds": 192,
       "checks": [
-        {
-          "prompt": "Four angles of a quadrilateral are 90°, 90° and 110°. What is the fourth angle?",
-          "options": [
-            "60°",
-            "70°",
-            "80°"
-          ],
-          "answer": 1,
-          "why": "The four angles of any quadrilateral add up to 360°.",
-          "steps": [
-            {
-              "text": "Add the three known angles: 90° + 90° + 110° = 290°."
-            },
-            {
-              "text": "Subtract from 360°: 360° − 290° = 70°."
-            },
-            {
-              "text": "Check with other numbers: 80° + 95° + 105° = 280°, and 360° − 280° = 80°. Same method works."
-            }
-          ]
-        },
         {
           "prompt": "Which shape always has angles that add up to 360°?",
           "options": [

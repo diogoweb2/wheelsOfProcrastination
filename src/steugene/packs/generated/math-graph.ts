@@ -16,18 +16,18 @@ export const pack: SePack = {
       "title": "A rule that makes a line",
       "lines": [
         "y = 2x + 1 is a rule.",
-        "It gives one y-value for every x-value you pick.",
+        "x is eliminations, y is XP earned in one match.",
         "Plot the pairs, join them, and you get a straight line."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi gets 2 points per goal, plus a 1-point bonus. The rule is his scoring."
+        "text": "Each elimination gives 2 XP, plus a 1 XP bonus for finishing the match."
       }
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-0",
-      "prompt": "Isagi's shot rule is y = 2x + 1. What is y when x = 3?",
+      "prompt": "Isagi's rule is y = 2x + 1, where x is shots on target. What is y when x = 3?",
       "options": [
         "y = 5",
         "y = 7",
@@ -45,17 +45,12 @@ export const pack: SePack = {
         {
           "text": "Same method for x = 3: 2 × 3 = 6, then 6 + 1 = 7."
         }
-      ],
-      "art": {
-        "art": "counters",
-        "pos": 4,
-        "neg": 9
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-1",
-      "prompt": "A table has x = 0, 1, 2, 3 and y = 1, 3, 5, 7. Which rule fits it?",
+      "prompt": "Blocks by minute: x = 0, 1, 2, 3 give y = 1, 3, 5, 7. Which rule fits?",
       "options": [
         "y = 3x + 1",
         "y = 2x + 1",
@@ -65,7 +60,7 @@ export const pack: SePack = {
       "why": "A rule must give the right y for every x in the table, not just one pair.",
       "steps": [
         {
-          "text": "Test a new table: x = 0, 1, 2 with y = 4, 6, 8. Try y = 2x + 4."
+          "text": "Test a new tower: minutes 0, 1, 2 give 4, 6, 8 blocks. Try y = 2x + 4."
         },
         {
           "text": "At x = 0: 2 × 0 + 4 = 4. At x = 1: 2 × 1 + 4 = 6. Both match."
@@ -103,34 +98,13 @@ export const pack: SePack = {
               "text": "Check the rule y = 3x + 3 with x = 2: 3(2) + 3 = 9. It matches, so the rule is y = 3x + 3."
             }
           ]
-        },
-        {
-          "prompt": "A table has points that line up on one straight line. Why do they form a straight line?",
-          "options": [
-            "y changes by the same amount for each step in x",
-            "y is x multiplied by itself each time",
-            "x and y are always equal numbers"
-          ],
-          "answer": 0,
-          "why": "A linear relation has a constant rate of change, so its points lie on one straight line.",
-          "steps": [
-            {
-              "text": "Look at the y-values for x = 0, 1, 2: they are 3, 6, 9. The jumps are 3 and 3, so the same each time."
-            },
-            {
-              "text": "Now try y-values 1, 4, 9 for x = 0, 1, 2. The jumps are 3 and 5, not the same, so the points bend."
-            },
-            {
-              "text": "Equal jumps mean a straight line. Unequal jumps mean the graph is a curve, not a linear relation."
-            }
-          ]
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-2",
-      "prompt": "Which point is on the line y = 2x + 1?",
+      "prompt": "Your Robux rule is y = 2x + 1, with x = weeks. Which point is on the line?",
       "options": [
         "(2, 4)",
         "(4, 8)",
@@ -153,7 +127,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-basics-3",
-      "prompt": "The rule is y = 4x − 2. When x goes up by 1, how much does y go up?",
+      "prompt": "Your Pokémon's CP rule is y = 4x − 2, with x = level. When x goes up by 1, how much does y go up?",
       "options": [
         "4",
         "−2",
@@ -179,18 +153,18 @@ export const pack: SePack = {
       "title": "Why this matters",
       "lines": [
         "Straight-line rules predict things before they happen.",
-        "Cost per hour, growth per week, pay per trip: all are lines.",
+        "A fixed Premium allowance each month is a line.",
         "A graph shows the answer without working out every single case."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A bounty that rises by the same amount each fight is a straight line."
+        "text": "A bounty that rises by the same Berries each fight is a straight line."
       }
     },
     {
       "kind": "build",
       "id": "math-graph-build-0",
-      "prompt": "Isagi's coach uses the rule y = 2x + 1. Each x is a match. What is y when x = 3?",
+      "prompt": "Your obby pays y = 2x + 1 Robux, where x is checkpoints. What is y when x = 3?",
       "answer": "7",
       "decoys": [
         "5",
@@ -228,7 +202,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-basics-4",
-      "prompt": "What is the y-intercept of the line y = 3x − 6?",
+      "prompt": "Your Minecraft furnace rule is y = 3x − 6. Where does its line cross the y-axis?",
       "options": [
         "3",
         "6",
@@ -251,7 +225,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-basics-5",
-      "prompt": "The rule is y = 3x − 2. What is y when x = −2?",
+      "prompt": "Your mine shaft drops by y = 3x − 2 blocks. What is y when x = −2?",
       "options": [
         "−8",
         "−4",
@@ -307,7 +281,7 @@ export const pack: SePack = {
       "id": "math-graph-teach-2",
       "title": "The method, step by step",
       "lines": [
-        "Pick x-values, like 0, 1, 2, 3.",
+        "Pick x-values, like 0, 1, 2, 3 matches played.",
         "For each x: multiply by 2, then add 1. That gives y.",
         "Plot each (x, y) pair, then join them with a ruler."
       ]
@@ -315,7 +289,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-basics-6",
-      "prompt": "A table has equal steps in x and equal steps in y. What shape does the graph make?",
+      "prompt": "Your Battle Pass XP rises by 2 every minute. What shape does its graph make?",
       "options": [
         "a straight line",
         "a curved line",
@@ -325,43 +299,43 @@ export const pack: SePack = {
       "why": "Each equal step in x adds the same amount to y, so the points line up in a straight line.",
       "steps": [
         {
-          "text": "Take x = 0, 1, 2 with y = 2, 4, 6. Each step adds 2 to y."
+          "text": "Take x = 0, 1, 2 minutes with XP = 2, 4, 6. Each minute adds 2 XP."
         },
         {
           "text": "Plot (0, 2), (1, 4), (2, 6). The dots sit at the same slope."
         },
         {
-          "text": "Think of Isagi running at a steady speed. He leaves a straight trail, not a curve."
+          "text": "Think of the XP bar filling at a steady rate. It leaves a straight trail, not a curve."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-7",
-      "prompt": "Which rule makes the steepest line?",
+      "prompt": "Which XP rule gains the most XP per minute?",
       "options": [
-        "y = x + 4",
-        "y = 5x − 1",
-        "y = 3x + 2"
+        "XP = t + 4",
+        "XP = 5t − 1",
+        "XP = 3t + 2"
       ],
       "answer": 1,
-      "why": "The number in front of x sets the steepness, so the bigger that number, the steeper the line.",
+      "why": "The number in front of t sets the rate, so the bigger that number, the steeper the XP line.",
       "steps": [
         {
-          "text": "Compare y = 2x, y = 6x and y = 4x. The numbers in front are 2, 6 and 4."
+          "text": "Compare XP = 2t, XP = 6t and XP = 4t. The numbers in front are 2, 6 and 4."
         },
         {
-          "text": "The biggest number is 6, so y = 6x is the steepest of the three."
+          "text": "The biggest number is 6, so XP = 6t gains XP fastest of the three."
         },
         {
-          "text": "Apply it: y = x + 4 has 1, y = 5x − 1 has 5, y = 3x + 2 has 3. Pick the biggest, 5."
+          "text": "Apply it: XP = t + 4 has 1, XP = 5t − 1 has 5, XP = 3t + 2 has 3. Pick the biggest, 5."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-graph-build-1",
-      "prompt": "A pirate crew's rule is y = 2x + 1. The y-value is 9. Find x.",
+      "prompt": "Your Robux rule is 2w + 1 after w weeks. Your pile reads 9. Find w.",
       "answer": "4",
       "decoys": [
         "3",
@@ -371,13 +345,13 @@ export const pack: SePack = {
       "why": "To undo a rule, reverse each operation and work in the opposite order.",
       "steps": [
         {
-          "text": "Work backwards on a new number. Start with y = 13."
+          "text": "Work backwards from a pile of 13 Robux. Start with 13."
         },
         {
           "text": "Take away the 1 first: 13 − 1 = 12."
         },
         {
-          "text": "Divide by 2: 12 ÷ 2 = 6, so x = 6 for y = 13. Check it in the rule."
+          "text": "Divide by 2: 12 ÷ 2 = 6, so w = 6 weeks for a pile of 13. Check it in the rule."
         }
       ]
     }
@@ -389,12 +363,12 @@ export const pack: SePack = {
       "title": "The trap: order matters",
       "lines": [
         "2x means 2 times x. Do the times first, then add 1.",
-        "With x = 3: 2 × 3 = 6, then 6 + 1 = 7.",
+        "With x = 3 games: 2 × 3 = 6, then 6 + 1 = 7.",
         "Not 2 × (3 + 1), which gives 8. That is a different rule."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A penalty goes wide if you rush the shot. Order matters in the rule too."
+        "text": "A shot rushed past the keeper goes wide. Order matters in the rule too."
       }
     },
     {
@@ -402,9 +376,9 @@ export const pack: SePack = {
       "id": "math-graph-teach-4",
       "title": "Worked example: y = 3x − 2",
       "lines": [
-        "Take y = 3x − 2 and try x = 0, 1, 2.",
-        "The points are (0, −2), (1, 1) and (2, 4).",
-        "Plot them and join them. The line climbs 3 for every 1 across."
+        "Your tower rule is y = 3x − 2, with y as the block height.",
+        "Try x = 0, 1, 2 to get the points (0, −2), (1, 1) and (2, 4).",
+        "Plot them and join them. The tower climbs 3 for every 1 across."
       ],
       "art": {
         "art": "numberline",
@@ -440,12 +414,12 @@ export const pack: SePack = {
       "title": "Recap",
       "lines": [
         "Rule, then table, then points, then a straight line.",
-        "For y = 2x + 1, the line crosses the y-axis at 1.",
+        "For y = 2x + 1, the line starts at 1 when x = 0.",
         "Each step right, the line climbs 2. That is the steepness."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock rule: find the pattern, then trust the line."
+        "text": "Pokédex rule: find the pattern, then trust the line."
       }
     },
     {
@@ -453,7 +427,7 @@ export const pack: SePack = {
       "id": "math-graph-deeper-0",
       "title": "The +1 is not the slope",
       "lines": [
-        "In y = 2x + 1, the 2 is the slope.",
+        "In the storm rule y = 2x + 1, the 2 is the slope.",
         "The +1 tells you where the line crosses the y-axis.",
         "That crossing point is (0, 1). Find it first."
       ],
@@ -468,12 +442,12 @@ export const pack: SePack = {
       "title": "Slope is the step, not the start",
       "lines": [
         "Slope tells you how far up for each step right.",
-        "In y = 2x + 1: one step right, two steps up.",
-        "Bigger slope means a steeper line."
+        "In y = 2x + 1: each minute adds 2 XP.",
+        "Bigger slope means XP climbs faster."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Think of Isagi's run: the slope is how sharply he climbs each sprint."
+        "text": "Your XP bar climbs 2 for every minute you survive the match."
       }
     },
     {
@@ -482,12 +456,12 @@ export const pack: SePack = {
       "title": "Minus means downhill",
       "lines": [
         "A negative slope makes the line fall.",
-        "y = −2x goes down as you move right.",
+        "y = −2x: the storm takes 2 health per second.",
         "Check the sign before you plot a single point."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A negative slope is a ship sinking as it sails right."
+        "text": "Health sliding down in the storm is a ship going under as it sails right."
       }
     },
     {
@@ -501,7 +475,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Pass to the winger first, then cross. The order decides the goal."
+        "text": "Walk 2 blocks east, then up 5. Swap those and you stand somewhere else."
       }
     },
     {
@@ -510,7 +484,7 @@ export const pack: SePack = {
       "title": "Equal steps make a straight line",
       "lines": [
         "A straight line grows by the same amount each time.",
-        "In a table, check the y-jumps. Same jump each time?",
+        "Robux per week: 100, 200, 300. Same jump each time?",
         "If the jumps change, the rule is not linear."
       ]
     },
@@ -524,37 +498,37 @@ export const pack: SePack = {
         "A line goes on forever. A dot does not."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Two islands on a map do not stop the sea. Keep sailing the line."
+        "flavour": "key",
+        "text": "Two points on your XP graph do not show the whole climb. Extend the line."
       }
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-8",
-      "prompt": "A pitch costs $20 to book plus $15 per hour. The rule is y = 15x + 20. What is the cost for 4 hours?",
+      "prompt": "A private server costs 20 Robux to open, plus 15 Robux per hour. The rule is y = 15x + 20. How many Robux for 4 hours?",
       "options": [
-        "$75",
-        "$65",
-        "$80"
+        "75 Robux",
+        "65 Robux",
+        "80 Robux"
       ],
       "answer": 2,
-      "why": "The rule adds the booking fee once and the hourly charge once for every hour, so you multiply first and then add.",
+      "why": "The rule adds the opening fee once and the hourly charge once for every hour, so you multiply first and then add.",
       "steps": [
         {
-          "text": "Try 3 hours: 15 × 3 = 45 dollars for the hours."
+          "text": "Try 3 hours: 15 × 3 = 45 Robux for the hours."
         },
         {
-          "text": "Add the booking fee: 45 + 20 = 65. So 3 hours costs $65."
+          "text": "Add the opening fee: 45 + 20 = 65. So 3 hours costs 65 Robux."
         },
         {
-          "text": "For 4 hours: 15 × 4 = 60, then 60 + 20 = 80."
+          "text": "For 4 hours: 15 × 4 = 60, then 60 + 20 = 80 Robux."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-basics-9",
-      "prompt": "A table is made from y = 2x + 1. The values are x = 0, 1, 2, 3 and y = 1, 3, 6, 7. Which x has a wrong y?",
+      "prompt": "Your tower rule is y = 2x + 1, where y is blocks per layer.\nLayers x = 0, 1, 2, 3 have y = 1, 3, 6, 7 blocks. Which layer is wrong?",
       "options": [
         "x = 1",
         "x = 2",
@@ -564,20 +538,20 @@ export const pack: SePack = {
       "why": "Checking each pair against the rule is the only way to find the one that breaks the pattern.",
       "steps": [
         {
-          "text": "Check a new table for y = x + 5: x = 0 gives y = 5, x = 1 gives y = 6."
+          "text": "Check a new rule, blocks = x + 5: layer 0 has 5 blocks, layer 1 has 6."
         },
         {
-          "text": "Now x = 2 should give 2 + 5 = 7. If the table says 8, that one is wrong."
+          "text": "Now layer 2 should have 2 + 5 = 7 blocks. If the table says 8, that layer is wrong."
         },
         {
-          "text": "So in your table, check x = 2: 2 × 2 + 1 = 5, but the table says 6. That is the wrong one."
+          "text": "So in your tower, check x = 2: 2 × 2 + 1 = 5, but the table says 6. That is the wrong one."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-applied-0",
-      "prompt": "Coach Ego's rule for Isagi's shots is y = 2x + 1. Which point is on the line?",
+      "prompt": "Your part's height rule is y = 2x + 1. Which point is on the line?",
       "options": [
         "(3, 7)",
         "(3, 6)",
@@ -617,23 +591,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-1",
-      "prompt": "Luffy's crew rule: y = −3x + 12. x is days at sea, y is food packs left. On what day are the packs gone?",
+      "prompt": "Timbits left in the box: y = −3x + 12. x is hours.\nOn what hour is the box empty?",
       "options": [
         "x = 4",
         "x = −4",
         "x = 12"
       ],
       "answer": 0,
-      "why": "The packs are gone when y is zero, which is where the line crosses the x-axis.",
+      "why": "The box is empty when y is zero, which is where the line crosses the x-axis.",
       "steps": [
         {
-          "text": "Packs gone means y = 0, so write 0 = −3x + 12."
+          "text": "Box empty means y = 0, so write 0 = −3x + 12."
         },
         {
           "text": "Move the 12 across: −12 = −3x, so x = 4."
         },
         {
-          "text": "Try a new rule, y = −2x + 10. Then 0 = −2x + 10, so x = 5."
+          "text": "Try a box with y = −2x + 10. Then 0 = −2x + 10, so x = 5."
         }
       ],
       "art": {
@@ -657,7 +631,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-2",
-      "prompt": "Bachira's dribble rule is y = 4x − 3. When x goes up by 1, how does y change?",
+      "prompt": "Your XP rule is y = 4x − 3, where x is matches played.\nWhen x goes up by 1, how does y change?",
       "options": [
         "y goes up by 4",
         "y goes up by 3",
@@ -673,14 +647,14 @@ export const pack: SePack = {
           "text": "Test it: y = 4(1) − 3 = 1, and y = 4(2) − 3 = 5. It rose by 4."
         },
         {
-          "text": "Now try y = −2x + 7. The number is −2, so y goes down by 2 each step."
+          "text": "Now try a storm rule y = −2x + 7. The number is −2, so y goes down by 2 each step."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-applied-3",
-      "prompt": "Two bike-rental rules on Yonge Street: y = 5x + 1 or y = 2x + 9. Which line is steeper?",
+      "prompt": "Two rules for shots taken by a striker: y = 5x + 1 or y = 2x + 9.\nWhich line is steeper?",
       "options": [
         "y = 5x + 1",
         "y = 2x + 9",
@@ -703,7 +677,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-4",
-      "prompt": "Where does the line y = 3x − 8 cross the y-axis?",
+      "prompt": "Your Pokémon's HP rule is y = 3x − 8, where x is turns.\nWhere does the line cross the y-axis?",
       "options": [
         "(0, −8)",
         "(−8, 0)",
@@ -726,7 +700,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-5",
-      "prompt": "Two crews share a map. Their lines are y = 2x + 1 and y = x + 4. Where do the lines meet?",
+      "prompt": "Two squads run routes on the Roblox map: y = 2x + 1 and y = x + 4.\nWhere do the routes cross?",
       "options": [
         "(3, 7)",
         "(7, 3)",
@@ -749,7 +723,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-6",
-      "prompt": "A table shows x = 0, 1, 2, 3 with y = 4, 7, 10, 13. Which rule fits?",
+      "prompt": "Your tower height is 4, 7, 10, 13 blocks at minutes 0, 1, 2, 3.\nWhich rule fits?",
       "options": [
         "y = 4x + 3",
         "y = 3x + 7",
@@ -765,14 +739,14 @@ export const pack: SePack = {
           "text": "At x = 0 the y-value is 4, so the y-intercept is 4. The rule is y = 3x + 4."
         },
         {
-          "text": "Try x = 0, 1, 2 with y = 6, 4, 2. The step is −2 and the start is 6, so y = −2x + 6."
+          "text": "Try a mine going down: 6, 4, 2 blocks at x = 0, 1, 2. The step is −2 and the start is 6, so y = −2x + 6."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-applied-7",
-      "prompt": "A sprint line goes through (0, 2) and (4, 10). Which rule is it?",
+      "prompt": "Your XP bar reads 2 at minute 0 and 10 at minute 4.\nWhich rule fits?",
       "options": [
         "y = 2x + 2",
         "y = 4x + 2",
@@ -795,7 +769,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-8",
-      "prompt": "Which point is NOT on the line y = −x + 5?",
+      "prompt": "A Pokémon's HP drops along the rule y = −x + 5.\nWhich point is NOT on that line?",
       "options": [
         "(2, 3)",
         "(−1, 6)",
@@ -818,7 +792,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-applied-9",
-      "prompt": "A line has slope 3 and passes through (1, 5). Which rule is it?",
+      "prompt": "Your Robux total grows by 3 a day and reads 5 on day 1.\nWhich rule fits?",
       "options": [
         "y = 3x + 2",
         "y = 3x + 5",
@@ -834,14 +808,14 @@ export const pack: SePack = {
           "text": "Expand the brackets: y − 5 = 3x − 3, so y = 3x + 2."
         },
         {
-          "text": "Try slope −1 through (2, 4): y − 4 = −(x − 2), so y = −x + 6."
+          "text": "Try a pizza count: 4 slices left after bite 2, dropping by 1 each bite. y − 4 = −(x − 2), so y = −x + 6."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graph-deeper-6",
-      "prompt": "Isagi's shot follows the rule y = 3x − 4. Where does the line cross the y-axis?",
+      "prompt": "Your Minecraft dig path follows y = 3x − 4.\nWhere does it cross the y-axis?",
       "options": [
         "(0, 3)",
         "(0, −4)",
@@ -854,7 +828,7 @@ export const pack: SePack = {
           "text": "The y-intercept is the number with no x. Here it is −4."
         },
         {
-          "text": "Try a new rule: y = 5x − 7. The number alone is −7."
+          "text": "Try a tunnel rule: y = 5x − 7. The number alone is −7."
         },
         {
           "text": "Check: at x = 0, y = 5(0) − 7 = −7. So it crosses at (0, −7)."
@@ -864,7 +838,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-deeper-7",
-      "prompt": "A pass sinks as it travels right. Which rule makes a line that falls?",
+      "prompt": "Your storm circle shrinks each phase. Which rule makes a line that falls?",
       "options": [
         "y = −5x + 3",
         "y = 5x + 3",
@@ -874,20 +848,37 @@ export const pack: SePack = {
       "why": "A negative number in front of x makes the line go down as x grows.",
       "steps": [
         {
-          "text": "Look at the number next to x. A minus sign means the line falls."
+          "text": "Look at the number in front of x. A minus sign means the radius falls."
         },
         {
-          "text": "Test y = −5x + 3 at x = 0, then at x = 1."
+          "text": "Try a new storm: y = −4x + 10. At x = 0, y = 10."
         },
         {
-          "text": "At x = 0, y = 3. At x = 1, y = −2. The y-value dropped, so it falls."
+          "text": "At x = 1, y = 6. The radius dropped from 10 to 6, so it falls."
         }
-      ]
+      ],
+      "art": {
+        "art": "numberline",
+        "from": -5,
+        "to": 5,
+        "step": 1,
+        "points": [
+          {
+            "at": -2.5,
+            "label": "−2.5",
+            "tone": "bad"
+          }
+        ],
+        "span": [
+          -2,
+          3
+        ]
+      }
     },
     {
       "kind": "choice",
       "id": "math-graph-deeper-8",
-      "prompt": "Isagi scores when x = 3 on the rule y = 2x + 1. Which point is the goal?",
+      "prompt": "Your obby checkpoint sits at x = 3 on the rule y = 2x + 1. Which point is the checkpoint?",
       "options": [
         "(3, 5)",
         "(7, 3)",
@@ -900,7 +891,7 @@ export const pack: SePack = {
           "text": "Write the point as (x, y). The x-value goes first."
         },
         {
-          "text": "Try a new rule: y = 4x − 2, with x = 2."
+          "text": "Try a new obby: y = 4x − 2, with x = 2."
         },
         {
           "text": "y = 4(2) − 2 = 6, so the point is (2, 6), not (6, 2)."
@@ -910,30 +901,37 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-deeper-9",
-      "prompt": "A table has x = 0, 1, 2, 3 and y = 2, 5, 8, 12. Is it a straight line?",
+      "prompt": "You add Timbits to a box each hour: 2, 5, 8, 12 in total. Is it a straight line?",
       "options": [
         "Yes, it is a straight line.",
         "No, the jumps change from 3 to 4.",
-        "Yes, because every y-value is whole."
+        "Yes, because every count is whole."
       ],
       "answer": 1,
       "why": "A straight line needs the same jump in y for each equal step in x.",
       "steps": [
         {
-          "text": "Find each jump in y: 5 − 2 = 3, then 8 − 5 = 3."
+          "text": "Find each jump in Timbits: 5 − 2 = 3, then 8 − 5 = 3."
         },
         {
-          "text": "Try a new table: x = 0, 2, 4, 6 and y = 1, 4, 7, 10."
+          "text": "Try a new box: x = 0, 1, 2, 3 and y = 1, 4, 7, 10 Timbits."
         },
         {
           "text": "The jumps are 3, 3, 3. The same each time, so it is linear."
         }
-      ]
+      ],
+      "art": {
+        "art": "bar",
+        "parts": 4,
+        "filled": 3,
+        "label": "3/4",
+        "tone": "calm"
+      }
     },
     {
       "kind": "choice",
       "id": "math-graph-deeper-10",
-      "prompt": "Two crew marks sit at (1, 3) and (4, 9) on a map. How should the line be drawn?",
+      "prompt": "Two beacons sit at (1, 3) and (4, 9) on your map. How should the line be drawn?",
       "options": [
         "Run it past both dots, both ways.",
         "Stop it at the two dots, no more.",
@@ -956,7 +954,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graph-deeper-11",
-      "prompt": "Isagi's shot line passes through (2, 5). Which rule fits?",
+      "prompt": "Your shot line passes through (2, 5) on the pitch. Which rule fits?",
       "options": [
         "y = 5x + 2",
         "y = 2x + 1",
@@ -979,7 +977,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graph-build-2",
-      "prompt": "Rin's rule is y = −3x + 5. What is the slope?",
+      "prompt": "A wild Pokémon's HP rule is y = −3x + 5. What is the slope?",
       "answer": "-3",
       "decoys": [
         "5",
@@ -991,7 +989,7 @@ export const pack: SePack = {
           "text": "The slope is the number that multiplies x. Look at the rule's x-part."
         },
         {
-          "text": "Try a new rule: y = 4x − 7. Its slope is 4, not −7."
+          "text": "Try a new HP rule: y = 4x − 7. Its slope is 4, not −7."
         },
         {
           "text": "The number on its own, like −7, is where the line crosses the y-axis, not the slope."
@@ -1000,31 +998,8 @@ export const pack: SePack = {
     },
     {
       "kind": "build",
-      "id": "math-graph-build-4",
-      "prompt": "Find x when y = 6 in the rule y = 2x + 1.",
-      "answer": "2.5",
-      "decoys": [
-        "3",
-        "1",
-        "4"
-      ],
-      "why": "Dividing by 2 can leave a decimal, so answers are not always whole numbers.",
-      "steps": [
-        {
-          "text": "Undo the +1 first: 6 − 1 = 5."
-        },
-        {
-          "text": "Divide by 2: 5 ÷ 2 = 2.5, so x = 2.5."
-        },
-        {
-          "text": "Check: 2 × 2.5 = 5, and 5 + 1 = 6. It works."
-        }
-      ]
-    },
-    {
-      "kind": "build",
       "id": "math-graph-build-5",
-      "prompt": "Zoro's rule is y = 2x + 1. Find y when x = −4.",
+      "prompt": "Your Minecraft mine height is y = 2x + 1. Find y when x = −4.",
       "answer": "-7",
       "decoys": [
         "8",
@@ -1039,7 +1014,7 @@ export const pack: SePack = {
           "text": "Now add 1: −8 + 1 = −7, so y = −7."
         },
         {
-          "text": "Try x = −5 with the same moves: 2 × (−5) = −10, then −10 + 1 = −9."
+          "text": "Dig one step deeper, x = −5: 2 × (−5) = −10, then −10 + 1 = −9."
         }
       ],
       "art": {
@@ -1063,7 +1038,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graph-build-6",
-      "prompt": "Where does the line y = 2x + 1 cross the y-axis? Give the y-value.",
+      "prompt": "Your Fortnite XP rule is y = 2x + 1. Where does it cross the y-axis? Give the y-value.",
       "answer": "1",
       "decoys": [
         "2",
@@ -1076,7 +1051,7 @@ export const pack: SePack = {
           "text": "The y-axis is where x = 0. Put x = 0 in the rule."
         },
         {
-          "text": "Try y = 3x + 4. At x = 0: 3 × 0 = 0, so y = 4."
+          "text": "Try a football rule y = 3x + 4. At x = 0: 3 × 0 = 0, so y = 4."
         },
         {
           "text": "The number on its own is the y-intercept, the point where the line crosses."
@@ -1086,7 +1061,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graph-build-7",
-      "prompt": "Blue Lock table: x = 2 gives y = 5, x = 3 gives y = 7, x = 4 gives y = 9. What is y when x = 5?",
+      "prompt": "Timbits deal: 2 boxes give 5 Timbits, 3 boxes give 7, 4 boxes give 9. How many for 5 boxes?",
       "answer": "11",
       "decoys": [
         "9"
@@ -1094,50 +1069,50 @@ export const pack: SePack = {
       "why": "A straight line means equal steps in x give equal steps in y.",
       "steps": [
         {
-          "text": "Look at the jumps: y goes 5, 7, 9. It rises by 2 each time."
+          "text": "Look at the jumps: 5, 7, 9. Each extra box adds 2 Timbits."
         },
         {
           "text": "Check the rule y = 2x + 1 at x = 5: 2 × 5 + 1 = 11."
         },
         {
-          "text": "Try x = 6 with the same rule: 2 × 6 + 1 = 13. The jump of 2 continues."
+          "text": "Try 6 boxes with the same rule: 2 × 6 + 1 = 13. The jump of 2 continues."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-graph-games-1",
-      "title": "Bounty Board Order",
+      "title": "Mine Height Order",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "x = 5: y = 11",
+            "label": "Tunnel 5: Y = 11",
             "value": 11
           },
           {
-            "label": "x = −2: y = −3",
+            "label": "Cave floor: Y = −3",
             "value": -3
           },
           {
-            "label": "x = 0: y = 1",
+            "label": "Ledge 0: Y = 1",
             "value": 1
           },
           {
-            "label": "x = 10: y = 21",
+            "label": "Tower top: Y = 21",
             "value": 21
           },
           {
-            "label": "x = 1: y = 3",
+            "label": "Tunnel 1: Y = 3",
             "value": 3
           },
           {
-            "label": "x = 3: y = 7",
+            "label": "Tunnel 3: Y = 7",
             "value": 7
           }
         ]
       },
-      "why": "Each x-value gives exactly one y-value, so each x makes one point on the line."
+      "why": "Each x gives one y, so each step along the line makes one height."
     },
     {
       "kind": "video",

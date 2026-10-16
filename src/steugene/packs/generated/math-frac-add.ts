@@ -16,12 +16,12 @@ export const pack: SePack = {
       "title": "What a fraction is",
       "lines": [
         "A fraction is a part of a whole.",
-        "The bottom number says how many equal parts the whole has.",
-        "The top number says how many parts you have."
+        "The bottom number is how many equal slices.",
+        "The top number is how many slices you have."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's team plays a 4-part match. Each part is one quarter. He is in 3 of them."
+        "flavour": "key",
+        "text": "One pizza is cut for 4 people. Each slice is 1/4. You take 3 slices: 3/4."
       },
       "art": {
         "art": "pie",
@@ -34,46 +34,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-basics-0",
-      "prompt": "Isagi tracks shots in halves. Rin tracks them in thirds. Why must they use a common denominator before adding 1/2 + 1/3?",
+      "prompt": "In EA FC you attack for 1/2 of a match and press for 1/3. Why change both to sixths before adding?",
       "options": [
-        "The top numbers must match before you can add.",
-        "Pieces must be the same size before you can add them.",
-        "The bottom numbers must be even before you can add."
+        "The top numbers must match before you add them.",
+        "The bottom numbers must be even before you add.",
+        "The pieces must be the same size before you add."
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Fractions only add when they count pieces of the same size.",
       "steps": [
         {
-          "text": "Try ⅖ + ¼ first. The bottoms are 5 and 4, so the pieces are different sizes."
+          "text": "A Timbits box of 20: 2/5 are honey dip, 1/4 are chocolate."
         },
         {
-          "text": "Make both bottoms 20: ⅖ becomes 8/20 and ¼ becomes 5/20."
+          "text": "Fifths and quarters are different sizes. Change both to twentieths: 2/5 = 8/20 and 1/4 = 5/20."
         },
         {
-          "text": "Now count the same-size pieces: 8 + 5 = 13, so the total is 13/20."
+          "text": "Now count same-size pieces: 8 + 5 = 13, so 13/20 of the box."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-basics-1",
-      "prompt": "Zoro's map has 1/4 of a route done. Nami's has 1/6. Which number can both fractions use as a denominator?",
+      "prompt": "One pizza is cut in 4 slices. Another is cut in 6. Recut both into the same number of slices. How many?",
       "options": [
-        "12",
         "10",
+        "12",
         "15"
       ],
-      "answer": 0,
-      "why": "12 is a multiple of both 4 and 6, so both fractions can change into twelfths.",
+      "answer": 1,
+      "why": "12 is a multiple of both 4 and 6, so both pizzas can be cut into 12 slices.",
       "steps": [
         {
-          "text": "Try 1/3 and 1/5 first. List multiples of 3: 3, 6, 9, 12, 15."
+          "text": "Try pizzas cut in 3 and in 5. Multiples of 3: 3, 6, 9, 12, 15."
         },
         {
-          "text": "List multiples of 5: 5, 10, 15. The first number in both lists is 15."
+          "text": "Multiples of 5: 5, 10, 15. The first number in both lists is 15."
         },
         {
-          "text": "So 15 is a common denominator for 1/3 and 1/5. Check it for your own pair next."
+          "text": "So both pizzas can be recut into 15 slices. Do the same with 4 and 6."
         }
       ]
     },
@@ -132,7 +132,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-basics-2",
-      "prompt": "Write 1/3 as an equivalent fraction with 12 on the bottom.",
+      "prompt": "Your Minecraft wall has 12 equal sections. 1/3 of it is built. Write 1/3 with 12 on the bottom.",
       "options": [
         "3/12",
         "6/12",
@@ -148,7 +148,7 @@ export const pack: SePack = {
           "text": "Multiply the top by 4 as well: 1 × 4 = 4, so the new top is 4."
         },
         {
-          "text": "Try 2/5 with 15 on the bottom. 5 × 3 = 15, so 2 × 3 = 6, giving 6/15."
+          "text": "Try 2/5 of a 15-block path. 5 × 3 = 15, so 2 × 3 = 6, giving 6/15."
         }
       ],
       "art": {
@@ -162,23 +162,26 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-basics-3",
-      "prompt": "Isagi has 5/6 of his energy. A tackle takes away 1/6. How much is left?",
+      "prompt": "Your Pokémon's HP bar is 5/6 full. A hit takes away 1/6. How much is left?",
       "options": [
-        "4/12",
         "2/3",
+        "4/12",
         "1/6"
       ],
-      "answer": 1,
-      "why": "When the bottoms match, you only subtract the tops and keep the bottom.",
+      "answer": 0,
+      "why": "When the bottoms match, you subtract the tops and keep the bottom, then simplify.",
       "steps": [
         {
           "text": "The bottoms are both 6, so keep 6. Subtract the tops: 5 − 1 = 4, giving 4/6."
         },
         {
-          "text": "Simplify: 4 and 6 both share a factor of 2, so 4/6 divides down to a simpler fraction."
+          "text": "Simplify: 4 and 6 both divide by 2. So 4/6 becomes 2/3."
         },
         {
-          "text": "Try 7/8 − 3/8 first. Keep the 8, then 7 − 3 = 4, so 4/8, which is 1/2."
+          "text": "Try a pizza with 7/8 left. You eat 3/8. Keep the 8: 7 − 3 = 4, so 4/8."
+        },
+        {
+          "text": "4 and 8 both divide by 4, so 4/8 simplifies to 1/2 of the pizza."
         }
       ],
       "art": {
@@ -194,19 +197,20 @@ export const pack: SePack = {
       "id": "math-frac-add-teach-1",
       "title": "Why we need the same size",
       "lines": [
-        "You can only add pieces that are the same size.",
-        "Two halves make one whole. Two thirds do not.",
-        "So before adding, we make the pieces match."
+        "You can only add slices that are the same size.",
+        "Two half-pizza slices make one whole pizza.",
+        "A half slice and a third slice do not fit together.",
+        "So before adding, we recut the slices to match."
       ],
       "callout": {
         "flavour": "key",
-        "text": "A half and a third are different sizes. You must change them first."
+        "text": "A half slice and a third slice are different sizes. Recut them first."
       }
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-0",
-      "prompt": "Isagi trains for 1/2 of an hour. Then he shoots for 1/4 of an hour. How much time in total?",
+      "prompt": "You eat 1/2 of a pizza. Then you eat 1/4 of a pizza. How much pizza in total?",
       "answer": "3/4",
       "decoys": [
         "2",
@@ -216,10 +220,10 @@ export const pack: SePack = {
       "why": "Fractions can only be added when their pieces are the same size, so the bottoms must match.",
       "steps": [
         {
-          "text": "Look at the bottoms: 3 and 6. Pick 6, because 3 goes into 6."
+          "text": "A pizza: you eat 1/3, then 1/6. The bottoms are 3 and 6. Pick 6, because 3 goes into 6."
         },
         {
-          "text": "Change 1/3 into sixths. Multiply top and bottom by 2. You get 2/6."
+          "text": "Recut the thirds into sixths. Multiply top and bottom by 2. 1/3 becomes 2/6."
         },
         {
           "text": "Add the tops and keep the bottom: 2/6 + 1/6 = 3/6."
@@ -232,7 +236,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-basics-4",
-      "prompt": "Find 1/2 + 1/3.",
+      "prompt": "Wood fills 1/2 of a chest. Brick fills 1/3 of it. How full is the chest?",
       "options": [
         "5/6",
         "2/5",
@@ -242,10 +246,10 @@ export const pack: SePack = {
       "why": "Changing both fractions to sixths lets you add the pieces: 3/6 + 2/6.",
       "steps": [
         {
-          "text": "Try 1/3 + 1/4 first. The common denominator is 12."
+          "text": "Try 1/3 + 1/4 of a pizza first. The common bottom is 12."
         },
         {
-          "text": "1/3 becomes 4/12 and 1/4 becomes 3/12. Now the pieces match."
+          "text": "1/3 becomes 4/12 and 1/4 becomes 3/12. Now the slices match."
         },
         {
           "text": "Add the tops only: 4 + 3 = 7, so the answer is 7/12."
@@ -262,44 +266,44 @@ export const pack: SePack = {
         "5/12"
       ],
       "answer": 2,
-      "why": "Subtracting works the same way as adding: change to a common denominator, then subtract the tops.",
+      "why": "Subtracting works the same way as adding: change to a common bottom, then subtract the tops.",
       "steps": [
         {
-          "text": "Try 5/6 − 1/4 first. The common denominator is 12."
+          "text": "Try a hunger bar of 10 drumsticks. It is 4/5 full. You lose 1/2 of the bar."
         },
         {
-          "text": "5/6 becomes 10/12 and 1/4 becomes 3/12."
+          "text": "The common bottom is 10. 4/5 becomes 8/10 and 1/2 becomes 5/10."
         },
         {
-          "text": "Subtract the tops: 10 − 3 = 7, so the answer is 7/12."
+          "text": "Subtract the tops: 8 − 5 = 3, so 3/10 of the bar is left."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-frac-add-games-0",
-      "title": "Match the Twelfths",
+      "title": "Party Pizza Twelfths",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "¼ in twelfths",
+            "¼ of a pizza",
             "3/12"
           ],
           [
-            "⅓ in twelfths",
+            "⅓ of a pizza",
             "4/12"
           ],
           [
-            "⅙ in twelfths",
+            "⅙ of a pizza",
             "2/12"
           ],
           [
-            "⅔ in twelfths",
+            "⅔ of a pizza",
             "8/12"
           ],
           [
-            "¾ in twelfths",
+            "¾ of a pizza",
             "9/12"
           ]
         ]
@@ -312,79 +316,82 @@ export const pack: SePack = {
       "title": "The method",
       "lines": [
         "Step 1: Find a number both bottoms go into.",
-        "Step 2: Rewrite both fractions with that bottom.",
-        "Step 3: Add the tops. Keep the bottom the same."
+        "Step 2: Recut both fractions into that many equal pieces.",
+        "Step 3: Add the tops. The bottom stays the same."
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-basics-6",
-      "prompt": "Usopp wrote 1/4 + 1/5 = 2/9 on a bounty sheet. What went wrong?",
+      "prompt": "A mate says 1/4 + 1/5 of a pizza is 2/9. What went wrong?",
       "options": [
-        "She multiplied the tops by 4 and 5.",
-        "She added the bottoms as well as the tops.",
-        "She should have made the bottoms 4 each."
+        "He multiplied the tops by 4 and 5.",
+        "He added the bottoms as well as the tops.",
+        "He should have made both bottoms 4."
       ],
       "answer": 1,
       "why": "Only the tops add. The bottom stays the same once the pieces match.",
       "steps": [
         {
-          "text": "Correct method for 1/4 + 1/5: make the bottoms 20."
+          "text": "Try 1/2 + 1/5 of a 10-Timbit box. Make the bottoms 10."
         },
         {
-          "text": "1/4 becomes 5/20 and 1/5 becomes 4/20."
+          "text": "1/2 becomes 5/10 and 1/5 becomes 2/10."
         },
         {
-          "text": "Add only the tops: 5 + 4 = 9, so 9/20. The 2/9 is far too small."
+          "text": "Add only the tops: 5 + 2 = 7, so 7/10. Adding bottoms (2/7) is far too small."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-basics-7",
-      "prompt": "Nagi hits 5/6 of his shots on target. Isagi hits 3/4. Who has the better rate?",
+      "prompt": "Nagi hits 5 of 6 shots on target. Isagi hits 3 of 4. Who has the better rate?",
       "options": [
         "Isagi's 3/4 is bigger",
         "Nagi's 5/6 is bigger",
-        "They are the same"
+        "They are exactly equal"
       ],
       "answer": 1,
-      "why": "Common denominators let you compare how many same-sized pieces each fraction has.",
+      "why": "Using twelfths, 5/6 is 10/12 and 3/4 is 9/12, so Nagi's rate is higher.",
       "steps": [
         {
-          "text": "Try 3/4 and 5/6 first. The common denominator is 12."
+          "text": "Two pizzas: one has 2/3 left, one has 3/4 left. Which has more?"
         },
         {
-          "text": "3/4 becomes 9/12 and 5/6 becomes 10/12."
+          "text": "Cut both into 12 slices, since 3 and 4 both go into 12."
         },
         {
-          "text": "Compare the tops: 10 is bigger than 9, so the second fraction is the bigger one."
+          "text": "2/3 becomes 8/12 and 3/4 becomes 9/12."
+        },
+        {
+          "text": "9 slices beats 8 slices, so the 3/4 pizza has more."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-1",
-      "prompt": "Kunigami has 3/4 of a bottle left. He drinks 1/3 of a bottle. How much is left?",
+      "prompt": "3/4 of a pizza is left. You eat 1/3 of a pizza. How much pizza is left?",
       "answer": "5/12",
       "decoys": [
         "3",
         "7",
         "0"
       ],
-      "why": "Subtraction needs matching pieces too, so you rename both fractions before you take away.",
+      "why": "Both fractions become twelfths, so 9/12 − 4/12 leaves 5/12 of the pizza.",
       "steps": [
         {
-          "text": "Look at the bottoms: 6 and 4. Pick 12, because 6 and 4 both go into 12."
+          "text": "A party pizza has 12 slices. 5/6 is left and you eat 1/4."
         },
         {
-          "text": "Change 5/6 into twelfths: 5/6 becomes 10/12, and 1/4 becomes 3/12."
+          "text": "Bottoms are 6 and 4. Both go into 12, so use twelfths."
         },
         {
-          "text": "Take the tops away and keep the bottom: 10/12 − 3/12 = 7/12."
+          "text": "5/6 becomes 10/12. 1/4 becomes 3/12."
         },
         {
-          "text": "Check: 7 and 12 share no factor, so 7/12 is already in simplest form."
+          "text": "Take away the tops, keep the bottom: 10/12 − 3/12 = 7/12."
         }
       ]
     }
@@ -396,23 +403,24 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Do not add the bottoms.",
-        "1/2 + 1/3 is not 2/5.",
-        "Adding bottoms changes the size of the pieces."
+        "1/2 + 1/4 is not 2/6.",
+        "A half shield is 50. A quarter is 25.",
+        "50 + 25 = 75. That is 3/4 of 100."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Adding bottoms is like calling two different sized pieces one size."
+        "text": "2/6 of a shield is only about 33. You really have 75."
       }
     },
     {
       "kind": "explain",
       "id": "math-frac-add-teach-4",
-      "title": "Worked example in words",
+      "title": "Worked example in pizza",
       "lines": [
-        "Take 2/3 + 1/4. Both bottoms go into 12.",
-        "2/3 becomes 8/12, because 2 × 4 = 8 and 3 × 4 = 12.",
-        "1/4 becomes 3/12, because 1 × 3 = 3 and 4 × 3 = 12.",
-        "Now add the tops: 8 + 3 = 11. The answer is 11/12."
+        "Take 2/3 + 1/4 of a party pizza. It has 12 slices.",
+        "2/3 is 8 slices, because 2 × 4 = 8 and 3 × 4 = 12.",
+        "1/4 is 3 slices, because 1 × 3 = 3 and 4 × 3 = 12.",
+        "Add the tops: 8 + 3 = 11 slices. The answer is 11/12."
       ],
       "art": {
         "art": "bar",
@@ -432,8 +440,8 @@ export const pack: SePack = {
         "Then add the tops. Never add the bottoms."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Like a crew, the pieces must line up before they can fight together."
+        "flavour": "key",
+        "text": "Hunger bar: 1/2 is 5 drumsticks, 1/5 is 2. Together that is 7/10."
       }
     },
     {
@@ -442,15 +450,15 @@ export const pack: SePack = {
       "title": "Only same-sized pieces can be added",
       "lines": [
         "You can only add pieces that are the same size.",
-        "A quarter and a third are different sizes.",
-        "So we rename both pieces to a shared size first."
+        "A quarter and a third of a pizza are different sizes.",
+        "Cut the pizza into 12 slices and both fit."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi can't pass to a teammate if the pitch is cut into different-sized zones."
+        "text": "A 1/4 piece is 3 of 12 slices. A 1/3 piece is 4 of 12 slices."
       },
       "art": {
-        "art": "bar",
+        "art": "pie",
         "parts": 4,
         "filled": 1,
         "label": "1/4",
@@ -464,7 +472,7 @@ export const pack: SePack = {
       "lines": [
         "Adding the bottoms is the most common mistake.",
         "1/2 + 1/2 is not 2/4. It is 1 whole.",
-        "The bottom number tells you the size of each piece."
+        "The bottom number tells you the size of each slice."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -474,15 +482,15 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-frac-add-deeper-2",
-      "title": "The common denominator is a size",
+      "title": "The common denominator is a slice size",
       "lines": [
-        "Find a number that both bottoms divide into.",
-        "For 3 and 4, that shared number is 12.",
-        "Then multiply each fraction to reach 12."
+        "A party pizza has 12 slices.",
+        "Thirds and fourths both fit into 12 slices.",
+        "So 12 is the shared bottom for 3 and 4."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Multiply the top AND the bottom by the same number. That keeps the fraction equal."
+        "text": "Multiply the top AND the bottom by the same number. 1/3 of the pizza is 4 slices: 4/12."
       }
     },
     {
@@ -491,12 +499,19 @@ export const pack: SePack = {
       "title": "Rename with top and bottom together",
       "lines": [
         "To rename 1/3 as sixths, multiply top and bottom by 2.",
-        "Doing it to only the bottom changes the size.",
-        "So 1/3 becomes 2/6, and it stays equal."
+        "Changing only the bottom changes how much pizza you have.",
+        "So 1/3 becomes 2/6. Same pizza, smaller slices."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro doesn't add extra swords to one side of the deck. Both sides change together."
+        "flavour": "imagine",
+        "text": "Cut each third in half. Now you hold 2 slices of sixths, but the same amount."
+      },
+      "art": {
+        "art": "pie",
+        "parts": 6,
+        "filled": 2,
+        "label": "2/6",
+        "tone": "focus"
       }
     },
     {
@@ -504,13 +519,13 @@ export const pack: SePack = {
       "id": "math-frac-add-deeper-4",
       "title": "Same bottoms: keep the bottom",
       "lines": [
-        "If the bottoms already match, leave them alone.",
-        "Add or subtract only the top numbers.",
-        "So 3/8 + 4/8 = 7/8, not 7/16."
+        "A large pizza has 8 slices. All the same size.",
+        "Add only the tops: 3/8 + 4/8 = 7/8.",
+        "It is not 7/16. The slices did not get smaller."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Same-sized pieces stay the same size. You only count how many you have."
+        "text": "Same-sized slices stay the same size. You only count how many you have."
       }
     },
     {
@@ -519,31 +534,31 @@ export const pack: SePack = {
       "title": "Always simplify at the end",
       "lines": [
         "Check whether the answer can be made smaller.",
-        "2/4 becomes 1/2 when you divide top and bottom by 2.",
-        "Divide top and bottom by the same number every time."
+        "A pizza in 4 slices: eat 2, and 2/4 is the same as 1/2.",
+        "Divide top and bottom by the same number: 2 ÷ 2 and 4 ÷ 2."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Simplest form is the answer a teacher expects. Leaving 2/4 can lose the mark."
+        "text": "Simplest form is the answer a test expects. Leaving 2/4 can lose the mark."
       }
     },
     {
       "kind": "choice",
       "id": "math-frac-add-basics-8",
-      "prompt": "Franky has 1/2 of a plank and adds 3/8 more. How much plank does he have now?",
+      "prompt": "You eat 1/2 of a large pizza, then 3/8 more. How much pizza is gone?",
       "options": [
         "4/10",
         "1/10",
         "7/8"
       ],
       "answer": 2,
-      "why": "Eighths fit exactly into halves, so 1/2 becomes 4/8 and the pieces match.",
+      "why": "A large pizza has 8 slices, so 1/2 is 4/8, and 4/8 + 3/8 = 7/8.",
       "steps": [
         {
-          "text": "Try 1/3 + 1/6 first. The common denominator is 6."
+          "text": "A box has 6 Timbits. You eat 1/3, then 1/6 more. Common bottom: 6."
         },
         {
-          "text": "1/3 becomes 2/6 and 1/6 stays 1/6."
+          "text": "1/3 of 6 Timbits is 2, so 1/3 becomes 2/6. 1/6 stays 1/6."
         },
         {
           "text": "Add the tops: 2 + 1 = 3, giving 3/6, which simplifies to 1/2."
@@ -553,40 +568,40 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-basics-9",
-      "prompt": "Bachira does 1/4 of an hour of ball control and 1/6 of an hour of sprints. How much of an hour is that in total?",
+      "prompt": "A party pizza has 12 slices. You eat 1/4 of it, then 1/6 more. How much of the pizza is gone?",
       "options": [
-        "2/10",
-        "5/12",
-        "1/10"
+        "2/10 of the pizza",
+        "5/12 of the pizza",
+        "1/10 of the pizza"
       ],
       "answer": 1,
       "why": "Twelfths fit both quarters and sixths, so both fractions can be added as the same-sized pieces.",
       "steps": [
         {
-          "text": "Try 1/2 + 1/5 first. The common denominator is 10."
+          "text": "Try another pizza: 1/2 + 1/5. Cut it into 10 slices, the common bottom."
         },
         {
-          "text": "1/2 becomes 5/10 and 1/5 becomes 2/10."
+          "text": "1/2 is 5 slices of 10, so 5/10. 1/5 is 2 slices of 10, so 2/10."
         },
         {
-          "text": "Add the tops: 5 + 2 = 7, so the total is 7/10 of an hour."
+          "text": "Add the tops: 5 + 2 = 7, so 7/10 of the pizza is gone."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-applied-0",
-      "prompt": "Isagi's sprint covers 2/3 of the pitch. Then he runs 1/4 more. How much of the pitch is that in total?",
+      "prompt": "You finish 2/3 of the Battle Pass. Then you finish 1/4 more. How much of the pass is done?",
       "options": [
-        "3/7 of the pitch",
-        "11/12 of the pitch",
-        "5/12 of the pitch"
+        "3/7 of the pass",
+        "11/12 of the pass",
+        "5/12 of the pass"
       ],
       "answer": 1,
       "why": "Fractions only add when the pieces are the same size, so the bottoms must match first.",
       "steps": [
         {
-          "text": "Worked example: 3/5 + 1/10. The bottoms are 5 and 10. Use 10, because both fit into it."
+          "text": "Try a box of 10 Timbits: 3/5 + 1/10. The bottoms are 5 and 10. Use 10."
         },
         {
           "text": "Change 3/5 to 6/10. Multiply top and bottom by 2: 3 × 2 = 6, 5 × 2 = 10."
@@ -606,53 +621,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-applied-1",
-      "prompt": "Zoro's crew raids 5/6 of a hoard. They give 3/8 of the hoard to a village. How much do they keep?",
+      "prompt": "Your EA FC player's stamina bar is 5/6 full. A sprint burns 3/8 of the bar. How much is left?",
       "options": [
-        "11/24 of the hoard",
-        "2/14 of the hoard",
-        "1/2 of the hoard"
+        "11/24 of the bar",
+        "2/14 of the bar",
+        "1/2 of the bar"
       ],
       "answer": 0,
       "why": "Subtraction needs the same bottom number too, or you are taking away different-sized pieces.",
       "steps": [
         {
-          "text": "Worked example: 3/4 − 2/5. Use 20, because 4 and 5 both fit into it."
+          "text": "Try another bar: 3/4 − 2/5. Use 20, because 4 and 5 both fit into it."
         },
         {
           "text": "Change the fractions: 3/4 = 15/20 and 2/5 = 8/20."
         },
         {
-          "text": "Subtract the tops: 15 − 8 = 7. So 3/4 − 2/5 = 7/20."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-frac-add-applied-3",
-      "prompt": "Sanji makes 2 1/6 litres of soup. The crew drinks 1 3/4 litres. How much soup is left?",
-      "options": [
-        "1 1/12 litres left",
-        "3 11/12 litres left",
-        "1 5/12 litres left"
-      ],
-      "answer": 2,
-      "why": "When the top fraction is smaller, you must borrow a whole before you can subtract.",
-      "steps": [
-        {
-          "text": "Worked example: 3 1/4 − 1 1/3. Use twelfths: 3 3/12 and 1 4/12."
-        },
-        {
-          "text": "4/12 is bigger than 3/12, so borrow 1 whole. 3 3/12 becomes 2 15/12."
-        },
-        {
-          "text": "Subtract: 2 15/12 − 1 4/12 = 1 11/12."
+          "text": "Subtract the tops: 15 − 8 = 7. So 3/4 − 2/5 = 7/20 of the bar."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-applied-4",
-      "prompt": "Bachira says you can add 3/5 + 1/4 straight away. What must happen before you add?",
+      "prompt": "You clear 3/5 of an obby, then 1/4 more. What must happen before adding 3/5 + 1/4?",
       "options": [
         "Change both to twentieths",
         "Add the tops and bottoms",
@@ -662,13 +654,13 @@ export const pack: SePack = {
       "why": "You need a common bottom number, and 20 is the smallest number that both 5 and 4 fit into.",
       "steps": [
         {
-          "text": "Worked example: 2/3 + 3/8. Use 24, because 3 and 8 both fit into it."
+          "text": "Try another obby: 2/3 + 3/8. Use 24, because 3 and 8 both fit into it."
         },
         {
           "text": "Change the fractions: 2/3 = 16/24 and 3/8 = 9/24."
         },
         {
-          "text": "Add the tops: 16/24 + 9/24 = 25/24, which is 1 1/24."
+          "text": "Add the tops: 16/24 + 9/24 = 25/24, which is 1 1/24 obbies."
         }
       ]
     },
@@ -685,33 +677,33 @@ export const pack: SePack = {
       "why": "Comparing needs the same bottom number, and then the tops show which total is bigger.",
       "steps": [
         {
-          "text": "Worked example: 1/3 + 1/4 compared with 1/2. Use 12 as the bottom."
+          "text": "Try a box of 12 Timbits: 1/3 + 1/4 against 1/2. Use 12 as the bottom."
         },
         {
           "text": "Change the fractions: 1/3 = 4/12, 1/4 = 3/12, and 1/2 = 6/12."
         },
         {
-          "text": "Add 4/12 + 3/12 = 7/12. This is bigger than 6/12 by 1/12."
+          "text": "Add 4/12 + 3/12 = 7/12. That is 7 Timbits, one more than 6/12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-applied-6",
-      "prompt": "Zoro has 5 metres of rope. He cuts off 2 3/8 metres. How much rope is left?",
+      "prompt": "Your squad orders 5 pizzas. You eat 2 3/8 pizzas. How much pizza is left?",
       "options": [
-        "3 5/8 m left",
-        "2 3/8 m left",
-        "2 5/8 m left"
+        "3 5/8 pizzas left",
+        "2 3/8 pizzas left",
+        "2 5/8 pizzas left"
       ],
       "answer": 2,
       "why": "A whole number has to be broken into a mixed number before you can take away a fraction.",
       "steps": [
         {
-          "text": "Worked example: 4 − 1 2/5. Write 4 as 3 5/5, so the fraction can be taken away."
+          "text": "Worked example: 4 chocolate bars, 5 pieces each. Eat 1 2/5 bars. Write 4 as 3 5/5."
         },
         {
-          "text": "Subtract: 3 5/5 − 1 2/5 = 2 3/5."
+          "text": "Subtract: 3 5/5 − 1 2/5 = 2 3/5 bars."
         },
         {
           "text": "Check: 2 3/5 + 1 2/5 = 4, so the answer is right."
@@ -731,20 +723,20 @@ export const pack: SePack = {
       "why": "Adding the tops and bottoms gives the wrong answer, because the bottoms must match first.",
       "steps": [
         {
-          "text": "Worked example: 5/6 + 3/4. Use 12 as the common bottom."
+          "text": "Worked example: 5/6 of one pizza plus 3/4 of another. Use 12 as the common bottom."
         },
         {
-          "text": "Change the fractions: 5/6 = 10/12 and 3/4 = 9/12."
+          "text": "Recut the slices: 5/6 = 10/12 and 3/4 = 9/12."
         },
         {
-          "text": "Add the tops: 10/12 + 9/12 = 19/12, which is 1 7/12."
+          "text": "Add the tops: 10/12 + 9/12 = 19/12, which is 1 7/12 pizzas."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-applied-8",
-      "prompt": "Bachira's team has 3/4 of a lap done. They need a total of 1 1/12 laps. What fraction of a lap is still missing?",
+      "prompt": "Your striker has jogged 3/4 of a lap of the pitch. The warm-up is 1 1/12 laps. How much is left?",
       "options": [
         "1/3 of a lap",
         "5/12 of a lap",
@@ -754,36 +746,36 @@ export const pack: SePack = {
       "why": "A missing part is found by subtracting the known part from the total, with matching bottoms.",
       "steps": [
         {
-          "text": "Worked example: 5/6 + ? = 1 1/4. Use twelfths: 1 1/4 = 15/12 and 5/6 = 10/12."
+          "text": "Worked example: warm-up is 1 1/4 laps. Done so far: 5/6 lap. Use twelfths: 1 1/4 = 15/12 and 5/6 = 10/12."
         },
         {
-          "text": "Subtract the known part: 15/12 − 10/12 = 5/12."
+          "text": "Subtract the part done: 15/12 − 10/12 = 5/12."
         },
         {
-          "text": "So the missing part is 5/12. Check: 5/6 + 5/12 = 15/12."
+          "text": "So 5/12 of a lap is left. Check: 5/6 + 5/12 = 15/12."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-applied-9",
-      "prompt": "Three crews claim 1/2, 1/4 and 1/6 of an island. What total fraction of the island do they claim?",
+      "prompt": "Three friends eat 1/2, 1/4 and 1/6 of a party pizza. How much of the pizza is eaten?",
       "options": [
-        "11/12 of the island",
-        "3/12 of the island",
-        "6/8 of the island"
+        "11/12 of the pizza",
+        "3/12 of the pizza",
+        "6/8 of the pizza"
       ],
       "answer": 0,
       "why": "Each piece must be changed to the same bottom number before the tops can be added.",
       "steps": [
         {
-          "text": "Worked example: 2/5 + 1/3 + 1/10. Use 30 as the bottom."
+          "text": "Worked example: a chest is 2/5 wood, 1/3 stone, 1/10 coal. Use 30 as the bottom."
         },
         {
           "text": "Change the fractions: 2/5 = 12/30, 1/3 = 10/30, 1/10 = 3/30."
         },
         {
-          "text": "Add the tops: 12 + 10 + 3 = 25, so the total is 25/30 = 5/6."
+          "text": "Add the tops: 12 + 10 + 3 = 25, so the total is 25/30 = 5/6 of the chest."
         }
       ],
       "art": {
@@ -797,7 +789,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-deeper-6",
-      "prompt": "Isagi runs 1/3 of a lap, then 1/4 of a lap. What is 1/3 + 1/4?",
+      "prompt": "You eat two snacks. One fills 1/3 of your hunger bar. The other fills 1/4. What is 1/3 + 1/4?",
       "options": [
         "2/7",
         "7/12",
@@ -807,50 +799,43 @@ export const pack: SePack = {
       "why": "The bottoms must match before adding, so both fractions are renamed as twelfths.",
       "steps": [
         {
-          "text": "The bottoms are 5 and 2, so they are different. Find a shared bottom: 10."
+          "text": "Worked example: snacks fill 1/5 and 1/2 of the bar. The bottoms differ. Shared bottom: 10."
         },
         {
           "text": "Rename 1/5 as 2/10. Multiply top and bottom by 2, since 5 × 2 = 10."
         },
         {
-          "text": "Rename 1/2 as 5/10. Then add the tops: 2/10 + 5/10 = 7/10."
+          "text": "Rename 1/2 as 5/10. Then add the tops: 2/10 + 5/10 = 7/10 of the bar."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-deeper-7",
-      "prompt": "What is the smallest common denominator for 4 and 6?",
+      "prompt": "One pizza is cut in 4 slices. Another is cut in 6. Cut both into how many equal slices to compare?",
       "options": [
-        "24",
-        "12",
-        "10"
+        "24 slices",
+        "12 slices",
+        "10 slices"
       ],
       "answer": 1,
       "why": "The smallest common denominator is the lowest common multiple, so the numbers stay as small as possible.",
       "steps": [
         {
-          "text": "List the multiples of 5: 5, 10, 15, 20. List the multiples of 3: 3, 6, 9, 12, 15."
+          "text": "Worked example: pizzas cut in 5 and 3. Multiples of 5: 5, 10, 15, 20. Multiples of 3: 3, 6, 9, 12, 15."
         },
         {
           "text": "Look for the first number in both lists. Here it is 15."
         },
         {
-          "text": "Check: 15 is the smallest, so it is the answer. Any bigger one works, but is not smallest."
+          "text": "Check: 15 is the smallest, so cut both into 15 slices. Bigger ones work, but are not smallest."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-deeper-8",
-      "prompt": "What is 3/4 − 1/2?",
+      "prompt": "3/4 of a pizza is left. You eat 1/2 a pizza. What is 3/4 − 1/2?",
       "options": [
         "1/4",
         "2/2",
@@ -860,36 +845,36 @@ export const pack: SePack = {
       "why": "You must rename 1/2 as 2/4 before subtracting, so the bottoms match.",
       "steps": [
         {
-          "text": "Rename 1/3 as sixths: 1/3 = 2/6, because 3 × 2 = 6."
+          "text": "A pizza has 6 slices. 5/6 is left. You eat 1/3. Rename 1/3 as 2/6, because 3 × 2 = 6."
         },
         {
           "text": "Subtract the tops only: 5/6 − 2/6 = 3/6."
         },
         {
-          "text": "Simplify: divide 3 and 6 by 3, so 3/6 = 1/2."
+          "text": "Simplify: divide 3 and 6 by 3, so 3/6 = 1/2. Half the pizza is left."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-frac-add-deeper-9",
-      "prompt": "Which fraction is equal to 1/3?",
+      "prompt": "30 minutes of a 90-minute match is 1/3. Which fraction equals 1/3?",
       "options": [
         "2/6",
         "1/6",
         "3/6"
       ],
       "answer": 0,
-      "why": "Multiplying top and bottom by the same number makes an equal fraction, but not a different size.",
+      "why": "Multiplying top and bottom by the same number makes an equal fraction, not a different size.",
       "steps": [
         {
-          "text": "Rename 2/5 as tenths. Multiply top and bottom by 2."
+          "text": "A chocolate bar has 5 pieces. You have 2. Snap each piece in half: 10 pieces."
         },
         {
           "text": "Top: 2 × 2 = 4. Bottom: 5 × 2 = 10."
         },
         {
-          "text": "So 2/5 = 4/10. Check that both numbers were multiplied the same way."
+          "text": "So 2/5 = 4/10. Both numbers were multiplied by 2, so the size stays the same."
         }
       ],
       "art": {
@@ -903,7 +888,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-frac-add-deeper-10",
-      "prompt": "What is 3/8 + 4/8?",
+      "prompt": "A large pizza has 8 slices. You eat 3, a friend eats 4. What is 3/8 + 4/8?",
       "options": [
         "7/16",
         "1/8",
@@ -913,20 +898,20 @@ export const pack: SePack = {
       "why": "When the bottoms match, the bottom stays the same and only the tops are added.",
       "steps": [
         {
-          "text": "The bottoms are both 9. They already match, so keep the 9."
+          "text": "One block needs 9 ingots. You have 2 ingots, then add 5. Both bottoms are 9, so keep the 9."
         },
         {
           "text": "Add only the tops: 2 + 5 = 7."
         },
         {
-          "text": "Write the answer: 7/9. The bottom did not change to 18."
+          "text": "Write the answer: 7/9 of a block. The bottom did not change to 18."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-2",
-      "prompt": "Bachira dribbles for 1/2 of a game. He passes for 2/5 of a game. How much of the game is that?",
+      "prompt": "A hit takes 1/2 of your 100 health. A fall takes 2/5 of it. How much of the bar is lost?",
       "answer": "9/10",
       "decoys": [
         "3",
@@ -936,13 +921,13 @@ export const pack: SePack = {
       "why": "A common denominator is a size of piece that both fractions can be written in exactly.",
       "steps": [
         {
-          "text": "Look at the bottoms: 3 and 5. Multiply them: 3 × 5 = 15, so use 15."
+          "text": "An obby has 15 checkpoints. You pass 1/3, then 1/5. Bottoms 3 and 5: 3 × 5 = 15."
         },
         {
-          "text": "Change 1/3 into fifteenths: 1/3 becomes 5/15, and 1/5 becomes 3/15."
+          "text": "1/3 of 15 is 5 checkpoints, so 1/3 = 5/15. 1/5 is 3 checkpoints, so 1/5 = 3/15."
         },
         {
-          "text": "Add the tops: 5/15 + 3/15 = 8/15. Keep the bottom."
+          "text": "Add the tops and keep the bottom: 5/15 + 3/15 = 8/15."
         },
         {
           "text": "Check: 8 and 15 share no factor, so 8/15 is simplest."
@@ -952,17 +937,17 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-add-build-3",
-      "prompt": "Zoro's energy bar is 7/8 full. A hard tackle takes away 1/2. How full is it now?",
+      "prompt": "A slot holds 7/8 of a stack of 64. You use 1/2 a stack. How much of a stack is left?",
       "answer": "3/8",
       "decoys": [
         "5",
         "7",
         "2"
       ],
-      "why": "You can only subtract 2ths from 8ths after both are written as eighths.",
+      "why": "Halves and eighths only subtract after both are written as eighths.",
       "steps": [
         {
-          "text": "Look at the bottoms: 3 and 6. Pick 6, because 3 goes into 6."
+          "text": "A pizza has 6 slices. You have 2/3 of it. You eat 1/6. Bottoms are 3 and 6, so use 6."
         },
         {
           "text": "Change 2/3 into sixths: multiply top and bottom by 2, so 2/3 becomes 4/6."
@@ -971,14 +956,14 @@ export const pack: SePack = {
           "text": "Subtract the tops and keep the bottom: 4/6 − 1/6 = 3/6."
         },
         {
-          "text": "Simplify: 3/6 divided by 3 on top and bottom gives 1/2."
+          "text": "Simplify: divide 3 and 6 by 3 to get 1/2."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-4",
-      "prompt": "Isagi runs 5/6 of a lap, then 3/4 of a lap. How many laps in total?",
+      "prompt": "Party pizzas have 12 slices. One has 5/6 left, another has 3/4. How much pizza is that?",
       "answer": "19/12",
       "decoys": [
         "6",
@@ -988,49 +973,49 @@ export const pack: SePack = {
       "why": "Fractions can be more than one whole, so the answer may be an improper fraction like 19/12.",
       "steps": [
         {
-          "text": "Look at the bottoms: 4 and 3. Multiply them: 4 × 3 = 12, so use 12."
+          "text": "A wall is 12 blocks long. You build 1/4, then 1/3. Bottoms 4 and 3: use 12."
         },
         {
-          "text": "Change 1/4 into twelfths: 1/4 becomes 3/12, and 1/3 becomes 4/12."
+          "text": "1/4 of 12 is 3 blocks, so 1/4 = 3/12. 1/3 of 12 is 4 blocks, so 1/3 = 4/12."
         },
         {
           "text": "Add the tops and keep the bottom: 3/12 + 4/12 = 7/12."
         },
         {
-          "text": "Check: 7 and 12 share no factor, so 7/12 is simplest. Try it on 5/6 and 3/4 next."
+          "text": "Check: 7 and 12 share no factor, so 7/12 is simplest."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-5",
-      "prompt": "Write 1/5 + 1/10 as a decimal.",
+      "prompt": "Your hunger bar has 10 drumsticks. Bread refills 1/5 of it, an apple 1/10. Write the total as a decimal.",
       "answer": "0.3",
       "decoys": [
         "7",
         "2",
         "1"
       ],
-      "why": "Tenths turn straight into decimals, so 3/10 is written as 0.3.",
+      "why": "Tenths turn straight into decimals, so 3/10 of the bar is written as 0.3.",
       "steps": [
         {
           "text": "Look at the bottoms: 5 and 10. Pick 10, because 5 goes into 10."
         },
         {
-          "text": "Change 1/5 into tenths: 1/5 becomes 2/10. Then add: 2/10 + 1/10 = 3/10."
+          "text": "Bar of 10 drumsticks: 1/5 is 2 drumsticks, so 1/5 becomes 2/10. Add: 2/10 + 1/10 = 3/10."
         },
         {
           "text": "Write 3 tenths as a decimal: 3/10 is 0.3, because the 3 sits in the tenths place."
         },
         {
-          "text": "Test it on a new pair: 3/10 + 1/5 gives 5/10, which is 0.5."
+          "text": "Test a new pair: a steak of 3/10 plus a 1/5 snack gives 5/10, which is 0.5."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-frac-add-build-6",
-      "prompt": "Nami gets 1/4 of a treasure map. Then she gets 1/6 more. How much of the map does she have?",
+      "prompt": "A party pizza has 12 slices. You eat 1/4 of it. Your mate eats 1/6. How much is gone?",
       "answer": "5/12",
       "decoys": [
         "8",
@@ -1043,7 +1028,7 @@ export const pack: SePack = {
           "text": "Look at the bottoms: 4 and 6. Pick 12, because both 4 and 6 go into 12."
         },
         {
-          "text": "Change the fractions: 1/4 becomes 3/12, and 1/6 becomes 2/12."
+          "text": "Count slices: 1/4 of 12 is 3 slices, so 1/4 is 3/12. 1/6 of 12 is 2 slices, so 1/6 is 2/12."
         },
         {
           "text": "Add the tops and keep the bottom: 3/12 + 2/12 = 5/12."
@@ -1056,7 +1041,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-frac-add-build-7",
-      "prompt": "A treasure chest is 4/5 full. Zoro takes 1/10 of the coins. How full is it now?",
+      "prompt": "Your shield bar is 4/5 full. One hit takes away 1/10 of the bar. How full is it now?",
       "answer": "7/10",
       "decoys": [
         "3",
@@ -1065,7 +1050,7 @@ export const pack: SePack = {
       "why": "Subtraction keeps the same bottom once both fractions are renamed to match.",
       "steps": [
         {
-          "text": "Look at the bottoms: 6 and 2. Pick 6, because 2 goes into 6."
+          "text": "Pizza is 5/6 left. You eat 1/2 of the whole pizza. Bottoms: 6 and 2. Pick 6."
         },
         {
           "text": "Change 1/2 into sixths: multiply top and bottom by 3, so 1/2 becomes 3/6."
@@ -1074,40 +1059,40 @@ export const pack: SePack = {
           "text": "Subtract the tops and keep the bottom: 5/6 − 3/6 = 2/6."
         },
         {
-          "text": "Simplify: 2/6 divided by 2 on top and bottom gives 1/3."
+          "text": "Simplify: divide the top and bottom of 2/6 by 2 to get 1/3 of the pizza left."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-frac-add-games-1",
-      "title": "Sum Showdown",
+      "title": "Pizza Showdown",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "⅙ + ¼",
+            "label": "⅙ + ¼ pizza",
             "value": 5
           },
           {
-            "label": "⅓ + ¼",
+            "label": "⅓ + ¼ pizza",
             "value": 7
           },
           {
-            "label": "½ + ⅙",
+            "label": "½ + ⅙ pizza",
             "value": 8
           },
           {
-            "label": "½ + ¼",
+            "label": "½ + ¼ pizza",
             "value": 9
           },
           {
-            "label": "⅔ + ¼",
+            "label": "⅔ + ¼ pizza",
             "value": 11
           }
         ]
       },
-      "why": "Once two fractions share a denominator, you can compare their sums by looking at the top numbers."
+      "why": "Once every sum is in twelfths of a party pizza, the bigger top number means more pizza eaten."
     },
     {
       "kind": "video",
@@ -1187,27 +1172,6 @@ export const pack: SePack = {
             },
             {
               "text": "Now the pieces match, so add the tops: 3/12 + 2/12 = 5/12."
-            }
-          ]
-        },
-        {
-          "prompt": "Luffy has 5/6 of a metre of rope and cuts off 1/3 of a metre. How much is left?",
-          "options": [
-            "1/2 m",
-            "2/3 m",
-            "1/6 m"
-          ],
-          "answer": 0,
-          "why": "Once the bottoms match, you subtract the tops and keep the same bottom.",
-          "steps": [
-            {
-              "text": "Try 3/4 − 1/8. The common denominator is 8."
-            },
-            {
-              "text": "Change 3/4 into eighths: 3/4 = 6/8. So 6/8 − 1/8."
-            },
-            {
-              "text": "Subtract the tops and keep the bottom: 6/8 − 1/8 = 5/8."
             }
           ]
         }

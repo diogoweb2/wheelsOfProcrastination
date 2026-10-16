@@ -15,55 +15,55 @@ export const pack: SePack = {
       "id": "math-circle-teach-0",
       "title": "What a circle is made of",
       "lines": [
-        "Every point on the edge is the same distance from the centre.",
+        "Every point on the storm edge is the same distance from the centre.",
         "Radius: centre to edge. Diameter: edge to edge, through the middle.",
         "Diameter = 2 × radius. This is always true."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Picture Isagi on the centre spot. Every point on the circle is the same distance from him."
+        "flavour": "key",
+        "text": "The storm edge is a circle. When the radius shrinks, the diameter shrinks by twice as much."
       }
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-0",
-      "prompt": "The centre circle on a football pitch has a radius of 9 m. What is its diameter?",
+      "prompt": "Your round Minecraft tower has a radius of 9 blocks. How wide is it across?",
       "options": [
-        "18 m",
-        "4.5 m",
-        "81 m"
+        "18 blocks",
+        "4.5 blocks",
+        "81 blocks"
       ],
       "answer": 0,
       "why": "The diameter is the straight line across the circle through its centre, so it is always twice the radius.",
       "steps": [
         {
-          "text": "Diameter is the full width across. Radius is only half of it."
+          "text": "Across means diameter. Radius is only half of it."
         },
         {
-          "text": "Example: radius 6 m. Double it: 6 × 2 = 12, so diameter is 12 m."
+          "text": "Example: radius 6 blocks. Double it: 6 × 2 = 12, so it is 12 blocks across."
         },
         {
-          "text": "Going back: 12 ÷ 2 = 6, so halving the diameter gives the radius."
+          "text": "Going back: 12 ÷ 2 = 6, so halving the width gives the radius."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-1",
-      "prompt": "Which formula gives the distance all the way around a circle, like a lap of the pitch?",
+      "prompt": "Which formula gives the distance all the way around the storm edge?",
       "options": [
         "C = r × r",
         "A = π × r²",
         "C = π × d"
       ],
       "answer": 2,
-      "why": "C stands for circumference, the distance around the edge, and it uses the diameter d.",
+      "why": "C stands for circumference, the walk around the edge, and it uses the diameter d.",
       "steps": [
         {
-          "text": "The letter C means the edge. A means the space inside."
+          "text": "The letter C means around the edge. A means the space inside."
         },
         {
-          "text": "Example: diameter 10 cm. C = π × 10 is about 31.4 cm."
+          "text": "Example: storm diameter 10 m. C = π × 10 is about 31.4 m."
         },
         {
           "text": "Check: C should be a bit more than 3 times the diameter, since π is about 3.14."
@@ -158,7 +158,7 @@ export const pack: SePack = {
       "why": "The radius goes from the centre to the edge, so it is half the diameter.",
       "steps": [
         {
-          "text": "Radius is from the middle to the edge. Diameter is edge to edge."
+          "text": "Radius is from the middle to the crust. Diameter is crust to crust."
         },
         {
           "text": "Example: diameter 20 cm. Half of 20 is 10, so the radius is 10 cm."
@@ -171,20 +171,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-basics-3",
-      "prompt": "A bike wheel has a diameter of 50 cm. About how far does it roll in one full turn? Use π ≈ 3.14.",
+      "prompt": "Your Roblox obby has a spinning disc, 50 studs across. How far is one trip around its edge? Use π ≈ 3.14.",
       "options": [
-        "about 25 cm",
-        "about 314 cm",
-        "about 157 cm"
+        "about 25 studs",
+        "about 314 studs",
+        "about 157 studs"
       ],
       "answer": 2,
-      "why": "One full turn covers the circumference, which is π times the diameter.",
+      "why": "One full trip around the edge is the circumference, which is π times the diameter.",
       "steps": [
         {
-          "text": "One turn of a wheel rolls one circumference."
+          "text": "One trip around the edge is one circumference."
         },
         {
-          "text": "Example: diameter 10 m. 3.14 × 10 = 31.4 m for one turn."
+          "text": "Example: diameter 10 studs. 3.14 × 10 = 31.4 studs around."
         },
         {
           "text": "Check: 3.14 × 50 is 3.14 × 5 with a zero added, so 157."
@@ -197,71 +197,64 @@ export const pack: SePack = {
       "title": "Why the distance around matters",
       "lines": [
         "Circumference is the distance all the way around a circle.",
-        "Wheels, pizza crusts and running tracks all need it.",
+        "Pitch centre circles, running tracks and pizza crusts all need it.",
         "Know one measurement and you can work out the rest."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's ship wheel turns once. The edge of the wheel travels one full circumference."
+        "flavour": "key",
+        "text": "A player running one lap of the 9.15 m centre circle covers about 57.5 m."
       }
     },
     {
       "kind": "build",
       "id": "math-circle-build-0",
-      "prompt": "Blue Lock: a match ball has a diameter of 22 cm. Build its circumference. Use π ≈ 3.14.",
+      "prompt": "A small pizza is 22 cm across. How far is the crust around it? Use π ≈ 3.14.",
       "answer": "69.08",
       "decoys": [
         "2",
         "5",
         "7"
       ],
-      "why": "Circumference is always π times the diameter, so every circle works the same way.",
+      "why": "The distance round any circle is π times its diameter.",
       "steps": [
         {
           "text": "Write the rule: C = 3.14 × d."
         },
         {
-          "text": "Test it on a diameter of 10 cm: 3.14 × 10 = 31.4 cm."
+          "text": "Test on a 10 cm pizza: 3.14 × 10 = 31.4 cm of crust."
         },
         {
-          "text": "Now use d = 22 cm: 3.14 × 22 = 69.08 cm."
+          "text": "Now the 22 cm pizza: 3.14 × 22 = 69.08 cm."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "build",
       "id": "math-circle-basics-4",
-      "prompt": "A circle has a radius of 7 cm. Use π ≈ 3.14. Build the circumference in cm.",
+      "prompt": "The storm circle on your map has a radius of 7 cm. Use π ≈ 3.14. How far is the edge?",
       "answer": "43.96",
       "decoys": [
         "2",
         "8",
         "1"
       ],
-      "why": "Circumference is 2 × π × r, and the radius must be doubled first to get the diameter.",
+      "why": "The edge is 2 × π × r, so the radius must be doubled to get the diameter first.",
       "steps": [
         {
           "text": "Double the radius first to get the diameter, then times π."
         },
         {
-          "text": "Example: radius 5. Diameter 10. 3.14 × 10 = 31.4."
+          "text": "Example: radius 5. Diameter 10. 3.14 × 10 = 31.4 cm round the edge."
         },
         {
-          "text": "Here 2 × 7 = 14, then 3.14 × 14 = 43.96. Keep the cm."
+          "text": "Here 2 × 7 = 14, then 3.14 × 14 = 43.96 cm."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-5",
-      "prompt": "Which line goes from one edge of a circle, through its centre, to the other edge?",
+      "prompt": "Which line crosses a round Minecraft tower, from one side through its centre to the other?",
       "options": [
         "the radius",
         "the diameter",
@@ -274,10 +267,10 @@ export const pack: SePack = {
           "text": "Radius stops at the centre. Diameter goes all the way across."
         },
         {
-          "text": "Example: a radius of 4 cm gives a diameter of 8 cm across the middle."
+          "text": "Example: a radius of 4 blocks gives a diameter of 8 blocks across the middle."
         },
         {
-          "text": "Circumference is the curved edge, not a straight line."
+          "text": "Circumference is the curved wall all the way round, not a straight line."
         }
       ]
     },
@@ -289,41 +282,41 @@ export const pack: SePack = {
         "mode": "order",
         "values": [
           {
-            "label": "Ring, d = 2 cm",
+            "label": "Gobstopper, d = 2 cm",
             "value": 6.28
           },
           {
-            "label": "Coin, d = 3 cm",
+            "label": "Timbit, d = 3 cm",
             "value": 9.42
           },
           {
-            "label": "Hoop, d = 5 cm",
+            "label": "Donut hoop, d = 5 cm",
             "value": 15.7
           },
           {
-            "label": "Bounty ring, d = 8 cm",
+            "label": "Berry coin, d = 8 cm",
             "value": 25.12
           },
           {
-            "label": "Wheel, d = 10 cm",
+            "label": "Storm ring, d = 10 cm",
             "value": 31.4
           },
           {
-            "label": "Big wheel, d = 20 cm",
+            "label": "Dinner plate, d = 20 cm",
             "value": 62.8
           }
         ]
       },
-      "why": "The circumference is always about 3.14 times the diameter, for every circle, big or small."
+      "why": "The distance round is always about 3.14 times the diameter, for every circle, big or small."
     },
     {
       "kind": "explain",
       "id": "math-circle-teach-2",
-      "title": "The one formula to learn",
+      "title": "The storm edge formula",
       "lines": [
-        "Circumference = π × diameter. Written as C = π × d.",
-        "π is about 3.14. It is the same number for every circle.",
-        "Given a radius? Double it first to get the diameter."
+        "Distance round the edge is C = π × d.",
+        "π is about 3.14. It is the same for every circle.",
+        "Only have the radius? Double it to get d first."
       ],
       "art": {
         "art": "bars",
@@ -345,30 +338,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-basics-6",
-      "prompt": "A bike wheel has a radius of 35 cm. What is its diameter?",
+      "prompt": "The centre circle on a football pitch has a radius of 9.15 m. What is its diameter?",
       "options": [
-        "17.5 cm",
-        "35 cm",
-        "70 cm"
+        "9.15 m",
+        "18.3 m",
+        "27.45 m"
       ],
-      "answer": 2,
-      "why": "Diameter is twice the radius, so 35 doubles to 70.",
+      "answer": 1,
+      "why": "Diameter is twice the radius, so 9.15 m doubles to 18.3 m.",
       "steps": [
         {
           "text": "Diameter is always two radii laid end to end."
         },
         {
-          "text": "Example: radius 8 cm. 8 × 2 = 16 cm diameter."
+          "text": "Example: a pizza radius of 6 cm. 6 × 2 = 12 cm across."
         },
         {
-          "text": "Going back: 16 ÷ 2 = 8, so you can always check the radius this way."
+          "text": "Check it back: 12 ÷ 2 = 6, so the radius is right."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-7",
-      "prompt": "A circle has a diameter of 10 m. Use π ≈ 3.14. What is its circumference?",
+      "prompt": "The storm's final ring is a circle 10 m across. Use π ≈ 3.14. How far is one lap of the ring?",
       "options": [
         "314 m",
         "31.4 m",
@@ -381,17 +374,17 @@ export const pack: SePack = {
           "text": "Multiply the diameter by 3.14."
         },
         {
-          "text": "Example: diameter 4 m. 3.14 × 4 = 12.56 m."
+          "text": "Example: a ring 4 m across. 3.14 × 4 = 12.56 m."
         },
         {
-          "text": "Check: the answer should be a bit more than 3 times the diameter."
+          "text": "Check: the lap should be a bit more than 3 times the diameter."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-1",
-      "prompt": "One Piece: Sanji's cooking pot has a radius of 4 cm. Build its circumference. Use π ≈ 3.14.",
+      "prompt": "A round Minecraft tower has a radius of 4 blocks. Build its circumference. Use π ≈ 3.14.",
       "answer": "25.12",
       "decoys": [
         "4",
@@ -400,13 +393,13 @@ export const pack: SePack = {
       "why": "The diameter is always twice the radius, so you double it before you multiply by π.",
       "steps": [
         {
-          "text": "Radius × 2 gives the diameter: 3 cm × 2 = 6 cm."
+          "text": "Radius × 2 gives the diameter: 3 blocks × 2 = 6 blocks."
         },
         {
-          "text": "Multiply by π: 3.14 × 6 = 18.84 cm for that pot."
+          "text": "Multiply by π: 3.14 × 6 = 18.84 blocks for that tower."
         },
         {
-          "text": "Do the same for r = 4 cm: d = 8 cm, then 3.14 × 8 = 25.12 cm."
+          "text": "Do the same for r = 4 blocks: d = 8 blocks, then 3.14 × 8 = 25.12 blocks."
         }
       ]
     }
@@ -418,12 +411,12 @@ export const pack: SePack = {
       "title": "The trap: radius and diameter",
       "lines": [
         "Trap: using the radius where the formula needs the diameter.",
-        "A radius of 5 cm is not a diameter of 5 cm.",
+        "A radius of 5 m is not a diameter of 5 m.",
         "Ask yourself: is this number across the middle, or from the centre?"
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A radius of 5 cm gives a diameter of 10 cm. Use 10 in the formula."
+        "text": "A radius of 5 m gives a diameter of 10 m. Use 10 in the formula."
       }
     },
     {
@@ -431,13 +424,13 @@ export const pack: SePack = {
       "id": "math-circle-teach-4",
       "title": "Worked example, step by step",
       "lines": [
-        "Isagi's practice ball has a radius of 4 cm.",
-        "First, the diameter: 4 × 2 = 8 cm.",
-        "Then C = π × 8, which is about 3.14 × 8 = 25.12 cm."
+        "Your obby's round platform has a radius of 4 m.",
+        "First, the diameter: 4 × 2 = 8 m.",
+        "Then C = π × 8, which is about 3.14 × 8 = 25.12 m."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "The ball's edge is about 25 cm long. That is one lap of the ball."
+        "flavour": "key",
+        "text": "The platform's edge is about 25 m around. That is one lap of the platform."
       }
     },
     {
@@ -447,7 +440,7 @@ export const pack: SePack = {
       "lines": [
         "Radius runs from centre to edge. Diameter runs edge to edge.",
         "Circumference = π × d. Use π ≈ 3.14.",
-        "Radius given? Double it first, then multiply by π."
+        "Centre circle radius 9.15 m? Double it first, then multiply by π."
       ],
       "callout": {
         "flavour": "key",
@@ -459,9 +452,9 @@ export const pack: SePack = {
       "id": "math-circle-deeper-0",
       "title": "Diameter goes all the way across",
       "lines": [
-        "Diameter is the line from edge to edge, through the centre.",
-        "It is the longest straight line you can fit inside a circle.",
-        "Radius is half of it: from the centre out to the edge."
+        "Diameter is the cut from edge to edge, through the centre.",
+        "A 12-inch pizza is 12 inches across that middle cut.",
+        "Radius is half of it: from the centre out to the crust."
       ],
       "callout": {
         "flavour": "key",
@@ -473,13 +466,13 @@ export const pack: SePack = {
       "id": "math-circle-deeper-1",
       "title": "The magic number: π",
       "lines": [
-        "Divide any circle's circumference by its diameter.",
-        "You always get the same number: about 3.14159...",
+        "Divide a storm circle's edge length by its width.",
+        "Every circle, big or small, gives about 3.14159...",
         "That number is π. It never ends and never repeats."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's shot bends, but the goal stays the same size."
+        "flavour": "key",
+        "text": "A 2 km storm circle and a 20 m one give the same π."
       }
     },
     {
@@ -493,7 +486,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Check the word first. Radius or diameter? Read it twice."
+        "text": "Storm radius 100 m? The width across is 200 m. Read the word first."
       }
     },
     {
@@ -502,12 +495,12 @@ export const pack: SePack = {
       "title": "Circumference is a length, not an area",
       "lines": [
         "Circumference is the distance around the outside edge.",
-        "Area is the space inside, measured in square units.",
-        "Circumference: cm. Area: cm². Don't mix the units."
+        "Area is the space inside, measured in square metres.",
+        "Circumference: m. Area: m². Don't mix the units."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Walking the edge is circumference. Painting the floor is area."
+        "text": "Walking the wall of a round tower is circumference. Filling its floor is area."
       }
     },
     {
@@ -520,8 +513,8 @@ export const pack: SePack = {
         "Use the π key on a calculator for the most exact answer."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Close enough for a treasure map. Not exact enough for a cannon."
+        "flavour": "key",
+        "text": "Close enough for a round Roblox obby. Not exact enough for a rocket."
       }
     },
     {
@@ -535,59 +528,59 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Read the given number first. Then choose the formula."
+        "text": "A football centre circle with r = 9.15 m takes the second road."
       }
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-8",
-      "prompt": "Why does every circle, big or small, have the same π?",
+      "prompt": "Why does every pizza, big or small, have the same π?",
       "options": [
         "Diameter is about 3.14 times the circumference",
-        "Circumference is about 3.14 times the radius",
-        "Circumference is about 3.14 times the diameter"
+        "Circumference is about 3.14 times the diameter",
+        "Circumference is about 3.14 times the radius"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "Every circle has the same ratio of circumference to diameter, and that ratio is π.",
       "steps": [
         {
-          "text": "Measure any circle around the edge with string, then across the middle."
+          "text": "Wrap string around a pizza's crust, then measure straight across the middle."
         },
         {
-          "text": "Example: a can with diameter 6 cm has a circumference near 18.8 cm."
+          "text": "Example: a pizza with diameter 20 cm has a crust near 62.8 cm."
         },
         {
-          "text": "Divide: 18.8 ÷ 6 is about 3.14 for that can, and for every circle."
+          "text": "Divide: 62.8 ÷ 20 is about 3.14 for that pizza, and for every circle."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-basics-9",
-      "prompt": "If a circle's radius doubles, what happens to its circumference?",
+      "prompt": "The storm radius doubles from 3 m to 6 m. What happens to the edge length?",
       "options": [
         "It stays the same",
         "It doubles",
         "It becomes four times bigger"
       ],
       "answer": 1,
-      "why": "Circumference is directly tied to the radius, so doubling the radius doubles the distance around.",
+      "why": "The edge length depends directly on the radius, so doubling the radius doubles the distance around.",
       "steps": [
         {
-          "text": "Try radius 3. C = 2 × 3.14 × 3 = 18.84."
+          "text": "Storm radius 3 m. Edge = 2 × 3.14 × 3 = 18.84 m."
         },
         {
-          "text": "Now double the radius to 6. C = 2 × 3.14 × 6 = 37.68."
+          "text": "Storm radius 6 m. Edge = 2 × 3.14 × 6 = 37.68 m."
         },
         {
-          "text": "Compare: 37.68 is exactly double 18.84, so the circumference doubles."
+          "text": "37.68 m is exactly double 18.84 m, so the edge doubles."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-applied-0",
-      "prompt": "Isagi's ball has a diameter of 22 cm. How far is it around the edge of the ball?",
+      "prompt": "Your EA FC ball is 22 cm across. How far is it around the middle?",
       "options": [
         "69.08 cm",
         "44.00 cm",
@@ -600,53 +593,53 @@ export const pack: SePack = {
           "text": "The edge of a circle is π × diameter. Use π ≈ 3.14."
         },
         {
-          "text": "Try a diameter of 14 cm. 3.14 × 14 = 43.96 cm."
+          "text": "Try a ball 14 cm across. 3.14 × 14 = 43.96 cm."
         },
         {
-          "text": "Check: 14 × 3 = 42. The edge should be a bit more than 42. 43.96 fits."
+          "text": "Check: 14 × 3 = 42. The edge should be a bit more. 43.96 fits."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-applied-1",
-      "prompt": "Luffy's crew has a treasure ring. Its radius is 5 m. How far is it around the ring?",
+      "prompt": "A round Minecraft pit has a radius of 5 blocks. How far is it around the edge?",
       "options": [
-        "15.70 m",
-        "31.40 m",
-        "78.50 m"
+        "15.70 blocks",
+        "31.40 blocks",
+        "78.50 blocks"
       ],
       "answer": 1,
-      "why": "The circumference formula uses the diameter, so a radius must be doubled first.",
+      "why": "The edge formula uses the diameter, so the radius must be doubled first.",
       "steps": [
         {
-          "text": "Radius is 5 m. Diameter is 2 × radius, so the diameter is 10 m."
+          "text": "Radius is 5 blocks. Diameter is 2 × 5 = 10 blocks."
         },
         {
-          "text": "Try a radius of 7 cm. Diameter is 14 cm. Then 3.14 × 14 = 43.96 cm."
+          "text": "Try a pit with radius 7 blocks. Diameter is 14. Then 3.14 × 14 = 43.96 blocks."
         },
         {
-          "text": "Check: the circumference should be about 3 times the diameter. 3 × 14 = 42, so 43.96 fits."
+          "text": "Check: the edge is about 3 times the diameter. 3 × 14 = 42, so 43.96 fits."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-applied-2",
-      "prompt": "A football's edge measures 70 cm around. About how wide is the ball, across the middle?",
+      "prompt": "A pizza crust measures 70 cm around. About how wide is the pizza, across the middle?",
       "options": [
         "219.8 cm",
         "35.0 cm",
         "22.3 cm"
       ],
       "answer": 2,
-      "why": "Dividing the circumference by π undoes multiplying the diameter by π.",
+      "why": "Dividing the edge length by π undoes multiplying the diameter by π.",
       "steps": [
         {
-          "text": "Diameter = circumference ÷ π."
+          "text": "Diameter = edge ÷ π."
         },
         {
-          "text": "Try an edge of 43.96 cm. 43.96 ÷ 3.14 = 14 cm."
+          "text": "Try a crust of 43.96 cm. 43.96 ÷ 3.14 = 14 cm across."
         },
         {
           "text": "Check: 14 × 3.14 = 43.96 again. The division was right."
@@ -656,20 +649,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-applied-3",
-      "prompt": "A pirate cart wheel has a radius of 40 cm. How far does it roll in one full turn?",
+      "prompt": "Your bike wheel has a radius of 40 cm. How far does it roll in one full turn?",
       "options": [
         "251.2 cm",
         "125.6 cm",
         "1256 cm"
       ],
       "answer": 0,
-      "why": "One full turn of a wheel covers exactly one circumference.",
+      "why": "One full turn of a wheel covers exactly one edge length, which is one circumference.",
       "steps": [
         {
           "text": "Double the radius first to get the diameter."
         },
         {
-          "text": "Try a radius of 3 cm. Diameter is 6 cm. Then 3.14 × 6 = 18.84 cm."
+          "text": "Try a skate wheel with radius 3 cm. Diameter 6 cm. Then 3.14 × 6 = 18.84 cm."
         },
         {
           "text": "Check: 6 × 3 = 18, and 18.84 is a bit more. That is the right size."
@@ -679,30 +672,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-applied-5",
-      "prompt": "Ring A has a diameter of 10 cm. Ring B has a radius of 6 cm. Which ring has the longer edge?",
+      "prompt": "Platform A is 10 m across. Platform B has a radius of 6 m. Which has the longer edge?",
       "options": [
-        "Ring A, because 10 cm is the diameter",
-        "Ring B, because its diameter is 12 cm",
-        "They are the same length"
+        "Platform A, since 10 m is its width",
+        "Platform B, since its width is 12 m",
+        "They have the same edge length"
       ],
       "answer": 1,
-      "why": "The bigger the diameter, the bigger the circumference, because C = π × d.",
+      "why": "The bigger the diameter, the bigger the edge, because the edge is π × diameter.",
       "steps": [
         {
-          "text": "Find the diameter of each ring. Ring B's diameter is 2 × 6 = 12 cm."
+          "text": "Find each width. Platform B's width is 2 × 6 = 12 m."
         },
         {
-          "text": "Try two rings: diameter 6 cm and diameter 8 cm. The 8 cm ring has the longer edge."
+          "text": "Try two platforms: 6 m across and 8 m across. The 8 m one has the longer edge."
         },
         {
-          "text": "Check: 3.14 × 8 is bigger than 3.14 × 6. So the bigger diameter wins."
+          "text": "Check: 3.14 × 8 is bigger than 3.14 × 6. The bigger width wins."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-applied-6",
-      "prompt": "A Toronto bike wheel has a diameter of 70 cm. It rolls 10 full turns. About how far does it go?",
+      "prompt": "A TTC streetcar wheel has a diameter of 70 cm. It rolls 10 full turns. About how far does it go?",
       "options": [
         "21.98 m",
         "2.198 m",
@@ -715,7 +708,7 @@ export const pack: SePack = {
           "text": "One turn covers one circumference: 3.14 × diameter."
         },
         {
-          "text": "Try a diameter of 50 cm. One turn is 157 cm. 10 turns is 1570 cm."
+          "text": "Try a wheel 50 cm across. One turn is 157 cm. 10 turns is 1570 cm."
         },
         {
           "text": "Check units: 100 cm = 1 m, so 1570 cm = 15.70 m. Divide by 100 at the end."
@@ -725,43 +718,43 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-applied-7",
-      "prompt": "A coin's edge measures 31.4 cm. Another coin's edge measures 15.7 cm. A third coin's diameter is 5 cm. Which one has a diameter of 10 cm?",
+      "prompt": "Pizza A's crust is 31.4 cm around. Pizza B's crust is 15.7 cm around.\nPizza C is 5 cm across. Which pizza is 10 cm across?",
       "options": [
-        "the 5 cm coin",
-        "the 31.4 cm coin",
-        "the 15.7 cm coin"
+        "the 5 cm pizza",
+        "the 31.4 cm pizza",
+        "the 15.7 cm pizza"
       ],
       "answer": 1,
       "why": "Dividing a circumference by π gives the diameter, so 31.4 ÷ 3.14 = 10.",
       "steps": [
         {
-          "text": "Diameter = circumference ÷ 3.14."
+          "text": "Diameter = crust length ÷ 3.14."
         },
         {
-          "text": "Try an edge of 15.7 cm. 15.7 ÷ 3.14 = 5 cm, so the diameter is 5 cm."
+          "text": "Try Pizza B: 15.7 cm ÷ 3.14 = 5 cm across, so its diameter is 5 cm."
         },
         {
-          "text": "Check: 5 × 3.14 = 15.7. The method works, so 31.4 gives 10."
+          "text": "Check: 5 × 3.14 = 15.7. The method works, so a 31.4 cm crust gives 10 cm."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-applied-8",
-      "prompt": "What is true about the number you get from circumference ÷ diameter, for any circle?",
+      "prompt": "A storm circle's edge divided by its diameter gives a number. What is true about that number for any circle?",
       "options": [
         "it is always about 3.14",
         "it is always about 2.5",
         "it changes with each circle"
       ],
       "answer": 0,
-      "why": "This fixed ratio is π, and it is the same for every circle in the world.",
+      "why": "This fixed ratio is π, and it is the same for every circle.",
       "steps": [
         {
-          "text": "Take a small circle. Diameter 2 cm. Edge is about 6.28 cm. 6.28 ÷ 2 = 3.14."
+          "text": "A storm circle 2 km across has an edge of about 6.28 km. 6.28 ÷ 2 = 3.14."
         },
         {
-          "text": "Take a big circle. Diameter 10 cm. Edge is about 31.4 cm. 31.4 ÷ 10 = 3.14."
+          "text": "A storm circle 10 km across has an edge of about 31.4 km. 31.4 ÷ 10 = 3.14."
         },
         {
           "text": "The ratio stayed the same. That number is the hidden π in every circle."
@@ -771,30 +764,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-applied-9",
-      "prompt": "The schoolyard has a round garden. Its radius is 4 m. A fence goes all the way round the outside. About how long is the fence?",
+      "prompt": "The centre circle's rope ring has a radius of 4 m. The rope goes all the way round the outside. About how long is the rope?",
       "options": [
         "12.56 m",
         "50.24 m",
         "25.12 m"
       ],
       "answer": 2,
-      "why": "A fence round a circle must match the circumference, not the radius.",
+      "why": "A rope round a circle must match the circumference, not the radius.",
       "steps": [
         {
           "text": "Double the radius to get the diameter."
         },
         {
-          "text": "Try a radius of 1 m. Diameter is 2 m. Then 3.14 × 2 = 6.28 m."
+          "text": "Try a ring with radius 1 m. Diameter is 2 m. Then 3.14 × 2 = 6.28 m."
         },
         {
-          "text": "Check: 6.28 is a little more than 3 × 2 = 6. The fence is a bit longer than three diameters, as expected."
+          "text": "Check: 6.28 is a little more than 3 × 2 = 6. The rope is a bit longer than three diameters, as expected."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-deeper-6",
-      "prompt": "A training ring has a diameter of 10 m. What is its circumference?",
+      "prompt": "A round arena wall is 10 blocks across. One block is 1 metre. How far is it all the way round the wall?",
       "options": [
         "31.4 m",
         "15.7 m",
@@ -804,27 +797,20 @@ export const pack: SePack = {
       "why": "Circumference is about 3.14 times the diameter, so 10 × 3.14 = 31.4.",
       "steps": [
         {
-          "text": "Find the diameter. Here it is 10 m, so use C = π × d."
+          "text": "Find the diameter. Here it is 10 blocks, so use C = π × d."
         },
         {
-          "text": "Worked example: diameter 4 m gives 4 × 3.14 = 12.56 m."
+          "text": "Worked example: an arena 4 blocks across gives 4 × 3.14 = 12.56 m."
         },
         {
           "text": "Circumference is a distance, so it is shorter than 10 times the diameter."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-circle-deeper-7",
-      "prompt": "A pirate's round deck has a radius of 5 m. What is its diameter?",
+      "prompt": "A round deck on the Thousand Sunny has a radius of 5 m. What is its diameter?",
       "options": [
         "2.5 m",
         "10 m",
@@ -837,7 +823,7 @@ export const pack: SePack = {
           "text": "Radius goes from the centre to the edge. Diameter goes edge to edge."
         },
         {
-          "text": "Worked example: radius 7 m gives 2 × 7 = 14 m for the diameter."
+          "text": "Worked example: a deck with radius 7 m gives 2 × 7 = 14 m across."
         },
         {
           "text": "Going back: 14 ÷ 2 = 7, which is the radius. The two numbers are linked."
@@ -847,144 +833,144 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-deeper-10",
-      "prompt": "A circle has a circumference of 18.84 cm. What is its diameter?",
+      "prompt": "The pizza crust is 18.84 cm all the way around. How wide across is the pizza?",
       "options": [
         "6 cm",
         "3 cm",
         "12 cm"
       ],
       "answer": 0,
-      "why": "Divide the circumference by π: 18.84 ÷ 3.14 = 6.",
+      "why": "Dividing the distance around by π gives the distance across, since circumference is π times diameter.",
       "steps": [
         {
-          "text": "Since C = π × d, you undo it by dividing C by π."
+          "text": "The crust is C = π × d, so you undo it by dividing C by π."
         },
         {
-          "text": "Worked example: circumference 25.12 cm gives 25.12 ÷ 3.14 = 8 cm."
+          "text": "Worked example: a crust 25.12 cm around gives 25.12 ÷ 3.14 = 8 cm across."
         },
         {
-          "text": "A 12 cm answer would be wrong: it doubles the diameter, which means you mixed up radius."
+          "text": "12 cm is wrong: that doubles the answer, which mixes up across with the radius."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-deeper-11",
-      "prompt": "Which calculation gives the same number for every circle?",
+      "prompt": "Storm circle A is 6 m across. Storm circle B is 10 m across. Which division gives the same number for both?",
       "options": [
         "C ÷ d",
         "C × r",
         "C ÷ 2"
       ],
       "answer": 0,
-      "why": "Circumference divided by diameter always gives π, so the answer is the same for every circle.",
+      "why": "Circumference divided by diameter always gives π, so every storm circle gives the same answer.",
       "steps": [
         {
-          "text": "Test it on a circle with diameter 6 cm. Its circumference is 18.84 cm."
+          "text": "Storm A has circumference 18.84 m. Test C ÷ d: 18.84 ÷ 6 = 3.14."
         },
         {
-          "text": "Worked example: 18.84 ÷ 6 = 3.14. Now test a circle with diameter 10 cm."
+          "text": "Worked example: storm B has circumference 31.4 m. Then 31.4 ÷ 10 = 3.14 again."
         },
         {
-          "text": "C ÷ 2 changes with each circle, so it is not the constant. Only C ÷ d stays put."
+          "text": "C ÷ 2 gives 9.42 for A and 15.7 for B, so it changes. Only C ÷ d stays at 3.14."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-2",
-      "prompt": "Blue Lock: a circle of cones has a circumference of 62.8 m. Build its diameter. Use π ≈ 3.14.",
+      "prompt": "Your round Minecraft fountain is 62.8 blocks around its rim. Build how wide it is across. Use π ≈ 3.14.",
       "answer": "20",
       "decoys": [
         "4",
         "1",
         "6"
       ],
-      "why": "To get the diameter back, you divide the circumference by π, which undoes the multiplying.",
+      "why": "To get the width across back, you divide the distance around by π, which undoes the multiplying.",
       "steps": [
         {
-          "text": "Write the rule backwards: d = C ÷ 3.14."
+          "text": "Write the rule backwards: width = distance around ÷ 3.14."
         },
         {
-          "text": "Test it on C = 31.4 cm: 31.4 ÷ 3.14 = 10 cm."
+          "text": "Test it on a rim of 31.4 blocks: 31.4 ÷ 3.14 = 10 blocks across."
         },
         {
-          "text": "Now use C = 62.8 m: 62.8 ÷ 3.14 = 20 m."
+          "text": "Now use a rim of 62.8 blocks: 62.8 ÷ 3.14 = 20 blocks across."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-3",
-      "prompt": "One Piece: a ship's steering wheel has a diameter of 0.6 m. Build its circumference in metres. Use π ≈ 3.14.",
+      "prompt": "Your Roblox Studio cylinder part is 0.6 m across. Build its distance around in metres. Use π ≈ 3.14.",
       "answer": "1.884",
       "decoys": [
         "3",
         "5"
       ],
-      "why": "Decimals work the same way, so a diameter in metres gives a circumference in metres.",
+      "why": "Decimals work the same way, so a width in metres gives a distance around in metres.",
       "steps": [
         {
-          "text": "Test the rule on d = 2 m: 3.14 × 2 = 6.28 m."
+          "text": "Test the rule on 2 m across: 3.14 × 2 = 6.28 m."
         },
         {
-          "text": "Test d = 0.5 m: 3.14 × 0.5 = 1.57 m."
+          "text": "Test 0.5 m across: 3.14 × 0.5 = 1.57 m."
         },
         {
-          "text": "Now d = 0.6 m: 3.14 × 0.6 = 1.884 m."
+          "text": "Now 0.6 m across: 3.14 × 0.6 = 1.884 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-4",
-      "prompt": "Blue Lock: a training circle has a radius of 7 m. Build its circumference. Use π ≈ 3.14.",
+      "prompt": "A Pokémon gym arena is a circle with a radius of 7 m. Build its distance around. Use π ≈ 3.14.",
       "answer": "43.96",
       "decoys": [
         "5",
         "8",
         "1"
       ],
-      "why": "A radius of 7 m gives a diameter of 14 m, and the circumference comes from that diameter.",
+      "why": "A radius of 7 m gives a width across of 14 m, and the distance around comes from that width.",
       "steps": [
         {
-          "text": "Double the radius: 7 m × 2 = 14 m is the diameter."
+          "text": "Double the radius: 7 m × 2 = 14 m across."
         },
         {
-          "text": "Test the method on r = 5 m: d = 10 m, so 3.14 × 10 = 31.4 m."
+          "text": "Test the method on a radius of 5 m: 10 m across, so 3.14 × 10 = 31.4 m around."
         },
         {
-          "text": "Now use d = 14 m: 3.14 × 14 = 43.96 m."
+          "text": "Now use 14 m across: 3.14 × 14 = 43.96 m around."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-5",
-      "prompt": "One Piece: a treasure barrel lid has a diameter of 50 cm. Build its circumference. Use π ≈ 3.14.",
+      "prompt": "Your round pool float is 50 cm across. Build its distance around in cm. Use π ≈ 3.14.",
       "answer": "157",
       "decoys": [
         "2",
         "6",
         "9"
       ],
-      "why": "Multiplying by 3.14 gives a circumference a little more than three times the diameter.",
+      "why": "Multiplying by 3.14 gives a distance around a little more than three times the width across.",
       "steps": [
         {
-          "text": "Test the rule on a diameter of 4 cm: 3.14 × 4 = 12.56 cm."
+          "text": "Test the rule on 4 cm across: 3.14 × 4 = 12.56 cm around."
         },
         {
-          "text": "Test a diameter of 100 cm: 3.14 × 100 = 314 cm."
+          "text": "Test 100 cm across: 3.14 × 100 = 314 cm around."
         },
         {
-          "text": "Now use 50 cm: 3.14 × 50 = 157 cm."
+          "text": "Now 50 cm across: 3.14 × 50 = 157 cm around."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-build-6",
-      "prompt": "Toronto cyclist: a bike wheel has a diameter of 0.7 m. Build how far it rolls in one turn, in metres. Use π ≈ 3.14.",
+      "prompt": "Your bike wheel is 0.7 m across.\nOne full turn rolls it how far, in metres?",
       "answer": "2.198",
       "decoys": [
         "7",
@@ -993,7 +979,7 @@ export const pack: SePack = {
       "why": "One full turn of a wheel moves it forward by exactly one circumference.",
       "steps": [
         {
-          "text": "Test the rule on d = 1 m: 3.14 × 1 = 3.14 m per turn."
+          "text": "Test d = 1 m: 3.14 × 1 = 3.14 m per turn."
         },
         {
           "text": "Test d = 0.2 m: 3.14 × 0.2 = 0.628 m per turn."
@@ -1006,21 +992,21 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-circle-games-1",
-      "title": "Match the Circle Words",
+      "title": "Match the Storm Circle Words",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "radius",
-            "centre to edge"
+            "middle to the storm edge"
           ],
           [
             "diameter",
-            "across the centre"
+            "straight across the storm"
           ],
           [
             "circumference",
-            "way around the edge"
+            "one lap around the edge"
           ],
           [
             "π (pi)",

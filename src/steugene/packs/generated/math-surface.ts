@@ -16,57 +16,57 @@ export const pack: SePack = {
       "title": "What is surface area?",
       "lines": [
         "Surface area is the total area of all the outside faces of a 3D shape.",
-        "Think of it as how much wrapping paper covers the whole shape.",
-        "Units are square units, like cm² or m²."
+        "Think of it as how much wool covers the whole build.",
+        "Units are square units, like m² or cm²."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi wraps a gift box for his mum. How much paper does he need?"
+        "flavour": "key",
+        "text": "Your mum wants a gift box wrapped in paper. How much do you cut?"
       }
     },
     {
       "kind": "choice",
       "id": "math-surface-basics-0",
-      "prompt": "Isagi's training box is 10 cm long, 4 cm wide and 3 cm high. How much wrapping paper does it need?",
+      "prompt": "Your wool-covered house is 10 blocks long, 4 wide and 3 high. How many m² of wool does it need?",
       "options": [
-        "164 cm²",
-        "120 cm²",
-        "190 cm²"
+        "164 m²",
+        "120 m²",
+        "190 m²"
       ],
       "answer": 0,
       "why": "Surface area is the total area of all six faces, and opposite faces match, so each pair is counted twice.",
       "steps": [
         {
-          "text": "Take a box 5 cm by 2 cm by 6 cm. Find the three face pairs: 5×2=10, 5×6=30, 2×6=12."
+          "text": "Take a box 5 m by 2 m by 6 m. Find the three face pairs: 5×2=10, 5×6=30, 2×6=12."
         },
         {
           "text": "Each pair appears twice on the box. Add 10+30+12=52, then double it."
         },
         {
-          "text": "52×2=104, so that box needs 104 cm² of paper."
+          "text": "52×2=104, so that box needs 104 m² of wool."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-basics-1",
-      "prompt": "Luffy's treasure chest is a cube. Each side is 3 cm. What is its surface area?",
+      "prompt": "Your Roblox obby cube platform is 3 m on each side. What is its surface area?",
       "options": [
-        "27 cm²",
-        "54 cm²",
-        "18 cm²"
+        "27 m²",
+        "54 m²",
+        "18 m²"
       ],
       "answer": 1,
       "why": "A cube has six identical square faces, so its surface area is six times the area of one face.",
       "steps": [
         {
-          "text": "Take a cube with sides of 4 cm. One face is 4×4=16 cm²."
+          "text": "Take a cube with sides of 4 m. One face is 4×4=16 m²."
         },
         {
           "text": "A cube has six faces, so 16×6=96."
         },
         {
-          "text": "So the 4 cm cube has a surface area of 96 cm²."
+          "text": "So the 4 m cube has a surface area of 96 m²."
         }
       ]
     },
@@ -132,7 +132,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-basics-2",
-      "prompt": "How many pairs of matching faces does a rectangular prism have?",
+      "prompt": "How many pairs of matching faces does a cereal box have?",
       "options": [
         "2 pairs",
         "3 pairs",
@@ -142,7 +142,7 @@ export const pack: SePack = {
       "why": "Every rectangular prism has six faces, and they come in three pairs of matching faces: top and bottom, front and back, left and right.",
       "steps": [
         {
-          "text": "Take a brick. It has 6 faces in total."
+          "text": "Take a cereal box. It has 6 faces in total."
         },
         {
           "text": "Pair them up: top with bottom, front with back, left with right."
@@ -155,23 +155,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-basics-3",
-      "prompt": "Surface area is measured in which unit?",
+      "prompt": "Your oak wall panel is 7 m by 2 m. Which unit is its area measured in?",
       "options": [
-        "cm²",
-        "cm³",
-        "cm"
+        "m²",
+        "m³",
+        "m"
       ],
       "answer": 0,
       "why": "Surface area adds up areas, and area is always measured in square units.",
       "steps": [
         {
-          "text": "A face that is 7 cm by 2 cm has area 7×2=14. The unit is square centimetres, cm²."
+          "text": "A panel that is 7 m by 2 m has area 7×2=14. The unit is square metres, m²."
         },
         {
-          "text": "Volume fills a box with small cubes, so its unit is cm³."
+          "text": "Volume fills a build with small cubes, so its unit is m³."
         },
         {
-          "text": "Surface area covers the outside with squares, so its unit is cm²."
+          "text": "Surface area covers the outside with squares, so its unit is m²."
         }
       ]
     },
@@ -180,19 +180,19 @@ export const pack: SePack = {
       "id": "math-surface-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Cardboard boxes, cereal boxes and tents are all made from flat pieces.",
+        "Cardboard boxes, shulker boxes and tents are all made from flat pieces.",
         "Builders and designers use surface area to know how much material to buy.",
         "Paint cans, tiles and wrapping paper are all sold by area."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's crew needs canvas for a new sail. Surface area tells them how much to order."
+        "flavour": "key",
+        "text": "Your shulker box needs paint on every face. Surface area tells you how much to craft."
       }
     },
     {
       "kind": "build",
       "id": "math-surface-build-0",
-      "prompt": "A Blue Lock training box is 4 cm long, 3 cm wide and 2 cm tall. How many cm² of tape covers all six faces?",
+      "prompt": "A Roblox part is 4 by 3 by 2 studs.\nHow many square studs cover all six faces?",
       "answer": "52",
       "decoys": [
         "3",
@@ -208,44 +208,14 @@ export const pack: SePack = {
           "text": "Try 5 by 2 by 1. Top is 10, front is 5, side is 2. Total 17."
         },
         {
-          "text": "Double 17 for the matching back faces. That gives 34 cm²."
-        }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 4,
-        "label": "4 faces in a pair set",
-        "tone": "focus"
-      }
-    },
-    {
-      "kind": "choice",
-      "id": "math-surface-basics-4",
-      "prompt": "A tent-shaped prism has triangle ends with a base of 6 cm and a height of 4 cm. Its sides are 5 cm, 5 cm and 6 cm, and it is 10 cm long. What is its surface area?",
-      "options": [
-        "184 cm²",
-        "160 cm²",
-        "124 cm²"
-      ],
-      "answer": 0,
-      "why": "A triangular prism has two triangle faces and three rectangle faces, and all five must be added.",
-      "steps": [
-        {
-          "text": "Take a triangle with base 4 cm and height 3 cm. Its area is ½×4×3=6 cm². Two triangles give 12 cm²."
-        },
-        {
-          "text": "Take a prism 2 cm long with sides 3, 4 and 5 cm. The rectangles are 3×2=6, 4×2=8 and 5×2=10, which add to 24."
-        },
-        {
-          "text": "Add the parts: 12+24=36 cm²."
+          "text": "Double 17 for the matching back faces. That gives 34 square studs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-basics-5",
-      "prompt": "A box 8 cm by 5 cm by 2 cm has no top. What is its surface area?",
+      "prompt": "A cardboard Timbits tray has no lid.\nIt is 8 cm by 5 cm by 2 cm. What is its surface area?",
       "options": [
         "132 cm²",
         "80 cm²",
@@ -268,44 +238,44 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-surface-games-0",
-      "title": "Crate Sizes",
+      "title": "Loot Crate Sizes",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "Crate A: 4 × 3 × 2 cm",
+            "label": "Loot crate A: 4 × 3 × 2",
             "value": 52
           },
           {
-            "label": "Crate B: 5 × 2 × 2 cm",
+            "label": "Loot crate B: 5 × 2 × 2",
             "value": 48
           },
           {
-            "label": "Crate C: 3 × 3 × 3 cm",
+            "label": "Loot crate C: 3 × 3 × 3",
             "value": 54
           },
           {
-            "label": "Crate D: 6 × 1 × 2 cm",
+            "label": "Loot crate D: 6 × 1 × 2",
             "value": 40
           },
           {
-            "label": "Crate E: 5 × 4 × 1 cm",
+            "label": "Loot crate E: 5 × 4 × 1",
             "value": 58
           },
           {
-            "label": "Crate F: 2 × 2 × 6 cm",
+            "label": "Loot crate F: 2 × 2 × 6",
             "value": 56
           }
         ]
       },
-      "why": "Surface area is the total area of all six faces, so you add every face together."
+      "why": "Each crate has six walls, so the total is every wall's area added together."
     },
     {
       "kind": "explain",
       "id": "math-surface-teach-2",
-      "title": "The unfold method",
+      "title": "Unfolding the treasure chest",
       "lines": [
-        "Imagine cutting the box along its edges and laying it flat.",
+        "Cut the chest along its edges, then lay it flat.",
         "Find the area of each flat face on its own.",
         "Add all the face areas together to get the total."
       ],
@@ -338,7 +308,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-basics-7",
-      "prompt": "A box is 3 cm by 2 cm by ? cm. Its surface area is 62 cm². What is the height?",
+      "prompt": "A Poké Ball storage box is 3 cm by 2 cm by ? cm.\nIts surface area is 62 cm². What is the height?",
       "options": [
         "4 cm",
         "5 cm",
@@ -361,7 +331,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-surface-build-1",
-      "prompt": "A One Piece treasure chest is a cube. Each edge is 3 cm. How many cm² of wood covers the whole chest?",
+      "prompt": "Your cube house is 3 blocks on each edge. How many wool blocks cover all six sides?",
       "answer": "54",
       "decoys": [
         "9",
@@ -371,13 +341,13 @@ export const pack: SePack = {
       "why": "A cube has six square faces that are all the same size, so one face times six gives the total.",
       "steps": [
         {
-          "text": "Find one face first. A square with 4 cm sides has area 16 cm²."
+          "text": "Find one face first. A wall 4 blocks by 4 blocks is 16 blocks."
         },
         {
-          "text": "Try a cube with 5 cm edges. One face is 25 cm². Six faces make 150 cm²."
+          "text": "Try a cube 5 blocks on each edge. One face is 25 blocks. Six faces make 150 blocks."
         },
         {
-          "text": "Multiply your one face by 6. For the 3 cm cube, that is 6 times 9."
+          "text": "Multiply your one face by 6. For the 3-block cube, that is 6 times 9."
         }
       ]
     }
@@ -388,13 +358,13 @@ export const pack: SePack = {
       "id": "math-surface-teach-3",
       "title": "The common trap",
       "lines": [
-        "Many students count only the faces they can see.",
-        "A rectangular prism has six faces, not three.",
+        "Many people count only the sides they can see.",
+        "A cereal box has six faces, not three.",
         "Opposite faces are the same size, so find each pair once and double it."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Six faces, not three. Count the hidden bottom too."
+        "text": "Six faces, not three. Count the bottom of the box too."
       }
     },
     {
@@ -402,13 +372,13 @@ export const pack: SePack = {
       "id": "math-surface-teach-4",
       "title": "A worked example in words",
       "lines": [
-        "A box is 10 cm long, 4 cm wide and 3 cm high.",
+        "A cereal box is 10 cm long, 4 cm wide and 3 cm high.",
         "Top and bottom: 10 × 4 = 40 cm² each, so 80 cm² together.",
         "Front and back: 10 × 3 = 30 cm² each, so 60 cm². Ends: 4 × 3 = 12 cm² each, so 24 cm². Total: 80 + 60 + 24 = 164 cm²."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Like a striker, every shot on goal counts. Every face counts too."
+        "text": "Every panel of paper counts. Miss one face and the box shows through."
       }
     },
     {
@@ -416,7 +386,7 @@ export const pack: SePack = {
       "id": "math-surface-teach-5",
       "title": "Recap",
       "lines": [
-        "Unfold the prism in your head and name each face.",
+        "Unfold the cereal box flat in your head and name each face.",
         "Find each face's area, pair the matching faces, then add.",
         "Always write the answer in square units, like cm²."
       ],
@@ -428,15 +398,15 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "math-surface-deeper-0",
-      "title": "Wrapping paper, not the stuffing",
+      "title": "Skin, not the stuffing",
       "lines": [
         "Surface area is the outside only.",
-        "Think of the paper that covers a gift.",
-        "Volume is the space inside the box."
+        "Think of the blocks that make the skin of a Minecraft build.",
+        "Volume is the space inside, the blocks that fill it."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Surface area is the paper. Volume is what fills the box."
+        "text": "Surface area is the skin. Volume is what fills the build."
       }
     },
     {
@@ -446,25 +416,25 @@ export const pack: SePack = {
       "lines": [
         "A closed box has six faces.",
         "The top and the bottom both count.",
-        "Most students forget the bottom. Do not."
+        "Most people forget the bottom. Do not."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Like a striker who forgets the far post. Count all six faces."
+        "text": "Like a Fortnite player who forgets the back wall. Count all six faces."
       }
     },
     {
       "kind": "explain",
       "id": "math-surface-deeper-4",
-      "title": "Each side is its own rectangle",
+      "title": "Each wall is its own rectangle",
       "lines": [
-        "The side faces are not all the same size.",
-        "Each side uses one edge of the base.",
-        "Multiply that edge by the prism's length."
+        "Walls on a house are not all the same size.",
+        "Each wall uses one edge of the floor.",
+        "Multiply that edge by the wall's height."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Three team lockers, each a different width. Each wall is different."
+        "flavour": "key",
+        "text": "Long wall: 9 × 4 = 36 blocks. Short wall: 5 × 4 = 20 blocks."
       }
     },
     {
@@ -472,7 +442,7 @@ export const pack: SePack = {
       "id": "math-surface-deeper-6",
       "title": "A can's wrap is a rectangle",
       "lines": [
-        "Peel the label off a can. It is a rectangle.",
+        "Peel the label off a soup can. It is a rectangle.",
         "Its long side is the circle's edge.",
         "That edge is the circumference, not the diameter."
       ],
@@ -487,48 +457,48 @@ export const pack: SePack = {
       "title": "Units: area is squared",
       "lines": [
         "Surface area is measured in square units.",
-        "1 cm is a line. 1 cm² is a square.",
+        "1 m is a line. 1 m² is a square.",
         "Change all lengths to one unit first."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Mixing 2 m and 50 cm gives a wrong answer. Change units first."
+        "text": "A wall 2 m wide and 50 cm tall needs both in the same unit first."
       }
     },
     {
       "kind": "choice",
       "id": "math-surface-basics-8",
-      "prompt": "Which formula gives the surface area of a rectangular prism with length l, width w and height h?",
+      "prompt": "Which formula counts the blocks to skin a box with length l, width w and height h?",
       "options": [
         "2 × (l×w + l×h + w×h)",
         "l × w × h",
         "2 × (l + w + h)"
       ],
       "answer": 0,
-      "why": "The surface area adds the area of each pair of faces, and each pair is counted twice.",
+      "why": "Skinning the box covers every face, and each pair of matching faces is counted twice.",
       "steps": [
         {
-          "text": "Try l=4, w=3, h=2. Then l×w×h = 24. That is the volume, not the surface area."
+          "text": "Try a 4 × 3 × 2 block build. Then l×w×h = 24. That counts the inside, not the skin."
         },
         {
-          "text": "Now find the three face areas: 4×3=12, 4×2=8 and 3×2=6."
+          "text": "Now find the three face areas: 4×3=12, 4×2=8 and 3×2=6 blocks."
         },
         {
-          "text": "Double their sum: 2×(12+8+6)=52 cm², which is the surface area."
+          "text": "Double their sum: 2×(12+8+6)=52 blocks, which is the skin."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-basics-9",
-      "prompt": "A gift box is 8 cm long, 6 cm wide and 2 cm high. How much wrapping paper does it need?",
+      "prompt": "A Pokémon box is 8 cm long, 6 cm wide and 2 cm high. How much cardboard covers all six faces?",
       "options": [
         "152 cm²",
         "76 cm²",
         "168 cm²"
       ],
       "answer": 0,
-      "why": "Wrapping paper must cover all six faces, so you need the total surface area.",
+      "why": "Covering the box needs all six faces, so you need the total surface area.",
       "steps": [
         {
           "text": "Take a box 9 cm by 5 cm by 2 cm. The pairs are 45, 18 and 10, which add to 73."
@@ -537,7 +507,7 @@ export const pack: SePack = {
           "text": "Double it for all six faces: 73×2=146."
         },
         {
-          "text": "So that box needs 146 cm² of paper."
+          "text": "So that box needs 146 cm² of cardboard."
         }
       ]
     },
@@ -567,34 +537,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-1",
-      "prompt": "Luffy's treasure chest is a cube, 8 cm on each edge. How much paper wraps it?",
+      "prompt": "Your cube house is 8 blocks on each edge. How many wool blocks cover all six sides?",
       "options": [
-        "48 cm²",
-        "512 cm²",
-        "384 cm²"
+        "48 wool blocks",
+        "512 wool blocks",
+        "384 wool blocks"
       ],
       "answer": 2,
       "why": "All six faces of a cube are equal squares, so one face's area times six gives the total.",
       "steps": [
         {
-          "text": "A cube has six faces, and every face is a square."
+          "text": "A cube has six sides, and every side is a square of blocks."
         },
         {
-          "text": "Try a cube 3 cm on each edge. One face is 3 × 3 = 9 cm²."
+          "text": "Try a 3-block cube. One side is 3 × 3 = 9 wool blocks."
         },
         {
-          "text": "Six faces: 6 × 9 = 54 cm². Square the edge first, then multiply by six."
+          "text": "Six sides: 6 × 9 = 54 wool blocks. Square the edge first, then multiply by six."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-applied-2",
-      "prompt": "A goal ramp is a triangular prism. Its end is a triangle with sides 3 cm, 4 cm and 5 cm. It is 10 cm long. How much paper covers it?",
+      "prompt": "Your Roblox obby ramp is a triangular prism. Its ends have sides 3, 4 and 5 studs. It is 10 studs long.",
       "options": [
-        "72 cm²",
-        "132 cm²",
-        "120 cm²"
+        "72 square studs",
+        "132 square studs",
+        "120 square studs"
       ],
       "answer": 1,
       "why": "A triangular prism has two triangle ends plus one rectangle for each side of the triangle.",
@@ -603,17 +573,17 @@ export const pack: SePack = {
           "text": "Two triangle ends, then three long rectangles, one for each side."
         },
         {
-          "text": "Try triangle sides 6, 8 and 10, with length 2. Each triangle is ½ × 6 × 8 = 24 cm²."
+          "text": "Try ends of 6, 8 and 10 studs, length 2. Each end is ½ × 6 × 8 = 24."
         },
         {
-          "text": "Two triangles: 48 cm². Rectangles: 6×2=12, 8×2=16, 10×2=20. Add everything: 96 cm²."
+          "text": "Two ends: 48. Rectangles: 6×2=12, 8×2=16, 10×2=20. Total: 96 square studs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-applied-3",
-      "prompt": "Zoro's sea chest is a box 20 cm by 15 cm by 10 cm. How much wrapping paper does it need?",
+      "prompt": "A cereal box is 20 cm by 15 cm by 10 cm. How much cardboard covers all of it?",
       "options": [
         "1300 cm²",
         "650 cm²",
@@ -623,10 +593,10 @@ export const pack: SePack = {
       "why": "Each of the three face sizes appears twice, so you add the three and then double the total.",
       "steps": [
         {
-          "text": "Find three face sizes: length × width, length × height, width × height."
+          "text": "Find three face sizes: 20×15, 20×10 and 15×10."
         },
         {
-          "text": "Try 12 by 5 by 4: 12×5=60, 12×4=48, 5×4=20."
+          "text": "Try a 12 by 5 by 4 box: 12×5=60, 12×4=48, 5×4=20."
         },
         {
           "text": "Add 60 + 48 + 20 = 128, then double it: 256 cm²."
@@ -636,20 +606,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-4",
-      "prompt": "A box is 6 cm by 4 cm at the base. Its surface area is 148 cm². How tall is it?",
+      "prompt": "Your glass tower base is 6 blocks by 4 blocks. It takes 148 glass blocks to skin it. How tall is it?",
       "options": [
-        "4 cm",
-        "5 cm",
-        "6 cm"
+        "4 blocks",
+        "5 blocks",
+        "6 blocks"
       ],
       "answer": 1,
       "why": "Working backwards, you undo the doubling and the adding before you divide.",
       "steps": [
         {
-          "text": "Write SA = 2(lw + lh + wh). Put in the numbers you already know."
+          "text": "Write SA = 2(lw + lh + wh). Put in the base numbers you already know."
         },
         {
-          "text": "Try base 5 by 3 with surface area 94: 2(15 + 5h + 3h) = 94."
+          "text": "Try a 5 by 3 base with 94 glass blocks: 2(15 + 5h + 3h) = 94."
         },
         {
           "text": "Simplify: 30 + 16h = 94, so 16h = 64, so h = 4."
@@ -659,7 +629,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-5",
-      "prompt": "A cube with edges 5 cm is compared with a box 4 cm by 6 cm by 5 cm. Which needs more paper?",
+      "prompt": "A cube box of Timbits is 5 cm on each edge. Another box is 4 cm by 6 cm by 5 cm. Which needs more paper?",
       "options": [
         "The box uses more paper.",
         "The cube uses more paper.",
@@ -682,7 +652,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-6",
-      "prompt": "A tiny box is 2.5 cm by 2 cm by 4 cm. How much wrapping paper does it need?",
+      "prompt": "A Poké Ball gift box is 2.5 cm by 2 cm by 4 cm. How much paper wraps it?",
       "options": [
         "46 cm²",
         "23 cm²",
@@ -705,30 +675,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-7",
-      "prompt": "A striker's gift box is a 10 cm cube with no lid. How much paper covers it?",
+      "prompt": "Your 10 × 10 × 10 block house has no roof. How much glass skins it? Each block is 1 m².",
       "options": [
-        "600 cm²",
-        "500 cm²",
-        "550 cm²"
+        "600 m²",
+        "500 m²",
+        "550 m²"
       ],
       "answer": 1,
-      "why": "Without a lid, the paper covers only five faces, so one face's area is left out.",
+      "why": "Without a roof, the glass covers only five faces, so one face of 100 blocks is left out.",
       "steps": [
         {
-          "text": "A full cube has six faces. An open box is missing one."
+          "text": "A full cube has six faces. An open house is missing one."
         },
         {
-          "text": "Try a 4 cm cube with no lid: one face is 16 cm², so 5 × 16 = 80 cm²."
+          "text": "Try a 4 × 4 × 4 build with no roof: one face is 16 blocks, so 5 × 16 = 80 blocks."
         },
         {
-          "text": "Count the faces the box actually has, then multiply by the area of one face."
+          "text": "Count the faces the house actually has, then multiply by the area of one face."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-applied-8",
-      "prompt": "A box 12 cm by 8 cm by 2 cm needs 10% extra paper for overlaps. How much paper should you buy?",
+      "prompt": "Your cereal box is 12 cm by 8 cm by 2 cm. Add 10% extra paper for overlaps. How much paper?",
       "options": [
         "249.6 cm²",
         "299.2 cm²",
@@ -741,7 +711,7 @@ export const pack: SePack = {
           "text": "Find the surface area first, then add the extra."
         },
         {
-          "text": "Try 5 by 4 by 3: 2(20 + 15 + 12) = 94 cm²."
+          "text": "Try a 5 by 4 by 3 cereal box: 2(20 + 15 + 12) = 94 cm²."
         },
         {
           "text": "Add 10%: 94 × 1.1 = 103.4 cm²."
@@ -751,7 +721,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-applied-9",
-      "prompt": "A Blue Lock training tent is a cube with edges 1.5 m. How much fabric covers all its faces?",
+      "prompt": "A Roblox part is a 1.5 m cube. How much paint covers all its faces?",
       "options": [
         "9 m²",
         "27 m²",
@@ -764,17 +734,17 @@ export const pack: SePack = {
           "text": "A cube has six equal square faces."
         },
         {
-          "text": "Try edges of 0.5 m: one face is 0.25 m², so 6 × 0.25 = 1.5 m²."
+          "text": "Try a 0.5 m part: one face is 0.25 m², so 6 × 0.25 = 1.5 m²."
         },
         {
-          "text": "Try edges of 2 m: one face is 4 m², so 6 × 4 = 24 m²."
+          "text": "Try a 2 m part: one face is 4 m², so 6 × 4 = 24 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-deeper-1",
-      "prompt": "Isagi wraps a gift box with paper. What unit does the paper area use?",
+      "prompt": "You wrap an Ultimate Team pack box in paper. What unit does the paper area use?",
       "options": [
         "cm³",
         "cm²",
@@ -797,7 +767,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-deeper-3",
-      "prompt": "Luffy's treasure chest has no lid. How many faces count for surface area?",
+      "prompt": "Your Timbits box has no lid. How many faces count for surface area?",
       "options": [
         "four",
         "five",
@@ -820,7 +790,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-deeper-5",
-      "prompt": "A can has a radius of 5 cm. How long is the rectangle of label when you unroll it?",
+      "prompt": "A Pokémon card tin has a radius of 5 cm. How long is the label when you unroll it?",
       "options": [
         "10π cm",
         "5π cm",
@@ -843,30 +813,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-surface-deeper-7",
-      "prompt": "A triangular prism has triangle ends with area 24 cm² each, and its sides total 120 cm². What is the surface area?",
+      "prompt": "Your Minecraft roof piece is a triangular prism.\nEach triangle end is 24 m². The sides total 120 m².\nWhat is its surface area?",
       "options": [
-        "120 cm²",
-        "144 cm²",
-        "168 cm²"
+        "120 m²",
+        "144 m²",
+        "168 m²"
       ],
       "answer": 2,
       "why": "Surface area includes both triangle ends, so you must add 2 × triangle area to the sides.",
       "steps": [
         {
-          "text": "Two triangle ends: 2 × 24 = 48 cm²."
+          "text": "Two roof ends of 10 m² each: 2 × 10 = 20 m²."
         },
         {
-          "text": "Add the three rectangle sides: 48 + 120 = 168 cm²."
+          "text": "Add the sides: 20 + 60 = 80 m²."
         },
         {
-          "text": "Forgetting the ends gives only 120 cm². Count the ends too."
+          "text": "Skip the ends and you get only 60 m². Count both ends."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-surface-deeper-9",
-      "prompt": "Zoro's crate is 5 cm by 2 cm by 3 cm. What is its surface area?",
+      "prompt": "Your squad's loot crate is 5 cm by 2 cm by 3 cm.\nWhat is its surface area?",
       "options": [
         "30 cm³",
         "31 cm²",
@@ -876,20 +846,20 @@ export const pack: SePack = {
       "why": "Each pair of opposite faces matches, so find three areas and double their sum.",
       "steps": [
         {
-          "text": "Use length 4, width 1, height 6. Pairs: 4×1 = 4, 4×6 = 24, 1×6 = 6."
+          "text": "Try 4 by 1 by 6. Pairs: 4, 24 and 6."
         },
         {
-          "text": "Add them: 4 + 24 + 6 = 34."
+          "text": "Add them: 4 + 24 + 6 = 34. Double it: 68 cm²."
         },
         {
-          "text": "Double it: 2 × 34 = 68 cm²."
+          "text": "30 cm³ is the volume, not the surface. Pick the cm² answer."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-surface-build-2",
-      "prompt": "Isagi's boot box is 6 cm long, 4 cm wide and 2 cm tall. What is its total surface area in cm²?",
+      "prompt": "Your cereal box is 6 cm long, 4 cm wide and 2 cm tall.\nWhat is its total surface area in cm²?",
       "answer": "88",
       "decoys": [
         "4",
@@ -898,61 +868,39 @@ export const pack: SePack = {
       "why": "Each pair of faces uses two of the three measurements, so you multiply two numbers at a time.",
       "steps": [
         {
-          "text": "Multiply length by width. That is the top and bottom pair."
+          "text": "Multiply length by width: 5 × 3 = 15. That is one pair."
         },
         {
-          "text": "Try 7 by 3 by 1. Top 21, front 7, side 3. Total 31."
+          "text": "Try 7 by 3 by 1. Pairs 21, 7 and 3. Sum 31, double 62."
         },
         {
-          "text": "Double the total. Then do this box: 6 by 4 by 2 times two pairs."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "math-surface-build-3",
-      "prompt": "A Straw Hat crew supply crate is 10 cm long, 5 cm wide and 3 cm tall. Find its surface area in cm².",
-      "answer": "190",
-      "decoys": [
-        "7",
-        "4"
-      ],
-      "why": "The total surface area is found by adding the three face pairs and then doubling, because each face has a match.",
-      "steps": [
-        {
-          "text": "Find length times width. Then find length times height."
-        },
-        {
-          "text": "Try 8 by 2 by 2. Pairs are 16, 16 and 4. Total 36."
-        },
-        {
-          "text": "Find width times height, then double the full sum for 10 by 5 by 3."
+          "text": "For the real box, add 24, 12 and 8. Double 44 to get 88."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-surface-build-4",
-      "prompt": "A blue crate is 2.5 cm long, 2 cm wide and 1.5 cm tall. What is its surface area in cm²?",
+      "prompt": "A Roblox build block is 2.5 studs long, 2 wide and 1.5 tall.\nWhat is its surface area in studs²?",
       "answer": "23.5",
       "decoys": [],
       "why": "Decimals work the same way as whole numbers, so multiply them, add the three pairs and double.",
       "steps": [
         {
-          "text": "Multiply 2.5 by 2 for the top. Then 2.5 by 1.5 for the side."
+          "text": "Multiply 2.5 by 2 for the top: that is 5."
         },
         {
-          "text": "Try 1.5 by 1 by 2. Pairs: 1.5, 3 and 2. Total 6.5."
+          "text": "Try 1.5 by 1 by 2. Pairs 1.5, 3 and 2. Sum 6.5, double 13."
         },
         {
-          "text": "Double 6.5 to get 13. Then finish the 2.5 by 2 by 1.5 box."
+          "text": "Try 3 by 0.5 by 2. Pairs 1.5, 6 and 1. Sum 8.5, double 17."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-surface-build-6",
-      "prompt": "A Blue Lock supply box is 7 cm long, 2 cm wide and 4 cm tall. Find the surface area in cm².",
+      "prompt": "Your Fortnite supply crate is 7 m long, 2 m wide and 4 m tall.\nFind its surface area in m².",
       "answer": "100",
       "decoys": [
         "5"
@@ -963,56 +911,31 @@ export const pack: SePack = {
           "text": "Find length times width. That gives one face pair."
         },
         {
-          "text": "Try 9 by 1 by 3. Pairs are 9, 27 and 3. Total 39, double is 78."
+          "text": "Try 9 by 1 by 3. Pairs 9, 27 and 3. Sum 39, double 78."
         },
         {
-          "text": "Find width times height and length times height. Add them and double."
-        }
-      ]
-    },
-    {
-      "kind": "build",
-      "id": "math-surface-build-7",
-      "prompt": "A One Piece barrel box is 12 cm long, 9 cm wide and 4 cm tall. What is its surface area in cm²?",
-      "answer": "384",
-      "decoys": [
-        "2"
-      ],
-      "why": "Surface area counts every outside face, so the answer is always the sum of all six faces.",
-      "steps": [
-        {
-          "text": "Multiply the length and width first. That is 12 times 9."
-        },
-        {
-          "text": "Try 6 by 5 by 3. Pairs are 30, 18 and 15. Total 63."
-        },
-        {
-          "text": "Find the other two pairs. Add the three totals and double the sum."
+          "text": "Try 5 by 3 by 2. Pairs 15, 10 and 6. Sum 31, double 62."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-surface-games-1",
-      "title": "Unfold the Box",
+      "title": "Unfold the Part",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "Face",
-            "One flat side"
+            "One flat side of a part"
           ],
           [
             "Net",
-            "Box unfolded flat"
+            "Part cut open and laid flat"
           ],
           [
             "Surface area",
-            "All faces added"
-          ],
-          [
-            "Prism",
-            "Same shape end to end"
+            "All faces added together"
           ],
           [
             "Edge",
@@ -1020,7 +943,7 @@ export const pack: SePack = {
           ]
         ]
       },
-      "why": "A net is the flat pattern you get when you cut a 3D shape open and lay it flat."
+      "why": "A net is what a Studio part looks like when you cut it open and lay it flat."
     },
     {
       "kind": "video",

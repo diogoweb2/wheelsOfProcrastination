@@ -16,18 +16,18 @@ export const pack: SePack = {
       "title": "One instruction, many times",
       "lines": [
         "A loop repeats steps for you.",
-        "You write the steps once. The computer does them again and again.",
+        "You write the steps once. The game runs them again and again.",
         "repeat 4 [ ... ] means: do the steps inside 4 times."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi takes the same shot 4 times in training. A loop is the coach saying: do it again, and again, and again."
+        "flavour": "key",
+        "text": "A wall of 10 blocks is one place-block step, repeated 10 times."
       }
     },
     {
       "kind": "choice",
       "id": "code-loop-basics-0",
-      "prompt": "Coach Ego's drill is: repeat 6 [ forward 30, left 60 ]. How many times does the body run?",
+      "prompt": "Your Fortnite build bot runs repeat 6 [ forward 30, left 60 ]. How many times does the body run?",
       "options": [
         "Six times",
         "Sixty times",
@@ -50,14 +50,14 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-basics-1",
-      "prompt": "Isagi codes repeat 4 [ forward 100, right 90 ]. Where does the turtle end up?",
+      "prompt": "A football drill runs repeat 4 [ forward 100, right 90 ]. Where does the player end up?",
       "options": [
         "Back at the start",
         "At the top corner",
-        "Off the screen"
+        "Off the pitch"
       ],
       "answer": 0,
-      "why": "Four right turns of 90 degrees add up to 360 degrees, a full circle, so the turtle faces its start direction.",
+      "why": "Four right turns of 90 degrees add up to 360 degrees, a full circle, so the player faces its start direction.",
       "steps": [
         {
           "text": "Each lap has one right turn of 90 degrees. Four laps give four turns."
@@ -66,7 +66,7 @@ export const pack: SePack = {
           "text": "Try repeat 3 [ forward 50, right 120 ]. Three turns of 120 make 360 degrees."
         },
         {
-          "text": "A total turn of 360 degrees brings the turtle back to where it started."
+          "text": "A total turn of 360 degrees brings the player back to where it started."
         }
       ]
     },
@@ -125,30 +125,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-basics-2",
-      "prompt": "Zoro wants the turtle to travel the total distance of repeat 7 [ forward 20, right 60 ]. How far does it go?",
+      "prompt": "Your Roblox obby part slides repeat 7 [ forward 20, right 60 ]. How far does it travel in studs?",
       "options": [
-        "20 cm",
-        "140 cm",
-        "27 cm"
+        "20 studs",
+        "140 studs",
+        "27 studs"
       ],
       "answer": 1,
       "why": "A loop's total forward distance is the forward number times how many times the loop runs.",
       "steps": [
         {
-          "text": "The forward step is 20 cm. The loop runs 7 times."
+          "text": "The forward step is 20 studs. The loop runs 7 times."
         },
         {
-          "text": "Try repeat 5 [ forward 15, right 72 ]. Five times 15 is 75 cm."
+          "text": "Try repeat 5 [ forward 15, right 72 ]. Five times 15 is 75 studs."
         },
         {
-          "text": "Work it as 7 times 20 is 140 cm. Adding the forward steps one by one gives the same answer."
+          "text": "Work it as 7 times 20 is 140 studs. Adding the forward steps one by one gives the same answer."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-basics-3",
-      "prompt": "Which code draws a square with sides of 80 cm?",
+      "prompt": "Which code builds a square obby platform with sides of 80 blocks?",
       "options": [
         "repeat 4 [ forward 80, right 90 ]",
         "repeat 4 [ forward 90, right 80 ]",
@@ -158,10 +158,10 @@ export const pack: SePack = {
       "why": "The forward number sets the side length, and the turn is 360 divided by the number of sides.",
       "steps": [
         {
-          "text": "A square has 4 sides, so the loop runs 4 times. The side is 80, so forward 80."
+          "text": "A square has 4 sides, so the loop runs 4 times. The side is 80 blocks, so forward 80."
         },
         {
-          "text": "Try a triangle with sides of 30 cm. That is repeat 3 [ forward 30, right 120 ]."
+          "text": "Try a triangle wall with sides of 30 blocks. That is repeat 3 [ forward 30, right 120 ]."
         },
         {
           "text": "Check the turn: 360 divided by 3 is 120. A square needs 360 divided by 4, which is 90."
@@ -197,7 +197,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-loop-build-0",
-      "prompt": "Isagi runs this code:\nrepeat 4 [ forward 30 ]\nHow many metres does he run in total?",
+      "prompt": "Isagi's bot runs repeat 4 [ forward 30 ].\nHow many metres in total?",
       "answer": "120",
       "decoys": [
         "7",
@@ -213,37 +213,37 @@ export const pack: SePack = {
           "text": "Multiply the count by the distance: 3 × 25 = 75 m."
         },
         {
-          "text": "Now do the same with Isagi's numbers. Which number is the count, and which is the distance?"
+          "text": "Now do Isagi's bot. Which number is the count, and which is the distance?"
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-basics-4",
-      "prompt": "Why do coders use a loop instead of writing the same two steps again and again?",
+      "prompt": "Why use a loop to place a wall of 10 blocks?",
       "options": [
         "It saves writing the same steps again",
-        "It makes the turtle move faster",
-        "It stops the turtle from turning"
+        "It makes the blocks cost less",
+        "It stops the blocks from falling"
       ],
       "answer": 0,
       "why": "A loop runs one set of instructions many times, so you write the code once instead of copying it.",
       "steps": [
         {
-          "text": "A hexagon needs 6 forward steps and 6 turns. Written out, that is 12 lines."
+          "text": "Ten placed blocks written out is 10 lines of place-block code."
         },
         {
-          "text": "With a loop it is just repeat 6 [ forward 40, right 60 ]. That is 1 line."
+          "text": "With a loop it is repeat 10 [ place block, forward 1 ]. That is 1 line."
         },
         {
-          "text": "A loop is shorter to write and easier to fix, because you change only one place."
+          "text": "If the wall needs to be 20 long, you change only the 10 to a 20."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-loop-basics-5",
-      "prompt": "Build the total turning in repeat 8 [ right 45 ]. How many degrees in all?",
+      "prompt": "Your Fortnite drone spins: repeat 8 [ right 45 ].\nHow many degrees in all?",
       "answer": "360",
       "decoys": [],
       "why": "Eight turns of 45 degrees add up to 360 degrees, a full circle.",
@@ -262,28 +262,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "code-loop-games-0",
-      "title": "Luffy's Ship Loop Race",
+      "title": "Winger's Sprint Loop Race",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "repeat 3 [forward 50]",
+            "label": "repeat 3 [sprint 50 m]",
             "value": 150
           },
           {
-            "label": "repeat 6 [forward 20]",
+            "label": "repeat 6 [sprint 20 m]",
             "value": 120
           },
           {
-            "label": "repeat 2 [forward 300]",
+            "label": "repeat 2 [sprint 300 m]",
             "value": 600
           },
           {
-            "label": "repeat 5 [forward 40]",
+            "label": "repeat 5 [sprint 40 m]",
             "value": 200
           },
           {
-            "label": "repeat 4 [forward 75]",
+            "label": "repeat 4 [sprint 75 m]",
             "value": 300
           }
         ]
@@ -307,7 +307,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-loop-basics-6",
-      "prompt": "Build the total distance in repeat 12 [ forward 25 ]. How many cm in all?",
+      "prompt": "Your Roblox part moves repeat 12 [ forward 25 ].\nHow many cm in all?",
       "answer": "300",
       "decoys": [
         "1",
@@ -330,14 +330,14 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-basics-7",
-      "prompt": "In repeat 5 [ forward 60, right 72 ], which part is the loop body?",
+      "prompt": "Your obby builder runs: repeat 5 [ forward 60, right 72 ]. Which part is the loop body?",
       "options": [
         "forward 60 and right 72",
-        "repeat 5 only",
-        "5 and 60 only"
+        "repeat 5 and the brackets",
+        "the 5 before the brackets"
       ],
       "answer": 0,
-      "why": "The loop body is the set of instructions inside the square brackets, and it is repeated each time.",
+      "why": "The loop body is the set of instructions inside the square brackets, and it runs once per lap.",
       "steps": [
         {
           "text": "Find the square brackets. Everything between them is the body."
@@ -353,23 +353,23 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-loop-build-1",
-      "prompt": "Luffy's ship sails this loop:\nrepeat 4 [ forward 100, right 90 ]\nHow many degrees does the ship turn in total?",
+      "prompt": "The battle bus drives this loop:\nrepeat 4 [ forward 100, right 90 ]\nHow many degrees does the bus turn in total?",
       "answer": "360",
       "decoys": [
         "9",
         "5",
         "8"
       ],
-      "why": "Each lap turns the ship once, so the total turn is the count times the one turn.",
+      "why": "Each lap turns the bus once, so the total turn is the count times the one turn.",
       "steps": [
         {
-          "text": "Worked example: repeat 6 [ right 50 ]. The ship turns 50° six times."
+          "text": "Worked example: repeat 6 [ right 50 ]. The bus turns 50° six times."
         },
         {
           "text": "Multiply the count by the turn: 6 × 50 = 300°. Forward moves do not change the turn total."
         },
         {
-          "text": "Now use Luffy's code. Ignore the forward 100, and find the count and the right turn."
+          "text": "Now use the bus loop. Ignore the forward 100, and find the count and the right turn."
         }
       ]
     }
@@ -386,7 +386,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Put right 90 outside the brackets. The turtle runs forward 4 times and turns once. No square!"
+        "text": "Put right 90 outside the brackets. Your builder walks forward 4 times and turns once. No square!"
       }
     },
     {
@@ -400,7 +400,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi runs a triangle drill: 3 laps, each with a sharp turn. The loop does the counting for him."
+        "text": "Your striker runs a cone drill: 3 laps, each with a sharp turn. The loop does the counting for the coach."
       }
     },
     {
@@ -414,7 +414,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro trains with repeat 100 [ swing sword ]. Same swing, 100 times, no extra typing."
+        "text": "Pikachu attacks with repeat 100 [ Thunder Shock ]. Same attack, 100 times, no extra typing."
       }
     },
     {
@@ -428,7 +428,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Isagi takes 4 shots. Each shot is one run of the body."
+        "text": "Your Minecraft builder gets 4 runs. Each run places one wall section."
       },
       "art": {
         "art": "bars",
@@ -456,8 +456,8 @@ export const pack: SePack = {
         "Triangle: 3 × 120 = 360."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "A crew sails a full loop of the island. Every turn adds up."
+        "flavour": "key",
+        "text": "A player runs one full lap of the pitch. Every corner turn adds up."
       }
     },
     {
@@ -466,12 +466,12 @@ export const pack: SePack = {
       "title": "The brackets decide what repeats",
       "lines": [
         "Only the commands inside the brackets repeat.",
-        "repeat 4 [forward 100] right 90 turns only once.",
-        "That draws a line, not a square."
+        "repeat 4 [place 1 block, forward 1] then right 90 turns only once.",
+        "That lays a line of blocks, not a square."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A turn outside the brackets happens once. Check where the ] sits."
+        "text": "A command after the ] runs once. Check where the ] sits."
       }
     },
     {
@@ -479,9 +479,9 @@ export const pack: SePack = {
       "id": "code-loop-deeper-3",
       "title": "A loop does not undo its turns",
       "lines": [
-        "After repeat 4 [forward 100, right 90], the turtle faces its start way.",
+        "After repeat 4 [forward 100, right 90], the part faces its start way.",
         "Four turns of 90° make one full circle.",
-        "So the turtle is back where it began, facing the same way."
+        "So the part ends where it began, facing the same way."
       ]
     },
     {
@@ -490,12 +490,12 @@ export const pack: SePack = {
       "title": "Nested loops multiply",
       "lines": [
         "A loop inside a loop runs the inside loop every time.",
-        "repeat 3 [repeat 4 [forward 50]] gives 3 × 4 = 12 forwards.",
+        "repeat 3 [repeat 4 [place wall]] gives 3 × 4 = 12 walls.",
         "Outer count times inner count. Not add."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Three Blue Lock drills, each with four passes. That is twelve passes."
+        "flavour": "key",
+        "text": "Three build rows, each with four wall pieces. That is twelve walls."
       }
     },
     {
@@ -503,19 +503,19 @@ export const pack: SePack = {
       "id": "code-loop-deeper-5",
       "title": "repeat 0 does nothing",
       "lines": [
-        "repeat 0 [forward 100] runs the body zero times.",
-        "The turtle does not move at all.",
+        "repeat 0 [throw Poké Ball] runs the body zero times.",
+        "No ball is thrown, so the Pokémon stays put.",
         "Zero runs is a real answer, not an error."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro skips every training set. repeat 0 means no sets."
+        "text": "The trainer keeps the ball in the bag. repeat 0 means no throws."
       }
     },
     {
       "kind": "choice",
       "id": "code-loop-basics-8",
-      "prompt": "Which shape does repeat 5 [ forward 50, right 72 ] draw?",
+      "prompt": "Your builder runs repeat 5 [forward 50 blocks, right 72]. What shape is the wall?",
       "options": [
         "Hexagon",
         "Square",
@@ -525,43 +525,43 @@ export const pack: SePack = {
       "why": "The number of sides equals the loop count, and 360 divided by the turn angle matches that count, 5 here.",
       "steps": [
         {
-          "text": "Count the loop runs: 5 times, so 5 sides."
+          "text": "Count the loop runs: 5 times, so 5 walls make 5 sides."
         },
         {
           "text": "Check the turn: 360 divided by 72 is 5. The two numbers agree."
         },
         {
-          "text": "Try repeat 6 [ forward 40, right 60 ]. 360 divided by 60 is 6, so it is a hexagon."
+          "text": "Try repeat 6 [forward 40, right 60]. 360 divided by 60 is 6, so it is a hexagon."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-applied-0",
-      "prompt": "Isagi drills with this code: repeat 6 [ forward 20, right 60 ]. How far does he run in total?",
+      "prompt": "Your Minecraft builder runs repeat 6 [ forward 20, right 60 ]. How many blocks does the builder walk?",
       "options": [
-        "120 m",
-        "360 m",
-        "600 m"
+        "120 blocks",
+        "360 blocks",
+        "600 blocks"
       ],
       "answer": 0,
-      "why": "The loop runs 6 times, and each run adds 20 m, so 6 × 20 = 120 m.",
+      "why": "The loop runs 6 times, and each run adds 20 blocks, so 6 × 20 = 120 blocks.",
       "steps": [
         {
           "text": "Count the runs first. repeat 6 means the body runs 6 times."
         },
         {
-          "text": "Try another code: repeat 5 [ forward 30, right 72 ]. Runs: 5. Distance: 5 × 30 = 150 m."
+          "text": "Try repeat 5 [ forward 30, right 72 ]. Runs: 5. Distance: 5 × 30 = 150 blocks."
         },
         {
-          "text": "Turns do not add distance. Only the forward numbers count, so 6 × 20 = 120 m."
+          "text": "Turns do not add distance. Only the forward numbers count, so 6 × 20 = 120 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-applied-1",
-      "prompt": "Luffy's ship sails repeat 7 [ forward 30, right 45 ]. What is the total turn in degrees?",
+      "prompt": "Your Roblox Studio part runs repeat 7 [ forward 30, right 45 ]. What is the total turn in degrees?",
       "options": [
         "315°",
         "270°",
@@ -584,30 +584,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-2",
-      "prompt": "Isagi's coach writes: repeat 3 [ repeat 4 [ forward 10 ] right 90 ]. How many forward moves happen?",
+      "prompt": "Your coach's passing drill: repeat 3 [ repeat 4 [ forward 10 ] right 90 ]. How many 10 m runs happen?",
       "options": [
-        "7 moves",
-        "12 moves",
-        "15 moves"
+        "7 runs",
+        "12 runs",
+        "15 runs"
       ],
       "answer": 1,
-      "why": "The inner loop runs 4 times inside each of the 3 outer runs, so 3 × 4 = 12 moves.",
+      "why": "The inner loop runs 4 times inside each of the 3 outer runs, so 3 × 4 = 12 runs.",
       "steps": [
         {
           "text": "The outer loop runs 3 times. Inside it, the inner loop runs 4 times each time."
         },
         {
-          "text": "Try repeat 2 [ repeat 5 [ forward 8 ] ]. Outer 2 times, inner 5 times: 2 × 5 = 10 moves."
+          "text": "Try repeat 2 [ repeat 5 [ forward 8 ] ]. Outer 2 times, inner 5 times: 2 × 5 = 10 runs."
         },
         {
-          "text": "Multiply the loop counts together, not add them. So 3 × 4 = 12 forward moves."
+          "text": "Multiply the loop counts together, not add them. So 3 × 4 = 12 runs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-applied-3",
-      "prompt": "The crew must sail exactly 280 m. Which loop gets them there?",
+      "prompt": "Your battle bus must cover exactly 280 m. Which loop gets it there?",
       "options": [
         "repeat 8 [ forward 35 ]",
         "repeat 7 [ forward 35 ]",
@@ -630,7 +630,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-4",
-      "prompt": "Which code draws a triangle with sides of 60 m?",
+      "prompt": "Which Blue Lock drill draws a triangle with sides of 60 m?",
       "options": [
         "repeat 3 [ forward 60, right 120 ]",
         "repeat 3 [ forward 60, right 90 ]",
@@ -653,7 +653,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-5",
-      "prompt": "Which code draws a regular octagon, with 8 equal sides?",
+      "prompt": "Which code walks a trainer around an octagon arena with 8 equal sides?",
       "options": [
         "repeat 6 [ forward 20, right 45 ]",
         "repeat 8 [ forward 20, right 60 ]",
@@ -676,7 +676,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-6",
-      "prompt": "You walk around one Toronto block with repeat 4 [ forward 150, right 90 ]. How far do you walk?",
+      "prompt": "Your Roblox bot runs repeat 4 [ forward 150, right 90 ] around an arena. How far does it walk?",
       "options": [
         "500 m",
         "600 m",
@@ -686,10 +686,10 @@ export const pack: SePack = {
       "why": "There are 4 sides of 150 m each, so 4 × 150 = 600 m.",
       "steps": [
         {
-          "text": "A square block has 4 sides. Each side is the forward number, 150 m here."
+          "text": "A square arena has 4 sides. Each side is the forward number, 150 m here."
         },
         {
-          "text": "Try a block with sides of 120 m: 4 × 120 = 480 m around the whole block."
+          "text": "Try an arena with 120 m sides: 4 × 120 = 480 m around the whole arena."
         },
         {
           "text": "Only the forward numbers add to the distance. So 4 × 150 = 600 m."
@@ -699,7 +699,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-7",
-      "prompt": "Isagi runs repeat 3 [ forward 40, right 120 ], then repeat 3 [ forward 40, left 120 ]. What is his total forward distance?",
+      "prompt": "Isagi sprints repeat 3 [ forward 40, right 120 ], then repeat 3 [ forward 40, left 120 ]. What is his total forward distance?",
       "options": [
         "120 m",
         "360 m",
@@ -722,7 +722,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-8",
-      "prompt": "Which loop turns the same way as repeat 4 [ forward 100, right −90 ]?",
+      "prompt": "Which loop turns the same way as your Minecraft drone's repeat 4 [ forward 100, right −90 ]?",
       "options": [
         "repeat 4 [ forward 100, right 90 ]",
         "repeat 4 [ forward 100, left 90 ]",
@@ -745,7 +745,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-applied-9",
-      "prompt": "Which change makes the square bigger but keeps it a square?",
+      "prompt": "Your Fortnite build loop makes a square fort. Which change makes it bigger but keeps it a square?",
       "options": [
         "change forward 100 to 150",
         "change repeat 4 to 8",
@@ -758,7 +758,7 @@ export const pack: SePack = {
           "text": "A square needs 4 sides and 90° turns. Those two numbers must stay the same."
         },
         {
-          "text": "Try forward 25 instead of 100. The square is smaller, still with 4 sides and 90° turns."
+          "text": "Try forward 25 instead of 100. The fort is smaller, still with 4 sides and 90° turns."
         },
         {
           "text": "Only the forward number sets the side length. So change forward 100 to 150."
@@ -768,7 +768,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-deeper-6",
-      "prompt": "repeat 6 [forward 80, right 60]. How many times does forward 80 run?",
+      "prompt": "Your EA FC winger runs repeat 6 [ forward 80, right 60 ]. How many times does forward 80 run?",
       "options": [
         "5 times",
         "6 times",
@@ -781,7 +781,7 @@ export const pack: SePack = {
           "text": "Find the number right after repeat. That is the run count."
         },
         {
-          "text": "Example: repeat 10 [forward 20] runs forward 10 times, not 9."
+          "text": "Example: repeat 10 [ forward 20 ] runs forward 10 times, not 9."
         },
         {
           "text": "Each run does every command in the brackets once, in order."
@@ -796,7 +796,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-deeper-7",
-      "prompt": "A pentagon (5 sides) closes. Which turn goes in repeat 5 [forward 100, right ___]?",
+      "prompt": "Your trainer loops repeat 5 [ forward 100, right ___ ] around a Pokémon Centre. Which turn closes the pentagon?",
       "options": [
         "60",
         "72",
@@ -809,7 +809,7 @@ export const pack: SePack = {
           "text": "Find the number of sides. Here it is 5."
         },
         {
-          "text": "Example: a hexagon has 6 sides, so 360 ÷ 6 = 60 each turn."
+          "text": "Example: a hexagon gym has 6 sides, so 360 ÷ 6 = 60 each turn."
         },
         {
           "text": "Divide 360 by the sides to get the turn that closes the loop."
@@ -819,11 +819,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-deeper-8",
-      "prompt": "Which code draws a square?",
+      "prompt": "Which code builds a square wall of blocks?",
       "options": [
-        "repeat 4 [forward 100, right 90]",
-        "repeat 4 [forward 100] right 90",
-        "repeat 4 [forward 100, right 360]"
+        "repeat 4 [build 10 blocks, turn right 90]",
+        "repeat 4 [build 10 blocks] turn right 90",
+        "repeat 4 [build 10 blocks, turn right 360]"
       ],
       "answer": 0,
       "why": "The turn must be inside the brackets so it runs four times, and 90 is the right size.",
@@ -832,17 +832,24 @@ export const pack: SePack = {
           "text": "Check that the right turn sits before the closing bracket."
         },
         {
-          "text": "Example: repeat 3 [forward 50, right 120] makes a triangle, since 3 × 120 = 360."
+          "text": "Example: repeat 3 [build 12 blocks, turn right 120] makes a triangle, since 3 × 120 = 360."
         },
         {
           "text": "A turn of 360 does nothing, so the turn must be a fraction of 360."
         }
-      ]
+      ],
+      "art": {
+        "art": "bar",
+        "parts": 4,
+        "filled": 1,
+        "label": "90/360",
+        "tone": "focus"
+      }
     },
     {
       "kind": "choice",
       "id": "code-loop-deeper-9",
-      "prompt": "After repeat 4 [forward 100, right 90], which way does the turtle face?",
+      "prompt": "After repeat 4 [move 100 studs, turn right 90], which way does the part face?",
       "options": [
         "The same way it started",
         "90° to the right of start",
@@ -855,21 +862,21 @@ export const pack: SePack = {
           "text": "Add up the turns: 90 + 90 + 90 + 90."
         },
         {
-          "text": "Example: repeat 3 [right 120] also adds to 360, so it ends facing the start way."
+          "text": "Example: repeat 3 [turn right 120] also adds to 360, so it ends facing the start way."
         },
         {
-          "text": "A total of 360 means the turtle has spun all the way round."
+          "text": "A total of 360 means the part has spun all the way round."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-loop-deeper-10",
-      "prompt": "How many forward moves does repeat 3 [repeat 4 [forward 50]] make?",
+      "prompt": "How many wall pieces does repeat 3 [repeat 4 [place wall]] place?",
       "options": [
-        "7 moves",
-        "12 moves",
-        "3 moves"
+        "7 walls",
+        "12 walls",
+        "3 walls"
       ],
       "answer": 1,
       "why": "The inner loop runs 4 times inside each of the 3 outer runs, so 3 × 4 = 12.",
@@ -878,7 +885,7 @@ export const pack: SePack = {
           "text": "Find how many times the outer loop runs. Here it is 3."
         },
         {
-          "text": "Example: repeat 2 [repeat 5 [forward 20]] gives 2 × 5 = 10 moves."
+          "text": "Example: repeat 2 [repeat 5 [place ramp]] gives 2 × 5 = 10 ramps."
         },
         {
           "text": "Multiply outer count by inner count. Adding would give the wrong answer."
@@ -888,11 +895,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-loop-deeper-11",
-      "prompt": "Zoro skips all his sets: repeat 0 [lift weights]. What happens?",
+      "prompt": "Pikachu skips his attacks: repeat 0 [Thunderbolt]. What happens?",
       "options": [
-        "He lifts zero times",
-        "He lifts one time",
-        "He lifts ten times"
+        "He attacks zero times",
+        "He attacks one time",
+        "He attacks ten times"
       ],
       "answer": 0,
       "why": "A repeat of 0 runs the body zero times, so nothing in the brackets happens.",
@@ -901,7 +908,7 @@ export const pack: SePack = {
           "text": "Look at the number after repeat. Here it is 0."
         },
         {
-          "text": "Example: repeat 0 [forward 100] leaves the turtle standing still."
+          "text": "Example: repeat 0 [Tackle] means no Tackle is used at all."
         },
         {
           "text": "Zero runs means the body is skipped completely."
@@ -911,7 +918,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-loop-build-2",
-      "prompt": "Zoro sails this loop:\nrepeat 3 [ forward 250, left 90 ]\nHow many metres does he sail in total?",
+      "prompt": "Your obby path runs this loop:\nrepeat 3 [ forward 250 studs, left 90 ]\nHow many studs in total?",
       "answer": "750",
       "decoys": [
         "2",
@@ -920,20 +927,20 @@ export const pack: SePack = {
       "why": "Only the forward moves add distance, and the loop repeats them once per lap.",
       "steps": [
         {
-          "text": "Worked example: repeat 5 [ forward 40, left 20 ]. The forward move is 40 m each lap."
+          "text": "Worked example: repeat 5 [ forward 40 studs, left 20 ]. The forward move is 40 studs each lap."
         },
         {
-          "text": "Multiply: 5 × 40 = 200 m. The left turn adds no metres."
+          "text": "Multiply: 5 × 40 = 200 studs. The left turn adds no studs."
         },
         {
-          "text": "Now use Zoro's code. Which move is the forward move, and how many laps are there?"
+          "text": "Now use the obby code. Which move adds studs, and how many laps are there?"
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-loop-build-3",
-      "prompt": "Isagi's bot runs this loop:\nrepeat 5 [ forward 40, right 30 ]\nHow many commands run in total?",
+      "prompt": "Your FC bot runs this loop:\nrepeat 5 [ dribble 40 m, turn right 30 ]\nHow many commands run in total?",
       "answer": "10",
       "decoys": [
         "4",
@@ -943,43 +950,43 @@ export const pack: SePack = {
       "why": "Every line inside the brackets runs once per lap, so you count the lines and multiply.",
       "steps": [
         {
-          "text": "Worked example: repeat 7 [ forward 9, left 45, forward 3 ]. There are 3 commands inside."
+          "text": "Worked example: repeat 7 [ place block, turn left 45, place block ]. There are 3 commands inside."
         },
         {
           "text": "Multiply the commands by the laps: 3 × 7 = 21 commands."
         },
         {
-          "text": "Now count the commands inside Isagi's brackets. Then multiply by the number of laps."
+          "text": "Now count the commands inside the bot's brackets. Then multiply by the number of laps."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-loop-build-4",
-      "prompt": "Coach says Isagi must run 96 m.\nEach lap of this loop is 8 m:\nrepeat ___ [ forward 8 ]\nWhat number goes in the blank?",
+      "prompt": "Your wall needs 96 blocks.\nEach row is 8 blocks:\nrepeat ___ [ place 8 blocks ]\nWhat number goes in the blank?",
       "answer": "12",
       "decoys": [
         "3",
         "7",
         "9"
       ],
-      "why": "To find the count, divide the total distance by the distance for one lap.",
+      "why": "To find the count, divide the total blocks by the blocks in one row.",
       "steps": [
         {
-          "text": "Worked example: total 45 m, one lap 9 m. Divide: 45 ÷ 9 = 5 laps."
+          "text": "Worked example: 45 blocks total, rows of 9. Divide: 45 ÷ 9 = 5 rows."
         },
         {
-          "text": "Check it: 5 laps of 9 m make 45 m, so the answer fits."
+          "text": "Check it: 5 rows of 9 blocks make 45 blocks, so the answer fits."
         },
         {
-          "text": "Now divide Isagi's total by his lap length. What count do you get?"
+          "text": "Now divide 96 blocks by rows of 8. How many rows do you get?"
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-loop-build-5",
-      "prompt": "A sea snail in a One Piece game moves like this:\nrepeat 5 [ forward 2.5 ]\nHow many metres does it move in total?",
+      "prompt": "Your obby platform slides like this:\nrepeat 5 [ forward 2.5 ]\nHow many studs does it move in total?",
       "answer": "12.5",
       "decoys": [
         "3",
@@ -989,10 +996,10 @@ export const pack: SePack = {
       "why": "Decimals multiply the same way as whole numbers, then the decimal point stays in place.",
       "steps": [
         {
-          "text": "Worked example: repeat 4 [ forward 1.5 ]. Each lap is 1.5 m."
+          "text": "Worked example: repeat 4 [ forward 1.5 ]. Each step is 1.5 studs."
         },
         {
-          "text": "Multiply: 4 × 1.5 = 6.0, or 6 m."
+          "text": "Multiply: 4 × 1.5 = 6.0, or 6 studs."
         },
         {
           "text": "Now multiply 5 by 2.5. Count the decimal place in your answer."
@@ -1002,7 +1009,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-loop-build-6",
-      "prompt": "Isagi runs the loop, then shoots:\nrepeat 4 [ forward 100, right 90 ]\nforward 50\nHow many metres in total?",
+      "prompt": "Your bot runs the test loop, then fires:\nrepeat 4 [ forward 100, right 90 ]\nforward 50\nHow many metres in total?",
       "answer": "450",
       "decoys": [],
       "why": "A loop and any lines after it add up separately, then you add the two totals.",
@@ -1014,14 +1021,14 @@ export const pack: SePack = {
           "text": "Add the single move: 16 + 5 = 21 m."
         },
         {
-          "text": "Now find the loop total for Isagi, then add the single forward 50 to it."
+          "text": "Now find the loop total for your bot, then add the single forward 50 to it."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-loop-build-7",
-      "prompt": "Two loops run one after the other:\nrepeat 3 [ forward 10 ]\nrepeat 2 [ right 90 ]\nHow many degrees does the bot turn in total?",
+      "prompt": "Two loops run one after the other:\nrepeat 3 [ forward 10 ]\nrepeat 2 [ right 90 ]\nHow many degrees does the training cone turn in total?",
       "answer": "180",
       "decoys": [
         "2",
@@ -1044,7 +1051,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "code-loop-games-1",
-      "title": "Blue Lock Turn Drill",
+      "title": "Kanto Turn Drill",
       "game": {
         "mode": "pair",
         "pairs": [

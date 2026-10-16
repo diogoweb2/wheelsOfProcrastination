@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi needs to know his goal total in match 100. The rule answers that without counting every game."
+        "text": "Your staircase reaches step 100. The rule gives the block count without building every step."
       },
       "art": {
         "art": "bars",
@@ -52,7 +52,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-0",
-      "prompt": "Isagi's team passes 5, 8, 11, 14 times in four drills. What is the rule?",
+      "prompt": "Storm damage per phase is 5, 8, 11, 14. Which rule matches?",
       "options": [
         "Add 5 each time",
         "Times 2 each time",
@@ -62,20 +62,20 @@ export const pack: SePack = {
       "why": "Each term is the one before plus the same amount, so the pattern is linear.",
       "steps": [
         {
-          "text": "Find the gap: 10 to 14 is 4. Check 6 to 10 is also 4."
+          "text": "Find the gap in a new run: 20 to 24 is 4. Check 24 to 28 is also 4."
         },
         {
           "text": "The gap stays the same, so the rule is add 4 each time."
         },
         {
-          "text": "Test it on the first term. Start at 6 and add 4 to get 10. It works."
+          "text": "Test it on the first term. Start at 20 and add 4 to get 24. It works."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-basics-1",
-      "prompt": "The rule is 3n + 1. What is term 100?",
+      "prompt": "XP needed for level n is 3n + 1. How much XP for level 100?",
       "options": [
         "301",
         "300",
@@ -85,13 +85,13 @@ export const pack: SePack = {
       "why": "You multiply the term number by 3, then add 1, to jump to any term.",
       "steps": [
         {
-          "text": "Try a new rule, 4n + 2, for term 20. Multiply 4 by 20 to get 80."
+          "text": "Try 4n + 2 for storm phase 20. Multiply 4 by 20 to get 80."
         },
         {
-          "text": "Add the 2: 80 + 2 = 82. So term 20 is 82."
+          "text": "Add the 2: 80 + 2 = 82. So phase 20 does 82 damage."
         },
         {
-          "text": "For term 100, do 3 × 100 = 300, then add 1. Term 100 is 301."
+          "text": "For level 100, do 3 × 100 = 300, then add 1. Level 100 needs 301 XP."
         }
       ]
     },
@@ -150,46 +150,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-2",
-      "prompt": "The pattern is 2, 5, 8, 11… The rule is 3n − 1. Which term is 29?",
+      "prompt": "Your staircase has 2, 5, 8, 11… blocks. The rule is 3n − 1. Which step has 29 blocks?",
       "options": [
-        "The 9th term",
-        "The 10th term",
-        "The 11th term"
+        "The 9th step",
+        "The 10th step",
+        "The 11th step"
       ],
       "answer": 1,
       "why": "Set the rule equal to 29, then solve for n to find the term number.",
       "steps": [
         {
-          "text": "New pattern: 5, 9, 13, 17. Rule 4n + 1. Which term is 45?"
+          "text": "New tower: 5, 9, 13, 17 blocks. Rule 4n + 1. Which layer has 45?"
         },
         {
           "text": "Set 4n + 1 = 45. Take 1 away: 4n = 44. Divide by 4 to get n = 11."
         },
         {
-          "text": "So 45 is the 11th term in the pattern."
+          "text": "So layer 11 has 45 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-basics-3",
-      "prompt": "Is 50 a term in the pattern 4, 7, 10, 13…?",
+      "prompt": "Does the storm ever do exactly 50 damage in 4, 7, 10, 13…?",
       "options": [
-        "Yes, it is term 16.",
-        "No, it is not in the list.",
-        "Yes, it is term 17."
+        "Yes, it is in phase 16.",
+        "No, 50 is not in the pattern.",
+        "Yes, it is in phase 17."
       ],
       "answer": 1,
       "why": "A number is in the pattern only if the rule gives a whole number for n.",
       "steps": [
         {
-          "text": "New check: is 41 in 5, 8, 11, 14…? The rule is 3n + 2."
+          "text": "New check: is 41 an XP level in 5, 8, 11, 14…? The rule is 3n + 2."
         },
         {
           "text": "Set 3n + 2 = 41. Take 2 away: 3n = 39. Then n = 13. Yes, it is term 13."
         },
         {
-          "text": "For 50 in the first pattern, 3n = 49 has no whole answer, so 50 is not in it."
+          "text": "For 50 in the storm pattern, 3n = 49 has no whole answer, so 50 is not in it."
         }
       ]
     },
@@ -198,19 +198,19 @@ export const pack: SePack = {
       "id": "math-pat-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Counting to term 100 one step at a time takes forever.",
-        "A rule jumps straight to term 100 in one calculation.",
+        "Placing one layer at a time up to layer 100 takes forever.",
+        "A rule jumps straight to layer 100 in one calculation.",
         "Game designers and engineers use rules like this every day."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy's crew does not count every wave to the next island. They use the map."
+        "text": "Your build crew does not place every block to layer 100. They use the rule."
       }
     },
     {
       "kind": "build",
       "id": "math-pat-build-0",
-      "prompt": "Isagi scores 3 shots in match 1, 6 in match 2, 9 in match 3. How many shots in match 40?",
+      "prompt": "Your staircase has 3 blocks in step 1, 6 in step 2, 9 in step 3. How many blocks in step 40?",
       "answer": "120",
       "decoys": [
         "4",
@@ -220,20 +220,20 @@ export const pack: SePack = {
       "why": "A pattern that adds the same amount each step has a rule that starts with that amount times n.",
       "steps": [
         {
-          "text": "Find the gap. 6 − 3 = 3. Each match adds 3 more shots."
+          "text": "Find the gap. 6 − 3 = 3. Each step adds 3 more blocks."
         },
         {
-          "text": "So the rule starts with 3n. Check: 3 × 1 = 3, which is match 1."
+          "text": "So the rule starts with 3n. Check: 3 × 1 = 3, which is step 1."
         },
         {
-          "text": "Try 4, 7, 10, 13. The gap is 3, and the rule is 3n + 1. Term 30 is 3 × 30 + 1 = 91."
+          "text": "Try 5, 9, 13 with gap 4. The rule is 4n + 1. Step 10 is 4 × 10 + 1 = 41."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-basics-4",
-      "prompt": "The table shows term 1 = 6, term 2 = 11, term 3 = 16, term 4 = 21. Which rule fits?",
+      "prompt": "Storm damage per phase: phase 1 = 6, phase 2 = 11, phase 3 = 16, phase 4 = 21. Which rule fits?",
       "options": [
         "5n + 1",
         "6n + 5",
@@ -243,7 +243,7 @@ export const pack: SePack = {
       "why": "The gap is 5, so the 5n part is right. Then the +1 is found by checking term 1.",
       "steps": [
         {
-          "text": "New table: 3, 7, 11, 15. The gap is 4, so the rule starts 4n."
+          "text": "Try 3, 7, 11, 15. The gap is 4, so the rule starts 4n."
         },
         {
           "text": "Term 1 is 3. Here 4 × 1 = 4, so you take 1 away: 4n − 1."
@@ -256,30 +256,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-5",
-      "prompt": "Matchstick squares: 1 square uses 4 sticks, 2 squares use 7, 3 squares use 10. How many sticks for n squares?",
+      "prompt": "Obby sections: 1 section uses 4 parts, 2 sections use 7, 3 sections use 10. How many parts for n sections?",
       "options": [
         "4n",
         "3n + 1",
         "n + 3"
       ],
       "answer": 1,
-      "why": "Each new square adds 3 sticks, and the first square needs 1 extra stick to start.",
+      "why": "Each new section adds 3 parts, and the first section needs 1 extra part to start.",
       "steps": [
         {
-          "text": "New shape: triangles. 1 triangle = 3 sticks, 2 = 5, 3 = 7. The gap is 2."
+          "text": "New sections: 1 = 3 parts, 2 = 5, 3 = 7. The gap is 2."
         },
         {
           "text": "So the rule starts 2n. Term 1 is 3, and 2 × 1 = 2, so add 1: 2n + 1."
         },
         {
-          "text": "Check 3 triangles: 2 × 3 + 1 = 7. It matches."
+          "text": "Check 3 sections: 2 × 3 + 1 = 7. It matches."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-pat-games-0",
-      "title": "Bounty Board Race",
+      "title": "Blue Lock Ranking Race",
       "game": {
         "mode": "order",
         "values": [
@@ -324,7 +324,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-6",
-      "prompt": "Zoro says 2, 4, 8, 16 is an add 2 pattern. What is wrong?",
+      "prompt": "Tyler says his team's points go 2, 4, 8, 16 and it is an add 2 pattern. What is wrong?",
       "options": [
         "The gaps change: 2, 4, 8.",
         "The rule is add 2 for term 4.",
@@ -347,7 +347,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-7",
-      "prompt": "Missing term: 9, 12, ?, 18, 21. What is the missing number?",
+      "prompt": "Your tower gains blocks each layer: 9, 12, ?, 18, 21. What is the missing layer?",
       "options": [
         "13",
         "16",
@@ -357,20 +357,20 @@ export const pack: SePack = {
       "why": "Each term adds the same gap, so the missing term is the one before plus that gap.",
       "steps": [
         {
-          "text": "New pattern: 4, 9, ?, 19, 24. Gap from 9 to 19 is 10 over two steps."
+          "text": "New tower: 4, 9, ?, 19, 24 blocks. Gap from 9 to 19 is 10 over two layers."
         },
         {
-          "text": "So each step is 5. The missing term is 9 + 5 = 14."
+          "text": "So each layer adds 5. The missing layer is 9 + 5 = 14 blocks."
         },
         {
-          "text": "Check: 14 + 5 = 19. It matches the next term."
+          "text": "Check: 14 + 5 = 19. It matches the next layer."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-build-1",
-      "prompt": "Zoro's bounty goes 7, 11, 15, 19 (millions). What is the bounty in week 25?",
+      "prompt": "Storm damage per phase: 7, 11, 15, 19 HP. What is the damage in phase 25?",
       "answer": "103",
       "decoys": [
         "5",
@@ -383,7 +383,7 @@ export const pack: SePack = {
           "text": "The gap is 11 − 7 = 4. So the rule starts with 4n."
         },
         {
-          "text": "4 × 1 = 4, but week 1 is 7. Add 3 to fix it: 4n + 3."
+          "text": "4 × 1 = 4, but phase 1 is 7. Add 3 to fix it: 4n + 3."
         },
         {
           "text": "Try 5, 8, 11, 14. The gap is 3, and the rule is 3n + 2. Term 20 is 3 × 20 + 2 = 62."
@@ -397,8 +397,8 @@ export const pack: SePack = {
       "id": "math-pat-teach-3",
       "title": "The common trap",
       "lines": [
-        "Many people write 3n for the pattern 4, 7, 10, 13.",
-        "Test it: 3 × 1 is 3, but term 1 is 4.",
+        "Many people write 3n for the HP bars 4, 7, 10, 13.",
+        "Test it: 3 × 1 is 3, but the first bar is 4.",
         "Always test the rule on term 1 before you trust it."
       ],
       "callout": {
@@ -411,13 +411,13 @@ export const pack: SePack = {
       "id": "math-pat-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "The pattern goes up by 3 each time, so the rule starts with 3n.",
-        "Term 1 is 4. But 3 × 1 is 3, so add 1 to make 4.",
-        "The rule is 3n + 1. Term 100 is 3 × 100 + 1, which is 301."
+        "The staircase goes up 3 blocks each step, so the rule starts with 3n.",
+        "Step 1 is 4 blocks. But 3 × 1 is 3, so add 1 to make 4.",
+        "The rule is 3n + 1. Step 100 is 3 × 100 + 1, which is 301."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Crew size grows by 3 each island. Find the rule, then the crew on island 100 is one calculation away."
+        "flavour": "key",
+        "text": "Each step adds 3 blocks. Find the rule, then step 100 is one calculation away."
       }
     },
     {
@@ -445,7 +445,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Isagi's shirt number is 9. That does not mean he scored 9 goals."
+        "text": "Storm phase 9 is not 9 HP of damage. Check the value in that phase."
       }
     },
     {
@@ -459,7 +459,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro counts his swords from one, not zero. Pattern rules work the same way."
+        "text": "Your first storm is phase 1. There is no phase 0 in a Victory Royale."
       }
     },
     {
@@ -467,8 +467,8 @@ export const pack: SePack = {
       "id": "math-pat-deeper-2",
       "title": "The step is the number with n",
       "lines": [
-        "In 3n + 1, the 3 is the step size.",
-        "The 3 says the pattern goes up by 3 each term.",
+        "Your staircase climbs 3 blocks each step.",
+        "In 3n + 1, the 3 is that step size.",
         "The +1 is only the starting shift, not the step."
       ],
       "callout": {
@@ -487,7 +487,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Imagine a striker whose goals per game keep changing. No simple formula fits."
+        "text": "A striker's goals per game keep jumping about. No simple formula fits."
       }
     },
     {
@@ -496,7 +496,7 @@ export const pack: SePack = {
       "title": "Negative steps shrink the pattern",
       "lines": [
         "Sometimes the numbers go down each time.",
-        "Then the step size is negative, like −3.",
+        "Your bridge drops 3 blocks each step, like −3.",
         "Write the rule as 23 − 3n, not 3n + 23."
       ],
       "callout": {
@@ -515,13 +515,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Before you sail, check the map twice. Check the rule twice too."
+        "text": "Before you battle, check the type chart twice. Check the rule twice too."
       }
     },
     {
       "kind": "choice",
       "id": "math-pat-basics-8",
-      "prompt": "The pattern 50, 46, 42, 38… Which rule works for every term?",
+      "prompt": "Players in a lobby: 50, 46, 42, 38… Which rule works for every term?",
       "options": [
         "−4n + 54",
         "4n + 46",
@@ -531,7 +531,7 @@ export const pack: SePack = {
       "why": "A rule must fit term 1 and term 2, not just one of them.",
       "steps": [
         {
-          "text": "New pattern: 30, 27, 24. The gap is −3, so the rule starts −3n."
+          "text": "Obby checkpoints left: 30, 27, 24. The gap is −3, so the rule starts −3n."
         },
         {
           "text": "Term 1 is 30, and −3 + 33 = 30. So the rule is −3n + 33."
@@ -561,194 +561,171 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-pat-basics-9",
-      "prompt": "Term 1 is 2. Each term adds 5. Which rule gives term n?",
+      "prompt": "Layer 1 has 4 blocks. Each layer adds 3 blocks. Which rule gives layer n?",
       "options": [
-        "5n − 3",
-        "2n + 5",
-        "5n + 2"
+        "4n − 1",
+        "n + 3",
+        "3n + 1"
       ],
-      "answer": 0,
-      "why": "The gap of 5 gives the 5n part, then the start value tells you the number to add or take away.",
+      "answer": 2,
+      "why": "The gap of 3 gives the 3n part, then the start value tells you the number to add or take away.",
       "steps": [
         {
-          "text": "New one: term 1 is 4, and each term adds 3. The rule starts 3n."
+          "text": "Layer 1 has 4 blocks and layer 2 has 7. The gap is 3, so the rule starts 3n."
         },
         {
-          "text": "3 × 1 = 3, but term 1 is 4. So add 1: 3n + 1."
+          "text": "3 × 1 = 3, but layer 1 has 4 blocks. So add 1: 3n + 1."
         },
         {
-          "text": "Check term 2: 3 × 2 + 1 = 7. Yes, 4 then 7."
+          "text": "Check layer 3: 3 × 3 + 1 = 10. The stairs go 4, 7, 10 ✓."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-0",
-      "prompt": "Isagi's team scores goals in each match: 2, 5, 8, 11. Which rule gives the goals in match n?",
+      "prompt": "Your EA FC career team scores 2, 5, 8, 11 goals in matches 1 to 4. Which rule gives goals in match n?",
       "options": [
+        "3n + 2",
         "2n + 3",
-        "3n − 1",
-        "3n + 2"
+        "3n − 1"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "The number added from one term to the next becomes the number in front of n.",
       "steps": [
         {
-          "text": "Find the step. 2 → 5 → 8 goes up by 3 each time, so the rule starts with 3n."
+          "text": "Goals go up 3 each match: 2 → 5 → 8. The rule starts with 3n."
         },
         {
-          "text": "Try a new sequence: 3, 7, 11, 15. The step is +4, so the rule starts with 4n."
+          "text": "Try 3, 7, 11, 15 in another season. The step is 4, so the rule starts 4n."
         },
         {
-          "text": "Term 1 of 4n is 4, but the first term is 3. Take 1 away: 4n − 1. Check term 2: 4 × 2 − 1 = 7 ✓."
+          "text": "Match 1 of 4n is 4, but the first score is 3. Take 1 away: 4n − 1. Check match 2: 7 ✓."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-1",
-      "prompt": "Luffy's crew finds a chest. It has 100 coins on day 1, 90 on day 2, 80 on day 3. Which rule gives the coins on day n?",
+      "prompt": "Your shield is 100 after tick 1, 90 after tick 2, 80 after tick 3. Which rule gives the shield on tick n?",
       "options": [
+        "110 − 10n",
         "100 − 10n",
-        "90 + 10n",
-        "110 − 10n"
+        "90 + 10n"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "A falling pattern has a negative step, so the rule uses a minus sign in front of the n.",
       "steps": [
         {
-          "text": "Try 55, 50, 45, 40. The step is −5, so the rule starts with −5n."
+          "text": "Shield drops 10 each tick: 100, 90, 80, 70. The step is −10, so the rule starts −10n."
         },
         {
-          "text": "Term 1 of −5n is −5, but the first term is 55. Add 60 to the rule, so the start is right."
+          "text": "Tick 1 of −10n is −10, but the shield is 100. Add 110: 110 − 10n."
         },
         {
-          "text": "Rule: 60 − 5n. Check day 2: 60 − 10 = 50 is wrong, so use 55 − 5n. Day 2: 55 − 10 = 45 ✓."
+          "text": "Check tick 4: 110 − 40 = 70 ✓."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-2",
-      "prompt": "On a Toronto bike lane, the first post is 5 m from the start. Then one post every 12 m. How far is post 100?",
+      "prompt": "Your obby's first platform is 5 m high. Each next platform is 12 m higher. How high is platform 100?",
       "options": [
         "1205 m",
-        "1193 m",
-        "1188 m"
+        "1188 m",
+        "1193 m"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Jumping to a far term means putting the term number into the rule, not counting every step.",
       "steps": [
         {
-          "text": "Try posts at 4 m, then 13 m, 22 m. The step is +9, so the rule starts with 9n."
+          "text": "Platforms sit at 5 m, 17 m, 29 m. The step is 12, so the rule starts 12n."
         },
         {
-          "text": "Term 1 of 9n is 9, but the first post is 4 m. Take 5 away: rule 9n − 5. Check: 9 − 5 = 4 ✓."
+          "text": "Term 1 of 12n is 12, but platform 1 is 5 m. Take 7 away: 12n − 7. Check: 12 − 7 = 5 ✓."
         },
         {
-          "text": "Use n = 40: 9 × 40 = 360, then 360 − 5 = 355 m. So post 40 is at 355 m."
+          "text": "Platform 40: 12 × 40 = 480, then 480 − 7 = 473 m."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-3",
-      "prompt": "Isagi trains with shots: 1, 4, 9, 16 in drills 1 to 4. Which rule gives the shots in drill n?",
+      "prompt": "Your square pads are 1, 4, 9, 16 blocks. Which rule gives the blocks in pad n?",
       "options": [
-        "n + 3",
         "2n − 2",
-        "n × n"
+        "n × n",
+        "n + 3"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "The steps 3, 5, 7 keep growing, so this pattern is not a straight line and needs n squared.",
       "steps": [
         {
           "text": "Try 4, 9, 16, 25. These are 2 × 2, 3 × 3, 4 × 4, 5 × 5."
         },
         {
-          "text": "Term 1 is 2 × 2, so the rule is (n + 1) × (n + 1), not n × n."
+          "text": "Pad 1 is 1 × 1, so the rule is n × n with no extra number."
         },
         {
-          "text": "Check term 4: (4 + 1) × (4 + 1) = 25 ✓. Good."
+          "text": "Check pad 4: 4 × 4 = 16 ✓. Pad 5 is 5 × 5 = 25."
         }
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Drill 1",
+            "label": "Pad 1",
             "value": 1,
             "tone": "focus"
           },
           {
-            "label": "Drill 2",
+            "label": "Pad 2",
             "value": 4,
             "tone": "focus"
           },
           {
-            "label": "Drill 3",
+            "label": "Pad 3",
             "value": 9,
             "tone": "focus"
           },
           {
-            "label": "Drill 4",
+            "label": "Pad 4",
             "value": 16,
             "tone": "good"
           }
         ],
-        "unit": "shots"
+        "unit": "blocks"
       }
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-4",
-      "prompt": "Zoro dives. Depths are −6 m, −12 m, −18 m. Which is the depth on dive 25?",
+      "prompt": "Your club's goal difference drops by 6 each week: −6, −12, −18. Which is it after week 25?",
       "options": [
-        "−156 m",
-        "−150 m",
-        "−144 m"
+        "−156",
+        "−144",
+        "−150"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "A negative number times a positive number stays negative, so the sequence keeps going down.",
       "steps": [
         {
-          "text": "Try −4 m, −8 m, −12 m. The step is −4, so the rule is −4n."
+          "text": "Weeks give −6, −12, −18. The step is −6, so the rule is −6n."
         },
         {
-          "text": "Term 1 of −4n is −4, which is correct. Check term 2: −4 × 2 = −8 ✓."
+          "text": "Week 1 of −6n is −6 ✓. Check week 2: −6 × 2 = −12 ✓."
         },
         {
-          "text": "Dive 30: −4 × 30 = −120. Multiply the number by n, then keep the minus."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-pat-applied-6",
-      "prompt": "At St. Eugene's gym, 1 table has 4 chairs, 2 tables have 6 chairs, 3 tables have 8 chairs. How many tables are needed for exactly 50 chairs?",
-      "options": [
-        "24 tables",
-        "25 tables",
-        "23 tables"
-      ],
-      "answer": 0,
-      "why": "Each new table adds the same number of chairs, so the pattern is linear.",
-      "steps": [
-        {
-          "text": "Try 1 table: 5 chairs, 2 tables: 8, 3 tables: 11. The step is +3, so the rule starts with 3n."
-        },
-        {
-          "text": "Term 1 of 3n is 3, but it should be 5. Add 2: rule 3n + 2. Check: 3 × 1 + 2 = 5 ✓."
-        },
-        {
-          "text": "Solve 3n + 2 = 53. Take 2 away to get 51, then divide by 3 to get n = 17."
+          "text": "Week 30: −6 × 30 = −180. Multiply by n, then keep the minus."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-applied-7",
-      "prompt": "Zoro lifts weights: 2.5 kg, 5 kg, 7.5 kg, 10 kg. What weight does he lift on day 12, in kg?",
+      "prompt": "Your obby's total Robux after days 1 to 4: 2.5, 5, 7.5, 10. Total on day 12?",
       "answer": "30",
       "decoys": [
         "5",
@@ -758,20 +735,20 @@ export const pack: SePack = {
       "why": "A decimal in front of n works exactly like a whole number, so the rule still needs multiplying.",
       "steps": [
         {
-          "text": "Try 1.5 kg, 3 kg, 4.5 kg, 6 kg. The step is +1.5, so the rule is 1.5n."
+          "text": "Try 0.5, 1, 1.5, 2 Robux. The step is +0.5, so the rule is 0.5n."
         },
         {
-          "text": "Check day 1: 1.5 × 1 = 1.5 ✓. The rule works from the start."
+          "text": "Check day 1: 0.5 × 1 = 0.5 ✓. The rule works from the start."
         },
         {
-          "text": "Day 8: 1.5 × 8 = 12. Multiply like whole numbers, then place the decimal point."
+          "text": "Day 8 at 2.5 a day: 25 × 8 = 200, so 2.5 × 8 = 20. Place the decimal point last."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-8",
-      "prompt": "The crew has 10 barrels of food. They use 3 barrels each day. Which rule gives the barrels left after day n?",
+      "prompt": "Your squad has 10 bandages. Each match uses 3 bandages. Which rule gives bandages left after match n?",
       "options": [
         "3 − 10n",
         "10 − 3n",
@@ -781,20 +758,20 @@ export const pack: SePack = {
       "why": "A falling pattern has a minus sign in front of the step, so the rule takes away the step each time.",
       "steps": [
         {
-          "text": "Try start 12, use 4 each day: 8, 4, 0. The step is −4, so the rule starts with −4n."
+          "text": "Try start 15, use 5 each match: 10, 5, 0. The step is −5, so the rule starts with −5n."
         },
         {
-          "text": "Term 1 of −4n is −4, but day 1 should be 8, so add 12: 12 − 4n. Check day 1: 12 − 4 = 8 ✓."
+          "text": "Term 1 of −5n is −5, but match 1 should leave 10, so add 15: 15 − 5n. Check: 15 − 5 = 10 ✓."
         },
         {
-          "text": "Check day 3: 12 − 12 = 0. The food runs out on day 3."
+          "text": "Check match 3: 15 − 15 = 0. The bandages run out in match 3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-applied-9",
-      "prompt": "Stadium row 1 has 12 seats, row 2 has 14, row 3 has 16. Which row has exactly 60 seats?",
+      "prompt": "Blue Lock arena: row 1 has 12 seats, row 2 has 14, row 3 has 16. Which row has exactly 60 seats?",
       "options": [
         "row 26",
         "row 24",
@@ -804,43 +781,43 @@ export const pack: SePack = {
       "why": "Each row adds the same number of seats, so the row rule is a straight-line pattern.",
       "steps": [
         {
-          "text": "Try row 1: 8 seats, row 2: 11, row 3: 14. The step is +3, so the rule starts with 3n."
+          "text": "Try row 1: 2 seats, row 2: 4, row 3: 6. The step is +2, so the rule starts with 2n."
         },
         {
-          "text": "Term 1 of 3n is 3, but it should be 8. Add 5: rule 3n + 5. Check: 3 × 1 + 5 = 8 ✓."
+          "text": "Term 1 of 2n is 2, but it should be 12. Add 10: rule 2n + 10. Check: 2 × 1 + 10 = 12 ✓."
         },
         {
-          "text": "Solve 3n + 5 = 50. Then 3n = 45, so n = 15. Row 15 has 50 seats."
+          "text": "Solve 2n + 10 = 60. Then 2n = 50, so n = 25. Row 25 has 60 seats."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-deeper-6",
-      "prompt": "In 4, 7, 10, 13, which term number is the number 13?",
+      "prompt": "Storm damage per phase: 4, 7, 10, 13 HP. Which phase deals 13 damage?",
       "options": [
-        "13",
-        "4",
-        "3"
+        "phase 13",
+        "phase 4",
+        "phase 3"
       ],
       "answer": 1,
-      "why": "13 is the fourth number in the list, so it is term 4.",
+      "why": "13 is the fourth number in the list, so it is phase 4.",
       "steps": [
         {
-          "text": "Take the pattern 2, 6, 10, 14. Number them: 2 is term 1, 6 is term 2."
+          "text": "Take storm ticks of 2, 6, 10, 14 HP. The 2 is phase 1, the 6 is phase 2."
         },
         {
-          "text": "Keep going: 10 is term 3, and 14 is term 4."
+          "text": "Keep going: 10 is phase 3, and 14 is phase 4."
         },
         {
-          "text": "So the value 10 is in position 3, not position 10."
+          "text": "So 10 damage is phase 3, not phase 10."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-deeper-7",
-      "prompt": "The pattern 6, 9, 12, 15 has which rule?",
+      "prompt": "A Timbit tower: layer 1 has 6, layer 2 has 9, layer 3 has 12, layer 4 has 15. Which rule gives layer n?",
       "options": [
         "3n + 6",
         "3n + 3",
@@ -850,66 +827,66 @@ export const pack: SePack = {
       "why": "The step is 3, and term 1 must give 6, so the shift is 3.",
       "steps": [
         {
-          "text": "Pattern 2, 5, 8, 11: the step is 3, so start with 3n."
+          "text": "Layers 2, 5, 8, 11 Timbits: the step is 3, so start with 3n."
         },
         {
-          "text": "Term 1 with 3n gives 3, but the pattern needs 2, so subtract 1."
+          "text": "Term 1 with 3n gives 3, but the tower needs 2, so subtract 1."
         },
         {
-          "text": "Check term 2: 3 × 2 − 1 = 5, which matches the pattern, so the rule is 3n − 1."
+          "text": "Check layer 2: 3 × 2 − 1 = 5, which matches, so the rule is 3n − 1."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-deeper-8",
-      "prompt": "The pattern 4, 7, 10, 13 has rule 3n + 1. What is term 100?",
+      "prompt": "Your staircase rises 3 blocks each step. Step 1 is 4 blocks high. How high is step 100?",
       "options": [
         "301",
         "300",
         "103"
       ],
       "answer": 0,
-      "why": "Term 100 is 3 × 100 + 1, so the answer is 301.",
+      "why": "Step 100 is 3 × 100 + 1 blocks high, so the answer is 301.",
       "steps": [
         {
-          "text": "Pattern 2, 5, 8, 11 has rule 3n − 1. Find term 50."
+          "text": "A ramp is 2, 5, 8, 11 blocks high, rising 3 each step. The rule is 3n − 1. Find step 50."
         },
         {
-          "text": "Multiply: 3 × 50 = 150."
+          "text": "Multiply: 3 × 50 = 150 blocks."
         },
         {
-          "text": "Subtract 1 for the shift: 150 − 1 = 149, so term 50 is 149."
+          "text": "Take away 1 for the shift: 150 − 1 = 149, so step 50 is 149 blocks high."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-pat-deeper-10",
-      "prompt": "The pattern 20, 17, 14, 11 has which rule?",
+      "prompt": "Your shield reads 20, 17, 14, 11 over four storm ticks. Which rule gives the shield on tick n?",
       "options": [
         "23 − 3n",
         "3n + 17",
         "−3n + 20"
       ],
       "answer": 0,
-      "why": "Term 1 gives 20, and the step is −3, so the rule is 23 − 3n.",
+      "why": "Tick 1 gives 20, and the shield drops 3 each tick, so the rule is 23 − 3n.",
       "steps": [
         {
-          "text": "Pattern 18, 15, 12, 9: the step is −3, so start with −3n."
+          "text": "Shields 18, 15, 12, 9 drop by 3 each tick, so start with −3n."
         },
         {
-          "text": "Term 1 needs 18, and −3 × 1 = −3, so add 21 to get 18."
+          "text": "Tick 1 needs 18, and −3 × 1 = −3, so add 21 to get 18."
         },
         {
-          "text": "Check term 2: 21 − 6 = 15, which matches, so the rule is −3n + 21."
+          "text": "Check tick 2: 21 − 6 = 15, which matches, so the rule is −3n + 21."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-build-2",
-      "prompt": "Isagi's lap times are 1.2, 1.7, 2.2, 2.7 minutes. What is lap 12, in minutes?",
+      "prompt": "Your obby checkpoints take 1.2, 1.7, 2.2, 2.7 minutes. What is checkpoint 12, in minutes?",
       "answer": "6.7",
       "decoys": [
         "0",
@@ -922,7 +899,7 @@ export const pack: SePack = {
           "text": "The gap is 1.7 − 1.2 = 0.5. So the rule starts with 0.5n."
         },
         {
-          "text": "0.5 × 1 = 0.5, but lap 1 is 1.2. Add 0.7: the rule is 0.5n + 0.7."
+          "text": "0.5 × 1 = 0.5, but checkpoint 1 is 1.2. Add 0.7: the rule is 0.5n + 0.7."
         },
         {
           "text": "Try 2.4, 2.9, 3.4. The gap is 0.5, so the rule is 0.5n + 1.9. Term 8 is 4 + 1.9 = 5.9."
@@ -932,7 +909,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-pat-build-4",
-      "prompt": "Ryo passes in a drill: 1/2, 2/3, 3/4, 4/5. What is term 10 as a fraction?",
+      "prompt": "Each round you cut a pizza and eat part of it. Round 1 is 1/2, round 2 is 2/3. What is round 10?",
       "answer": "10/11",
       "decoys": [
         "9"
@@ -940,20 +917,20 @@ export const pack: SePack = {
       "why": "In a fraction pattern, the top and the bottom can each follow their own rule.",
       "steps": [
         {
-          "text": "The top is the term number n. The bottom is always one more than the top."
+          "text": "The top is the round number n. The bottom is always one more than the top."
         },
         {
-          "text": "So the rule is n/(n + 1). Check: term 1 is 1/2, and term 2 is 2/3."
+          "text": "So the rule is n/(n + 1). Check: round 1 is 1/2, and round 2 is 2/3."
         },
         {
-          "text": "Try 2/3, 3/4, 4/5, 5/6. The top is n + 1 and the bottom is n + 2. Term 7 is 8/9."
+          "text": "Try 2/3, 3/4, 4/5, 5/6. The top is n + 1 and the bottom is n + 2. Round 7 is 8/9."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-build-5",
-      "prompt": "Isagi's shots on target: 5, 8, 11, 14 in matches 1 to 4. How many in match 100?",
+      "prompt": "XP needed for levels 1 to 4 is 5, 8, 11, 14. How much XP does level 100 need?",
       "answer": "302",
       "decoys": [
         "7",
@@ -963,20 +940,20 @@ export const pack: SePack = {
       "why": "Substituting n = 100 into a rule is much faster than counting up one term at a time.",
       "steps": [
         {
-          "text": "The gap is 3, so the rule starts with 3n. Then 3 × 1 = 3, but match 1 is 5."
+          "text": "The gap is 3, so the rule starts with 3n. Then 3 × 1 = 3, but level 1 needs 5."
         },
         {
           "text": "Add 2 to fix it: the rule is 3n + 2. Put n = 100 in: 3 × 100 + 2."
         },
         {
-          "text": "Try 4, 9, 14, 19. The gap is 5 and the rule is 5n − 1. Term 12 is 60 − 1 = 59."
+          "text": "Try 4, 9, 14, 19 XP. The gap is 5 and the rule is 5n − 1. Term 12 is 60 − 1 = 59."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-build-6",
-      "prompt": "A pattern goes 6, 11, 16, 21. Which term number is 56?",
+      "prompt": "Your obby's first layer has 6 platforms. Layers hold 6, 11, 16, 21 platforms. Which layer has 56?",
       "answer": "11",
       "decoys": [
         "5",
@@ -989,66 +966,66 @@ export const pack: SePack = {
           "text": "The gap is 5, and 6 − 5 = 1. So the rule is 5n + 1."
         },
         {
-          "text": "Set the rule equal to 56: 5n + 1 = 56. Take away 1: 5n = 55."
+          "text": "Set the rule equal to 56: 5n + 1 = 56. Take away 1: 5n = 55, so n = 11."
         },
         {
-          "text": "Try 4, 7, 10. The rule is 3n + 1. For 61: 3n = 60, so n = 20."
+          "text": "Try 4, 7, 10 platforms. The rule is 3n + 1. For 61: 3n = 60, so n = 20."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-pat-build-7",
-      "prompt": "Stadium rows hold 12, 19, 26, 33 seats. How many seats are in row 15?",
+      "prompt": "Your tower gets 7 more blocks each layer.\nLayer 1 has 12. Layer 2 has 19. Layer 15 has how many?",
       "answer": "110",
       "decoys": [
         "6",
         "9",
         "4"
       ],
-      "why": "Each row adds the same number of seats, so the gap is the multiplier of n in the rule.",
+      "why": "Each layer adds the same number of blocks, so the gap is the multiplier of n in the rule.",
       "steps": [
         {
-          "text": "The gap is 19 − 12 = 7. So the rule starts with 7n."
+          "text": "Each layer adds 19 − 12 = 7 blocks. So the rule starts with 7n."
         },
         {
-          "text": "7 × 1 = 7, but row 1 is 12. Add 5: the rule is 7n + 5."
+          "text": "7 × 1 = 7, but layer 1 has 12. Add 5: the rule is 7n + 5."
         },
         {
-          "text": "Try 9, 13, 17, 21. The rule is 4n + 5. Row 10 is 4 × 10 + 5 = 45."
+          "text": "Check layer 4: 7 × 4 + 5 = 33. Layer 15 is 7 × 15 + 5 = 110."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-pat-games-1",
-      "title": "Crew Match-Up",
+      "title": "Obby Stage Match-Up",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "2n + 5",
-            "Term 100 = 205"
+            "Stage 100 = 205 studs"
           ],
           [
             "4n − 3",
-            "Term 100 = 397"
+            "Stage 100 = 397 studs"
           ],
           [
             "5n − 2",
-            "Term 100 = 498"
+            "Stage 100 = 498 studs"
           ],
           [
             "n + 99",
-            "Term 100 = 199"
+            "Stage 100 = 199 studs"
           ],
           [
             "6n − 4",
-            "Term 100 = 596"
+            "Stage 100 = 596 studs"
           ]
         ]
       },
-      "why": "Once you have the rule, you can jump to any term without listing the numbers."
+      "why": "Once you have the rule, you can jump to stage 100 without counting each stage."
     },
     {
       "kind": "video",

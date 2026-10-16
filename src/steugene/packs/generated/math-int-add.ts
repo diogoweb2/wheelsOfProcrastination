@@ -17,11 +17,11 @@ export const pack: SePack = {
       "lines": [
         "Integers are whole numbers: positive, negative, and zero.",
         "Negative numbers sit left of zero on a number line.",
-        "Blue Lock: a team that concedes more than it scores sits below zero."
+        "In a football table, conceding more than you score puts you below zero."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Picture the scoreboard. Isagi's team is down by 2 goals. Their goal difference is −2."
+        "flavour": "key",
+        "text": "Lose 1–3 and your goal difference is −2."
       },
       "art": {
         "art": "numberline",
@@ -44,7 +44,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-basics-0",
-      "prompt": "Blue Lock drill score: 8 − (−3). What is the answer?",
+      "prompt": "Surface at Y = 8. Diamonds at Y = −3. 8 − (−3) is how many blocks down?",
       "options": [
         "11",
         "5",
@@ -54,13 +54,13 @@ export const pack: SePack = {
       "why": "Subtracting a negative number gives the same result as adding its positive partner.",
       "steps": [
         {
-          "text": "Subtracting −3 is the same as adding 3."
+          "text": "Y = −3 up to Y = 0 is 3 blocks. Then 8 more to Y = 8."
         },
         {
           "text": "So 8 − (−3) becomes 8 + 3."
         },
         {
-          "text": "Try 6 − (−4): it becomes 6 + 4, which is 10."
+          "text": "Try Y = 6 and Y = −4: 6 − (−4) = 6 + 4, which is 10 blocks."
         }
       ],
       "art": {
@@ -70,26 +70,26 @@ export const pack: SePack = {
         "step": 1,
         "points": [
           {
+            "at": -3,
+            "label": "−3",
+            "tone": "bad"
+          },
+          {
             "at": 8,
             "label": "8",
             "tone": "focus"
-          },
-          {
-            "at": 11,
-            "label": "11",
-            "tone": "good"
           }
         ],
         "span": [
-          8,
-          11
+          -3,
+          8
         ]
       }
     },
     {
       "kind": "choice",
       "id": "math-int-add-basics-1",
-      "prompt": "Which expression has the same value as 7 + 2?",
+      "prompt": "You have 7 V-Bucks. A 2 V-Buck charge is cancelled. Which equals 7 + 2?",
       "options": [
         "−7 + 2",
         "−7 − (−2)",
@@ -99,13 +99,13 @@ export const pack: SePack = {
       "why": "Two minus signs in a row, one before a negative number, cancel to a plus sign.",
       "steps": [
         {
-          "text": "Look at 7 − (−2). The minus before the bracket and the minus inside it make a plus."
+          "text": "Cancelling a −2 charge is 7 − (−2)."
         },
         {
-          "text": "So 7 − (−2) becomes 7 + 2."
+          "text": "The minus before the bracket and the minus inside make a plus: 7 + 2."
         },
         {
-          "text": "Test the same idea on 5 − (−1). It becomes 5 + 1, which is 6."
+          "text": "Try 5 V-Bucks and a −1 charge cancelled: 5 − (−1) = 5 + 1 = 6."
         }
       ]
     },
@@ -169,7 +169,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-basics-2",
-      "prompt": "Isagi's training score: −4 − (−9). What is the answer?",
+      "prompt": "Team A has goal difference −4. Team B has −9. A − B is −4 − (−9). What is it?",
       "options": [
         "−13",
         "5",
@@ -182,17 +182,17 @@ export const pack: SePack = {
           "text": "Change the minus-minus to a plus: −4 + 9."
         },
         {
-          "text": "Start at −4 and move right 9 steps. 4 steps reach zero, leaving 5 more steps."
+          "text": "Start at −4 and move right 9. Four steps reach zero, leaving 5 more."
         },
         {
-          "text": "Try −10 − (−6). It becomes −10 + 6, which is −4."
+          "text": "Try −10 − (−6): −10 + 6 is −4. The team on −10 is 4 goals behind."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-basics-3",
-      "prompt": "The counters show 4 positive and 9 negative. Which is 4 + (−9)?",
+      "prompt": "A potion heals 4 HP. A fall does 9 HP damage. Which is 4 + (−9)?",
       "options": [
         "5",
         "−5",
@@ -202,13 +202,13 @@ export const pack: SePack = {
       "why": "A positive and a negative cancel in pairs, and whatever is left over decides the sign.",
       "steps": [
         {
-          "text": "Pair each positive with a negative. Four pairs cancel out."
+          "text": "Pair each healed point with a damage point. Four pairs cancel out."
         },
         {
-          "text": "That leaves 5 negatives, so the total is −5."
+          "text": "That leaves 5 damage points, so the total is −5 HP."
         },
         {
-          "text": "Try 3 + (−7). Three pairs cancel, leaving 4 negatives, which is −4."
+          "text": "Try heal 3, fall 7: 3 + (−7). Three pairs cancel, leaving 4 damage, which is −4."
         }
       ],
       "art": {
@@ -223,8 +223,8 @@ export const pack: SePack = {
       "id": "math-int-add-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Integers show temperature, bank balances, and depth under the sea.",
-        "A One Piece crew diving 20 m under the sea is at −20 m.",
+        "Integers show Y levels, goal difference, and V-Bucks spent.",
+        "Diamonds near Y = −59 sit 59 blocks below zero.",
         "Get the sign wrong and your whole answer is far off."
       ],
       "callout": {
@@ -235,20 +235,20 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-add-build-0",
-      "prompt": "Isagi's drill tally is at −9. A −4 penalty is taken away. Build the new tally: −9 − (−4) = ?",
+      "prompt": "Your fight tally is −9 HP. A −4 HP hit is undone. Build the new tally: −9 − (−4) = ?",
       "answer": "-5",
       "decoys": [
         "4",
         "+",
         "9"
       ],
-      "why": "Taking away a negative number makes the total go up, the same as adding its positive.",
+      "why": "Undoing a negative hit makes the total go up, the same as adding its positive.",
       "steps": [
         {
-          "text": "Taking away a minus is the same as adding a plus."
+          "text": "Undoing a −4 hit is the same as adding 4."
         },
         {
-          "text": "Example: −6 − (−2) becomes −6 + 2."
+          "text": "Example: tally −6 HP, a −2 HP hit is undone. −6 − (−2) becomes −6 + 2."
         },
         {
           "text": "Start at −6 and move 2 right. You land on −4."
@@ -275,7 +275,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-basics-4",
-      "prompt": "Goal difference for Isagi's team: 3 scored, 8 let in. What is 3 − 8?",
+      "prompt": "Your club scored 3 and let in 8. Goal difference is 3 − 8. What is it?",
       "options": [
         "5",
         "11",
@@ -288,40 +288,40 @@ export const pack: SePack = {
           "text": "Start at 3 and count down 3 steps to reach zero."
         },
         {
-          "text": "There are 5 steps left, so the result goes 5 below zero."
+          "text": "There are 5 steps left, so the result is 5 below zero."
         },
         {
-          "text": "Try a team that scores 6 and concedes 2. It is 6 − 2, which is 4."
+          "text": "Try a 4–1 win. That is 4 − 1, so the goal difference is +3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-basics-5",
-      "prompt": "Missing number: −6 + ? = 2. What goes in the box?",
+      "prompt": "A Studio part sits at Y = −6 studs. You move it to Y = 2. Missing number: −6 + ? = 2.",
       "options": [
         "4",
         "8",
         "−8"
       ],
       "answer": 1,
-      "why": "To find a missing addend, count the distance from the starting number to the answer on the number line.",
+      "why": "To find the missing number, count the distance from the start to the answer on the number line.",
       "steps": [
         {
-          "text": "From −6 to zero is 6 steps up."
+          "text": "From Y = −6 up to Y = 0 is 6 studs."
         },
         {
-          "text": "From zero to 2 is 2 more steps, so the total distance is 8."
+          "text": "From Y = 0 up to Y = 2 is 2 more, so 8 in total."
         },
         {
-          "text": "Try −5 + ? = 1. The distance from −5 to 1 is 6, so the box is 6."
+          "text": "Try a part at Y = −5 moved to Y = 1. The distance is 6 studs."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-int-add-games-0",
-      "title": "Bounty Board: Minus a Minus",
+      "title": "Undo the Damage: Minus a Minus",
       "game": {
         "mode": "order",
         "values": [
@@ -355,8 +355,8 @@ export const pack: SePack = {
       "title": "The method: minus a minus",
       "lines": [
         "Adding a negative moves you left. Subtracting a negative moves you right.",
-        "Minus a minus turns into a plus: 5 − (−3) = 5 + 3.",
-        "Example: −7 + 12. Start at −7, move right 12 steps, and land on 5."
+        "Undo a −3 HP hit and you gain 3: 5 − (−3) = 5 + 3.",
+        "Example: at Y = −7, dig up 12 blocks. You land on Y = 5."
       ],
       "art": {
         "art": "numberline",
@@ -384,67 +384,67 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-basics-6",
-      "prompt": "The crew dives to −25 m, then rises 10 m. Where are they now?",
+      "prompt": "You mine down to Y = −25. Then you climb 10 blocks. Where are you now?",
       "options": [
-        "−35 m",
-        "−15 m",
-        "15 m"
+        "Y = −35",
+        "Y = −15",
+        "Y = 15"
       ],
       "answer": 1,
-      "why": "Rising means adding a positive amount, so the depth moves up towards zero.",
+      "why": "Climbing means adding a positive amount, so your Y moves up towards zero.",
       "steps": [
         {
-          "text": "Rising 10 m is the same as adding 10 to −25."
+          "text": "Climbing 10 blocks is the same as adding 10 to −25."
         },
         {
-          "text": "Start at −25 and climb 10 steps. You reach −15."
+          "text": "Start at Y = −25 and go up 10 steps. You reach Y = −15."
         },
         {
-          "text": "Try −30 m rising 4 m. The answer is −26 m."
+          "text": "Try Y = −30 and climb 4 blocks. You reach Y = −26."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-basics-7",
-      "prompt": "What is −(−6)?",
+      "prompt": "Fall damage is −6 HP. Undo it. What is −(−6)?",
       "options": [
         "6",
         "0",
         "−6"
       ],
       "answer": 0,
-      "why": "Taking the opposite of an opposite brings you back to the original positive number.",
+      "why": "The opposite of an opposite brings you back to the original positive number.",
       "steps": [
         {
-          "text": "The opposite of −6 is 6, the same distance from zero on the other side."
+          "text": "The opposite of −6 is 6: same distance from zero, other side."
         },
         {
-          "text": "A minus sign and a negative sign together give a plus, so −(−6) is +6."
+          "text": "Undoing a 6 HP fall gives 6 HP back, so −(−6) is +6."
         },
         {
-          "text": "Try −(−9). The opposite of −9 is 9."
+          "text": "Try −(−9). Undo a −9 HP fall and you get 9 HP back."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-1",
-      "prompt": "Build the answer: 7 − (−8) = ?",
+      "prompt": "Balance: 7 V-Bucks. A −8 charge is cancelled. Build 7 − (−8) = ?",
       "answer": "15",
       "decoys": [
         "-"
       ],
-      "why": "Subtracting a negative is the same as adding its positive, so 7 + 8 = 15.",
+      "why": "Cancelling a −8 charge gives 8 V-Bucks back, so 7 + 8 = 15.",
       "steps": [
         {
-          "text": "Change the minus-minus into a plus: 7 − (−8) becomes 7 + 8."
+          "text": "Cancelling a charge gives V-Bucks back. Flip the pair: 7 − (−8) becomes 7 + 8."
         },
         {
-          "text": "Example: 5 − (−3) becomes 5 + 3, which is 8."
+          "text": "Example: balance 4, cancel a −6 charge. 4 + 6 = 10."
         },
         {
-          "text": "Add the two positive numbers to get the total."
+          "text": "Add the two positive numbers to get the new balance."
         }
       ]
     }
@@ -455,13 +455,13 @@ export const pack: SePack = {
       "id": "math-int-add-teach-3",
       "title": "The common trap",
       "lines": [
-        "Trap: two minus signs do not make a bigger minus.",
-        "5 − (−3) is not 2. It is 8.",
-        "Ask yourself: is something being taken away? If so, flip it to a plus."
+        "Trap: 5 − (−3) is not 2. It is 8.",
+        "Your Roblox balance is 5 Robux. A −3 fee is cancelled.",
+        "Cancelling a fee gives Robux back, so the balance rises."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Do not stop at the first minus. Read the whole pair before you answer."
+        "text": "Is a negative being taken away? Flip the pair into a plus."
       }
     },
     {
@@ -469,9 +469,9 @@ export const pack: SePack = {
       "id": "math-int-add-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "Blue Lock example: Isagi has 5 points. A penalty of −3 is cancelled.",
-        "Cancelling a −3 means subtracting −3. Start at 5.",
-        "5 − (−3) = 5 + 3 = 8. The score goes up by 3."
+        "Blue Lock: Isagi has 5 points. He took a −3 penalty.",
+        "The penalty is cancelled. That means subtract −3.",
+        "5 − (−3) = 5 + 3 = 8. His score goes up by 3."
       ],
       "art": {
         "art": "numberline",
@@ -501,8 +501,8 @@ export const pack: SePack = {
       "id": "math-int-add-teach-5",
       "title": "Recap",
       "lines": [
-        "Adding a negative: move left.",
-        "Subtracting a negative: move right.",
+        "Adding a negative: hearts drop. Move left.",
+        "Subtracting a negative: damage undone. Move right.",
         "Minus a minus equals plus. Every time."
       ],
       "callout": {
@@ -516,8 +516,8 @@ export const pack: SePack = {
       "title": "Two minus signs in a row",
       "lines": [
         "One minus can mean take away.",
-        "Two minuses can sit together, like 5 − (−3).",
-        "Read it as: take away a negative. That is the same as adding."
+        "A club has 5 points. A −3 deduction is lifted: 5 − (−3).",
+        "Lifting a deduction gives points back. 5 + 3 = 8."
       ],
       "callout": {
         "flavour": "key",
@@ -529,8 +529,9 @@ export const pack: SePack = {
       "id": "math-int-add-deeper-1",
       "title": "Minus a minus turns plus",
       "lines": [
-        "The first minus means the opposite of what is inside.",
-        "The opposite of −4 is 4.",
+        "A minus in front means \"the opposite of\".",
+        "Y = −4 is 4 blocks below zero.",
+        "Its opposite is Y = 4, 4 blocks above.",
         "So −(−4) = 4. Two minus signs make one plus."
       ]
     },
@@ -539,8 +540,9 @@ export const pack: SePack = {
       "id": "math-int-add-deeper-2",
       "title": "Adding two negatives is not the same",
       "lines": [
+        "A fall costs −3 health. A hit then costs −4.",
         "−3 + (−4) has a plus sign, so it adds.",
-        "Both negatives push you further below zero.",
+        "Both hits push you further below zero.",
         "So −3 + (−4) = −7, not 7."
       ],
       "callout": {
@@ -554,12 +556,13 @@ export const pack: SePack = {
       "title": "Goal difference is a negative sum",
       "lines": [
         "Goal difference = goals scored − goals conceded.",
+        "A 4–1 win gives 4 − 1 = +3.",
         "Each goal you concede pulls your difference down by 1.",
         "If the ref cancels one conceded goal, you go up by 1."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi's team sits at −2. The ref cancels one conceded goal."
+        "text": "Your team sits at −2. The ref cancels one conceded goal."
       }
     },
     {
@@ -567,9 +570,10 @@ export const pack: SePack = {
       "id": "math-int-add-deeper-4",
       "title": "Only the number after the minus flips",
       "lines": [
-        "In −6 − (−4), the first −6 stays negative.",
+        "Usopp owes 6 million Berries. That is −6.",
+        "Nami wipes out a 4 million bill: −6 − (−4).",
         "Only the −4 flips, to become +4.",
-        "So the sum becomes −6 + 4, which is −2."
+        "So it becomes −6 + 4, which is −2."
       ],
       "callout": {
         "flavour": "pirate",
@@ -599,8 +603,8 @@ export const pack: SePack = {
       "id": "math-int-add-deeper-5",
       "title": "Subtraction is adding the opposite",
       "lines": [
-        "Taking away 4 is the same as adding −4.",
-        "Taking away −4 is the same as adding 4.",
+        "Digging 4 blocks down: Y − 4 is the same as Y + (−4).",
+        "Filling a 4-block hole back in: Y − (−4) is the same as Y + 4.",
         "So every subtraction can become an addition of the opposite."
       ],
       "callout": {
@@ -611,115 +615,115 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-basics-8",
-      "prompt": "What is −10 − (−6)?",
+      "prompt": "Your damage tally is −10 HP. Then 6 damage is undone. What is −10 − (−6)?",
       "options": [
-        "4",
-        "−16",
-        "−4"
+        "+4 HP",
+        "−16 HP",
+        "−4 HP"
       ],
       "answer": 2,
-      "why": "Subtracting a negative number adds its positive partner, which moves the answer closer to zero.",
+      "why": "Subtracting a negative adds its positive partner, which moves the answer closer to zero.",
       "steps": [
         {
-          "text": "Subtracting −6 is the same as adding 6, so the question becomes −10 + 6."
+          "text": "Undoing −6 damage is the same as adding 6, so it becomes −10 + 6."
         },
         {
           "text": "From −10, move 6 steps right. You reach −4."
         },
         {
-          "text": "Try −8 − (−3). It becomes −8 + 3, which is −5."
+          "text": "Try −8 − (−3) with a −8 tally and 3 damage undone. It becomes −8 + 3, which is −5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-basics-9",
-      "prompt": "The Thousand Sunny sits at −12 m and sinks 7 m more. Where is it now?",
+      "prompt": "You mine at Y = −12. Dig 7 blocks straight down. Where are you now?",
       "options": [
-        "−19 m",
-        "−5 m",
-        "19 m"
+        "Y = −19",
+        "Y = −5",
+        "Y = 19"
       ],
       "answer": 0,
-      "why": "Sinking further below sea level means subtracting from a negative depth, so the number gets more negative.",
+      "why": "Digging further below zero subtracts from a negative Y, so the number gets more negative.",
       "steps": [
         {
-          "text": "Sinking 7 m more is subtracting 7 from −12: −12 − 7."
+          "text": "Digging 7 blocks down is subtracting 7: −12 − 7."
         },
         {
-          "text": "Start at −12 and go 7 steps further down. You reach −19."
+          "text": "Start at Y = −12 and go 7 blocks lower. You reach Y = −19."
         },
         {
-          "text": "Try −6 m sinking 9 m. The answer is −15 m."
+          "text": "Try Y = −6 and dig 9 blocks down. You land on Y = −15."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-0",
-      "prompt": "Team Z is on −4 in the training league. The ref cancels a −3 penalty point. Work out −4 − (−3).",
+      "prompt": "Your club sits on −4 goal difference. A 0–3 loss is wiped from the record. Work out −4 − (−3).",
       "options": [
         "−7",
         "+1",
         "−1"
       ],
       "answer": 2,
-      "why": "Subtracting a negative number gives the same result as adding its positive.",
+      "why": "Taking away a negative result is the same as adding its positive.",
       "steps": [
         {
-          "text": "Try −6 − (−2) first. The second minus is taking away a negative."
+          "text": "Try a club on −6 with a 0–2 loss wiped: −6 − (−2)."
         },
         {
-          "text": "Taking away a negative is the same as adding a positive. So −6 − (−2) = −6 + 2 = −4."
+          "text": "Wiping a −2 loss is adding 2. So −6 + 2 = −4."
         },
         {
-          "text": "Check with a new pair: −5 − (−8) = −5 + 8 = 3. Same trick every time."
+          "text": "New club: −5 and a 0–8 loss wiped. −5 + 8 = +3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-1",
-      "prompt": "Nami is tracking a whirlpool at −9 m. Her map cancels a −4 m error. Work out −9 − (−4).",
+      "prompt": "A Roblox part sits at X = −9. You undo a move of −4 studs. Work out −9 − (−4).",
       "options": [
         "−5",
         "−13",
         "+5"
       ],
       "answer": 0,
-      "why": "Two minus signs side by side make a plus once the negative is removed.",
+      "why": "Undoing a negative move adds 4, so the part slides right, toward zero.",
       "steps": [
         {
-          "text": "Try −2 − (−7) first. The second minus is taking away a negative."
+          "text": "Try a part at X = −2, undoing a move of −7: −2 − (−7)."
         },
         {
-          "text": "Taking away −7 is the same as adding 7. So −2 + 7 = 5."
+          "text": "Undoing −7 is adding 7. So −2 + 7 = 5."
         },
         {
-          "text": "Check with a new pair: −8 − (−3) = −8 + 3 = −5. The answer stays negative because you start far below zero."
+          "text": "New part: X = −8, undo a move of −3. −8 + 3 = −5, still left of zero."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-2",
-      "prompt": "Isagi's team is at −3 in the league table. The ref removes a −7 penalty. Work out −3 − (−7).",
+      "prompt": "Isagi's team sits on −3 goal difference. A 0–7 loss is wiped. Work out −3 − (−7).",
       "options": [
         "−4",
         "+4",
         "−10"
       ],
       "answer": 1,
-      "why": "Removing a negative amount moves you up the number line, so the answer is positive here.",
+      "why": "Wiping a bigger negative result moves the table score up past zero.",
       "steps": [
         {
-          "text": "Try −8 − (−3) first. Count how far −8 must move to reach −3 by taking away −3."
+          "text": "Try a team on −8 with a 0–3 loss wiped: −8 − (−3)."
         },
         {
-          "text": "Taking away −3 means adding 3. So −8 + 3 = −5."
+          "text": "Wiping a −3 loss is adding 3. So −8 + 3 = −5."
         },
         {
-          "text": "Check with a new pair: −1 − (−6) = −1 + 6 = 5. Removing a big negative pushes you above zero."
+          "text": "New team: −1 and a 0–6 loss wiped. −1 + 6 = +5, above zero."
         }
       ],
       "art": {
@@ -743,76 +747,76 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-applied-3",
-      "prompt": "At 7 a.m. it was −9°C on Yonge Street. At noon it was −3°C. Find the change: −3 − (−9).",
+      "prompt": "You start at Y = −9 and climb to Y = −3. Find the change: −3 − (−9).",
       "options": [
         "+6",
         "−6",
         "−12"
       ],
       "answer": 0,
-      "why": "A rise in temperature is a positive change, even when both temperatures are below zero.",
+      "why": "Climbing is a positive change in Y, even when both heights are below zero.",
       "steps": [
         {
-          "text": "Try a warm-up: −2 − (−7). Subtracting −7 is the same as adding 7."
+          "text": "Try a climb from Y = −7 to Y = −2: −2 − (−7)."
         },
         {
-          "text": "So −2 + 7 = 5. The temperature rose 5 degrees."
+          "text": "Taking away −7 is adding 7. So −2 + 7 = 5 blocks up."
         },
         {
-          "text": "Check: a fall from −1 to −6 is −6 − (−1) = −5. Falls give negative answers."
+          "text": "Check a drop from Y = −1 to Y = −6: −6 − (−1) = −5. Drops give negative answers."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-4",
-      "prompt": "On the school field trip, the bus is at −3 km on the route map. The driver cancels a −2 km detour. Work out −3 − (−2).",
+      "prompt": "Your V-Bucks tracker reads −3 hundred. A −2 hundred buy is refunded. Work out −3 − (−2).",
       "options": [
         "−5",
         "+1",
         "−1"
       ],
       "answer": 2,
-      "why": "When the two negatives are close together, the answer is a small negative.",
+      "why": "Refunding a small negative buy moves you up a little, so the answer is still negative.",
       "steps": [
         {
-          "text": "Try −6 − (−4) first. The second minus is taking away −4."
+          "text": "Try a tracker on −6 with a −4 buy refunded: −6 − (−4)."
         },
         {
-          "text": "Taking away −4 is adding 4. So −6 + 4 = −2."
+          "text": "Refunding −4 is adding 4. So −6 + 4 = −2."
         },
         {
-          "text": "Check: −1 − (−5) = −1 + 5 = 4. Subtracting a bigger negative gives a bigger positive."
+          "text": "New tracker: −1 with a −5 buy refunded. −1 + 5 = 4, a big jump up."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-5",
-      "prompt": "Luffy's crew owes −120 berries. A bounty of −45 berries is cancelled. Work out −120 − (−45).",
+      "prompt": "You owe a friend 120 Robux, so your balance is −120. He cancels 45 of it. Work out −120 − (−45).",
       "options": [
         "+75",
         "−165",
         "−75"
       ],
       "answer": 2,
-      "why": "Cancelling a debt means you take away a negative, so the total moves towards zero.",
+      "why": "Cancelling a debt takes away a negative, so the balance moves up towards zero.",
       "steps": [
         {
-          "text": "Try −30 − (−10) first. Taking away −10 is the same as adding 10."
+          "text": "Try −30 − (−10) first. You owe 30 Robux and 10 is cancelled."
         },
         {
-          "text": "So −30 + 10 = −20. The total moved up 10 towards zero."
+          "text": "Taking away −10 is adding 10. So −30 + 10 = −20."
         },
         {
-          "text": "Check: −50 − (−15) = −50 + 15 = −35. Still negative, because you started far below zero."
+          "text": "Check: −50 − (−15) = −50 + 15 = −35. Still in debt, because you started far below zero."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-6",
-      "prompt": "Isagi's goal tally starts at −2. Then a −5 is removed, then a −3 is added. Work out −2 − (−5) + (−3).",
+      "prompt": "Your club's goal difference is −2. A 0–5 loss is struck off, then a 0–3 loss is added. Work out −2 − (−5) + (−3).",
       "options": [
         "0",
         "+6",
@@ -822,7 +826,7 @@ export const pack: SePack = {
       "why": "Work through a long calculation from left to right, one step at a time.",
       "steps": [
         {
-          "text": "Try −1 − (−4) + (−2) first. Do the first two numbers before the last one."
+          "text": "Try goal difference −1, strike off a 0–4 loss, add a 0–2 loss. That is −1 − (−4) + (−2)."
         },
         {
           "text": "−1 − (−4) = −1 + 4 = 3. Then 3 + (−2) = 1."
@@ -835,7 +839,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-applied-7",
-      "prompt": "Nagi says: take away a −9 demerit from zero. Work out −(−9).",
+      "prompt": "A storm hit logged −9 health. The hit is undone. Work out −(−9).",
       "options": [
         "−9",
         "+9",
@@ -845,10 +849,10 @@ export const pack: SePack = {
       "why": "A minus in front of a negative number flips it to positive.",
       "steps": [
         {
-          "text": "Think of −(−6) as 0 − (−6). Taking away −6 is adding 6."
+          "text": "Try a −6 health hit that is undone. That is −(−6), or 0 − (−6)."
         },
         {
-          "text": "So 0 − (−6) = 0 + 6 = 6."
+          "text": "Taking away −6 is adding 6. So 0 − (−6) = 0 + 6 = 6."
         },
         {
           "text": "Check: −(−2) means 0 − (−2) = 2. The same flip happens every time."
@@ -858,46 +862,46 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-applied-8",
-      "prompt": "A low tide at the Toronto Islands was −25 m on the chart. The high tide reading was −10 m. Find the change: −10 − (−25).",
+      "prompt": "You mine at Y = −25, then climb to Y = −10. Find the change: −10 − (−25).",
       "options": [
         "−35",
         "+15",
         "−15"
       ],
       "answer": 1,
-      "why": "A change from a low point up to a higher point is a positive change.",
+      "why": "Going from a lower Y level up to a higher one is a positive change.",
       "steps": [
         {
-          "text": "Try −4 − (−11) first. Taking away −11 is the same as adding 11."
+          "text": "Try Y = −11 up to Y = −4. That is −4 − (−11)."
         },
         {
-          "text": "So −4 + 11 = 7. The level rose 7 units."
+          "text": "Taking away −11 is adding 11. So −4 + 11 = 7 blocks up."
         },
         {
-          "text": "Check: −20 − (−8) = −20 + 8 = −12. Here the level fell, so the answer is negative."
+          "text": "Check: Y = −8 down to Y = −20 is −20 − (−8) = −12. You went down, so it is negative."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-applied-9",
-      "prompt": "Wilson's bank account is at −$34. A −$12 fee is cancelled by the bank. Work out −34 − (−12).",
+      "prompt": "You owe $34 for shawarma, so your tab is −34. Your cousin cancels $12 of it. Work out −34 − (−12).",
       "options": [
         "−46",
         "+22",
         "−22"
       ],
       "answer": 2,
-      "why": "Cancelling a fee is taking away a negative, so the balance goes up but stays below zero.",
+      "why": "Cancelling part of a debt takes away a negative, so the tab goes up but stays below zero.",
       "steps": [
         {
-          "text": "Try −15 − (−9) first. Taking away −9 is the same as adding 9."
+          "text": "Try a $15 poutine tab with $9 cancelled. That is −15 − (−9)."
         },
         {
-          "text": "So −15 + 9 = −6. The balance moved up 9 but is still below zero."
+          "text": "Taking away −9 is adding 9. So −15 + 9 = −6, still owing."
         },
         {
-          "text": "Check: −3 − (−10) = −3 + 10 = 7. A big cancelled fee can lift you above zero."
+          "text": "Check: owe $3 and $10 is cancelled. −3 − (−10) = −3 + 10 = 7, so you are ahead."
         }
       ]
     },
@@ -927,66 +931,66 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-deeper-7",
-      "prompt": "What is 5 − (−3)?",
+      "prompt": "You stand at Y = 5. The cave floor is at Y = −3. How many blocks down?",
       "options": [
-        "2",
-        "8",
-        "−8"
+        "2 blocks",
+        "8 blocks",
+        "3 blocks"
       ],
       "answer": 1,
-      "why": "Subtracting a negative means adding its positive, so 5 − (−3) is 5 + 3.",
+      "why": "The drop is 5 − (−3), and subtracting a negative means adding, so 5 + 3 = 8 blocks.",
       "steps": [
         {
-          "text": "Subtracting −3 means the same as adding 3."
+          "text": "Going from Y = 5 to Y = −3 is 5 − (−3). Subtracting −3 means adding 3."
         },
         {
-          "text": "Try 4 − (−6). Change it to 4 + 6, using the same move."
+          "text": "Try Y = 4 down to Y = −5. That is 4 − (−5), which is 4 + 5."
         },
         {
-          "text": "Count up 6 from 4 on the number line. You land on 10."
+          "text": "Count it: 4 blocks down to Y = 0, then 5 more. That is 9 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-deeper-8",
-      "prompt": "What is −3 + (−4)?",
+      "prompt": "In Roblox Studio, a part sits at X = −3. You move it by −4. Where is it now?",
       "options": [
-        "−7",
-        "+7",
-        "−1"
+        "X = −7",
+        "X = 7",
+        "X = −1"
       ],
       "answer": 0,
-      "why": "Adding two negatives makes the total more negative, because both numbers push you below zero.",
+      "why": "Both numbers point the same way, below zero, so the sizes add: −3 + (−4) = −7.",
       "steps": [
         {
-          "text": "Both numbers are negative, and the plus sign is between them. Both push down."
+          "text": "The part is at −3 and the move is −4. Both push it left."
         },
         {
-          "text": "Try −2 + (−6). Start at −2, then move 6 steps down."
+          "text": "Try X = −2 and a move of −6. Start at −2, then go 6 more left."
         },
         {
-          "text": "You land on −8, so both negatives stacked to make a bigger negative."
+          "text": "You land on −8. Two negatives stack into a bigger negative."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-add-deeper-9",
-      "prompt": "Blue Lock: Isagi's team has goal difference −2. The ref cancels one goal they conceded. What is the new goal difference?",
+      "prompt": "Your club's goal difference is −2. VAR cancels one goal you conceded. New goal difference?",
       "options": [
         "−3",
         "−1",
         "+3"
       ],
       "answer": 1,
-      "why": "Cancelling a conceded goal removes a −1, so the difference goes up by 1.",
+      "why": "Cancelling a conceded goal removes a −1, so the goal difference goes up by 1.",
       "steps": [
         {
           "text": "A conceded goal counts as −1. Cancelling it means subtracting −1."
         },
         {
-          "text": "Try −4 − (−1). Subtracting −1 is adding 1, so −4 + 1."
+          "text": "Try a table at −4 with one conceded goal cancelled. That is −4 − (−1), so −4 + 1."
         },
         {
           "text": "That gives −3. Each cancelled conceded goal lifts you by 1."
@@ -1014,7 +1018,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-add-deeper-10",
-      "prompt": "One Piece: the crew's account is at −6 beri. Luffy wipes out a −4 beri bill. What is the new balance?",
+      "prompt": "One Piece: the crew's account is at −6 Berries (thousands). Luffy wipes out a −4 bill. New balance?",
       "options": [
         "−2",
         "−10",
@@ -1027,7 +1031,7 @@ export const pack: SePack = {
           "text": "Wiping out a −4 bill means subtracting −4, so add 4 instead."
         },
         {
-          "text": "Try −5 with a −2 bill wiped out. That is −5 − (−2), which is −5 + 2."
+          "text": "Try a balance of −5 with a −2 bill wiped out. That is −5 − (−2), so −5 + 2."
         },
         {
           "text": "Work it: −5 + 2 = −3. The debt shrinks, so the balance rises."
@@ -1060,7 +1064,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-add-build-2",
-      "prompt": "Build the answer: −12 + 5 = ?",
+      "prompt": "Fortnite: the storm takes 12 health. You heal 5. Net change: −12 + 5 = ?",
       "answer": "-7",
       "decoys": [
         "+"
@@ -1068,132 +1072,132 @@ export const pack: SePack = {
       "why": "When the signs differ, subtract the smaller size and keep the sign of the bigger one.",
       "steps": [
         {
-          "text": "The two signs differ, so subtract the sizes: 12 − 5 = 7."
+          "text": "Damage and healing pull opposite ways. Subtract the sizes: 12 − 5 = 7."
         },
         {
-          "text": "Example: −15 + 6. The sizes are 15 and 6, so 15 − 6 = 9."
+          "text": "Try the storm taking 15 and a heal of 6. The sizes give 15 − 6 = 9."
         },
         {
-          "text": "The bigger size, 15, is negative, so the answer is −9."
+          "text": "The bigger size, 15, is damage (negative), so the net change is −9."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-3",
-      "prompt": "Build the answer: −4 − (−11) = ?",
+      "prompt": "You stand at Y = −4. Diamonds are at Y = −11. Build the blocks above them: −4 − (−11) = ?",
       "answer": "7",
       "decoys": [
         "-",
         "1",
         "3"
       ],
-      "why": "Subtracting −11 adds 11, so you move 11 steps right from −4 and land on 7.",
+      "why": "Subtracting −11 adds 11, so you are 7 blocks above the diamonds.",
       "steps": [
         {
           "text": "Rewrite the minus-minus as a plus: −4 + 11."
         },
         {
-          "text": "Example: −20 − (−9) becomes −20 + 9, which is −11."
+          "text": "Example: Y = −20 and a cave at Y = −29. −20 − (−29) is −20 + 29, which is 9."
         },
         {
-          "text": "Work out the sizes, 11 − 4 = 7, and the bigger size, 11, is positive."
+          "text": "Find the difference of the sizes, 11 − 4 = 7. The bigger size, 11, is positive."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-4",
-      "prompt": "Build the answer: −0.5 − (−1.25) = ?",
+      "prompt": "In Roblox Studio, Part A is at Y = −0.5 and Part B is at Y = −1.25. Build the gap: −0.5 − (−1.25) = ?",
       "answer": "0.75",
       "decoys": [
         "-",
         "2"
       ],
-      "why": "Decimals follow the same rule as whole numbers, so subtracting −1.25 adds 1.25.",
+      "why": "Decimals follow the same rule as whole numbers, so subtracting −1.25 adds 1.25 studs.",
       "steps": [
         {
           "text": "Rewrite as a plus: −0.5 + 1.25."
         },
         {
-          "text": "Example: −2.5 − (−0.5) becomes −2.5 + 0.5, which is −2."
+          "text": "Example: Part C at −2.5 and Part D at −0.5. −2.5 − (−0.5) is −2.5 + 0.5, which is −2."
         },
         {
-          "text": "Find the difference of the sizes, 1.25 − 0.5 = 0.75, and it is positive."
+          "text": "Find the difference of the sizes, 1.25 − 0.5 = 0.75. The bigger size is positive."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-5",
-      "prompt": "Build the answer: −1/2 − (−3/4) = ?",
+      "prompt": "You owe Sam 1/2 a pizza, so your tab is −1/2. A 3/4-pizza debt is wiped. Build: −1/2 − (−3/4) = ?",
       "answer": "1/4",
       "decoys": [
         "-",
         "3"
       ],
-      "why": "Fractions use the same sign rules, so subtracting −3/4 adds 3/4 to −1/2.",
+      "why": "Removing a 3/4 debt adds 3/4 to the tab, so −1/2 becomes 1/4 of a pizza.",
       "steps": [
         {
           "text": "Rewrite as a plus: −1/2 + 3/4."
         },
         {
-          "text": "Example: −3/4 − (−1/4) becomes −3/4 + 1/4, which is −2/4."
+          "text": "Example: tab of −3/4 pizza, and a 1/4 debt is wiped. −3/4 + 1/4 is −2/4."
         },
         {
-          "text": "Use a common denominator: 3/4 − 2/4 = 1/4."
+          "text": "Use quarters: −1/2 is −2/4, so 3/4 − 2/4 = 1/4."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-6",
-      "prompt": "Zoro is at −18 m, and Sanji is at −30 m. Build the depth gap: −18 − (−30) = ?",
+      "prompt": "Zoro dives to −18 m. Sanji dives to −30 m. Build Zoro's height above Sanji: −18 − (−30) = ?",
       "answer": "12",
       "decoys": [
         "-",
         "8"
       ],
-      "why": "A depth gap is always positive, and subtracting −30 adds 30 to −18.",
+      "why": "Zoro is shallower, so the gap is positive: subtracting −30 adds 30 to −18.",
       "steps": [
         {
           "text": "Rewrite as a plus: −18 + 30."
         },
         {
-          "text": "Example: −20 − (−9) becomes −20 + 9, which is −11."
+          "text": "Example: Luffy at −20 m and Usopp at −9 m. −20 − (−9) is −20 + 9, which is −11."
         },
         {
-          "text": "Find the difference of the sizes, 30 − 18 = 12, and the answer is positive."
+          "text": "Find the difference of the sizes, 30 − 18 = 12. The bigger size, 30, is positive."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-add-build-7",
-      "prompt": "Team Z's goal difference is −16. Build the answer: −16 − (−43) = ?",
+      "prompt": "Team Z has a goal difference of −16. Team Y has −43. Build Z's lead: −16 − (−43) = ?",
       "answer": "27",
       "decoys": [
         "-",
         "4",
         "6"
       ],
-      "why": "Subtracting a negative moves the total up, so −16 + 43 gives a positive 27.",
+      "why": "Team Z is 27 goals better, because subtracting −43 adds 43 to −16.",
       "steps": [
         {
           "text": "Rewrite as a plus: −16 + 43."
         },
         {
-          "text": "Example: −20 − (−35) becomes −20 + 35, which is 15."
+          "text": "Example: Team X at −20 and Team W at −35. −20 − (−35) is −20 + 35, which is 15."
         },
         {
-          "text": "Subtract the sizes, 43 − 16 = 27, and the bigger size is positive."
+          "text": "Subtract the sizes, 43 − 16 = 27. The bigger size, 43, is positive."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-int-add-games-1",
-      "title": "Crew Match: Flip the Sign",
+      "title": "Y-Level Match: Flip the Sign",
       "game": {
         "mode": "pair",
         "pairs": [

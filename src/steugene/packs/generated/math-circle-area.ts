@@ -16,18 +16,18 @@ export const pack: SePack = {
       "title": "What area of a circle means",
       "lines": [
         "Area is the flat space inside a circle.",
-        "Think of the grass covered by a centre circle on a pitch.",
+        "Think of the grass inside the centre circle on a pitch.",
         "Area is measured in square units, like cm² or m²."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "You are Isagi. The centre circle is your zone. How much grass is inside it?"
+        "flavour": "key",
+        "text": "The storm circle covers ground. How much ground is inside it?"
       }
     },
     {
       "kind": "choice",
       "id": "math-circle-area-basics-0",
-      "prompt": "Isagi's shooting circle has radius 4 m. What is its area? Use π ≈ 3.14.",
+      "prompt": "A round Roblox platform has radius 4 m. What is its area? Use π ≈ 3.14.",
       "options": [
         "25.12 m²",
         "50.24 m²",
@@ -50,23 +50,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-basics-1",
-      "prompt": "A One Piece treasure island is a circle. Its diameter is 14 km. What is its radius?",
+      "prompt": "A round Minecraft lake is 14 blocks across. What is its radius?",
       "options": [
-        "7 km",
-        "14 km",
-        "28 km"
+        "7 blocks",
+        "14 blocks",
+        "28 blocks"
       ],
       "answer": 0,
       "why": "The radius is half the diameter, because the diameter runs all the way across the circle through the centre.",
       "steps": [
         {
-          "text": "Write down the diameter: 14 km."
+          "text": "Write down the diameter: 14 blocks."
         },
         {
-          "text": "Divide by 2 to get the radius: 14 ÷ 2 = 7 km."
+          "text": "Divide by 2 to get the radius: 14 ÷ 2 = 7 blocks."
         },
         {
-          "text": "Try diameter 20 m: 20 ÷ 2 = 10 m, so the radius is 10 m."
+          "text": "Try diameter 20 blocks: 20 ÷ 2 = 10, so the radius is 10 blocks."
         }
       ]
     },
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-basics-2",
-      "prompt": "Which formula gives the area of a circle?",
+      "prompt": "Which formula gives the area of the storm circle?",
       "options": [
         "A = π r²",
         "C = 2 π r",
@@ -141,18 +141,18 @@ export const pack: SePack = {
           "text": "2 π r has only one r, so it cannot be area."
         },
         {
-          "text": "Check with radius 5 cm: π × 5 × 5 = 25π cm², which is the area."
+          "text": "Check with radius 5 blocks: π × 5 × 5 = 25π blocks², which is the area."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-basics-3",
-      "prompt": "A circle has radius 6 cm. What is r² in this circle?",
+      "prompt": "A round Minecraft pond has radius 6 blocks. What is r² for this pond?",
       "options": [
-        "36 cm²",
-        "12 cm²",
-        "6 cm²"
+        "36 blocks²",
+        "12 blocks²",
+        "6 blocks²"
       ],
       "answer": 0,
       "why": "r² means r × r, so 6 × 6 gives 36, not 6 × 2.",
@@ -164,7 +164,7 @@ export const pack: SePack = {
           "text": "Calculate: 6 × 6 = 36."
         },
         {
-          "text": "Try radius 9 cm: 9 × 9 = 81 cm²."
+          "text": "Try radius 9 blocks: 9 × 9 = 81 blocks²."
         }
       ]
     },
@@ -173,13 +173,13 @@ export const pack: SePack = {
       "id": "math-circle-area-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Circles are everywhere: pizzas, pools, clock faces, wheels.",
-        "To buy the right amount of paint or sod, you need the area.",
-        "Area tells you how much space a round thing covers."
+        "Pizzas, pools and storm circles are all circles.",
+        "Area tells you how much space a round thing covers.",
+        "A bigger radius adds far more area than you expect."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Sod rolls and paint cans are sold by area, so the maths saves money."
+        "text": "A 12-inch pizza has more area than two 8-inch pizzas."
       }
     },
     {
@@ -215,7 +215,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-basics-4",
-      "prompt": "The radius of a circle doubles. What happens to its area?",
+      "prompt": "A pizza's radius doubles, from 3 inches to 6 inches. What happens to its area?",
       "options": [
         "It doubles.",
         "It becomes four times bigger.",
@@ -225,10 +225,10 @@ export const pack: SePack = {
       "why": "Because the radius is squared, doubling it multiplies the area by 2 × 2 = 4.",
       "steps": [
         {
-          "text": "Start with radius 3 cm: area = 9π cm²."
+          "text": "A 3-inch radius gives area = 9π in²."
         },
         {
-          "text": "Double the radius to 6 cm: area = 36π cm²."
+          "text": "A 6-inch radius gives area = 36π in²."
         },
         {
           "text": "Compare: 36 ÷ 9 = 4, so the area is four times bigger."
@@ -238,23 +238,23 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Radius 3 cm",
+            "label": "Radius 3 in",
             "value": 9,
             "tone": "calm"
           },
           {
-            "label": "Radius 6 cm",
+            "label": "Radius 6 in",
             "value": 36,
             "tone": "good"
           }
         ],
-        "unit": "π cm²"
+        "unit": "π in²"
       }
     },
     {
       "kind": "game",
       "id": "math-circle-area-games-0",
-      "title": "Radius Squad Match",
+      "title": "Block Ring Match",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -267,7 +267,7 @@ export const pack: SePack = {
             "2 × r"
           ],
           [
-            "Radius, r",
+            "Radius, r, in blocks",
             "Centre to edge"
           ],
           [
@@ -287,7 +287,8 @@ export const pack: SePack = {
       "id": "math-circle-area-teach-2",
       "title": "The formula: A = π r²",
       "lines": [
-        "A is the area. r is the radius, from the centre to the edge.",
+        "A is the area of a round platform, in studs².",
+        "r is the radius, from the centre to the edge.",
         "Step 1: square the radius. That means r × r.",
         "Step 2: multiply that answer by π, about 3.14."
       ],
@@ -299,9 +300,9 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-basics-6",
-      "prompt": "A circle has diameter 10 cm. Which step should you do first to find the area?",
+      "prompt": "The storm circle is 10 metres across. Which step should you do first to find its area?",
       "options": [
-        "Find the radius: 10 ÷ 2 = 5 cm, then square it.",
+        "Find the radius: 10 ÷ 2 = 5 m, then square it.",
         "Square the 10 first, then halve it.",
         "Multiply 10 by π first, then square it."
       ],
@@ -312,17 +313,17 @@ export const pack: SePack = {
           "text": "The formula uses r, not the diameter, so change diameter to radius first."
         },
         {
-          "text": "Try diameter 8 cm: radius = 8 ÷ 2 = 4 cm."
+          "text": "Try diameter 8 m: radius = 8 ÷ 2 = 4 m."
         },
         {
-          "text": "Then square it: 4 × 4 = 16, so the area is 16π cm²."
+          "text": "Then square it: 4 × 4 = 16, so the area is 16π m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-basics-7",
-      "prompt": "A circle has radius 10 cm. Using π ≈ 3, which is the best estimate of its area?",
+      "prompt": "A football's centre-circle marker has radius 10 cm. Using π ≈ 3, what is its area?",
       "options": [
         "about 30 cm²",
         "about 300 cm²",
@@ -345,17 +346,17 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-circle-area-build-1",
-      "prompt": "Bachira kicks a ball inside a circle of radius 10 m. Build the area. Use π = 3.14.",
+      "prompt": "A round Roblox platform has radius 10 m. Build its area. Use π = 3.14.",
       "answer": "314",
       "decoys": [
         "2",
         "9",
         "0"
       ],
-      "why": "A circle with radius 10 m covers 100 m² times 3.14, so the area is 314 m².",
+      "why": "Radius 10 m gives 100 m² times 3.14, so the area is 314 m².",
       "steps": [
         {
-          "text": "Step 1: Square the radius. Example: radius 9 m. 9 × 9 = 81."
+          "text": "Step 1: Square the radius. Example: a platform with radius 9 m. 9 × 9 = 81."
         },
         {
           "text": "Step 2: Multiply the square by 3.14. Example: 81 × 3.14 = 254.34."
@@ -372,13 +373,13 @@ export const pack: SePack = {
       "id": "math-circle-area-teach-3",
       "title": "The common trap",
       "lines": [
-        "Many students double the radius instead of squaring it.",
-        "Radius 4 cm: doubling gives 8. Squaring gives 16.",
+        "Many players double the radius instead of squaring it.",
+        "Radius 4 blocks: doubling gives 8. Squaring gives 16.",
         "Doubling is 2 × r. Squaring is r × r. Those are not the same."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "If the question gives the diameter, halve it first to get the radius."
+        "text": "If a pit is 8 blocks across, halve it first. The radius is 4."
       }
     },
     {
@@ -386,13 +387,13 @@ export const pack: SePack = {
       "id": "math-circle-area-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "A centre circle has a radius of 9.15 m.",
+        "A football centre circle has a radius of 9.15 m.",
         "Step 1: square the radius. 9.15 × 9.15 is about 83.7.",
         "Step 2: multiply by π. 83.7 × 3.14 is about 263 m²."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "On a round island with radius 5 km, the same steps give about 78.5 km²."
+        "text": "A Fortnite storm circle with radius 5 km covers about 78.5 km²."
       }
     },
     {
@@ -402,7 +403,7 @@ export const pack: SePack = {
       "lines": [
         "Area of a circle: A = π r².",
         "Find the radius first. Square it. Then multiply by π.",
-        "Never double the radius. Halve the diameter to find the radius."
+        "A 12-inch pizza has radius 6 inches. Halve the diameter first."
       ],
       "callout": {
         "flavour": "key",
@@ -420,7 +421,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Isagi's circle has diameter 20 m. Its radius is 10 m."
+        "text": "A Pokémon Gym arena has diameter 20 m. Its radius is 10 m."
       }
     },
     {
@@ -442,13 +443,13 @@ export const pack: SePack = {
       "id": "math-circle-area-deeper-2",
       "title": "Double the radius, four times the area",
       "lines": [
-        "Radius 2 cm gives an area of 4π cm².",
-        "Radius 4 cm gives an area of 16π cm².",
+        "Storm circle radius 2 km gives an area of 4π km².",
+        "Radius 4 km gives an area of 16π km².",
         "16 is four times 4. The area grows much faster than the radius."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Doubling the radius does not double the area. It quadruples it."
+        "text": "Doubling the storm's radius does not double the area. It quadruples it."
       }
     },
     {
@@ -456,13 +457,13 @@ export const pack: SePack = {
       "id": "math-circle-area-deeper-3",
       "title": "Area is in square units",
       "lines": [
-        "Area counts the squares inside a shape: cm², m².",
-        "Circumference is a length: cm, m.",
+        "Area counts the squares inside a shape: m², blocks².",
+        "Circumference is a length: m, blocks.",
         "π has no unit. It is just a ratio."
       ],
       "callout": {
         "flavour": "key",
-        "text": "A pitch has area in m². The touchline is measured in m."
+        "text": "A round Minecraft farm: its floor is in m², its fence is in m."
       }
     },
     {
@@ -475,8 +476,8 @@ export const pack: SePack = {
         "Keep π in exact answers unless the question asks for a decimal."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Imagine a striker who rounds the goal width. Close, but not exact."
+        "flavour": "key",
+        "text": "The menu's '12-inch' pizza is rounded too. Close, not exact."
       }
     },
     {
@@ -489,41 +490,41 @@ export const pack: SePack = {
         "The square root undoes the squaring."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Find the radius of the treasure circle from its area."
+        "flavour": "key",
+        "text": "The EA FC centre circle has area about 263 m². Work back to its radius."
       }
     },
     {
       "kind": "choice",
       "id": "math-circle-area-basics-8",
-      "prompt": "A semi-circle has radius 4 cm. Using π ≈ 3.14, what is its area?",
+      "prompt": "A half-moon Roblox platform has radius 4 m. Using π ≈ 3.14, what is its area?",
       "options": [
-        "25.12 cm²",
-        "50.24 cm²",
-        "12.56 cm²"
+        "25.12 m²",
+        "50.24 m²",
+        "12.56 m²"
       ],
       "answer": 0,
-      "why": "A semi-circle is half a circle, so you find the full circle's area and then divide by 2.",
+      "why": "A half-moon is half a circle, so you find the full circle's area and then divide by 2.",
       "steps": [
         {
-          "text": "Full circle: 3.14 × 4 × 4 = 50.24 cm²."
+          "text": "Full circle: 3.14 × 4 × 4 = 50.24 m²."
         },
         {
-          "text": "Half of that: 50.24 ÷ 2 = 25.12 cm²."
+          "text": "Half of that: 50.24 ÷ 2 = 25.12 m²."
         },
         {
-          "text": "Try radius 6 cm: full circle 113.04, half is 56.52 cm²."
+          "text": "Try radius 6 m: full circle 113.04 m², half is 56.52 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-0",
-      "prompt": "Isagi's coach draws a circle of radius 6 m on the training pitch. What is its area?",
+      "prompt": "Your round Minecraft pond has radius 6 blocks. What is its area?",
       "options": [
-        "12π m²",
-        "36π m²",
-        "6π m²"
+        "12π blocks²",
+        "36π blocks²",
+        "6π blocks²"
       ],
       "answer": 1,
       "why": "Area uses the radius squared, so you multiply the radius by itself, not by 2.",
@@ -535,60 +536,60 @@ export const pack: SePack = {
           "text": "Radius is 6, so r² = 6 × 6 = 36."
         },
         {
-          "text": "Try radius 5: 5 × 5 = 25, so the area is 25π m²."
+          "text": "Try radius 5: 5 × 5 = 25, so the area is 25π blocks²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-1",
-      "prompt": "Luffy's crew paints a circle on the deck. The radius is 3 m. What is the area?",
+      "prompt": "A round tower floor in Minecraft has radius 3 blocks. What is its area?",
       "options": [
-        "3π m²",
-        "6π m²",
-        "9π m²"
+        "3π blocks²",
+        "6π blocks²",
+        "9π blocks²"
       ],
       "answer": 2,
-      "why": "Doubling the radius gives 6π, but the area rule squares it, giving 9π.",
+      "why": "The area rule squares the radius, so doubling the radius does not double the area.",
       "steps": [
         {
           "text": "Write the rule: A = π r². Square the radius first."
         },
         {
-          "text": "Radius is 3, so r² = 3 × 3 = 9. Area is 9π m²."
+          "text": "Radius is 3, so r² = 3 × 3 = 9. Area is 9π blocks²."
         },
         {
-          "text": "Try radius 4: 4 × 4 = 16, so the area is 16π m². Doubling would give 8π, which is wrong."
+          "text": "Try radius 4: 4 × 4 = 16, so the area is 16π blocks². Doubling would give 8π, which is wrong."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-2",
-      "prompt": "A round practice mat has a diameter of 8 m. What is its area?",
+      "prompt": "A round pizza is 8 inches across. What is its area?",
       "options": [
-        "16π m²",
-        "8π m²",
-        "64π m²"
+        "16π square inches",
+        "8π square inches",
+        "64π square inches"
       ],
       "answer": 0,
       "why": "The area rule needs the radius, which is half the diameter, so r = 4 here.",
       "steps": [
         {
-          "text": "Diameter is 8 m, so radius is 8 ÷ 2 = 4 m."
+          "text": "Diameter is 8 inches, so radius is 8 ÷ 2 = 4 inches."
         },
         {
-          "text": "Square the radius: r² = 4 × 4 = 16. Area is 16π m²."
+          "text": "Square the radius: r² = 4 × 4 = 16. Area is 16π square inches."
         },
         {
-          "text": "Try diameter 14: radius 7, 7 × 7 = 49, so the area is 49π m²."
+          "text": "Try a 14-inch pizza: radius 7, 7 × 7 = 49, so the area is 49π square inches."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-3",
-      "prompt": "Circle A has radius 2 m. Circle B has radius 4 m. How many times bigger is Circle B's area?",
+      "prompt": "The storm circle now has radius 2 m. Earlier it had radius 4 m. How many times bigger was the earlier area?",
       "options": [
         "2 times",
         "4 times",
@@ -598,10 +599,10 @@ export const pack: SePack = {
       "why": "Doubling the radius makes the area four times bigger, because the radius is squared.",
       "steps": [
         {
-          "text": "Circle A: r² = 2 × 2 = 4, so area is 4π m²."
+          "text": "Now: r² = 2 × 2 = 4, so the area is 4π m²."
         },
         {
-          "text": "Circle B: r² = 4 × 4 = 16, so area is 16π m²."
+          "text": "Earlier: r² = 4 × 4 = 16, so the area is 16π m²."
         },
         {
           "text": "Compare: 16 ÷ 4 = 4. Try radius 3 vs 6: 36 ÷ 9 = 4 again."
@@ -611,7 +612,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-applied-4",
-      "prompt": "Isagi's shooting target is a circle with radius 2.5 m. Using π = 3.14, what is its area?",
+      "prompt": "Isagi trains on a round target with radius 2.5 m. Using π = 3.14, what is its area?",
       "options": [
         "15.7 m²",
         "31.4 m²",
@@ -634,7 +635,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-applied-5",
-      "prompt": "Luffy's crew has a square deck, 10 m by 10 m. A circle of radius 5 m is painted in the middle. Using π = 3.14, how much deck is NOT painted?",
+      "prompt": "Luffy's crew has a square deck, 10 m by 10 m. A painted circle of radius 5 m covers the middle. Using π = 3.14, how much deck is NOT painted?",
       "options": [
         "78.5 m²",
         "28.5 m²",
@@ -650,14 +651,14 @@ export const pack: SePack = {
           "text": "Subtract: 100 − 78.5 = 21.5 m² is the unpainted part."
         },
         {
-          "text": "Try a square 8 m wide, radius 2 m: 64 − 12.56 = 51.44, about 51.4 m²."
+          "text": "Try a square 8 m wide with a circle of radius 2 m: 64 − 12.56 = 51.44, about 51.4 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-6",
-      "prompt": "A round garden bed in Toronto has a radius of 10 m. Using π = 3.14, what is its area?",
+      "prompt": "A round Roblox platform has a radius of 10 m. Using π = 3.14, what is its area?",
       "options": [
         "62.8 m²",
         "314 m²",
@@ -680,11 +681,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-applied-8",
-      "prompt": "Zoro finds a round treasure circle with an area of 81π m². What is its radius?",
+      "prompt": "A round Roblox platform has area 81π studs². What is its radius?",
       "options": [
-        "81 m",
-        "9 m",
-        "18 m"
+        "81 studs",
+        "9 studs",
+        "18 studs"
       ],
       "answer": 1,
       "why": "To undo squaring, you take the square root, and √81 = 9.",
@@ -696,14 +697,14 @@ export const pack: SePack = {
           "text": "Find the number that times itself gives 81: 9 × 9 = 81."
         },
         {
-          "text": "Try area 49π: 7 × 7 = 49, so the radius is 7 m."
+          "text": "Try area 49π: 7 × 7 = 49, so the radius is 7 studs."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-applied-9",
-      "prompt": "A Toronto school field is a circle with area 113.04 m². Using π = 3.14, what is the radius?",
+      "prompt": "A round Minecraft pond covers 113.04 m². Using π = 3.14, what is its radius?",
       "options": [
         "6 m",
         "12 m",
@@ -726,20 +727,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-deeper-6",
-      "prompt": "Isagi's training circle has a radius of 6 m. What is its area?",
+      "prompt": "A round pizza has a radius of 6 cm. What is its area?",
       "options": [
-        "36π m²",
-        "12π m²",
-        "6π m²"
+        "36π cm²",
+        "12π cm²",
+        "6π cm²"
       ],
       "answer": 0,
       "why": "Area uses r squared, so 6 × 6 = 36, not 6 × 2.",
       "steps": [
         {
-          "text": "Try radius 4 m first. r² = 4 × 4 = 16."
+          "text": "Try radius 4 cm first. r² = 4 × 4 = 16."
         },
         {
-          "text": "Area = π × 16 = 16π m², not 8π m²."
+          "text": "Area = π × 16 = 16π cm², not 8π cm²."
         },
         {
           "text": "Doubling 4 would give 8. That is the trap, not the method."
@@ -772,7 +773,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-deeper-8",
-      "prompt": "Isagi doubles the radius of a circle from 3 cm to 6 cm. The area becomes:",
+      "prompt": "The storm circle grows from radius 3 km to radius 6 km. Its area becomes:",
       "options": [
         "twice as big",
         "four times as big",
@@ -782,10 +783,10 @@ export const pack: SePack = {
       "why": "Doubling r multiplies r² by 4, so the area is four times bigger.",
       "steps": [
         {
-          "text": "Try radius 5 cm. Area = π × 5² = 25π cm²."
+          "text": "Try radius 5 km. Area = π × 5² = 25π km²."
         },
         {
-          "text": "Now double it to radius 10 cm. Area = π × 10² = 100π cm²."
+          "text": "Now double it to radius 10 km. Area = π × 10² = 100π km²."
         },
         {
           "text": "Compare: 100 ÷ 25 is the scale factor for the area."
@@ -795,30 +796,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-circle-area-deeper-9",
-      "prompt": "Which unit goes with the area of a circular mat?",
+      "prompt": "Which unit measures the floor of Luffy's round arena?",
       "options": [
         "cm",
-        "cm²",
-        "cm³"
+        "m²",
+        "m³"
       ],
       "answer": 1,
       "why": "Area counts flat squares, so it is measured in square units.",
       "steps": [
         {
-          "text": "A rectangle 5 cm by 2 cm has 10 little squares inside."
+          "text": "A rectangle 5 m by 2 m has 10 little squares inside."
         },
         {
-          "text": "Each little square is 1 cm², so the area is 10 cm²."
+          "text": "Each little square is 1 m², so the area is 10 m²."
         },
         {
-          "text": "A length like 5 cm is a line, not a surface. Area needs squares."
+          "text": "A length like 5 m is a line, not a surface. Area needs squares."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-deeper-10",
-      "prompt": "Which formula finds the area of a circle?",
+      "prompt": "The storm circle is round. Which formula gives the ground it covers?",
       "options": [
         "A = 2πr",
         "A = πr²",
@@ -828,33 +829,33 @@ export const pack: SePack = {
       "why": "Area is π times r squared. The 2πr formula gives the circumference instead.",
       "steps": [
         {
-          "text": "Try radius 3 cm. The circumference 2πr = 6π cm, which is a length."
+          "text": "Storm radius 3 blocks. The edge is 2πr = 6π blocks, which is a length."
         },
         {
-          "text": "The area πr² = π × 9 = 9π cm², which is a square unit."
+          "text": "The ground is πr² = π × 9 = 9π blocks², which is a square unit."
         },
         {
-          "text": "Check the units. Area must be in squares, so only one formula fits."
+          "text": "Check the units. Ground is in squares, so only one formula fits."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-circle-area-deeper-11",
-      "prompt": "A treasure map circle has an area of 49π cm². Its radius is:",
+      "prompt": "A round Roblox platform covers 49π studs². Its radius is:",
       "options": [
-        "7 cm",
-        "14 cm",
-        "24.5 cm"
+        "7 studs",
+        "14 studs",
+        "24.5 studs"
       ],
       "answer": 0,
       "why": "Divide the area by π to get r², then take the square root to get r.",
       "steps": [
         {
-          "text": "Try an area of 16π cm². Divide by π: 16 = r²."
+          "text": "Another platform covers 16π studs². Divide by π: 16 = r²."
         },
         {
-          "text": "Take the square root: √16 = 4, so r = 4 cm."
+          "text": "Take the square root: √16 = 4, so the radius is 4 studs."
         },
         {
           "text": "Half of 16 is not the radius. Only the square root undoes the squaring."
@@ -864,30 +865,30 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-circle-area-build-2",
-      "prompt": "A training circle has radius 6 m. Build the area. Use π = 3.14.",
+      "prompt": "Your round Minecraft farm has radius 6 blocks. Build its area. Use π = 3.14.",
       "answer": "113.04",
       "decoys": [
         "8",
         "5",
         "9"
       ],
-      "why": "Squaring 6 gives 36, and 36 × 3.14 gives 113.04 m².",
+      "why": "Squaring 6 gives 36, and 36 × 3.14 gives 113.04 blocks².",
       "steps": [
         {
-          "text": "Step 1: Square the radius. Example: radius 12 m. 12 × 12 = 144."
+          "text": "Step 1: Square the radius. Example: radius 12 blocks. 12 × 12 = 144."
         },
         {
           "text": "Step 2: Multiply by 3.14. Example: 144 × 3.14 = 452.16."
         },
         {
-          "text": "Step 3: Keep two decimal places, because money-style answers need them."
+          "text": "Step 3: Keep two decimal places, as the answer needs them."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-area-build-3",
-      "prompt": "Chigiri's practice circle has radius 3 m. Build the area. Use π = 3.14.",
+      "prompt": "Chigiri's practice ring has radius 3 m. Build the area. Use π = 3.14.",
       "answer": "28.26",
       "decoys": [
         "1"
@@ -901,7 +902,7 @@ export const pack: SePack = {
           "text": "Step 2: Multiply by 3.14. Example: 121 × 3.14 = 379.94."
         },
         {
-          "text": "Step 3: Compare with the radius. The area should be about three times the square, not six."
+          "text": "Step 3: Compare with the radius. The area is about 3 times r², not 6 times."
         }
       ]
     },
@@ -930,7 +931,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-circle-area-build-5",
-      "prompt": "A tiny target circle around a penalty spot has radius 1.5 m. Build the area. Use π = 3.14.",
+      "prompt": "A round target on the training pitch has radius 1.5 m. Build the area. Use π = 3.14.",
       "answer": "7.065",
       "decoys": [
         "9",
@@ -953,36 +954,36 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-circle-area-build-6",
-      "prompt": "A circle on the training pitch has radius 7 m. Build the area. Use π = 3.14.",
+      "prompt": "Your Minecraft round platform has radius 7 blocks. Build its area. Use π = 3.14.",
       "answer": "153.86",
       "decoys": [
         "4"
       ],
-      "why": "Radius 7 m squared is 49 m², and 49 × 3.14 is 153.86 m².",
+      "why": "Radius 7 blocks squared is 49 blocks², and 49 × 3.14 is 153.86 blocks².",
       "steps": [
         {
-          "text": "Step 1: Square the radius. Example: radius 11 m. 11 × 11 = 121."
+          "text": "Step 1: Square the radius. Example: a platform with radius 11 blocks gives 11 × 11 = 121."
         },
         {
           "text": "Step 2: Multiply by 3.14. Example: 121 × 3.14 = 379.94."
         },
         {
-          "text": "Step 3: Remember that the answer is an area, so it is always larger than the radius squared alone."
+          "text": "Step 3: The answer is square blocks, so the unit is blocks², not blocks."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-circle-area-build-7",
-      "prompt": "A training circle has a diameter of 8 m. Find the radius first, then build the area. Use π = 3.14.",
+      "prompt": "Your round Roblox obby platform is 8 studs across. Find the radius, then build the area. Use π = 3.14.",
       "answer": "50.24",
       "decoys": [
         "6"
       ],
-      "why": "The radius is half the diameter, so 8 m gives 4 m, and 4 × 4 × 3.14 is 50.24 m².",
+      "why": "The radius is half the diameter, so 8 studs gives 4 studs, and 4 × 4 × 3.14 is 50.24 studs².",
       "steps": [
         {
-          "text": "Step 1: Halve the diameter to get the radius. Example: diameter 30 m gives radius 15 m."
+          "text": "Step 1: Halve the diameter to get the radius. Example: 30 studs across gives radius 15."
         },
         {
           "text": "Step 2: Square the radius. Example: 15 × 15 = 225."

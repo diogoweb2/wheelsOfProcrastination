@@ -27,40 +27,40 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-avg-basics-0",
-      "prompt": "Isagi scored these goals in five games: 2, 0, 3, 1, 4. What is the mean number of goals?",
+      "prompt": "Your eliminations in five matches: 2, 0, 3, 1, 4. What is the mean?",
       "options": [
-        "3 goals",
-        "2 goals",
-        "2.5 goals"
+        "3 eliminations",
+        "2 eliminations",
+        "2.5 eliminations"
       ],
       "answer": 1,
       "why": "The mean is the total divided by how many values there are, so 10 ÷ 5 = 2.",
       "steps": [
         {
-          "text": "Add all the goals: 6 + 2 + 4 + 0 = 12."
+          "text": "Add the eliminations: 6 + 2 + 4 + 0 = 12."
         },
         {
-          "text": "Count the games: there are 4 values, so divide by 4."
+          "text": "Count the matches: there are 4 values, so divide by 4."
         },
         {
-          "text": "12 ÷ 4 = 3, so the mean in that example is 3 goals."
+          "text": "12 ÷ 4 = 3, so the mean in that example is 3 eliminations."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-basics-1",
-      "prompt": "Five pirates have bounties of 3, 9, 1, 7 and 5 million berries. What is the median bounty?",
+      "prompt": "Five chests hold 3, 9, 1, 7 and 5 stacks of cobblestone. What is the median?",
       "options": [
-        "3 million",
-        "5 million",
-        "7 million"
+        "3 stacks",
+        "5 stacks",
+        "7 stacks"
       ],
       "answer": 1,
       "why": "The median is the middle value once the numbers are in order from smallest to largest.",
       "steps": [
         {
-          "text": "Put the numbers in order: 2, 4, 6, 8, 10."
+          "text": "Put the numbers in order: 2, 4, 6, 8, 10 stacks."
         },
         {
           "text": "Find the middle one. With 5 numbers, the middle is the 3rd, which is 6."
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-avg-basics-2",
-      "prompt": "In six games, Isagi had these shots on target: 2, 7, 4, 1, 6, 9. What is the median?",
+      "prompt": "Isagi's shots on target in six games: 2, 7, 4, 1, 6, 9. What is the median?",
       "options": [
         "4",
         "6",
@@ -148,11 +148,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-avg-basics-3",
-      "prompt": "Isagi's goals in one season: 1, 3, 3, 2, 3, 0, 1. Which number of goals is the mode?",
+      "prompt": "Your catches per day over seven days: 1, 3, 3, 2, 3, 0, 1. Which is the mode?",
       "options": [
-        "1 goal",
-        "2 goals",
-        "3 goals"
+        "1 catch",
+        "2 catches",
+        "3 catches"
       ],
       "answer": 2,
       "why": "The mode is the value that appears most often, and 3 appears three times.",
@@ -173,32 +173,32 @@ export const pack: SePack = {
       "id": "math-avg-teach-1",
       "title": "Why it matters",
       "lines": [
-        "A scout checks a striker's goals over five matches.",
-        "One huge match can make him look better than he is.",
+        "A game gets visits over five days.",
+        "One record day can make it look bigger than it is.",
         "Picking the right measure stops you being fooled by one big number."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "You are the coach. Who do you sign: the one hat-trick guy or the steady scorer?"
+        "text": "Which game do you publish: one record day, or steady visits every day?"
       }
     },
     {
       "kind": "build",
       "id": "math-avg-build-0",
-      "prompt": "Isagi scored 0, 1, 1 and 4 goals in four games. What is his mean?",
+      "prompt": "Your eliminations in four Fortnite matches were 0, 1, 1 and 4. What is the mean?",
       "answer": "1.5",
       "decoys": [
         "6",
         "2",
         "4"
       ],
-      "why": "The mean spreads the total evenly across every game, even when the answer is not a whole number.",
+      "why": "The mean spreads the total evenly across every match, even when it is not a whole number.",
       "steps": [
         {
-          "text": "Worked example: Rin scored 3, 0, 2 and 2. Add them: 3 + 0 + 2 + 2 = 7."
+          "text": "Worked example: your squad got 3, 0, 2 and 2 eliminations. Add: 3 + 0 + 2 + 2 = 7."
         },
         {
-          "text": "Share the total across the games: 7 ÷ 4 = 1.75. That is the mean."
+          "text": "Share the total across 4 matches: 7 ÷ 4 = 1.75. That is the mean."
         },
         {
           "text": "Check: the mean must sit between the lowest and highest score."
@@ -208,109 +208,109 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Game 1",
+            "label": "Match 1",
             "value": 0,
             "tone": "calm"
           },
           {
-            "label": "Game 2",
+            "label": "Match 2",
             "value": 1,
             "tone": "calm"
           },
           {
-            "label": "Game 3",
+            "label": "Match 3",
             "value": 1,
             "tone": "calm"
           },
           {
-            "label": "Game 4",
+            "label": "Match 4",
             "value": 4,
             "tone": "focus"
           }
         ],
-        "unit": "goals"
+        "unit": "elims"
       }
     },
     {
       "kind": "choice",
       "id": "math-avg-basics-4",
-      "prompt": "Toronto's lowest and highest temperatures on five January days were −8°C, −3°C, −12°C, 0°C and −5°C. What is the range?",
+      "prompt": "You mined at these Y levels: −8, −3, −12, 0, −5. How many blocks is the spread?",
       "options": [
-        "12°C",
-        "−12°C",
-        "8°C"
+        "12 blocks",
+        "−12 blocks",
+        "8 blocks"
       ],
       "answer": 0,
-      "why": "The range is the highest value minus the lowest, so 0 − (−12) = 12.",
+      "why": "The range is highest minus lowest, so 0 − (−12) = 12 blocks.",
       "steps": [
         {
-          "text": "Find the highest value. In the example −4, 2, −9, 5, the highest is 5."
+          "text": "Your F3 screen read −4, 2, −9, 5. The highest Y is 5."
         },
         {
-          "text": "Find the lowest value, which is −9. Then 5 − (−9) = 5 + 9 = 14."
+          "text": "The lowest Y is −9. Then 5 − (−9) = 5 + 9 = 14 blocks."
         },
         {
-          "text": "A negative number taken away makes the answer bigger. Here, use 0 and −12."
+          "text": "Taking away a negative makes the answer bigger. Here, use 0 and −12."
         }
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Mon",
+            "label": "Dig 1",
             "value": -8,
             "tone": "calm"
           },
           {
-            "label": "Tue",
+            "label": "Dig 2",
             "value": -3,
             "tone": "calm"
           },
           {
-            "label": "Wed",
+            "label": "Dig 3",
             "value": -12,
             "tone": "bad"
           },
           {
-            "label": "Thu",
+            "label": "Dig 4",
             "value": 0,
             "tone": "good"
           },
           {
-            "label": "Fri",
+            "label": "Dig 5",
             "value": -5,
             "tone": "calm"
           }
         ],
-        "unit": "°C"
+        "unit": "Y"
       }
     },
     {
       "kind": "game",
       "id": "math-avg-games-0",
-      "title": "Which Typical?",
+      "title": "Match the stat",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "Mean",
-            "Add all, then divide"
+            "Add all games, then divide"
           ],
           [
             "Median",
-            "Middle value, sorted"
+            "Middle value, after sorting"
           ],
           [
             "Mode",
-            "Most frequent value"
+            "Most frequent goal total"
           ],
           [
             "Range",
-            "Largest − smallest"
+            "Largest − smallest goals"
           ],
           [
             "Median (even count)",
-            "Average of 2 middles"
+            "Average of the 2 middle games"
           ]
         ]
       },
@@ -321,49 +321,49 @@ export const pack: SePack = {
       "id": "math-avg-teach-2",
       "title": "The four methods",
       "lines": [
-        "Mean: add all the numbers, then divide by how many there are.",
-        "Median: put the numbers in order, then pick the middle one.",
-        "Mode: the number that appears most often.",
-        "Range: biggest number − smallest number."
+        "Mean: add every CP, then divide by how many Pokémon you caught.",
+        "Median: sort the CP values, then pick the middle one.",
+        "Mode: the value that appears most often in the list.",
+        "Range: highest CP − lowest CP, the gap in your team."
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-basics-6",
-      "prompt": "Isagi's average is 6 goals over 5 games. In the first four games he scored 3, 8, 5 and 9 goals. How many goals did he score in game 5?",
+      "prompt": "Your striker averages 6 goals over 5 games. Games 1–4: 3, 8, 5 and 9. Goals in game 5?",
       "options": [
         "4 goals",
         "5 goals",
         "6 goals"
       ],
       "answer": 1,
-      "why": "The total is the mean times the number of values, so 6 × 5 = 30, and 30 − 25 = 5.",
+      "why": "The total is the mean times the number of games, so 6 × 5 = 30, and 30 − 25 = 5.",
       "steps": [
         {
-          "text": "In the example, the mean is 4 over 4 games, so the total is 16. The first three games total 2 + 5 + 6 = 13."
+          "text": "Worked example: a winger averages 4 goals over 4 games, so the total is 16. Games 1–3: 2 + 5 + 6 = 13."
         },
         {
-          "text": "The missing value is the total minus the known values: 16 − 13 = 3."
+          "text": "The missing game is the total minus the known games: 16 − 13 = 3 goals."
         },
         {
-          "text": "So the fourth game was 3 goals in that example. Here, use the total and the four known games."
+          "text": "So game 4 was 3 goals in that example. Now use the total and the four known games."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-avg-build-1",
-      "prompt": "Bachira's goals in six games: 2, 5, 0, 4, 3, 7. What is the median?",
+      "prompt": "Your Roblox obby's visits (in thousands) over six days: 2, 5, 0, 4, 3, 7. What is the median?",
       "answer": "3.5",
       "decoys": [
         "4",
         "2",
         "6"
       ],
-      "why": "With an even number of games, the median is the average of the two middle values.",
+      "why": "With an even count of days, the median is the average of the two middle values.",
       "steps": [
         {
-          "text": "Worked example: 8, 1, 6, 3. Put them in order: 1, 3, 6, 8."
+          "text": "Worked example: Timbits sold per hour were 8, 1, 6, 3. Put them in order: 1, 3, 6, 8."
         },
         {
           "text": "Two middle numbers, so take 3 and 6. Add: 3 + 6 = 9. Halve it: 9 ÷ 2 = 4.5."
@@ -380,13 +380,13 @@ export const pack: SePack = {
       "id": "math-avg-teach-3",
       "title": "The common trap",
       "lines": [
-        "Mean gets pulled up by one very big number.",
-        "Median does not care how big that outlier is.",
-        "Always put the list in order before you find the median."
+        "One huge number drags the mean up.",
+        "The median ignores how big the outlier is.",
+        "Sort the list before you pick the median."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Skipping the sort gives a wrong median every time, even with the right numbers."
+        "text": "Skipping the sort gives a wrong median, even with the right numbers."
       },
       "art": {
         "art": "bars",
@@ -412,7 +412,7 @@ export const pack: SePack = {
             "tone": "bad"
           }
         ],
-        "unit": "goals"
+        "unit": "elims"
       }
     },
     {
@@ -464,11 +464,11 @@ export const pack: SePack = {
       "lines": [
         "Mean: total ÷ count. Median: middle number, after sorting.",
         "Mode: the most common number. Range: biggest − smallest.",
-        "Use median when one outlier would distort the mean."
+        "Use median when one huge build skews the mean."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro's bounty list works the same way. Check which number tells the true story."
+        "flavour": "key",
+        "text": "Check which number tells the true story about your chunk."
       }
     },
     {
@@ -478,7 +478,7 @@ export const pack: SePack = {
       "lines": [
         "Median is the middle number of a list.",
         "But only after the numbers are in order.",
-        "Blue Lock coaches line up goal totals first. Then they find the middle."
+        "Your crew sorts Timbits eaten per shift, lowest first, then finds the middle."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -490,9 +490,9 @@ export const pack: SePack = {
       "id": "math-avg-deeper-1",
       "title": "Even count: two middle numbers",
       "lines": [
-        "An even count of numbers has two middle numbers.",
-        "Find both. Add them. Divide by 2.",
-        "So the median can be a number that is not in the list."
+        "Four obbys have 12, 18, 20 and 30 checkpoints.",
+        "The two middle numbers are 18 and 20.",
+        "Add them, divide by 2. The median is 19."
       ],
       "callout": {
         "flavour": "key",
@@ -505,6 +505,7 @@ export const pack: SePack = {
       "title": "Mode can be none, or more than one",
       "lines": [
         "Mode is the number that shows up most often.",
+        "Team levels 40, 42, 40, 38, 42, 40 have mode 40.",
         "If every number shows up once, there is no mode.",
         "If two numbers tie for most, there are two modes."
       ],
@@ -518,9 +519,9 @@ export const pack: SePack = {
       "id": "math-avg-deeper-3",
       "title": "Range measures spread, not the middle",
       "lines": [
-        "Range = biggest number minus smallest number.",
-        "It tells you how far apart the values are.",
-        "It does not tell you what is typical."
+        "Range = highest number minus lowest number.",
+        "Your damage per match: lowest 2, highest 14.",
+        "Range shows how spread out, not what is typical."
       ],
       "art": {
         "art": "numberline",
@@ -555,8 +556,8 @@ export const pack: SePack = {
         "The median ignores how big the extreme value is."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "One huge bounty can make a crew look stronger than it is."
+        "flavour": "key",
+        "text": "One 9-0 win makes a team's average goals look far too high."
       }
     },
     {
@@ -564,88 +565,88 @@ export const pack: SePack = {
       "id": "math-avg-deeper-5",
       "title": "The mean is a fair share",
       "lines": [
-        "Mean is what each value would get if shared equally.",
+        "Mean = what each value would get if shared equally.",
         "Add all the values. Divide by how many there are.",
         "The mean does not have to be in the list."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Share the goals out evenly. Each player gets the mean."
+        "flavour": "key",
+        "text": "Share 12 diamonds between 4 miners. Each gets the mean, 3."
       }
     },
     {
       "kind": "choice",
       "id": "math-avg-basics-8",
-      "prompt": "Which list has a mean of 6?",
+      "prompt": "Which 4 matches give a mean of 6 eliminations?",
       "options": [
         "4, 5, 6, 7",
         "3, 6, 9, 6",
         "2, 3, 4, 5"
       ],
       "answer": 1,
-      "why": "A mean of 6 means the total is 6 times the number of values.",
+      "why": "A mean of 6 over 4 matches needs a total of 24 eliminations.",
       "steps": [
         {
-          "text": "In the example 4, 8, 6, 2, the total is 20, and 20 ÷ 4 = 5, so the mean is 5."
+          "text": "Example: 4, 8, 6, 2 has a total of 20, and 20 ÷ 4 = 5."
         },
         {
-          "text": "Add up each list and divide by how many values it has."
+          "text": "Add each list, then divide by how many matches it has."
         },
         {
-          "text": "Here, check whether the total of each list is 4 × 6 = 24 or not."
+          "text": "Check the total against 4 × 6 = 24 to see which list works."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-basics-9",
-      "prompt": "What does the range of a set of numbers tell you?",
+      "prompt": "What does the range of the Y-levels you mined tell you?",
       "options": [
         "The gap from lowest to highest",
         "The value that appears most",
         "The middle value once sorted"
       ],
       "answer": 0,
-      "why": "The range is the highest value minus the lowest value, so it shows how spread out the numbers are.",
+      "why": "Range is highest value minus lowest value, so it shows the gap between them.",
       "steps": [
         {
-          "text": "In the example 4, 9, 2, 7, the lowest value is 2 and the highest is 9."
+          "text": "Example: Y = 4, 30, −12, 9. The lowest is −12 and the highest is 30."
         },
         {
-          "text": "The range is 9 − 2 = 7, so the numbers are spread over a gap of 7."
+          "text": "The range is 30 − (−12) = 42 blocks."
         },
         {
-          "text": "Here, the other two choices describe the mode and the median, which are different measures."
+          "text": "A range of 0 would mean every value was exactly the same."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-0",
-      "prompt": "Isagi's striker hit the target in 6 matches: 1, 4, 0, 4, 2, 3. What is the median?",
+      "prompt": "Isagi's goals in 6 matches: 1, 4, 0, 4, 2, 3. What is the median?",
       "options": [
-        "2 shots",
-        "3 shots",
-        "2.5 shots"
+        "2 goals",
+        "3 goals",
+        "2.5 goals"
       ],
       "answer": 2,
-      "why": "The median is the middle value after sorting, and with an even count it is the average of the two middle values.",
+      "why": "With an even count, the median is the average of the two middle values after sorting.",
       "steps": [
         {
-          "text": "Sort the numbers from smallest to biggest. Example: 8, 2, 6, 4 becomes 2, 4, 6, 8."
+          "text": "Sort the numbers: 8, 2, 6, 4 becomes 2, 4, 6, 8."
         },
         {
-          "text": "Find the two middle numbers. In 2, 4, 6, 8 they are 4 and 6."
+          "text": "Find the two middle numbers: in 2, 4, 6, 8 they are 4 and 6."
         },
         {
-          "text": "Find their average: (4 + 6) ÷ 2 = 5. So the median of 8, 2, 6, 4 is 5."
+          "text": "Average them: (4 + 6) ÷ 2 = 5, so the median is 5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-1",
-      "prompt": "Five One Piece crew bounties, in millions: 30, 45, 45, 60, 300. What is the mean?",
+      "prompt": "Five crew bounties, in millions of Berries: 30, 45, 45, 60, 300. What is the mean?",
       "options": [
         "45 million",
         "96 million",
@@ -655,36 +656,36 @@ export const pack: SePack = {
       "why": "One very large value pulls the mean up, while the median ignores how big the outlier is.",
       "steps": [
         {
-          "text": "Add all the values. Example: 4 + 6 + 8 + 10 = 28."
+          "text": "Add all the values. Example: 2 + 5 + 7 = 14."
         },
         {
-          "text": "Divide the total by how many values there are. Here there are 4 values: 28 ÷ 4 = 7."
+          "text": "Divide the total by how many values there are. Example: 14 ÷ 3 is not whole, so use 21 ÷ 3 = 7 instead."
         },
         {
-          "text": "Check: 7 × 4 = 28, so the mean is correct. Now try the bounties: add them to get 480, then 480 ÷ 5."
+          "text": "Now the crew: 30 + 45 + 45 + 60 + 300 = 480, then 480 ÷ 5 = 96."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-2",
-      "prompt": "Toronto January lows over 5 days: −12, −3, 0, 5, 9 °C. What is the range?",
+      "prompt": "Your mine logged these Y levels: −12, −3, 0, 5, 9. What is the range?",
       "options": [
-        "12°C",
-        "9°C",
-        "21°C"
+        "12 blocks",
+        "9 blocks",
+        "21 blocks"
       ],
       "answer": 2,
       "why": "Range measures spread: it is the highest value minus the lowest value.",
       "steps": [
         {
-          "text": "Find the highest and lowest values. Example: in −6, 2, −1, 4 the highest is 4 and the lowest is −6."
+          "text": "Find the highest and lowest values. Example: in 7, −4, 2, 0 the highest is 7 and the lowest is −4."
         },
         {
-          "text": "Subtract the lowest from the highest: 4 − (−6)."
+          "text": "Subtract the lowest from the highest: 7 − (−4)."
         },
         {
-          "text": "Subtracting a negative means adding it, so 4 − (−6) = 10. The range is 10."
+          "text": "Subtracting a negative means adding it, so 7 − (−4) = 11. Now do 9 − (−12) for your mine."
         }
       ],
       "art": {
@@ -713,34 +714,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-avg-applied-3",
-      "prompt": "Isagi's team averaged 2.5 goals over 4 matches. In three of them they scored 2, 3 and 4. How many goals in the fourth match?",
+      "prompt": "Your squad averaged 2.5 kills over 4 matches. In three of them you got 2, 3 and 4. How many kills in the fourth?",
       "options": [
-        "3 goals",
-        "1 goal",
-        "5 goals"
+        "3 kills",
+        "1 kill",
+        "5 kills"
       ],
       "answer": 1,
       "why": "A mean is a total shared out evenly, so you can work the total backwards from the mean.",
       "steps": [
         {
-          "text": "Find the total: mean × number of matches. Example: mean 3 over 5 matches gives 3 × 5 = 15."
+          "text": "Find the total: mean × number of matches. Example: mean 4 over 3 matches gives 4 × 3 = 12."
         },
         {
-          "text": "Add the known values and subtract from the total. Example: 1 + 4 + 2 + 5 = 12, and 15 − 12 = 3."
+          "text": "Add the known values and subtract from the total. Example: 2 + 6 + 3 = 11, and 15 − 11 = 4."
         },
         {
-          "text": "So for Isagi: total is 2.5 × 4 = 10. Known goals are 2 + 3 + 4 = 9, so the missing match is 10 − 9."
+          "text": "For you: total is 2.5 × 4 = 10. Known kills are 2 + 3 + 4 = 9, so the missing match is 10 − 9 = 1."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-4",
-      "prompt": "Ages of crew members: 3, 5, 5, 8, 3, 9. Which statement is true?",
+      "prompt": "Favourite obbys in your class: Sky Tower, Lava Run, Lava Run, Candy Maze, Sky Tower, Ice Slide. Which is true?",
       "options": [
-        "Only 3 is the mode",
-        "3 and 5 are both modes",
-        "The mode is 8"
+        "Only Lava Run is the mode",
+        "Sky Tower and Lava Run are both modes",
+        "The mode is Ice Slide"
       ],
       "answer": 1,
       "why": "A set can have two modes when two values tie for the most repeats, or no mode when every value appears once.",
@@ -752,14 +753,14 @@ export const pack: SePack = {
           "text": "Find the highest count. Here it is 2, and two different values reach it."
         },
         {
-          "text": "So 4 and 6 are both modes. A mode is the value that appears most, and ties are allowed."
+          "text": "So Sky Tower and Lava Run are both modes. A mode is the value that appears most, and ties are allowed."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-5",
-      "prompt": "A bake sale: each class sold 4, 7, 8, 10 snack bags. A fifth class sells 12. What is the new median?",
+      "prompt": "Timbit boxes sold by four classes: 4, 7, 8, 10. A fifth class sells 12. What is the new median?",
       "options": [
         "7.5",
         "9",
@@ -772,17 +773,17 @@ export const pack: SePack = {
           "text": "Sort the new list. Example: adding 1 to 3, 9, 5 gives 1, 3, 5, 9."
         },
         {
-          "text": "With 4 values, the median is the average of the middle two. Here that is (3 + 5) ÷ 2 = 4."
+          "text": "With 4 values, the median is the average of the middle two. Example: (3 + 5) ÷ 2 = 4."
         },
         {
-          "text": "For the bake sale, sort 4, 7, 8, 10, 12. With 5 values the middle is the 3rd value, so the median is 8."
+          "text": "For the Timbits, sort 4, 7, 8, 10, 12. With 5 values the middle is the 3rd value, so the median is 8."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-6",
-      "prompt": "Isagi scored 2, 3 and 4 goals in three matches, so his mean is 3. In match 4 he scores 9. What happens to the mean?",
+      "prompt": "Diamonds mined per trip: 2, 3, 4. Your next trip finds 9. What happens to the mean?",
       "options": [
         "It stays at 3",
         "It falls to 2",
@@ -798,37 +799,37 @@ export const pack: SePack = {
           "text": "Add the new value and find the new mean. Example: adding 14 gives 32 ÷ 4 = 8."
         },
         {
-          "text": "So the mean went from 6 up to 8. For Isagi: 9 + 9 = 18, and 18 ÷ 4 = 4.5, so it rises."
+          "text": "So the mean went from 6 up to 8. For your diamonds: 9 + 9 = 18, and 18 ÷ 4 = 4.5, so it rises."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-applied-7",
-      "prompt": "Fish caught on a Lake Ontario trip, in cm: 34, 19, 41, 27, 19. What is the range?",
+      "prompt": "Blocks of stone mined each night: 34, 19, 41, 27, 19. What is the range?",
       "options": [
-        "15 cm",
-        "41 cm",
-        "22 cm"
+        "15 blocks",
+        "41 blocks",
+        "22 blocks"
       ],
       "answer": 2,
       "why": "Range uses only the two extremes, so it ignores the values between them.",
       "steps": [
         {
-          "text": "Find the biggest and smallest values. Example: in 56, 12, 30 the biggest is 56 and the smallest is 12."
+          "text": "Find the biggest and smallest. Example: stacks of cobblestone 56, 12, 30. Biggest 56, smallest 12."
         },
         {
           "text": "Subtract the smallest from the biggest: 56 − 12 = 44."
         },
         {
-          "text": "For the fish: 41 is the biggest and 19 is the smallest. Work out 41 − 19 to get the range."
+          "text": "For your stone: 41 is the biggest and 19 is the smallest. Work out 41 − 19."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-avg-applied-8",
-      "prompt": "Shots on target in 4 matches: 3, 4, 5, 10. Type the mean.",
+      "prompt": "Eliminations in 4 matches: 3, 4, 5, 10. Type the mean.",
       "answer": "5.5",
       "decoys": [
         "2",
@@ -844,14 +845,14 @@ export const pack: SePack = {
           "text": "Divide by how many values there are. Example: 15 ÷ 3 = 5."
         },
         {
-          "text": "For the shots: 3 + 4 + 5 + 10 = 22, and 22 ÷ 4 gives the mean."
+          "text": "Your eliminations: 3 + 4 + 5 + 10 = 22. Then divide 22 by 4."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-deeper-6",
-      "prompt": "Isagi's goals in 7 games: 5, 12, 3, 8, 10, 1, 7. What is the median?",
+      "prompt": "Gym battles won in 7 weeks: 5, 12, 3, 8, 10, 1, 7. What is the median?",
       "options": [
         "5",
         "7",
@@ -867,14 +868,14 @@ export const pack: SePack = {
           "text": "Five numbers means the 3rd one is the middle. That is 6."
         },
         {
-          "text": "Now do the same with 9 and 3 and 7 and 1, 5, 11, 2. Order first, then pick the middle."
+          "text": "Now do gym wins 9, 3, 7, 1, 5, 11, 2. Order first, then pick the middle."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-deeper-7",
-      "prompt": "Four goal totals for a team: 3, 5, 7, 9. What is the median?",
+      "prompt": "Your team's goals in 4 EA FC games: 3, 5, 7, 9. What is the median?",
       "options": [
         "6",
         "7",
@@ -884,7 +885,7 @@ export const pack: SePack = {
       "why": "With an even count, the median is the average of the two middle numbers.",
       "steps": [
         {
-          "text": "Take 12, 4, 10, 6. Order: 4, 6, 10, 12."
+          "text": "Take 12, 4, 10, 6 as goals. Order: 4, 6, 10, 12."
         },
         {
           "text": "The two middle numbers are 6 and 10."
@@ -897,7 +898,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-avg-deeper-8",
-      "prompt": "Shots on target in 4 games: 2, 5, 7, 9. What is the mode?",
+      "prompt": "Timbits in 4 orders: 2, 5, 7, 9. What is the mode?",
       "options": [
         "The mode is 7.",
         "There is no mode.",
@@ -907,20 +908,20 @@ export const pack: SePack = {
       "why": "A mode needs a number that repeats, and no number repeats here.",
       "steps": [
         {
-          "text": "Take 6, 2, 6, 6, 9. Count each number. The 6 shows up 3 times."
+          "text": "Take slices each friend ate: 6, 2, 6, 6, 9. Count each number. The 6 shows up 3 times."
         },
         {
           "text": "So the mode is 6. It is the one that repeats most."
         },
         {
-          "text": "Now take 4, 8, 1, 9. Each number shows up once, so there is no mode."
+          "text": "Now Timbits in 4 boxes: 4, 8, 1, 9. Each shows up once, so there is no mode."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-avg-deeper-9",
-      "prompt": "A striker's goals in 5 games: 1, 2, 1, 0, 8. Which pair is correct?",
+      "prompt": "Millions of visits to your obby, 5 days: 1, 2, 1, 0, 8. Which pair is correct?",
       "options": [
         "The mean is 1 and the median is 2.4.",
         "Both the mean and median are 2.4.",
@@ -930,7 +931,7 @@ export const pack: SePack = {
       "why": "The 8 pulls the mean up to 2.4, but the median stays at the middle value, 1.",
       "steps": [
         {
-          "text": "Take 3, 3, 9, 0, 4. Add them: 19. Divide by 5: 3.8. That is the mean."
+          "text": "Take Robux earned per day: 3, 3, 9, 0, 4. Add them: 19. Divide by 5: 3.8. That is the mean."
         },
         {
           "text": "Order them: 0, 3, 3, 4, 9. The middle one is 3. That is the median."
@@ -943,48 +944,48 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Game 1",
+            "label": "Day 1",
             "value": 1,
             "tone": "calm"
           },
           {
-            "label": "Game 2",
+            "label": "Day 2",
             "value": 2,
             "tone": "calm"
           },
           {
-            "label": "Game 3",
+            "label": "Day 3",
             "value": 1,
             "tone": "calm"
           },
           {
-            "label": "Game 4",
+            "label": "Day 4",
             "value": 0,
             "tone": "calm"
           },
           {
-            "label": "Game 5",
+            "label": "Day 5",
             "value": 8,
             "tone": "bad"
           }
         ],
-        "unit": "goals"
+        "unit": "m visits"
       }
     },
     {
       "kind": "choice",
       "id": "math-avg-deeper-10",
-      "prompt": "Can the mean of a list be a number that is not in the list?",
+      "prompt": "Your squad got 1, 2 and 6 eliminations. Can the mean be a number not in the list?",
       "options": [
-        "Yes, it can.",
         "No, it is always in the list.",
+        "Yes, it can.",
         "Only if the list has no repeats."
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "The mean is a fair share, so it can land between values that are in the list.",
       "steps": [
         {
-          "text": "Take 1, 2, 6. Add them: 9. Divide by 3: 3."
+          "text": "Eliminations: 1, 2, 6. Add them: 9. Divide by 3: 3."
         },
         {
           "text": "The mean is 3, but 3 is not in the list."
@@ -997,7 +998,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-2",
-      "prompt": "Chigiri's goals per game: 1, 3, 3, 0, 2, 3, 1. Which number is the mode?",
+      "prompt": "Blocks mined per trip: 1, 3, 3, 0, 2, 3, 1. Which number is the mode?",
       "answer": "3",
       "decoys": [
         "1",
@@ -1007,10 +1008,10 @@ export const pack: SePack = {
       "why": "A list can have no mode, or two modes, when the counts are tied.",
       "steps": [
         {
-          "text": "Worked example: 5, 2, 5, 7, 5, 2. The 5 appears three times, the 2 twice."
+          "text": "Worked example: Pokémon caught each day: 5, 2, 5, 7, 5, 2."
         },
         {
-          "text": "So the mode is 5. The mode is the value that appears most often."
+          "text": "The 5 appears three times, the 2 twice. So the mode is 5."
         },
         {
           "text": "Count each number before you decide. The biggest number is not always the mode."
@@ -1020,7 +1021,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-3",
-      "prompt": "Shots on target in five games: 7, 2, 9, 4, 5. What is the range?",
+      "prompt": "Shots on target in five matches: 7, 2, 9, 4, 5. What is the range?",
       "answer": "7",
       "decoys": [
         "5",
@@ -1043,27 +1044,27 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Game 1",
+            "label": "Match 1",
             "value": 7,
             "tone": "focus"
           },
           {
-            "label": "Game 2",
+            "label": "Match 2",
             "value": 2,
             "tone": "calm"
           },
           {
-            "label": "Game 3",
+            "label": "Match 3",
             "value": 9,
             "tone": "good"
           },
           {
-            "label": "Game 4",
+            "label": "Match 4",
             "value": 4,
             "tone": "calm"
           },
           {
-            "label": "Game 5",
+            "label": "Match 5",
             "value": 5,
             "tone": "calm"
           }
@@ -1074,7 +1075,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-4",
-      "prompt": "Four crew bounties: 30, 45, 60 and 85 million. What is the mean?",
+      "prompt": "Four crew bounties: 30, 45, 60 and 85 million Berries. What is the mean?",
       "answer": "55",
       "decoys": [
         "6",
@@ -1096,7 +1097,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-5",
-      "prompt": "Goals in seven games: 9, 4, 0, 2, 5, 6, 3. What is the median?",
+      "prompt": "Deaths per player in your obby this week: 9, 4, 0, 2, 5, 6, 3. What is the median?",
       "answer": "4",
       "decoys": [
         "2",
@@ -1106,10 +1107,10 @@ export const pack: SePack = {
       "why": "Median ignores how big the outliers are, so one huge score cannot drag it.",
       "steps": [
         {
-          "text": "Worked example: 8, 1, 5, 3, 9. In order: 1, 3, 5, 8, 9. Middle value is 5."
+          "text": "Worked example: Robux earned per day: 8, 1, 5, 3, 9."
         },
         {
-          "text": "Odd number of values, so the median is the single middle value."
+          "text": "In order: 1, 3, 5, 8, 9. Odd count, so the middle value 5 is the median."
         },
         {
           "text": "Put the list in order first, every time, before you pick the middle."
@@ -1119,7 +1120,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-6",
-      "prompt": "Passes in five games: 3, 1, 2, 4, 2. What is the mean?",
+      "prompt": "Slices of pizza eaten each night for five nights: 3, 1, 2, 4, 2. What is the mean?",
       "answer": "2.4",
       "decoys": [
         "1",
@@ -1128,10 +1129,10 @@ export const pack: SePack = {
       "why": "The mean can be a decimal even when every value is a whole number.",
       "steps": [
         {
-          "text": "Worked example: 0, 1, 2, 4. Add them: 0 + 1 + 2 + 4 = 7."
+          "text": "Worked example: Timbits eaten by four friends: 0, 1, 2, 4."
         },
         {
-          "text": "Divide by how many values: 7 ÷ 4 = 1.75. Decimals are fine here."
+          "text": "Add them: 0 + 1 + 2 + 4 = 7. Divide by 4: 7 ÷ 4 = 1.75."
         },
         {
           "text": "Add all the values first, then divide by how many there are."
@@ -1141,23 +1142,23 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-avg-build-7",
-      "prompt": "Isagi scored 4, 6, 2 and 5 goals in four games. His mean over five games is 4. How many in game five?",
+      "prompt": "Four matches: 4, 6, 2 and 5 eliminations.\nMean over five matches is 4. Match five?",
       "answer": "3",
       "decoys": [
         "7",
         "2",
         "1"
       ],
-      "why": "Mean times the number of games gives the total, so a missing value is what is left.",
+      "why": "Mean times the number of matches gives the total, so a missing value is what is left.",
       "steps": [
         {
-          "text": "Worked example: mean 6 over 3 games, with scores 5 and 8. Total needed: 6 × 3 = 18."
+          "text": "Worked example: 3 furnace batches average 6 ingots. Batches make 5 and 8."
         },
         {
-          "text": "Subtract the scores you already have: 18 − 13 = 5. That is the missing value."
+          "text": "Total needed: 6 × 3 = 18. Then 18 − 13 = 5 is the missing batch."
         },
         {
-          "text": "Total = mean × number of games. Work out the total first, then subtract."
+          "text": "Total = mean × number of batches. Work out the total first, then subtract."
         }
       ]
     },

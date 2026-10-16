@@ -17,17 +17,17 @@ export const pack: SePack = {
       "lines": [
         "A variable is a box with a name on it.",
         "The box holds one value, like a number.",
-        "In Blue Lock, Isagi's goal tally is a variable."
+        "Your Roblox leaderboard score is a variable."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Picture a scoreboard in a box labelled score. The box holds the number 2."
+        "flavour": "key",
+        "text": "Picture a box labelled score that holds the number 2."
       }
     },
     {
       "kind": "choice",
       "id": "code-var-basics-0",
-      "prompt": "Isagi's goals box holds 2. The code says: goals = goals + 1. What is in the box now?",
+      "prompt": "Your kills box holds 2. The code says: kills = kills + 1. What is in the box now?",
       "options": [
         "1",
         "3",
@@ -37,36 +37,36 @@ export const pack: SePack = {
       "why": "The code reads the old value first, adds 1, then stores the new value back in the box.",
       "steps": [
         {
-          "text": "Look inside the box first. Shots box holds 5, so the old value is 5."
+          "text": "Look in the box first. Your blocks box holds 5, so the old value is 5."
         },
         {
           "text": "Work out the right side: 5 + 1 = 6."
         },
         {
-          "text": "Store 6 back in the box. Now shots = 6, not 5."
+          "text": "Store 6 back in the box. Now blocks = 6, not 5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-basics-1",
-      "prompt": "Which line correctly updates a box called passes?",
+      "prompt": "Which line correctly updates a box called caught?",
       "options": [
-        "passes = passes + 1",
-        "1 = passes + 1",
-        "passes + 1 = passes"
+        "1 = caught + 1",
+        "caught = caught + 1",
+        "caught + 1 = caught"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "The name on the left is the box that receives the answer, so it must be a single name.",
       "steps": [
         {
-          "text": "Check the left side. It must be one name, like assists or passes."
+          "text": "Check the left side. It must be one name, like caught or hits."
         },
         {
-          "text": "Try assists = assists + 1. The name is on the left, so it works."
+          "text": "Try caught = caught + 1. The name is on the left, so it works."
         },
         {
-          "text": "Try 3 = assists + 1. A number cannot be a box, so it breaks."
+          "text": "Try 3 = caught + 1. A number cannot be a box, so it breaks."
         }
       ]
     },
@@ -131,30 +131,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-basics-2",
-      "prompt": "a = 6. The code says b = a. Then the code says a = 1. What is b now?",
+      "prompt": "Your Roblox score box holds 6. The code says best = score. Then score = 1. What is best now?",
       "options": [
         "1",
         "6",
         "7"
       ],
       "answer": 1,
-      "why": "b copied the value of a when the line ran, so changing a later does not change b.",
+      "why": "best copied the value of score when the line ran, so changing score later does not change best.",
       "steps": [
         {
-          "text": "b = a copies the value in a right now. Example: c = 4, then d = c puts 4 in d."
+          "text": "best = score copies the value in score right now. Example: coins = 4, then saved = coins puts 4 in saved."
         },
         {
-          "text": "A later change to c does not reach d. Example: c = 9 now, but d is still 4."
+          "text": "A later change to coins does not reach saved. Example: coins = 9 now, but saved is still 4."
         },
         {
-          "text": "Only a new line that touches d changes d. Example: d = d + 1 makes d = 5."
+          "text": "Only a new line that touches saved changes saved. Example: saved = saved + 1 makes saved = 5."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-basics-3",
-      "prompt": "Isagi's dribbles box starts at 10. The code says: dribbles = dribbles + 5, then dribbles = dribbles − 3. What is in the box at the end?",
+      "prompt": "Your shield box starts at 10. The code says: shield = shield + 5, then shield = shield − 3. What is in the box at the end?",
       "options": [
         "7",
         "12",
@@ -164,7 +164,7 @@ export const pack: SePack = {
       "why": "Each line works on the value left by the line before it, so the lines run in order.",
       "steps": [
         {
-          "text": "Start with a different box. Shots box holds 4. First line: 4 + 6 = 10."
+          "text": "Start with a different box. Your wood box holds 4. First line: 4 + 6 = 10."
         },
         {
           "text": "Second line uses the new value: 10 − 2 = 8."
@@ -185,13 +185,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Luffy's bounty is a variable too. The Marines read the box to know his price."
+        "text": "Your Minecraft speed box is set once. Every line that reads it uses the new speed."
       }
     },
     {
       "kind": "build",
       "id": "code-var-build-0",
-      "prompt": "Isagi's box is called goals. It starts at 2.\n\ngoals = goals + 1\ngoals = goals + 1\n\nWhat is goals now?",
+      "prompt": "Your elims box starts at 2.\n\nelims = elims + 1\nelims = elims + 1\n\nWhat is elims now?",
       "answer": "4",
       "decoys": [
         "3",
@@ -203,17 +203,17 @@ export const pack: SePack = {
           "text": "Start with the box holding 2. That is the old value."
         },
         {
-          "text": "Read the right side first. goals + 1 means old value plus one."
+          "text": "Read the right side first. elims + 1 means old value plus one."
         },
         {
-          "text": "Example: points = 5, then points = points + 2. Points becomes 7, so the old 5 is gone."
+          "text": "Example: wood = 5, then wood = wood + 2. Wood becomes 7, so the old 5 is gone."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-basics-5",
-      "prompt": "Zoro's swords box holds 3. The code says: swords = swords + swords. What is in the box now?",
+      "prompt": "Your ingot box holds 3. The code says: ingots = ingots + ingots. What is in the box now?",
       "options": [
         "4",
         "6",
@@ -223,10 +223,10 @@ export const pack: SePack = {
       "why": "The same name can appear on both sides, because the right side is read before the box changes.",
       "steps": [
         {
-          "text": "Try a different box. Ships box holds 5, so ships + ships is 5 + 5."
+          "text": "Try a different box. Diamonds holds 5, so diamonds + diamonds is 5 + 5."
         },
         {
-          "text": "That makes 10. Store 10 back in ships."
+          "text": "That makes 10. Store 10 back in diamonds."
         },
         {
           "text": "So doubling a box means the name appears twice on the right."
@@ -249,12 +249,12 @@ export const pack: SePack = {
             "store into the box"
           ],
           [
-            "score = score + 1",
+            "coins = coins + 1",
             "read, add, store back"
           ],
           [
             "box name",
-            "label on the box"
+            "label on the coin box"
           ],
           [
             "reassign",
@@ -267,30 +267,30 @@ export const pack: SePack = {
     {
       "kind": "explain",
       "id": "code-var-teach-2",
-      "title": "How to read score = score + 1",
+      "title": "How to read points = points + 3",
       "lines": [
-        "Work on the right side first. Find the answer.",
+        "Read the right side first. Find the answer.",
         "Then store that answer in the box on the left.",
-        "So: take score, add 1, put the result back in score."
+        "So: take points, add 3, put the result back in points."
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-basics-6",
-      "prompt": "Which name can Nami use for her berry box?",
+      "prompt": "Which name can Ash use for his Poké Ball counter?",
       "options": [
-        "berry_count",
-        "berry count",
-        "2nd_berry"
+        "catch_count",
+        "catch count",
+        "2nd_catch"
       ],
       "answer": 0,
       "why": "Names cannot have spaces or start with a digit, so use underscores to join words.",
       "steps": [
         {
-          "text": "Spaces break a name, so berry count becomes berry_count."
+          "text": "Spaces break a name, so catch count becomes catch_count."
         },
         {
-          "text": "A name cannot start with a digit, so 2nd_berry is not allowed."
+          "text": "A name cannot start with a digit, so 2nd_catch is not allowed."
         },
         {
           "text": "Test your name: start with a letter, then use letters, digits or underscores."
@@ -300,7 +300,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-basics-7",
-      "prompt": "The crew box holds 3. The code says: crew = crew + 2, then crew = crew − 1. What is in the box now?",
+      "prompt": "Your shawarma box holds 3. The code says: shawarmas = shawarmas + 2, then shawarmas = shawarmas − 1. What is in the box now?",
       "options": [
         "5",
         "4",
@@ -310,10 +310,10 @@ export const pack: SePack = {
       "why": "Each line works on the value left by the line before, so read them one at a time.",
       "steps": [
         {
-          "text": "Start with a different box. Ships holds 4. First line: 4 + 2 = 6."
+          "text": "Start with a different box. Poutine holds 4. First line: 4 + 2 = 6."
         },
         {
-          "text": "Second line: 6 − 1 = 5. Store 5 in ships."
+          "text": "Second line: 6 − 1 = 5. Store 5 in poutine."
         },
         {
           "text": "Always read the value after the last line, not the start value."
@@ -323,7 +323,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-var-build-1",
-      "prompt": "Luffy's bounty box starts at 40.\n\nbounty = bounty + 15\n\nWhat is bounty now?",
+      "prompt": "Your V-Bucks counter starts at 40.\n\nvbucks = vbucks + 15\n\nWhat is vbucks now?",
       "answer": "55",
       "decoys": [
         "3",
@@ -332,7 +332,7 @@ export const pack: SePack = {
       "why": "The box keeps only the newest value, so the old number is thrown away when the line runs.",
       "steps": [
         {
-          "text": "Example: crew = 12, then crew = crew + 4. The right side reads 12 + 4."
+          "text": "Example: wood = 120, then wood = wood + 40. The right side reads 120 + 40."
         },
         {
           "text": "Work out that sum, then write the answer into the box. Do not write the sum beside it."
@@ -351,11 +351,11 @@ export const pack: SePack = {
       "lines": [
         "In code, the = sign does not mean equal, like in maths.",
         "It means store the value on the right into the box on the left.",
-        "So score = score + 1 is not a false sentence. It is an instruction."
+        "So blocks = blocks + 1 is not a false sentence. It is an instruction."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "In maths, x = x + 1 has no answer. In code, it adds 1 to the box."
+        "text": "In maths, blocks = blocks + 1 is false. In code, it adds 1 block."
       }
     },
     {
@@ -363,9 +363,9 @@ export const pack: SePack = {
       "id": "code-var-teach-4",
       "title": "Worked example: two goals",
       "lines": [
-        "Isagi's score starts at 2. The box holds 2.",
-        "A goal goes in. Run score = score + 1.",
-        "Read the right side: 2 + 1 = 3. Store 3 in score."
+        "Your team's goals counter starts at 2. The box holds 2.",
+        "A goal goes in. Run goals = goals + 1.",
+        "Read the right side: 2 + 1 = 3. Store 3 in goals."
       ],
       "art": {
         "art": "bars",
@@ -391,11 +391,11 @@ export const pack: SePack = {
       "lines": [
         "A variable is a named box that holds one value.",
         "The right side works out a value. The left side stores it.",
-        "Read = as store. Then score = score + 1 makes sense."
+        "Read = as store. Then coins = coins + 1 makes sense."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Every goal, every bounty, every score: one box, one name, one new value."
+        "text": "Every coin, every Robux total, every score: one box, one name, one new value."
       }
     },
     {
@@ -405,7 +405,7 @@ export const pack: SePack = {
       "lines": [
         "In code, = means: put this value in the box.",
         "It does not ask if two things are equal.",
-        "So score = score + 1 means: take the value, add 1, store it."
+        "So catches = catches + 1 means: take the value, add 1, store it."
       ],
       "callout": {
         "flavour": "key",
@@ -418,12 +418,12 @@ export const pack: SePack = {
       "title": "Right side first, always",
       "lines": [
         "Code works out the right side before it touches the left.",
-        "So it uses the old value of score.",
+        "So it uses the old value of timbits.",
         "Only then does it store the answer in the box."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi works out the pass first, then the box gets the goal."
+        "text": "Count the Timbits first, then write the new total on the box."
       }
     },
     {
@@ -431,9 +431,9 @@ export const pack: SePack = {
       "id": "code-var-deeper-2",
       "title": "A box holds one value at a time",
       "lines": [
-        "Putting a new value in a box removes the old one.",
+        "Setting a box to a new value removes the old one.",
         "The old value is replaced, not added on.",
-        "Think of a scoreboard. It shows one number, not a list."
+        "Like a Roblox leaderboard: it shows one score, not a list."
       ]
     },
     {
@@ -441,7 +441,7 @@ export const pack: SePack = {
       "id": "code-var-deeper-3",
       "title": "Capitals matter in names",
       "lines": [
-        "Goals and goals are two different boxes.",
+        "Stack and stack are two different boxes.",
         "Code will say the name does not exist if the spelling is off.",
         "Pick one spelling and copy it exactly every time."
       ],
@@ -455,13 +455,13 @@ export const pack: SePack = {
       "id": "code-var-deeper-4",
       "title": "Copying a value is not linking boxes",
       "lines": [
-        "If a = 5 and then b = a, b gets a copy of 5.",
-        "Change a to 9 later. b is still 5.",
-        "b did not become a box that follows a."
+        "If wood = 5 and then mine = wood, mine gets a copy of 5.",
+        "Change wood to 9 later. mine is still 5.",
+        "mine did not become a box that follows wood."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro copies Luffy's bounty. Luffy gets a raise. Zoro's sheet stays the same."
+        "flavour": "key",
+        "text": "Your squad mate copies your 500 wood. You build 200 more. Their count stays at 500."
       }
     },
     {
@@ -469,8 +469,8 @@ export const pack: SePack = {
       "id": "code-var-deeper-5",
       "title": "Words need quote marks",
       "lines": [
-        "A box can hold words, like name = 'Luffy'.",
-        "Without quote marks, code looks for a box called Luffy.",
+        "A box can hold words, like team = 'Arsenal'.",
+        "Without quote marks, code looks for a box called Arsenal.",
         "Numbers like 5 need no quote marks at all."
       ],
       "callout": {
@@ -481,20 +481,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-basics-8",
-      "prompt": "Start with x = 1 and y = 4. The code says: x = x + y, then y = x + y. What is y now?",
+      "prompt": "Start with badges = 1 and xp = 4. Run badges = badges + xp, then xp = badges + xp. What is xp now?",
       "options": [
         "8",
         "9",
         "5"
       ],
       "answer": 1,
-      "why": "The second line uses the new value of x, so the first line changes the answer for y.",
+      "why": "The second line uses the new value of badges, so the first line changes the answer for xp.",
       "steps": [
         {
-          "text": "Try p = 2 and q = 3. The line p = p + q gives p = 5."
+          "text": "Try candies = 2 and gems = 3. The line candies = candies + gems gives candies = 5."
         },
         {
-          "text": "Now the line q = p + q uses the new p: q = 5 + 3 = 8."
+          "text": "Now the line gems = candies + gems uses the new candies: gems = 5 + 3 = 8."
         },
         {
           "text": "Run the lines in order, one at a time, and use the latest values."
@@ -504,17 +504,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-basics-9",
-      "prompt": "passes = 0. The line passes = passes + 2 runs 3 times. What is in passes at the end?",
+      "prompt": "timbits = 0. The line timbits = timbits + 2 runs 3 times. What is in timbits at the end?",
       "options": [
         "3",
         "5",
         "6"
       ],
       "answer": 2,
-      "why": "Each run adds 2 to the box, so 3 runs add 2 three times.",
+      "why": "Each run adds 2 timbits to the box, so 3 runs add 2 three times.",
       "steps": [
         {
-          "text": "Try a line that adds 3 and runs 2 times: 0, then 3, then 6."
+          "text": "Try a line that adds 4 and runs 2 times: 0, then 4, then 8."
         },
         {
           "text": "So each run adds the same step size to the box."
@@ -527,30 +527,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-applied-0",
-      "prompt": "Isagi's box is called goals. It holds 2. The code runs: goals = goals + 3. What is in goals now?",
+      "prompt": "Your Fortnite kills box holds 2. The code runs: kills = kills + 3. What is in kills now?",
       "options": [
-        "goals is 5",
-        "goals is 6",
-        "goals is 1"
+        "kills is 5",
+        "kills is 6",
+        "kills is 1"
       ],
       "answer": 0,
       "why": "The computer works out the right side using the old value, then stores the answer back in the same box.",
       "steps": [
         {
-          "text": "Step 1: Find the old value. Say goals holds 4."
+          "text": "Step 1: Find the old value. Say kills holds 4."
         },
         {
           "text": "Step 2: Work out the right side. 4 + 3 = 7."
         },
         {
-          "text": "Step 3: Store 7 back in goals. Now goals is 7, not 4."
+          "text": "Step 3: Store 7 back in kills. Now kills is 7, not 4."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-applied-1",
-      "prompt": "Box a holds 5. Box b holds 9. The code runs: a = b, then b = a. What do a and b hold now?",
+      "prompt": "Team slot a holds 5 Pokémon. Slot b holds 9. The code runs: a = b, then b = a. What do a and b hold now?",
       "options": [
         "a is 9, b is 9",
         "a is 5, b is 9",
@@ -573,53 +573,53 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-applied-2",
-      "prompt": "Luffy's bounty box holds 300 berries. The code runs: berries = berries * 2, then berries = berries − 100. What is in berries?",
+      "prompt": "Your Robux box holds 300. The code runs: robux = robux * 2, then robux = robux − 100. What is in robux?",
       "options": [
-        "500 berries",
-        "600 berries",
-        "400 berries"
+        "500 Robux",
+        "600 Robux",
+        "400 Robux"
       ],
       "answer": 0,
       "why": "Lines run from top to bottom, so each line uses the value left by the line above it.",
       "steps": [
         {
-          "text": "Step 1: Use a new start. Say berries holds 40."
+          "text": "Step 1: Use a new start. Say robux holds 60."
         },
         {
-          "text": "Step 2: Run the doubling line. 40 * 2 = 80, so berries is 80."
+          "text": "Step 2: Run the doubling line. 60 * 2 = 120, so robux is 120."
         },
         {
-          "text": "Step 3: Run the minus line. 80 − 10 = 70, so berries is 70."
+          "text": "Step 3: Run the minus line. 120 − 100 = 20, so robux is 20."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-applied-3",
-      "prompt": "A striker's count box holds 10. The code runs count = count − 3 two times. What is in count at the end?",
+      "prompt": "Rin's shots box holds 10. The code runs shots = shots − 3 two times. What is in shots at the end?",
       "options": [
-        "count is 4",
-        "count is 7",
-        "count is 13"
+        "shots is 4",
+        "shots is 7",
+        "shots is 13"
       ],
       "answer": 0,
       "why": "Each run of the line takes 3 away from whatever the box holds at that moment.",
       "steps": [
         {
-          "text": "Step 1: Use a new start. Say count holds 9."
+          "text": "Step 1: Use a new start. Say shots holds 9."
         },
         {
-          "text": "Step 2: First run: 9 − 3 = 6, so count is 6."
+          "text": "Step 2: First run: 9 − 3 = 6, so shots is 6."
         },
         {
-          "text": "Step 3: Second run: 6 − 3 = 3, so count is 3."
+          "text": "Step 3: Second run: 6 − 3 = 3, so shots is 3."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-applied-4",
-      "prompt": "Zoro's box y holds 4. The code runs: y = y * y. What is in y now?",
+      "prompt": "Your Minecraft box y holds 4. The code runs: y = y * y. What is in y now?",
       "options": [
         "y is 8",
         "y is 16",
@@ -642,7 +642,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-applied-5",
-      "prompt": "Box home holds 2. Box away holds 1. The code runs: home = home + away, then away = 0. What do they hold now?",
+      "prompt": "The home goals box holds 2. Away goals holds 1. The code runs: home = home + away, then away = 0. What do they hold now?",
       "options": [
         "home is 3, away is 0",
         "home is 2, away is 1",
@@ -665,7 +665,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-applied-6",
-      "prompt": "A coffee on a Toronto street costs fare = 3.25 dollars. The code runs: fare = fare + 0.75. What is fare now?",
+      "prompt": "A Timbits bag costs total = 3.25 dollars. The code runs total = total + 0.75 for poutine. What is total now?",
       "options": [
         "4.00 dollars",
         "4.25 dollars",
@@ -675,43 +675,43 @@ export const pack: SePack = {
       "why": "Decimal money is added the same way as whole numbers, with the decimal points lined up.",
       "steps": [
         {
-          "text": "Step 1: Use a new price. Say fare holds 2.40."
+          "text": "Step 1: Use a new price. Say a shawarma box holds 2.40 dollars."
         },
         {
           "text": "Step 2: Add the new amount. 2.40 + 0.60 = 3.00."
         },
         {
-          "text": "Step 3: Store 3.00 in fare. Now fare is 3.00 dollars."
+          "text": "Step 3: Store 3.00 in total. Now total is 3.00 dollars."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-applied-7",
-      "prompt": "Usopp's crew box holds 5. The code runs crew = crew + 1 after a recruit, then crew = crew − 2 after a fight. What is in crew now?",
+      "prompt": "Your PC box holds 5 Pokémon. The code runs box = box + 1 after a catch, then box = box − 2 after a release. What is in box now?",
       "options": [
-        "4 crew members",
-        "6 crew members",
-        "3 crew members"
+        "4 Pokémon in the box",
+        "6 Pokémon in the box",
+        "3 Pokémon in the box"
       ],
       "answer": 0,
       "why": "Each line changes the box by its own amount, and the second line starts from the value the first line left.",
       "steps": [
         {
-          "text": "Step 1: Use a new start. Say crew holds 8."
+          "text": "Step 1: Use a new start. Say box holds 3."
         },
         {
-          "text": "Step 2: Recruit line: 8 + 1 = 9, so crew is 9."
+          "text": "Step 2: Catch line: 3 + 1 = 4, so box is 4."
         },
         {
-          "text": "Step 3: Fight line: 9 − 2 = 7, so crew is 7."
+          "text": "Step 3: Release line: 4 − 2 = 2, so box is 2."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-applied-8",
-      "prompt": "Box score holds 6. Which line makes score go up by exactly 2?",
+      "prompt": "Your leaderboard box score holds 6. Which line makes score go up by exactly 2?",
       "options": [
         "score = score + 2",
         "score = score * 2",
@@ -734,7 +734,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-applied-9",
-      "prompt": "Box a holds 2. Box b holds 5. The code runs: a = a + b, then b = a − b. What do a and b hold now?",
+      "prompt": "Chest a holds 2 iron. Chest b holds 5 iron. The code runs a = a + b, then b = a − b. What do a and b hold now?",
       "options": [
         "a is 7, b is 2",
         "a is 7, b is 5",
@@ -767,20 +767,20 @@ export const pack: SePack = {
       "why": "The right side is worked out first, then the answer replaces the old value in the box.",
       "steps": [
         {
-          "text": "Take a different box: shots = 7, and the line shots = shots + 2."
+          "text": "Take a different box: saves = 7, and the line saves = saves + 2."
         },
         {
           "text": "Work out the right side first: 7 + 2 = 9."
         },
         {
-          "text": "Store 9 in shots. The old 7 is gone."
+          "text": "Store 9 in saves. The old 7 is gone."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-deeper-7",
-      "prompt": "Zoro's bounty box is p = 6. Then q = p. Then p = 2. What is q now?",
+      "prompt": "Your squad's eliminations box p = 6. Then q = p. Then p = 2. What is q now?",
       "options": [
         "q is 2, because it follows p.",
         "q is 2, because p was changed.",
@@ -803,20 +803,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-deeper-8",
-      "prompt": "Which line puts the name Luffy in a box called name?",
+      "prompt": "Which line puts the name Pikachu in a box called name?",
       "options": [
-        "name = Luffy",
-        "name = 'Luffy'",
-        "'name' = Luffy"
+        "name = Pikachu",
+        "name = 'Pikachu'",
+        "'name' = Pikachu"
       ],
       "answer": 1,
-      "why": "Words need quote marks, or code will look for a box named Luffy and fail.",
+      "why": "Words need quote marks, or code will look for a box named Pikachu and fail.",
       "steps": [
         {
-          "text": "Try a different word: team = 'Blue Lock'. The words sit in quotes."
+          "text": "Try a different word: mode = 'Obby'. The word sits in quotes."
         },
         {
-          "text": "Without quotes, code reads Blue Lock as a box name and fails."
+          "text": "Without quotes, code reads Obby as a box name and fails."
         },
         {
           "text": "Numbers like 5 need no quotes, because 5 is not a box name."
@@ -826,20 +826,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-deeper-9",
-      "prompt": "Isagi's box is called isagi. Code also has a box called Isagi. Are they the same box?",
+      "prompt": "Your striker box is called striker. Code also has a box called Striker. Are they the same box?",
       "options": [
         "They are the same box.",
         "They are two different boxes.",
         "Python makes them match."
       ],
       "answer": 1,
-      "why": "Python checks every letter, capitals included, so Isagi and isagi are different names.",
+      "why": "Python checks every letter, capitals included, so striker and Striker are different names.",
       "steps": [
         {
-          "text": "Try a different pair: Team and team. Do they match letter for letter?"
+          "text": "Try a different pair: Goal and goal. Do they match letter for letter?"
         },
         {
-          "text": "No. The capital T makes it a different name, so it is a different box."
+          "text": "No. The capital G makes it a different name, so it is a different box."
         },
         {
           "text": "Pick one spelling for every line, or the code breaks."
@@ -849,53 +849,53 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-var-deeper-10",
-      "prompt": "Isagi's points box is points = 3. Then points = points * 4. What is points now?",
+      "prompt": "Your ingots box is ingots = 3. Then ingots = ingots * 4. What is ingots now?",
       "options": [
-        "points is 7 now",
-        "points is 34 now",
-        "points is 12 now"
+        "ingots is 7 now",
+        "ingots is 34 now",
+        "ingots is 12 now"
       ],
       "answer": 2,
       "why": "The right side is worked out first using the old value, so 3 × 4 gives 12.",
       "steps": [
         {
-          "text": "Try goals = 5, then goals = goals * 2."
+          "text": "Try coal = 5, then coal = coal * 2."
         },
         {
           "text": "Work out the right side first: 5 × 2 = 10."
         },
         {
-          "text": "Store 10 in goals. Now goals is 10, not 5 and 2."
+          "text": "Store 10 in coal. Now coal is 10, not 5 and 2."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-var-deeper-11",
-      "prompt": "Passes is 8. Then passes = passes − 3. What is passes now?",
+      "prompt": "Your wood box is wood = 8. Then wood = wood − 3. What is wood now?",
       "options": [
-        "passes is 5 now",
-        "passes is 11 now",
-        "passes is 8 still"
+        "wood is 5 now",
+        "wood is 11 now",
+        "wood is 8 still"
       ],
       "answer": 0,
       "why": "The minus line works out 8 − 3 first, then replaces the old 8 with 5.",
       "steps": [
         {
-          "text": "Try ball = 12, then ball = ball − 4."
+          "text": "Try shield = 60, then shield = shield − 40."
         },
         {
-          "text": "Work out the right side first: 12 − 4 = 8."
+          "text": "Work out the right side first: 60 − 40 = 20."
         },
         {
-          "text": "Store 8 in ball. The 12 is replaced, not kept beside it."
+          "text": "Store 20 in shield. The 60 is replaced, not kept beside it."
         }
       ]
     },
     {
       "kind": "build",
       "id": "code-var-build-2",
-      "prompt": "Isagi's passes box starts at 3.\n\npasses = passes * 2\npasses = passes * 2\n\nWhat is passes now?",
+      "prompt": "Your Timbits box starts at 3.\n\ntimbits = timbits * 2\ntimbits = timbits * 2\n\nWhat is timbits now?",
       "answer": "12",
       "decoys": [
         "6",
@@ -904,7 +904,7 @@ export const pack: SePack = {
       "why": "The star symbol * is the code way to write multiply, because x could be confused with a letter.",
       "steps": [
         {
-          "text": "Example: score = 5, then score = score * 2. The box now holds 10."
+          "text": "Example: pizza = 5, then pizza = pizza * 2. The box now holds 10."
         },
         {
           "text": "Run the first line once. Then run the second line on the new value, not the first start."
@@ -916,30 +916,8 @@ export const pack: SePack = {
     },
     {
       "kind": "build",
-      "id": "code-var-build-5",
-      "prompt": "Isagi's goal difference box starts at 1.\n\ngoal_diff = goal_diff − 3\n\nWhat is goal_diff now? Use − for the minus sign.",
-      "answer": "-2",
-      "decoys": [
-        "3",
-        "5"
-      ],
-      "why": "Goal difference can go below zero, which is why a number line stretches left past 0.",
-      "steps": [
-        {
-          "text": "Example: heat = 2, then heat = heat − 5. The box holds −3 now."
-        },
-        {
-          "text": "On a number line, start at the old value and count left the amount you subtract."
-        },
-        {
-          "text": "A negative number in the box is still a valid value, like a team that has let in more goals."
-        }
-      ]
-    },
-    {
-      "kind": "build",
       "id": "code-var-build-6",
-      "prompt": "Isagi's power box starts at 4.\n\npower = power + power\npower = power + power\n\nWhat is power now?",
+      "prompt": "Your coin counter starts at 4.\n\ncoins = coins + coins\ncoins = coins + coins\n\nWhat is coins now?",
       "answer": "16",
       "decoys": [
         "8",
@@ -948,7 +926,7 @@ export const pack: SePack = {
       "why": "A variable can be added to itself, so the box doubles each time that line runs.",
       "steps": [
         {
-          "text": "Example: x = 3, then x = x + x. The box now holds 6."
+          "text": "Example: blocks = 3, then blocks = blocks + blocks. The box now holds 6."
         },
         {
           "text": "Run each line on the value that is in the box at that moment."
@@ -961,7 +939,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-var-build-7",
-      "prompt": "Luffy's crew box starts at 4.\n\ncrew = crew + 3\ncrew = crew * 2\n\nWhat is crew now?",
+      "prompt": "Your block box starts at 4.\n\nblocks = blocks + 3\nblocks = blocks * 2\n\nWhat is blocks now?",
       "answer": "14",
       "decoys": [
         "6",
@@ -970,7 +948,7 @@ export const pack: SePack = {
       "why": "Code runs lines from top to bottom, so the order of the lines changes the final answer.",
       "steps": [
         {
-          "text": "Example: gems = 2, then gems = gems + 5 gives 7, then gems = gems * 3 gives 21."
+          "text": "Example: wood = 2, then wood = wood + 5 gives 7, then wood = wood * 3 gives 21."
         },
         {
           "text": "Do the top line first and write its result into the box."
@@ -988,23 +966,23 @@ export const pack: SePack = {
         "mode": "order",
         "values": [
           {
-            "label": "x = 4 + 6",
+            "label": "pts = 4 + 6",
             "value": 10
           },
           {
-            "label": "x = 2 × 3",
+            "label": "pts = 2 × 3",
             "value": 6
           },
           {
-            "label": "x = 9 − 1",
+            "label": "pts = 9 − 1",
             "value": 8
           },
           {
-            "label": "x = 20 ÷ 4",
+            "label": "pts = 20 ÷ 4",
             "value": 5
           },
           {
-            "label": "x = 7 + 7",
+            "label": "pts = 7 + 7",
             "value": 14
           }
         ]

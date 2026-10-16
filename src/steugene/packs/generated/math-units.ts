@@ -16,18 +16,18 @@ export const pack: SePack = {
       "title": "Same length, new name",
       "lines": [
         "One length can have many names.",
-        "2.4 m, 240 cm and 2400 mm are all the same distance.",
-        "Changing the unit changes the number, not the length."
+        "A fence is 2.4 m, 240 cm, or 2400 mm.",
+        "The unit changes the number, not the length."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi's shot is one ball, one path. Only the units on the scoreboard change."
+        "flavour": "key",
+        "text": "One Minecraft block is 1 m. A 2.4-block fence is still 2.4 m, whatever you call it."
       }
     },
     {
       "kind": "choice",
       "id": "math-units-basics-0",
-      "prompt": "A Blue Lock striker takes a shot from 3.5 m out. How many cm is that?",
+      "prompt": "Your Minecraft tower is 3.5 blocks tall. How many cm is that?",
       "options": [
         "35 cm",
         "3500 cm",
@@ -40,24 +40,17 @@ export const pack: SePack = {
           "text": "Find the decimal point in 3.5. It sits between the 3 and the 5."
         },
         {
-          "text": "Move it 2 places right for cm. Try 1.25 m: it becomes 125 cm."
+          "text": "Move it 2 places right for cm. Try 1.25 blocks: it becomes 125 cm."
         },
         {
-          "text": "Check 0.6 m. Move the point 2 places right: 60 cm. Now do 3.5 m."
+          "text": "Check 0.6 blocks: move the point 2 places, so 60 cm. Now do 3.5 blocks."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3.5 m",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-units-basics-1",
-      "prompt": "Luffy's ship sails over a trench 2.4 km deep. How many m is that?",
+      "prompt": "Your squad runs 2.4 km to the storm circle. How many m is that?",
       "options": [
         "240 m",
         "2400 m",
@@ -132,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-basics-2",
-      "prompt": "Which is more: 1.5 L or 1250 mL?",
+      "prompt": "Which is more: a 1.5 L bottle or a 1250 mL juice box?",
       "options": [
         "1.5 L is more",
         "1250 mL is more",
@@ -155,7 +148,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-basics-3",
-      "prompt": "A Blue Lock boot weighs 0.25 kg. How many g is that?",
+      "prompt": "A Pokémon weighs 0.25 kg. How many g is that?",
       "options": [
         "25 g",
         "2500 g",
@@ -180,7 +173,7 @@ export const pack: SePack = {
       "id": "math-units-teach-1",
       "title": "Measure the same thing",
       "lines": [
-        "Pitch lengths, ball sizes and field plans all use metric units.",
+        "Pitch plans, ball sizes and goal sizes use metric units.",
         "Mixing units gives a wrong answer. Convert first, then calculate.",
         "A goal mouth is 7320 mm wide. That is 7.32 m."
       ],
@@ -204,7 +197,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-units-build-0",
-      "prompt": "Bachira lines up a free kick 9.2 m from the wall. Build that distance in cm.",
+      "prompt": "Your Minecraft wall is 9.2 blocks long. One block is 1 metre. Build that length in cm.",
       "answer": "920",
       "decoys": [
         "5",
@@ -216,17 +209,17 @@ export const pack: SePack = {
           "text": "Metres to centimetres: multiply by 100. Move the decimal point 2 places right."
         },
         {
-          "text": "Try 4.7 m. Move the point 2 places right. You get 470 cm."
+          "text": "Your wall is 4.7 blocks. Move the point 2 places right: 470 cm."
         },
         {
-          "text": "Try 0.6 m. Move the point 2 places right. You get 60 cm, with a zero filling the gap."
+          "text": "Your hallway is 0.6 blocks. Move the point 2 places right: 60 cm, with a zero filling the gap."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-units-basics-4",
-      "prompt": "Luffy's bounty poster is 0.3 m wide. How many mm is that?",
+      "prompt": "Your Roblox obby plank is 0.3 m wide. How many mm is that?",
       "options": [
         "3 mm",
         "300 mm",
@@ -239,7 +232,7 @@ export const pack: SePack = {
           "text": "Write 0.3 m. Move the point 3 places right, adding zeros where needed."
         },
         {
-          "text": "Try 0.8 m: it becomes 800 mm. Try 1.2 m: it becomes 1200 mm."
+          "text": "Try a 0.8 m platform: it becomes 800 mm. Try a 1.2 m platform: it becomes 1200 mm."
         },
         {
           "text": "Now do 0.3 m again. You should get 300 mm, not 30 mm."
@@ -249,7 +242,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-basics-5",
-      "prompt": "A regulation goal is 7.32 m wide. How many cm is that?",
+      "prompt": "The goal in your EA FC match is 7.32 m wide. How many cm is that?",
       "options": [
         "732 cm",
         "73.2 cm",
@@ -262,17 +255,17 @@ export const pack: SePack = {
           "text": "Write 7.32 m. Move the point 2 places right: 732 cm."
         },
         {
-          "text": "Try 2.5 m: move the point 2 places right, giving 250 cm."
+          "text": "Try a 2.5 m crossbar section: move the point 2 places right, giving 250 cm."
         },
         {
-          "text": "Try 0.09 m: move the point 2 places right, giving 9 cm."
+          "text": "Try a 0.09 m gap: move the point 2 places right, giving 9 cm."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-units-games-0",
-      "title": "Sword Length Line-Up",
+      "title": "Blade Length Line-Up",
       "game": {
         "mode": "order",
         "values": [
@@ -302,7 +295,7 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "Converting to one unit first lets you compare lengths fairly."
+      "why": "Converting every blade to cm first lets you compare them fairly."
     },
     {
       "kind": "explain",
@@ -311,7 +304,7 @@ export const pack: SePack = {
       "lines": [
         "Metric units jump by 10, 100 or 1000.",
         "Going to a smaller unit: move the decimal point right.",
-        "m to cm: right 2 places. m to mm: right 3 places."
+        "Fortnite ramp at 2.5 m: right 2 places gives 250 cm."
       ],
       "callout": {
         "flavour": "key",
@@ -321,7 +314,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-basics-6",
-      "prompt": "Which conversion is WRONG?",
+      "prompt": "Your snack list has three conversions. Which one is WRONG?",
       "options": [
         "3 km = 3000 m",
         "4.5 m = 450 cm",
@@ -337,14 +330,14 @@ export const pack: SePack = {
           "text": "Check the second. 1 m is 100 cm, so 4.5 m is 450 cm. Correct."
         },
         {
-          "text": "Check 6 L the same way. Litres to mL multiplies by 1000, so 6 L is 6000 mL."
+          "text": "Check your 6 L pop jug the same way. Litres to mL multiplies by 1000, so 6 L is 6000 mL."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-basics-7",
-      "prompt": "Type the number. How many cm is 4.2 m?",
+      "prompt": "Your Minecraft wall is 4.2 blocks long. How many cm is that?",
       "answer": "420",
       "decoys": [
         "5"
@@ -352,20 +345,20 @@ export const pack: SePack = {
       "why": "One metre is 100 cm, so the decimal point moves two places right.",
       "steps": [
         {
-          "text": "Write 4.2 m. Move the point 2 places right."
+          "text": "4.2 blocks is 4.2 m. Move the point 2 places right."
         },
         {
-          "text": "Try 1.25 m: it becomes 125 cm. Fill any gap with a zero."
+          "text": "A 1.25-block bridge is 125 cm. Fill the gap with a zero."
         },
         {
-          "text": "Try 0.6 m: it becomes 60 cm. Now apply the same move to 4.2 m."
+          "text": "A 0.6-block ledge is 60 cm. Use the same move on 4.2 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-build-1",
-      "prompt": "Isagi's goal post is 2.44 m high. Build that height in mm.",
+      "prompt": "The goal is 2.44 m high. Type that height in mm.",
       "answer": "2440",
       "decoys": [
         "7",
@@ -374,13 +367,13 @@ export const pack: SePack = {
       "why": "One metre is 1000 millimetres, so the number gets 1000 times bigger.",
       "steps": [
         {
-          "text": "Metres to millimetres: multiply by 1000. Move the decimal point 3 places right."
+          "text": "Metres to millimetres: move the decimal point 3 places right."
         },
         {
-          "text": "Try 1.8 m. Move the point 3 places right. You get 1800 mm."
+          "text": "A 1.8 m keeper wall is 1800 mm. Move the point 3 places right."
         },
         {
-          "text": "Try 0.25 m. Move the point 3 places right. You get 250 mm."
+          "text": "A 0.25 m tackle sled is 250 mm. Same move, same method."
         }
       ]
     }
@@ -392,12 +385,12 @@ export const pack: SePack = {
       "title": "Trap: which way to move?",
       "lines": [
         "A smaller unit gives a bigger number.",
-        "2.4 m is 2.4 big steps. 240 cm is 240 small steps.",
-        "Check: if the number got bigger, the unit got smaller."
+        "A 2.4 m Roblox part is 2.4 big steps.",
+        "The same part is 240 cm, or 240 small steps."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A keeper who dives the wrong way loses the match. Check your direction first."
+        "text": "Check the direction first. If the number got bigger, the unit got smaller."
       }
     },
     {
@@ -405,7 +398,7 @@ export const pack: SePack = {
       "id": "math-units-teach-4",
       "title": "Walk through: 3.75 m to mm",
       "lines": [
-        "Start with 3.75 m. Millimetres are three places smaller, so move right three.",
+        "Start with a 3.75 m Fortnite ramp. Millimetres are three places smaller, so move right three.",
         "Move one place: 37.5. Two places: 375. Three places: 3750.",
         "Answer: 3.75 m = 3750 mm."
       ]
@@ -421,7 +414,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Crew rule: no number sails without its unit."
+        "text": "Kitchen rule: no pizza box gets measured without its unit written beside it."
       }
     },
     {
@@ -435,7 +428,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Isagi's shot is 4 m. That is 400 cm. More cm, bigger number."
+        "text": "A Pokémon that is 4 m tall is 400 cm. More cm, bigger number."
       },
       "art": {
         "art": "numberline",
@@ -460,13 +453,13 @@ export const pack: SePack = {
       "id": "math-units-deeper-1",
       "title": "Zeros can hide the move",
       "lines": [
+        "Your fence post is 0.5 m tall.",
         "0.5 m is not 5 cm. It is 50 cm.",
-        "Half a metre is half of 100 cm.",
-        "Count the places before you write the answer."
+        "Half a block is half of 100 cm."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Writing 5 instead of 50 makes a goal look tiny. Check the zero."
+        "text": "Writing 5 instead of 50 makes your wall look tiny. Check the zero."
       }
     },
     {
@@ -474,13 +467,13 @@ export const pack: SePack = {
       "id": "math-units-deeper-2",
       "title": "Squares square the number",
       "lines": [
-        "Area is measured in squares, so change both sides.",
+        "A floor tile is 1 m × 1 m.",
         "1 m² is 100 cm × 100 cm.",
         "That is 10 000 cm², not just 100 cm²."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A treasure map square is not 100 cm². Square the whole conversion."
+        "text": "A square patch is not 100 cm². Square the whole conversion."
       }
     },
     {
@@ -494,7 +487,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Learn the three prefixes once. Then every unit with that prefix works the same way."
+        "text": "A 2 L pop bottle holds 2000 mL. Learn the three prefixes once."
       }
     },
     {
@@ -502,13 +495,13 @@ export const pack: SePack = {
       "id": "math-units-deeper-4",
       "title": "Going to a bigger unit",
       "lines": [
-        "Going from metres to kilometres, the number shrinks.",
+        "Your bike loop on the Waterfront is 2500 m.",
         "2500 m is 2.5 km. Divide by 1000.",
-        "The decimal point moves to the left, one place per zero."
+        "The decimal point moves left, one place per zero."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "The Blue Lock pitch is 1000 m across in a dream. Count the zeros, then move the point."
+        "text": "Count the zeros, then move the point. The same move works every time."
       }
     },
     {
@@ -516,19 +509,19 @@ export const pack: SePack = {
       "id": "math-units-deeper-5",
       "title": "mL and cm³ are the same",
       "lines": [
-        "A cube 1 cm on each side holds 1 mL.",
+        "A sugar cube, 1 cm on each side, holds 1 mL.",
         "So volume in cm³ and capacity in mL match.",
         "Litres are a different jump: 1 L = 1000 mL."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Luffy's rum cup and a sugar cube can match. Same space, same number."
+        "text": "A sugar cube and a 1 mL dropper fill the same space. Same number."
       }
     },
     {
       "kind": "build",
       "id": "math-units-basics-8",
-      "prompt": "Type the number. How many m is 3.07 km?",
+      "prompt": "Type the number. Your run is 3.07 km. How many m is that?",
       "answer": "3070",
       "decoys": [
         "5",
@@ -538,10 +531,10 @@ export const pack: SePack = {
       "why": "One kilometre is 1000 m, so the decimal point moves three places right.",
       "steps": [
         {
-          "text": "Write 3.07 km. Move the point 3 places right. The gap needs a zero."
+          "text": "Your run is 3.07 km. Move the point 3 places right. The gap needs a zero."
         },
         {
-          "text": "Try 1.6 km: it becomes 1600 m. Try 0.45 km: it becomes 450 m."
+          "text": "Your Battle Bus flies 1.6 km: that is 1600 m. A 0.45 km drop is 450 m."
         },
         {
           "text": "Now do 3.07 km. Move the point 3 places right, then check the digits."
@@ -551,30 +544,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-basics-9",
-      "prompt": "Which unit fits the height of a front door?",
+      "prompt": "Your Minecraft door is 2 blocks tall. Which unit fits its height?",
       "options": [
         "metres",
         "millimetres",
         "kilometres"
       ],
       "answer": 0,
-      "why": "A door is about 2 m tall, so metres give a sensible size.",
+      "why": "One block is 1 m, so a 2-block door is about 2 m tall.",
       "steps": [
         {
-          "text": "Think of a pencil. It is about 15 cm, so cm is the right scale."
+          "text": "A Poké Ball is about 6 cm across, so cm fits small things."
         },
         {
-          "text": "Think of a bridge. It is about 1 km long, so km is right for that."
+          "text": "A football pitch is about 105 m long, so km is too big for it."
         },
         {
-          "text": "A door is about 2 m. Choose the unit that matches a person-sized thing."
+          "text": "A door is 2 blocks, about 2 m. Pick the unit for a person-sized thing."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-units-applied-0",
-      "prompt": "Coach Ego says the goal is 7.32 m wide. Isagi asks for the width in centimetres. Which is right?",
+      "prompt": "Your Roblox part is 7.32 m wide. How wide is it in centimetres?",
       "options": [
         "73.2 cm",
         "7320 cm",
@@ -587,24 +580,17 @@ export const pack: SePack = {
           "text": "Write down the rule. 1 m = 100 cm. Multiply by 100."
         },
         {
-          "text": "Try 3.85 m. Move the point two places right: 385 cm."
+          "text": "Your Roblox ramp is 3.85 m. Move the point two places right: 385 cm."
         },
         {
           "text": "So 7.32 m becomes 732 cm. Each place to the right is ×10."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "calm"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-units-applied-1",
-      "prompt": "One Piece: Luffy's crew draws a deck on a map. It is 12 m long and 5 m wide. What is its area in cm²?",
+      "prompt": "Your Minecraft house floor is 12 m long and 5 m wide. Its area in cm²?",
       "options": [
         "60 000 cm²",
         "600 000 cm²",
@@ -617,7 +603,7 @@ export const pack: SePack = {
           "text": "Change each side to cm first. 12 m = 1200 cm. 5 m = 500 cm."
         },
         {
-          "text": "Try a 3 m by 4 m table. 300 cm × 400 cm = 120 000 cm²."
+          "text": "Try a 3 m by 4 m rug. 300 cm × 400 cm = 120 000 cm²."
         },
         {
           "text": "Area is length × width. Do not just slide the point once."
@@ -627,7 +613,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-2",
-      "prompt": "Isagi's shot leaves his boot at 108 km/h. How fast is that in metres per second?",
+      "prompt": "A real free kick leaves the boot at 108 km/h. How fast is that in metres per second?",
       "options": [
         "3 m/s",
         "300 m/s",
@@ -650,11 +636,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-3",
-      "prompt": "Blue Lock: Two strikers compare their boots. Isagi's is 0.8 L of sports drink. Bachira's bottle is 750 mL. Who has more?",
+      "prompt": "Two party drinks: Drink A is 0.8 L. Drink B is 750 mL. Which one holds more?",
       "options": [
-        "Isagi's bottle, 0.8 L",
-        "Bachira's bottle, 750 mL",
-        "They are the same"
+        "Drink A, the 0.8 L",
+        "Drink B, the 750 mL",
+        "They hold the same"
       ],
       "answer": 0,
       "why": "Units must match before you compare, and 1 L is 1000 mL.",
@@ -673,12 +659,12 @@ export const pack: SePack = {
         "art": "bars",
         "rows": [
           {
-            "label": "Isagi",
+            "label": "Drink A",
             "value": 800,
             "tone": "good"
           },
           {
-            "label": "Bachira",
+            "label": "Drink B",
             "value": 750,
             "tone": "calm"
           }
@@ -689,7 +675,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-4",
-      "prompt": "Blue Lock: The Blue Lock pitch training run is 0.105 km long. How long is that in metres?",
+      "prompt": "The storm closes in on a 0.105 km path. How long is that path in metres?",
       "options": [
         "10.5 m",
         "105 m",
@@ -702,30 +688,30 @@ export const pack: SePack = {
           "text": "Write the rule. 1 km = 1000 m. Multiply by 1000."
         },
         {
-          "text": "Try 0.4 km. Move the point three places right: 400 m."
+          "text": "Try a 0.4 km bus route. Move the point three places right: 400 m."
         },
         {
-          "text": "Try 2.75 km. Move it three places right: 2750 m."
+          "text": "Try a 2.75 km storm edge. Move it three places right: 2750 m."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-units-applied-5",
-      "prompt": "One Piece: The Going Merry carries 0.15 t of barrels and 275 kg of rope. What is the total in kilograms?",
+      "prompt": "Your food truck carries 0.15 t of flour and 275 kg of rice. What is the total in kg?",
       "options": [
+        "425 kg",
         "530 kg",
-        "80450 kg",
-        "425 kg"
+        "80450 kg"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "Units must match before you add, and 1 tonne is 1000 kg.",
       "steps": [
         {
-          "text": "Change tonnes to kg. Multiply by 1000. 0.15 t = 150 kg."
+          "text": "Change tonnes to kg. Multiply by 1000. 0.2 t = 200 kg."
         },
         {
-          "text": "Now add. Try 0.08 t plus 450 kg. 80 kg + 450 kg = 530 kg."
+          "text": "Now add. Try 0.08 t of cheese plus 450 kg of meat. 80 kg + 450 kg = 530 kg."
         },
         {
           "text": "Never add 0.15 and 275 straight away. The units are different."
@@ -735,43 +721,43 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-6",
-      "prompt": "Blue Lock: The coach measures the pitch as 6 800 cm wide. Is that correct for a pitch 68 m wide?",
+      "prompt": "Your Minecraft wall is 6 800 cm long. Is that 68 blocks, since 1 block = 1 m?",
       "options": [
-        "Yes, it is 68 m wide",
-        "No, it is 680 m wide",
-        "No, it is 6.8 m wide"
+        "Yes, that is 68 blocks",
+        "No, that is 680 blocks",
+        "No, that is 6.8 blocks"
       ],
       "answer": 0,
       "why": "One metre is 100 cm, so you divide by 100 by moving the point two places left.",
       "steps": [
         {
-          "text": "Divide by 100 to change cm to m. Move the point two places left."
+          "text": "Divide by 100 to change cm to blocks. Move the point two places left."
         },
         {
-          "text": "Try 5 400 cm. That is 54 m. Move the point left twice."
+          "text": "Try a 5 400 cm wall. That is 54 blocks. Move the point left twice."
         },
         {
-          "text": "Try 9 000 cm. That is 90 m."
+          "text": "Try a 9 000 cm wall. That is 90 blocks."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-units-applied-7",
-      "prompt": "One Piece: A gold coin has a mass of 0.0085 kg. What is its mass in grams?",
+      "prompt": "One Timbit weighs 0.0085 kg. What is its mass in grams?",
       "options": [
         "0.85 g",
-        "8.5 g",
-        "85 g"
+        "85 g",
+        "8.5 g"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "One kilogram is 1000 grams, so the decimal point moves three places right.",
       "steps": [
         {
           "text": "Write the rule. 1 kg = 1000 g. Move the point three places right."
         },
         {
-          "text": "Try 0.0342 kg. Move the point three places right: 34.2 g."
+          "text": "Try 0.0342 kg of sugar. Move the point three places right: 34.2 g."
         },
         {
           "text": "Check: a small number of kg should give a small number of g, but still a whole-number size."
@@ -781,20 +767,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-8",
-      "prompt": "Blue Lock: Isagi's training mat is 3 m long and 80 cm wide. What is its area in m²?",
+      "prompt": "Your Roblox obby platform is 3 m long and 80 cm wide. What is its area in m²?",
       "options": [
-        "100 m²",
         "0.1 m²",
-        "2.4 m²"
+        "2.4 m²",
+        "100 m²"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "Both sides must be in the same unit before you multiply, so 80 cm becomes 0.8 m.",
       "steps": [
         {
           "text": "Change cm to m first. 80 cm = 0.8 m."
         },
         {
-          "text": "Try 4 m by 50 cm. 50 cm = 0.5 m. 4 × 0.5 = 2 m²."
+          "text": "Try a 4 m platform, 50 cm wide. 50 cm = 0.5 m. 4 × 0.5 = 2 m²."
         },
         {
           "text": "Then multiply the two lengths in metres. That gives the area in m²."
@@ -804,20 +790,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-applied-9",
-      "prompt": "One Piece: On a treasure map, 1 cm stands for 0.5 km. The island is 14 cm across on the map. How far is it in real life?",
+      "prompt": "On the Fortnite map, 1 cm stands for 0.5 km. The route is 14 cm long. How far is it in km?",
       "options": [
+        "70 km",
         "0.7 km",
-        "7 km",
-        "70 km"
+        "7 km"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "A map scale multiplies the map length, and then the decimal point is placed by the unit change.",
       "steps": [
         {
           "text": "Multiply the map length by the scale. 14 × 0.5 = 7."
         },
         {
-          "text": "Try 9 cm on a map of 0.5 km per cm. 9 × 0.5 = 4.5 km."
+          "text": "Try 9 cm between two POIs at 0.5 km per cm. 9 × 0.5 = 4.5 km."
         },
         {
           "text": "Check the unit. The answer should be in km, because the scale is in km."
@@ -827,20 +813,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-deeper-6",
-      "prompt": "Isagi's shot travels 4.2 m. How many cm is that?",
+      "prompt": "A goal kick travels 4.2 m across the pitch. How many cm is that?",
       "options": [
+        "4200 cm",
         "42 cm",
-        "420 cm",
-        "4200 cm"
+        "420 cm"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "One metre is 100 cm, so the decimal point moves two places to the right.",
       "steps": [
         {
           "text": "Metres to cm: multiply by 100."
         },
         {
-          "text": "Example: 0.7 m × 100 = 70 cm. Move the point 2 places right: 0.7 → 70."
+          "text": "Example: a 0.7 m pass × 100 = 70 cm. Move the point 2 places right: 0.7 → 70."
         },
         {
           "text": "Check: the unit got smaller, so the number got bigger."
@@ -863,7 +849,7 @@ export const pack: SePack = {
           "text": "cm to mm: multiply by 10."
         },
         {
-          "text": "Example: 3.5 cm × 10 = 35 mm. Move the point 1 place right: 3.5 → 35."
+          "text": "Example: a 3.5 cm cone is 35 mm wide. Move the point 1 place right: 3.5 → 35."
         },
         {
           "text": "Check: mm is smaller than cm, so the number must get bigger, not smaller."
@@ -873,7 +859,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-deeper-8",
-      "prompt": "A One Piece log pose shows the island is 1600 m away. How many km is that?",
+      "prompt": "Your Minecraft railway is 1600 m long. How many km is that?",
       "options": [
         "16 km",
         "1.6 km",
@@ -886,7 +872,7 @@ export const pack: SePack = {
           "text": "m to km: divide by 1000."
         },
         {
-          "text": "Example: 2500 m ÷ 1000 = 2.5 km. Move the point 3 places left: 2500 → 2.5."
+          "text": "Example: a 2500 m minecart track is 2.5 km. Move the point 3 places left: 2500 → 2.5."
         },
         {
           "text": "Check: km is bigger than m, so the number must get smaller."
@@ -896,7 +882,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-deeper-9",
-      "prompt": "A field is 2 m long and 3 m wide. What is its area in cm²?",
+      "prompt": "Your bedroom rug is 2 m long and 3 m wide. What is its area in cm²?",
       "options": [
         "600 cm²",
         "6000 cm²",
@@ -909,7 +895,7 @@ export const pack: SePack = {
           "text": "Find the area in m² first. Then multiply by 10 000 for cm²."
         },
         {
-          "text": "Example: 4 m × 1 m = 4 m². Then 4 × 10 000 = 40 000 cm²."
+          "text": "Example: a 4 m × 1 m mat is 4 m². Then 4 × 10 000 = 40 000 cm²."
         },
         {
           "text": "Check: if you only multiply by 100, you forgot to square the conversion."
@@ -919,7 +905,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-deeper-10",
-      "prompt": "A water bottle holds 0.75 L. How many mL is that?",
+      "prompt": "A carton of chocolate milk holds 0.75 L. How many mL is that?",
       "options": [
         "750 mL",
         "75 mL",
@@ -932,7 +918,7 @@ export const pack: SePack = {
           "text": "L to mL: multiply by 1000."
         },
         {
-          "text": "Example: 0.2 L × 1000 = 200 mL. Move the point 3 places right: 0.2 → 200."
+          "text": "Example: a 0.2 L juice box is 200 mL. Move the point 3 places right: 0.2 → 200."
         },
         {
           "text": "Check: mL is smaller than L, so the number must be much bigger."
@@ -942,7 +928,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-units-deeper-11",
-      "prompt": "A hatchback has a mass of 1.2 t. What is that in kg?",
+      "prompt": "A hatchback in a Scarborough parking lot has a mass of 1.2 t. What is that in kg?",
       "options": [
         "12 kg",
         "120 kg",
@@ -955,7 +941,7 @@ export const pack: SePack = {
           "text": "t to kg: multiply by 1000."
         },
         {
-          "text": "Example: 0.85 t × 1000 = 850 kg. Move the point 3 places right: 0.85 → 850."
+          "text": "Example: a 0.85 t smart car is 850 kg. Move the point 3 places right: 0.85 → 850."
         },
         {
           "text": "Check: kg is smaller than t, so the number must get bigger."
@@ -974,17 +960,17 @@ export const pack: SePack = {
           "text": "Metres to centimetres: multiply by 100. Move the decimal point 2 places right."
         },
         {
-          "text": "Try 3.8 m. Move the point 2 places right. You get 380 cm."
+          "text": "Try a 3.8 m sail rope. Move the point 2 places right. You get 380 cm."
         },
         {
-          "text": "Try 0.9 m. Move the point 2 places right. You get 90 cm."
+          "text": "Try a 0.9 m Going Merry plank. Move the point 2 places right. You get 90 cm."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-build-3",
-      "prompt": "Chigiri sprints 580 cm down the wing. Build that distance in metres.",
+      "prompt": "Your Minecraft minecart track is 580 cm long. Build that length in metres.",
       "answer": "5.8",
       "decoys": [
         "0"
@@ -995,17 +981,17 @@ export const pack: SePack = {
           "text": "Centimetres to metres: divide by 100. Move the decimal point 2 places left."
         },
         {
-          "text": "Try 340 cm. Move the point 2 places left. You get 3.4 m."
+          "text": "Try a 340 cm fence. Move the point 2 places left. You get 3.4 m."
         },
         {
-          "text": "Try 75 cm. Move the point 2 places left. You get 0.75 m."
+          "text": "Try a 75 cm ramp. Move the point 2 places left. You get 0.75 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-build-4",
-      "prompt": "Sanji's cooking pot is 850 mm tall. Build that height in metres.",
+      "prompt": "Your Roblox Studio part is 850 mm tall. Build that height in metres.",
       "answer": "0.85",
       "decoys": [
         "4",
@@ -1017,17 +1003,17 @@ export const pack: SePack = {
           "text": "Millimetres to metres: divide by 1000. Move the decimal point 3 places left."
         },
         {
-          "text": "Try 2400 mm. Move the point 3 places left. You get 2.4 m."
+          "text": "Try a 2400 mm goal post. Move the point 3 places left. You get 2.4 m."
         },
         {
-          "text": "Try 75 mm. Move the point 3 places left. You get 0.075 m."
+          "text": "Try a 75 mm Minecraft slab. Move the point 3 places left. You get 0.075 m."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-build-5",
-      "prompt": "Sae's water bottle holds 1.75 L. Build that amount in mL.",
+      "prompt": "Your Slurpee cup holds 1.75 L. Build that amount in mL.",
       "answer": "1750",
       "decoys": [],
       "why": "One litre holds 1000 millilitres, so the number gets 1000 times bigger.",
@@ -1036,17 +1022,17 @@ export const pack: SePack = {
           "text": "Litres to millilitres: multiply by 1000. Move the decimal point 3 places right."
         },
         {
-          "text": "Try 0.5 L. Move the point 3 places right. You get 500 mL."
+          "text": "Try a 0.5 L juice box. Move the point 3 places right. You get 500 mL."
         },
         {
-          "text": "Try 2.2 L. Move the point 3 places right. You get 2200 mL."
+          "text": "Try a 2.2 L bottle. Move the point 3 places right. You get 2200 mL."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-units-build-6",
-      "prompt": "The Thousand Sunny's mast is 3.45 m tall. Build that height in mm.",
+      "prompt": "The storm wall you built in Fortnite is 3.45 m tall. Build that height in mm.",
       "answer": "3450",
       "decoys": [
         "8",
@@ -1058,10 +1044,10 @@ export const pack: SePack = {
           "text": "Metres to millimetres: multiply by 1000. Move the decimal point 3 places right."
         },
         {
-          "text": "Try 0.8 m. Move the point 3 places right. You get 800 mm."
+          "text": "Try a 0.8 m wood wall. Move the point 3 places right. You get 800 mm."
         },
         {
-          "text": "Try 12.5 m. Move the point 3 places right. You get 12 500 mm, or 12500."
+          "text": "Try a 12.5 m Minecraft tower. Move the point 3 places right. You get 12 500 mm, or 12500."
         }
       ]
     },
@@ -1080,17 +1066,17 @@ export const pack: SePack = {
           "text": "Metres to kilometres: divide by 1000. Move the decimal point 3 places left."
         },
         {
-          "text": "Try 4800 m. Move the point 3 places left. You get 4.8 km."
+          "text": "Try a 4800 m Minecraft world border. Move the point 3 places left. You get 4.8 km."
         },
         {
-          "text": "Try 75 m. Move the point 3 places left. You get 0.075 km."
+          "text": "Try a 75 m Roblox obby. Move the point 3 places left. You get 0.075 km."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-units-games-1",
-      "title": "Prefix Bounty Board",
+      "title": "Prefix Ranking Board",
       "game": {
         "mode": "pair",
         "pairs": [

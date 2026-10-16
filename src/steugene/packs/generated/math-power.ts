@@ -17,17 +17,17 @@ export const pack: SePack = {
       "lines": [
         "A small raised number is the exponent. It counts how many times to multiply.",
         "In 7², the 7 is the base. It gets multiplied by itself.",
-        "So 7² means 7 × 7, which is 49."
+        "A 7² block platform means 7 × 7, which is 49 blocks."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Think of Blue Lock's scoring streak. Same move, repeated again and again."
+        "text": "Same block, placed again and again, row by row, until the floor is full."
       }
     },
     {
       "kind": "choice",
       "id": "math-power-basics-0",
-      "prompt": "Isagi writes 2⁵ on the Blue Lock whiteboard. What does it mean?",
+      "prompt": "Your squad opens a chest. The loot doubles five times. What is 2⁵?",
       "options": [
         "2 × 5 = 10",
         "2 × 2 × 2 × 2 × 2",
@@ -37,7 +37,7 @@ export const pack: SePack = {
       "why": "The small raised number tells you how many times to multiply the base by itself.",
       "steps": [
         {
-          "text": "Read 3⁴. The base is 3. The exponent is 4."
+          "text": "Read 3⁴ on a Roblox obby. The base is 3. The exponent is 4."
         },
         {
           "text": "The exponent says to multiply four 3s: 3 × 3 × 3 × 3."
@@ -50,7 +50,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-basics-1",
-      "prompt": "Coach draws 4³ on the board. Strikers must find its value. What is it?",
+      "prompt": "A storage cube is 4 blocks wide, 4 deep and 4 tall. How many blocks is 4³?",
       "options": [
         "12",
         "48",
@@ -60,7 +60,7 @@ export const pack: SePack = {
       "why": "A cube means the base is multiplied by itself three times, so 4³ is 4 × 4 × 4.",
       "steps": [
         {
-          "text": "Read 5³. The base is 5. The exponent is 3, so use three 5s."
+          "text": "Read 5³ for a 5 × 5 × 5 cube. The base is 5. Use three 5s."
         },
         {
           "text": "Multiply the first two: 5 × 5 = 25."
@@ -111,30 +111,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-basics-2",
-      "prompt": "Isagi's shot must beat the keeper. Which number, times itself, makes 81? That is √81.",
+      "prompt": "Your obby platform is a square of 144 tiles. Its side is how many tiles?",
       "options": [
-        "9",
-        "40.5",
-        "8"
+        "72",
+        "12",
+        "24"
       ],
-      "answer": 0,
-      "why": "A square root asks which number multiplied by itself gives the number under the root sign.",
+      "answer": 1,
+      "why": "A square root finds the side length when you know the total number of tiles in a square.",
       "steps": [
         {
-          "text": "The question is: what times itself makes 64? That is √64."
+          "text": "The platform has 64 tiles. What times itself makes 64? That is √64."
         },
         {
           "text": "Try 7: 7 × 7 = 49. Too small."
         },
         {
-          "text": "Try 8: 8 × 8 = 64. Yes, so √64 = 8."
+          "text": "Try 8: 8 × 8 = 64. Yes, so the side is 8 tiles."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-basics-3",
-      "prompt": "Between which two whole numbers is √50? Use your best striker's eye.",
+      "prompt": "A square build covers 50 blocks. Its side is between which two whole numbers?",
       "options": [
         "5 and 6",
         "9 and 10",
@@ -144,13 +144,13 @@ export const pack: SePack = {
       "why": "√50 is not a whole number, so you find the squares just below and just above 50.",
       "steps": [
         {
-          "text": "Find the squares near 30: 5² = 25 and 6² = 36. 30 is between them."
+          "text": "Find the squares near 20: 4² = 16 and 5² = 25. 20 is between them."
         },
         {
-          "text": "So √30 sits between 5 and 6, because 25 < 30 < 36."
+          "text": "So √20 sits between 4 and 5, because 16 < 20 < 25."
         },
         {
-          "text": "Now check 50 the same way: 7² = 49 and 8² = 64, so 50 is between 49 and 64."
+          "text": "Now check 50: 7² = 49 and 8² = 64, so √50 is between 7 and 8."
         }
       ]
     },
@@ -160,8 +160,8 @@ export const pack: SePack = {
       "title": "Why powers matter",
       "lines": [
         "Powers make big numbers fast. Doubling eight times gives 256.",
-        "Screen colours are built from powers of 2.",
-        "Bank interest and bacteria growth follow the same pattern."
+        "Your obby's visits double each hour: 2, 4, 8, 16.",
+        "Each bar is one more doubling of the bar before it."
       ],
       "art": {
         "art": "bars",
@@ -192,30 +192,30 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-0",
-      "prompt": "Bachira's shot is 2 × 2 × 2. Build the answer: 2³ = ?",
+      "prompt": "Your chest tower doubles 3 times from 2. Build 2³ = ?",
       "answer": "8",
       "decoys": [
         "3",
         "7",
         "0"
       ],
-      "why": "A small raised number tells you how many times to multiply the base by itself.",
+      "why": "The small raised number says how many times to multiply the base by itself.",
       "steps": [
         {
           "text": "The small 3 says: use the 2 three times."
         },
         {
-          "text": "Example: 4³ means 4 × 4 × 4."
+          "text": "Example: 5³ means 5 × 5 × 5."
         },
         {
-          "text": "4 × 4 = 16, then 16 × 4 = 64. So 4³ = 64."
+          "text": "5 × 5 = 25, then 25 × 5 = 125. So 5³ = 125."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-basics-4",
-      "prompt": "Luffy's crew needs a perfect square as a lock code. Which one is a perfect square?",
+      "prompt": "Your Minecraft base is a square of blocks. Which total makes a perfect square?",
       "options": [
         "24",
         "40",
@@ -225,43 +225,43 @@ export const pack: SePack = {
       "why": "A perfect square is a number whose square root is a whole number, like 36 = 6 × 6.",
       "steps": [
         {
-          "text": "Test 50. Is there a whole number times itself that makes 50?"
+          "text": "Test 60 blocks. Is there a whole number times itself that makes 60?"
         },
         {
-          "text": "7 × 7 = 49 and 8 × 8 = 64. Neither makes 50, so 50 is not a perfect square."
+          "text": "7 × 7 = 49 and 8 × 8 = 64. Neither makes 60, so 60 is not a perfect square."
         },
         {
-          "text": "Test 49 instead: 7 × 7 = 49, so 49 is a perfect square."
+          "text": "Test 81 instead: 9 × 9 = 81, so 81 is a perfect square."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-basics-5",
-      "prompt": "A striker square-shaped pitch zone has a perfect undo button: √(7²). What is it?",
+      "prompt": "Your wall is 9 × 9, so 9² = 81 blocks. Press √ on it. Which side length comes back?",
       "options": [
-        "7",
-        "14",
-        "49"
+        "9",
+        "18",
+        "81"
       ],
       "answer": 0,
       "why": "The square root undoes squaring, so √(n²) takes you straight back to n.",
       "steps": [
         {
-          "text": "Start with a number: 6. Square it: 6² = 36."
+          "text": "Start with a wall 5 blocks wide. Square it: 5² = 25 blocks."
         },
         {
-          "text": "Now press the root button: √36."
+          "text": "Now press the root button: √25."
         },
         {
-          "text": "Ask what times itself gives 36. It is 6, so √(6²) = 6, the start again."
+          "text": "Ask what times itself gives 25. It is 5, so √(5²) = 5, the start again."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-power-games-0",
-      "title": "Bounty Board: Size Order",
+      "title": "Visit Counter: Smallest to Biggest",
       "game": {
         "mode": "order",
         "values": [
@@ -291,26 +291,26 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "An exponent tells you how many times to multiply the base by itself, so 4³ means 4 × 4 × 4."
+      "why": "Round visit counts often come from squares and cubes, so 10² visits is 100."
     },
     {
       "kind": "explain",
       "id": "math-power-teach-2",
       "title": "The method: squaring and the undo button",
       "lines": [
-        "Squaring: multiply the base by itself. 6² = 6 × 6 = 36.",
-        "Cubing counts three: 2³ = 2 × 2 × 2 = 8.",
-        "The square root sign √ undoes squaring. √36 = 6, because 6 × 6 = 36."
+        "Squaring: multiply the base by itself. A 6 × 6 wall has 6² = 36 blocks.",
+        "Cubing uses three copies: 2 × 2 × 2 = 8 chests after three doublings.",
+        "The √ sign undoes squaring. √36 = 6, back to the wall's side length."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Squaring and square roots cancel out. One undoes the other, like a shot and a save."
+        "text": "Squaring and square roots cancel out, like a build and a demolish."
       }
     },
     {
       "kind": "choice",
       "id": "math-power-basics-6",
-      "prompt": "In One Piece, a bounty doubles five times. Which is 10³ on the board?",
+      "prompt": "Your Roblox obby's visits multiply by 10 three times. What is 10³ visits?",
       "options": [
         "30",
         "300",
@@ -320,20 +320,20 @@ export const pack: SePack = {
       "why": "10³ means 10 × 10 × 10, which is 1000, with three zeros.",
       "steps": [
         {
-          "text": "Read 10². The base is 10 and the exponent is 2, so 10 × 10."
+          "text": "Read 4². The base is 4 and the exponent is 2, so 4 × 4."
         },
         {
-          "text": "Work it out: 10 × 10 = 100, which has two zeros."
+          "text": "Work it out: 4 × 4 = 16."
         },
         {
-          "text": "A cube adds one more factor. So 10³ = 100 × 10 = 1000."
+          "text": "A cube adds one more factor. So 16 × 4 = 64, and 4³ = 64."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-basics-7",
-      "prompt": "Which expression means the same as 3 × 3 × 3 × 3 × 3?",
+      "prompt": "Your Minecraft vault is 3 × 3 × 3 × 3 × 3 blocks. Which power means the same?",
       "options": [
         "3⁵",
         "5³",
@@ -343,7 +343,7 @@ export const pack: SePack = {
       "why": "Five equal factors of 3 are written as 3 with exponent 5.",
       "steps": [
         {
-          "text": "Count the factors in 6 × 6 × 6 × 6. There are four 6s."
+          "text": "A vault is 6 × 6 × 6 × 6 blocks. Count the 6s: there are four."
         },
         {
           "text": "The base is 6, and the exponent is the count, 4."
@@ -356,20 +356,20 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-1",
-      "prompt": "Isagi passes to a spot with area 81 m². Build the side length: √81 = ?",
+      "prompt": "Your square base covers 81 blocks. Build the side length: √81 = ?",
       "answer": "9",
       "decoys": [
         "3",
         "7",
         "0"
       ],
-      "why": "A square root is the button that undoes a square: it asks which number times itself gives this.",
+      "why": "A square root is the undo button for squaring: it asks which number times itself gives this.",
       "steps": [
         {
-          "text": "The √ button asks: what number times itself makes 81?"
+          "text": "A 5 × 5 chest room covers 25 blocks. So √25 = 5, since 5 × 5 = 25."
         },
         {
-          "text": "Example: √25. Try 5 × 5 = 25, so √25 = 5."
+          "text": "Try 8 × 8 = 64, too small. Try 10 × 10 = 100, too big."
         },
         {
           "text": "Now try 9 × 9 and see if it lands on 81."
@@ -383,9 +383,9 @@ export const pack: SePack = {
       "id": "math-power-teach-3",
       "title": "The common trap",
       "lines": [
-        "Do not multiply the base by the exponent. 3² is 3 × 3, not 3 × 2.",
-        "Watch the brackets. (−4)² = 16, but −4² = −16.",
-        "The power only grabs what sits directly beside it."
+        "Do not multiply the base by the exponent.",
+        "A chest doubled 3 times is 2 × 2 × 2, not 2 × 3.",
+        "Watch the brackets: (−4)² = 16, but −4² = −16."
       ],
       "callout": {
         "flavour": "gotcha",
@@ -397,13 +397,13 @@ export const pack: SePack = {
       "id": "math-power-teach-4",
       "title": "Worked example: √144",
       "lines": [
+        "A square base of 12 × 12 blocks covers 144 blocks.",
         "Ask: which number, times itself, makes 144?",
-        "Try 10 × 10 = 100. Too small. Try 12 × 12 = 144. Yes.",
-        "So √144 = 12. The undo button gave the base back."
+        "Try 10 × 10 = 100. Too small. Try 12 × 12 = 144. Yes."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Like Luffy's crew checking each island until the map matches. Keep searching until it fits."
+        "flavour": "key",
+        "text": "Like checking storm circles: keep searching until the square fits the map."
       }
     },
     {
@@ -427,7 +427,7 @@ export const pack: SePack = {
       "lines": [
         "2³ means 2 × 2 × 2. Three 2s, all multiplied.",
         "It does NOT mean 2 × 3. That is a common trap.",
-        "Isagi's pass doubles three times: 2 × 2 × 2 = 8."
+        "Your wood farm doubles 3 times: 2 × 2 × 2 = 8 logs."
       ],
       "callout": {
         "flavour": "key",
@@ -439,13 +439,13 @@ export const pack: SePack = {
       "id": "math-power-deeper-1",
       "title": "Where the minus sign sits",
       "lines": [
-        "−3² means −(3 × 3). The answer is −9.",
-        "(−3)² means (−3) × (−3). The answer is 9.",
-        "Brackets change the answer. Do them first."
+        "−3² means −(3 × 3). Square first, then the minus. Answer: −9.",
+        "(−3)² means (−3) × (−3). The bracket takes the minus too. Answer: 9.",
+        "Roblox Studio part at X = −3. Brackets change what you square."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Same digits, different answers. Look for the brackets."
+        "text": "Same digits, different answers. The bracket decides."
       }
     },
     {
@@ -459,7 +459,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zero crew members still leaves one captain at the wheel."
+        "text": "Zero extra Pokémon still leaves your starter on the team."
       }
     },
     {
@@ -467,9 +467,9 @@ export const pack: SePack = {
       "id": "math-power-deeper-3",
       "title": "√ has one answer. x² = has two.",
       "lines": [
-        "√49 = 7. The root symbol gives only the positive answer.",
-        "But x² = 49 has two answers: 7 and −7.",
-        "Both 7 × 7 and −7 × −7 make 49."
+        "A 7 × 7 build covers 49 blocks. Its side is √49 = 7.",
+        "The root symbol gives only the positive answer, 7.",
+        "But x² = 49 has two: 7 and −7. Both make 49."
       ],
       "callout": {
         "flavour": "key",
@@ -501,59 +501,59 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "No crew, no bounty. Some numbers just aren't on the wanted list."
+        "text": "No team scores −4 goals, and no root of −4 exists in grade 7."
       }
     },
     {
       "kind": "choice",
       "id": "math-power-basics-8",
-      "prompt": "The Blue Lock pitch zone is a square of area 144 m². What is the side length?",
+      "prompt": "A Minecraft base is a square of 144 blocks. What is its side length?",
       "options": [
-        "72 m",
-        "14.4 m",
-        "12 m"
+        "72 blocks",
+        "14.4 blocks",
+        "12 blocks"
       ],
       "answer": 2,
       "why": "The side of a square is the square root of its area, because the area is side × side.",
       "steps": [
         {
-          "text": "Area of a 14 m by 14 m square? That is 14 × 14 = 196 m²."
+          "text": "Try a 14 by 14 base: 14 × 14 = 196 blocks."
         },
         {
-          "text": "So a side of 14 m gives 196 m², which is too big."
+          "text": "196 is too big, so the side must be smaller than 14."
         },
         {
-          "text": "Side length is the square root of the area, so √196 = 14 m. Check: 14 × 14 = 196."
+          "text": "Side = √144 = 12, because 12 × 12 = 144."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-basics-9",
-      "prompt": "Zoro is counting power on the ship. What is 2³ + 2²?",
+      "prompt": "Your base has 2³ chests in one row and 2² chests in another. How many chests in total?",
       "options": [
-        "16",
-        "12",
-        "8"
+        "16 chests",
+        "12 chests",
+        "8 chests"
       ],
       "answer": 1,
       "why": "Powers are worked out first, then the results are added, so 2³ + 2² = 8 + 4 = 12.",
       "steps": [
         {
-          "text": "Work out the powers first. 3³ = 3 × 3 × 3 = 27."
+          "text": "Work out the powers first. 3³ = 3 × 3 × 3 = 27 chests in one storage wall."
         },
         {
-          "text": "Then 1² = 1 × 1 = 1."
+          "text": "Then 1² = 1 × 1 = 1 chest in the corner."
         },
         {
-          "text": "Add the results: 27 + 1 = 28, so 3³ + 1² = 28."
+          "text": "Add the results: 27 + 1 = 28 chests, so 3³ + 1² = 28."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-0",
-      "prompt": "Coach Ego's training pitch is a square with sides of 2³ m. What is its area?",
+      "prompt": "Your Roblox Studio baseplate is a square with sides of 2³ m. What is its area?",
       "options": [
         "32 m²",
         "64 m²",
@@ -569,60 +569,60 @@ export const pack: SePack = {
           "text": "Here the side is 2³, so the area is (2³)²."
         },
         {
-          "text": "Multiply the exponents: (2³)² = 2⁶ = 64. Check with side 3²: (3²)² = 3⁴ = 81."
+          "text": "Multiply the exponents: (2³)² = 2⁶ = 64. Check with a 3² m part: (3²)² = 3⁴ = 81 m²."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-1",
-      "prompt": "In one match, Team A took 2⁵ shots and Team B took 4³ shots. Which team took more?",
+      "prompt": "In one half, Team A took 2⁵ shots and Team B took 4³ shots. Which team took more?",
       "options": [
-        "Team A, with 32 shots",
-        "Team B, with 64 shots",
-        "Both took the same"
+        "Team A, 32 shots",
+        "Team B, 64 shots",
+        "Both, 64 shots"
       ],
       "answer": 1,
       "why": "To compare powers, rewrite them with the same base, then compare the exponents.",
       "steps": [
         {
-          "text": "Evaluate both: 2⁵ = 32 and 4³ = 64."
+          "text": "Evaluate both: 2⁵ = 32 shots and 4³ = 64 shots."
         },
         {
           "text": "Or rewrite 4³ as (2²)³ = 2⁶, so it is bigger than 2⁵."
         },
         {
-          "text": "Try 8² and 4³: 8² = 2⁶ = 64 and 4³ = 64, so they are equal."
+          "text": "Try 8² and 4³: 8² = 2⁶ = 64 and 4³ = 64, so those two are equal."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-2",
-      "prompt": "A penalty box is a square with an area of 144 m². How long is each side?",
+      "prompt": "Your square wall base covers 144 blocks. How many blocks long is each side?",
       "options": [
-        "12 m",
-        "72 m",
-        "14 m"
+        "12 blocks",
+        "72 blocks",
+        "14 blocks"
       ],
       "answer": 0,
       "why": "A square root asks which number, multiplied by itself, gives the area.",
       "steps": [
         {
-          "text": "Side × side = 144, so we need √144."
+          "text": "Side × side = 144 blocks, so we need √144."
         },
         {
           "text": "Test 10² = 100, which is too small. Test 20² = 400, which is too big."
         },
         {
-          "text": "12 × 12 = 144, so √144 = 12. Check another: √225 = 15, because 15 × 15 = 225."
+          "text": "12 × 12 = 144, so √144 = 12. Check a 15 × 15 chest room: 15 × 15 = 225 blocks, so √225 = 15."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-3",
-      "prompt": "A goal mouth square has an area of 40 m². Which is the best estimate of its side?",
+      "prompt": "Your 40 m² square build platform is in Fortnite. About how long is each side?",
       "options": [
         "about 6 m",
         "about 4 m",
@@ -638,18 +638,18 @@ export const pack: SePack = {
           "text": "40 is between 36 and 49, so √40 is between 6 and 7."
         },
         {
-          "text": "40 is closer to 36 than 49, so √40 ≈ 6.3. Try √80: 8² = 64, 9² = 81, so √80 ≈ 9."
+          "text": "40 is closer to 36 than 49, so √40 ≈ 6.3. Try a 80 m² platform: 8² = 64, 9² = 81, so √80 ≈ 9 m."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-4",
-      "prompt": "Which pair is correct?",
+      "prompt": "A Pokémon has a power score of −4. Which pair is correct?",
       "options": [
         "(−4)² = 16, and −4² = −16",
         "(−4)² = −16, and −4² = 16",
-        "Both equal 16"
+        "Both pairs equal 16"
       ],
       "answer": 0,
       "why": "Brackets make the minus sign part of the base, but without brackets the power applies before the minus sign.",
@@ -668,7 +668,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-applied-5",
-      "prompt": "Simplify 3⁵ ÷ 3².",
+      "prompt": "A shop packs 3⁵ Timbits into 3² equal boxes. What is 3⁵ ÷ 3²?",
       "options": [
         "3³",
         "3⁷",
@@ -681,17 +681,17 @@ export const pack: SePack = {
           "text": "Same base 3, so keep the base and work with the exponents."
         },
         {
-          "text": "Subtract: 5 − 2 = 3, so the answer is 3³."
+          "text": "Subtract: 5 − 2 = 3, so each box gets 3³ Timbits."
         },
         {
-          "text": "Try 4⁶ ÷ 4²: 6 − 2 = 4, so the answer is 4⁴."
+          "text": "Try 4⁶ Timbits in 4² boxes: 6 − 2 = 4, so 4⁴ per box."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-6",
-      "prompt": "Luffy's bounty starts at 3 million and doubles 4 times. What is it now?",
+      "prompt": "Your obby has 3 million visits and doubles 4 times. How many now?",
       "options": [
         "40 million",
         "80 million",
@@ -704,17 +704,17 @@ export const pack: SePack = {
           "text": "Doubling 4 times is × 2 × 2 × 2 × 2 = × 2⁴ = × 16."
         },
         {
-          "text": "Multiply the start: 3 × 16 = 48 million."
+          "text": "Multiply the start: 3 × 16 = 48 million visits."
         },
         {
-          "text": "Try 5 million doubled 3 times: 5 × 2³ = 5 × 8 = 40 million."
+          "text": "Try 5 million visits doubled 3 times: 5 × 2³ = 5 × 8 = 40 million."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-7",
-      "prompt": "What is √(9 + 16)?",
+      "prompt": "A square base has 9 + 16 blocks in total. What is its side, √(9 + 16)?",
       "options": [
         "5",
         "7",
@@ -724,20 +724,20 @@ export const pack: SePack = {
       "why": "The root applies to the whole sum, so you add inside the root before you take the root.",
       "steps": [
         {
-          "text": "Work inside the brackets first: 9 + 16 = 25."
+          "text": "Work inside the brackets first: 9 + 16 = 25 blocks."
         },
         {
-          "text": "Then find √25, the number that times itself gives 25: 5 × 5 = 25."
+          "text": "Then find √25, the number that times itself gives 25: 5 × 5 = 25, so the side is 5."
         },
         {
-          "text": "Try √(36 + 64) = √100 = 10. Not 6 + 8, which is 14."
+          "text": "Try 36 + 64 = 100 blocks: side 10. Not 6 + 8, which is 14."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-applied-8",
-      "prompt": "Evaluate 2 + 3² × 2.",
+      "prompt": "You have 2 shield potions, then loot 3² chests with 2 potions each. Total: 2 + 3² × 2?",
       "options": [
         "50",
         "18",
@@ -747,10 +747,10 @@ export const pack: SePack = {
       "why": "Powers come before multiplication, and multiplication comes before addition.",
       "steps": [
         {
-          "text": "Powers first: 3² = 9, so the sum is 2 + 9 × 2."
+          "text": "Powers first: 3² = 9 chests, so the total is 2 + 9 × 2."
         },
         {
-          "text": "Multiply next: 9 × 2 = 18, so the sum is 2 + 18."
+          "text": "Multiply next: 9 × 2 = 18 potions from the chests, so the total is 2 + 18."
         },
         {
           "text": "Add last: 2 + 18 = 20. Try 1 + 4² ÷ 2: 1 + 16 ÷ 2 = 1 + 8 = 9."
@@ -760,7 +760,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-applied-9",
-      "prompt": "Which is greater: 10² or 2¹⁰?",
+      "prompt": "Pen A is 10 × 10 blocks: 10². Pen B's sheep after 10 doublings is 2¹⁰. Which is greater?",
       "options": [
         "2¹⁰ is greater",
         "10² is greater",
@@ -770,10 +770,10 @@ export const pack: SePack = {
       "why": "Powers grow fast, so a smaller base with a bigger exponent can beat a bigger base with a smaller one.",
       "steps": [
         {
-          "text": "10² = 100. Double from 2: 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024."
+          "text": "10² = 100 blocks. Doubling from 1 sheep: 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024."
         },
         {
-          "text": "So 2¹⁰ = 1024, which is bigger than 100."
+          "text": "So 2¹⁰ = 1024 sheep, which is bigger than 100."
         },
         {
           "text": "Try 3⁴ and 4³: 3⁴ = 81 and 4³ = 64, so 3⁴ is bigger."
@@ -798,7 +798,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-deeper-6",
-      "prompt": "Which is 4³?",
+      "prompt": "A Roblox cube part is 4 studs by 4 by 4. Which is its volume, 4³?",
       "options": [
         "12",
         "64",
@@ -811,10 +811,10 @@ export const pack: SePack = {
           "text": "Step 1: The small raised number tells you how many times to multiply."
         },
         {
-          "text": "Step 2: Work 3⁴ the same way: 3 × 3 × 3 × 3."
+          "text": "Step 2: Try a 3 by 3 by 3 part: 3 × 3 × 3 = 27 small cubes."
         },
         {
-          "text": "Step 3: 3 × 3 = 9, then 9 × 3 = 27, then 27 × 3 = 81."
+          "text": "Step 3: Check it: 3 × 3 = 9, then 9 × 3 = 27 small cubes."
         }
       ]
     },
@@ -844,30 +844,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-power-deeper-8",
-      "prompt": "Which is √(16 + 9)?",
+      "prompt": "Your Minecraft pad covers 16 + 9 blocks². What is √(16 + 9)?",
       "options": [
-        "7",
-        "5",
-        "25"
+        "7 blocks",
+        "5 blocks",
+        "25 blocks"
       ],
       "answer": 1,
       "why": "The root covers the whole bracket, so add inside before you take the root.",
       "steps": [
         {
-          "text": "Step 1: Work inside the root first: 16 + 9 = 25."
+          "text": "Step 1: Add inside the root first: 16 + 9 = 25 blocks²."
         },
         {
-          "text": "Step 2: Try √(25 + 144). Inside first gives 169."
+          "text": "Step 2: Another pad covers 25 + 144 blocks². Inside first gives 169 blocks²."
         },
         {
-          "text": "Step 3: √169 = 13, because 13 × 13 = 169."
+          "text": "Step 3: √169 = 13 blocks, because 13 × 13 = 169."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-deeper-9",
-      "prompt": "What is 7⁰?",
+      "prompt": "Fortnite build grid: 7³ = 343 and 7² = 49. What is 7⁰?",
       "options": [
         "0",
         "1",
@@ -877,47 +877,24 @@ export const pack: SePack = {
       "why": "Each step down the powers divides by the base, so the power 0 gives 1.",
       "steps": [
         {
-          "text": "Step 1: Write the pattern: 7³ = 343 and 7² = 49."
+          "text": "Step 1: Write the pattern: 7³ is a 7 × 7 × 7 build of 343 pieces, and 7² is a 7 × 7 floor of 49."
         },
         {
-          "text": "Step 2: Keep going down: 7¹ = 7."
+          "text": "Step 2: Keep going down: 7¹ = 7, one row of 7 pieces."
         },
         {
-          "text": "Step 3: Each step down divides by 7 again, so 7⁰ = 1."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
-      "id": "math-power-deeper-10",
-      "prompt": "Solve x² = 81. Which gives all the answers?",
-      "options": [
-        "x = 9 only",
-        "x = 9 or x = −9",
-        "x = 81 only"
-      ],
-      "answer": 1,
-      "why": "Two negative numbers multiply to a positive, so both −9 and 9 square to 81.",
-      "steps": [
-        {
-          "text": "Step 1: Ask which number times itself gives 81."
-        },
-        {
-          "text": "Step 2: Try x² = 64. Both 8 × 8 and −8 × −8 give 64."
-        },
-        {
-          "text": "Step 3: So for x² = 81, x = 9 or x = −9."
+          "text": "Step 3: Each step down divides by 7 again, so 7⁰ = 1, a single piece."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-power-deeper-11",
-      "prompt": "What is √0.36?",
+      "prompt": "A square cheese tray covers 0.36 m². What is its side, √0.36?",
       "options": [
-        "0.6",
-        "0.18",
-        "3.6"
+        "0.6 m",
+        "0.18 m",
+        "3.6 m"
       ],
       "answer": 0,
       "why": "A decimal's square has twice as many decimal places as the root, so 0.36 needs a root with one.",
@@ -926,7 +903,7 @@ export const pack: SePack = {
           "text": "Step 1: Count decimal places. 0.16 has two places."
         },
         {
-          "text": "Step 2: √0.16 = 0.4, because 0.4 × 0.4 = 0.16."
+          "text": "Step 2: A square tray of 0.16 m² has side 0.4 m, because 0.4 × 0.4 = 0.16."
         },
         {
           "text": "Step 3: So 0.36 has two places and needs a root with one place."
@@ -936,7 +913,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-2",
-      "prompt": "Luffy's bounty is 10 × 10 berries. Build it: 10² = ?",
+      "prompt": "Your Minecraft base is 10 × 10 blocks. Build the area: 10² = ?",
       "answer": "100",
       "decoys": [
         "9",
@@ -948,17 +925,17 @@ export const pack: SePack = {
           "text": "The small 2 means: write the base twice and multiply."
         },
         {
-          "text": "Example: 6² = 6 × 6 = 36. Count it as 6 rows of 6."
+          "text": "Example: a 6 × 6 pen holds 6 × 6 = 36 blocks. Count it as 6 rows of 6."
         },
         {
-          "text": "Now do 10 × 10. Count the zeros you get."
+          "text": "Now a 10 × 10 pad. Count the zeros you get."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-power-build-3",
-      "prompt": "Kunigami's pass covers a square field with area 169 m². Build √169 = ?",
+      "prompt": "Your square base covers 169 blocks. Build the side length: √169 = ?",
       "answer": "13",
       "decoys": [
         "4",
@@ -971,7 +948,7 @@ export const pack: SePack = {
           "text": "Find the number that times itself gives 169. Try 10 first."
         },
         {
-          "text": "Example: √49. Try 6 × 6 = 36, too small. Try 7 × 7 = 49. So √49 = 7."
+          "text": "Example: a base of 49 blocks. 6 × 6 = 36 is too small. 7 × 7 = 49, so the side is 7."
         },
         {
           "text": "Now test 12 × 12 and 13 × 13. Which one is too big, and which is right?"
@@ -981,7 +958,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-4",
-      "prompt": "Zoro cuts a crate of 3 × 3 × 3 cubes. Build 3³ = ?",
+      "prompt": "Your Minecraft build is 3 blocks wide, 3 high, 3 deep. Build 3³ = ?",
       "answer": "27",
       "decoys": [
         "9",
@@ -1003,7 +980,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-5",
-      "prompt": "Isagi's shot is in a square of area 0.25 m². Build √0.25 = ?",
+      "prompt": "A square Roblox part has an area of 0.25 m². Build its side: √0.25 = ?",
       "answer": "0.5",
       "decoys": [
         "2",
@@ -1026,7 +1003,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-6",
-      "prompt": "A pirate crew splits a treasure: (1/2)² of the gold. Build (1/2)² = ?",
+      "prompt": "You eat half of a half of a pizza. Build (1/2)² = ?",
       "answer": "1/4",
       "decoys": [
         "2",
@@ -1056,7 +1033,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-power-build-7",
-      "prompt": "Two moves: √16 + 2². Do the roots and powers first, then add. Build the total.",
+      "prompt": "Your squad gets √16 + 2² eliminations. Do the roots and powers first. Build the total.",
       "answer": "8",
       "decoys": [
         "6",
@@ -1079,7 +1056,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-power-games-1",
-      "title": "Undo the Squad",
+      "title": "Match the Powers",
       "game": {
         "mode": "pair",
         "pairs": [

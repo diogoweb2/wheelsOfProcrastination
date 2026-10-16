@@ -20,30 +20,30 @@ export const pack: SePack = {
         "It never skips ahead. It never guesses what you meant."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi plans a goal: first the pass, then the run, then the shot. The order is the plan."
+        "flavour": "key",
+        "text": "Minecraft crafting: planks first, then sticks, then the pickaxe. Backwards fails."
       }
     },
     {
       "kind": "choice",
       "id": "code-seq-basics-0",
-      "prompt": "Isagi's goal counter program:\nSet goals to 0.\nAdd 4.\nAdd 3.\nWhat does goals show at the end?",
+      "prompt": "Your Fortnite stat script:\nSet eliminations to 0.\nAdd 4.\nAdd 3.\nWhat does eliminations show at the end?",
       "options": [
-        "goals shows 7",
-        "goals shows 4",
-        "goals shows 12"
+        "eliminations shows 7",
+        "eliminations shows 4",
+        "eliminations shows 12"
       ],
       "answer": 0,
       "why": "A computer runs each line once, from top to bottom, and keeps the latest value.",
       "steps": [
         {
-          "text": "Start: goals is 0."
+          "text": "Start: eliminations is 0."
         },
         {
-          "text": "Add 6: goals is now 6."
+          "text": "Add 6: eliminations is now 6."
         },
         {
-          "text": "Subtract 1: goals is now 5. Each line uses the value left by the line before it."
+          "text": "Subtract 1: eliminations is now 5. Each line uses the value left by the line before it."
         }
       ],
       "art": {
@@ -53,37 +53,37 @@ export const pack: SePack = {
         "step": 1,
         "points": [
           {
-            "at": 5,
-            "label": "5",
+            "at": 7,
+            "label": "7",
             "tone": "good"
           }
         ],
         "span": [
           0,
-          6
+          7
         ]
       }
     },
     {
       "kind": "choice",
       "id": "code-seq-basics-1",
-      "prompt": "Luffy's bounty program:\nSet bounty to 100.\nDouble it.\nAdd 50.\nWhat is the bounty at the end?",
+      "prompt": "Your Roblox obby coin script:\nSet coins to 100.\nDouble it.\nAdd 50.\nWhat does coins show at the end?",
       "options": [
-        "bounty is 250",
-        "bounty is 150",
-        "bounty is 200"
+        "coins shows 250",
+        "coins shows 150",
+        "coins shows 200"
       ],
       "answer": 0,
       "why": "Each step changes the value the step before left behind, so the order sets the final number.",
       "steps": [
         {
-          "text": "Start: bounty is 10."
+          "text": "Start: coins is 10."
         },
         {
-          "text": "Add 5: bounty is 15."
+          "text": "Add 5: coins is 15."
         },
         {
-          "text": "Double it: 15 × 2 means bounty is 30."
+          "text": "Double it: 15 × 2 means coins is 30."
         }
       ]
     },
@@ -166,7 +166,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-basics-2",
-      "prompt": "Start with 1. Which sequence of steps gives 9?",
+      "prompt": "Your striker starts with 1 goal. Which steps give 9?",
       "options": [
         "Add 2, then multiply by 3",
         "Multiply by 3, then add 2",
@@ -176,7 +176,7 @@ export const pack: SePack = {
       "why": "Changing the order of steps can change the output, because each step uses the result before it.",
       "steps": [
         {
-          "text": "Start with 2. Add 1 first: 2 + 1 = 3. Then 3 × 4 = 12."
+          "text": "Start with 2 goals. Add 1 first: 2 + 1 = 3. Then 3 × 4 = 12."
         },
         {
           "text": "Now multiply by 4 first: 2 × 4 = 8. Then 8 + 1 = 9."
@@ -189,7 +189,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-basics-3",
-      "prompt": "Isagi types 8 into the program. The program does this:\nAsk for a number.\nAdd 7.\nShow the answer.\nWhat does the screen show?",
+      "prompt": "A player types 8 into the Roblox text box.\nThe script does this:\nAsk for a number.\nAdd 7.\nShow the answer.\nWhat does the screen show?",
       "options": [
         "The screen shows 15.",
         "The screen shows 8.",
@@ -199,13 +199,13 @@ export const pack: SePack = {
       "why": "The input is the data the user gives, and the output is the result the program shows.",
       "steps": [
         {
-          "text": "Input: the user types 3."
+          "text": "Input: the player types 3."
         },
         {
-          "text": "Multiply the input by 2: 3 × 2 = 6."
+          "text": "Add 7 to the input: 3 + 7 = 10."
         },
         {
-          "text": "Show the answer: the screen shows 6, the output."
+          "text": "Show the answer: the screen shows 10, the output."
         }
       ]
     },
@@ -220,29 +220,29 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "A vending machine: coins in (input), press B3, a drink out (output)."
+        "text": "A Pokémon Centre machine: your team goes in (input), full HP comes out (output)."
       }
     },
     {
       "kind": "build",
       "id": "code-seq-build-0",
-      "prompt": "Isagi's code runs top to bottom. Input: 4. Step 1: add 5. Step 2: double the result. Build the output.",
+      "prompt": "Your Roblox script runs top to bottom. Input: 4. Line 1: add 5. Line 2: double the result. Build the output.",
       "answer": "18",
       "decoys": [
         "9",
         "3",
         "0"
       ],
-      "why": "A computer changes the number at each line, and the next line uses the new number.",
+      "why": "Each line changes the number, and the next line works on the new number.",
       "steps": [
         {
-          "text": "Worked example, input 3: step 1 gives 3 + 5 = 8."
+          "text": "Worked example, input 3: line 1 gives 3 + 5 = 8."
         },
         {
-          "text": "Step 2 doubles that: 8 × 2 = 16. So input 3 gives output 16."
+          "text": "Line 2 doubles that: 8 × 2 = 16. So input 3 gives output 16."
         },
         {
-          "text": "Do the lines in order. Never swap them, or the answer changes."
+          "text": "Run the lines in order. Swapping them changes the answer."
         }
       ]
     },
@@ -256,46 +256,46 @@ export const pack: SePack = {
         "A part of code that repeats many times."
       ],
       "answer": 0,
-      "why": "Input goes in, the program works on it, and output comes out, like a goal scored from a pass.",
+      "why": "Input goes in, the program works on it, and output comes out, like a furnace turning ore into ingots.",
       "steps": [
         {
-          "text": "Think of a vending machine. Coins going in are the input."
+          "text": "A furnace needs ore and coal put in first. Those are its input."
         },
         {
-          "text": "The machine works out what you paid for. That is the processing in the middle."
+          "text": "The furnace works on them, one item every 10 seconds."
         },
         {
-          "text": "The snack that drops out is the output."
+          "text": "The ingot that drops out is the output."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-seq-basics-5",
-      "prompt": "Luffy wants to make a sandwich. Which order of steps works?",
+      "prompt": "Your squad builds a mini base in Fortnite. Which order works?",
       "options": [
-        "Get bread, spread jam, then close the sandwich.",
-        "Spread jam, get bread, then close the sandwich.",
-        "Close the sandwich, get bread, then spread jam."
+        "Place the floor, then the walls, then the roof.",
+        "Place the walls, then the roof, then the floor.",
+        "Place the roof, then the floor, then the walls."
       ],
       "answer": 0,
-      "why": "A computer can only use something after that thing has been set up, so the order must be right.",
+      "why": "Each piece needs something under or beside it, so the order of building must be right.",
       "steps": [
         {
-          "text": "Try toast: plug in the toaster first, then put the bread in."
+          "text": "Try a ramp: you need ground under it before you can place it."
         },
         {
-          "text": "Now try putting the bread in before plugging in. The toaster never gets power."
+          "text": "Now try placing the ramp in the air first. It falls down."
         },
         {
-          "text": "A sequence needs each step to be possible when it runs."
+          "text": "A build step must be possible when it runs."
         }
       ]
     },
     {
       "kind": "game",
       "id": "code-seq-games-0",
-      "title": "Same Steps, New Answer",
+      "title": "Start at 3, Then Change",
       "game": {
         "mode": "order",
         "values": [
@@ -329,34 +329,34 @@ export const pack: SePack = {
       "title": "Why does order matter?",
       "lines": [
         "Changing the order can change the result.",
-        "Put on your socks, then your boots. Not the other way round.",
+        "A Roblox script runs its lines from top to bottom.",
         "A coder must get the order right, every single time."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Shoot, then pass? The ball is already gone before the pass happens."
+        "text": "Build a wall, then shoot? Shoot first and the enemy is already gone."
       }
     },
     {
       "kind": "choice",
       "id": "code-seq-basics-6",
-      "prompt": "Start with −2. Add 5. Then subtract 9. What is the output?",
+      "prompt": "You are at Y = −2 in Minecraft. Go up 5 blocks. Then go down 9 blocks. What is your Y?",
       "options": [
         "−6",
         "−4",
         "3"
       ],
       "answer": 0,
-      "why": "Negative numbers work the same way as positive ones, but each step moves you left or right on the number line.",
+      "why": "Negative numbers work the same way as positive ones, but each step moves you up or down the number line.",
       "steps": [
         {
-          "text": "Start with −1. Add 4: −1 + 4 = 3."
+          "text": "Start at Y = −1. Go up 4: −1 + 4 = 3."
         },
         {
-          "text": "Subtract 6: 3 − 6 = −3."
+          "text": "Go down 6: 3 − 6 = −3."
         },
         {
-          "text": "Count left from 3 by 6 steps. You land on −3."
+          "text": "Count down 6 from 3. You land on −3."
         }
       ],
       "art": {
@@ -380,7 +380,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-basics-7",
-      "prompt": "Isagi's team program:\nSet score to 2.\nShow score.\nAdd 5.\nWhat does the screen show?",
+      "prompt": "Your Roblox script:\nSet Coins to 2.\nShow Coins.\nAdd 5 to Coins.\nWhat does the screen show?",
       "options": [
         "The screen shows 2.",
         "The screen shows 7.",
@@ -390,10 +390,10 @@ export const pack: SePack = {
       "why": "A program shows only what is on the screen at the moment the show line runs, not what happens later.",
       "steps": [
         {
-          "text": "Set score to 6. Then Show score: the screen shows 6."
+          "text": "Set Coins to 6. Then Show Coins: the screen shows 6."
         },
         {
-          "text": "Add 3 after showing: score becomes 9, but nothing new appears yet."
+          "text": "Add 3 after showing: Coins becomes 9, but nothing new appears yet."
         },
         {
           "text": "Only the show line sends a value to the screen. Later lines do not change it."
@@ -403,7 +403,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-seq-build-1",
-      "prompt": "Luffy's bounty code. Input: 0. Step 1: add 300. Step 2: subtract 40. Build the output.",
+      "prompt": "Your chest code. Start: 0 blocks.\nStep 1: add 300 blocks.\nStep 2: take away 40 blocks.\nBuild the output.",
       "answer": "260",
       "decoys": [
         "5",
@@ -412,10 +412,10 @@ export const pack: SePack = {
       "why": "Each line of code runs once, in order, and the output is whatever number is left at the end.",
       "steps": [
         {
-          "text": "Worked example, input 0: add 500 gives 500, then subtract 90 gives 410."
+          "text": "Worked example, start 0: add 500 gives 500, then take away 90 gives 410."
         },
         {
-          "text": "Notice the input is only used at the start. Each step then works on the running total."
+          "text": "Notice the start is only used at the beginning. Each step then works on the running total."
         },
         {
           "text": "For this code: 0 + 300 = 300, then 300 − 40 = 260."
@@ -445,7 +445,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Zoro is not lost. The map was right. He read the turns in the wrong order."
+        "text": "Your EA FC striker missed. The pass came after the shot, so the order was wrong."
       }
     },
     {
@@ -453,7 +453,7 @@ export const pack: SePack = {
       "id": "code-seq-teach-5",
       "title": "Worked example and recap",
       "lines": [
-        "Input: 4. Step 1: add 3. Step 2: times 2. Output: 14.",
+        "Input: 4 Timbits. Step 1: add 3. Step 2: times 2. Output: 14.",
         "Now swap the steps. Step 1: times 2. Step 2: add 3. Output: 11.",
         "Same steps, different order, different answer. That is the whole idea."
       ],
@@ -473,7 +473,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock: a cross only leads to a goal if the pass comes first."
+        "text": "Minecraft: the furnace only smelts if the coal goes in first."
       }
     },
     {
@@ -483,11 +483,11 @@ export const pack: SePack = {
       "lines": [
         "Input is what goes into the program.",
         "Output is what the program sends back.",
-        "A typed name is input. The message on screen is output."
+        "Your typed loot drop name is the input. The popup on screen is the output."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Imagine Isagi typing his shot power before the kick starts."
+        "text": "Your typed shot power is the input. The ball speed on screen is the output."
       }
     },
     {
@@ -496,7 +496,7 @@ export const pack: SePack = {
       "title": "The computer fills no gaps",
       "lines": [
         "It does exactly the steps you wrote, and nothing extra.",
-        "It will not check whether the ball went in.",
+        "It will not check whether the part landed on the platform.",
         "If you want a check, you must write it as a step."
       ],
       "callout": {
@@ -523,13 +523,13 @@ export const pack: SePack = {
       "id": "code-seq-deeper-4",
       "title": "Equals can mean change",
       "lines": [
-        "In code, x = x + 2 is an instruction, not a balance.",
-        "Read it as: take x, add 2, store the new value in x.",
+        "In code, goals = goals + 2 is an instruction, not a balance.",
+        "Read it as: take goals, add 2, store the new value in goals.",
         "Each line uses the value left behind by the line above."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy's bounty changes when the Marines update the poster."
+        "flavour": "gotcha",
+        "text": "Your striker's goal tally changes every time the line runs."
       }
     },
     {
@@ -537,8 +537,8 @@ export const pack: SePack = {
       "id": "code-seq-deeper-5",
       "title": "A print is a snapshot",
       "lines": [
-        "A print shows the value at the moment that line runs.",
-        "Changing the value later does not change what was printed.",
+        "A print shows the HP at the moment that line runs.",
+        "Changing the HP later does not change what was printed.",
         "Trace the program line by line to see each printed value."
       ]
     },
@@ -555,7 +555,7 @@ export const pack: SePack = {
       "why": "Each line works on the value the line before it left, so the final output is the result after every step.",
       "steps": [
         {
-          "text": "Start: bounty is 2."
+          "text": "Start: bounty counter is 2."
         },
         {
           "text": "Multiply by 4: 2 × 4 = 8."
@@ -568,17 +568,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-basics-9",
-      "prompt": "Isagi's program:\nAsk for a name.\nShow Hello.\nShow the name.\nThe user types Mio. What does the screen show?",
+      "prompt": "Your Roblox script:\nAsk the player for a name.\nShow Hello.\nShow the name.\nThe player types Mio. What does the screen show?",
       "options": [
-        "Hello Mio",
         "Mio Hello",
+        "Hello Mio",
         "Mio Mio"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Lines run in order, so the screen shows each thing in the order the show lines appear.",
       "steps": [
         {
-          "text": "Ask for the name: the user types Rin."
+          "text": "Ask for the name: the player types Rin."
         },
         {
           "text": "Show Hello: the screen shows Hello. Then show the name: Rin."
@@ -591,13 +591,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-0",
-      "prompt": "Isagi's training app takes an input of 4 shots. Step 1: add 3. Step 2: double it. Step 3: subtract 2. What is the output?",
+      "prompt": "Your Minecraft farm machine takes 4 carrots as input.\nStep 1: add 3.\nStep 2: double it.\nStep 3: subtract 2.\nWhat is the output?",
       "options": [
         "9",
-        "12",
-        "11"
+        "11",
+        "12"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "A computer applies each step in order, so each step uses the result of the step before it.",
       "steps": [
         {
@@ -610,20 +610,20 @@ export const pack: SePack = {
           "text": "Step 3 subtracts 2: 16 − 2 = 14. So input 5 gives output 14."
         },
         {
-          "text": "Swap steps 1 and 2 and the answer changes. Order matters."
+          "text": "Swap steps 1 and 2 and input 4 gives 9 instead of 12. Order matters."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-seq-applied-1",
-      "prompt": "Zoro's bounty app takes 300 million berries as input. Step 1: add 50. Step 2: double it. Step 3: subtract 100. What is the output?",
+      "prompt": "Your Fortnite build counter takes 300 wood as input.\nStep 1: add 50.\nStep 2: double it.\nStep 3: subtract 100.\nWhat is the output?",
       "options": [
-        "550",
         "650",
-        "600"
+        "600",
+        "550"
       ],
-      "answer": 2,
+      "answer": 1,
       "why": "Changing the order of the same steps can change the output, so the sequence has to be exact.",
       "steps": [
         {
@@ -643,13 +643,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-2",
-      "prompt": "A Blue Lock shot counter says: if shots are more than 5, add 2. Then multiply by 3. The input is 4 shots. What is the output?",
+      "prompt": "Your EA FC rating script:\nIf goals are more than 5, add 2.\nThen multiply by 3.\nThe input is 4 goals. What is the output?",
       "options": [
-        "12",
         "15",
+        "12",
         "9"
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "An IF step only changes the number when its condition is true, so the other steps still run.",
       "steps": [
         {
@@ -669,13 +669,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-3",
-      "prompt": "Luffy's bounty counter starts at 10. It repeats 3 times: add 2 each time. What is the output?",
+      "prompt": "Your snack counter starts with 10 Timbits.\nIt repeats 3 times: add 2 Timbits each time.\nWhat is the output?",
       "options": [
         "18",
-        "16",
-        "14"
+        "14",
+        "16"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "A loop runs the same steps again and again, and each run uses the new number from the run before.",
       "steps": [
         {
@@ -695,13 +695,13 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-4",
-      "prompt": "A Toronto app gives these outputs. Input 1 gives 3. Input 2 gives 5. Input 3 gives 7. Which program makes this table?",
+      "prompt": "A Pokémon battle script gives these outputs.\nInput 1 gives 3. Input 2 gives 5. Input 3 gives 7.\nWhich program makes this table?",
       "options": [
+        "Double, then add 1",
         "Add 1, then double",
-        "Double, then subtract 1",
-        "Double, then add 1"
+        "Double, then subtract 1"
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "A program's output is found by running its steps in order, so two programs with the same steps can give different tables.",
       "steps": [
         {
@@ -721,23 +721,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-5",
-      "prompt": "A bubble tea shop charges $5 a cup. Each cup gets $1 off. Which program gives $12 for 3 cups?",
+      "prompt": "Each skin costs 5 V-Bucks. A code takes 1 V-Buck off each skin. Which program gives 12 V-Bucks for 3 skins?",
       "options": [
-        "Multiply by 3 cups, then subtract $1",
-        "Subtract $1 from the price, then multiply by cups",
-        "Subtract 3 from cups, then multiply by price"
+        "Multiply by 3, then take off 1",
+        "Take 1 off each skin, then multiply",
+        "Take 3 off the skins, then multiply"
       ],
       "answer": 1,
-      "why": "The discount is taken off each cup, so it must happen before the cups are multiplied in.",
+      "why": "The discount is taken off each skin, so it must happen before the skins are multiplied in.",
       "steps": [
         {
-          "text": "Try 4 cups at $6, with $1 off each. Step 1: 6 − 1 = 5 a cup."
+          "text": "Try 4 skins at 6 V-Bucks, with 1 off each. Step 1: 6 − 1 = 5 a skin."
         },
         {
-          "text": "Step 2: multiply the cups: 5 × 4 = 20. So the total is $20."
+          "text": "Step 2: multiply the skins: 5 × 4 = 20 V-Bucks."
         },
         {
-          "text": "The wrong way: 4 × 6 = 24, then − 1 = 23. The discount is only taken off once."
+          "text": "The wrong way: 4 × 6 = 24, then − 1 = 23. The discount only comes off once."
         },
         {
           "text": "Taking the discount off the price first gives the right total."
@@ -747,49 +747,49 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-6",
-      "prompt": "Sanji's pot: input is 4 bowls. Step 1: add 2 bowls. Step 2: if bowls are 5 or more, output Feast. Otherwise output Snack. What is the output?",
+      "prompt": "Roblox script: coins = 4. Line 1: coins += 2. Line 2: if coins ≥ 5, print Feast, else print Snack. What prints?",
       "options": [
         "Feast",
         "Snack",
         "Empty"
       ],
       "answer": 0,
-      "why": "An IF step checks the number at that point in the sequence, so the earlier step changes what it sees.",
+      "why": "An IF line checks the number at that point in the script, so the earlier line changes what it sees.",
       "steps": [
         {
-          "text": "Try input 2. Step 1: 2 + 2 = 4."
+          "text": "Try coins = 2. Line 1: 2 + 2 = 4."
         },
         {
-          "text": "Step 2: 4 is less than 5, so the output is Snack."
+          "text": "Line 2: 4 is less than 5, so the script prints Snack."
         },
         {
-          "text": "Try input 3. Step 1: 3 + 2 = 5. Step 2: 5 is 5 or more, so Feast."
+          "text": "Try coins = 3. Line 1: 3 + 2 = 5. Line 2: 5 is 5 or more, so Feast."
         },
         {
-          "text": "The number 5 counts, because the rule says 5 or more."
+          "text": "The number 5 counts, because the check says 5 or more."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-seq-applied-7",
-      "prompt": "Coach's board shows only the last output. The input is 3. Which program shows 4 at the end?",
+      "prompt": "A chain of command blocks ends in a sign. The sign shows only the last number. Input is 3. Which chain makes the sign show 4?",
       "options": [
         "Output 3, then add 1",
         "Add 2, then output the total",
         "Add 1, then output the total"
       ],
       "answer": 2,
-      "why": "A program shows only the output it reaches last, so the output step must come after the number is final.",
+      "why": "The sign shows only the number it reaches last, so the output must come after the number is final.",
       "steps": [
         {
-          "text": "Try input 6. Add 1, then output: the board shows 7."
+          "text": "Try input 6. Add 1, then output: the sign shows 7."
         },
         {
-          "text": "Try input 6 with add 2, then output: the board shows 8."
+          "text": "Try input 6 with add 2, then output: the sign shows 8."
         },
         {
-          "text": "Output then add 1 shows the number before the change. The board shows 6."
+          "text": "Output then add 1 shows the number before the change. The sign shows 6."
         },
         {
           "text": "Only add 1 then output gives the number 4 from input 3."
@@ -799,7 +799,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-8",
-      "prompt": "Robin reads a log. Input is 9. Step 1: subtract 4. Step 2: multiply by 3. What is the output?",
+      "prompt": "A Roblox script reads a part's height. Input is 9 studs. Step 1: subtract 4. Step 2: multiply by 3. What is the output?",
       "options": [
         "23",
         "21",
@@ -825,33 +825,33 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-applied-9",
-      "prompt": "A variable x starts at 4. Step 1: x = x + 1. Step 2: x = x × x. What is the output?",
+      "prompt": "A Roblox variable called x starts at 4. Line 1: x = x + 1. Line 2: x = x × x. What is the output?",
       "options": [
         "9",
         "5",
         "25"
       ],
       "answer": 2,
-      "why": "A variable holds one number, and each step replaces it, so the next step uses the new value.",
+      "why": "A variable holds one number, and each line replaces it, so the next line uses the new value.",
       "steps": [
         {
-          "text": "Start x = 4. Step 1: x = 4 + 1 = 5."
+          "text": "Start x = 4. Line 1: x = 4 + 1 = 5."
         },
         {
-          "text": "Step 2: x = 5 × 5 = 25. So the output is 25 here."
+          "text": "Line 2: x = 5 × 5 = 25. So the output is 25 here."
         },
         {
-          "text": "Try start x = 2. Step 1: x = 3. Step 2: x = 3 × 3 = 9."
+          "text": "Try start x = 2. Line 1: x = 3. Line 2: x = 3 × 3 = 9."
         },
         {
-          "text": "If the steps were swapped, x × x first would give 4 × 4 = 16, then + 1 = 17."
+          "text": "If the lines were swapped, x × x first would give 4 × 4 = 16, then + 1 = 17."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "code-seq-deeper-6",
-      "prompt": "Isagi's shot script: start with 5 goals. Step 1: double it. Step 2: add 3. What is the output?",
+      "prompt": "Minecraft chest order: start with 5 stacks. Step 1: double it. Step 2: add 3 stacks. What is the output?",
       "options": [
         "13",
         "9",
@@ -874,11 +874,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-deeper-7",
-      "prompt": "In a Blue Lock shot game, a player types power 7. The screen then shows GOAL. Which part is the input?",
+      "prompt": "In Blue Lock, a striker types power 7. The screen then shows GOAL. Which part is the input?",
       "options": [
         "The word GOAL on the screen",
         "The rule that checks the shot",
-        "The 7 the player typed in"
+        "The 7 the striker typed in"
       ],
       "answer": 2,
       "why": "Input is information that goes into the program from outside.",
@@ -887,7 +887,7 @@ export const pack: SePack = {
           "text": "Input is what goes into the program. Output is what the program sends back."
         },
         {
-          "text": "Example: a One Piece bounty game. The player types a crew name, the screen shows a bounty. The name is input, the bounty is output."
+          "text": "Example: a Minecraft sign asks how many stacks. You type 3, it shows 192 items. The 3 is input, 192 is output."
         },
         {
           "text": "Ask: did this come from outside and go in? If yes, it is input."
@@ -897,7 +897,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-deeper-8",
-      "prompt": "Zoro's script: Step 1: kick the ball. Step 2: print GOAL. The ball flies wide. What appears on screen?",
+      "prompt": "Your EA FC script: step 1 kick the ball. Step 2 print GOAL. The ball flies wide. What appears?",
       "options": [
         "MISS, the computer saw it fail",
         "GOAL, because step 2 says so",
@@ -910,7 +910,7 @@ export const pack: SePack = {
           "text": "Read the script one line at a time, from top to bottom."
         },
         {
-          "text": "Example: step 1 wave, step 2 print DONE. The computer waves without checking, then prints DONE."
+          "text": "Example: step 1 whistle, step 2 print FULL TIME. The computer whistles without checking, then prints FULL TIME."
         },
         {
           "text": "A check is also a step. If no step checks, the computer will not notice a miss."
@@ -920,7 +920,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-deeper-9",
-      "prompt": "Repeat 3 times: step A: kick the ball. Step B: run back. How many actions happen in total?",
+      "prompt": "Repeat 3 times: step A: build a wall. Step B: reload. How many actions happen in total?",
       "options": [
         "3",
         "9",
@@ -930,10 +930,10 @@ export const pack: SePack = {
       "why": "A repeat runs every line inside it on each pass, so you count all the lines each time.",
       "steps": [
         {
-          "text": "Count one pass: kick and run is 2 actions."
+          "text": "Count one pass: build and reload is 2 actions."
         },
         {
-          "text": "Example: repeat 4 times, wave then jump. One pass is 2 actions, 4 passes is 8 actions."
+          "text": "Example: repeat 4 times, build a ramp then jump. One pass is 2 actions, 4 passes is 8 actions."
         },
         {
           "text": "Multiply the actions in one pass by the number of repeats."
@@ -943,7 +943,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-deeper-10",
-      "prompt": "A player's stamina is 5. Step 1: stamina = stamina + 2. Step 2: stamina = stamina × 3. What is stamina now?",
+      "prompt": "Your Pokémon's HP is 5. Step 1: HP = HP + 2. Step 2: HP = HP × 3. What is HP now?",
       "options": [
         "15",
         "21",
@@ -953,10 +953,10 @@ export const pack: SePack = {
       "why": "In code, a line like x = x + 2 is an instruction that updates the stored value.",
       "steps": [
         {
-          "text": "Read stamina = stamina + 2 as: take the value, add 2, store it back."
+          "text": "Read HP = HP + 2 as: take the value, add 2, store it back."
         },
         {
-          "text": "Example: score = 4, then score = score + 1, then score = score × 2. That gives 5, then 10."
+          "text": "Example: shield = 4, then shield = shield + 1, then shield = shield × 2. That gives 5, then 10."
         },
         {
           "text": "Use the value left by step 1 when you start step 2."
@@ -966,7 +966,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "code-seq-deeper-11",
-      "prompt": "Luffy's bounty is set to 3. Step 1: print bounty. Step 2: set bounty to 9. Step 3: print bounty. What shows on screen?",
+      "prompt": "Your obby coin count is 3. Step 1: print coins. Step 2: set coins to 9. Step 3: print coins. What shows?",
       "options": [
         "3 then 9",
         "9 then 9",
@@ -979,7 +979,7 @@ export const pack: SePack = {
           "text": "A print shows the value at the moment that line runs."
         },
         {
-          "text": "Example: score = 2, print, score = 5, print. Output is 2, then 5."
+          "text": "Example: coins = 2, print, coins = 5, print. Output is 2, then 5."
         },
         {
           "text": "Later changes never reach a line that already printed."
@@ -989,7 +989,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-seq-build-2",
-      "prompt": "Input: 1/2. Step 1: multiply by 3. Step 2: subtract 1/4. Build the output as a fraction.",
+      "prompt": "Pizza code. Input: 1/2 of a pizza. Step 1: multiply by 3. Step 2: subtract 1/4. Build the output as a fraction.",
       "answer": "5/4",
       "decoys": [
         "3",
@@ -1012,7 +1012,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-seq-build-3",
-      "prompt": "Zoro's training code. Input: 2.5. Step 1: multiply by 4. Step 2: subtract 0.8. Build the output as a decimal.",
+      "prompt": "Your Studio script takes 2.5 as input.\nLine 1: multiply by 4. Line 2: subtract 0.8. Build the output.",
       "answer": "9.2",
       "decoys": [
         "1",
@@ -1022,10 +1022,10 @@ export const pack: SePack = {
       "why": "Decimals follow the same order rules as whole numbers, so the lines still run one by one.",
       "steps": [
         {
-          "text": "Worked example, input 1.5: step 1 gives 1.5 × 2 = 3.0. Step 2 with 0.5 gives 3.0 − 0.5 = 2.5."
+          "text": "Worked example, input 1.5: line 1 gives 1.5 × 2 = 3.0. Line 2 with 0.5 gives 3.0 − 0.5 = 2.5."
         },
         {
-          "text": "For this code: 2.5 × 4 = 10.0."
+          "text": "For this script: 2.5 × 4 = 10.0."
         },
         {
           "text": "Then 10.0 − 0.8 = 9.2. Keep the decimal point lined up."
@@ -1035,7 +1035,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-seq-build-5",
-      "prompt": "Input: 36. Step 1: divide by 4. Step 2: add 7. Build the output.",
+      "prompt": "Input: 36 iron ingots.\nLine 1: divide by 4 (four furnaces). Line 2: add 7. Build the output.",
       "answer": "16",
       "decoys": [
         "5",
@@ -1045,10 +1045,10 @@ export const pack: SePack = {
       "why": "Division is done before addition when the code lists it first, because the lines run in order.",
       "steps": [
         {
-          "text": "Worked example, input 20: step 1 gives 20 ÷ 4 = 5. Step 2 adds 3, giving 8."
+          "text": "Worked example, input 20 ore: line 1 gives 20 ÷ 4 = 5. Line 2 adds 3, giving 8."
         },
         {
-          "text": "For this code: 36 ÷ 4 = 9."
+          "text": "For this build: 36 ÷ 4 = 9."
         },
         {
           "text": "Then 9 + 7 = 16. Check each line before moving to the next one."
@@ -1058,7 +1058,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "code-seq-build-6",
-      "prompt": "Input: 6. Step 1: subtract 4. Step 2: multiply by 5. Step 3: add 0.5. Build the output.",
+      "prompt": "Input: 6 eliminations for your squad.\nLine 1: subtract 4. Line 2: multiply by 5. Line 3: add 0.5. Build the output.",
       "answer": "10.5",
       "decoys": [
         "7",
@@ -1068,10 +1068,10 @@ export const pack: SePack = {
       "why": "A longer code is just several short lines in a row, so track the running total after each line.",
       "steps": [
         {
-          "text": "Worked example, input 7: step 1 gives 7 − 4 = 3. Step 2 gives 3 × 5 = 15. Step 3 gives 15.5."
+          "text": "Worked example, input 7 eliminations: line 1 gives 7 − 4 = 3. Line 2 gives 3 × 5 = 15. Line 3 gives 15.5."
         },
         {
-          "text": "For this code: 6 − 4 = 2."
+          "text": "For this squad: 6 − 4 = 2."
         },
         {
           "text": "Then 2 × 5 = 10, and 10 + 0.5 = 10.5."
@@ -1081,13 +1081,13 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "code-seq-games-1",
-      "title": "Crew Words",
+      "title": "Studio Words",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "Input",
-            "Information it gets"
+            "Value the script receives"
           ],
           [
             "Output",
@@ -1095,7 +1095,7 @@ export const pack: SePack = {
           ],
           [
             "Sequence",
-            "Steps in exact order"
+            "Lines in exact order"
           ],
           [
             "Algorithm",
@@ -1103,11 +1103,11 @@ export const pack: SePack = {
           ],
           [
             "Bug",
-            "A mistake in code"
+            "A mistake in the code"
           ]
         ]
       },
-      "why": "Input is what goes in, output is what comes out, and a bug is a wrong step in the code."
+      "why": "A Studio script runs top to bottom, so a bug is a wrong line that changes every output after it."
     },
     {
       "kind": "video",

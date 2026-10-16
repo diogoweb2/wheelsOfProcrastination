@@ -15,13 +15,13 @@ export const pack: SePack = {
       "id": "math-eq2-teach-0",
       "title": "What a two-step equation is",
       "lines": [
-        "2x − 5 = 11 has two steps done to x.",
-        "First, x is multiplied by 2.",
-        "Then, 5 is taken away. The answer is 11."
+        "Two chests each hold x blocks.",
+        "Take 5 blocks out. 11 are left.",
+        "Undo the steps in reverse to find x."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi sees the goal. Two passes set him up. Your job: find the mystery number x."
+        "flavour": "key",
+        "text": "2x − 5 = 11: two stacks of x, minus 5, leaves 11."
       },
       "art": {
         "art": "scale",
@@ -33,7 +33,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-basics-0",
-      "prompt": "Blue Lock: a striker's score is 2x − 5 = 11. Solve for x.",
+      "prompt": "Fortnite: 2 heals of x HP, then a 5 HP hit. You are left on 11 HP. Solve for x.",
       "options": [
         "x = 8",
         "x = 3",
@@ -43,7 +43,7 @@ export const pack: SePack = {
       "why": "Undo the −5 first, then undo the ×2, because that is the reverse of the order the equation was built.",
       "steps": [
         {
-          "text": "Take 3x + 4 = 19 as a new example."
+          "text": "Take a Blue Lock example: 3x + 4 = 19 as a new example."
         },
         {
           "text": "Undo the +4 first. Subtract 4 from both sides. You get 3x = 15."
@@ -62,7 +62,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-basics-1",
-      "prompt": "One Piece: Luffy's bounty is 4x + 7 = 23. What is the first step to solve it?",
+      "prompt": "One Piece: Luffy has 4 bags of x Berries, plus 7 loose. Total: 23. What is the first step?",
       "options": [
         "Divide both sides by 4",
         "Multiply both sides by 4",
@@ -72,7 +72,7 @@ export const pack: SePack = {
       "why": "The +7 is the outer operation, so you undo it before the ×4 that touches x directly.",
       "steps": [
         {
-          "text": "Take 5x − 2 = 18 as a new example."
+          "text": "Take a Minecraft example: 5x − 2 = 18, where x is blocks."
         },
         {
           "text": "The −2 is the outer step. Undo it first by adding 2 to both sides. You get 5x = 20."
@@ -146,7 +146,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-basics-2",
-      "prompt": "Solve for x: x ÷ 3 + 2 = 6.",
+      "prompt": "Pizza night: each of 3 friends gets x ÷ 3 slices, plus 2 more. Each has 6. Solve for x.",
       "options": [
         "x = 8",
         "x = 12",
@@ -156,7 +156,7 @@ export const pack: SePack = {
       "why": "Undo the +2 first, then multiply by 3, because division by 3 is undone by multiplying.",
       "steps": [
         {
-          "text": "Take n ÷ 4 − 3 = 2 as a new example."
+          "text": "Take a Roblox example: n ÷ 4 − 3 = 2 as a new example."
         },
         {
           "text": "Undo the −3 first. Add 3 to both sides. You get n ÷ 4 = 5."
@@ -169,7 +169,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-basics-3",
-      "prompt": "Pirate crew: 'Triple a number, then add 6, gives 21.' Which equation matches?",
+      "prompt": "Roblox: triple your Robux, then add 6, and you have 21. Which equation matches?",
       "options": [
         "3n + 6 = 21",
         "3(n + 6) = 21",
@@ -179,10 +179,10 @@ export const pack: SePack = {
       "why": "Read the words in order: triple means ×3 first, then add 6, so the ×3 comes before the +6.",
       "steps": [
         {
-          "text": "Take 'half a number, then subtract 4, gives 9' as the example."
+          "text": "Take 'half the Robux, then subtract 4, gives 9' as the example."
         },
         {
-          "text": "Half a number is n ÷ 2. Then subtract 4. That gives n ÷ 2 − 4."
+          "text": "Half the Robux is n ÷ 2. Then subtract 4. That gives n ÷ 2 − 4."
         },
         {
           "text": "It equals 9. So n ÷ 2 − 4 = 9. Each word becomes one step, in order."
@@ -194,19 +194,19 @@ export const pack: SePack = {
       "id": "math-eq2-teach-1",
       "title": "Why it matters",
       "lines": [
-        "Coaches use equations to track goal difference.",
-        "Recipes, phone plans and budgets use them too.",
+        "Coaches use equations to plan goal difference.",
+        "Robux, V-Bucks and Berries all use them too.",
         "Solving one tells you the missing number."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Any time something is missing, an equation can find it."
+        "text": "If a number is missing, an equation can find it."
       }
     },
     {
       "kind": "build",
       "id": "math-eq2-build-0",
-      "prompt": "Blue Lock: Rin's goals follow 3m + 4 = 19. Here m is the number of matches. Find m.",
+      "prompt": "Roblox: each visit earns 3 Robux. A 4 Robux daily bonus is added. Total 19 Robux. Find m, the visits.",
       "answer": "5",
       "decoys": [
         "2",
@@ -216,13 +216,13 @@ export const pack: SePack = {
       "why": "Equations reverse the order of operations, so you undo the last step first.",
       "steps": [
         {
-          "text": "Worked example: 2x + 6 = 14."
+          "text": "Worked example: a chest holds 2 stacks plus 6 loose blocks, 14 in total."
         },
         {
           "text": "Undo +6 first. Take 6 from both sides: 2x = 8."
         },
         {
-          "text": "Undo ×2 next. Divide both sides by 2: x = 4."
+          "text": "Undo ×2 next. Divide both sides by 2: x = 4 stacks."
         }
       ],
       "art": {
@@ -234,31 +234,8 @@ export const pack: SePack = {
     },
     {
       "kind": "choice",
-      "id": "math-eq2-basics-4",
-      "prompt": "Solve for x: −3x + 2 = 14.",
-      "options": [
-        "x = 4",
-        "x = −4",
-        "x = 12"
-      ],
-      "answer": 1,
-      "why": "Dividing by a negative number changes the sign of the answer, so −3x = 12 gives x = −4.",
-      "steps": [
-        {
-          "text": "Take −2x − 5 = 9 as a new example."
-        },
-        {
-          "text": "Undo the −5 by adding 5 to both sides. You get −2x = 14."
-        },
-        {
-          "text": "Divide both sides by −2. Negative divided by negative makes positive, but here the answer is −7. Check: −2 × −7 − 5 = 9."
-        }
-      ]
-    },
-    {
-      "kind": "choice",
       "id": "math-eq2-basics-5",
-      "prompt": "Which value of x makes 6x + 1 = 19 true?",
+      "prompt": "Each Timbits box holds 6 Timbits, plus 1 extra. You have 19 in total. Which x makes 6x + 1 = 19 true?",
       "options": [
         "x = 2",
         "x = 4",
@@ -268,45 +245,45 @@ export const pack: SePack = {
       "why": "Substituting the right value turns both sides into the same number, so you can check your answer quickly.",
       "steps": [
         {
-          "text": "Test x = 4 in 4x − 3 = 13. Work it out: 4 × 4 − 3 = 13. It works."
+          "text": "Test x = 4 in 4x − 3 = 13: 4 × 4 − 3 = 13. It works."
         },
         {
           "text": "Now test x = 2 in the same equation: 4 × 2 − 3 = 5. Not 13, so it fails."
         },
         {
-          "text": "Always substitute your answer back into the original equation to check."
+          "text": "Always put your answer back into the original equation to check."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-eq2-games-0",
-      "title": "Bounty Board: Smallest First",
+      "title": "Ranked Board: Smallest First",
       "game": {
         "mode": "order",
         "values": [
           {
-            "label": "2x − 5 = 11",
+            "label": "Fortnite: 2x − 5 = 11",
             "value": 8
           },
           {
-            "label": "3x + 4 = 19",
+            "label": "Timbits: 3x + 4 = 19",
             "value": 5
           },
           {
-            "label": "4x − 6 = 10",
+            "label": "Roblox: 4x − 6 = 10",
             "value": 4
           },
           {
-            "label": "2x + 9 = 1",
+            "label": "Pokémon: 2x + 9 = 1",
             "value": -4
           },
           {
-            "label": "5x − 3 = 27",
+            "label": "Shawarma: 5x − 3 = 27",
             "value": 6
           },
           {
-            "label": "3x − 7 = 2",
+            "label": "Football: 3x − 7 = 2",
             "value": 3
           }
         ]
@@ -319,18 +296,18 @@ export const pack: SePack = {
       "title": "The method: undo in reverse",
       "lines": [
         "Work backwards. Undo the last step first.",
-        "In 2x − 5, the last step is minus 5.",
-        "Undo it by adding 5. Then divide by 2."
+        "In 2x − 5 blocks, the last step is minus 5.",
+        "Add 5 back. Then divide by 2."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Last on, first off. Like unloading a ship in reverse order."
+        "text": "Last on, first off. Like unloading a chest in reverse order."
       }
     },
     {
       "kind": "build",
       "id": "math-eq2-basics-6",
-      "prompt": "Blue Lock: solve 3x + 8 = 29. Build the value of x.",
+      "prompt": "Football: your team has 8 points from warm-up. Each win adds 3. You have 29 points. Find x, the wins.",
       "answer": "7",
       "decoys": [
         "2",
@@ -340,7 +317,7 @@ export const pack: SePack = {
       "why": "Undo the +8 first to get 3x = 21, then divide by 3 to get x = 7.",
       "steps": [
         {
-          "text": "Take 5x + 1 = 26 as a new example."
+          "text": "Take 5x + 1 = 26: 5 chests of 5 items plus 1 spare, 26 items."
         },
         {
           "text": "Undo the +1 first. Subtract 1 from both sides. You get 5x = 25."
@@ -359,23 +336,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-basics-7",
-      "prompt": "Which equation has the answer x = 5?",
+      "prompt": "Each skin costs x dollars. Two skins and a $3 fee cost $13. Which equation is right?",
       "options": [
         "2x + 3 = 13",
         "2x − 3 = 13",
         "3x − 5 = 12"
       ],
       "answer": 0,
-      "why": "Working backwards from each option is the fastest way to see which one fits x = 5.",
+      "why": "Substituting x = 5 into each equation shows only the first one balances.",
       "steps": [
         {
-          "text": "Take 4x − 1 = 7 as a new example. Test x = 2: 4 × 2 − 1 = 7. It works."
+          "text": "Test x = 2 in 4x − 1 = 7: 4 × 2 − 1 = 7. It works, so x = 2."
         },
         {
-          "text": "Undo the −1 by adding 1. You get 4x = 8. Divide by 4 to get x = 2."
+          "text": "Your furnace run: 4x − 1 = 7. Add 1 to both sides to get 4x = 8."
         },
         {
-          "text": "So each step you undo must reverse the step that built the equation."
+          "text": "Then divide both sides by 4 to get x = 2. Check by putting 2 back in."
         }
       ]
     }
@@ -387,12 +364,12 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Many people undo the steps in the wrong order.",
-        "They also forget the opposite of minus 5 is plus 5.",
+        "They also forget the opposite of −5 is +5.",
         "Always do the same thing to both sides."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Doing minus 5 again is the classic slip. Check your sign."
+        "text": "Doing −5 again is the classic slip. Check your sign every time."
       }
     },
     {
@@ -400,13 +377,13 @@ export const pack: SePack = {
       "id": "math-eq2-teach-4",
       "title": "Worked example",
       "lines": [
-        "Take 3x + 4 = 19.",
+        "Take 3x + 4 = 19: three chests of x blocks, plus 4 spare.",
         "The last step was plus 4, so subtract 4 from both sides.",
-        "That gives 3x = 15. Then divide both sides by 3. x = 5."
+        "That gives 3x = 15. Divide both sides by 3. x = 5."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro's bounty is 3 times his crew's share, plus 4. Work back to find the share."
+        "text": "Three chests of x blocks, plus 4 spare, make 19. Work back to find x."
       },
       "art": {
         "art": "scale",
@@ -434,13 +411,13 @@ export const pack: SePack = {
       "id": "math-eq2-deeper-0",
       "title": "Undo the outside first",
       "lines": [
-        "2x − 5 = 11 has two steps: times 2, then take away 5.",
+        "2x − 5 = 11: times 2, then take away 5.",
         "Undo the last step first: add 5 to both sides.",
         "Then undo the times 2: divide both sides by 2."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Like a Blue Lock drill: replay the last pass first, then the one before it."
+        "text": "Like a Roblox obby: reach the last checkpoint first, then work back."
       }
     },
     {
@@ -449,7 +426,7 @@ export const pack: SePack = {
       "title": "Do it to both sides",
       "lines": [
         "An equation is a balance. Whatever you do to one side, do to the other.",
-        "Add 5 to the left. Add 5 to the right.",
+        "Add 5 to the left side. Add 5 to the right side too.",
         "Forgetting one side is the most common slip."
       ],
       "callout": {
@@ -462,7 +439,7 @@ export const pack: SePack = {
       "id": "math-eq2-deeper-2",
       "title": "Undo subtract with add",
       "lines": [
-        "The −5 is the last thing done to 2x.",
+        "Your shield is 2x. A storm hit took away 5.",
         "To undo −5, add 5. Do not subtract 5.",
         "Add undoes subtract. Divide undoes multiply."
       ]
@@ -472,13 +449,13 @@ export const pack: SePack = {
       "id": "math-eq2-deeper-3",
       "title": "A minus in front of the x",
       "lines": [
-        "−3x = 12 means negative three times x is 12.",
+        "−3x = 12: each loss costs −3 points, total 12.",
         "Divide both sides by −3, not by 3.",
         "A positive divided by a negative gives a negative answer."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A negative sign is a sea tax on the answer. Never forget to pay it."
+        "text": "A minus sign flips the answer. Never forget to flip it back."
       }
     },
     {
@@ -486,7 +463,7 @@ export const pack: SePack = {
       "id": "math-eq2-deeper-4",
       "title": "Fractions: undo the take-away first",
       "lines": [
-        "x/4 − 3 = 2 has a fraction and a take-away.",
+        "One quarter of the pizza x, minus 3 slices, leaves 2.",
         "Undo the −3 first: add 3 to both sides.",
         "Then undo the ÷4: multiply both sides by 4."
       ]
@@ -502,13 +479,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Check before you shoot. You cannot take a penalty back."
+        "text": "Check before you lock in. A wrong answer cannot be unsent."
       }
     },
     {
       "kind": "build",
       "id": "math-eq2-basics-8",
-      "prompt": "One Piece: solve x ÷ 5 − 4 = −6. Build the value of x.",
+      "prompt": "Minecraft mine: x ÷ 5 − 4 = −6. Build the value of x.",
       "answer": "-10",
       "decoys": [
         "5"
@@ -516,20 +493,20 @@ export const pack: SePack = {
       "why": "Add 4 to get x ÷ 5 = −2, then multiply by 5 to get x = −10.",
       "steps": [
         {
-          "text": "Take 2x ÷ 3 + 1 = −3 as a new example. You can use the same method."
+          "text": "Try a new one: 2x ÷ 3 + 1 = −3, a Y-level in a deep mine."
         },
         {
           "text": "Undo the +1 by subtracting 1. You get 2x ÷ 3 = −4."
         },
         {
-          "text": "Undo the ÷3 by multiplying by 3. Then divide by 2. Check the answer in the first equation."
+          "text": "Undo the ÷3 by multiplying by 3. Then divide by 2. Check in the first equation."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-eq2-basics-9",
-      "prompt": "Solve for x: 0.5x + 1 = 4.",
+      "prompt": "Your Roblox game earns 0.5x + 1 = 4. Solve for x.",
       "options": [
         "x = 3",
         "x = 1.5",
@@ -539,7 +516,7 @@ export const pack: SePack = {
       "why": "Half of x is 0.5x, so undoing the +1 and then doubling gives the answer.",
       "steps": [
         {
-          "text": "Take 0.25x − 2 = 3 as a new example."
+          "text": "Try a Roblox one: 0.25x − 2 = 3, with a quarter of the visits."
         },
         {
           "text": "Undo the −2 by adding 2. You get 0.25x = 5."
@@ -552,26 +529,26 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-applied-0",
-      "prompt": "Bachira's dribble score: 4x − 6 = 18. The number x is his touches. What is x?",
+      "prompt": "Four mining trips give x blocks each, minus 6 lost to lava. You keep 18.",
       "options": [
         "x = 3",
         "x = 12",
         "x = 6"
       ],
       "answer": 2,
-      "why": "Undo the operation done last, so the −6 gets undone before the ×4.",
+      "why": "The −6 happened last, so you undo it before the ×4.",
       "steps": [
         {
-          "text": "Start with 5x + 2 = 37. The +2 was added last."
+          "text": "Your 5 mining trips plus 2 stray blocks make 37. Start with 5x + 2 = 37."
         },
         {
-          "text": "Undo it: subtract 2 from both sides. Now 5x = 35."
+          "text": "Take the 2 stray blocks off both sides. Now 5x = 35."
         },
         {
-          "text": "Undo the ×5: divide both sides by 5. So x = 7."
+          "text": "Share 35 blocks across 5 trips: x = 7."
         },
         {
-          "text": "Check: 5 × 7 + 2 = 37. It works."
+          "text": "Check: 5 × 7 + 2 = 37. Correct."
         }
       ],
       "art": {
@@ -584,7 +561,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-applied-1",
-      "prompt": "Kaiser's team: x/3 − 4 = 2. What is x?",
+      "prompt": "A creator splits x Robux into 3 equal piles. Then 4 Robux are taken. 2 are left.",
       "options": [
         "x = 4",
         "x = 18",
@@ -594,23 +571,23 @@ export const pack: SePack = {
       "why": "Undo the −4 first, then the ÷3, because ÷3 was done before the −4.",
       "steps": [
         {
-          "text": "Start with y/5 + 7 = 9. The +7 was added last."
+          "text": "Premium gives 7 Robux, plus y/5 from your game: 9 total. Start with y/5 + 7 = 9."
         },
         {
-          "text": "Undo it: subtract 7 from both sides. Now y/5 = 2."
+          "text": "Take the 7 Premium Robux off both sides. Now y/5 = 2."
         },
         {
-          "text": "Undo the ÷5: multiply both sides by 5. So y = 10."
+          "text": "Multiply both sides by 5: y = 10."
         },
         {
-          "text": "Check: 10 ÷ 5 + 7 = 9. It works."
+          "text": "Check: 10 ÷ 5 + 7 = 9. Correct."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-eq2-applied-2",
-      "prompt": "Luffy's bounty plan: 3b − 15 = 60, in thousands of berries. What is b?",
+      "prompt": "Three party boxes hold b Timbits each. You eat 15 of them. 60 are left.",
       "options": [
         "b = 45",
         "b = 15",
@@ -620,49 +597,49 @@ export const pack: SePack = {
       "why": "Reverse the order of operations, because the last thing done to b is undone first.",
       "steps": [
         {
-          "text": "Start with 4c + 9 = 45. The +9 was added last."
+          "text": "Four Poké Balls with c catches each, plus 9 spares, make 45. Start with 4c + 9 = 45."
         },
         {
-          "text": "Undo it: subtract 9. Now 4c = 36."
+          "text": "Take the 9 spares away. Now 4c = 36."
         },
         {
-          "text": "Undo the ×4: divide by 4. So c = 9."
+          "text": "Share 36 catches across 4 balls: c = 9."
         },
         {
-          "text": "Check: 4 × 9 + 9 = 45. It works."
+          "text": "Check: 4 × 9 + 9 = 45. Correct."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-eq2-applied-3",
-      "prompt": "Two coffees and a $1.50 tip cost $9.50. Each coffee costs c. What is c?",
+      "prompt": "Two V-Buck bundles at c dollars each, plus a $1.50 fee, cost $9.50.",
       "options": [
         "c = $4.00",
         "c = $5.50",
         "c = $3.75"
       ],
       "answer": 0,
-      "why": "Undo the tip first, because it was added after the coffees were bought.",
+      "why": "Undo the fee first, because it was added after the bundles were bought.",
       "steps": [
         {
-          "text": "Start with 4n + 2.50 = 14.50. The +2.50 was added last."
+          "text": "Four party pizzas at n dollars each, plus a $2.50 fee, cost $14.50."
         },
         {
-          "text": "Undo it: subtract 2.50. Now 4n = 12."
+          "text": "Take the $2.50 fee off both sides. Now 4n = 12."
         },
         {
-          "text": "Undo the ×4: divide by 4. So n = 3."
+          "text": "Split $12 across 4 pizzas: n = 3."
         },
         {
-          "text": "Check: 4 × 3 + 2.50 = 14.50. It works."
+          "text": "Check: 4 × 3 + 2.50 = 14.50. Correct."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-eq2-applied-4",
-      "prompt": "Isagi's shot score drops: −3x + 4 = 19. What is x?",
+      "prompt": "Your Minecraft Y level reads 19 after −3x + 4. Each x counts trips down the shaft. What is x?",
       "options": [
         "x = 5",
         "x = −5",
@@ -672,16 +649,16 @@ export const pack: SePack = {
       "why": "Dividing a negative number by a positive number gives a negative answer.",
       "steps": [
         {
-          "text": "Start with −2y − 7 = 3. The −7 was done last."
+          "text": "Your obby score is −2y − 7 = 3. The −7 was added last."
         },
         {
-          "text": "Undo it: add 7 to both sides. Now −2y = 10."
+          "text": "Add 7 to both sides. Now −2y = 10."
         },
         {
-          "text": "Undo the ×(−2): divide both sides by −2. So y = −5."
+          "text": "Divide both sides by −2. So y = −5."
         },
         {
-          "text": "Check: −2 × (−5) − 7 = 3. It works."
+          "text": "Check: −2 × (−5) − 7 = 3. Correct."
         }
       ],
       "art": {
@@ -703,35 +680,9 @@ export const pack: SePack = {
       }
     },
     {
-      "kind": "choice",
-      "id": "math-eq2-applied-5",
-      "prompt": "Thousand Sunny's crew: 6h − 10 = −22. What is h?",
-      "options": [
-        "h = 2",
-        "h = −2",
-        "h = −6"
-      ],
-      "answer": 1,
-      "why": "Undo the −10 first, because it was the last step done to h.",
-      "steps": [
-        {
-          "text": "Start with 3k − 9 = −18. The −9 was done last."
-        },
-        {
-          "text": "Undo it: add 9 to both sides. Now 3k = −9."
-        },
-        {
-          "text": "Undo the ×3: divide both sides by 3. So k = −3."
-        },
-        {
-          "text": "Check: 3 × (−3) − 9 = −18. It works."
-        }
-      ]
-    },
-    {
       "kind": "build",
       "id": "math-eq2-applied-7",
-      "prompt": "Shot power: 5x − 9 = −29. Build the value of x from the tiles.",
+      "prompt": "Roblox Studio: a part's Y position is 5x − 9 = −29. Build x.",
       "answer": "-4",
       "decoys": [
         "7",
@@ -741,10 +692,10 @@ export const pack: SePack = {
       "why": "A negative divided by a positive gives a negative answer.",
       "steps": [
         {
-          "text": "Start with 3m + 5 = 20. The +5 was added last."
+          "text": "Your crafting: 3 stacks of m blocks plus 5 spare blocks make 20."
         },
         {
-          "text": "Undo it: subtract 5. Now 3m = 15."
+          "text": "Undo the spare blocks: subtract 5. Now 3m = 15."
         },
         {
           "text": "Undo the ×3: divide by 3. So m = 5. Check: 3 × 5 + 5 = 20."
@@ -754,7 +705,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-applied-8",
-      "prompt": "The class spent $39.50 on 6 pizzas and $3.50 delivery. What did one pizza cost?",
+      "prompt": "Your party orders 6 pizzas plus a $3.50 delivery fee. The bill is $39.50. What is one pizza?",
       "options": [
         "$5.00",
         "$6.00",
@@ -764,10 +715,10 @@ export const pack: SePack = {
       "why": "Undo the delivery fee first, because it was the last cost added to the bill.",
       "steps": [
         {
-          "text": "Start with 4p + 2.50 = 22.50. The delivery was added last."
+          "text": "Last time: 4 pizzas plus a $2.50 fee came to $22.50."
         },
         {
-          "text": "Undo it: subtract 2.50. Now 4p = 20."
+          "text": "Undo the fee: subtract 2.50. Now 4p = 20."
         },
         {
           "text": "Undo the ×4: divide by 4. So p = 5.00."
@@ -780,7 +731,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-applied-9",
-      "prompt": "Usopp's slingshot: x/4 + 6 = 2. What is x?",
+      "prompt": "Your mine trip: x ÷ 4 + 6 = 2 on the F3 screen. What is x?",
       "options": [
         "x = −16",
         "x = 16",
@@ -790,10 +741,10 @@ export const pack: SePack = {
       "why": "Undo the +6 first, then the ÷4, because the ÷4 was done before the +6.",
       "steps": [
         {
-          "text": "Start with z/2 − 8 = −3. The −8 was done last."
+          "text": "Goal difference: z ÷ 2 − 8 = −3. The −8 was done last."
         },
         {
-          "text": "Undo it: add 8 to both sides. Now z/2 = 5."
+          "text": "Undo it: add 8 to both sides. Now z ÷ 2 = 5."
         },
         {
           "text": "Undo the ÷2: multiply both sides by 2. So z = 10."
@@ -806,7 +757,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-deeper-6",
-      "prompt": "3x + 7 = 25. What is the first step?",
+      "prompt": "Three bundles of x V-Bucks plus a 7 bonus make 25. First step?",
       "options": [
         "Subtract 7 from both sides",
         "Divide both sides by 3",
@@ -815,6 +766,9 @@ export const pack: SePack = {
       "answer": 0,
       "why": "The +7 was added last, so it is undone first by subtracting 7.",
       "steps": [
+        {
+          "text": "Ultimate Team: 4 packs of x coins plus 9 coins make 33."
+        },
         {
           "text": "Take 9 from both sides of 4x + 9 = 33. You get 4x = 24."
         },
@@ -835,7 +789,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-deeper-7",
-      "prompt": "4x + 6 = 30. After the first step, what is left?",
+      "prompt": "Your chest: 4 piles of x wood plus 6 loose wood make 30 total. After the first step, what is left?",
       "options": [
         "4x = 36",
         "4x = 24",
@@ -844,6 +798,9 @@ export const pack: SePack = {
       "answer": 1,
       "why": "The +6 is undone by subtracting 6 from both sides, not adding it.",
       "steps": [
+        {
+          "text": "Pokémon: 5 hits of x damage plus 8 HP makes 38 total."
+        },
         {
           "text": "Take 8 from both sides of 5x + 8 = 38. You get 5x = 30."
         },
@@ -858,7 +815,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-deeper-8",
-      "prompt": "−3x = 12. What is x?",
+      "prompt": "Each lost round is −3 points. Your total is −3x = 12. What is x?",
       "options": [
         "x = 4",
         "x = −4",
@@ -868,10 +825,13 @@ export const pack: SePack = {
       "why": "A positive 12 divided by a negative −3 gives a negative answer.",
       "steps": [
         {
-          "text": "Divide both sides of −2x = 14 by −2. You get x = 14 ÷ (−2)."
+          "text": "Two storm ticks of −x HP make 14. Divide both sides of −2x = 14 by −2."
         },
         {
-          "text": "14 ÷ (−2) = −7, because the signs are different."
+          "text": "You get x = 14 ÷ (−2). The signs are different, so the answer is negative."
+        },
+        {
+          "text": "14 ÷ (−2) = −7."
         },
         {
           "text": "Check: −2 × (−7) = 14. It works."
@@ -898,43 +858,43 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-eq2-deeper-9",
-      "prompt": "x/4 − 3 = 2. What is x?",
+      "prompt": "Your squad splits x wood into 4 piles, takes 3 away, and has 2 left. x/4 − 3 = 2. Find x.",
       "options": [
         "x = 20",
-        "x = 9",
-        "x = 5"
+        "x = 12",
+        "x = 14"
       ],
       "answer": 0,
       "why": "Undo the −3 first, then undo the ÷4 by multiplying by 4.",
       "steps": [
         {
-          "text": "Add 3 to both sides of x/3 + 1 = 4 — no, subtract 1: x/3 = 3."
+          "text": "Worked example: x/2 + 1 = 5. Take 1 from both sides: x/2 = 4."
         },
         {
-          "text": "Multiply both sides by 3. You get x = 9."
+          "text": "Multiply both sides by 2. You get x = 8 wood."
         },
         {
-          "text": "Check: 9 ÷ 3 + 1 = 3 + 1 = 4. It works."
+          "text": "Check: 8 ÷ 2 + 1 = 4 + 1 = 5. It works."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-eq2-deeper-10",
-      "prompt": "10 − 2x = 4. What is x?",
+      "prompt": "You start with 10 hearts. Each arrow takes 2 hearts. 10 − 2x = 4. Find x.",
       "options": [
-        "x = −3",
         "x = 7",
-        "x = 3"
+        "x = 3",
+        "x = 5"
       ],
-      "answer": 2,
-      "why": "Take 10 from both sides, then divide by −2, which gives x = 3.",
+      "answer": 1,
+      "why": "Subtract 10 from both sides, then divide by −2, which gives x = 3.",
       "steps": [
         {
-          "text": "Subtract 9 from both sides of 9 − 3x = 3. You get −3x = −6."
+          "text": "Worked example: 9 − 3x = 3. Take 9 from both sides: −3x = −6."
         },
         {
-          "text": "Divide both sides by −3. You get x = −6 ÷ (−3) = 2."
+          "text": "Divide both sides by −3. You get x = 2 arrows."
         },
         {
           "text": "Check: 9 − 3 × 2 = 9 − 6 = 3. It works."
@@ -943,41 +903,18 @@ export const pack: SePack = {
     },
     {
       "kind": "build",
-      "id": "math-eq2-build-2",
-      "prompt": "Blue Lock: Hiori solves 4x + 3 = 5. Build x as a fraction.",
-      "answer": "1/2",
-      "decoys": [
-        "4",
-        "8",
-        "3"
-      ],
-      "why": "A fraction answer appears when you divide a number that is not a multiple of the divisor.",
-      "steps": [
-        {
-          "text": "Worked example: 2x + 3 = 6."
-        },
-        {
-          "text": "Undo +3 first. Take 3 from both sides: 2x = 3."
-        },
-        {
-          "text": "Undo ×2 next. Divide by 2: x = 3/2, which is 1.5."
-        }
-      ]
-    },
-    {
-      "kind": "build",
       "id": "math-eq2-build-3",
-      "prompt": "One Piece: Chopper mixes 4z − 2 = 3. Find z as a decimal.",
+      "prompt": "4z − 2 = 3. Four tickets cost z each, minus a $2 coupon, total $3. Find z.",
       "answer": "1.25",
       "decoys": [
         "6",
         "0",
         "4"
       ],
-      "why": "Decimals come from dividing a whole number that does not split evenly, like 5 ÷ 4.",
+      "why": "Dividing 5 by 4 does not split evenly, so the answer is a decimal.",
       "steps": [
         {
-          "text": "Worked example: 2t + 5 = 6."
+          "text": "Worked example: 2t + 5 = 6. Two bags of t candies, plus 5 candies."
         },
         {
           "text": "Undo +5 first. Take 5 from both sides: 2t = 1."
@@ -990,7 +927,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq2-build-4",
-      "prompt": "Blue Lock: Isagi's team goal difference is 3g + 7 = 1. Find g. The answer is negative.",
+      "prompt": "Roblox: 3g + 7 = 1 after a gift card top-up. Find g. The answer is negative.",
       "answer": "-2",
       "decoys": [
         "6",
@@ -1000,7 +937,7 @@ export const pack: SePack = {
       "why": "A negative answer is a real result, shown on a number line left of zero.",
       "steps": [
         {
-          "text": "Worked example: 2x + 9 = 3."
+          "text": "Worked example: 2x + 9 = 3, a Robux balance."
         },
         {
           "text": "Undo +9 first. Take 9 from both sides: 2x = −6."
@@ -1026,17 +963,17 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq2-build-5",
-      "prompt": "One Piece: The crew's bounty total is 7k − 3 = 25. Find k.",
+      "prompt": "Pokémon: 7k − 3 = 25. Seven Pokémon each gain k CP, minus 3 lost. Find k.",
       "answer": "4",
       "decoys": [
         "7",
         "2",
         "3"
       ],
-      "why": "Working backwards through an equation finds the number that made both sides equal.",
+      "why": "Working backwards undoes each step, so you find the number that made both sides equal.",
       "steps": [
         {
-          "text": "Worked example: 2m − 9 = 3."
+          "text": "Worked example: 2m − 9 = 3, with 9 CP lost."
         },
         {
           "text": "Undo −9 first. Add 9 to both sides: 2m = 12."
@@ -1049,7 +986,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq2-build-6",
-      "prompt": "Blue Lock: A pass is shared three ways. x ÷ 3 + 2 = 5. Find x.",
+      "prompt": "Fortnite: Your squad splits x wood three ways, then you grab 2 more.\nYou end with 5 pieces. Find x.",
       "answer": "9",
       "decoys": [
         "3",
@@ -1059,7 +996,7 @@ export const pack: SePack = {
       "why": "Dividing by 3 is undone by multiplying by 3, so you work back to the start.",
       "steps": [
         {
-          "text": "Worked example: x ÷ 4 − 1 = 2."
+          "text": "Worked example: Pizza: x ÷ 4 − 1 = 2 slices."
         },
         {
           "text": "Undo −1 first. Add 1 to both sides: x ÷ 4 = 3."
@@ -1078,7 +1015,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-eq2-build-7",
-      "prompt": "One Piece: Nami's map reads 5a − 6 = −2. Find a as a decimal.",
+      "prompt": "Minecraft: You mine a blocks per trip, for 5 trips.\nThen lava burns 6 blocks. You end at −2 blocks. Find a.",
       "answer": "0.8",
       "decoys": [
         "3",
@@ -1088,7 +1025,7 @@ export const pack: SePack = {
       "why": "A decimal is a fraction of one written in tenths, like 4 ÷ 5 = 0.8.",
       "steps": [
         {
-          "text": "Worked example: 2b + 1 = 4."
+          "text": "Worked example: Goals: 2b + 1 = 4 for your striker."
         },
         {
           "text": "Undo +1 first. Take 1 from both sides: 2b = 3."
@@ -1101,7 +1038,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-eq2-games-1",
-      "title": "Crew Order: Undo Backwards",
+      "title": "Ranked Queue: Undo Backwards",
       "game": {
         "mode": "pair",
         "pairs": [

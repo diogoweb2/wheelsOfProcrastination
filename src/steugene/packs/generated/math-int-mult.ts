@@ -21,7 +21,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Blue Lock: a striker's goal difference falls by 2 each match. Rewind the match and it rises by 2."
+        "text": "Blue Lock: a striker's goal difference falls by 4 each match. Undo 6 matches and it rises by 24."
       },
       "art": {
         "art": "numberline",
@@ -44,7 +44,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-basics-0",
-      "prompt": "Isagi's team scores (−4) × (−6) in a training drill. What is the answer?",
+      "prompt": "Fortnite: your HP drops 4 a tick. Rewind 6 ticks. What is (−4) × (−6)?",
       "options": [
         "24",
         "−24",
@@ -54,25 +54,20 @@ export const pack: SePack = {
       "why": "Multiplying two negative numbers always gives a positive answer.",
       "steps": [
         {
-          "text": "Ignore the signs at first. Multiply 3 × 5 = 15."
+          "text": "Ignore the signs at first. Multiply 5 × 2 = 10."
         },
         {
           "text": "Count the negative signs. There are two, so the answer is positive."
         },
         {
-          "text": "So (−3) × (−5) = +15. Try (−2) × (−8) the same way: 16, positive."
+          "text": "So (−5) × (−2) = +10. Try (−3) × (−8): 24, positive."
         }
-      ],
-      "art": {
-        "art": "counters",
-        "pos": 0,
-        "neg": 4
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-basics-1",
-      "prompt": "Without working it out, what sign does (−7) × (−2) have?",
+      "prompt": "Minecraft: your Y-level drops 7 blocks a step. You walk back 2 steps. Without working it out, what sign does (−7) × (−2) have?",
       "options": [
         "Negative",
         "Positive",
@@ -88,7 +83,7 @@ export const pack: SePack = {
           "text": "Two negatives cancel each other out, so the sign is positive."
         },
         {
-          "text": "Check with (−9) × (−3). Two negatives, so it is positive, and 27."
+          "text": "Check: a 9-block drop, undone over 3 steps, is (−9) × (−3) = 27, positive."
         }
       ]
     },
@@ -164,7 +159,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-basics-2",
-      "prompt": "What is (−36) ÷ (−9)?",
+      "prompt": "Pokémon: your team's HP fell by 36 over 9 turns. Undo it: what is (−36) ÷ (−9)?",
       "options": [
         "4",
         "−4",
@@ -180,14 +175,14 @@ export const pack: SePack = {
           "text": "Both numbers are negative, so the answer is positive: +4."
         },
         {
-          "text": "Try (−48) ÷ (−6). 48 ÷ 6 = 8, and the sign is positive, so the answer is 8."
+          "text": "Check a 48-HP drain over 6 turns: (−48) ÷ (−6) = 8 HP per turn, positive."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-basics-3",
-      "prompt": "(−5) × ___ = 35. What number goes in the blank?",
+      "prompt": "Football: your team's goal difference drops 5 each round. Which number makes (−5) × ___ = 35?",
       "options": [
         "7",
         "−7",
@@ -203,7 +198,7 @@ export const pack: SePack = {
           "text": "Negative divided by negative is positive, but −5 needs a negative partner, so the blank is −7."
         },
         {
-          "text": "Try (−4) × ___ = 28. 28 ÷ 4 = 7, so the blank is −7. Check: (−4) × (−7) = 28."
+          "text": "Check a 4-goal drop giving 28: (−4) × (−7) = 28, so the blank is −7."
         }
       ]
     },
@@ -218,43 +213,43 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Zoro's debt is 6 Berries a day. Two debts cancelled out leave a gain, not a loss."
+        "text": "Zoro owes 6 Berries a day. Cancel 2 days of that debt and you gain 12 Berries."
       }
     },
     {
       "kind": "build",
       "id": "math-int-mult-build-0",
-      "prompt": "Bachira's team sits at −4 on the goal-difference table. The coach multiplies it by −6 for a bonus stat. Build the answer.",
+      "prompt": "Your team lost 6 matches, each costing −4 goal difference. Undo all 6. Build the total change.",
       "answer": "24",
       "decoys": [
         "-",
         "6",
         "0"
       ],
-      "why": "A negative times a negative is positive, because two sign flips cancel each other out.",
+      "why": "A negative times a negative is positive, because undoing a loss flips its sign.",
       "steps": [
         {
-          "text": "Step 1: Look at the signs. Both are −, so the answer will be positive."
+          "text": "Step 1: Undoing a loss flips its sign. Both are −, so the answer is positive."
         },
         {
-          "text": "Step 2: Ignore the signs for now. Work out 5 × 3 = 15."
+          "text": "Step 2: Ignore the signs. Work out 5 × 3 = 15 first."
         },
         {
-          "text": "Step 3: Put the sign back. (−5) × (−3) = +15, so the answer is 15."
+          "text": "Step 3: Undo 3 losses of −5 each. (−5) × (−3) = +15, so the answer is 15."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-basics-4",
-      "prompt": "The pattern is: (−2) × 3 = −6, (−2) × 2 = −4, (−2) × 1 = −2, (−2) × 0 = 0. What is (−2) × (−1)?",
+      "prompt": "Your health drops 2 per storm tick: 3 ticks = −6, 2 ticks = −4, 1 tick = −2, 0 ticks = 0. What is (−2) × (−1)?",
       "options": [
         "−2",
         "0",
         "2"
       ],
       "answer": 2,
-      "why": "Each step down in the second number adds 2, so the pattern keeps going up to positive 2.",
+      "why": "Each step down the tick count adds 2, so the pattern keeps rising to positive 2.",
       "steps": [
         {
           "text": "Look at the answers. Each step down adds 2 to the answer."
@@ -270,7 +265,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-int-mult-games-0",
-      "title": "Bounty Board Sort",
+      "title": "Obby Checkpoint Sort",
       "game": {
         "mode": "order",
         "values": [
@@ -300,16 +295,16 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "A negative times a negative is positive, because each step down the pattern adds 2 more, so (−1) × (−2) = 2."
+      "why": "A negative times a negative is positive, because the two sign flips cancel out."
     },
     {
       "kind": "explain",
       "id": "math-int-mult-teach-2",
-      "title": "The method",
+      "title": "The sign rule",
       "lines": [
         "Step 1: Multiply the numbers as if the signs were not there.",
         "Step 2: Two negatives in a row? The answer is positive.",
-        "Example: (−4) × (−6): 4 × 6 = 24, so the answer is +24."
+        "Example: (−5) × (−7): 5 × 7 = 35, so the answer is +35."
       ],
       "callout": {
         "flavour": "key",
@@ -319,7 +314,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-basics-6",
-      "prompt": "Which of these products is positive?",
+      "prompt": "Blue Lock ranking tables: which of these products is positive?",
       "options": [
         "(−6) × 2",
         "(−6) × (−2)",
@@ -365,7 +360,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-1",
-      "prompt": "Luffy's bounty drops by 3 million berries each week. Ace checks the change 7 weeks back. Build (−3) × (−7).",
+      "prompt": "Your game earns −3 Robux a day.\nSeven days back, the change was (−3) × (−7). Build it.",
       "answer": "21",
       "decoys": [
         "-",
@@ -377,10 +372,10 @@ export const pack: SePack = {
           "text": "Step 1: Both numbers are negative, so the answer is positive."
         },
         {
-          "text": "Step 2: Multiply the sizes. 4 × 6 = 24."
+          "text": "Step 2: Multiply the sizes. (−5) × (−4): 5 × 4 = 20, so it is +20."
         },
         {
-          "text": "Step 3: Keep the positive sign. (−4) × (−6) = 24, so 4 × 6 = 24 is the sign-free part."
+          "text": "Step 3: Try (−6) × (−2). The sizes give 6 × 2 = 12, and the sign is +, so it is +12."
         }
       ]
     }
@@ -397,7 +392,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Think of a striker's score dropping 2 each match. Going backwards, it climbs 2 each step."
+        "text": "A Blue Lock striker's score drops 2 each match. Looking back, it climbs 2 each step."
       },
       "art": {
         "art": "numberline",
@@ -423,7 +418,7 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "Many students think two negatives make a negative.",
-        "That mix-up comes from adding: (−3) + (−5) = −8.",
+        "Taking 3 damage, then 5 more: (−3) + (−5) = −8 health.",
         "Multiplying is different: (−3) × (−5) = +15."
       ],
       "callout": {
@@ -436,9 +431,9 @@ export const pack: SePack = {
       "id": "math-int-mult-teach-5",
       "title": "Worked example in words",
       "lines": [
-        "Question: what is (−7) × (−2)?",
+        "Question: undo 2 rounds of −7 HP each. What is (−7) × (−2)?",
         "Multiply 7 by 2 to get 14.",
-        "Both signs are negative, so the answer is +14."
+        "Both signs are negative, so the answer is +14 HP."
       ],
       "callout": {
         "flavour": "key",
@@ -456,7 +451,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Two minus crewmates make a plus. Same signs, positive. Different signs, negative."
+        "text": "Two minus signs make a plus. Same signs give positive; different signs give negative."
       }
     },
     {
@@ -470,7 +465,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock: a striker who reads the pattern scores first."
+        "text": "Pokémon tip: spot the pattern down the rows, and the missing row is easy to fill in."
       }
     },
     {
@@ -483,8 +478,8 @@ export const pack: SePack = {
         "One minus sign stays. The answer is negative."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "One Piece: two enemies cancel each other out. One left is still a threat."
+        "flavour": "key",
+        "text": "Fortnite: a hit is a minus. Undoing a hit cancels it out."
       }
     },
     {
@@ -508,7 +503,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "The brackets change the answer. Look for them first."
+        "text": "Minecraft: a 4 × 4 build is 16 blocks. Brackets decide where the minus goes."
       }
     },
     {
@@ -522,7 +517,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A bounty adds up. A crew multiplies. Know which one you have."
+        "text": "Pokémon: losing 4 HP twice adds up to −8. Multiplying two negatives gives +16."
       }
     },
     {
@@ -535,8 +530,8 @@ export const pack: SePack = {
         "So an odd number of minus signs gives a negative answer."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "One minus sign left over. The sea always keeps one."
+        "flavour": "key",
+        "text": "Football: an odd count of minus signs keeps the goal difference in the red."
       }
     },
     {
@@ -545,54 +540,54 @@ export const pack: SePack = {
       "prompt": "Which statement is true?",
       "options": [
         "(−6) × (−6) = −36",
-        "(−6) × (−6) = 36",
-        "(−6) × (−6) = −12"
+        "(−6) × (−6) = −12",
+        "(−6) × (−6) = 36"
       ],
-      "answer": 1,
+      "answer": 2,
       "why": "Any negative number squared gives a positive answer, because the two negatives cancel.",
       "steps": [
         {
-          "text": "Multiply the numbers without signs: 6 × 6 = 36."
+          "text": "Pokémon: ignore the signs for now. 6 × 6 = 36."
         },
         {
-          "text": "Two negative signs, so the answer is positive: +36."
+          "text": "Two minus signs cancel, so the answer is +36."
         },
         {
-          "text": "Try (−4) × (−4): 4 × 4 = 16, and the sign is positive, so the answer is 16."
+          "text": "Minecraft check: (−4) × (−4) = 16, and the sign is positive, so 16."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-basics-9",
-      "prompt": "Which reasoning shows that (−5) × (−4) = 20?",
+      "prompt": "The storm takes −5 HP a tick. Which reasoning shows (−5) × (−4) = 20?",
       "options": [
-        "Removing four losses of 5 gives a gain of 20",
-        "Adding four losses of 5 gives a loss of 20",
-        "Adding four gains of 5 gives a gain of 9"
+        "Removing four hits of 5 HP gives a gain of 20",
+        "Adding four hits of 5 HP gives a loss of 20",
+        "Adding four gains of 5 HP gives a gain of 9"
       ],
       "answer": 0,
       "why": "Taking away a negative is like adding a positive, so removing losses leaves a gain.",
       "steps": [
         {
-          "text": "A loss of 5 counts as −5. Multiplying by −4 means removing four of them."
+          "text": "A storm tick of 5 HP counts as −5. Times −4 means removing four of those ticks."
         },
         {
-          "text": "Removing four losses of 5 takes away −20, which leaves a gain of +20."
+          "text": "Removing four hits of 5 HP takes away −20, which leaves a gain of +20."
         },
         {
-          "text": "Try (−3) × (−2): removing two losses of 3 gives a gain of 6."
+          "text": "Try (−3) × (−2): removing two hits of 3 HP gives a gain of 6."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-applied-0",
-      "prompt": "Isagi's score drops 4 points a minute. Six minutes ago is −6 minutes. What is (−4) × (−6)?",
+      "prompt": "Your EA FC goal difference falls −4 a match. Six matches back is −6 matches. What is (−4) × (−6)?",
       "options": [
-        "+24 points",
-        "−24 points",
-        "−10 points"
+        "+24 goals",
+        "−24 goals",
+        "−10 goals"
       ],
       "answer": 0,
       "why": "Two negatives multiply to a positive, so a loss taken away twice becomes a gain.",
@@ -611,11 +606,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-1",
-      "prompt": "Nami's ledger shows −180 berries spread over −6 days. What is (−180) ÷ (−6)?",
+      "prompt": "Your Roblox game lost −180 visits over −6 days. What is (−180) ÷ (−6)?",
       "options": [
-        "−30 berries",
-        "−186 berries",
-        "+30 berries"
+        "−30 visits a day",
+        "−186 visits a day",
+        "+30 visits a day"
       ],
       "answer": 2,
       "why": "Dividing two negatives gives a positive, the same sign rule that works for multiplying.",
@@ -634,11 +629,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-2",
-      "prompt": "Three Blue Lock defenders each lose −2, −3 and −5 rating points. What is (−2) × (−3) × (−5)?",
+      "prompt": "Three Pokémon lose −2, −3 and −5 CP in a row. What is (−2) × (−3) × (−5)?",
       "options": [
-        "+30",
-        "−30",
-        "+10"
+        "+30 CP",
+        "−30 CP",
+        "+10 CP"
       ],
       "answer": 1,
       "why": "An odd number of negatives gives a negative answer, and an even number gives a positive one.",
@@ -657,7 +652,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-3",
-      "prompt": "Zoro's bounty sum: (−3) × (−6) − (−1). What is the answer?",
+      "prompt": "Your hunger falls −3 drumsticks a minute. Six minutes back, then −(−1). What is (−3) × (−6) − (−1)?",
       "options": [
         "17",
         "19",
@@ -680,7 +675,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-4",
-      "prompt": "Luffy needs a number n where (−7) × n = +42. What is n?",
+      "prompt": "A bounty falls −7 million Berries a day. Which n gives (−7) × n = +42 million?",
       "options": [
         "−6",
         "+6",
@@ -726,7 +721,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-6",
-      "prompt": "A Kensington Market stall's stock changes by −96 apples over −8 days. What is (−96) ÷ (−8)?",
+      "prompt": "Your Minecraft chest's count changed by −96 items over −8 days. What is (−96) ÷ (−8)?",
       "options": [
         "+12",
         "−12",
@@ -749,7 +744,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-7",
-      "prompt": "Look at this pattern: (−2) × 3 = −6, (−2) × 2 = −4, (−2) × 1 = −2, (−2) × 0 = 0. What is (−2) × (−1)?",
+      "prompt": "A team concedes 2 goals a match. Goal difference over 3, 2, 1, 0 matches: −6, −4, −2, 0. What is (−2) × (−1)?",
       "options": [
         "−2",
         "+2",
@@ -772,7 +767,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-applied-8",
-      "prompt": "Sanji's bounty power uses x = −4. What is x × x?",
+      "prompt": "Your storm takes x = −4 HP per tick. What is x × x?",
       "options": [
         "16",
         "−16",
@@ -818,7 +813,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-deeper-6",
-      "prompt": "Isagi writes (−7) × (−3) in his notes. What is it?",
+      "prompt": "Your Roblox game lost −3 Robux a day, 7 days ago. What is (−7) × (−3)?",
       "options": [
         "−21",
         "21",
@@ -841,7 +836,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-deeper-7",
-      "prompt": "A rival team loses 4 points in each of 9 games. Which is (−4) × 9?",
+      "prompt": "The storm takes 4 HP a tick. Over 9 ticks, which is (−4) × 9?",
       "options": [
         "36",
         "−13",
@@ -864,7 +859,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-deeper-8",
-      "prompt": "What is (−48) ÷ (−6)?",
+      "prompt": "Your squad's health drops by 48 over 6 ticks. Which is (−48) ÷ (−6)?",
       "options": [
         "−8",
         "−54",
@@ -887,7 +882,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-int-mult-deeper-9",
-      "prompt": "What is the value of −3²?",
+      "prompt": "A mob deals 3 squared hearts of damage to you. What is −3²?",
       "options": [
         "−6",
         "9",
@@ -897,20 +892,20 @@ export const pack: SePack = {
       "why": "Without brackets, the square applies to 3 first, then the minus sign goes in front.",
       "steps": [
         {
-          "text": "There are no brackets, so square 5 first: 5 × 5 = 25."
+          "text": "There are no brackets, so square 3 first: 3 × 3 = 9."
         },
         {
-          "text": "Then put the minus in front: −25."
+          "text": "Then put the minus in front: −9."
         },
         {
-          "text": "Compare (−5)²: the brackets square the minus too, so it is 25."
+          "text": "Compare (−3)²: the brackets square the minus too, so it is 9."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-int-mult-deeper-10",
-      "prompt": "Which statement is true?",
+      "prompt": "Which statement about the storm damage is true?",
       "options": [
         "(−4) + (−4) = 16",
         "(−4) × (−4) = 16",
@@ -956,7 +951,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-2",
-      "prompt": "Isagi's shot power drops by 0.5 each minute. The coach checks it 8 minutes back. Build (−0.5) × (−8).",
+      "prompt": "Your Roblox obby's Robux per hour falls by 0.5 each hour. Checked 8 hours back, build (−0.5) × (−8).",
       "answer": "4",
       "decoys": [
         "-",
@@ -979,7 +974,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-3",
-      "prompt": "Zoro cuts a sea rope into (−2/5) parts, times (−5/6) of a tide. Build the answer as a fraction in simplest form.",
+      "prompt": "The storm drains (−2/5) of a shield bar per tick. The crew reverses (−5/6) of a tick. Build (−2/5) × (−5/6) as a fraction in simplest form.",
       "answer": "1/3",
       "decoys": [
         "-",
@@ -1002,7 +997,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-4",
-      "prompt": "Sanji's team's goal difference falls by 2.5 each match. After 6 matches, the coach checks it. Build (−2.5) × (−6).",
+      "prompt": "Each Blue Lock drill drops your rating by 2.5 points. The coach reverses 6 drills. Build (−2.5) × (−6).",
       "answer": "15",
       "decoys": [
         "-"
@@ -1023,7 +1018,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-5",
-      "prompt": "A quick sprint: the crew splits 48 Berries of treasure among −6 wanted posters. Build (−48) ÷ (−6).",
+      "prompt": "Your team's shield change was −48, spread over −6 storm ticks. Build (−48) ÷ (−6).",
       "answer": "8",
       "decoys": [
         "-",
@@ -1046,7 +1041,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-int-mult-build-6",
-      "prompt": "Chopper's medicine level drops by 1.2 per stage. The team checks 0.4 of a stage back. Build (−1.2) × (−0.4).",
+      "prompt": "Your Pokémon's attack falls by 1.2 each battle turn. The trainer reverses 0.4 of a turn. Build (−1.2) × (−0.4).",
       "answer": "0.48",
       "decoys": [
         "-"
@@ -1057,17 +1052,17 @@ export const pack: SePack = {
           "text": "Step 1: Both are negative, so the answer is positive."
         },
         {
-          "text": "Step 2: Multiply sizes. 1.5 × 0.2 = 0.3."
+          "text": "Step 2: Multiply sizes. 2.4 × 0.5 = 1.2."
         },
         {
-          "text": "Step 3: Count decimal places. 1.5 has 1, 0.2 has 1, so 0.3 becomes 0.30 with two places total."
+          "text": "Step 3: Put the sign back. (−2.4) × (−0.5) = +1.2."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-int-mult-build-7",
-      "prompt": "Isagi's crew pushes −9 points back each round. The coach multiplies by −11 for scale. Build (−9) × (−11).",
+      "prompt": "The storm took 9 HP a tick. Your squad reverses 11 of those ticks. Build (−9) × (−11).",
       "answer": "99",
       "decoys": [
         "-",
@@ -1089,28 +1084,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-int-mult-games-1",
-      "title": "Crew Sign Match",
+      "title": "Storm Sign Match",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "(−3) × (−5)",
+            "(−3 HP) × (−5 ticks)",
             "Positive 15"
           ],
           [
-            "(−8) × (−2)",
+            "(−8 Robux) × (−2 weeks)",
             "Positive 16"
           ],
           [
-            "(−6) × 4",
+            "(−6 HP) × 4 ticks",
             "Negative 24"
           ],
           [
-            "(−9) × (−1)",
+            "(−9 blocks) × (−1 turn)",
             "Positive 9"
           ],
           [
-            "(−5) × 3",
+            "(−5 goals) × 3 matches",
             "Negative 15"
           ]
         ]

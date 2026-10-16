@@ -16,18 +16,18 @@ export const pack: SePack = {
       "title": "A letter is a box",
       "lines": [
         "A letter like n is a box.",
-        "A number goes inside the box.",
-        "Put that same number in every place you see n."
+        "Put one number inside. That number is n.",
+        "Every n in the sum gets the same number."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Think of the box as a shirt number on the team sheet. The coach fills it in before kickoff."
+        "flavour": "key",
+        "text": "In Roblox Studio, a variable called speed is a box. Every line that reads speed uses the same number."
       }
     },
     {
       "kind": "choice",
       "id": "math-var-basics-0",
-      "prompt": "Isagi's shot count is s = 2k + 4. What is s when k = 6?",
+      "prompt": "Isagi takes s = 2k + 4 shots, where k is the drills. What is s when k = 6?",
       "options": [
         "16",
         "14",
@@ -50,23 +50,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-basics-1",
-      "prompt": "Bachira scores g goals. Nagi scores 4 more than Bachira. Which expression shows Nagi's goals?",
+      "prompt": "Your squad mate gets h eliminations. You get 4 more. Which expression is yours?",
       "options": [
-        "4g",
-        "g − 4",
-        "g + 4"
+        "4h",
+        "h − 4",
+        "h + 4"
       ],
       "answer": 2,
       "why": "The word 'more' means add, so the letter gets a plus.",
       "steps": [
         {
-          "text": "Try an example: Reo scores h goals. Barou scores 2 fewer."
+          "text": "Try an example: a teammate gets h kills. You get 2 fewer."
         },
         {
-          "text": "'Fewer' means take away, so Barou = h − 2."
+          "text": "'Fewer' means take away, so yours = h − 2."
         },
         {
-          "text": "Check with h = 5: Barou scores 3. That works."
+          "text": "Check with h = 5: you get 3 kills. That works."
         }
       ]
     },
@@ -125,7 +125,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-basics-2",
-      "prompt": "In 5n + 9, what number is in front of the letter n?",
+      "prompt": "A pizza night costs 5n + 9 dollars, where n is pizzas. What number is in front of n?",
       "options": [
         "9",
         "5",
@@ -148,7 +148,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-basics-3",
-      "prompt": "A bounty is B = 5x − 3. What is B when x = −2?",
+      "prompt": "Your drill height is Y = 5x − 3. What is Y when x = −2?",
       "options": [
         "−7",
         "13",
@@ -174,18 +174,18 @@ export const pack: SePack = {
       "title": "Why we use boxes",
       "lines": [
         "One expression can answer many questions.",
-        "3n + 1 is a rule for goals in any number of games.",
+        "3n + 1 is a rule for any number of wins.",
         "Change the number in the box, and the answer changes."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Blue Lock: one formula, every match. Only the box changes."
+        "text": "Pokémon gym run: one formula for every battle. Only the box changes."
       }
     },
     {
       "kind": "build",
       "id": "math-var-build-0",
-      "prompt": "In Blue Lock, a striker's points are 2n + 3. Here n is his goals. Isagi has 4 goals. Build his points.",
+      "prompt": "Isagi scores n goals. His points are 2n + 3. He has 4 goals. Build his points.",
       "answer": "11",
       "decoys": [
         "6",
@@ -194,20 +194,20 @@ export const pack: SePack = {
       "why": "Substituting a number for a letter turns an expression into a number you can calculate.",
       "steps": [
         {
-          "text": "The letter n is a box. Put the number in the box: 2 × n becomes 2 × 6."
+          "text": "Rin scores 6 goals. Put 6 in the box: 2 × 6 = 12."
         },
         {
-          "text": "Do the multiplication first: 2 × 6 = 12."
+          "text": "Add the 3 that is left over: 12 + 3 = 15."
         },
         {
-          "text": "Then add the 3 that is left over: 12 + 3 = 15. So 2n + 3 is 15 when n = 6."
+          "text": "Now Isagi: 2 × 4 = 8, then 8 + 3 = 11."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-var-basics-4",
-      "prompt": "Each Straw Hat gets 5 coins. There are c crew members. Which expression gives the total coins?",
+      "prompt": "Each villager pays you 5 emeralds. You trade with c villagers. Which expression gives your total?",
       "options": [
         "c + 5",
         "5c",
@@ -217,30 +217,36 @@ export const pack: SePack = {
       "why": "Same amount for each person means multiply the amount by the number of people.",
       "steps": [
         {
-          "text": "Try an example: 3 coins each, d people."
+          "text": "Try an example: 3 emeralds each, d villagers."
         },
         {
           "text": "Total = 3 × d, which we write as 3d."
         },
         {
-          "text": "Apply it: 5 coins each, c people, so the total is 5c."
+          "text": "Apply it: 5 emeralds each, c villagers, so the total is 5c."
         }
-      ]
+      ],
+      "art": {
+        "art": "scale",
+        "left": "5c",
+        "right": "c + 5",
+        "tilt": 0
+      }
     },
     {
       "kind": "choice",
       "id": "math-var-basics-5",
-      "prompt": "Which expression is the same as 2(n + 3)?",
+      "prompt": "Two lunch bags each hold k chips and 4 Timbits. Which is the same as 2(k + 4)?",
       "options": [
-        "n + 6",
-        "2n + 3",
-        "2n + 6"
+        "k + 8",
+        "2k + 4",
+        "2k + 8"
       ],
       "answer": 2,
       "why": "The 2 outside the bracket multiplies every part inside it.",
       "steps": [
         {
-          "text": "Try an example: 3(k + 4)."
+          "text": "Try an example: 3 bags, each with k pops and 4 chips: 3(k + 4)."
         },
         {
           "text": "Multiply the 3 by k: 3k. Multiply the 3 by 4: 12."
@@ -253,7 +259,7 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-var-games-0",
-      "title": "Bounty Board Order",
+      "title": "Fortnite Damage Order",
       "game": {
         "mode": "order",
         "values": [
@@ -283,15 +289,15 @@ export const pack: SePack = {
           }
         ]
       },
-      "why": "Put the number in for n first, then multiply, then add."
+      "why": "Put n in first, multiply by 3, then add 1, like counting hits on a shield."
     },
     {
       "kind": "explain",
       "id": "math-var-teach-2",
       "title": "The method",
       "lines": [
-        "Write the number into the box.",
-        "Multiply first: 3 × 7 = 21.",
+        "Your Studio part speed is 3n + 1.",
+        "Write the number into the box, then multiply: 3 × 7 = 21.",
         "Then add: 21 + 1 = 22."
       ],
       "art": {
@@ -318,7 +324,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-basics-6",
-      "prompt": "a = 4 and b = 3. What is 2a + b?",
+      "prompt": "Your EA FC score is 2a + b. a = 4 goals and b = 3 assists. What is the score?",
       "options": [
         "9",
         "14",
@@ -341,7 +347,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-basics-7",
-      "prompt": "Which expression means: multiply n by 3, then add 7?",
+      "prompt": "Your Roblox sword does 3 damage per swing, then a 7 damage crit. Which expression is the total after n swings?",
       "options": [
         "3(n + 7)",
         "3n + 7",
@@ -351,35 +357,35 @@ export const pack: SePack = {
       "why": "Writing 3n + 7 means multiply first, then add, which matches the words in order.",
       "steps": [
         {
-          "text": "Try an example: multiply by 4, then add 1."
+          "text": "Try n = 4 matches: 5 kills per match, then 2 bonus kills."
         },
         {
-          "text": "Multiply first: 4n. Then add: 4n + 1."
+          "text": "Multiply first: 5 × 4 = 20. Then add: 20 + 2 = 22."
         },
         {
-          "text": "The brackets in 3(n + 7) would add first, so it does not match."
+          "text": "5(n + 2) would add first, so it gives the wrong total."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-var-build-1",
-      "prompt": "A One Piece bounty is 4b − 2, in millions. Here b is 5. Build the bounty.",
+      "prompt": "A Minecraft tower needs 4 × b − 2 blocks. Here b = 5 floors. Build the block count.",
       "answer": "18",
       "decoys": [
         "3",
         "7"
       ],
-      "why": "Multiplication comes before subtraction, so the 4b part is worked out first.",
+      "why": "Multiplication comes before subtraction, so the 4 × b part is worked out first.",
       "steps": [
         {
-          "text": "Put the number in the box for b: 4 × b becomes 4 × 6."
+          "text": "Test b = 3 floors: 4 × 3 becomes 12."
         },
         {
-          "text": "Multiply first: 4 × 6 = 24."
+          "text": "Multiply first: 4 × 3 = 12."
         },
         {
-          "text": "Then subtract 2: 24 − 2 = 22. So 4b − 2 is 22 when b = 6."
+          "text": "Then subtract 2: 12 − 2 = 10 blocks for 3 floors."
         }
       ]
     }
@@ -391,7 +397,7 @@ export const pack: SePack = {
       "title": "The common trap",
       "lines": [
         "3n means 3 times n, not 3 plus n.",
-        "With n = 7, 3n is 21, not 10.",
+        "With n = 7 hits, 3n is 21 damage, not 10.",
         "Multiply before you add. Never skip the 3."
       ],
       "callout": {
@@ -404,13 +410,13 @@ export const pack: SePack = {
       "id": "math-var-teach-4",
       "title": "Worked example",
       "lines": [
-        "Let n be the number of days at sea.",
-        "Each day, the crew catches 3 sea kings, plus 1 spare.",
+        "Let n be the number of days you log in.",
+        "Each day you get 3 V-Bucks, plus a 1 V-Buck bonus.",
         "On day 7: 3 × 7 = 21, then 21 + 1 = 22."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Nami counts the catch on day 7. The total is 22."
+        "flavour": "key",
+        "text": "Day 7 gives you 22 V-Bucks in total."
       }
     },
     {
@@ -438,7 +444,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Three strikers each score n goals. That is 3 × n, not 3 + n."
+        "text": "Three Timbits boxes with n Timbits each: 3 × n, not 3 + n."
       }
     },
     {
@@ -446,13 +452,13 @@ export const pack: SePack = {
       "id": "math-var-deeper-1",
       "title": "2n is not n²",
       "lines": [
-        "n² means n × n.",
-        "2n means 2 × n.",
-        "Test n = 3: n² is 9, but 2n is 6."
+        "n² means n × n, a square plot.",
+        "2n means 2 × n, two rows.",
+        "Test n = 3: n² is 9 blocks, 2n is 6."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Zoro's grid of n by n swings. The small raised 2 makes a square."
+        "flavour": "key",
+        "text": "A 3 by 3 plot is 9 blocks. The small raised 2 makes a square."
       }
     },
     {
@@ -462,7 +468,7 @@ export const pack: SePack = {
       "lines": [
         "3a + 4a works. Both are a's. Make 7a.",
         "3a + 4b does not work. Different letters.",
-        "A shot and a pass are different. You cannot add them."
+        "A V-Buck and a Robux are different. You cannot add them."
       ],
       "callout": {
         "flavour": "key",
@@ -474,13 +480,13 @@ export const pack: SePack = {
       "id": "math-var-deeper-3",
       "title": "A minus sign on a letter",
       "lines": [
-        "−n is a sign, not the answer.",
-        "If n = −4, then −n = −(−4).",
+        "−Y is a sign, not the answer.",
+        "Your F3 screen shows Y = −4. Then −Y = −(−4).",
         "Two minus signs make a plus. So −(−4) = 4."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "−n can be positive. It depends on what n is."
+        "text": "−Y can be positive. It depends on what Y is."
       }
     },
     {
@@ -488,9 +494,9 @@ export const pack: SePack = {
       "id": "math-var-deeper-4",
       "title": "Expressions have no equals sign",
       "lines": [
-        "3n + 1 is an expression. It has no =.",
+        "Roblox Studio: speed = 3n + 1 has no =.",
         "You cannot solve it. You can only evaluate it.",
-        "Evaluate: swap the letter for a number, then calculate."
+        "Evaluate: swap n for a number, then calculate."
       ],
       "callout": {
         "flavour": "key",
@@ -502,19 +508,19 @@ export const pack: SePack = {
       "id": "math-var-deeper-5",
       "title": "Order matters when you swap",
       "lines": [
-        "3n + 1 when n = 7.",
-        "Multiply first: 3 × 7 = 21.",
+        "3 boxes of n Timbits, plus 1 loose one.",
+        "Multiply first: 3 × 7 = 21 when n = 7.",
         "Then add: 21 + 1 = 22. Not 28."
       ],
       "callout": {
-        "flavour": "pirate",
-        "text": "Luffy eats the fruit first, then he fights. Times come before plus."
+        "flavour": "gotcha",
+        "text": "Times come before plus, even when the Timbits are in boxes."
       }
     },
     {
       "kind": "choice",
       "id": "math-var-basics-8",
-      "prompt": "What is 3n when n = 4?",
+      "prompt": "Each shot deals 3 damage. What is 3n when n = 4?",
       "options": [
         "34",
         "7",
@@ -524,43 +530,50 @@ export const pack: SePack = {
       "why": "A number and a letter next to each other mean multiply, so 3n is 3 × n.",
       "steps": [
         {
-          "text": "Try an example: n = 5."
+          "text": "Try an example: n = 5 shots."
         },
         {
-          "text": "3n = 3 × 5 = 15, not 35."
+          "text": "3n = 3 × 5 = 15 damage, not 35."
         },
         {
-          "text": "Now use n = 4: 3 × 4 = 12."
+          "text": "Now use n = 4: 3 × 4 = 12 damage."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-var-basics-9",
-      "prompt": "Figure 1 has 5 tiles, figure 2 has 8 and figure 3 has 11. Which expression gives the tiles for figure n?",
+      "prompt": "Fence 1 has 5 blocks, fence 2 has 8 and fence 3 has 11. Which rule gives the blocks for fence n?",
       "options": [
         "5n + 3",
         "3n + 2",
         "n + 4"
       ],
       "answer": 1,
-      "why": "The pattern goes up by the same amount each figure, and that amount is the number in front of n.",
+      "why": "The fences grow by the same amount each time, and that amount is the number in front of n.",
       "steps": [
         {
-          "text": "Find the jump: 8 − 5 = 3 tiles each time."
+          "text": "Find the jump: 8 − 5 = 3 blocks each time."
         },
         {
           "text": "Multiply n by the jump: 3n."
         },
         {
-          "text": "Check figure 1: 3 + 2 = 5 tiles. The 2 is what is left over."
+          "text": "Check fence 1: 3 + 2 = 5 blocks. The 2 is what is left over."
         }
-      ]
+      ],
+      "art": {
+        "art": "bar",
+        "parts": 4,
+        "filled": 3,
+        "label": "3/4",
+        "tone": "calm"
+      }
     },
     {
       "kind": "choice",
       "id": "math-var-applied-0",
-      "prompt": "In Blue Lock, a striker's score is 4s − 3. The letter s is shots on target. Isagi has 6 shots on target. What is his score?",
+      "prompt": "Your score is 4e − 3, where e is eliminations. You got 6 eliminations. What is your score?",
       "options": [
         "27",
         "21",
@@ -570,10 +583,10 @@ export const pack: SePack = {
       "why": "To find the value of an expression, replace the letter with its number, then calculate in order.",
       "steps": [
         {
-          "text": "Try s = 5 first. Replace the s: 4 × 5 = 20."
+          "text": "Try e = 5 first. Replace the e: 4 × 5 = 20."
         },
         {
-          "text": "Now take away 3: 20 − 3 = 17. So the score is 17 when s = 5."
+          "text": "Now take away 3: 20 − 3 = 17. So the score is 17 when e = 5."
         },
         {
           "text": "Same two moves every time: multiply first, then add or subtract."
@@ -583,7 +596,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-1",
-      "prompt": "A striker's rating is 2g + a². The letter g is goals and a is assists. Isagi has g = 3 and a = 4. What is his rating?",
+      "prompt": "A Roblox obby reward is 2c + a², where c is checkpoints and a is boosters. You have c = 3 and a = 4. What is the reward?",
       "options": [
         "70",
         "22",
@@ -593,7 +606,7 @@ export const pack: SePack = {
       "why": "The little 2 on a² means a × a, and it is worked out before the add.",
       "steps": [
         {
-          "text": "Try g = 2 and a = 5. Start with 2g: 2 × 2 = 4."
+          "text": "Try c = 2 and a = 5. Start with 2c: 2 × 2 = 4."
         },
         {
           "text": "Then a²: 5 × 5 = 25, not 5 × 2."
@@ -606,7 +619,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-2",
-      "prompt": "In a Blue Lock drill, a score is 3x − 2y. Here x = 5 and y = −4. What is the score?",
+      "prompt": "Your Minecraft build score is 3x − 2y. Here x = 5 and y = −4. What is the score?",
       "options": [
         "23",
         "7",
@@ -629,14 +642,14 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-3",
-      "prompt": "A bakery on Bloor Street sells p pastries at $2.50 each. It adds a $4.00 box fee. The total cost is 2.50p + 4. For p = 6, what is the total?",
+      "prompt": "A pizza place on Queen Street sells p slices at $2.50 each, plus a $4.00 box fee. The total is 2.50p + 4. For p = 6, what is the total?",
       "options": [
         "$15.00",
         "$34.00",
         "$19.00"
       ],
       "answer": 2,
-      "why": "Multiply the price by the number of pastries first, then add the fixed box fee.",
+      "why": "Multiply the price by the number of slices first, then add the fixed box fee.",
       "steps": [
         {
           "text": "Try p = 4. Multiply: 2.50 × 4 = 10.00."
@@ -652,7 +665,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-4",
-      "prompt": "A Blue Lock striker says: I score 3 fewer than twice Bachira's goals. Bachira's goals are b. Which expression is correct?",
+      "prompt": "A trainer says: I have 3 fewer than twice Misty's badges. Misty has b badges. Which expression is correct?",
       "options": [
         "2b − 3",
         "3 − 2b",
@@ -662,7 +675,7 @@ export const pack: SePack = {
       "why": "Twice b is 2b, and then 3 is taken away from that result, so the minus comes after the 2b.",
       "steps": [
         {
-          "text": "Try b = 5. Twice Bachira is 2 × 5 = 10."
+          "text": "Try b = 5. Twice Misty's badges is 2 × 5 = 10."
         },
         {
           "text": "Three fewer than that: 10 − 3 = 7."
@@ -675,20 +688,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-5",
-      "prompt": "Luffy's crew has five ships. Each ship has c crew, and there are 3 spare crew on the deck. When c = 12, how many crew in total?",
+      "prompt": "Five minecarts each carry c villagers. 3 more villagers wait at the station. When c = 12, how many in total?",
       "options": [
         "45",
         "63",
         "60"
       ],
       "answer": 1,
-      "why": "Five ships of c crew is 5c, and the 3 spare crew are added on the end.",
+      "why": "Five carts of c villagers is 5c, and the 3 waiting villagers are added on the end.",
       "steps": [
         {
-          "text": "Try c = 10. Five ships: 5 × 10 = 50."
+          "text": "Try c = 10. Five carts: 5 × 10 = 50."
         },
         {
-          "text": "Add the 3 spare crew: 50 + 3 = 53."
+          "text": "Add the 3 waiting villagers: 50 + 3 = 53."
         },
         {
           "text": "Five groups of c, then the extra fixed number. Use the same rule with c = 12."
@@ -698,7 +711,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-6",
-      "prompt": "Simplify the expression 5a + 2a − 3a. What is it?",
+      "prompt": "You have 5a Robux, earn 2a more, then spend 3a on a hat. What is left?",
       "options": [
         "6a",
         "4a",
@@ -721,7 +734,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-7",
-      "prompt": "A Blue Lock coach uses the rule 0.5h + 2. The letter h is the number of hours. For h = 3.6, what is the answer?",
+      "prompt": "A coach's training rule is 0.5h + 2 points. The letter h is hours trained. For h = 3.6, what is the answer?",
       "options": [
         "7.2",
         "3.8",
@@ -744,7 +757,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-8",
-      "prompt": "A sea-king's rule is 10 − 2x². Here x = −3. What is the answer?",
+      "prompt": "A Pokémon move scores 10 − 2x². Here x = −3. What is the score?",
       "options": [
         "28",
         "−26",
@@ -767,7 +780,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-applied-9",
-      "prompt": "A Grade 7 trip to Ontario Place costs 250b + 12n. The letter b is buses and n is students. For b = 2 and n = 60, what is the total?",
+      "prompt": "A pizza-party bill is 250b + 12n dollars. b is pizza boxes and n is students. For b = 2 and n = 60, what is the total?",
       "options": [
         "$1100",
         "$1220",
@@ -777,7 +790,7 @@ export const pack: SePack = {
       "why": "Each part is worked out with its own number, and the two totals are added at the end.",
       "steps": [
         {
-          "text": "Try b = 3 and n = 10. Buses: 250 × 3 = 750."
+          "text": "Try b = 3 and n = 10. Boxes: 250 × 3 = 750."
         },
         {
           "text": "Students: 12 × 10 = 120. Add them: 750 + 120 = 870."
@@ -790,7 +803,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-deeper-6",
-      "prompt": "What does 5n mean?",
+      "prompt": "Each chest you open holds n bricks. You open 5 chests. What does 5n mean?",
       "options": [
         "5 + n",
         "5 × n",
@@ -806,27 +819,27 @@ export const pack: SePack = {
           "text": "No sign between a number and a letter means times. So 5n is 5 × n."
         },
         {
-          "text": "Try n = 4. 5 × 4 = 20. The sum 5 + 4 = 9 is a different answer."
+          "text": "Try n = 4 bricks: 5 × 4 = 20. The sum 5 + 4 = 9 is a different answer."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-var-deeper-7",
-      "prompt": "When n = 4, what is n²?",
+      "prompt": "Your farm is n × n blocks. When n = 4, what is n²?",
       "options": [
-        "8",
-        "16",
-        "12"
+        "8 blocks",
+        "16 blocks",
+        "12 blocks"
       ],
       "answer": 1,
-      "why": "n² means n × n, so with n = 4 it is 4 × 4 = 16.",
+      "why": "n² means n × n, so a 4 × 4 farm is 16 blocks.",
       "steps": [
         {
-          "text": "n² means n × n. Here n = 5, so 5 × 5 = 25."
+          "text": "A 5 × 5 farm is 5 × 5 = 25 blocks."
         },
         {
-          "text": "2n means 2 × 5 = 10. That is a different number from n²."
+          "text": "A fence of 2n blocks with n = 5 is 2 × 5 = 10 blocks. That is a different number from n²."
         },
         {
           "text": "The small raised 2 means square the letter. The big 2 in front means multiply by 2."
@@ -836,7 +849,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-deeper-8",
-      "prompt": "What is 3a + 4a?",
+      "prompt": "A bundle costs a V-Bucks. You buy 3 bundles, then 4 more. What is 3a + 4a?",
       "options": [
         "7a",
         "7ab",
@@ -846,7 +859,7 @@ export const pack: SePack = {
       "why": "Both terms have the same letter, so you add the numbers in front: 3 + 4 = 7.",
       "steps": [
         {
-          "text": "Both terms have a. Count the a's: 6a + 2a is 8a."
+          "text": "Both terms have a. Count the bundles: 6a + 2a is 8a."
         },
         {
           "text": "Now try 9y + 5y. Same letter y, so 9 + 5 = 14, giving 14y."
@@ -859,7 +872,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-var-deeper-9",
-      "prompt": "If n = −4, what is −n?",
+      "prompt": "A Roblox part sits at X = n. If n = −4, what is −n?",
       "options": [
         "−4",
         "4",
@@ -895,30 +908,30 @@ export const pack: SePack = {
           "text": "Look for the equals sign. An expression has none."
         },
         {
-          "text": "An equation says two sides are equal. That is a claim you can test."
+          "text": "An equation says two sides are equal, like a score that must add up. That is a claim you can test."
         },
         {
-          "text": "Try 2n + 5 with n = 3. That gives 11. You worked out a value, you did not solve anything."
+          "text": "Try 2n + 5 with n = 3 goals per game. That gives 11. You worked out a value, you did not solve anything."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-var-deeper-11",
-      "prompt": "3n + 1 when n = 6. What is the answer?",
+      "prompt": "You buy 6 boxes of 3 Timbits, plus 1 free Timbit. Use 3n + 1 with n = 6. How many?",
       "options": [
-        "19",
-        "24",
-        "21"
+        "19 Timbits",
+        "24 Timbits",
+        "21 Timbits"
       ],
       "answer": 0,
-      "why": "Multiply first, then add: 3 × 6 = 18, and 18 + 1 = 19.",
+      "why": "Multiply first: 3 × 6 = 18, then add the free one to get 19.",
       "steps": [
         {
-          "text": "Try n = 5 first. Multiply: 3 × 5 = 15."
+          "text": "Try n = 5 boxes first. Multiply: 3 × 5 = 15 Timbits."
         },
         {
-          "text": "Then add 1: 15 + 1 = 16."
+          "text": "Then add the free one: 15 + 1 = 16 Timbits."
         },
         {
           "text": "Adding first gives 4 × 5 = 20. That is the wrong order, so it is wrong."
@@ -928,7 +941,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-var-build-2",
-      "prompt": "A Blue Lock coach uses 0.5n + 1 to score a player. Here n = 3. Build the score.",
+      "prompt": "A Blue Lock score is 0.5 per shot, plus 1 bonus. You took 3 shots. Build the score.",
       "answer": "2.5",
       "decoys": [
         "7",
@@ -937,20 +950,20 @@ export const pack: SePack = {
       "why": "Decimals follow the same order as whole numbers, so multiply first and then add.",
       "steps": [
         {
-          "text": "Put the number in the box for n: 0.5 × n becomes 0.5 × 6."
+          "text": "Put the shots into the formula: 0.5 × n becomes 0.5 × 4 for 4 shots."
         },
         {
-          "text": "Multiply: 0.5 × 6 = 3. Half of 6 is 3."
+          "text": "Multiply: 0.5 × 4 = 2. Half of 4 is 2."
         },
         {
-          "text": "Add 1: 3 + 1 = 4. So 0.5n + 1 is 4 when n = 6."
+          "text": "Add the bonus: 2 + 1 = 3. So 4 shots scores 3."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-var-build-3",
-      "prompt": "In Blue Lock, a winger's bonus is x + 1/2. Here x = 1/4. Build the bonus.",
+      "prompt": "Your shield bonus is x + 1/2 of a bar. Here x = 1/4. Build the total.",
       "answer": "3/4",
       "decoys": [
         "5",
@@ -959,7 +972,7 @@ export const pack: SePack = {
       "why": "To add fractions you need the same denominator, so you change one fraction before you add.",
       "steps": [
         {
-          "text": "Put the number in the box for x: 1/3 + 1/2."
+          "text": "Put the number in the box for x: x + 1/2 with x = 1/3 is 1/3 + 1/2."
         },
         {
           "text": "Change both to sixths: 1/3 = 2/6 and 1/2 = 3/6."
@@ -972,7 +985,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-var-build-4",
-      "prompt": "A One Piece diver's depth is −4d + 2, in metres. Here d = 3. Build the depth.",
+      "prompt": "Your miner's height is −4d + 2 blocks. Here d = 3 layers dug. Build the height.",
       "answer": "-10",
       "decoys": [
         "6",
@@ -982,7 +995,7 @@ export const pack: SePack = {
       "why": "Multiplying a positive number by a negative sign gives a negative result, which moves you below sea level.",
       "steps": [
         {
-          "text": "Put the number in the box for d: −4 × d becomes −4 × 5."
+          "text": "Put the number in the box for d: −4 × d with d = 5 becomes −4 × 5."
         },
         {
           "text": "Multiply: −4 × 5 = −20."
@@ -1012,7 +1025,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-var-build-5",
-      "prompt": "In Blue Lock, a striker's shot value is 3a − b. Here a = 5 and b = 4. Build the value.",
+      "prompt": "In Roblox Studio, a part's speed is 3a − b. Here a = 5 and b = 4. Build the speed.",
       "answer": "11",
       "decoys": [
         "3",
@@ -1034,7 +1047,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-var-build-6",
-      "prompt": "A One Piece crew earns 6p − 9 berries, in thousands. Here p = 7. Build the earnings.",
+      "prompt": "Your club earns 6p − 9 points after p matches. Here p = 7. Build the points.",
       "answer": "33",
       "decoys": [
         "5",
@@ -1056,7 +1069,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-var-build-7",
-      "prompt": "In Blue Lock, a fitness score is 0.4n + 0.6. Here n = 3. Build the score.",
+      "prompt": "A Timbits box costs 0.4n + 0.6 dollars, for n boxes. Here n = 3. Build the cost.",
       "answer": "1.8",
       "decoys": [
         "2",
@@ -1078,28 +1091,28 @@ export const pack: SePack = {
     {
       "kind": "game",
       "id": "math-var-games-1",
-      "title": "Crew Match Up",
+      "title": "Storm Match Up",
       "game": {
         "mode": "pair",
         "pairs": [
           [
-            "3n + 1, n = 2",
+            "Storm: 3n + 1, n = 2",
             "7"
           ],
           [
-            "3n + 1, n = 4",
+            "Storm: 3n + 1, n = 4",
             "13"
           ],
           [
-            "3n + 1, n = 5",
+            "Storm: 3n + 1, n = 5",
             "16"
           ],
           [
-            "3n + 1, n = 7",
+            "Storm: 3n + 1, n = 7",
             "22"
           ],
           [
-            "3n + 1, n = 9",
+            "Storm: 3n + 1, n = 9",
             "28"
           ]
         ]

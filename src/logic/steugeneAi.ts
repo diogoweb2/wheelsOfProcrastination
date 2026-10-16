@@ -10,6 +10,7 @@
 // be inventing unsupervised.
 import { askOpenRouter, DEFAULT_MODEL, sliceJson } from './openrouter'
 import { seFind } from './steugene'
+import { WORLD_KIT, WORLD_RULES, worldFor } from '../steugene/world'
 import type { AiConfig } from '../types'
 import type { SeBlock, SeChoice, SeBuild, SeExplain } from '../steugene/types'
 
@@ -42,11 +43,17 @@ export async function generateSeBlocks(opts: {
   if (!where) throw new Error(`unknown subtopic ${opts.subtopicId}`)
   const { subject, strand, subtopic } = where
 
+  // Maths gets the full world brief (§24m). Everything else keeps the shorter
+  // rules above, because a history date does not become clearer in Minecraft.
+  const world = worldFor(opts.subtopicId)
+  const system = world ? `${SYSTEM}\n\n${WORLD_KIT}\n\n${WORLD_RULES}` : SYSTEM
+
   const avoid = opts.existing.slice(-40)
   const prompt = [
     `Subject: ${subject.name}. Strand: ${strand.title}.`,
     `Topic: ${subtopic.title} — ${subtopic.plain}`,
     `What it looks like on the page: ${subtopic.sample}`,
+    ...(world ? ['', `WHERE THIS ONE LIVES: ${world}`] : []),
     '',
     opts.want === 'questions'
       ? 'Write 6 NEW questions: 4 "choice" and 2 "build".'
@@ -60,7 +67,7 @@ export async function generateSeBlocks(opts: {
   const raw = await askOpenRouter({
     key: opts.ai.openrouterKey!,
     model: opts.ai.model || DEFAULT_MODEL,
-    system: SYSTEM,
+    system,
     prompt,
     title: 'St. Eugene 7',
     temperature: 0.8,

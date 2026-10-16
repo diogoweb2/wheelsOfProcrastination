@@ -20,53 +20,53 @@ export const pack: SePack = {
         "The whole group you care about is the population."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Isagi wants to know who the best striker in Toronto is. He has to ask people."
+        "flavour": "key",
+        "text": "Your squad asks each other if Fortnite is the best game. That is a sample of 4."
       }
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-0",
-      "prompt": "Isagi wants to know the favourite snack of his whole 22-player team. He asks only the 3 strikers. Is this a fair sample?",
+      "prompt": "Mia wants the favourite Pokémon starter of her 28-kid class. She asks only her 3 best friends. Is this a fair sample?",
       "options": [
-        "Yes. Strikers score the most goals.",
-        "No. Three strikers are not the whole team.",
+        "Yes. Friends usually pick the same starter.",
+        "No. Three best friends are not the whole class.",
         "Yes. Three people is always enough."
       ],
       "answer": 1,
       "why": "A fair sample must represent the whole group, not just one part of it.",
       "steps": [
         {
-          "text": "The population is everyone you want to learn about. Here, that is all 22 players."
+          "text": "The population is everyone you want to learn about. Here, that is all 28 kids."
         },
         {
-          "text": "The sample is who you actually asked. Three strikers is only one position on the team."
+          "text": "The sample is who you asked. Three best friends share the same tastes."
         },
         {
-          "text": "Try a school asking only Grade 8s about lunch. Grade 7s get no say, so the answer is biased."
+          "text": "Ask 7 kids picked from a hat in a class of 28. The answers spread out more."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-1",
-      "prompt": "Zoro wants to know which island the crew should sail to next. He asks only the cook. Is this fair?",
+      "prompt": "Rae wants to know if the whole team wants a new kit. She asks only the goalkeeper. Is this fair?",
       "options": [
-        "Asking the cook is fair; food is their job.",
-        "Asking the cook alone is fine for any question.",
-        "Asking one cook is biased; the crew is bigger."
+        "Asking the keeper is fair; they see the whole pitch.",
+        "Asking the keeper alone is fine for any question.",
+        "Asking one keeper is biased; the team is bigger."
       ],
       "answer": 2,
       "why": "One person's view can differ from the group, so the sample must include more of the group.",
       "steps": [
         {
-          "text": "The population here is the whole crew. The sample is the one person you asked."
+          "text": "The population here is the whole team of 11. The sample is the one keeper you asked."
         },
         {
-          "text": "A cook may want a port with good food. The crew may want a fight, or treasure."
+          "text": "The keeper may want the new kit for the colours. Strikers may want something else."
         },
         {
-          "text": "Ask 1 in 5 crew members and their answers spread out. One voice is only one vote."
+          "text": "Ask 3 of the 11 and their answers spread out. One voice is only one vote."
         }
       ]
     },
@@ -125,34 +125,34 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-collect-basics-2",
-      "prompt": "The coach wants to know what all 40,000 fans think. He asks 60 fans at the gate. What is the sample?",
+      "prompt": "The Minecraft server owner wants what all 1,200 players think. He asks 60 players at spawn. What is the sample?",
       "options": [
-        "The coach and his assistant staff",
-        "The 40,000 fans in the stadium",
-        "The 60 fans he asked at the gate"
+        "The server admins and their helpers",
+        "The 1,200 players on the server",
+        "The 60 players he asked at spawn"
       ],
       "answer": 2,
       "why": "The sample is the smaller group you actually collect data from; the population is the whole group.",
       "steps": [
         {
-          "text": "The population is the whole group you care about. Here, that is all 40,000 fans."
+          "text": "The population is the whole group you care about. Here, that is all 1,200 players."
         },
         {
-          "text": "The sample is the part you can reach and ask. Here, that is the 60 at the gate."
+          "text": "The sample is the part you can reach and ask. Here, that is the 60 at spawn."
         },
         {
-          "text": "A pirate asks 10 sailors at one port about all sailors on the sea. Those 10 are the sample."
+          "text": "A Roblox creator asks 10 players in one obby about all 900 players. Those 10 are the sample."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-3",
-      "prompt": "Which way gives every student an equal chance to be picked for a survey?",
+      "prompt": "A Fortnite lobby has 100 players. Which way gives each one an equal chance to be picked?",
       "options": [
-        "Ask the first 20 students who walk in.",
+        "Ask the first 20 players who drop in.",
         "Write every name on paper and draw 20.",
-        "Ask only the students you sit beside."
+        "Ask only the players in your squad."
       ],
       "answer": 1,
       "why": "A random sample uses chance, so the surveyor cannot pick favourites.",
@@ -161,10 +161,10 @@ export const pack: SePack = {
           "text": "Random means chance decides. Each name has the same chance of being drawn."
         },
         {
-          "text": "Try 300 students. Draw 30 names from a hat. Every student has a 30 in 300 chance, or 1 in 10."
+          "text": "Try 300 Fortnite players. Draw 30 names. Each has a 30 in 300 chance, or 1 in 10."
         },
         {
-          "text": "Picking the first students who walk in lets early arrivals win, so it is not random."
+          "text": "Picking the first players who drop in lets early landers win, so it is not random."
         }
       ]
     },
@@ -179,13 +179,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "In Blue Lock, the wrong numbers can lose the whole match."
+        "text": "One lucky Victory Royale tells you almost nothing about your real skill."
       }
     },
     {
       "kind": "build",
       "id": "math-collect-build-0",
-      "prompt": "Coach Ego asks 30 of the 150 players which striker is best. What fraction of the players did he ask?",
+      "prompt": "A Roblox obby has 150 players online. 30 of them vote on the next stage. What fraction of the players voted?",
       "answer": "1/5",
       "decoys": [
         "3",
@@ -198,7 +198,7 @@ export const pack: SePack = {
           "text": "Fraction = number asked ÷ whole group. Here it is 30 out of 150."
         },
         {
-          "text": "Try a new one: 12 asked out of 80. Write 12/80."
+          "text": "Try a new one: 12 of 80 players. Write 12/80."
         },
         {
           "text": "Divide top and bottom by 4: 12 ÷ 4 = 3 and 80 ÷ 4 = 20. So 3/20."
@@ -217,9 +217,9 @@ export const pack: SePack = {
       "id": "math-collect-basics-4",
       "prompt": "Which question could push people to answer one way?",
       "options": [
-        "Don't you agree Isagi is the best striker?",
-        "Do you enjoy playing football at recess?",
-        "How many times a week do you play?"
+        "Don't you agree Fortnite is the best game ever?",
+        "Which game do you play most often at home?",
+        "How many hours a week do you play Fortnite?"
       ],
       "answer": 0,
       "why": "A leading question hints at the answer it wants, so the results are biased.",
@@ -228,50 +228,50 @@ export const pack: SePack = {
           "text": "Look for words that suggest an answer, like 'don't you agree'. That is a hint."
         },
         {
-          "text": "Rewrite it neutrally: 'Who do you think is the best striker?' Now people choose freely."
+          "text": "Rewrite it neutrally: 'What do you think of Fortnite?' Now people choose freely."
         },
         {
-          "text": "Try 'Don't you agree the school food is great?' versus 'How do you rate the school food?' The second is fair."
+          "text": "Try 'Don't you agree Minecraft beats everything?' versus 'Which game do you like most?' The second is fair."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-5",
-      "prompt": "A One Piece fan site asks visitors to vote for their favourite arc. Which sample is this?",
+      "prompt": "A Minecraft server pops up a poll: 'Who wants a new spawn?' Which sample is this?",
       "options": [
         "A voluntary response sample",
-        "A random sample of 50 people",
-        "A census of every fan worldwide"
+        "A random sample of 50 players",
+        "A census of every player on the server"
       ],
       "answer": 0,
-      "why": "In a voluntary response sample, people choose to answer, so keen fans can dominate the results.",
+      "why": "In a voluntary response sample, people choose to answer, so keen players can dominate the results.",
       "steps": [
         {
           "text": "Voluntary means people decide to take part, not the surveyor. Nobody is chosen."
         },
         {
-          "text": "A school poll on the intercom only hears from kids who want to speak up."
+          "text": "A poll in the server chat only hears from players who want to click it."
         },
         {
-          "text": "So the loudest or keenest voices can outnumber the quiet majority. Results can lean."
+          "text": "So the most active builders can outnumber the quiet players. Results can lean."
         }
       ]
     },
     {
       "kind": "game",
       "id": "math-collect-games-0",
-      "title": "Crew Scout: Sampling Words",
+      "title": "Squad Scout: Sampling Words",
       "game": {
         "mode": "pair",
         "pairs": [
           [
             "Population",
-            "Everyone in the group"
+            "Every player on the server"
           ],
           [
             "Sample",
-            "Part of the group"
+            "Part of the server"
           ],
           [
             "Random sample",
@@ -294,19 +294,19 @@ export const pack: SePack = {
       "id": "math-collect-teach-2",
       "title": "The fair way: random sampling",
       "lines": [
-        "A fair sample gives everyone a chance to be picked.",
+        "A fair sample gives every player an equal chance to be picked.",
         "Random means chosen by chance, like drawing names from a hat.",
-        "Aim for a sample that looks like the whole group."
+        "Aim for a sample that looks like the whole server."
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-6",
-      "prompt": "Which sample would tell you more about all 900 students in a school?",
+      "prompt": "Which sample would tell you more about all 900 players in a Roblox game?",
       "options": [
-        "Asking 5 students at lunch",
-        "Asking the 12 members of the club",
-        "Asking 90 students picked at random"
+        "Asking 5 players who just joined",
+        "Asking the 12 members of your clan",
+        "Asking 90 players picked at random"
       ],
       "answer": 2,
       "why": "A bigger random sample usually gives steadier results that better match the whole group.",
@@ -315,40 +315,40 @@ export const pack: SePack = {
           "text": "Find 10 percent of the population first. 10 percent of 900 is 90."
         },
         {
-          "text": "Try 1,200 students. 10 percent is 120, so a random sample of 120 is a useful size."
+          "text": "Try 1,200 players. 10 percent is 120, so a random sample of 120 is a useful size."
         },
         {
-          "text": "Five students is too few to speak for 900. The answer would swing wildly."
+          "text": "Five players is too few to speak for 900. The answer would swing wildly."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-7",
-      "prompt": "A teacher wants the height of every student in a class of 28. What is the best method?",
+      "prompt": "Your teacher wants to know how many of the 28 students play Fortnite. What is the best method?",
       "options": [
-        "A sample: measure just 5 students",
-        "A guess from the tallest student",
-        "A census: measure all 28 students"
+        "Ask 5 of your squad mates",
+        "Ask the player who wins most",
+        "Ask all 28 students in the class"
       ],
       "answer": 2,
       "why": "A census collects data from every member of the group, which works when the group is small.",
       "steps": [
         {
-          "text": "A census asks everyone in the population. A sample asks only some of them."
+          "text": "A census asks everyone. A sample asks only some of them."
         },
         {
-          "text": "Canada's census counts every home. That is huge, so polls use smaller samples instead."
+          "text": "Canada's census counts every home. That is huge, so polls use samples."
         },
         {
-          "text": "For 28 students, measuring everyone is quick, so a census is the best choice."
+          "text": "For 28 students, asking everyone is quick, so a census is the best choice."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-collect-build-1",
-      "prompt": "Isagi asks 80 students if they like football. 52 say yes. Write the answer as a decimal.",
+      "prompt": "80 people vote in a Roblox server. 52 say yes. Write the answer as a decimal.",
       "answer": "0.65",
       "decoys": [
         "8"
@@ -359,7 +359,7 @@ export const pack: SePack = {
           "text": "Yes answers over total asked: 52 out of 80."
         },
         {
-          "text": "Try 17 out of 40. Multiply top and bottom by 2.5 to make 100: that gives 42.5/100."
+          "text": "Try 17 out of 40 Minecraft players. Multiply top and bottom by 2.5 to make 100: that gives 42.5/100."
         },
         {
           "text": "Check your answer: 0.65 × 80 = 52, so it is right."
@@ -374,12 +374,12 @@ export const pack: SePack = {
       "title": "The common trap: a biased sample",
       "lines": [
         "A biased sample leans one way.",
-        "Asking only your own soccer team is biased.",
-        "They will all say their own striker is best."
+        "Asking only your own Fortnite squad is biased.",
+        "They will all say their own weapon is best."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Luffy asks only his own crew who the best pirate is. Guess who wins."
+        "text": "Ask only your squad if Fortnite is the best game. Guess who wins."
       }
     },
     {
@@ -387,8 +387,8 @@ export const pack: SePack = {
       "id": "math-collect-teach-4",
       "title": "Worked example in words",
       "lines": [
-        "Step 1: The population is all grade 7 students at St. Eugene.",
-        "Step 2: A biased sample is only the students in the football club.",
+        "Step 1: The population is all grade 7 students at school.",
+        "Step 2: A biased sample is only the kids on your Minecraft server.",
         "Step 3: A fair sample is 30 names drawn at random from the class lists."
       ]
     },
@@ -397,7 +397,7 @@ export const pack: SePack = {
       "id": "math-collect-teach-5",
       "title": "Recap: check who you asked",
       "lines": [
-        "Sample: the people you actually ask.",
+        "Sample: the trainers you actually ask.",
         "Population: everyone you want to know about.",
         "Fair sample: random, so everyone has a chance."
       ],
@@ -417,7 +417,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "key",
-        "text": "Bad sample, bad answer. Even with perfect maths."
+        "text": "One lucky Victory Royale is a bad sample. Even with perfect maths."
       }
     },
     {
@@ -425,13 +425,13 @@ export const pack: SePack = {
       "id": "math-collect-deeper-1",
       "title": "Big is not the same as fair",
       "lines": [
-        "A sample of 5000 can still be biased.",
+        "A poll of 5000 Roblox players can still be biased.",
         "Size shrinks random luck. It cannot fix a bad group.",
         "Fair picks matter more than a big pile of answers."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Ten thousand fans at one game still all like the same team."
+        "text": "Ten thousand fans at one football match still all like the same team."
       }
     },
     {
@@ -459,7 +459,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "A bounty poster only gets answers from pirates who want the bounty."
+        "text": "A One Piece bounty poll only hears from pirates who want the bounty."
       }
     },
     {
@@ -469,7 +469,7 @@ export const pack: SePack = {
       "lines": [
         "Random means each member has the same chance to be picked.",
         "Random does not mean messy or quick.",
-        "Use a full list, then draw names or random numbers."
+        "Use a full list of 200 server names, then draw a few."
       ],
       "callout": {
         "flavour": "key",
@@ -481,111 +481,104 @@ export const pack: SePack = {
       "id": "math-collect-deeper-5",
       "title": "Stratified sampling",
       "lines": [
-        "Split the population into groups first, like grades.",
+        "Split the customers into groups first, like chicken or beef.",
         "Pick from each group in the same share as the whole.",
         "This keeps each group's size fair in the sample."
       ],
       "callout": {
         "flavour": "imagine",
-        "text": "Two-thirds of the team are Grade 7s. Two-thirds of the sample should be too."
+        "text": "Two-thirds of the shawarma orders are chicken. Two-thirds of the taste test should be too."
       }
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-8",
-      "prompt": "A school has 300 Grade 7s and 200 Grade 8s. To survey 50 students fairly, what should happen?",
+      "prompt": "A Fortnite lobby has 300 Solo players and 200 Duo players. To survey 50 players fairly, what should happen?",
       "options": [
-        "Pick 30 from Grade 7 and 20 from Grade 8",
-        "Pick 50 students from Grade 7 only",
-        "Pick 25 from Grade 7 and 25 from Grade 8"
+        "Pick 30 Solo and 20 Duo players",
+        "Pick 50 Solo players only",
+        "Pick 25 Solo and 25 Duo players"
       ],
       "answer": 0,
-      "why": "Each group should be sampled in the same proportion it has in the whole school.",
+      "why": "Each group should be sampled in the same proportion it has in the whole lobby.",
       "steps": [
         {
-          "text": "Grade 7s are 300 of 500 students, which is 3 in 5. Take 3 in 5 of 50, which is 30."
+          "text": "Solo players are 300 of 500, which is 3 in 5. Take 3 in 5 of 50, which is 30."
         },
         {
-          "text": "Grade 8s are 2 in 5. Take 2 in 5 of 50, which is 20."
+          "text": "Duo players are 2 in 5. Take 2 in 5 of 50, which is 20."
         },
         {
-          "text": "Try 120 boys and 80 girls with 20 picked: 12 boys and 8 girls keep the same mix."
+          "text": "Try 120 Kanto fans and 80 Johto fans with 20 picked: 12 and 8 keep the same mix."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-basics-9",
-      "prompt": "Isagi asks only the teammates sitting next to him: 'Who is the best striker?' Which method is this?",
+      "prompt": "Isagi asks only the strikers sitting next to him: 'Who is the best striker?' Which method is this?",
       "options": [
-        "A random sample drawn from the squad list",
+        "A random sample drawn from the striker list",
         "A convenience sample: whoever sits closest",
-        "A census of every player in the squad"
+        "A census of every striker in Blue Lock"
       ],
       "answer": 1,
       "why": "A convenience sample uses whoever is easiest to reach, which can leave out most of the group.",
       "steps": [
         {
-          "text": "Convenience means easiest to reach. Here, that is the players sitting nearby."
+          "text": "Convenience means easiest to reach. Here, that is the strikers sitting nearby."
         },
         {
-          "text": "A bakery that asks only its own shop customers about bread misses people who never visit."
+          "text": "Asking one team's bench misses the other strikers who never sat there."
         },
         {
-          "text": "Easy is not the same as fair. A random sample would give every player an equal chance."
+          "text": "Easy is not the same as fair. A random draw gives every striker an equal chance."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-0",
-      "prompt": "Coach Ego asks only the six top scorers how hard training is. Is this a fair way to learn what the whole squad thinks?",
+      "prompt": "A YouTuber asks only the six best players on his server if packs are fair. Is this fair?",
       "options": [
-        "No. Top scorers may feel differently from the rest of the squad.",
-        "Yes. Top scorers train hardest, so they know training best.",
-        "Yes. Six players is enough to speak for a squad of forty."
+        "No. Top players may feel differently from everyone else on the server.",
+        "Yes. Top players open the most packs, so they know packs best.",
+        "Yes. Six players is enough to speak for a server of forty."
       ],
       "answer": 0,
       "why": "A sample only tells you about the group it was taken from.",
       "steps": [
         {
-          "text": "Start with the group you care about. Here it is the whole squad. That group is the population."
+          "text": "Start with the group you care about: every player on the server. That is the population."
         },
         {
-          "text": "Then ask who had a chance to be asked. Only the top scorers were picked, so the rest had no chance."
+          "text": "Then ask who had a chance to be asked. Only the six top players were picked."
         },
         {
-          "text": "Example: a canteen asks only Grade 8s if pizza day is popular. Their answer may not match the whole school."
+          "text": "Example: a Timbits poll asking only the first ten people in line may miss the rest."
         }
-      ],
-      "art": {
-        "art": "bar",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "focus"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-1",
-      "prompt": "Isagi scores 3 of 4 training shots on target. He says he is a 75% striker in every match. What is the big problem?",
+      "prompt": "Steve's arrows hit 3 of 4 skeletons. He says he is a 75% archer every time. What is the big problem?",
       "options": [
         "Four shots is too few to show his true accuracy.",
-        "Three on target is good, so 75% is a fair estimate.",
-        "He should have used his left foot for all four shots."
+        "Three hits is good, so 75% is a fair estimate.",
+        "He should have used a crossbow for all four shots."
       ],
       "answer": 0,
       "why": "A small sample can swing a lot, so one lucky run can look like a pattern.",
       "steps": [
         {
-          "text": "Flip a coin 4 times. You might get 4 heads, but that does not mean the coin always lands heads."
+          "text": "Four flips of a fair coin can all land heads, by luck alone."
         },
         {
-          "text": "A bigger sample, like 400 flips, settles closer to the true chance of heads."
+          "text": "400 flips settle much closer to the true chance of heads."
         },
         {
-          "text": "So Isagi needs more shots, across many sessions, before he claims a true percentage."
+          "text": "So Steve needs many fights, not four arrows, before claiming 75%."
         }
       ],
       "art": {
@@ -609,10 +602,10 @@ export const pack: SePack = {
       "why": "Random selection gives every person the same chance, so the picker cannot choose the answer they want.",
       "steps": [
         {
-          "text": "Random means every person in the group has an equal chance to be picked."
+          "text": "Random means every crew member has an equal chance to be picked."
         },
         {
-          "text": "Example: a bag of 12 hockey cards, and you draw 4 blind. Each card had a 1 in 12 chance on the first draw."
+          "text": "Example: 12 Timbits in a box, and you pick 4 without looking. Each had a 1 in 12 chance."
         },
         {
           "text": "Hook: the first five in the galley are the hungry ones, so their answers are not the crew's answers."
@@ -622,30 +615,30 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-collect-applied-3",
-      "prompt": "Which question is the fairest to ask a Toronto street survey about the new bike lanes?",
+      "prompt": "Which question is fairest to ask players about the new Roblox obby?",
       "options": [
-        "Do you agree the bike lanes are a great idea?",
-        "Are you for or against the bike lanes on Bloor?",
-        "Don't you think the bike lanes are too slow to build?"
+        "Don't you think the new obby is too hard?",
+        "Is the new obby too hard, too easy, or just right?",
+        "Don't you agree the new obby is the best game?"
       ],
       "answer": 1,
       "why": "A leading question carries the surveyor's opinion, so people are pushed toward one answer.",
       "steps": [
         {
-          "text": "Look for words that show an opinion, like great, too slow, or don't you think."
+          "text": "Look for words that show an opinion, like don't you think, or the best."
         },
         {
-          "text": "Example: Don't you agree the Leafs should have won? The question already says what to think."
+          "text": "Example: Don't you agree the new skin is the best one ever? The question already says what to think."
         },
         {
-          "text": "Hook: a neutral question gives both sides an equal starting point, so the answer can be trusted."
+          "text": "Hook: a neutral question gives every answer an equal start, so the results can be trusted."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-4",
-      "prompt": "The school has 150 Grade 7s and 450 Grade 8s. A fair survey of 40 students keeps the same mix. How many Grade 7s should be asked?",
+      "prompt": "The Fortnite club has 150 Grade 7s and 450 Grade 8s. A fair survey of 40 members keeps the same mix. How many Grade 7s should be asked?",
       "options": [
         "15 Grade 7s",
         "10 Grade 7s",
@@ -655,68 +648,68 @@ export const pack: SePack = {
       "why": "A stratified sample keeps each group in the same share it has in the whole population.",
       "steps": [
         {
-          "text": "Add the groups in the example: 200 Grade 6s plus 300 Grade 7s makes 500 students."
+          "text": "Add the groups: 100 Grade 9s plus 200 Grade 10s makes 300 players."
         },
         {
-          "text": "The Grade 6 share is 200 out of 500, which is 2/5."
+          "text": "The Grade 9 share is 100 out of 300, which is 1/3."
         },
         {
-          "text": "Take 2/5 of a sample of 60: 60 ÷ 5 is 12, and 12 × 2 is 24 Grade 6s."
+          "text": "Take 1/3 of 60: 60 ÷ 3 is 20, so 20 Grade 9s get asked."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-5",
-      "prompt": "A survey on Toronto transit calls people by phone at 2 p.m. on weekdays. Which group is most likely to be missed?",
+      "prompt": "A Fortnite poll is open only 9 a.m. to 3 p.m. on school days. Who is most likely missed?",
       "options": [
-        "Retired people, who are home and answer their phones.",
-        "Commuters and shift workers, who are out at that hour.",
-        "People with landlines, because they answer fewer calls."
+        "Players who only log on after school, when the poll is closed.",
+        "Players who answer in the morning before the first class.",
+        "Players who play on a tablet instead of a laptop."
       ],
-      "answer": 1,
-      "why": "The time you call decides who is at home to answer, so some groups get left out.",
+      "answer": 0,
+      "why": "The time a poll is open decides who can answer, so some players get left out.",
       "steps": [
         {
-          "text": "Ask when the sample is taken. The time of day shapes who is around to answer."
+          "text": "Ask when the poll is open. The time of day decides who is around to answer."
         },
         {
-          "text": "Example: a survey at a Leafs game at 7 p.m. reaches fans, but not people working late shifts."
+          "text": "Example: a poll open only on Monday mornings misses players who log on at night."
         },
         {
-          "text": "Hook: the people missed are often the ones who ride transit most, so the results lean away from them."
+          "text": "Hook: the missed players are often the heaviest players, so the results lean away from them."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-6",
-      "prompt": "Isagi wants to know how all 300 Blue Lock players feel. He asks 30 of them. What is the population?",
+      "prompt": "Ash wants to know how all 150 trainers in Viridian City feel. He asks 15 of them. What is the population?",
       "options": [
-        "The 30 players Isagi asked.",
-        "All 300 players in Blue Lock.",
-        "The 30 questions Isagi wrote."
+        "The 15 trainers Ash asked.",
+        "All 150 trainers in Viridian City.",
+        "The 15 questions Ash wrote."
       ],
       "answer": 1,
       "why": "The population is the whole group you want to learn about, and the sample is the part you ask.",
       "steps": [
         {
-          "text": "Example: a school of 500 students, and Ms. Patel asks 50 of them about lunch."
+          "text": "Example: a poutine stand serves 300 customers a week, and Ms. Patel surveys 30 of them."
         },
         {
-          "text": "The 500 students are the population, because that is the whole group she wants to know about."
+          "text": "The 300 customers are the population, because that is the whole group she wants to know about."
         },
         {
-          "text": "Hook: the 50 students are the sample, a small part standing in for the big group."
+          "text": "Hook: the 30 customers are the sample, a small part standing in for the big group."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-7",
-      "prompt": "Chigiri needs 5 players picked fairly from a list of 40. Which method is random?",
+      "prompt": "A coach needs 5 players picked fairly from a squad of 40. Which method is random?",
       "options": [
-        "Pick the five players whose numbers look lucky.",
+        "Pick the five players with the luckiest shirt numbers.",
         "Use a random number generator on numbers 1 to 40.",
         "Pick the five players with the shortest names."
       ],
@@ -724,79 +717,79 @@ export const pack: SePack = {
       "why": "A random method lets chance decide, so no one's bias or preference chooses the group.",
       "steps": [
         {
-          "text": "Give each player a number from 1 to 40, so every name has a place in the list."
+          "text": "Give each player a number from 1 to 40 on the team list, so every name has a place."
         },
         {
           "text": "A random number generator picks numbers with no pattern, so each one has an equal chance."
         },
         {
-          "text": "Hook: picking by name length or by lucky numbers sneaks in a hidden choice, so it is not random."
+          "text": "Hook: picking by shirt number or name length sneaks in a hidden choice, so it is not random."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-applied-8",
-      "prompt": "A survey of Ontario households is sent by email only. Which problem is the most serious?",
+      "prompt": "A Minecraft server survey is sent by Discord only. Which problem is the most serious?",
       "options": [
-        "Emails are a cheap way to reach many people.",
-        "Most people now use computers at home, so it is fine.",
-        "Some households have no email, so they can't be asked."
+        "Discord is a cheap way to reach many people.",
+        "Most people use Discord now, so it is fine.",
+        "Some players have no Discord, so they can't be asked."
       ],
       "answer": 2,
       "why": "A sampling frame that leaves people out causes undercoverage, and the results miss those people.",
       "steps": [
         {
-          "text": "The list you draw from is the sampling frame. If the frame is missing people, the sample cannot include them."
+          "text": "The list you draw from is the sampling frame. If it is missing players, they cannot be asked."
         },
         {
-          "text": "Example: an old phone book left out people who had only cell phones, so those people never got called."
+          "text": "Example: an old phone book left out people who only had cell phones."
         },
         {
-          "text": "Hook: email surveys miss anyone without internet, so the results can look right but still skip a whole group."
+          "text": "Hook: a Discord survey misses players without an account, so results look right but skip them."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-deeper-6",
-      "prompt": "Ms. Ross wants 20 students from her 300 for a survey. Which method is random?",
+      "prompt": "A Roblox club wants 20 players from its 300 members for a survey. Which method is random?",
       "options": [
-        "Ask the first 20 kids who walk into the gym.",
-        "Ask the 20 kids who sit closest to Ms. Ross.",
-        "Draw 20 names from a hat with every student's name."
+        "Ask the first 20 players who join the lobby.",
+        "Ask the 20 players who stand closest to the host.",
+        "Draw 20 names from a hat with all 300 members."
       ],
       "answer": 2,
-      "why": "Every student has the same chance of being drawn, so no one is favoured by position.",
+      "why": "Every member has the same chance of being drawn, so no one is favoured by position.",
       "steps": [
         {
-          "text": "Check the list covers everyone. A school of 200 kids needs all 200 names in the hat."
+          "text": "Check the list covers everyone. A club of 200 members needs all 200 names in the hat."
         },
         {
-          "text": "Work out each chance. Picking 10 of 200 gives each student 10/200, which is 1/20."
+          "text": "Work out each chance. Picking 10 of 200 gives each member 10/200, which is 1/20."
         },
         {
-          "text": "Ask if the method picks by order or seat. If it does, it is not random."
+          "text": "Ask if the method picks by join order or spawn spot. If it does, it is not random."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-deeper-7",
-      "prompt": "A survey of 5000 people is done at one Leafs game. Is the sample fair?",
+      "prompt": "A survey of 5000 people is done at one Minecraft convention. Is the sample fair?",
       "options": [
         "Yes, because 5000 people is far more than 50.",
-        "No, because all 5000 came from one hockey game.",
+        "No, because all 5000 came from one convention.",
         "Yes, because a bigger sample always removes bias."
       ],
       "answer": 1,
       "why": "A big sample taken from one group still only describes that group.",
       "steps": [
         {
-          "text": "Compare two samples: 2000 fans at a Blue Jays game, and 2000 people picked across Toronto."
+          "text": "Compare two samples: 2000 people at a Roblox expo, and 2000 people picked across Canada."
         },
         {
-          "text": "Both have 2000 people, so size is equal. Only the second covers the whole city."
+          "text": "Both have 2000 people, so size is equal. Only the second covers the whole country."
         },
         {
           "text": "Ask who could have been picked. If only one group could be picked, the sample is biased."
@@ -806,43 +799,43 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-collect-deeper-8",
-      "prompt": "A fan club posts a poll: \"Who is the best striker? Click here.\" What do the results show?",
+      "prompt": "A Fortnite fan page posts a poll: \"Best skin ever? Vote now.\" What do the results show?",
       "options": [
-        "What every student at St. Eugene thinks.",
-        "Mostly the keenest fans who chose to click.",
-        "The answer the coach will use for the team."
+        "Every player who ever dropped in.",
+        "Mostly the keenest players who voted.",
+        "The answer Epic will use for the game."
       ],
       "answer": 1,
-      "why": "People who choose to answer are often the ones with the strongest opinions.",
+      "why": "People who choose to vote are often the ones with the strongest opinions.",
       "steps": [
         {
-          "text": "Ask who had the choice. Only people who saw the post and chose to click are counted."
+          "text": "Ask who had the choice. Only fans who saw the poll and clicked are counted."
         },
         {
           "text": "Try another case: a bake sale vote where 50 of 400 students answer. Those 50 may be the keen bakers."
         },
         {
-          "text": "So the results show the people who chose to answer, not the whole group."
+          "text": "So the results show the people who chose to vote, not the whole group."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-collect-deeper-9",
-      "prompt": "Ms. Ross asks 60 of her 180 Grade 7s about lunch. What is the population?",
+      "prompt": "A Roblox team asks 60 of its 180 players about their favourite obby. What is the population?",
       "options": [
-        "The 60 students Ms. Ross asked.",
-        "All 180 Grade 7 students at her school.",
-        "The 60 lunch answers she wrote down."
+        "The 60 players who answered the survey.",
+        "All 180 players in the Roblox game.",
+        "The 60 survey answers the team wrote down."
       ],
       "answer": 1,
       "why": "The population is the whole group you want to know about, and the sample is the part you asked.",
       "steps": [
         {
-          "text": "Find the group the question is about. Here it is every Grade 7 at the school."
+          "text": "Find the group the question is about. Here it is every player in the game."
         },
         {
-          "text": "Try another case: 50 of 240 Grade 8s are asked. The population is 240, the sample is 50."
+          "text": "Try another case: 50 of 240 Robux buyers are asked. The population is 240, the sample is 50."
         },
         {
           "text": "Remember the sample sits inside the population. The answers are data, not the group."
@@ -852,17 +845,17 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-collect-deeper-10",
-      "prompt": "A school has 200 students: 120 in Grade 7 and 80 in Grade 8. A stratified sample of 20 is picked. How many from each grade?",
+      "prompt": "A Pokémon club has 200 members: 120 in Grade 7 and 80 in Grade 8. A stratified sample of 20 is picked. How many from each grade?",
       "options": [
-        "12 from Grade 7 and 8 from Grade 8.",
         "10 from Grade 7 and 10 from Grade 8.",
+        "12 from Grade 7 and 8 from Grade 8.",
         "20 from Grade 7 and none from Grade 8."
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Stratified sampling keeps each group in the same share as the whole population.",
       "steps": [
         {
-          "text": "Find the share. 120/200 = 3/5 of the school is Grade 7."
+          "text": "Find the share. 120/200 = 3/5 of the club is Grade 7."
         },
         {
           "text": "Apply it to the sample. 3/5 of 20 is 12, so 12 Grade 7s."
@@ -875,7 +868,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-collect-deeper-11",
-      "prompt": "A coach asks 9 of his 36 players in a survey. What fraction of the team did he ask?",
+      "prompt": "A Minecraft server has 36 players. An admin surveys 9 of them. What fraction of the players did he ask?",
       "options": [
         "1/4",
         "4/9",
@@ -885,7 +878,7 @@ export const pack: SePack = {
       "why": "A fraction of a group is the part asked over the whole group, simplified.",
       "steps": [
         {
-          "text": "Write the part over the whole. Try 8 of 40: that is 8/40."
+          "text": "Write the part over the whole. Try 8 of 40 blocks mined: that is 8/40."
         },
         {
           "text": "Divide top and bottom by 8: 8 ÷ 8 = 1 and 40 ÷ 8 = 5, so 1/5."
@@ -905,7 +898,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-collect-build-3",
-      "prompt": "48 of the 60 players in the camp say Isagi is best. What percent is that?",
+      "prompt": "48 of the 60 members in the football fan group say Salah is best. What percent is that?",
       "answer": "80%",
       "decoys": [
         "."
@@ -926,7 +919,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-collect-build-4",
-      "prompt": "Blue Lock staff ask 35 people out of 250. Write the fraction asked as a decimal.",
+      "prompt": "Blue Lock staff ask 35 strikers out of 250. Write the fraction asked as a decimal.",
       "answer": "0.14",
       "decoys": [
         "5"
@@ -947,7 +940,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-collect-build-5",
-      "prompt": "The school has 600 students. 30 are asked a survey question. What percent of the school is that?",
+      "prompt": "A Roblox group has 600 members. The poll goes to 30 of them. What percent of the group is that?",
       "answer": "5%",
       "decoys": [
         "0",
@@ -969,7 +962,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-collect-build-6",
-      "prompt": "Zoro's crew asks 18 of the 48 sailors on a ship which island they want. Write the fraction in simplest form.",
+      "prompt": "A football club has 48 players. The coach asks 18 which formation they like. Write the fraction in simplest form.",
       "answer": "3/8",
       "decoys": [
         "6",

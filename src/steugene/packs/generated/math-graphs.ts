@@ -20,53 +20,30 @@ export const pack: SePack = {
         "Pick the graph type that fits your question."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Blue Lock counts every striker's goals. The screen shows the picture, not the list."
+        "flavour": "key",
+        "text": "Your squad got 7, 5 and 3 eliminations. The bars show who got the most."
       },
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Isagi",
+            "label": "Ace",
             "value": 7,
             "tone": "good"
           },
           {
-            "label": "Chigiri",
+            "label": "Kiki",
             "value": 5,
             "tone": "focus"
           },
           {
-            "label": "Kunigami",
+            "label": "Vex",
             "value": 3,
             "tone": "calm"
           }
         ],
-        "unit": "goals"
+        "unit": "elims"
       }
-    },
-    {
-      "kind": "choice",
-      "id": "math-graphs-basics-1",
-      "prompt": "Isagi's goals each month show if he is improving. Which graph shows that?",
-      "options": [
-        "A line graph, months along the bottom",
-        "A bar graph, one bar per player",
-        "A scatter graph, one dot per goal"
-      ],
-      "answer": 0,
-      "why": "A line graph shows how one number changes from one time to the next.",
-      "steps": [
-        {
-          "text": "Look for time in the question. Time runs left to right, so a line fits."
-        },
-        {
-          "text": "Example: Toronto noon temps are 4, then 6, then 3. Joined dots go up, then down."
-        },
-        {
-          "text": "The slope tells the change. A steep rise means a big jump from one time to the next."
-        }
-      ]
     },
     {
       "kind": "video",
@@ -140,7 +117,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-basics-2",
-      "prompt": "Isagi's 20 shots: 12 right foot, 5 left foot, 3 head. Which graph shows the share of each?",
+      "prompt": "Your EA FC striker took 20 shots: 12 right foot, 5 left foot, 3 head. Which graph shows each share?",
       "options": [
         "A bar graph of the three shot types",
         "A line graph joining the three shot types",
@@ -153,37 +130,30 @@ export const pack: SePack = {
           "text": "Each slice is a share of the whole 20 shots. The shares must add to 100%."
         },
         {
-          "text": "Example: 6 saves from 10 tries is 60%, so that part takes 60% of the circle."
+          "text": "Example: 6 of 10 chest slots hold stone, so that slice is 60% of the circle."
         },
         {
           "text": "Check the sum: 12 + 5 + 3 = 20. All 20 shots fill the whole circle."
         }
-      ],
-      "art": {
-        "art": "pie",
-        "parts": 4,
-        "filled": 3,
-        "label": "3/4",
-        "tone": "good"
-      }
+      ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-basics-3",
-      "prompt": "Does more training time link to more goals? Each striker is one dot.",
+      "prompt": "Does more hours mining link to more diamonds found? Each player is one dot.",
       "options": [
-        "A scatter graph, one dot per striker",
-        "A circle graph, one slice per striker",
-        "A bar graph, one bar per training hour"
+        "A scatter graph, one dot per player",
+        "A circle graph, one slice per player",
+        "A bar graph, one bar per mining hour"
       ],
       "answer": 0,
       "why": "A scatter graph shows whether two numbers are linked.",
       "steps": [
         {
-          "text": "Each dot holds two values: hours trained and goals scored. Plot both."
+          "text": "Each dot holds two values: hours mined and diamonds found. Plot both."
         },
         {
-          "text": "Example: a player with 4 hours and 6 goals is one dot at (4, 6)."
+          "text": "Example: a player with 4 hours and 6 diamonds is one dot at (4, 6)."
         },
         {
           "text": "If the dots rise from left to right, the two numbers tend to grow together."
@@ -201,13 +171,13 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A coach who cuts the bottom off an axis can make a tiny lead look like a blowout."
+        "text": "A pizza shop that cuts the bottom off its sales graph makes a tiny lead look like a blowout."
       }
     },
     {
       "kind": "choice",
       "id": "math-graphs-basics-4",
-      "prompt": "A bar graph shows goals as 46 and 48. The y-axis starts at 44. What fixes it?",
+      "prompt": "Your Pokémon's CP bars read 46 and 48. The y-axis starts at 44. What fixes it?",
       "options": [
         "Start the axis at zero",
         "Start the axis at 44 always",
@@ -220,7 +190,7 @@ export const pack: SePack = {
           "text": "Bar height shows size. A cut-off axis fakes the height of the bars."
         },
         {
-          "text": "Example: 30 and 33 with the axis starting at 28. The bars look 2 and 5, so 33 seems far bigger."
+          "text": "Example: pizza sales of 30 and 33, axis starting at 28. Bars look 2 and 5, so 33 seems far bigger."
         },
         {
           "text": "From zero, 30 and 33 look close, which is the honest picture. The true gap is 3."
@@ -230,11 +200,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-basics-5",
-      "prompt": "Bounties on a bar graph: Zoro 320, Luffy 300, Nami 160 (million berries). Which is true?",
+      "prompt": "Kills on a bar graph: Dash 16, Kai 15, Mo 8. Which is true?",
       "options": [
-        "Luffy's bar is taller than Zoro's bar",
-        "Nami's bar is half of Zoro's bar",
-        "Zoro's bar is 40 taller than Luffy's bar"
+        "Kai's bar is taller than Dash's bar",
+        "Mo's bar is half of Dash's bar",
+        "Dash's bar is 8 taller than Kai's bar"
       ],
       "answer": 1,
       "why": "Read each bar's top against the scale, then compare the numbers.",
@@ -243,38 +213,38 @@ export const pack: SePack = {
           "text": "Read the top of each bar against the scale. Ignore the colour."
         },
         {
-          "text": "Example: bar A is 50 and bar B is 20. A is 30 taller, and 2.5 times as big as B."
+          "text": "Example: Dash has 30 kills and Mo has 10. Dash has 3 times as many."
         },
         {
-          "text": "Half check: 160 ÷ 320 = 0.5, so Nami's bar is half of Zoro's."
+          "text": "Half check: 8 ÷ 16 = 0.5, so Mo's bar is half of Dash's."
         }
       ],
       "art": {
         "art": "bars",
         "rows": [
           {
-            "label": "Zoro",
-            "value": 320,
+            "label": "Dash",
+            "value": 16,
             "tone": "good"
           },
           {
-            "label": "Luffy",
-            "value": 300,
+            "label": "Kai",
+            "value": 15,
             "tone": "focus"
           },
           {
-            "label": "Nami",
-            "value": 160,
+            "label": "Mo",
+            "value": 8,
             "tone": "calm"
           }
         ],
-        "unit": "M"
+        "unit": "kills"
       }
     },
     {
       "kind": "game",
       "id": "math-graphs-games-0",
-      "title": "Pick the Right Log Pose",
+      "title": "Pick the Right Minimap",
       "game": {
         "mode": "pair",
         "pairs": [
@@ -307,20 +277,20 @@ export const pack: SePack = {
       "id": "math-graphs-teach-2",
       "title": "The four graphs and their jobs",
       "lines": [
-        "Bar graph: compare separate groups, like goals by player.",
-        "Line graph: show change over time, like goals each match.",
-        "Circle graph: show parts of one whole, like each striker's share of all goals.",
-        "Scatter graph: show two numbers for each item, like shots and goals."
+        "Bar graph: compare separate groups, like blocks mined by each player.",
+        "Line graph: show change over time, like your XP each day.",
+        "Circle graph: show parts of one whole, like screen time split by app.",
+        "Scatter graph: show two numbers for each item, like rating and price."
       ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-basics-6",
-      "prompt": "Toronto's temperature rose from −12 °C at 6 a.m. to −2 °C at noon. What does the rising line show?",
+      "prompt": "Your Y level went from −12 to −2 in one session. What does the rising line show?",
       "options": [
-        "The temperature got colder as time passed",
-        "The temperature warmed as time passed",
-        "The temperature stayed the same all day"
+        "Y got lower as time passed",
+        "Y got higher as time passed",
+        "Y stayed the same all session"
       ],
       "answer": 1,
       "why": "A rising line means the number went up as time moved on.",
@@ -329,10 +299,10 @@ export const pack: SePack = {
           "text": "Read the line from left to right, like reading a sentence."
         },
         {
-          "text": "Example: a line falling from 8 to 2 means the number went down, so it cooled."
+          "text": "Example: a line falling from 8 to 2 means Y went down, so you dug deeper."
         },
         {
-          "text": "Check: −2 is bigger than −12, so the temperature went up. It warmed."
+          "text": "Check: −2 is bigger than −12, so Y went up. You climbed."
         }
       ],
       "art": {
@@ -361,7 +331,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-basics-7",
-      "prompt": "Luffy's crew splits treasure on a circle graph: 50%, 30%, 20%. What must the slices add to?",
+      "prompt": "Screen time on a circle graph: Fortnite 50%, Minecraft 30%, Roblox 20%. What must the slices add to?",
       "options": [
         "100 per cent of the whole",
         "50 per cent of the whole",
@@ -374,7 +344,7 @@ export const pack: SePack = {
           "text": "Add every share: 50 + 30 + 20."
         },
         {
-          "text": "Example: 25%, 25%, 40% and 10% add to 100%, so the circle is complete."
+          "text": "Example: 25 + 25 + 40 + 10 = 100, so the circle is complete."
         },
         {
           "text": "If the total is not 100%, a slice is missing or a number is wrong."
@@ -384,7 +354,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graphs-build-1",
-      "prompt": "Zoro got 3 slices of a pie chart with 8 equal slices. What fraction of the pie is Zoro?",
+      "prompt": "The squad's pie chart has 8 equal slices. Your share is 3 slices. What fraction is yours?",
       "answer": "3/8",
       "decoys": [
         "5",
@@ -393,10 +363,10 @@ export const pack: SePack = {
       "why": "In a circle graph, each slice is a fraction: slices for the group over all the equal slices.",
       "steps": [
         {
-          "text": "Count all the equal slices. The whole pie has 12 in one example."
+          "text": "Count all the equal slices. The whole pie has 10 in one example."
         },
         {
-          "text": "Example: 5 slices of 12 is 5/12. Top is the part, bottom is the whole."
+          "text": "Example: 4 slices of 10 is 4/10. Top is the part, bottom is the whole."
         },
         {
           "text": "Use the same rule with the 3 slices and the 8 slices."
@@ -423,7 +393,7 @@ export const pack: SePack = {
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Always look at the numbers on the side first. A cut-off axis lies with a straight face."
+        "text": "Read the numbers on the side first. A cut-off axis can make a small win look huge."
       }
     },
     {
@@ -468,14 +438,14 @@ export const pack: SePack = {
       "id": "math-graphs-teach-5",
       "title": "Recap",
       "lines": [
-        "Compare separate groups: bar graph.",
-        "Track change over time: line graph.",
-        "Show parts of one whole: circle graph.",
-        "Compare two numbers for each item: scatter graph."
+        "Compare separate biomes: bar graph.",
+        "Track your XP each day: line graph.",
+        "Show parts of one stack of 64: circle graph.",
+        "Compare two numbers for each block: scatter graph."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Before you draw, ask: what am I comparing? Then pick the graph that answers that."
+        "text": "Before you build the graph, ask what you are comparing. Then pick the graph that answers it."
       }
     },
     {
@@ -483,13 +453,13 @@ export const pack: SePack = {
       "id": "math-graphs-deeper-0",
       "title": "Line graphs need an order",
       "lines": [
-        "A line graph shows change over time.",
-        "Each point is one moment. The line joins them in order.",
-        "Joining things with no order makes a false trend."
+        "Your obby visits each day make a line graph.",
+        "Each point is one day. The line joins them in order.",
+        "Joining days in a random order makes a false trend."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Ask: does the order matter? If yes, line graph."
+        "text": "Ask: does the order matter? If yes, use a line graph."
       }
     },
     {
@@ -497,13 +467,13 @@ export const pack: SePack = {
       "id": "math-graphs-deeper-1",
       "title": "Bars for separate things",
       "lines": [
-        "A bar graph compares separate things, like teams.",
-        "The gaps between bars show the things are separate.",
+        "A bar graph compares separate teams in a league.",
+        "The gaps between bars show the teams are separate.",
         "Bars must start at zero, or the gaps look fake."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "A bar that starts at 900 can look three times bigger."
+        "text": "An axis starting at 9,000 Robux makes 10,000 look enormous."
       }
     },
     {
@@ -511,13 +481,13 @@ export const pack: SePack = {
       "id": "math-graphs-deeper-2",
       "title": "Pie charts need one whole",
       "lines": [
-        "A circle graph shows parts of one whole.",
+        "A circle graph shows parts of one whole pizza.",
         "The slices must add up to 100%.",
         "If they add to more or less, the chart is wrong."
       ],
       "callout": {
         "flavour": "pirate",
-        "text": "Shares of one treasure. Each slice is a piece of the same gold."
+        "text": "Each slice is a piece of the same pizza. No slice can come from another one."
       }
     },
     {
@@ -525,13 +495,13 @@ export const pack: SePack = {
       "id": "math-graphs-deeper-3",
       "title": "Scatter shows pairs",
       "lines": [
-        "A scatter graph puts one dot for each item.",
+        "A scatter graph puts one dot for each player card.",
         "Each dot has two numbers: one across, one up.",
         "A pattern in the dots is not proof one causes the other."
       ],
       "callout": {
-        "flavour": "imagine",
-        "text": "Each dot is one striker. Across is shots. Up is goals."
+        "flavour": "key",
+        "text": "Each dot is one FC player card. Across is overall rating. Up is price."
       }
     },
     {
@@ -540,12 +510,12 @@ export const pack: SePack = {
       "title": "Check the scale first",
       "lines": [
         "Read the first number on the vertical axis.",
-        "If it starts above zero, the bars lie.",
-        "Gaps look huge when the scale starts high."
+        "If it starts at 900, not 0, the bars lie.",
+        "A 920 bar then looks twice as tall as a 910 bar."
       ],
       "callout": {
         "flavour": "gotcha",
-        "text": "Blue Lock tip: read the scoreboard before you cheer."
+        "text": "Roblox tip: check where the axis starts before you compare games."
       }
     },
     {
@@ -553,106 +523,67 @@ export const pack: SePack = {
       "id": "math-graphs-deeper-5",
       "title": "Ask what you are comparing",
       "lines": [
-        "Parts of one whole? Use a circle graph.",
-        "Change over time? Use a line graph.",
-        "Separate things side by side? Use a bar graph."
+        "Parts of one whole, like 40 Timbits by flavour? Circle graph.",
+        "Change over days, like a streak? Line graph.",
+        "Separate things side by side, like 3 friends' wins? Bar graph."
       ],
       "callout": {
         "flavour": "key",
-        "text": "Scatter is for two numbers per item, to see a pattern."
+        "text": "Scatter is for two numbers per item, to spot a pattern."
       }
     },
     {
       "kind": "choice",
       "id": "math-graphs-basics-8",
-      "prompt": "Ontario's population was counted each census year from 1991 to 2021. Which graph fits?",
+      "prompt": "Your Pokédex grew from 12 to 48 over six weeks. Which graph fits?",
       "options": [
-        "A circle graph, one slice per census year",
-        "A bar graph, one bar per school in Toronto",
-        "A line graph, census years along the bottom"
+        "A circle graph, one slice per week",
+        "A line graph, weeks along the bottom",
+        "A bar graph, one bar per Pokémon type"
       ],
-      "answer": 2,
-      "why": "Line graphs show change over time, so census years are the clue.",
+      "answer": 1,
+      "why": "A line graph shows change over time, so the weeks are the clue.",
       "steps": [
         {
-          "text": "Look for time in the question. Census years are points in time."
+          "text": "Look for time in the question. Weeks are points in time."
         },
         {
-          "text": "Example: a town's school count in 2010, 2015 and 2020 is best shown as a line."
+          "text": "New example: your Robux each month for a year is best shown as a line."
         },
         {
-          "text": "Circle graphs need parts of one whole, not a number that keeps growing."
+          "text": "Circle graphs need parts of one whole, not a count that keeps growing."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-basics-9",
-      "prompt": "A teacher shows how Canadian students get to school: walk, bus or bike. Which graph shows the shares?",
+      "prompt": "Friday's screen time: 6 h Fortnite, 2 h Minecraft, 2 h other. Which graph shows the shares?",
       "options": [
-        "A line graph, one point per way",
-        "A scatter graph, one dot per way",
-        "A circle graph, one slice per way"
+        "A line graph, one point per game",
+        "A scatter graph, one dot per game",
+        "A circle graph, one slice per game"
       ],
       "answer": 2,
-      "why": "A circle graph shows parts of one whole, so the slices add to 100%.",
+      "why": "A circle graph shows parts of one whole, so the slices add up to all your time.",
       "steps": [
         {
-          "text": "Walk, bus and bike are parts of all the students. That makes one whole."
+          "text": "All the games together make one whole: your full screen time."
         },
         {
-          "text": "Example: if 60 of 100 students walk, that slice is 60% of the circle."
+          "text": "New example: 5 h Roblox and 5 h Minecraft is a circle split in half."
         },
         {
-          "text": "The slices must fill the circle exactly, or a group is missing from the survey."
+          "text": "The slices must add to the whole, or an hour is missing from the chart."
         }
       ]
     },
     {
       "kind": "choice",
-      "id": "math-graphs-applied-0",
-      "prompt": "Coach Ego wants to compare shots on target for four strikers in one match. Which graph fits best?",
-      "options": [
-        "A bar graph, with one bar for each striker.",
-        "A line graph, joining the four strikers with one line.",
-        "A circle graph, with one slice for each striker."
-      ],
-      "answer": 0,
-      "why": "A bar graph compares separate amounts side by side, while a line suggests a change over time.",
-      "steps": [
-        {
-          "text": "Ask what the categories are. Here they are people, not time."
-        },
-        {
-          "text": "New example: goals scored by three defenders. Each defender is separate, so use bars."
-        },
-        {
-          "text": "A line needs time in order along the bottom. No time, no line."
-        }
-      ],
-      "art": {
-        "art": "bars",
-        "rows": [
-          {
-            "label": "Striker A",
-            "value": 5,
-            "tone": "good"
-          },
-          {
-            "label": "Striker B",
-            "value": 3,
-            "tone": "calm"
-          }
-        ],
-        "unit": "shots"
-      }
-    },
-    {
-      "kind": "choice",
       "id": "math-graphs-applied-1",
-      "prompt": "Isagi's team scored goals in each of 12 weeks. Which graph shows if they are getting better?",
+      "prompt": "Your Minecraft world: blocks mined each week for 12 weeks. Which graph shows if you are improving?",
       "options": [
-        "A circle graph of goals in each week.",
+        "A circle graph of blocks mined, one slice per week.",
         "A bar graph, with one bar for each week.",
         "A line graph, with one point for each week."
       ],
@@ -663,21 +594,21 @@ export const pack: SePack = {
           "text": "Check the bottom axis. Weeks are in order, so time is the key variable."
         },
         {
-          "text": "New example: Toronto temperature each month. Mark each month, then join the points."
+          "text": "New example: blocks mined each day, 40, 55, 70. Mark each day, then join the points."
         },
         {
-          "text": "A line climbing steadily means the value is growing. Goals 2, 3, 5, 6 show a climb."
+          "text": "A line climbing steadily means the value is growing. Wins 2, 3, 5, 6 show a climb."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-applied-2",
-      "prompt": "The Straw Hat crew splits a treasure. Luffy gets 40%, Zoro 25%, Nami 20%, and others 15%. Which graph shows the shares?",
+      "prompt": "Your V-Bucks go 40% Battle Pass, 25% skins, 20% emotes, 15% other. Which graph shows the shares?",
       "options": [
-        "A scatter plot, with one dot for each crew member.",
+        "A scatter plot, with one dot for each player.",
         "A circle graph, because the shares make up one whole.",
-        "A line graph, because the share rises from day to day."
+        "A line graph, because the spending rises each week."
       ],
       "answer": 1,
       "why": "A circle graph shows how parts make up a whole, so it fits percentages that add to 100.",
@@ -686,7 +617,7 @@ export const pack: SePack = {
           "text": "Add the shares first: 40 + 25 + 20 + 15 = 100. That is one whole."
         },
         {
-          "text": "New example: a bake sale with 50%, 30% and 20% of sales. Still 100, so a circle works."
+          "text": "New example: Timbits sold 50%, 30% and 20% plain, chocolate, honey dip. Still 100, so a circle works."
         },
         {
           "text": "If the parts do not reach 100, a circle graph would mislead about the whole."
@@ -696,7 +627,7 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-applied-3",
-      "prompt": "Coach wants to see if taller strikers score more goals. Each striker is one point. Which graph fits?",
+      "prompt": "Coach wants to know if taller strikers score more. Each striker is one dot. Which graph fits?",
       "options": [
         "A bar graph, with one bar for each striker's height.",
         "A circle graph, with a slice for each goal scored.",
@@ -709,7 +640,7 @@ export const pack: SePack = {
           "text": "Each striker has two numbers: height and goals. Plot each as a pair."
         },
         {
-          "text": "New example: practice hours and free throws made by 8 Toronto players. Plot 8 dots."
+          "text": "New example: Blue Lock, 8 strikers, shots taken against goals scored. Plot 8 dots."
         },
         {
           "text": "Dots rising to the right mean the numbers grow together. That is a link, not proof of cause."
@@ -732,7 +663,7 @@ export const pack: SePack = {
           "text": "Bar length is the value. Starting at 2,900 makes a tiny gap look huge."
         },
         {
-          "text": "New example: 40 and 38 sightings. Starting the axis at 36 squashes the bars. Start at zero."
+          "text": "New example: Obby A got 40 million visits, Obby B got 38 million. Start at zero, not 36."
         },
         {
           "text": "Test it: does each bar's length match its number? If not, the graph lies."
@@ -758,23 +689,23 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-applied-5",
-      "prompt": "A stall on Kensington Market counts hot chocolates sold and the temperature each day. Which graph shows a link?",
+      "prompt": "Each day you count hours played and Pokémon caught. Which graph shows a link?",
       "options": [
-        "A circle graph of sales, with one slice per day.",
-        "A scatter plot, with one dot per day for temperature and sales.",
-        "A bar graph of temperature, with one bar per day."
+        "A circle graph of catches, with one slice per day.",
+        "A scatter plot, with one dot per day for hours and catches.",
+        "A bar graph of hours, with one bar per day."
       ],
       "answer": 1,
       "why": "A scatter plot pairs two numbers per day, so any pattern between them shows up as dots.",
       "steps": [
         {
-          "text": "Each day gives two numbers, so each day is one dot: (temperature, sales)."
+          "text": "Each day gives two numbers, so each day is one dot: (hours, catches)."
         },
         {
-          "text": "New example: six days of Blue Jays ticket sales against rain. Plot six pairs."
+          "text": "New example: six days of Timbits sales against rain. Plot six pairs."
         },
         {
-          "text": "Dots sloping down to the right mean fewer sales as the temperature rises."
+          "text": "Dots sloping down to the right mean fewer catches as the hours rise."
         }
       ]
     },
@@ -804,11 +735,11 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-applied-7",
-      "prompt": "Five crew members each chose a favourite island. Why is a line graph wrong for this?",
+      "prompt": "Five squadmates each picked a favourite landing spot. Why is a line graph wrong here?",
       "options": [
-        "Lines only work with numbers above zero.",
-        "Islands are separate choices, not points in time order.",
-        "A line graph can only show two islands at once."
+        "Lines only work when every number is above zero.",
+        "Landing spots are separate choices, not points in time order.",
+        "A line graph can only show two spots at once."
       ],
       "answer": 1,
       "why": "A line joins points in time order, so it suits data that changes over time.",
@@ -817,7 +748,7 @@ export const pack: SePack = {
           "text": "A line joins points left to right. That only means something if left to right is time."
         },
         {
-          "text": "New example: five Toronto subway lines and their riders. Lines are categories, so use bars."
+          "text": "New example: five Minecraft biomes and how many chunks each has. Biomes are categories, so use bars."
         },
         {
           "text": "Test it: if you can reorder the items without losing meaning, use bars, not a line."
@@ -827,9 +758,9 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-applied-8",
-      "prompt": "Isagi had 12 shots and 5 were on target. Which graph shows the share on target?",
+      "prompt": "Isagi took 12 shots and 5 were on target. Which graph shows the share on target?",
       "options": [
-        "A bar graph, with 12 bars for each shot.",
+        "A bar graph, with 12 bars, one per shot.",
         "A line graph of shots from match to match.",
         "A circle graph, with 5 of 12 slices shaded."
       ],
@@ -840,7 +771,7 @@ export const pack: SePack = {
           "text": "Shots on target are part of all shots. That is a share, so think circle."
         },
         {
-          "text": "New example: a goalkeeper makes 9 saves out of 15. Shade 9 of 15 slices."
+          "text": "New example: an EA FC keeper makes 9 saves from 15 shots. Shade 9 of 15 slices."
         },
         {
           "text": "Turn it into a percentage if needed: 5 ÷ 12 is about 42%."
@@ -850,20 +781,20 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-applied-9",
-      "prompt": "A Grade 7 class raised money: A $120, B $95, C $150, D $80. Which graph compares the four totals best?",
+      "prompt": "Four bake-sale tables raised $120, $95, $150 and $80. Which graph compares them best?",
       "options": [
-        "A circle graph of totals, with one slice per class.",
-        "A line graph joining the four classes in order.",
-        "A bar graph, with one bar per class and a zero base."
+        "A bar graph, with one bar per table and a zero base.",
+        "A circle graph of totals, with one slice per table.",
+        "A line graph joining the four tables in order."
       ],
-      "answer": 2,
+      "answer": 0,
       "why": "A bar graph compares separate totals side by side, and a zero base keeps the lengths honest.",
       "steps": [
         {
-          "text": "The four classes are separate groups, not a time sequence, so no line."
+          "text": "The four tables are separate groups, not a time sequence, so no line."
         },
         {
-          "text": "New example: three Toronto parks with 40, 25 and 60 trees planted. Draw bars from zero."
+          "text": "New example: three Minecraft villages with 40, 25 and 60 villagers. Draw bars from zero."
         },
         {
           "text": "Check the tallest bar matches the biggest total, then label each bar with its number."
@@ -873,59 +804,59 @@ export const pack: SePack = {
     {
       "kind": "choice",
       "id": "math-graphs-deeper-6",
-      "prompt": "Isagi scores in 10 matches. Which graph shows his goals best?",
+      "prompt": "Your Fortnite squad plays 10 matches. Which graph shows your eliminations best?",
       "options": [
         "A circle graph with one slice per match.",
         "A line graph with one point per match.",
-        "A scatter graph of goals and shots."
+        "A scatter graph of eliminations and wins."
       ],
       "answer": 1,
-      "why": "Matches happen in order, so a line graph shows how his goals change over time.",
+      "why": "Matches happen in order, so a line graph shows how your eliminations change over time.",
       "steps": [
         {
           "text": "Matches happen in order: match 1, then 2, then 3."
         },
         {
-          "text": "Put match number across, goals up. Plot 0, 2, 1, 3."
+          "text": "Put match number across, eliminations up. Plot 0, 2, 1, 3 for matches 1 to 4."
         },
         {
-          "text": "Join the points in order. The line shows his scoring pattern."
+          "text": "Join the points in order. The line shows your squad's pattern."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-deeper-8",
-      "prompt": "Which graph best compares goals scored by five teams in one season?",
+      "prompt": "Which graph best compares Robux earned by five Roblox games in one month?",
       "options": [
-        "A bar graph, with one bar per team.",
-        "A line graph, joining the five teams.",
-        "A scatter graph of teams and wins."
+        "A line graph, joining the five games.",
+        "A scatter graph of games and visits.",
+        "A bar graph, with one bar per game."
       ],
-      "answer": 0,
-      "why": "Teams are separate things, so bars side by side compare them fairly.",
+      "answer": 2,
+      "why": "Games are separate things, so bars side by side compare them fairly.",
       "steps": [
         {
-          "text": "The five teams have no order in time, so no line is needed."
+          "text": "The five games have no order in time, so no line is needed."
         },
         {
-          "text": "Draw one bar per team, starting at zero. Try 12, 7, 9, 15, 4 goals."
+          "text": "Draw one bar per game, starting at zero. Try 12, 7, 9, 15, 4 thousand Robux."
         },
         {
-          "text": "The tallest bar is the best scoring team. Compare bars side by side."
+          "text": "The tallest bar is the biggest earner. Compare bars side by side."
         }
       ]
     },
     {
       "kind": "choice",
       "id": "math-graphs-deeper-10",
-      "prompt": "Which graph shows each player's share of the total minutes played?",
+      "prompt": "Which graph shows each player's share of the total minutes in an EA FC match?",
       "options": [
-        "A circle graph of each player's share.",
         "A line graph of minutes for each match.",
+        "A circle graph of each player's share.",
         "A scatter graph of minutes and goals."
       ],
-      "answer": 0,
+      "answer": 1,
       "why": "Shares of one total are parts of a whole, which is what a circle graph shows.",
       "steps": [
         {
@@ -942,51 +873,51 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graphs-build-2",
-      "prompt": "Blue Lock tested 40 players. 10 chose striker. Write the decimal part of the whole that chose striker.",
+      "prompt": "10 of 40 Fortnite squads landed at Tilted Towers. Write the share as a decimal.",
       "answer": "0.25",
       "decoys": [
         "4",
         "6"
       ],
-      "why": "A decimal is a part divided by the whole, so 10 ÷ 40 gives the share.",
+      "why": "A decimal share is the part divided by the whole, so 10 ÷ 40 gives the share.",
       "steps": [
         {
-          "text": "Write the share as part ÷ whole."
+          "text": "Write the share as part ÷ whole: 10 ÷ 40."
         },
         {
-          "text": "Example: 4 ÷ 10 = 0.4. Check: 0.4 × 10 = 4."
+          "text": "Example: 3 of 10 squads = 3 ÷ 10 = 0.3. Check: 0.3 × 10 = 3."
         },
         {
-          "text": "Check your answer by multiplying it back by the whole."
+          "text": "Multiply your answer by 40 to check it gives 10 squads."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-graphs-build-3",
-      "prompt": "Toronto temperature line graph: 6 a.m. is −3°C, 2 p.m. is 9°C. How many degrees did it rise?",
+      "prompt": "You mine down to Y = −3, then climb up to Y = 9. How many blocks up did you go?",
       "answer": "12",
       "decoys": [
         "6",
         "4"
       ],
-      "why": "A rise on a line graph is the end value minus the start value, even when the start is negative.",
+      "why": "Going up from one height to another is the top height minus the bottom height, even when the bottom is negative.",
       "steps": [
         {
-          "text": "Find the start point and the end point on the line."
+          "text": "Find the start height on F3 and the end height."
         },
         {
-          "text": "Example: from −5 to 2 rises 2 − (−5) = 7. Subtracting a negative adds."
+          "text": "Example: from Y = −5 to Y = 2 is 2 − (−5) = 7 blocks up."
         },
         {
-          "text": "Count up on a number line from −3 to 9 to check."
+          "text": "Count up from −3 to 9 one block at a time to check."
         }
       ]
     },
     {
       "kind": "build",
       "id": "math-graphs-build-4",
-      "prompt": "Scatter plot of 20 players. 14 dots follow the trend. Write the fraction in simplest form.",
+      "prompt": "A Roblox obby had 20 players. 14 reached the final checkpoint. Write the fraction in simplest form.",
       "answer": "7/10",
       "decoys": [
         "4",
@@ -995,7 +926,7 @@ export const pack: SePack = {
       "why": "A fraction is simplest when the top and bottom share no common factor except 1.",
       "steps": [
         {
-          "text": "Write the fraction: trend dots over all dots."
+          "text": "Write the fraction: players who finished over all players."
         },
         {
           "text": "Example: 6/8 ÷ 2 = 3/4. Divide top and bottom by the same number."
@@ -1007,30 +938,8 @@ export const pack: SePack = {
     },
     {
       "kind": "build",
-      "id": "math-graphs-build-5",
-      "prompt": "Bar graph shows a 50 starting axis. Bar A reaches 95, bar B reaches 40. What is the real difference?",
-      "answer": "55",
-      "decoys": [
-        "3",
-        "6"
-      ],
-      "why": "The bar heights on a truncated axis can mislead, so you must use the numbers on the axis instead.",
-      "steps": [
-        {
-          "text": "Read each bar top as a value, not as a picture."
-        },
-        {
-          "text": "Example: 90 and 70 give 90 − 70 = 20."
-        },
-        {
-          "text": "Subtract the two values you read."
-        }
-      ]
-    },
-    {
-      "kind": "build",
       "id": "math-graphs-build-6",
-      "prompt": "Four One Piece crew bounties on a bar graph: 2, 4, 9 and 6 million. Find the mean in millions.",
+      "prompt": "Four One Piece crew bounties on a bar graph, in millions of Berries: 2, 4, 9 and 6. Find the mean.",
       "answer": "5.25",
       "decoys": [
         "1",
@@ -1039,10 +948,10 @@ export const pack: SePack = {
       "why": "The mean is the total divided by how many values there are, and that can be a decimal.",
       "steps": [
         {
-          "text": "Add all the bars to get the total."
+          "text": "Add all four bars to get the total."
         },
         {
-          "text": "Example: 3 + 4 + 5 = 12, then 12 ÷ 3 = 4."
+          "text": "Example: Luffy 3 + Zoro 4 + Sanji 5 = 12, then 12 ÷ 3 = 4."
         },
         {
           "text": "Divide the total by how many bars there are."
@@ -1052,7 +961,7 @@ export const pack: SePack = {
     {
       "kind": "build",
       "id": "math-graphs-build-7",
-      "prompt": "Blue Lock: 12 players in a circle graph. 9 chose striker. Write the fraction in simplest form.",
+      "prompt": "Your PC box holds 12 Pokémon. 9 are fire types. Write the fraction in simplest form.",
       "answer": "3/4",
       "decoys": [
         "9",
@@ -1061,7 +970,7 @@ export const pack: SePack = {
       "why": "A circle graph's slices are fractions, and simplifying gives the easiest fraction to read.",
       "steps": [
         {
-          "text": "Write the fraction as the striker players over all players."
+          "text": "Write the fraction: fire types over all Pokémon."
         },
         {
           "text": "Example: 10/15 ÷ 5 = 2/3. Divide top and bottom by the same number."
