@@ -177,6 +177,17 @@ function checkWritten(b: SeBlock, fail: (m: string) => void) {
     if (/[−–]/.test(b.answer)) fail(`${b.id}: a build answer is typed with tiles, so its minus is "-", not "−"`)
   }
   if (b.kind === 'explain' && b.art) arts.push(b.art)
+  // Two cards that LOOK the same are one card to him: tapping the "wrong"
+  // twin would be marked as a slip for a correct answer.
+  if (b.kind === 'game' && b.game.mode === 'pair') {
+    const look = (v: string) => v.trim().toLowerCase()
+    if (new Set(b.game.pairs.map((p) => look(p[1]))).size !== b.game.pairs.length) fail(`${b.id}: two right-hand cards look the same`)
+    if (new Set(b.game.pairs.map((p) => look(p[0]))).size !== b.game.pairs.length) fail(`${b.id}: two left-hand cards look the same`)
+  }
+  if (b.kind === 'game' && b.game.mode === 'order') {
+    const look = new Set(b.game.values.map((v) => v.label.trim()))
+    if (look.size !== b.game.values.length) fail(`${b.id}: two chips have the same label`)
+  }
   for (const a of arts) checkArt(a, b.id, fail)
 }
 
