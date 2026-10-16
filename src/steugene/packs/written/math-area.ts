@@ -144,7 +144,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 348,
     },
     {
       kind: 'explain',
@@ -495,7 +494,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 501,
     },
     {
       kind: 'choice',

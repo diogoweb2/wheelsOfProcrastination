@@ -131,7 +131,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 220,
     },
     {
       kind: 'choice',
@@ -506,7 +505,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 553,
     },
     {
       kind: 'build',

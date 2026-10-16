@@ -144,7 +144,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 237,
     },
     {
       kind: 'explain',
@@ -461,7 +460,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 337,
     },
     {
       kind: 'explain',

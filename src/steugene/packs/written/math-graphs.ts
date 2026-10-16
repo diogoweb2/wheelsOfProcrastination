@@ -157,7 +157,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 162,
     },
     {
       kind: 'explain',

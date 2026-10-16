@@ -640,7 +640,7 @@ function OrderGame({
 
   return (
     <>
-      <p className="muted">Tap them smallest first.</p>
+      <p className="muted">{game.hint ?? 'Tap them smallest first.'}</p>
       <div className="se-order__done">
         {placed.map((l) => (
           <span key={l} className="se-chip se-chip--done">

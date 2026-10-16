@@ -328,7 +328,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 385,
     },
   ],
 
@@ -448,6 +447,7 @@ export const pack: SePack = {
       title: 'Line the mobs up west → east',
       game: {
         mode: 'order',
+        hint: 'Tap the one farthest WEST first.',
         values: [
           { label: '🟢 creeper at X −40', value: -40 },
           { label: '💀 skeleton at X 15', value: 15 },
@@ -640,7 +640,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 342,
     },
     {
       kind: 'video',
@@ -673,7 +672,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 261,
     },
   ],
 }

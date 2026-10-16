@@ -318,7 +318,8 @@ export interface SeGame extends SeBlockBase {
   title: string
   /** Order the values smallest → largest by tapping them in sequence. */
   game:
-    | { mode: 'order'; values: { label: string; value: number }[] }
+    /** `hint` replaces "Tap them smallest first." when the order is steps, not sizes. */
+    | { mode: 'order'; values: { label: string; value: number }[]; hint?: string }
     /** Tap a left card, then its partner on the right. */
     | { mode: 'pair'; pairs: [string, string][] }
     /** Tap the spot on a number line where the value lives. */

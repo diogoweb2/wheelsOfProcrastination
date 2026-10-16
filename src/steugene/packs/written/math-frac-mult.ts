@@ -143,7 +143,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 222,
     },
     {
       kind: 'explain',
@@ -563,7 +562,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 374,
     },
     {
       kind: 'video',
@@ -596,7 +594,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 387,
     },
     {
       kind: 'build',

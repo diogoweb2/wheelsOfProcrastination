@@ -159,7 +159,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 220,
     },
     {
       kind: 'choice',
@@ -632,7 +631,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 329,
     },
     {
       kind: 'video',
@@ -665,7 +663,6 @@ export const pack: SePack = {
           ],
         },
       ],
-      secs: 282,
     },
     {
       kind: 'game',
