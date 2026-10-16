@@ -1699,7 +1699,9 @@ export interface SeFixLock {
   mistakes: SeAnswer[]
   /** Set by Dad. Until then, these questions are out of the deck. */
   allowedAt?: number
-  /** He has since redone them. */
+  /** Misses he has since redone in "mistakes to fix", by answer id (§24f). */
+  fixed?: string[]
+  /** Every miss in it has been redone. */
   clearedAt?: number
 }
 
@@ -1715,6 +1717,8 @@ export interface SeRun {
   /** How far down the queue he is. */
   pos: number
   answers: SeAnswer[]
+  /** A "mistakes to fix" run (§24f): only his unlocked misses, no clock, no top-up. */
+  fix?: boolean
 }
 
 export interface StEugeneState {

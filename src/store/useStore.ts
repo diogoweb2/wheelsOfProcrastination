@@ -53,7 +53,7 @@ import {
 } from './storage'
 import type { SeDesk, SeBlock } from '../steugene/types'
 import { packFor } from '../steugene/packs'
-import { seAvailable, sePlanLesson, seTopUp } from '../logic/steugeneLesson'
+import { seAvailable, seFixGroups, seLockLeft, sePlanLesson, seTopUp, seWithChecks } from '../logic/steugeneLesson'
 import { seFind } from '../logic/steugene'
 import { generateSeBlocks } from '../logic/steugeneAi'
 import { SE_HISTORY_CAP } from './storage'
@@ -443,6 +443,8 @@ interface StoreState {
   // --- 🏫 St. Eugene 7 (§24) ------------------------------------------------
   /** Deal a lesson for a subtopic and make it the one in flight. An open lesson is finished first, not dropped. */
   seStart: (subtopicId: string) => void
+  /** Deal his unlocked misses for a subtopic as their own lesson: "mistakes to fix" (§24f). */
+  seStartFix: (subtopicId: string) => void
   /** Picking a lesson back up: step past a card he already answered, so it is never a second go (§24f). */
   seResume: () => void
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
@@ -1157,19 +1159,36 @@ export const useStore = create<StoreState>((set, get) => {
   /**
    * Every block that may be dealt for a subtopic: the written pack, plus
    * anything the AI added (§24h), minus the questions he got wrong and has
-   * not been allowed to fix (§24f).
+   * not redone yet (§24f) — sealed, or unlocked and waiting in "mistakes to
+   * fix", which is the only place they are dealt from.
    *
    * That last subtraction is the no-second-go rule, and it lives here rather
    * than in the player so it holds for every route into a lesson.
    */
   function seBench(data: AppData, desk: SeDesk, subtopicId: string): SeBlock[] {
-    const generated = desk.generated.filter((g) => g.subtopicId === subtopicId).flatMap((g) => g.blocks)
     const sealed = new Set(
       data.steugene.locks
-        .filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
-        .flatMap((l) => l.mistakes.map((m) => m.id)),
+        .filter((l) => l.subtopicId === subtopicId && !l.clearedAt)
+        .flatMap((l) => seLockLeft(l).map((m) => m.id)),
     )
-    return seAvailable(packFor(subtopicId), generated).filter((b) => !sealed.has(b.id))
+    return seAvailable(packFor(subtopicId), seGenerated(desk, subtopicId)).filter((b) => !sealed.has(b.id))
+  }
+
+  function seGenerated(desk: SeDesk, subtopicId: string): SeBlock[] {
+    return desk.generated.filter((g) => g.subtopicId === subtopicId).flatMap((g) => g.blocks)
+  }
+
+  /**
+   * Tick misses off his unlocked locks for a subtopic. A lock with nothing
+   * left is cleared, which drops its row from "mistakes to fix".
+   */
+  function seMarkFixed(d: AppData, subtopicId: string, ids: string[]) {
+    for (const lock of d.steugene.locks) {
+      if (lock.subtopicId !== subtopicId || !lock.allowedAt || lock.clearedAt) continue
+      const mine = new Set(lock.mistakes.map((m) => m.id))
+      lock.fixed = [...new Set([...(lock.fixed ?? []), ...ids.filter((id) => mine.has(id))])]
+      if (!seLockLeft(lock).length) lock.clearedAt = Date.now()
+    }
   }
 
   /** Clone-mutate-sync helper. Mutates a copy of the active profile's data and writes through to Firestore. */
@@ -3962,7 +3981,9 @@ export const useStore = create<StoreState>((set, get) => {
       if (!run) return
       // Ahead of the clock and running out of cards: deal another one (§24d).
       // Two blocks of lookahead, so the next card is always already there.
-      const needMore = run.pos >= run.blockIds.length - 2 && run.activeSeconds < run.targetMinutes * 60
+      // "Mistakes to fix" is exactly its misses and is never topped up.
+      const needMore =
+        !run.fix && run.pos >= run.blockIds.length - 2 && run.activeSeconds < run.targetMinutes * 60
       const extra = needMore
         ? seTopUp(seBench(data, seDesk, run.subtopicId), run.blockIds)
         : null
@@ -3993,6 +4014,9 @@ export const useStore = create<StoreState>((set, get) => {
         // reaches for the bench before it reaches for these again. Only up to
         // `pos`: a lesson closed early leaves the rest of its queue unseen.
         stat.seen = [...new Set([...stat.seen, ...run.blockIds.slice(0, run.pos + 1)])]
+        // Every miss he answered again is redone, right or wrong — a wrong one
+        // is sealed afresh just below, and goes back to Dad (§24f).
+        if (run.fix) seMarkFixed(d, run.subtopicId, run.answers.map((a) => a.id))
         if (wrong.length) {
           d.steugene.locks.push({
             id: `lock-${Date.now().toString(36)}`,
@@ -4002,6 +4026,32 @@ export const useStore = create<StoreState>((set, get) => {
           })
         }
         d.steugene.run = null
+      })
+    },
+
+    seStartFix(subtopicId) {
+      if (get().data.steugene.run?.answers.length) get().seFinish()
+      const { data, seDesk } = get()
+      const left = seFixGroups(data.steugene.locks).find((g) => g.subtopicId === subtopicId)?.left ?? []
+      const dealable = new Set(seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId))).map((b) => b.id))
+      const ids = [...new Set(left.map((m) => m.id))]
+      // A miss whose card has since left the pack can never be redone, so it
+      // is ticked off rather than left in the row for ever.
+      const gone = ids.filter((id) => !dealable.has(id))
+      const blockIds = ids.filter((id) => dealable.has(id))
+      commit((d) => {
+        if (gone.length) seMarkFixed(d, subtopicId, gone)
+        if (!blockIds.length) return
+        d.steugene.run = {
+          subtopicId,
+          startedAt: Date.now(),
+          targetMinutes: data.steugene.minutes,
+          activeSeconds: 0,
+          blockIds,
+          pos: 0,
+          answers: [],
+          fix: true,
+        }
       })
     },
 

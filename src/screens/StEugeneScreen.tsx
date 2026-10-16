@@ -21,7 +21,7 @@ import {
   type SeTerm,
 } from '../logic/steugene'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
-import { SE_LENGTHS } from '../logic/steugeneLesson'
+import { SE_LENGTHS, seFixGroups } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { speak } from '../lib/speak'
 import { dayKey, prettyDay } from '../logic/dates'
@@ -47,9 +47,23 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
 const TERMS: SeTerm[] = ['term1', 'general', 'term2']
 
 function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
-  const { data } = useStore()
+  const { data, seStartFix } = useStore()
   const [open, setOpen] = useState<string | null>(seFind(CURRENT_SUBTOPIC)?.subject.id ?? 'math')
   const [picked, setPicked] = useState<string | null>(null)
+  const [fixing, setFixing] = useState<string | null>(null)
+  const fixes = seFixGroups(data.steugene.locks)
+
+  const fix = async (subtopicId: string) => {
+    const run = data.steugene.run
+    if (!(run?.fix && run.subtopicId === subtopicId)) {
+      sfx.fanfare()
+      setFixing(subtopicId)
+      await ensurePack(subtopicId)
+      seStartFix(subtopicId)
+    }
+    walkIn()
+    setTab('lesson')
+  }
 
   return (
     <>
@@ -58,10 +72,30 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
         Your whole year, in the order your class does it. Tap a topic to start.
       </p>
 
-      {data.steugene.run && (
-        <button className="btn btn--blue" style={{ marginBottom: 12 }} onClick={() => setTab('lesson')}>
-          ▶️ Carry on with {seFind(data.steugene.run.subtopicId)?.subtopic.title}
-        </button>
+      <OpenLesson onIn={() => setTab('lesson')} />
+
+      {fixes.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          {fixes.map((g) => (
+            <button
+              key={g.subtopicId}
+              className="se-topic se-topic--fix"
+              disabled={!!fixing}
+              onClick={() => void fix(g.subtopicId)}
+            >
+              <span className="se-topic__emoji">🔧</span>
+              <span className="se-topic__body">
+                <span className="se-topic__title">
+                  {seFind(g.subtopicId)?.subtopic.title ?? g.subtopicId} — mistakes to fix
+                </span>
+                <span className="se-topic__sample">
+                  {fixing === g.subtopicId ? 'Getting it ready…' : 'Dad unlocked these. One more go at each.'}
+                </span>
+              </span>
+              <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>
+            </button>
+          ))}
+        </div>
       )}
 
       {TERMS.map((term) => {
@@ -179,7 +213,7 @@ function TopicSheet({
   const pending = asks.filter((r) => r.status === 'pending')
   const locked = data.steugene.locks.filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
   const inFlight = data.steugene.run
-  const resuming = inFlight?.subtopicId === subtopicId
+  const resuming = inFlight?.subtopicId === subtopicId && !inFlight.fix
   if (!where) return null
 
   // The pack is its own chunk (see steugene/packs/generated), so it has to
@@ -191,6 +225,7 @@ function TopicSheet({
     setOpening(true)
     await ensurePack(subtopicId)
     seStart(subtopicId)
+    walkIn()
     onClose()
     setTab('lesson')
   }
@@ -237,11 +272,12 @@ function TopicSheet({
             className="btn btn--blue"
             onClick={() => {
               sfx.click()
+              walkIn()
               onClose()
               setTab('lesson')
             }}
           >
-            ▶️ Carry on where you stopped
+            ▶️ Resume
           </button>
         )}
 
@@ -252,7 +288,7 @@ function TopicSheet({
             disabled={opening}
             onClick={() => void start()}
           >
-            {opening ? 'Getting it ready…' : resuming ? '🔄 Start a fresh one' : '▶️ Start the lesson'}
+            {opening ? 'Getting it ready…' : resuming ? '🔄 Start over' : '▶️ Start the lesson'}
           </button>
         ) : (
           <p className="muted" style={{ marginTop: 8 }}>
@@ -262,7 +298,8 @@ function TopicSheet({
 
         {written && inFlight && !resuming && (
           <p className="muted" style={{ marginTop: 10 }}>
-            Starting this one finishes your {seFind(inFlight.subtopicId)?.subtopic.title} lesson.
+            Starting this one finishes your {seFind(inFlight.subtopicId)?.subtopic.title}
+            {inFlight.fix ? ' mistakes to fix' : ' lesson'}.
           </p>
         )}
 
@@ -419,6 +456,7 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
           setOpening(true)
           void ensurePack(here.id).then(() => {
             seStart(here.id)
+            walkIn()
             setTab('lesson')
           })
         }}
@@ -440,9 +478,68 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
 
 // --- the lesson --------------------------------------------------------------------
 
+/**
+ * The lesson this app session has already walked into, by its `startedAt`.
+ * One that is open but is not this one — the app was closed mid-lesson, or he
+ * came in by the 📘 tab — is asked about first: ▶️ Resume or 🔄 Start over.
+ * Module state on purpose: it is forgotten exactly when the app is.
+ */
+let walkedInto: number | null = null
+function walkIn() {
+  walkedInto = useStore.getState().data.steugene.run?.startedAt ?? null
+}
+
+/** ⏸ The lesson still open: ▶️ Resume it, or 🔄 Start it over (§24d). */
+function OpenLesson({ onIn }: { onIn: () => void }) {
+  const { data, seStart, seStartFix } = useStore()
+  const [opening, setOpening] = useState(false)
+  const run = data.steugene.run
+  if (!run) return null
+  const { subtopicId, fix } = run
+
+  return (
+    <div className="card se-open">
+      <div className="se-open__title">
+        ⏸ {seFind(subtopicId)?.subtopic.title}
+        {fix && ' — mistakes to fix'}
+      </div>
+      <p className="muted">You stopped in the middle of this one.</p>
+      <div className="se-open__btns">
+        <button
+          className="btn btn--blue"
+          disabled={opening}
+          onClick={() => {
+            sfx.click()
+            walkIn()
+            onIn()
+          }}
+        >
+          ▶️ Resume
+        </button>
+        <button
+          className="btn btn--ghost"
+          disabled={opening}
+          onClick={async () => {
+            sfx.fanfare()
+            setOpening(true)
+            await ensurePack(subtopicId)
+            if (fix) seStartFix(subtopicId)
+            else seStart(subtopicId)
+            walkIn()
+            onIn()
+          }}
+        >
+          {opening ? 'Getting it ready…' : '🔄 Start over'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
   const { data, seResume } = useStore()
   const run = data.steugene.run
+  const [, rerender] = useState(0)
   // A reload (or the app being killed) lands here with a lesson in flight and
   // nothing in memory to render it from, so fetch the chunk back first.
   const [ready, setReady] = useState(() => !run || !!packFor(run.subtopicId))
@@ -466,6 +563,7 @@ function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
   }, [!!run, ready, resumed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (run && !ready) return <div className="card">Opening your lesson…</div>
+  if (run && walkedInto !== run.startedAt) return <OpenLesson onIn={() => rerender((n) => n + 1)} />
   if (run) return <LessonPlayer onLeave={() => setTab('subjects')} />
   return (
     <>

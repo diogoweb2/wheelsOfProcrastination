@@ -11,6 +11,7 @@
 // content before the time is up is the one failure mode that matters, which is
 // why every pack carries far more `extra` than `core`.
 import type { SeBlock, SePack } from '../steugene/types'
+import type { SeAnswer, SeFixLock } from '../types'
 
 /** Allowed lesson lengths, in minutes. The middle one is the default. */
 export const SE_LENGTHS = [30, 40, 60] as const
@@ -129,6 +130,40 @@ export function seAvailable(pack: SePack | null, generated: SeBlock[]): SeBlock[
     out.push(b)
   }
   return out
+}
+
+/**
+ * The same blocks, plus every video question as a card of its own, under the
+ * id it is filed as (`<video>-q<n>`, see VideoCard). A miss on a video
+ * question is redone as just that question, not as the whole video again.
+ */
+export function seWithChecks(blocks: SeBlock[]): SeBlock[] {
+  const checks = blocks.flatMap((b) =>
+    b.kind === 'video' ? b.checks.map((c, i): SeBlock => ({ ...c, kind: 'choice', id: `${b.id}-q${i}` })) : [],
+  )
+  return [...blocks, ...checks]
+}
+
+// --- Mistakes to fix (§24f) ----------------------------------------------------
+
+/** The misses in a lock he has not redone yet. */
+export function seLockLeft(lock: SeFixLock): SeAnswer[] {
+  const fixed = new Set(lock.fixed ?? [])
+  return lock.mistakes.filter((m) => !fixed.has(m.id))
+}
+
+/**
+ * What Dad has unlocked and he has not redone yet, one group per subtopic:
+ * the "Rational numbers — mistakes to fix" rows. Oldest group first.
+ */
+export function seFixGroups(locks: SeFixLock[]): { subtopicId: string; left: SeAnswer[] }[] {
+  const groups = new Map<string, SeAnswer[]>()
+  for (const lock of [...locks].sort((a, b) => a.at - b.at)) {
+    if (!lock.allowedAt || lock.clearedAt) continue
+    const left = seLockLeft(lock)
+    if (left.length) groups.set(lock.subtopicId, [...(groups.get(lock.subtopicId) ?? []), ...left])
+  }
+  return [...groups].map(([subtopicId, left]) => ({ subtopicId, left }))
 }
 
 // --- Build-your-own-answer tiles (§24f) --------------------------------------

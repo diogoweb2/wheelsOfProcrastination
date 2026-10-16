@@ -18,7 +18,7 @@ import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
 import { packFor } from '../../steugene/packs'
-import { seAvailable, seTiles } from '../../logic/steugeneLesson'
+import { seAvailable, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
@@ -119,13 +119,14 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
 
   const flushNow = useActiveClock(!!run, seTick)
 
-  // Everything that could be dealt, by id. Note this is NOT filtered by the
+  // Everything that could be dealt, by id — video questions on their own too,
+  // which is how "mistakes to fix" deals one. Note this is NOT filtered by the
   // fix-lock: a block already in the queue stays playable even if a lock was
   // written mid-lesson.
   const byId = useMemo(() => {
     if (!run) return new Map<string, SeBlock>()
     const generated = seDesk.generated.filter((g) => g.subtopicId === run.subtopicId).flatMap((g) => g.blocks)
-    return new Map(seAvailable(packFor(run.subtopicId), generated).map((b) => [b.id, b]))
+    return new Map(seWithChecks(seAvailable(packFor(run.subtopicId), generated)).map((b) => [b.id, b]))
   }, [run?.subtopicId, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
@@ -142,7 +143,8 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
     const fresh = useStore.getState().data.steugene.run ?? run
     // §24d — the CLOCK ends the lesson, at the end of a card. The queue is
     // dealt with headroom precisely so it is rarely what runs out first.
-    const timeUp = fresh.activeSeconds >= fresh.targetMinutes * 60
+    // "Mistakes to fix" has no clock: it ends when the misses do.
+    const timeUp = !fresh.fix && fresh.activeSeconds >= fresh.targetMinutes * 60
     if (timeUp || fresh.pos + 1 >= fresh.blockIds.length) {
       void confetti({ particleCount: 140, spread: 95, origin: { y: 0.5 } })
       sfx.fanfare()
@@ -193,6 +195,7 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
 
       <div className="se-lesson__where muted">
         {where?.subject.emoji} {where?.subtopic.title}
+        {run.fix && ' — mistakes to fix'}
       </div>
 
       <div key={block.id} className="se-card-in">
@@ -825,7 +828,10 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         <div className="h1">
           {right} / {answers.length} right
         </div>
-        <p className="muted">{where?.subtopic.title}</p>
+        <p className="muted">
+          {where?.subtopic.title}
+          {run?.fix && ' — mistakes to fix'}
+        </p>
         <div className="se-result__bar">
           <div style={{ width: `${pct}%` }} />
         </div>
