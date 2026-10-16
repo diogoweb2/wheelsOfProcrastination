@@ -573,5 +573,32 @@ export const pack: SePack = {
       ],
       secs: 40,
     },
+    {
+      kind: 'choice',
+      id: 'pow-x-c15',
+      prompt: 'A full stack is 64 items. 64 is 2 to which power?',
+      options: ['2⁶', '2⁸', '2⁴'],
+      answer: 0,
+      why: '2 × 2 × 2 × 2 × 2 × 2 = 64: six 2s, so 64 = 2⁶.',
+      steps: [
+        { text: 'Keep doubling from 2.' },
+        { text: '2, 4, 8, 16…' },
+        { text: 'Count the doublings. Other: 16 = 2⁴.' },
+      ],
+    },
+    {
+      kind: 'build',
+      id: 'pow-x-b4',
+      prompt: 'One water block in the middle keeps a 9-by-9 square of farmland wet. A square farm covers 81 blocks. How long is each side?',
+      art: { art: 'blocks', w: 9, h: 9, tile: 'dirt', paint: [{ x: 4, y: 4, w: 1, h: 1, tile: 'water' }] },
+      answer: '9',
+      decoys: ['3', '8'],
+      why: '9 × 9 = 81, so √81 = 9 blocks on each side.',
+      steps: [
+        { text: 'Which number times itself gives the area?' },
+        { text: 'Other: 49.' },
+        { text: '7 × 7, so 7.' },
+      ],
+    },
   ],
 }

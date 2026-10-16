@@ -15,7 +15,8 @@ const PALETTE = ['#49acf2', '#b15be2', '#60aa3a', '#d37841', '#ffd83d', '#e8312a
 
 /** "$32", but "32%" and "32 kg": a currency sign goes in front. */
 function withUnit(v: number, unit: string): string {
-  return unit === '$' ? `$${v}` : `${v}${unit}`
+  const n = v < 0 ? `−${-v}` : `${v}`
+  return unit === '$' ? `$${n}` : `${n}${unit}`
 }
 
 // --- code ---------------------------------------------------------------------
@@ -315,7 +316,7 @@ export function Chart({ art }: { art: ArtOf<'chart'> }) {
         <g key={v}>
           <line x1={left} y1={Y(v)} x2={right} y2={Y(v)} stroke="var(--line)" strokeWidth={v === lo ? 2 : 0.8} opacity={v === lo ? 1 : 0.6} />
           <text x={left - 5} y={Y(v) + 4} textAnchor="end" fontSize={10} fontWeight={800} fill="var(--muted)">
-            {v}
+            {withUnit(v, '')}
           </text>
         </g>
       ))}
