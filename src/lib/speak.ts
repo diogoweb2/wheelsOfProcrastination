@@ -15,10 +15,24 @@
 import { inShell } from '../push'
 
 /** Symbols a speech engine reads as punctuation, or skips entirely. */
-const SAY: [RegExp, string][] = [
+const SAY: [RegExp, string | ((match: string) => string)][] = [
   [/−/g, ' minus '], // U+2212, the one the packs use
   [/(^|[\s(])-(\d)/g, '$1minus $2'], // a leading hyphen is a sign, not a dash
   [/√/g, ' the square root of '],
+  [/²/g, ' squared'],
+  [/³/g, ' cubed'],
+  [/[⁴⁵⁶⁷⁸⁹]/g, (d) => ` to the power of ${'⁴⁵⁶⁷⁸⁹'.indexOf(d) + 4}`],
+  [/(\d)½/g, '$1 and a half'], // 1½ pizzas
+  [/(\d)¼/g, '$1 and a quarter'],
+  [/(\d)¾/g, '$1 and three quarters'],
+  [/(\d)⅓/g, '$1 and a third'],
+  [/(\d)⅔/g, '$1 and two thirds'],
+  [/½/g, ' one half'],
+  [/¼/g, ' one quarter'],
+  [/¾/g, ' three quarters'],
+  [/(\d)\s:\s(\d)/g, '$1 to $2'], // a ratio, 3 : 5
+  [/≈/g, ' about '],
+  [/→/g, ' becomes '],
   [/÷/g, ' divided by '],
   [/×/g, ' times '],
   [/≥/g, ' is greater than or equal to '],
@@ -36,7 +50,7 @@ const SAY: [RegExp, string][] = [
 
 /** Turn a line of a lesson into something a speech engine says correctly. */
 export function speakable(text: string): string {
-  return SAY.reduce((out, [re, to]) => out.replace(re, to), text).trim()
+  return SAY.reduce((out, [re, to]) => (typeof to === 'string' ? out.replace(re, to) : out.replace(re, to)), text).trim()
 }
 
 export function canSpeak(): boolean {

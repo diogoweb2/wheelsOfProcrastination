@@ -48,6 +48,7 @@ export type SeIcon =
   | 'star'
   | 'skull'
   | 'player'
+  | 'torch'
 
 /** A Minecraft block face, for the grids and boxes. */
 export type SeTile = 'grass' | 'dirt' | 'stone' | 'plank' | 'glass' | 'water' | 'sand' | 'wool' | 'brick' | 'gold' | 'diamond' | 'obsidian'

@@ -152,6 +152,10 @@ const SPRITES: Record<SeIcon, SpriteDef> = {
     rows: ['.wwwwww.', 'wwwwwwww', 'wkkwwkkw', 'wkkwwkkw', 'wwwkkwww', '.wwwwww.', '.wkwkwk.', '........'],
     pal: { w: '#e8e8e8', k: '#222222' },
   },
+  torch: {
+    rows: ['...yy...', '..yoyy..', '...oo...', '...bb...', '...bb...', '...bb...', '...bb...', '...bb...'],
+    pal: { y: '#ffe34d', o: '#ff8a1f', b: '#8a5a2b' },
+  },
   player: {
     rows: ['..hhhh..', '..hssh..', '..ewew..', '..ssss..', '.cccccc.', 's.cccc.s', '..bbbb..', '..b..b..'],
     pal: { h: '#5a3a1a', s: '#e0ac7e', e: '#3a2a8a', w: '#ffffff', c: '#2fa3c6', b: '#3a3a9a' },

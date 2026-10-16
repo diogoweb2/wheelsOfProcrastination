@@ -160,6 +160,11 @@ function checkWritten(b: SeBlock, fail: (m: string) => void) {
     if (!c.why?.trim()) fail(`${where}: no "why"`)
     if (c.art) arts.push(c.art)
     for (const st of c.steps ?? []) if (st.art) arts.push(st.art)
+    stepsReadRight(c.steps, where)
+  }
+  // A walk-through step he has to read is a sentence, not a stub.
+  const stepsReadRight = (steps: { text: string }[] | undefined, where: string) => {
+    for (const st of steps ?? []) if (st.text.trim().length < 2 || /\b(TODO|TBD|fixed below)\b/i.test(st.text)) fail(`${where}: a walk-through step is a placeholder`)
   }
   // A hop is drawn to where it LANDS, and on a question that is the answer.
   // Hops belong on explanations and walk-throughs.
@@ -173,6 +178,7 @@ function checkWritten(b: SeBlock, fail: (m: string) => void) {
   if (b.kind === 'build') {
     if (b.art) arts.push(b.art)
     for (const st of b.steps ?? []) if (st.art) arts.push(st.art)
+    stepsReadRight(b.steps, b.id)
     if ((b.steps?.length ?? 0) < 2) fail(`${b.id}: a walk-through needs at least two steps`)
     if (/[−–]/.test(b.answer)) fail(`${b.id}: a build answer is typed with tiles, so its minus is "-", not "−"`)
   }
