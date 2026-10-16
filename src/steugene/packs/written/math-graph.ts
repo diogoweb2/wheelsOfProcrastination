@@ -495,7 +495,7 @@ export const pack: SePack = {
           prompt: 'How many points do you need, at least, to draw a straight line?',
           options: ['1', '2', '10'],
           answer: 1,
-          why: 'Two points fix a straight line. A third is a good check.',
+          why: '2 points fix a straight line. A third is a good check.',
           steps: [
             { text: 'Through one point you can draw any line you like.' },
             { text: 'Through two points, only one straight line.' },

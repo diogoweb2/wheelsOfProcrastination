@@ -291,7 +291,7 @@ export const pack: SePack = {
       prompt: 'Usopp\'s bounty is 500,000,000. How do you say it?',
       options: ['5 hundred thousand', '500 million', '50 million'],
       answer: 1,
-      why: '500,000,000 is five hundred million.',
+      why: '500,000,000 is 500 million: five hundred million.',
       steps: [
         { text: 'Count the groups of three zeros.' },
         { text: '500 | 000 | 000: the first group is millions.' },

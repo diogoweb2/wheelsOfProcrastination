@@ -398,7 +398,7 @@ export const pack: SePack = {
       prompt: 'Which undoes "× 6"?',
       options: ['− 6', '÷ 6', '+ 6'],
       answer: 1,
-      why: 'Times and divide undo each other. Plus and minus undo each other.',
+      why: '÷ 6 undoes × 6. Times and divide undo each other; plus and minus undo each other.',
       steps: [
         { text: 'What undoes "÷ 5"?' },
         { text: 'Its opposite: × 5.' },

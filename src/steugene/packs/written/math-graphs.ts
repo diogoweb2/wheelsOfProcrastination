@@ -212,7 +212,7 @@ export const pack: SePack = {
       art: { art: 'chart', type: 'bar', labels: ['Isagi', 'Rin'], values: [82, 90], min: 80, title: 'career goals' },
       options: ['The bars are the wrong colour', 'The scale does not start at 0', 'Rin really is 5 times better'],
       answer: 1,
-      why: 'Real numbers: 82 against 90. Starting the scale at 80 makes a small gap look huge.',
+      why: 'The scale does not start at 0 — it starts at 80. Real numbers: 82 against 90, a small gap made to look huge.',
       steps: [
         { text: 'Always check where the scale starts.' },
         { text: 'If it starts above 0, the bars are cut off at the bottom.' },

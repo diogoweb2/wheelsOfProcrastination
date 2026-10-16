@@ -267,7 +267,7 @@ export const pack: SePack = {
       prompt: 'Which is the FAIREST way to choose 20 kids from a school of 400?',
       options: ['the first 20 kids through the door', '20 names drawn from a hat', 'the 20 who volunteer'],
       answer: 1,
-      why: 'Names from a hat: everyone has the same chance. That is a random sample.',
+      why: '20 names drawn from a hat: everyone has the same chance. That is a random sample.',
       steps: [
         { text: 'First at the door: early arrivers only.' },
         { text: 'Volunteers: only people who like surveys.' },
@@ -368,7 +368,7 @@ export const pack: SePack = {
       prompt: 'Which is a better survey answer choice for "How many hours do you game a day?"',
       options: ['a lot / some / not much', '0–1, 1–2, 2–3, 3+', 'yes / no'],
       answer: 1,
-      why: 'Number ranges give data you can compare. "A lot" means different things to different people.',
+      why: 'Ranges like 0–1, 1–2, 2–3, 3+ give data you can compare. "A lot" means different things to different people.',
       steps: [
         { text: 'One kid\'s "a lot" is 1 hour. Another\'s is 6.' },
         { text: 'Ranges with numbers mean the same to everyone.' },

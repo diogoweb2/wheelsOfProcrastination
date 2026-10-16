@@ -227,7 +227,7 @@ export const pack: SePack = {
       prompt: 'A Roblox game hits 10⁶ visits. How many visits is that?',
       options: ['60', '1,000,000', '100,000,000'],
       answer: 1,
-      why: '10⁶ is 1 followed by 6 zeros: one million.',
+      why: '10⁶ is 1 followed by 6 zeros: 1,000,000, one million.',
       steps: [
         { text: 'Different one: 10³.' },
         { text: '10 × 10 × 10.' },

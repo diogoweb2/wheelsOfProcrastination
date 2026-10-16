@@ -152,6 +152,14 @@ type Check = Omit<SeChoice, 'kind' | 'id'>
 function checkWritten(b: SeBlock, fail: (m: string) => void) {
   const arts: SeArt[] = []
   const ask = (c: Check, where: string) => {
+    // The key has to agree with its own explanation. A "why" that works the
+    // sum out to 80 under an option marked "100°" is a mis-keyed question,
+    // and on this app a mis-keyed question seals his RIGHT answer away (§24f).
+    const nums = (t: string) => (t.replace(/−/g, '-').match(/-?\d[\d,]*(?:\.\d+)?/g) ?? []).map((n) => Number(n.replace(/,/g, '')))
+    const keyNums = nums(c.options[c.answer] ?? '')
+    const said = nums(c.why)
+    if (keyNums.length && !keyNums.some((n) => said.some((w) => Math.abs(w - n) < 1e-9)))
+      fail(`${where}: the "why" never says the keyed answer (${c.options[c.answer]})`)
     // §24f: the right answer must never be the one that LOOKS right — the
     // longest option is the oldest tell there is.
     const len = c.options.map((o) => o.length)

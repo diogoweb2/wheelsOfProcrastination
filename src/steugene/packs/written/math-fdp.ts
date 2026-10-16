@@ -319,7 +319,7 @@ export const pack: SePack = {
       art: { art: 'pizza', pies: [{ slices: 3, take: 1 }] },
       options: ['0.3', '0.333…', '3.333…'],
       answer: 1,
-      why: '1 ÷ 3 = 0.3333… and the 3s go on forever.',
+      why: '1 ÷ 3 = 0.333… and the 3s go on forever.',
       steps: [
         { text: 'Different one: 2/3.' },
         { text: '2 ÷ 3 = 0.6666…' },

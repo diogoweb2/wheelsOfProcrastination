@@ -122,7 +122,7 @@ export const pack: SePack = {
           prompt: 'Which one is an EQUATION, not just an expression?',
           options: ['4x + 1', '4x + 1 = 9', '4x + 1 − 9'],
           answer: 1,
-          why: 'An equation has an = sign. An expression does not.',
+          why: '4x + 1 = 9 has an = sign, so it is an equation. An expression does not.',
           steps: [
             { text: 'Check: is 2n − 5 an equation?' },
             { text: 'No = sign.' },

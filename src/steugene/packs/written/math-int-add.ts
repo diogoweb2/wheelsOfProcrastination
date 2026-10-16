@@ -126,7 +126,7 @@ export const pack: SePack = {
           prompt: 'A positive chip and a negative chip together are worth…',
           options: ['1', '0', '2'],
           answer: 1,
-          why: '+1 and −1 cancel. That pair is a zero pair.',
+          why: '+1 and −1 cancel to 0. That pair is a zero pair.',
           steps: [
             { text: 'Try three of each: +3 and −3.' },
             { text: 'Three zero pairs.' },
@@ -544,7 +544,7 @@ export const pack: SePack = {
           prompt: 'To do 2 − 5 with chips, you have only 2 positive chips. What do you add first?',
           options: ['5 negative chips', '3 zero pairs', '5 positive chips'],
           answer: 1,
-          why: 'Zero pairs change nothing, but they give you enough positives to take 5 away.',
+          why: 'Add 3 zero pairs. They change nothing, but they give you enough positives to take 5 away.',
           steps: [
             { text: 'Different one: 1 − 4.' },
             { text: 'Add 3 zero pairs: now 4 positives and 3 negatives.' },

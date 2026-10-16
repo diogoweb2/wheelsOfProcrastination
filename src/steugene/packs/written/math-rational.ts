@@ -104,7 +104,7 @@ export const pack: SePack = {
       },
       options: ['You — Y −20 is smaller', 'Your friend — Y −59', 'Both are the same depth'],
       answer: 1,
-      why: 'Your friend is further down. On a number line, further down (or further left) is smaller.',
+      why: 'Your friend at Y −59 is further down. Further down (or further left on a line) is smaller.',
       steps: [
         { text: 'Different pair: Y −5 and Y −40.' },
         { text: 'Picture them in the ground. −40 is 40 blocks under Y 0. −5 is only 5 under.' },
@@ -119,7 +119,7 @@ export const pack: SePack = {
       prompt: 'Which one of these is NOT a rational number?',
       options: ['−8 (a whole number)', 'π = 3.14159…', '0.25 (a quarter)'],
       answer: 1,
-      why: 'π never ends and never repeats, so no fraction equals it exactly. −8 is −8/1 and 0.25 is 1/4.',
+      why: 'π = 3.14159… never ends and never repeats, so no fraction equals it exactly. −8 is −8/1 and 0.25 is 1/4.',
       steps: [
         { text: 'Try the test on a different number: √9.' },
         { text: '√9 = 3, and 3 can be written as 3/1. So √9 IS rational.' },
@@ -682,7 +682,7 @@ export const pack: SePack = {
           prompt: 'A point sits exactly halfway between 2 and 3. It is…',
           options: ['2.3', '2.5', '5'],
           answer: 1,
-          why: 'Halfway between two whole numbers always ends in .5.',
+          why: 'Halfway between 2 and 3 is 2.5. Halfway between two whole numbers always ends in .5.',
           steps: [
             { text: 'Different pair: halfway between −6 and −5.' },
             { text: 'Mark both and find the middle.', art: { art: 'numberline', from: -7, to: -4, points: [{ at: -5.5, label: '−5.5', tone: 'focus' }] } },
@@ -709,7 +709,7 @@ export const pack: SePack = {
       prompt: 'Which list is in order, smallest to largest?',
       options: ['−0.75, −1.5, 0, 1/4', '−1.5, −0.75, 0, 1/4', '0, 1/4, −0.75, −1.5'],
       answer: 1,
-      why: 'Every negative comes before zero, and the most negative comes first of all.',
+      why: '−1.5, −0.75, 0, 1/4. Every negative comes before zero, and the most negative comes first of all.',
       steps: [
         { text: 'Different list: 0.5, −2, −0.1.' },
         { text: 'Pull the negatives out first: −2 and −0.1.' },

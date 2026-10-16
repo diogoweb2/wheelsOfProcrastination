@@ -148,7 +148,7 @@ export const pack: SePack = {
           prompt: 'To compare −3/4 and −0.7, the easiest first move is…',
           options: ['ignore both minus signs completely', 'turn −3/4 into a decimal', 'pick whichever looks shorter'],
           answer: 1,
-          why: 'Once both are decimals (−0.75 and −0.70) you can line them up and compare.',
+          why: 'Turn −3/4 into a decimal first. Once both are decimals (−0.75 and −0.70) you can line them up and compare.',
           steps: [
             { text: 'Different pair: −1/2 and −0.4.' },
             { text: '−1/2 = −0.5.' },
@@ -410,7 +410,7 @@ export const pack: SePack = {
       art: { art: 'bars', rows: [{ label: 'Pikachu', value: 0.4, tone: 'focus' }, { label: 'Meowth', value: 0.4, tone: 'calm' }], unit: ' m' },
       options: ['0.4 > 0.4', '0.4 < 0.4', '0.4 = 0.4'],
       answer: 2,
-      why: 'Same number, same height. Neither is bigger, so it is =.',
+      why: 'Same number, same height: 0.4 = 0.4. Neither is bigger.',
       steps: [
         { text: 'Different pair: 0.50 and 0.5.' },
         { text: 'Add or remove the end zero: they are the same number.' },

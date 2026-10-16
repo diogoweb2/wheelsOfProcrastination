@@ -213,7 +213,7 @@ export const pack: SePack = {
       art: { art: 'storm', d: 'across', ring: 'round' },
       options: ['Straight across, through the centre', 'Round it — about 3 times longer', 'They are the same'],
       answer: 1,
-      why: 'The way round is π ≈ 3.14 times the way across, for every circle.',
+      why: 'Round it — about 3 times longer. The way round is π ≈ 3.14 times the way across, for every circle.',
       steps: [
         { text: 'Check with a 10 m circle.' },
         { text: 'Across: 10 m. Round: 31.4 m.' },

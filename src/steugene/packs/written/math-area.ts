@@ -125,7 +125,7 @@ export const pack: SePack = {
           prompt: 'The formula for the area of a triangle is…',
           options: ['b × h × 2', 'b × h ÷ 2', 'b + h'],
           answer: 1,
-          why: 'A triangle is half of the rectangle around it.',
+          why: 'A triangle is half of the rectangle around it: b × h ÷ 2.',
           steps: [
             { text: 'Base 6, height 4.' },
             { text: '6 × 4 = 24.' },

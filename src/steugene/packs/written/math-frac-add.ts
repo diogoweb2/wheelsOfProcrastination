@@ -564,7 +564,7 @@ export const pack: SePack = {
           prompt: 'Which one NEEDS a common denominator first?',
           options: ['2/3 × 1/4', '2/3 + 1/4', '2/3 ÷ 1/4'],
           answer: 1,
-          why: 'Adding and subtracting need same-size slices. Multiplying and dividing do not.',
+          why: '2/3 + 1/4 needs twelfths first. Adding and subtracting need same-size slices; × and ÷ do not.',
           steps: [
             { text: 'Try 1/2 × 1/3: tops 1 × 1, bottoms 2 × 3. 1/6. No common bottom needed.' },
             { text: 'Try 1/2 + 1/3: you need sixths first.' },
