@@ -718,5 +718,37 @@ export const pack: SePack = {
         { text: '90°.' },
       ],
     },
+    {
+      kind: 'video',
+      id: 'grs-x-v1',
+      youtube: 'yrTB5JSQPqY',
+      title: 'Types of graphs, and when to use each one',
+      by: 'MooMooMath and Science',
+      seconds: 192,
+      checks: [
+        {
+          prompt: 'You want to show how your XP changed over 7 days. Which graph?',
+          options: ['a line graph', 'a circle graph', 'a scatter plot'],
+          answer: 0,
+          why: 'A line graph is for one thing changing as time goes on.',
+          steps: [
+            { text: 'Changing over time goes on a line.' },
+            { text: 'Shares of one whole go in a circle.' },
+            { text: 'Two numbers paired up go on a scatter.' },
+          ],
+        },
+        {
+          prompt: 'A circle graph is the right pick when the parts…',
+          options: ['add up to one whole', 'are measured over time', 'come from different days'],
+          answer: 0,
+          why: 'Every slice is a share of the same 100%, so the parts must make one whole.',
+          steps: [
+            { text: 'One day of screen time split by app: one whole → circle.' },
+            { text: 'Goals scored by five players: separate totals → bar.' },
+            { text: 'Ask "is this one whole?" before you draw.' },
+          ],
+        },
+      ],
+    },
   ],
 }

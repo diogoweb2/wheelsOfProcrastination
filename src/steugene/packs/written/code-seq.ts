@@ -227,6 +227,38 @@ export const pack: SePack = {
         { text: '6 left.' },
       ],
     },
+    {
+      kind: 'video',
+      id: 'seq-v1',
+      youtube: 'eSYeHlwDCNA',
+      title: 'Computer Science Basics: Sequences, Selections, and Loops',
+      by: 'LearnFree',
+      seconds: 147,
+      checks: [
+        {
+          prompt: 'A sequence means the steps run…',
+          options: ['in the order you wrote them', 'all at the very same moment', 'in whatever order it likes'],
+          answer: 0,
+          why: 'A computer finishes line 1 before it looks at line 2.',
+          steps: [
+            { text: 'Chop the tree, then craft the planks.' },
+            { text: 'Swap them and there is nothing to craft with.' },
+            { text: 'The order IS part of the instruction.' },
+          ],
+        },
+        {
+          prompt: 'Which one of these is a SELECTION?',
+          options: ['if lava then jump', 'walk, then walk again', 'print out your score'],
+          answer: 0,
+          why: 'A selection is a choice the program makes: if this, then that.',
+          steps: [
+            { text: 'walk then mine is a sequence.' },
+            { text: 'repeat 4 [ walk ] is a loop.' },
+            { text: 'if hp < 20 then heal is a selection.' },
+          ],
+        },
+      ],
+    },
   ],
 
   extra: [
@@ -451,38 +483,6 @@ export const pack: SePack = {
       secs: 50,
     },
     {
-      kind: 'video',
-      id: 'seq-x-v1',
-      youtube: 'z2IBSAuImyk',
-      title: 'Input and Output Tables (Function Tables)',
-      by: 'Math with Mr. J',
-      seconds: 306,
-      checks: [
-        {
-          prompt: 'In an input/output table, the rule is…',
-          options: ['the same job done to every input', 'the biggest number anywhere in the table', 'the first row only'],
-          answer: 0,
-          why: 'One rule, used on every input, makes every output. Just like a line of code.',
-          steps: [
-            { text: 'Input 2 → output 4.' },
-            { text: 'Input 3 → output 6.' },
-            { text: 'Same job each time: × 2.' },
-          ],
-        },
-        {
-          prompt: 'The rule is × 3. The input is 5. What is the output?',
-          options: ['8', '15', '53'],
-          answer: 1,
-          why: '5 × 3 = 15.',
-          steps: [
-            { text: 'Rule × 3, input 4.' },
-            { text: '4 × 3.' },
-            { text: '12.' },
-          ],
-        },
-      ],
-    },
-    {
       kind: 'explain',
       id: 'seq-x-e2',
       emoji: '🌋',
@@ -638,6 +638,38 @@ export const pack: SePack = {
         { text: 'Order changes the answer.' },
       ],
       secs: 60,
+    },
+    {
+      kind: 'video',
+      id: 'seq-x-v1',
+      youtube: 'kM9ASKAni_s',
+      title: 'Computer Science Basics: Algorithms',
+      by: 'LearnFree',
+      seconds: 150,
+      checks: [
+        {
+          prompt: 'An algorithm is…',
+          options: ['a list of steps that solves something', 'a special part found inside a computer', 'a bug hiding in the program'],
+          answer: 0,
+          why: 'An algorithm is the recipe: the steps, in the order that works.',
+          steps: [
+            { text: 'A pizza recipe is an algorithm.' },
+            { text: 'So is mine, smelt, craft.' },
+            { text: 'Steps plus order equals algorithm.' },
+          ],
+        },
+        {
+          prompt: 'Two algorithms give the same answer. The better one usually…',
+          options: ['takes fewer steps', 'uses longer names', 'has more comments'],
+          answer: 0,
+          why: 'Fewer steps is less work for the computer and less for you to get wrong.',
+          steps: [
+            { text: 'Place 10 blocks one line at a time: 10 lines.' },
+            { text: 'for i = 1, 10 do: one line.' },
+            { text: 'Same wall, a tenth of the code.' },
+          ],
+        },
+      ],
     },
   ],
 }

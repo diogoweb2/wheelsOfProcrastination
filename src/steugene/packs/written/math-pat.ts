@@ -642,5 +642,69 @@ export const pack: SePack = {
         { text: 'Other: start 5, +2 a day → 5 + 2d.' },
       ],
     },
+    {
+      kind: 'video',
+      id: 'pat-x-v1',
+      youtube: 'VgBSzYBMbh4',
+      title: 'Find the nth term in a sequence',
+      by: 'Maths with Jay',
+      seconds: 189,
+      checks: [
+        {
+          prompt: '4, 7, 10, 13, … The rule for term n is…',
+          options: ['3n + 1', 'n + 3', '4n − 1'],
+          answer: 0,
+          why: 'It climbs 3 each step, so 3n; and 3 × 1 = 3, which needs +1 to reach the 4.',
+          steps: [
+            { text: 'Try 5, 9, 13 — it climbs 4, so start with 4n.' },
+            { text: '4 × 1 = 4, but the first term is 5.' },
+            { text: 'So the rule is 4n + 1. Find the climb, then fix the start.' },
+          ],
+        },
+        {
+          prompt: 'Why find the rule instead of counting up to term 100?',
+          options: ['you can jump straight to term 100', 'the numbers eventually get smaller', 'counting them is not allowed'],
+          answer: 0,
+          why: 'With a rule, term 100 is one calculation instead of ninety-nine steps.',
+          steps: [
+            { text: 'Rule: 3n + 1.' },
+            { text: 'Term 100 is 3 × 100 + 1.' },
+            { text: '301, in one line, without counting.' },
+          ],
+        },
+      ],
+    },
+    {
+      kind: 'video',
+      id: 'pat-x-v2',
+      youtube: 'z2IBSAuImyk',
+      title: 'Input and output tables (function tables)',
+      by: 'Math with Mr. J',
+      seconds: 306,
+      checks: [
+        {
+          prompt: 'A table says input 2 → 7 and input 3 → 10. The rule is…',
+          options: ['× 3 + 1', '+ 5', '× 4 − 1'],
+          answer: 0,
+          why: '2 × 3 + 1 = 7 and 3 × 3 + 1 = 10. The other two only fit the first row.',
+          steps: [
+            { text: 'Try a table: 1 → 4 and 2 → 7.' },
+            { text: '+3 works on the first row and fails on the second.' },
+            { text: '× 3 + 1 works on both. A rule has to fit EVERY row.' },
+          ],
+        },
+        {
+          prompt: 'An input-output table is really…',
+          options: ['one rule used on different inputs', 'a list of numbers with no pattern', 'a graph that lost both of its axes'],
+          answer: 0,
+          why: 'Every row is the same rule, fed a different starting number.',
+          steps: [
+            { text: 'Rule: × 2.' },
+            { text: 'Inputs 1, 2, 3 give outputs 2, 4, 6.' },
+            { text: 'Three rows, one rule.' },
+          ],
+        },
+      ],
+    },
   ],
 }

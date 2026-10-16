@@ -435,38 +435,6 @@ export const pack: SePack = {
       secs: 50,
     },
     {
-      kind: 'video',
-      id: 'lop-x-v2',
-      youtube: 'KWgYha0clzw',
-      title: 'Learn Python for loops in 5 minutes!',
-      by: 'Bro Code',
-      seconds: 306,
-      checks: [
-        {
-          prompt: 'A for loop repeats code…',
-          options: ['a set number of times', 'only once', 'until the computer turns off'],
-          answer: 0,
-          why: 'A for loop runs a set number of times, then stops.',
-          steps: [
-            { text: 'You say how many.' },
-            { text: 'It counts.' },
-            { text: 'It stops at the end.' },
-          ],
-        },
-        {
-          prompt: 'In Python, range(1, 11) counts…',
-          options: ['1 to 11', '1 to 10', '0 to 11'],
-          answer: 1,
-          why: 'Python stops BEFORE the last number, so 1 to 10. (Lua\'s for i = 1, 10 includes the 10.)',
-          steps: [
-            { text: 'range(1, 6).' },
-            { text: 'Stops before 6.' },
-            { text: '1 to 5.' },
-          ],
-        },
-      ],
-    },
-    {
       kind: 'explain',
       id: 'lop-x-e2',
       emoji: '🤔',
@@ -571,6 +539,38 @@ export const pack: SePack = {
         { text: 'Other: start 10, for 1–3, + 4.' },
         { text: '3 × 4 = 12.' },
         { text: '10 + 12 = 22.' },
+      ],
+    },
+    {
+      kind: 'video',
+      id: 'lop-x-v1',
+      youtube: 'L2QdKXDfa6M',
+      title: 'Learning Lua — the for loop in Roblox Studio',
+      by: 'LearningLua',
+      seconds: 169,
+      checks: [
+        {
+          prompt: 'for i = 1, 5 do … end runs how many times?',
+          options: ['5', '4', '6'],
+          answer: 0,
+          why: 'It counts 1, 2, 3, 4, 5 — five passes, one per number.',
+          steps: [
+            { text: 'Try for i = 1, 3.' },
+            { text: 'i is 1, then 2, then 3.' },
+            { text: 'Three passes. Count the numbers, not the gaps.' },
+          ],
+        },
+        {
+          prompt: 'In for i = 1, 3 do print(i) end, what does i hold on the last pass?',
+          options: ['3', '1', '0'],
+          answer: 0,
+          why: 'i walks 1, 2, 3 and stops on the end number, so the last pass holds 3.',
+          steps: [
+            { text: 'Try for i = 1, 2.' },
+            { text: 'i is 1, then i is 2.' },
+            { text: 'The last pass always holds the end number.' },
+          ],
+        },
       ],
     },
   ],

@@ -623,5 +623,37 @@ export const pack: SePack = {
       ],
       secs: 50,
     },
+    {
+      kind: 'video',
+      id: 'dbg-x-v1',
+      youtube: 'JpeE1RxNVho',
+      title: 'Print Debugging',
+      by: 'Roblox',
+      seconds: 182,
+      checks: [
+        {
+          prompt: 'Why add print() lines while you are hunting a bug?',
+          options: ['to see what the values really are', 'to make the whole script run faster', 'to delete the broken line'],
+          answer: 0,
+          why: 'print shows the value at that exact moment, so you stop guessing.',
+          steps: [
+            { text: 'The door will not open.' },
+            { text: 'print(coins) shows 9, not the 10 you expected.' },
+            { text: 'Now you know which half of the script to fix.' },
+          ],
+        },
+        {
+          prompt: 'Where does print() show its message in Roblox Studio?',
+          options: ['the Output window', 'the Explorer window', 'the Toolbox'],
+          answer: 0,
+          why: 'Output is the panel that prints messages and errors back at you.',
+          steps: [
+            { text: 'Explorer lists the parts in the game.' },
+            { text: 'Toolbox is where you get models.' },
+            { text: 'Output is the one that talks back.' },
+          ],
+        },
+      ],
+    },
   ],
 }

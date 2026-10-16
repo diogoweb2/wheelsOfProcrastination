@@ -229,6 +229,38 @@ export const pack: SePack = {
       ],
       secs: 50,
     },
+    {
+      kind: 'video',
+      id: 'cif-v1',
+      youtube: '-7C_7JBzLys',
+      title: 'If Statements — Roblox Studio for Beginners',
+      by: 'Psuedon',
+      seconds: 165,
+      checks: [
+        {
+          prompt: 'In Lua, which one ASKS whether two things are equal?',
+          options: ['==', '=', '~='],
+          answer: 0,
+          why: 'One = stores a value. Two == asks a question. ~= asks the opposite.',
+          steps: [
+            { text: 'hp = 100 puts 100 in the box.' },
+            { text: 'if hp == 100 then asks whether it is.' },
+            { text: 'Storing and asking are different jobs.' },
+          ],
+        },
+        {
+          prompt: 'if coins >= 50 then … and coins is exactly 50. What happens?',
+          options: ['it runs', 'it is skipped', 'it errors'],
+          answer: 0,
+          why: '>= means greater than OR equal, so landing exactly on 50 passes.',
+          steps: [
+            { text: 'Other test: if hp > 20, with hp = 20.' },
+            { text: '> alone does not include equal.' },
+            { text: 'Skipped. The one character changes the answer.' },
+          ],
+        },
+      ],
+    },
   ],
 
   extra: [
@@ -658,6 +690,38 @@ export const pack: SePack = {
         ],
       },
       why: 'Biggest first. If Gold (>= 100) came first, a score of 2000 would stop there.',
+    },
+    {
+      kind: 'video',
+      id: 'cif-x-v1',
+      youtube: 'Gy7vsKBQQj0',
+      title: 'If Statements • How to Script on Roblox',
+      by: 'jotslo',
+      seconds: 238,
+      checks: [
+        {
+          prompt: 'Which word closes an if block in Lua?',
+          options: ['end', 'stop', 'close'],
+          answer: 0,
+          why: 'Lua closes every if with end, so it knows where the block stops.',
+          steps: [
+            { text: 'if lava then jump() end.' },
+            { text: 'A for loop closes with end too.' },
+            { text: 'Open a block, close it with end.' },
+          ],
+        },
+        {
+          prompt: 'The condition is false and there is no else. What runs?',
+          options: ['nothing inside the if', 'the first line inside', 'the whole block anyway'],
+          answer: 0,
+          why: 'False skips the whole block, and with no else there is nothing to do instead.',
+          steps: [
+            { text: 'if shield > 0 then heal() end.' },
+            { text: 'Shield is 0, so the test is false.' },
+            { text: 'heal() never runs and the script carries on.' },
+          ],
+        },
+      ],
     },
   ],
 }
