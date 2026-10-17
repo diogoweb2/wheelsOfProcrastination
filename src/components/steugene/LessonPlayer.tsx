@@ -19,8 +19,9 @@ import confetti from 'canvas-confetti'
 import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
+import { dayKey } from '../../logic/dates'
 import { packFor } from '../../steugene/packs'
-import { SE_WARM_INTRO, seAvailable, seTiles, seWithChecks } from '../../logic/steugeneLesson'
+import { SE_WARM_INTRO, seAvailable, seForFix, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
@@ -128,13 +129,14 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   const byId = useMemo(() => {
     if (!run) return new Map<string, SeBlock>()
     const generated = seDesk.generated.filter((g) => g.subtopicId === run.subtopicId).flatMap((g) => g.blocks)
-    const map = new Map(seWithChecks(seAvailable(packFor(run.subtopicId), generated)).map((b) => [b.id, b]))
+    const blocks = seWithChecks(seAvailable(packFor(run.subtopicId), generated))
+    const map = new Map((run.fix ? blocks.map(seForFix) : blocks).map((b) => [b.id, b]))
     // The warm-up's own title card (§24q) belongs to no pack, so it is added
     // here rather than to the bench — the bench is what gets dealt from, and
     // a top-up must never hand him the warm-up sign a second time.
     map.set(SE_WARM_INTRO.id, SE_WARM_INTRO)
     return map
-  }, [run?.subtopicId, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [run?.subtopicId, run?.fix, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
 
@@ -945,6 +947,12 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   const wrong = answers.filter((a) => !a.right)
   const nudged = answers.filter((a) => a.helped).length
   const pct = answers.length ? Math.round((right / answers.length) * 100) : 100
+  // A fix he got right on the day he missed it is not fixed yet (§24f).
+  const today = dayKey()
+  const missedToday = new Set(
+    data.steugene.locks.flatMap((l) => l.mistakes.filter((m) => dayKey(new Date(m.at)) === today).map((m) => m.id)),
+  )
+  const again = run?.fix ? answers.filter((a) => a.right && missedToday.has(a.id)).length : 0
 
   useEffect(() => {
     stopSpeaking()
@@ -973,6 +981,12 @@ function LessonResult({ onClose }: { onClose: () => void }) {
           <p className="se-result__nudged">
             🤔 You asked for a nudge {nudged === 1 ? 'once' : `${nudged} times`} instead of guessing. That is the
             right move.
+          </p>
+        )}
+        {again > 0 && (
+          <p className="muted" style={{ marginTop: 6 }}>
+            🔁 {again === 1 ? 'The one' : `The ${again}`} you got right come{again === 1 ? 's' : ''} back once more tomorrow.
+            Right on a different day is how you know it stuck.
           </p>
         )}
       </div>

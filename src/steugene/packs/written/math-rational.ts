@@ -12,6 +12,10 @@
 //     never from a "negative score", a match "wiped from the record", or a
 //     pirate holding integer chips (§24n).
 //  4. Nearly every card has a picture, and the picture never gives the answer.
+//  5. An id is never renamed once he has played it. His sealed mistakes point
+//     at it, and a miss whose card has gone can never be redone (§24f).
+//  6. A question that needs a picture to make sense names it in `lead`, and
+//     the lead uses different numbers from every question that points at it.
 import type { SePack } from '../../types'
 
 export const pack: SePack = {
@@ -92,6 +96,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-c2',
+      lead: 'rat-l2',
       prompt: 'You are at Y −20. Your friend is at Y −59. Who has the SMALLER Y number?',
       art: {
         art: 'ylevel',
@@ -250,6 +255,7 @@ export const pack: SePack = {
     {
       kind: 'game',
       id: 'rat-g1',
+      lead: 'rat-l2',
       title: 'Line them up — smallest first',
       game: {
         mode: 'order',
@@ -308,6 +314,7 @@ export const pack: SePack = {
     {
       kind: 'build',
       id: 'rat-b4',
+      lead: 'rat-l3',
       prompt: 'You stand on a slab in a cave. F3 says Y = −3½. Write it as a decimal.',
       answer: '-3.5',
       decoys: ['2', '0', '/'],
@@ -352,6 +359,73 @@ export const pack: SePack = {
   ],
 
   extra: [
+    // --- leads (§24d): each one is shown right before the questions that name it.
+    // Written for the two things his first lesson got wrong: negatives (which
+    // is smaller, how far apart) and what the digit after the dot means.
+    {
+      kind: 'explain',
+      id: 'rat-l1',
+      emoji: '🪜',
+      title: 'How far apart? Count the shaft',
+      lines: [
+        'Two levels underground. How far apart are they?',
+        'Do not add the two numbers. Count the blocks in the shaft between them.',
+        'Y −10 up to Y −3 is a shaft 7 blocks tall.',
+        'Quick way: higher minus lower. −3 − (−10) = −3 + 10 = 7.',
+      ],
+      art: {
+        art: 'ylevel',
+        from: -12,
+        to: 0,
+        step: 2,
+        marks: [
+          { at: -10, label: 'bottom −10', icon: 'player', tone: 'focus' },
+          { at: -3, label: 'top −3', icon: 'torch', tone: 'good' },
+        ],
+        dig: [-10, -3],
+      },
+      callout: { flavour: 'gotcha', text: 'A distance is never negative. Got a minus? You took them away the wrong way round.' },
+      secs: 50,
+    },
+    {
+      kind: 'explain',
+      id: 'rat-l2',
+      emoji: '⛏️',
+      title: 'Deeper means smaller',
+      lines: [
+        'Underground, the deeper you dig, the SMALLER the Y number.',
+        'Y −8 is deeper than Y −3, so −8 is smaller. Even though 8 is bigger than 3.',
+        'Pieces work the same: −0.6 sits a little below −0.2, so −0.6 is smaller.',
+        'Bigger always means higher up.',
+      ],
+      art: {
+        art: 'ylevel',
+        from: -10,
+        to: 2,
+        step: 2,
+        marks: [
+          { at: -3, label: 'you −3', icon: 'player', tone: 'good' },
+          { at: -8, label: 'friend −8', icon: 'pickaxe', tone: 'bad' },
+        ],
+      },
+      callout: { flavour: 'key', text: 'Ignore how big the digits look. Ask one thing: which one is higher up?' },
+      secs: 50,
+    },
+    {
+      kind: 'explain',
+      id: 'rat-l3',
+      emoji: '🍕',
+      title: 'The digit after the dot counts tenths',
+      lines: [
+        'Cut a pizza into 10 slices. Each slice is one tenth: 0.1.',
+        '0.3 means 3 of those 10 slices. So 0.3 = 3/10.',
+        'The 3 is a COUNT of slices. It is not the bottom of a fraction.',
+        'A half is 5 slices out of 10, so ½ = 0.5, and −1½ = −1.5.',
+      ],
+      art: { art: 'pizza', pies: [{ slices: 10, take: 3, label: '0.3 — 3 slices out of 10' }] },
+      callout: { flavour: 'gotcha', text: '0.3 is NOT 1/3. Say "three tenths" out loud and the trap disappears.' },
+      secs: 55,
+    },
     {
       kind: 'explain',
       id: 'rat-x-e1',
@@ -369,6 +443,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c1',
+      lead: 'rat-l2',
       prompt: 'Which is bigger: −4/5 or −0.9?',
       art: { art: 'numberline', from: -1, to: 0, step: 0.1, points: [{ at: -0.9, label: '−0.9', tone: 'bad' }] },
       options: ['−0.9', 'They are equal', '−4/5'],
@@ -438,6 +513,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c2',
+      lead: 'rat-l1',
       prompt: 'Diamonds at Y −59. Your base floor at Y 100. How many blocks apart?',
       art: {
         art: 'ylevel',
@@ -497,6 +573,7 @@ export const pack: SePack = {
     {
       kind: 'game',
       id: 'rat-x-g3',
+      lead: 'rat-l2',
       title: 'Drop it on the line',
       game: {
         mode: 'line',
@@ -706,6 +783,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c6',
+      lead: 'rat-l2',
       prompt: 'Which list is in order, smallest to largest?',
       options: ['−0.75, −1.5, 0, 1/4', '−1.5, −0.75, 0, 1/4', '0, 1/4, −0.75, −1.5'],
       answer: 1,
@@ -737,6 +815,7 @@ export const pack: SePack = {
     {
       kind: 'build',
       id: 'rat-x-b4',
+      lead: 'rat-e3',
       prompt: 'You eat 1 slice of a 4-slice pizza. Write 1/4 as a decimal.',
       art: { art: 'pizza', pies: [{ slices: 4, take: 1 }] },
       answer: '0.25',
@@ -752,6 +831,7 @@ export const pack: SePack = {
     {
       kind: 'build',
       id: 'rat-x-b5',
+      lead: 'rat-l1',
       prompt: 'You climb a ladder from Y −12 up to Y −4. How many blocks did you climb?',
       art: {
         art: 'ylevel',
@@ -801,6 +881,7 @@ export const pack: SePack = {
     {
       kind: 'game',
       id: 'rat-x-g4',
+      lead: 'rat-l2',
       title: 'Hardest one yet — line them up',
       game: {
         mode: 'order',
@@ -818,6 +899,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c8',
+      lead: 'rat-l3',
       prompt: 'Which is the SAME number as 0.6?',
       options: ['6/100', '3/5', '1/6'],
       answer: 1,
@@ -833,6 +915,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c9',
+      lead: 'rat-l3',
       prompt: 'Your hunger bar shows 7 of 10 drumsticks. As a decimal, that is…',
       art: { art: 'hearts', full: 7, kind: 'drumstick' },
       options: ['7.10', '0.7', '0.07'],
@@ -863,6 +946,7 @@ export const pack: SePack = {
     {
       kind: 'choice',
       id: 'rat-x-c10',
+      lead: 'rat-l2',
       prompt: 'Which number sits between −2 and −1?',
       art: { art: 'numberline', from: -3, to: 3, points: [{ at: -2, label: '−2', tone: 'calm' }, { at: -1, label: '−1', tone: 'calm' }], span: [-2, -1] },
       options: ['−2.5', '1.5', '−1.5'],
