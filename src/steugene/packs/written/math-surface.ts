@@ -119,6 +119,7 @@ export const pack: SePack = {
       title: 'How to Find the Surface Area of a Rectangular Prism',
       by: 'Math with Mr. J',
       seconds: 297,
+      watchFor: 'Why he doubles after adding only three faces.',
       checks: [
         {
           prompt: 'Why do you double after adding the three faces?',
@@ -421,6 +422,7 @@ export const pack: SePack = {
       title: 'Finding surface area using a net',
       by: 'Khan Academy',
       seconds: 213,
+      watchFor: 'What a net is, and why unfolding the box helps.',
       checks: [
         {
           prompt: 'A net is…',
@@ -453,6 +455,7 @@ export const pack: SePack = {
       title: 'How to Find the Surface Area of a Triangular Prism',
       by: 'Math with Mr. J',
       seconds: 402,
+      watchFor: 'How many rectangles it has, and how many triangles.',
       checks: [
         {
           prompt: 'A triangular prism has how many rectangle faces?',
@@ -492,6 +495,51 @@ export const pack: SePack = {
         { text: '6.' },
       ],
       secs: 30,
+    },
+    {
+      kind: 'explain',
+      id: 'sur-fn1',
+      emoji: '📦',
+      title: 'Boxing up: how many pieces to close yourself in',
+      lines: [
+        'Four walls, one floor, one roof. Six faces, and that is any box.',
+        'SURFACE AREA is those faces added up — the wrapping, not the inside.',
+        'Make the box 2 tiles on every edge and each face is 2 × 2 = 4 tiles.',
+        'Six faces × 4 tiles = 24 tiles of wrapping.',
+      ],
+      art: { art: 'prism', base: 'rect', l: 2, w: 2, h: 2, tile: 'plank', labels: { l: '2', w: '2', h: '2' }, label: 'six faces, 4 tiles each' },
+      callout: { flavour: 'key', text: 'Work out ONE face, then count how many faces look the same.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'sur-fn2',
+      prompt: 'A cube build is 3 tiles along every edge. What is its surface area?',
+      art: { art: 'prism', base: 'rect', l: 3, w: 3, h: 3, tile: 'plank', labels: { l: '3', w: '3', h: '3' } },
+      options: ['27 tiles', '54 tiles', '9 tiles'],
+      answer: 1,
+      why: 'One face is 3 × 3 = 9, and six faces makes 6 × 9 = 54 tiles.',
+      steps: [
+        { text: 'Different cube: 4 along every edge.' },
+        { text: 'One face is 4 × 4 = 16, and there are 6 of them.' },
+        { text: '6 × 16 = 96 tiles.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'build',
+      id: 'sur-fn3',
+      prompt: 'A glass box is 2 tiles wide, 2 deep and 2 high. How many tiles of glass in total?',
+      art: { art: 'prism', base: 'rect', l: 2, w: 2, h: 2, tile: 'glass', labels: { l: '2', w: '2', h: '2' } },
+      answer: '24',
+      decoys: ['8'],
+      why: 'One face is 2 × 2 = 4, and 6 faces makes 6 × 4 = 24.',
+      steps: [
+        { text: 'Different box: 5 by 5 by 5.' },
+        { text: 'One face is 25 tiles, and there are 6 faces.' },
+        { text: '= 150 tiles.' },
+      ],
+      secs: 60,
     },
   ],
 }

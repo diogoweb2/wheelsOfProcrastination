@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'Parts of a Circle: Center, Radius, Chord, and Diameter',
       by: 'Math with Mr. J',
       seconds: 328,
+      watchFor: 'Which line has to pass through the centre, and its name.',
       checks: [
         {
           prompt: 'A line from one edge to the other THROUGH the centre is the…',
@@ -434,6 +435,7 @@ export const pack: SePack = {
       title: 'Circumference of a Circle',
       by: 'Math with Mr. J',
       seconds: 417,
+      watchFor: 'What he multiplies the diameter by to get all the way round.',
       checks: [
         {
           prompt: 'If you know the diameter, the circumference is…',
@@ -466,6 +468,7 @@ export const pack: SePack = {
       title: 'What is the Radius and Diameter of a Circle?',
       by: 'Math with Mr. J',
       seconds: 232,
+      watchFor: 'Which of the two is bigger, and by exactly how much.',
       checks: [
         {
           prompt: 'A circle has diameter 18. Its radius is…',

@@ -110,6 +110,7 @@ export const pack: SePack = {
       title: 'How to Round Decimals',
       by: 'Math with Mr. J',
       seconds: 388,
+      watchFor: 'Which digit he looks at to decide up or down.',
       checks: [
         {
           prompt: 'Round 4.65 to the nearest tenth.',
@@ -507,6 +508,7 @@ export const pack: SePack = {
       title: 'Estimating Whole Number Sums & Differences',
       by: 'Math with Mr. J',
       seconds: 458,
+      watchFor: 'What he rounds to before adding, and why that is close enough.',
       checks: [
         {
           prompt: 'Estimate 587 − 212 by rounding to the nearest hundred.',
@@ -539,6 +541,7 @@ export const pack: SePack = {
       title: 'Estimating Whole Number Products',
       by: 'Math with Mr. J',
       seconds: 417,
+      watchFor: 'How much he is allowed to change the numbers by.',
       checks: [
         {
           prompt: 'Estimate 62 × 38.',

@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'Variables, Expressions, and Equations',
       by: 'Math with Mr. J',
       seconds: 253,
+      watchFor: 'Which part of 7 + y is the variable.',
       checks: [
         {
           prompt: 'In 7 + y, the variable is…',
@@ -508,6 +509,7 @@ export const pack: SePack = {
       title: 'Intro to Evaluating Algebraic Expressions',
       by: 'Math with Mr. J',
       seconds: 332,
+      watchFor: 'What he does with m before working anything out.',
       checks: [
         {
           prompt: 'Evaluate 4m + 3 when m = 5.',
@@ -540,6 +542,7 @@ export const pack: SePack = {
       title: 'What are variables, expressions, and equations?',
       by: 'Khan Academy',
       seconds: 415,
+      watchFor: 'The difference between an expression and an equation.',
       checks: [
         {
           prompt: 'A variable is…',

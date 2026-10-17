@@ -195,6 +195,7 @@ export const pack: SePack = {
       title: 'How to Calculate Sales Tax',
       by: 'Math with Mr. J',
       seconds: 441,
+      watchFor: 'Whether tax is added to the sticker price or already inside it.',
       checks: [
         {
           prompt: 'Sales tax is…',
@@ -470,6 +471,7 @@ export const pack: SePack = {
       title: 'How to Calculate a Discount and Sale Price',
       by: 'Math with Mr. J',
       seconds: 424,
+      watchFor: 'Whether the discount comes off before or after the tax.',
       checks: [
         {
           prompt: 'A discount is…',

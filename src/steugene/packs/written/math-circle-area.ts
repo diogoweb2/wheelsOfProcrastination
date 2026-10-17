@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'How to Find the Area of a Circle Given the Radius',
       by: 'Math with Mr. J',
       seconds: 342,
+      watchFor: 'What gets squared in the area formula: radius, or diameter.',
       checks: [
         {
           prompt: 'The area of a circle is…',
@@ -421,6 +422,7 @@ export const pack: SePack = {
       title: 'How to Find the Area of the Shaded Region (Circle in a Square)',
       by: 'Math with Mr. J',
       seconds: 298,
+      watchFor: 'The subtraction he does to get the leftover bit.',
       checks: [
         {
           prompt: 'To find the shaded area outside a circle but inside a square, you…',
@@ -453,6 +455,7 @@ export const pack: SePack = {
       title: 'How to Find the Area of a Circle',
       by: 'Math with Mr. J',
       seconds: 399,
+      watchFor: 'What he does with a diameter before it goes in the formula.',
       checks: [
         {
           prompt: 'A circle has diameter 10. What do you use for r?',

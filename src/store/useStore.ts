@@ -53,7 +53,7 @@ import {
 } from './storage'
 import type { SeDesk, SeBlock } from '../steugene/types'
 import { packFor } from '../steugene/packs'
-import { seAvailable, seFixGroups, seLockLeft, sePlanLesson, seTopUp, seWithChecks } from '../logic/steugeneLesson'
+import { SE_WARM_INTRO, seAvailable, seFixGroups, seLockLeft, sePlanLesson, seTopUp, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
 import { seFind } from '../logic/steugene'
 import { generateSeBlocks } from '../logic/steugeneAi'
 import { SE_HISTORY_CAP } from './storage'
@@ -450,7 +450,7 @@ interface StoreState {
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
   seTick: (seconds: number) => void
   /** File one answer. There is no un-filing it (§24f). */
-  seRecord: (a: { id: string; right: boolean; prompt: string; given: string; expected: string }) => void
+  seRecord: (a: { id: string; right: boolean; prompt: string; given: string; expected: string; helped?: boolean }) => void
   /** Move to the next block, topping the queue up if he is ahead of the clock. */
   seAdvance: () => void
   /** End the lesson: bank the stats and seal the mistakes. */
@@ -3929,7 +3929,13 @@ export const useStore = create<StoreState>((set, get) => {
       const blocks = seBench(data, seDesk, subtopicId)
       const seen = data.steugene.stats[subtopicId]?.seen ?? []
       const minutes = data.steugene.minutes
-      const plan = sePlanLesson(blocks, seen, minutes * 60)
+      // §24q — the warm-up goes first and comes out of the main plan, so a
+      // question is never asked twice in one lesson. It eats into the minutes
+      // on purpose: remembering last week IS the work.
+      const warm = seWarmUp(blocks, data.steugene.history, subtopicId)
+      const warmIds = new Set(warm.map((b) => b.id))
+      const body = sePlanLesson(blocks, seen, minutes * 60).filter((b) => !warmIds.has(b.id))
+      const plan = warm.length ? [SE_WARM_INTRO, ...warm, ...body] : body
       if (!plan.length) return
       commit((d) => {
         d.steugene.run = {
@@ -3971,6 +3977,9 @@ export const useStore = create<StoreState>((set, get) => {
         })
         stat.attempts += 1
         if (answer.right) stat.right += 1
+        // §24p — counted separately from wrong, because they mean different
+        // things: a nudge is "he needed starting", a miss is "he has it wrong".
+        if (answer.helped) stat.helped = (stat.helped ?? 0) + 1
         stat.lastAt = answer.at
       })
     },

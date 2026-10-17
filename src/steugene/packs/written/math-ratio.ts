@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'Ratios — All About Ratios',
       by: 'Math with Mr. J',
       seconds: 357,
+      watchFor: 'Which number goes first in a ratio, and whether order matters.',
       checks: [
         {
           prompt: 'A squad has 3 skins with capes and 1 without. The ratio caped : not caped is…',
@@ -521,6 +522,7 @@ export const pack: SePack = {
       title: 'Rates and Unit Rates',
       by: 'Math with Mr. J',
       seconds: 307,
+      watchFor: 'What the "unit" in unit rate is always equal to.',
       checks: [
         {
           prompt: 'A unit rate tells you the amount for…',
@@ -553,6 +555,7 @@ export const pack: SePack = {
       title: 'How to Solve Proportions',
       by: 'Math with Mr. J',
       seconds: 516,
+      watchFor: 'What he does to one side to make the bottoms match.',
       checks: [
         {
           prompt: 'In 2/3 = x/12, what do you multiply 3 by to get 12?',
@@ -604,6 +607,66 @@ export const pack: SePack = {
         { text: 'Different one: 2 logs.' },
         { text: '8 planks.' },
         { text: '4 lots of 2 → 16 sticks.' },
+      ],
+      secs: 55,
+    },
+    {
+      kind: 'explain',
+      id: 'rat2-fn1',
+      emoji: '🎯',
+      title: 'K/D is a ratio, and that is all it is',
+      lines: [
+        'You get 12 eliminations across 4 matches. That is 12 : 4.',
+        'Divide both sides by 4 and it becomes 3 : 1.',
+        'Three elims a match. A RATE is a ratio with units stuck on it.',
+        'Now it compares fairly with anyone, however many matches they played.',
+      ],
+      art: { art: 'bars', rows: [{ label: 'elims', value: 12, tone: 'good' }, { label: 'matches', value: 4, tone: 'calm' }] },
+      callout: { flavour: 'key', text: 'Divide BOTH sides by the same number and the ratio has not changed.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'rat2-fn2',
+      prompt: 'You get 18 eliminations in 6 matches. How many a match is that?',
+      art: { art: 'table', head: ['matches', 'elims'], rows: [[6, 18], [1, '?']] },
+      options: ['3', '12', '24'],
+      answer: 0,
+      why: '18 ÷ 6 = 3 eliminations a match.',
+      steps: [
+        { text: 'Different run: 20 elims in 5 matches.' },
+        { text: '20 ÷ 5.' },
+        { text: '= 4 a match.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'rat2-fn3',
+      prompt: 'A gun does 30 damage a shot and fires 4 shots a second. What is its damage per second?',
+      art: { art: 'bars', rows: [{ label: 'damage a shot', value: 30, tone: 'focus' }, { label: 'shots a second', value: 4, tone: 'calm' }] },
+      options: ['34', '120', '7.5'],
+      answer: 1,
+      why: 'Per second means multiply: 30 × 4 = 120 damage.',
+      steps: [
+        { text: 'Different gun: 25 damage, 2 shots a second.' },
+        { text: '25 × 2.' },
+        { text: '= 50 damage a second.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'rat2-spot1',
+      prompt: 'Someone worked out eliminations per match from 18 elims in 6 matches. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'per match means divide'], ['2', '6 ÷ 18 = 0.33'], ['3', 'so 0.33 elims a match']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 divided the wrong way round. It is elims ÷ matches: 18 ÷ 6 = 3 a match.',
+      steps: [
+        { text: 'Try 20 elims in 5 matches.' },
+        { text: 'Elims on top, matches underneath: 20 ÷ 5.' },
+        { text: '= 4 a match.' },
       ],
       secs: 55,
     },

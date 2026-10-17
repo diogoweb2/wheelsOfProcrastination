@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'How to Find the Volume of a Cylinder',
       by: 'Math with Mr. J',
       seconds: 237,
+      watchFor: 'What the base of a cylinder is, and how he gets its area.',
       checks: [
         {
           prompt: 'The volume of a cylinder is…',
@@ -436,6 +437,7 @@ export const pack: SePack = {
       title: 'How to Find the Volume of a Triangular Prism',
       by: 'Math with Mr. J',
       seconds: 337,
+      watchFor: 'The very first thing he works out for a triangular prism.',
       checks: [
         {
           prompt: 'First step for a triangular prism\'s volume:',
@@ -585,6 +587,50 @@ export const pack: SePack = {
         { text: 'A 10 cm cube is 1 L.' },
         { text: 'Ten of those along each edge of a metre.' },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'vol-fn1',
+      emoji: '🧊',
+      title: 'How much air is inside your box?',
+      lines: [
+        'A 1-tile box is 1 wide, 1 deep, 1 high. Volume 1.',
+        'Make it 3 wide, 3 deep and 2 high: 3 × 3 × 2 = 18 tiles of space.',
+        'VOLUME is how much fits inside. SURFACE AREA is the wrapping.',
+        'The move that always works: area of the base, times the height.',
+      ],
+      art: { art: 'prism', base: 'rect', l: 3, w: 3, h: 2, tile: 'glass', labels: { l: '3', w: '3', h: '2' }, label: '3 × 3 × 2 = 18' },
+      callout: { flavour: 'key', text: 'Volume = base area × height. Every prism, every cylinder.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'vol-fn2',
+      prompt: 'A build is 4 tiles wide, 3 deep and 5 high. What is its volume?',
+      art: { art: 'prism', base: 'rect', l: 4, w: 3, h: 5, tile: 'plank', labels: { l: '4', w: '3', h: '5' } },
+      options: ['12', '60', '94'],
+      answer: 1,
+      why: '4 × 3 × 5 = 60 tiles of space.',
+      steps: [
+        { text: 'Different build: 2 by 2 by 6.' },
+        { text: '2 × 2 × 6.' },
+        { text: '= 24.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'vol-fn3',
+      prompt: 'One build is 2 × 3 × 4. Another is 1 × 24 × 1. Do they hold the same amount of space?',
+      options: ['yes, both 24', 'no, the tall one holds more than the flat one', 'no, the flat one holds more than the tall one'],
+      answer: 0,
+      why: '2 × 3 × 4 = 24 and 1 × 24 × 1 = 24. Same volume, nothing like the same shape.',
+      steps: [
+        { text: 'Different pair: 2 × 2 × 9 and 1 × 6 × 6.' },
+        { text: '2 × 2 × 9 = 36, and 1 × 6 × 6 = 36.' },
+        { text: 'Same volume again, and they look nothing alike.' },
+      ],
+      secs: 50,
     },
   ],
 }

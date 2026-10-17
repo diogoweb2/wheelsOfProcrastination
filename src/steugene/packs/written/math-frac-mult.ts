@@ -119,6 +119,7 @@ export const pack: SePack = {
       title: 'How to Multiply and Divide Fractions',
       by: 'Math with Mr. J',
       seconds: 222,
+      watchFor: 'Whether multiplying needs a common bottom. Listen carefully.',
       checks: [
         {
           prompt: 'To multiply two fractions, you…',
@@ -538,6 +539,7 @@ export const pack: SePack = {
       title: 'Multiplying Whole Numbers and Fractions',
       by: 'Math with Mr. J',
       seconds: 374,
+      watchFor: 'How he turns the whole number into a fraction.',
       checks: [
         {
           prompt: 'What is 4 × 2/3?',
@@ -570,6 +572,7 @@ export const pack: SePack = {
       title: 'How to Multiply and Divide Mixed Numbers',
       by: 'Math with Mr. J',
       seconds: 387,
+      watchFor: 'What he does to a mixed number before multiplying.',
       checks: [
         {
           prompt: 'Before multiplying 1½ × 2⅓, you should…',
@@ -623,6 +626,21 @@ export const pack: SePack = {
         { text: '= 3/8.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'fmu-spot1',
+      prompt: 'Someone worked out 1/2 of a half pizza — that is 1/2 × 1/2. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'multiply the tops: 1 × 1 = 1'], ['2', 'multiply the bottoms: 2 × 2 = 4'], ['3', 'so the answer is 1/2']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 2,
+      why: 'Step 3 ignored its own working. Top 1 over bottom 4 is 1/4, and half of a half really is a quarter.',
+      steps: [
+        { text: 'Try 1/2 × 1/3.' },
+        { text: 'Tops: 1 × 1 = 1. Bottoms: 2 × 3 = 6.' },
+        { text: 'The answer is 1/6.' },
+      ],
+      secs: 55,
     },
   ],
 }

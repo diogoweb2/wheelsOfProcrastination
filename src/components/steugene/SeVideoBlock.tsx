@@ -18,6 +18,10 @@
 // is long enough that the video has made its point and short enough that a
 // ten-minute upload cannot eat a third of his hour. The hold counts PLAYING
 // seconds only, so pausing it and walking away buys him nothing.
+//
+// `watchFor` is the other half of making those two minutes count: one thing
+// to listen for, pinned above the frame before he presses play, so watching
+// has a target instead of being a wait.
 import { useEffect, useRef, useState } from 'react'
 import { sfx } from '../../audio'
 
@@ -67,6 +71,7 @@ export function SeVideoBlock({
   by,
   start,
   end,
+  watchFor,
   onFinished,
 }: {
   youtube: string
@@ -74,6 +79,8 @@ export function SeVideoBlock({
   by?: string
   start?: number
   end?: number
+  /** The one thing to listen for, pinned above the frame (§24g). */
+  watchFor?: string
   /** Fired once: it played out, he let it go after the hold, or it broke. */
   onFinished: (reason: 'ended' | 'broken' | 'skipped') => void
 }) {
@@ -179,6 +186,16 @@ export function SeVideoBlock({
 
   return (
     <div className="se-video">
+      {/* Above the frame, and it STAYS there while it plays — the whole point
+          is that he can look back at what he is hunting for. */}
+      {watchFor && (
+        <div className="se-video__watch">
+          <span aria-hidden>🎯</span>
+          <span>
+            <strong>Listen for:</strong> {watchFor}
+          </span>
+        </div>
+      )}
       <div className="se-video__frame">
         <div ref={host} />
         {/* Nothing inside the frame is clickable. Everything he can press is below it. */}

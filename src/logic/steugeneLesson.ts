@@ -10,7 +10,7 @@
 // more in from the pack's bench whenever he is ahead of it. Running OUT of
 // content before the time is up is the one failure mode that matters, which is
 // why every pack carries far more `extra` than `core`.
-import type { SeBlock, SePack } from '../steugene/types'
+import type { SeBlock, SeExplain, SePack } from '../steugene/types'
 import type { SeAnswer, SeFixLock } from '../types'
 
 /** Allowed lesson lengths, in minutes. The middle one is the default. */
@@ -61,6 +61,11 @@ export function seIsQuestion(b: SeBlock): boolean {
  * Unseen blocks are dealt first, so repeating a subtopic (§24) gives him
  * different work. When the bench is exhausted the seen ones come back round,
  * oldest-served first — better a repeat than an empty screen.
+ *
+ * Note what that means on its own: a card he has seen is effectively gone.
+ * That is right for *new work* and wrong for *remembering*, which is why the
+ * warm-up (`seWarmUp`, §24q) is prepended to this and deliberately reaches
+ * for seen cards.
  */
 export function sePlanLesson(available: SeBlock[], seen: string[], targetSeconds: number): SeBlock[] {
   const budgetTo = targetSeconds * SE_PLAN_HEADROOM
@@ -102,6 +107,73 @@ export function sePlanLesson(available: SeBlock[], seen: string[], targetSeconds
     if (out.length === before) break // every deck is empty; nothing more to deal
   }
   return out
+}
+
+// --- The warm-up (§24q) --------------------------------------------------------
+
+/**
+ * How long a question has to have been left alone before it comes back.
+ *
+ * Three days, because the point is RETRIEVAL — pulling it back out of memory
+ * after it has gone cold. Asking the same thing an hour later measures
+ * nothing; asking it three days later is what makes it stick.
+ */
+export const SE_WARM_MIN_AGE_MS = 3 * 24 * 60 * 60 * 1000
+
+/** At most this many. It is a warm-up, not a test. */
+export const SE_WARM_MAX = 3
+
+/**
+ * The card that says what the warm-up is.
+ *
+ * It exists because §24d promises the first thing he meets is never a
+ * question he might get wrong, and because three questions with no framing
+ * read as an exam. Framed, they read as a win he already has in the bank.
+ */
+export const SE_WARM_INTRO: SeExplain = {
+  kind: 'explain',
+  id: 'se-warm-intro',
+  emoji: '⚡',
+  title: 'Warm-up',
+  lines: ['First, a few you have already got right before.', 'Nothing new yet — this is the drop before the storm moves.'],
+  secs: 12,
+}
+
+/**
+ * Questions he got RIGHT at least three days ago, oldest first (§24q).
+ *
+ * The gap this closes: `seen` takes a card out of the deck and never puts it
+ * back (see `sePlanLesson`). So before this, nothing he learned was ever
+ * deliberately met again — he saw each idea once and the engine moved on.
+ * Understanding is not built that way; it is built by meeting the same idea
+ * again after forgetting some of it.
+ *
+ * Only things he got right, and only his LATEST answer counts: a question he
+ * got right in September and wrong last week is not warm, it is broken, and
+ * it belongs in "mistakes to fix" (§24f), not here. A card he gets wrong in
+ * the warm-up is sealed like any other, which is the honest outcome — it
+ * means he had lost it.
+ *
+ * `available` is the bench, so sealed misses are already out.
+ */
+export function seWarmUp(
+  available: SeBlock[],
+  history: SeAnswer[],
+  subtopicId: string,
+  now: number = Date.now(),
+): SeBlock[] {
+  const cutoff = now - SE_WARM_MIN_AGE_MS
+  // Latest answer per block — history is oldest-first, so the last one wins.
+  const latest = new Map<string, SeAnswer>()
+  for (const a of history) {
+    if (a.subtopicId === subtopicId) latest.set(a.id, a)
+  }
+  const askable = new Map(available.filter(seIsQuestion).map((b) => [b.id, b]))
+  return [...latest.values()]
+    .filter((a) => a.right && a.at <= cutoff && askable.has(a.id))
+    .sort((x, y) => x.at - y.at) // coldest first: longest since he last saw it
+    .slice(0, SE_WARM_MAX)
+    .map((a) => askable.get(a.id)!)
 }
 
 /**

@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'Rules for Number Patterns',
       by: 'IconMath',
       seconds: 257,
+      watchFor: 'How he describes the jump between terms, in words.',
       checks: [
         {
           prompt: 'In 2, 6, 10, 14, … what is the pattern rule in words?',
@@ -649,6 +650,7 @@ export const pack: SePack = {
       title: 'Find the nth term in a sequence',
       by: 'Maths with Jay',
       seconds: 189,
+      watchFor: 'Where the size of the jump ends up in the rule.',
       checks: [
         {
           prompt: '4, 7, 10, 13, … The rule for term n is…',
@@ -681,6 +683,7 @@ export const pack: SePack = {
       title: 'Input and output tables (function tables)',
       by: 'Math with Mr. J',
       seconds: 306,
+      watchFor: 'How he gets from input to output. Two steps, not one.',
       checks: [
         {
           prompt: 'A table says input 2 → 7 and input 3 → 10. The rule is…',

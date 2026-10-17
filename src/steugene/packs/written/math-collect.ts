@@ -103,6 +103,7 @@ export const pack: SePack = {
       title: 'Populations and Samples in Statistics',
       by: 'dsmithinschools',
       seconds: 302,
+      watchFor: 'The difference between the population and the sample.',
       checks: [
         {
           prompt: 'The POPULATION is…',
@@ -382,6 +383,7 @@ export const pack: SePack = {
       title: 'Collecting Data',
       by: 'FuseSchool',
       seconds: 226,
+      watchFor: 'What a tally chart is actually for.',
       checks: [
         {
           prompt: 'A tally chart is used to…',
@@ -414,6 +416,7 @@ export const pack: SePack = {
       title: 'Sampling: Simple Random, Convenience, Systematic, Cluster, Stratified',
       by: 'Dr Nic\'s Maths and Stats',
       seconds: 294,
+      watchFor: 'The name for asking whoever happens to be nearest.',
       checks: [
         {
           prompt: 'Asking whoever is easiest to reach is called…',

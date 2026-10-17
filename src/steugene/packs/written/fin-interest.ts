@@ -212,6 +212,7 @@ export const pack: SePack = {
       title: 'What is compound interest?',
       by: 'Canstar',
       seconds: 201,
+      watchFor: 'What compound interest is paid ON. That is the whole trick.',
       checks: [
         {
           prompt: 'Compound interest is interest earned on…',
@@ -484,6 +485,7 @@ export const pack: SePack = {
       title: 'Calculating simple & compound interest',
       by: 'Khan Academy',
       seconds: 394,
+      watchFor: 'How far apart the two answers are after only two years.',
       checks: [
         {
           prompt: 'Simple interest on $1,000 at 5% for 2 years is…',
@@ -516,6 +518,7 @@ export const pack: SePack = {
       title: 'How to Calculate Simple Interest',
       by: 'Cognito',
       seconds: 245,
+      watchFor: 'Which amount simple interest is always worked out on.',
       checks: [
         {
           prompt: 'Simple interest is worked out on…',
@@ -540,6 +543,52 @@ export const pack: SePack = {
           ],
         },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'int-fn1',
+      emoji: '🎟️',
+      title: 'Saving for the Battle Pass, with the bank helping',
+      lines: [
+        'A Battle Pass is 950 V-Bucks. A 1,000 V-Bucks bundle runs about $13.',
+        'Say you have $100 saved and the bank pays 5% a year.',
+        'SIMPLE: 5% of $100 = $5 a year. After 3 years, $115.',
+        'COMPOUND: the $5 earns too. $105, then $110.25, then $115.76.',
+        'Compound wins every time, and the gap grows the longer you leave it.',
+      ],
+      art: { art: 'chart', type: 'line', labels: ['now', '1 yr', '2 yr', '3 yr'], values: [100, 105, 110.25, 115.76], unit: '$', min: 95, title: '$100 compounding at 5%' },
+      callout: { flavour: 'key', text: 'Simple grows by the same AMOUNT. Compound grows by the same PERCENT.' },
+      secs: 60,
+    },
+    {
+      kind: 'choice',
+      id: 'int-fn2',
+      prompt: 'You put $200 in at 10% a year, simple interest. How much INTEREST after 2 years?',
+      art: { art: 'table', head: ['what', 'value'], rows: [['put in', '$200'], ['rate', '10% a year'], ['years', '2']] },
+      options: ['$20', '$40', '$220'],
+      answer: 1,
+      why: '10% of $200 = $20 a year, and two years of that is $40.',
+      steps: [
+        { text: 'Different one: $300 at 10% for 2 years.' },
+        { text: '10% of 300 = $30 a year.' },
+        { text: 'Two years: $60 of interest.' },
+      ],
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'int-fn3',
+      prompt: 'A credit card charges about 20% a year. You owe $100 and pay nothing for a year. What do you owe now?',
+      art: { art: 'receipt', lines: [{ item: 'owed', price: '$100' }, { item: 'interest at 20%', price: '?' }], note: 'after one year with no payment' },
+      options: ['$100, nothing has changed', '$120', '$20'],
+      answer: 1,
+      why: '20% of $100 = $20 of interest on top, so you owe $120.',
+      steps: [
+        { text: 'Different card: 25% a year on $200.' },
+        { text: '25% of 200 = $50.' },
+        { text: 'You would owe $250.' },
+      ],
+      secs: 55,
     },
   ],
 }

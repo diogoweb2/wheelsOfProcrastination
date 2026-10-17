@@ -12,13 +12,15 @@
 //    picks, and what follows is an explanation, not another go.
 //  - That explanation is worked on a DIFFERENT number, so it teaches the move
 //    rather than handing him the answer he just missed.
+//  - He may ask BEFORE answering (§24p). "I don't get it yet" hands him that
+//    same walk-through up front, and the answer still counts.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
 import { packFor } from '../../steugene/packs'
-import { seAvailable, seTiles, seWithChecks } from '../../logic/steugeneLesson'
+import { SE_WARM_INTRO, seAvailable, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
@@ -126,7 +128,12 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   const byId = useMemo(() => {
     if (!run) return new Map<string, SeBlock>()
     const generated = seDesk.generated.filter((g) => g.subtopicId === run.subtopicId).flatMap((g) => g.blocks)
-    return new Map(seWithChecks(seAvailable(packFor(run.subtopicId), generated)).map((b) => [b.id, b]))
+    const map = new Map(seWithChecks(seAvailable(packFor(run.subtopicId), generated)).map((b) => [b.id, b]))
+    // The warm-up's own title card (§24q) belongs to no pack, so it is added
+    // here rather than to the bench — the bench is what gets dealt from, and
+    // a top-up must never hand him the warm-up sign a second time.
+    map.set(SE_WARM_INTRO.id, SE_WARM_INTRO)
+    return map
   }, [run?.subtopicId, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
@@ -293,12 +300,126 @@ function Callout({ callout }: { callout: NonNullable<SeExplain['callout']> }) {
 
 // --- the verdict strip, shared by every question ------------------------------
 
-type Record_ = (a: { id: string; right: boolean; prompt: string; given: string; expected: string }) => void
+type Record_ = (a: { id: string; right: boolean; prompt: string; given: string; expected: string; helped?: boolean }) => void
+
+/**
+ * The walk-through, revealed one step at a time.
+ *
+ * Shared by the verdict on a miss and by the nudge before an answer (§24p),
+ * because it is the same teaching either way: the move, worked on numbers
+ * that are not the ones in front of him. One step at a time matters — four
+ * steps at once is a wall of text, and he stops reading walls.
+ */
+function Walk({
+  steps,
+  label,
+  speakOn,
+  rate,
+  autoRead = false,
+}: {
+  steps: SeStep[]
+  label: string
+  speakOn: boolean
+  rate: number
+  /** Say the first step on its own, for when nothing else on the card is spoken. */
+  autoRead?: boolean
+}) {
+  const [step, setStep] = useState(0)
+  useAutoRead(autoRead ? (steps[0]?.text ?? '') : '', speakOn, rate)
+
+  return (
+    <div className="se-walk">
+      <div className="muted se-walk__label">{label}</div>
+      {steps.slice(0, step + 1).map((s, i) => (
+        <div key={i} className="se-walk__step">
+          <span className="se-walk__n">{i + 1}</span>
+          <div>
+            <div>{s.text}</div>
+            {s.art && <SeArtwork art={s.art} />}
+          </div>
+        </div>
+      ))}
+      {step < steps.length - 1 && (
+        <button
+          className="btn btn--ghost btn--small"
+          onClick={() => {
+            sfx.click()
+            const s = steps[step + 1]
+            setStep(step + 1)
+            if (speakOn) speak(s.text, rate)
+          }}
+        >
+          Then what? ↓
+        </button>
+      )}
+    </div>
+  )
+}
+
+/**
+ * "I don't get it yet" — the third thing he can do with a question (§24p).
+ *
+ * Before this, a question he did not understand left him exactly one legal
+ * move: guess. A wrong guess is final (§24f), gets sealed, and lands on Dad's
+ * desk labelled *mistake* — when the truth was that he never had a way in.
+ * Worse, it trained the habit this whole app exists to break: when you do not
+ * understand, pick one and move on.
+ *
+ * So he can ask first, and what he gets is the walk-through the card already
+ * carries. Because those steps are worked on DIFFERENT numbers (§24f),
+ * reading every one of them still never hands him the answer. It hands him
+ * the move and leaves him the question.
+ *
+ * The answer that follows counts for real — right is right. It is only
+ * flagged `helped`, so the Report can tell "he has this" apart from "he has
+ * this once someone starts him off". Those are different conversations.
+ */
+function Nudge({
+  steps,
+  asked,
+  onAsk,
+  speakOn,
+  rate,
+}: {
+  steps?: SeStep[]
+  asked: boolean
+  onAsk: () => void
+  speakOn: boolean
+  rate: number
+}) {
+  if (!steps?.length) return null
+  if (!asked) {
+    return (
+      <button
+        className="btn btn--ghost btn--small se-nudge__ask"
+        onClick={() => {
+          sfx.click()
+          onAsk()
+        }}
+      >
+        🤔 I don’t get it yet
+      </button>
+    )
+  }
+  return (
+    <div className="se-nudge">
+      <Walk
+        steps={steps}
+        label="Start here — the same move on different numbers:"
+        speakOn={speakOn}
+        rate={rate}
+        autoRead
+      />
+      <div className="se-nudge__foot">Now have a go. Getting it after a nudge still counts.</div>
+    </div>
+  )
+}
 
 function Verdict({
   right,
   why,
   steps,
+  helped,
   rate,
   speakOn,
   onNext,
@@ -306,11 +427,12 @@ function Verdict({
   right: boolean
   why: string
   steps?: SeStep[]
+  /** He asked for the nudge first (§24p). */
+  helped?: boolean
   rate: number
   speakOn: boolean
   onNext: () => void
 }) {
-  const [step, setStep] = useState(0)
   const walk = right ? [] : (steps ?? [])
   const spoken = right ? `Yes. ${why}` : `Not this time. ${why}`
   useAutoRead(spoken, speakOn, rate)
@@ -318,37 +440,15 @@ function Verdict({
   return (
     <div className={`se-verdict ${right ? 'se-verdict--yes' : 'se-verdict--no'}`}>
       <div className="se-verdict__head">
-        <strong>{right ? '✅ Yes' : '❌ Not this time'}</strong>
+        {/* A nudge is said out loud as a good move, never as an asterisk on
+            the win — asking is the behaviour we want more of. */}
+        <strong>{right ? (helped ? '✅ Yes — you asked, then you got it' : '✅ Yes') : '❌ Not this time'}</strong>
         <SpeakButton text={spoken} rate={rate} />
       </div>
       <p>{why}</p>
 
       {walk.length > 0 && (
-        <div className="se-walk">
-          <div className="muted se-walk__label">Same move, different number:</div>
-          {walk.slice(0, step + 1).map((s, i) => (
-            <div key={i} className="se-walk__step">
-              <span className="se-walk__n">{i + 1}</span>
-              <div>
-                <div>{s.text}</div>
-                {s.art && <SeArtwork art={s.art} />}
-              </div>
-            </div>
-          ))}
-          {step < walk.length - 1 && (
-            <button
-              className="btn btn--ghost btn--small"
-              onClick={() => {
-                sfx.click()
-                const s = walk[step + 1]
-                setStep(step + 1)
-                if (speakOn) speak(s.text, rate)
-              }}
-            >
-              Then what? ↓
-            </button>
-          )}
-        </div>
+        <Walk steps={walk} label="Same move, different number:" speakOn={speakOn} rate={rate} />
       )}
 
       <button className="btn btn--blue se-next" onClick={onNext}>
@@ -374,8 +474,9 @@ function ChoiceCard({
   onRecord: Record_
 }) {
   const [picked, setPicked] = useState<number | null>(null)
+  const [helped, setHelped] = useState(false)
   const spoken = `${block.prompt}. ${block.options.map((o, i) => `${i + 1}. ${o}`).join('. ')}`
-  useAutoRead(picked === null ? spoken : '', speakOn, rate)
+  useAutoRead(picked === null && !helped ? spoken : '', speakOn, rate)
 
   const choose = (i: number) => {
     if (picked !== null) return // §24f — one answer, and it is the one that counts
@@ -393,6 +494,7 @@ function ChoiceCard({
       prompt: block.prompt,
       given: block.options[i],
       expected: block.options[block.answer],
+      ...(helped ? { helped: true } : {}),
     })
   }
 
@@ -420,11 +522,16 @@ function ChoiceCard({
         ))}
       </div>
 
+      {picked === null && (
+        <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+      )}
+
       {picked !== null && (
         <Verdict
           right={picked === block.answer}
           why={block.why}
           steps={block.steps}
+          helped={helped}
           rate={rate}
           speakOn={speakOn}
           onNext={onNext}
@@ -453,9 +560,10 @@ function BuildCard({
   const tiles = useMemo(() => seTiles(block.answer, block.decoys), [block.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [used, setUsed] = useState<number[]>([])
   const [locked, setLocked] = useState<boolean | null>(null)
+  const [helped, setHelped] = useState(false)
 
   const built = used.map((i) => tiles[i]).join('')
-  useAutoRead(locked === null ? block.prompt : '', speakOn, rate)
+  useAutoRead(locked === null && !helped ? block.prompt : '', speakOn, rate)
 
   const check = () => {
     if (locked !== null || !built) return
@@ -467,7 +575,14 @@ function BuildCard({
     } else {
       sfx.error()
     }
-    onRecord({ id: block.id, right, prompt: block.prompt, given: built, expected: block.answer })
+    onRecord({
+      id: block.id,
+      right,
+      prompt: block.prompt,
+      given: built,
+      expected: block.answer,
+      ...(helped ? { helped: true } : {}),
+    })
   }
 
   return (
@@ -517,8 +632,20 @@ function BuildCard({
         </div>
       )}
 
+      {locked === null && (
+        <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+      )}
+
       {locked !== null && (
-        <Verdict right={locked} why={block.why} steps={block.steps} rate={rate} speakOn={speakOn} onNext={onNext} />
+        <Verdict
+          right={locked}
+          why={block.why}
+          steps={block.steps}
+          helped={helped}
+          rate={rate}
+          speakOn={speakOn}
+          onNext={onNext}
+        />
       )}
     </div>
   )
@@ -560,6 +687,7 @@ function VideoCard({
           by={block.by}
           start={block.start}
           end={block.end}
+          watchFor={block.watchFor}
           onFinished={(reason) => {
             // Broken → move on entirely. Ended OR let go after the two-minute
             // hold (§24g) → the questions, which is why the skip button says so.
@@ -815,6 +943,7 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   const answers = run?.answers ?? []
   const right = answers.filter((a) => a.right).length
   const wrong = answers.filter((a) => !a.right)
+  const nudged = answers.filter((a) => a.helped).length
   const pct = answers.length ? Math.round((right / answers.length) * 100) : 100
 
   useEffect(() => {
@@ -838,6 +967,14 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         <p style={{ marginTop: 10, fontWeight: 800 }}>
           {pct >= 80 ? 'That was a strong run.' : pct >= 50 ? 'Decent. The misses are the interesting part.' : 'Hard one. Now you know which bits to ask about.'}
         </p>
+        {/* §24p — said back to him as a win, because it is one. Asking before
+            guessing is the single habit this app is trying to build. */}
+        {nudged > 0 && (
+          <p className="se-result__nudged">
+            🤔 You asked for a nudge {nudged === 1 ? 'once' : `${nudged} times`} instead of guessing. That is the
+            right move.
+          </p>
+        )}
       </div>
 
       {wrong.length > 0 && (

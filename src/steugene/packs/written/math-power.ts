@@ -119,6 +119,7 @@ export const pack: SePack = {
       title: 'What are Square Roots?',
       by: 'Math with Mr. J',
       seconds: 240,
+      watchFor: 'What a square root undoes.',
       checks: [
         {
           prompt: '√36 is…',
@@ -488,6 +489,7 @@ export const pack: SePack = {
       title: 'Square Roots and Cube Roots',
       by: 'Math with Mr. J',
       seconds: 303,
+      watchFor: 'How many times a number is multiplied for a cube root.',
       checks: [
         {
           prompt: 'The cube root of 8 is…',
@@ -599,6 +601,50 @@ export const pack: SePack = {
         { text: 'Other: 49.' },
         { text: '7 × 7, so 7.' },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'pow-fn1',
+      emoji: '🟪',
+      title: 'A square number is a square you could build',
+      lines: [
+        'Lay a floor 8 tiles by 8 tiles. How many pieces? 8 × 8 = 64.',
+        'Writing 8 × 8 as 8² just saves you the second 8.',
+        'It means "8, two of them, multiplied" — not 8 × 2.',
+        '8² = 64. And √64 = 8, the button that undoes it.',
+      ],
+      art: { art: 'blocks', w: 8, h: 8, tile: 'plank', wLabel: '8', hLabel: '8', label: '8² = 64 pieces' },
+      callout: { flavour: 'gotcha', text: '8² is 64, not 16. The little 2 is how MANY 8s, not what to multiply by.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'pow-fn2',
+      prompt: 'You build a square floor 6 tiles along each side. How many pieces, written as a power?',
+      art: { art: 'blocks', w: 6, h: 6, tile: 'plank', wLabel: '6', hLabel: '6' },
+      options: ['6² = 36', '2⁶ = 64', '6 × 2 = 12'],
+      answer: 0,
+      why: '6 along and 6 across: 6² = 36 pieces.',
+      steps: [
+        { text: 'Different build: 9 along each side.' },
+        { text: '9 along, 9 across.' },
+        { text: '9² = 81 pieces.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'build',
+      id: 'pow-fn3',
+      prompt: 'A square floor took exactly 49 pieces. How many tiles along one side?',
+      art: { art: 'items', rows: [{ icon: 'plank', n: 49, per: 10, label: '49 floor pieces' }] },
+      answer: '7',
+      why: '√49 = 7, so the floor is 7 along each side.',
+      steps: [
+        { text: 'Different floor: 100 pieces.' },
+        { text: 'What number times itself makes 100?' },
+        { text: '√100 = 10, so 10 along each side.' },
+      ],
+      secs: 55,
     },
   ],
 }

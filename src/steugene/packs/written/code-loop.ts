@@ -208,6 +208,7 @@ export const pack: SePack = {
       title: 'What are Loops? Coding for Kids',
       by: 'Kodable',
       seconds: 221,
+      watchFor: 'The one job a loop does that saves you writing a line twice.',
       checks: [
         {
           prompt: 'A loop is used to…',
@@ -548,6 +549,7 @@ export const pack: SePack = {
       title: 'Learning Lua — the for loop in Roblox Studio',
       by: 'LearningLua',
       seconds: 169,
+      watchFor: 'What the two numbers in "for i = 1, 5" actually control.',
       checks: [
         {
           prompt: 'for i = 1, 5 do … end runs how many times?',
@@ -572,6 +574,51 @@ export const pack: SePack = {
           ],
         },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'lop-fn1',
+      emoji: '🧱',
+      title: 'Ten walls, one line of code',
+      lines: [
+        'Placing 10 walls by hand is 10 lines that all say the same thing.',
+        'A loop says it once and tells the computer how many times.',
+        'for i = 1, 10 do … end runs whatever is inside it ten times.',
+        'And i counts 1, 2, 3 … 10, so you can use i to move each wall along.',
+      ],
+      art: { art: 'code', style: 'text', lines: ['for i = 1, 10 do', '  placeWall(i)', 'end'], out: ['wall 1', 'wall 2', 'wall 3', '… on up to wall 10'] },
+      callout: { flavour: 'key', text: 'A loop is one instruction plus a count. Change the count, not the code.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'lop-fn2',
+      prompt: 'How many walls does this place?',
+      art: { art: 'code', style: 'text', lines: ['for i = 1, 4 do', '  placeWall(i)', 'end'] },
+      options: ['1', '4', '5'],
+      answer: 1,
+      why: 'i runs 1, 2, 3, 4 — so placeWall happens 4 times.',
+      steps: [
+        { text: 'Different loop: for i = 1, 7.' },
+        { text: 'i runs 1 all the way up to 7.' },
+        { text: 'That is 7 times round.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'lop-fn3',
+      prompt: 'A 1×1 box needs 4 walls, 1 floor and 1 roof. Which loop places just the WALLS?',
+      art: { art: 'code', style: 'text', lines: ['for i = 1, ? do', '  placeWall(i)', 'end'] },
+      options: ['for i = 1, 1', 'for i = 1, 4', 'for i = 1, 6, which builds the lot'],
+      answer: 1,
+      why: 'There are 4 walls, so the loop runs from 1 to 4.',
+      steps: [
+        { text: 'Different build: a 2 × 2 floor needs 4 pieces.' },
+        { text: 'Four pieces means four times round.' },
+        { text: 'for i = 1, 4.' },
+      ],
+      secs: 50,
     },
   ],
 }

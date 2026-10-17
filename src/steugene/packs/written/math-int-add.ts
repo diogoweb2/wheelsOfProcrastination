@@ -121,6 +121,7 @@ export const pack: SePack = {
       title: 'Adding with integer chips',
       by: 'Khan Academy',
       seconds: 226,
+      watchFor: 'What one positive and one negative chip are worth together.',
       checks: [
         {
           prompt: 'A positive chip and a negative chip together are worth…',
@@ -538,6 +539,7 @@ export const pack: SePack = {
       title: 'Subtracting with integer chips',
       by: 'Khan Academy',
       seconds: 330,
+      watchFor: 'What he adds to the pile when there is not enough to take away.',
       checks: [
         {
           prompt: 'To do 2 − 5 with chips, you have only 2 positive chips. What do you add first?',
@@ -570,6 +572,7 @@ export const pack: SePack = {
       title: 'Subtracting Integers Explained',
       by: 'Math with Mr. J',
       seconds: 183,
+      watchFor: 'What subtracting turns into. It is one word.',
       checks: [
         {
           prompt: 'Subtracting an integer is the same as…',
@@ -711,6 +714,21 @@ export const pack: SePack = {
       ],
       art: { art: 'numberline', from: -8, to: 6, points: [{ at: 4, label: '4', tone: 'focus' }], hops: [{ from: 4, to: 0, label: '−4' }, { from: 0, to: -6, label: '−6', tone: 'bad' }] },
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'add-spot1',
+      prompt: 'Someone worked out −7 + 12. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'start at −7 on the line'], ['2', 'plus 12 means move 12 to the RIGHT'], ['3', 'you land on −19']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 2,
+      why: 'Step 3 moved left instead of right. From −7, going 12 right lands on 5.',
+      steps: [
+        { text: 'Try −3 + 10.' },
+        { text: 'Start at −3, move 10 to the right.' },
+        { text: 'You land on 7.' },
+      ],
+      secs: 55,
     },
   ],
 }

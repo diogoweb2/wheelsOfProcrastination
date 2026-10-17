@@ -153,6 +153,7 @@ export const pack: SePack = {
       title: 'Multiplying Integers Explained',
       by: 'Math with Mr. J',
       seconds: 167,
+      watchFor: 'What sign you get from one positive and one negative.',
       checks: [
         {
           prompt: 'A positive times a negative is always…',
@@ -587,6 +588,7 @@ export const pack: SePack = {
       title: 'Multiplying and Dividing Integers: A Step-By-Step Review',
       by: 'Math with Mr. J',
       seconds: 332,
+      watchFor: 'Whether the sign rule is the same for dividing as multiplying.',
       checks: [
         {
           prompt: 'What is −42 ÷ 6?',
@@ -681,6 +683,21 @@ export const pack: SePack = {
         { text: 'Different case: 100 health, 8 a second for 5 seconds.' },
         { text: 'Change: 5 × (−8) = −40.' },
         { text: '100 − 40 = 60 health.' },
+      ],
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'mul-spot1',
+      prompt: 'Someone worked out (−4) × (−6). One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', '4 × 6 = 24'], ['2', 'two minuses multiplied give a minus'], ['3', 'so the answer is −24']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 has the rule backwards. Two negatives multiplied give a POSITIVE, so it is 24.',
+      steps: [
+        { text: 'Try (−3) × (−5).' },
+        { text: '3 × 5 = 15, and two minuses make a plus.' },
+        { text: 'The answer is 15, not −15.' },
       ],
       secs: 55,
     },

@@ -309,6 +309,14 @@ export interface SeVideo extends SeBlockBase {
   /** Start/stop inside a longer video, so a 20-minute upload can give 3 minutes. */
   start?: number
   end?: number
+  /**
+   * One thing to listen for, shown BEFORE the video starts (§24g).
+   *
+   * Two minutes of held video with no job to do is two minutes of looking at
+   * a screen. A question in advance turns watching into hunting, which is the
+   * difference between him being present and him being there.
+   */
+  watchFor?: string
   checks: Omit<SeChoice, 'kind' | 'id'>[]
 }
 

@@ -6365,6 +6365,7 @@ input, select { font-family: inherit; }
 .se-row__bar > div.good { background: var(--profit); height: 100%; }
 .se-row__meta { font-size: 12px; }
 .se-row__flag { color: var(--orange); }
+.se-row__nudge { color: var(--yellow); }
 
 /* --- Dad's desk --- */
 .se-lock { padding: 11px 0; border-bottom: 1px dashed var(--line); }
@@ -6593,3 +6594,53 @@ input, select { font-family: inherit; }
    on the card — watching is still the default. */
 .se-video__skip { width: 100%; margin-top: 7px; background: var(--card2); color: var(--text); border: 1px solid var(--line); }
 .se-video__skip--held { background: transparent; color: var(--muted); border-style: dashed; opacity: 1; cursor: default; }
+
+/* 🏫 St. Eugene 7 §24p — "I don't get it yet". The ask is deliberately quiet
+   (a ghost button, no colour, no badge) so it never reads as the easy way
+   out; the help it opens is warm, because the point is that asking worked. */
+.se-nudge__ask { margin-top: 12px; width: 100%; opacity: 0.85; }
+.se-nudge {
+  margin-top: 12px;
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 2px dashed var(--yellow);
+}
+.se-nudge .se-walk { margin-top: 0; border-top: 0; padding-top: 0; }
+.se-nudge__foot { margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--yellow); }
+.se-result__nudged { margin-top: 8px; font-size: 14px; font-weight: 800; color: var(--yellow); }
+
+/* 🏫 St. Eugene 7 §24g — "Listen for:". Above the frame and it stays there,
+   so the two held minutes have a job in them instead of being a wait. */
+.se-video__watch {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 2px solid var(--yellow);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.se-video__watch strong { color: var(--yellow); }
+
+/* 🏫 St. Eugene 7 §24r — "What I can do now". The one place in the app where
+   the year accumulates where he can see it. Green, because it is all wins. */
+.se-can { border: 2px solid var(--profit); }
+.se-can__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.se-can__count {
+  min-width: 26px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--profit);
+  color: #05230f;
+  font-weight: 900;
+  font-size: 13px;
+  text-align: center;
+}
+.se-can__list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.se-can__list li { display: flex; gap: 9px; align-items: flex-start; font-size: 14px; line-height: 1.4; font-weight: 700; }
+.se-can__list li > span:first-child { flex: 0 0 auto; }
+.se-can .btn { margin-top: 10px; }

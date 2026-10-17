@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'Finding a Percent of a Number',
       by: 'Math with Mr. J',
       seconds: 387,
+      watchFor: 'The decimal he multiplies by instead of using 30%.',
       checks: [
         {
           prompt: 'To find 30% of a number, you can multiply it by…',
@@ -509,6 +510,7 @@ export const pack: SePack = {
       title: 'Math Antics — Finding A Percent Of A Number',
       by: 'mathantics',
       seconds: 452,
+      watchFor: 'What the word percent literally means.',
       checks: [
         {
           prompt: '"Percent" literally means…',
@@ -541,6 +543,7 @@ export const pack: SePack = {
       title: 'How to work out percentages instantly',
       by: 'tecmath',
       seconds: 310,
+      watchFor: 'The swap he makes to turn a hard percent into an easy one.',
       checks: [
         {
           prompt: '8% of 50 is the same as…',
@@ -608,6 +611,21 @@ export const pack: SePack = {
         { text: 'Level 65.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'pct-spot1',
+      prompt: 'An $80 skin is 25% off. Someone worked out what you pay. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', '25% of 80 = 20'], ['2', '80 + 20 = 100'], ['3', 'you pay $100']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 added the discount instead of taking it off. 80 − 20 = $60 is what you pay.',
+      steps: [
+        { text: 'Try a $50 item at 10% off.' },
+        { text: '10% of 50 = 5, and a discount comes off.' },
+        { text: '50 − 5 = $45.' },
+      ],
+      secs: 55,
     },
   ],
 }

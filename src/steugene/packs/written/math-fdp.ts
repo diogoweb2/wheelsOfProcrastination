@@ -119,6 +119,7 @@ export const pack: SePack = {
       title: 'Converting Fractions to Percents',
       by: 'Math with Mr. J',
       seconds: 320,
+      watchFor: 'What he multiplies by to turn a decimal into a percent.',
       checks: [
         {
           prompt: 'To turn 3/4 into a percent, you can…',
@@ -563,6 +564,7 @@ export const pack: SePack = {
       title: 'Converting Percents to Fractions',
       by: 'Math with Mr. J',
       seconds: 187,
+      watchFor: 'The number a percent always goes over first.',
       checks: [
         {
           prompt: 'To turn a percent into a fraction, first put it over…',
@@ -630,6 +632,21 @@ export const pack: SePack = {
       ],
       art: { art: 'bar', parts: 4, filled: 1, tone: 'calm', label: '1/4 = 25/100 = 0.25 = 25%' },
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'fdp-spot1',
+      prompt: 'Someone turned 3/4 into a percent. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', '3 ÷ 4 = 0.75'], ['2', 'to make a percent, divide by 100'], ['3', 'so 3/4 = 0.0075%']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 went the wrong way. To get a percent you MULTIPLY by 100: 0.75 × 100 = 75%.',
+      steps: [
+        { text: 'Try 1/2.' },
+        { text: '1 ÷ 2 = 0.5, then multiply by 100.' },
+        { text: '0.5 × 100 = 50%.' },
+      ],
+      secs: 55,
     },
   ],
 }

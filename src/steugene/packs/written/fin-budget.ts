@@ -215,6 +215,7 @@ export const pack: SePack = {
       title: 'Budgeting Basics!',
       by: 'Two Cents',
       seconds: 313,
+      watchFor: 'The two sides of every budget, and which one you control.',
       checks: [
         {
           prompt: 'A budget is…',
@@ -498,6 +499,7 @@ export const pack: SePack = {
       title: '7th Grade Personal Financial Literacy: Calculating a Personal Budget',
       by: 'Aaron Daffern',
       seconds: 300,
+      watchFor: 'Which side of the budget income sits on.',
       checks: [
         {
           prompt: 'In a budget, income is…',

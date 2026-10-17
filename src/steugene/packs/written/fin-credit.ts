@@ -200,6 +200,7 @@ export const pack: SePack = {
       title: 'Borrowing vs. Saving',
       by: 'Learn Bright',
       seconds: 349,
+      watchFor: 'The difference between saving for a thing and borrowing for it.',
       checks: [
         {
           prompt: 'Saving means…',
@@ -495,6 +496,7 @@ export const pack: SePack = {
       title: 'Debit and Credit',
       by: 'Learn Bright',
       seconds: 310,
+      watchFor: 'Whose money a debit card spends, and whose a credit card spends.',
       checks: [
         {
           prompt: 'A debit card uses…',
@@ -527,6 +529,7 @@ export const pack: SePack = {
       title: 'Loans 101 (Loan Basics 1/3)',
       by: 'MoneyCoach',
       seconds: 223,
+      watchFor: 'The name for the amount you borrowed, before any interest.',
       checks: [
         {
           prompt: 'The amount you borrow is called the…',
@@ -551,6 +554,50 @@ export const pack: SePack = {
           ],
         },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'crd-fn1',
+      emoji: '🎮',
+      title: 'Borrowing is renting money',
+      lines: [
+        'A $150 skin bundle on a credit card is not $150. It is $150 plus rent.',
+        'The rent is called interest. In Canada a card charges about 20% a year.',
+        'Paying the MINIMUM — say $10 a month — pays mostly rent and barely the bundle.',
+        'Saving $15 a month for 10 months costs you $150. Borrowing it costs more.',
+      ],
+      art: { art: 'bars', rows: [{ label: 'saved up first', value: 150, tone: 'good' }, { label: 'borrowed, paid off slowly', value: 195, tone: 'bad' }], unit: '$' },
+      callout: { flavour: 'gotcha', text: 'The sticker price is what it costs if you already have the money.' },
+      secs: 60,
+    },
+    {
+      kind: 'choice',
+      id: 'crd-fn2',
+      prompt: 'You put a $150 bundle on a card at 20% a year and take a whole year to pay it off. What have you paid in total?',
+      art: { art: 'receipt', lines: [{ item: 'skin bundle', price: '$150' }, { item: 'interest at 20%', price: '?' }], note: 'paid off after one year' },
+      options: ['$150', '$180', '$30'],
+      answer: 1,
+      why: '20% of $150 = $30 of interest, so $150 + $30 = $180 in all.',
+      steps: [
+        { text: 'Different one: $200 on a card at 20% for a year.' },
+        { text: '20% of 200 = $40 of interest.' },
+        { text: 'You pay $240.' },
+      ],
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'crd-fn3',
+      prompt: 'Which of these is the cheapest way to end up owning a $150 bundle?',
+      options: ['save $15 a month for 10 months', 'put it on a card and pay the minimum each month', 'put it on a card and clear it in 3 months'],
+      answer: 0,
+      why: 'Saving $15 a month for 10 months pays the $150 and not a cent of interest.',
+      steps: [
+        { text: 'Different case: a $60 game.' },
+        { text: 'Saving $20 a month for 3 months costs you exactly $60.' },
+        { text: 'Borrowing $60 costs $60 plus interest. Saving always wins on price.' },
+      ],
+      secs: 55,
     },
   ],
 }

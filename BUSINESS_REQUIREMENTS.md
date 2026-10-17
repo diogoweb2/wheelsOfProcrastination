@@ -1873,6 +1873,48 @@ A calculator sits on every **maths** lesson, and only a maths lesson — nothing
 - **No `eval`.** `src/logic/seCalc.ts` parses the expression by hand — `+ − × ÷ ( )`, precedence, unary minus — so the calculator can never become a way to run something, and a half-typed `5 ×` fails quietly instead of throwing. Dividing by zero shows nothing rather than `Infinity`. The parser is split from the component precisely so it can be tested without a browser.
 - Its taps count as activity on the lesson clock (§24d), because working a sum out is working.
 
+### 24p. "I don't get it yet" — asking is a legal move
+
+Until this existed, a question he did not understand left him exactly **one** legal move: guess. A wrong guess is final (§24f), gets sealed, and lands on Dad's desk labelled *mistake* — when the truth was that he never had a way in. Worse, it trained the one habit this whole app exists to break: when you do not understand, pick something and move on.
+
+So every `choice` and `build` question carries a quiet ghost button — **🤔 I don't get it yet** — and pressing it opens the walk-through the card already has, one step at a time.
+
+- **It cannot hand him the answer.** The walk-through is worked on *different numbers* (§24f), so he can read every step of it and still has to make the move himself. It gives him the method and leaves him the question.
+- **The answer afterwards counts for real.** Right is right. The verdict says "✅ Yes — you asked, then you got it", and the result card says it again: *you asked for a nudge N times instead of guessing. That is the right move.* Asking is never shown as an asterisk on the win.
+- **It is recorded, not punished.** `SeAnswer.helped` and `SeStat.helped`. Nothing is sealed, no lock is written — but the Report can now tell **"he has this"** from **"he has this once someone starts him off"**, which are two different conversations. A topic with 4+ attempts, no accuracy flag and nudges on 40% or more of them is marked **"gets there with a nudge"** in yellow, beside the orange "needs a hand".
+- **The ask is deliberately plain** — ghost button, no colour, no badge — so it never reads as the easy way out. The help it opens is warm, because the point is that asking worked.
+
+### 24q. The warm-up — three he already got right
+
+`sePlanLesson` deals unseen cards first and a card in `stats[id].seen` effectively never comes back. That is correct for *new work* and wrong for *remembering*: before this, nothing he learned was ever met again on purpose. He saw each idea once and the engine moved on.
+
+So **every lesson opens with up to three questions he got right at least three days ago**, coldest first, behind a ⚡ **Warm-up** title card.
+
+- **Three days, because the point is retrieval.** Asking the same thing an hour later measures nothing. Asking it after it has gone cold is what makes it stick.
+- **Only his LATEST answer counts.** Right in September and wrong last week is not warm, it is broken, and it belongs in "mistakes to fix" (§24f), not here.
+- **It comes out of the main plan**, so a question is never asked twice in one lesson, and it eats into the 30–60 minutes on purpose — remembering last week *is* the work.
+- **A miss in the warm-up seals like any other** (§24f). That is the honest outcome: it means he had lost it.
+- The title card exists because §24d promises the first thing he meets is never a question he might get wrong, and because three questions with no framing read as an exam. Framed, they read as a win already in the bank. `SE_WARM_INTRO` belongs to no pack, so it is resolved in the player and never in the bench — a top-up must not hand him the warm-up sign twice.
+
+### 24r. "What I can do now" (💪)
+
+The app pays **nothing** on purpose (§24), so the only reward it has to give is the fact that he gets it — and that fact was nowhere on screen. The ⛵ shows progress through one lesson and resets. The Report is percentages, which is Dad's language.
+
+So the Subjects tab opens with a green card listing, in **his own voice**, what he can now do: *"I can say how far a number is from zero without caring which side."* Every one of the 105 subtopics carries a `can` line (`src/logic/steugene.ts`), authored as an **ability**, not the topic reworded — "Wrapping paper, basically" is a topic; "I can unfold a box in my head and add up the faces" is a win.
+
+- **Earned at 4+ attempts and 75% right.** One lucky guess is not a skill, and the claim has to be true.
+- **Four lines, newest first**, with the rest behind a "+N more". Twenty lines is a wall; the ones that carry any charge are the ones from this week.
+- **It only ever grows, and it never lists what is missing.** A list of what he has not got is a list of failures.
+- It sits above the year because the screen he opens to pick today's work should open with what he has already won, not with the fifteen topics he has not touched.
+
+### 24s. "Spot the mistake"
+
+A card format with no new code behind it: a `choice` block whose drawing is a three-row table of somebody *else's* working, one row of which is wrong, and whose three options are **Step 1 / Step 2 / Step 3**.
+
+It earns its place for two reasons. **Judging is easier than generating**, so he can engage with a topic he cannot yet execute — and he is reading maths instead of producing it, which is the half of this he is better at. And it tests whether he holds the **concept** rather than whether he can run the procedure, which is the exact complaint that started all of this: *"I feel right now he is just doing in a mechanical way."*
+
+The wrong row is never highlighted. Twelve of them are written across the maths spine, one per subtopic, each one built on the real mistake for that topic — adding denominators, dividing a rate the wrong way up, keeping the minus on an absolute value, adding a discount instead of taking it off.
+
 ### 24c. It reads to him
 
 He can do the thinking; reading is what stops him. So **read-aloud is ON by default**, every card speaks itself when it appears, and every card has a 🔊 to hear it again. **It costs nothing** — the device's own voice, never a model.
@@ -1911,6 +1953,8 @@ Ask him if he is on rational numbers and he does not know. Show him `|−20|` an
 A video only earns its place because questions follow it, and that only works if it is the video we chose. YouTube's own chrome is a corridor out: the title links away, the end screen offers six more, the avatar is a door.
 
 So none of it is reachable. `youtube-nocookie.com` through the IFrame API with `controls=0`, a **transparent shield over the whole frame** so no click lands inside it, and every control he gets is ours (play/pause, ⏪10s, replay) driving the player through the API. The end screen never appears because the moment the video ends we cover it. It **fails open**: a video that will not load says so and lets him move on.
+
+**One thing to listen for.** A video block may carry a `watchFor` line, pinned above the frame *before* he presses play and still there while it runs: *"Listen for: why he doubles after adding only three faces."* Two held minutes with no job in them is two minutes of looking at a screen; a question in advance turns watching into hunting. All 108 videos in the Mathematics packs have one, and none of them gives its own answer away.
 
 **Two minutes, then he is free.** The skip button is held for the first 120 seconds and reads `⏭ Skip in 1:12`; after that it reads `⏭ Skip to the questions` and ends the video. Two minutes is long enough that the video has made its point and short enough that a ten-minute upload cannot eat a third of his hour — and a lesson he is allowed to leave is a lesson he does not spend fighting.
 

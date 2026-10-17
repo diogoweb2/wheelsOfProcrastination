@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'Finding the Missing Angle of a Triangle',
       by: 'Math with Mr. J',
       seconds: 314,
+      watchFor: 'The total of the three angles. Every triangle, same total.',
       checks: [
         {
           prompt: 'The three angles inside a triangle add up to…',
@@ -421,6 +422,7 @@ export const pack: SePack = {
       title: 'Classifying Triangles By Their Angles',
       by: 'Math with Mr. J',
       seconds: 180,
+      watchFor: 'What makes a triangle obtuse rather than acute.',
       checks: [
         {
           prompt: 'An OBTUSE triangle has…',
@@ -453,6 +455,7 @@ export const pack: SePack = {
       title: 'Finding the Missing Angle of a Quadrilateral',
       by: 'Math with Mr. J',
       seconds: 192,
+      watchFor: 'The total for four angles, and how it relates to 180.',
       checks: [
         {
           prompt: 'The four angles of a quadrilateral add up to…',
@@ -561,6 +564,51 @@ export const pack: SePack = {
         { text: 'Which sides are equal? The square\'s.' },
         { text: 'Right + isosceles.' },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'shp-fn1',
+      emoji: '🔺',
+      title: 'Every Fortnite build is one of four shapes',
+      lines: [
+        'Floor: a square. Wall: a square. Ramp: a square with a triangle across it.',
+        'A cone is a pyramid — four triangles leaning on each other.',
+        'The three angles of ANY triangle add to 180°, your ramp included.',
+        'The four angles of any quadrilateral add to 360°.',
+      ],
+      art: { art: 'shape', pts: [[0, 0], [4, 0], [4, 3]], angles: ['37°', '90°', '53°'], right: [1], tone: 'focus', label: 'a ramp, side on' },
+      callout: { flavour: 'key', text: 'Triangle = 180°. Quadrilateral = 360°. Every single time.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'shp-fn2',
+      prompt: 'A ramp seen side on is a triangle. Two of its angles are 90° and 37°. What is the third one?',
+      art: { art: 'shape', pts: [[0, 0], [4, 0], [4, 3]], angles: ['37°', '90°', '?'], right: [1], tone: 'focus' },
+      options: ['53°', '63°', '127°'],
+      answer: 0,
+      why: '180 − 90 − 37 = 53°.',
+      steps: [
+        { text: 'Different triangle: 90° and 20°.' },
+        { text: '180 − 90 − 20.' },
+        { text: '= 70°.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'shp-fn3',
+      prompt: 'A floor piece is a square. Which of these is true of EVERY square?',
+      art: { art: 'shape', pts: [[0, 0], [0, 3], [3, 3], [3, 0]], ticks: [0, 1, 2, 3], right: [0, 1, 2, 3], tone: 'good' },
+      options: ['four equal sides, four 90° angles', 'only the opposite sides are equal, like a rectangle', 'the four angles add to 180°, not 360°'],
+      answer: 0,
+      why: 'A square has four equal sides and four angles of 90°.',
+      steps: [
+        { text: 'Different shape: a rectangle.' },
+        { text: 'Opposite sides equal and four 90° angles, but not all four sides the same.' },
+        { text: 'So every square is a rectangle, and not every rectangle is a square.' },
+      ],
+      secs: 50,
     },
   ],
 }

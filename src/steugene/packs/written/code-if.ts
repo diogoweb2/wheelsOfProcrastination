@@ -236,6 +236,7 @@ export const pack: SePack = {
       title: 'If Statements — Roblox Studio for Beginners',
       by: 'Psuedon',
       seconds: 165,
+      watchFor: 'The symbol Lua uses to ASK whether two things are equal.',
       checks: [
         {
           prompt: 'In Lua, which one ASKS whether two things are equal?',
@@ -698,6 +699,7 @@ export const pack: SePack = {
       title: 'If Statements • How to Script on Roblox',
       by: 'jotslo',
       seconds: 238,
+      watchFor: 'The word that closes an if block. One word, right at the end.',
       checks: [
         {
           prompt: 'Which word closes an if block in Lua?',

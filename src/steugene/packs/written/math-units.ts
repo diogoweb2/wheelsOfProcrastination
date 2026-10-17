@@ -102,6 +102,7 @@ export const pack: SePack = {
       title: 'Metric Units of Length: Convert mm, cm, m and km',
       by: 'Math with Mr. J',
       seconds: 335,
+      watchFor: 'Whether km into m multiplies or divides, and by what.',
       checks: [
         {
           prompt: 'To change km into m, you…',
@@ -466,6 +467,7 @@ export const pack: SePack = {
       title: 'Kilograms and Grams: Converting kg to g and g to kg',
       by: 'Math with Mr. J',
       seconds: 385,
+      watchFor: 'How many grams there are in one kilogram.',
       checks: [
         {
           prompt: '3 kg is how many grams?',
@@ -498,6 +500,7 @@ export const pack: SePack = {
       title: 'Unit Conversion the Easy Way',
       by: 'ketzbook',
       seconds: 374,
+      watchFor: 'The number he uses for turning hours into minutes.',
       checks: [
         {
           prompt: 'Changing 3 hours into minutes, you…',
@@ -550,6 +553,51 @@ export const pack: SePack = {
         { text: '2 h 15 min.' },
       ],
       secs: 40,
+    },
+    {
+      kind: 'explain',
+      id: 'uni-fn1',
+      emoji: '🌪️',
+      title: 'How far is the storm?',
+      lines: [
+        'The game tells you the storm is 850 m away. That is 850 metres.',
+        '1 km = 1000 m, so 850 m is a bit less than one kilometre.',
+        '1 m = 100 cm. 1 cm = 10 mm.',
+        'Going up the ladder you divide. Coming back down you multiply.',
+      ],
+      art: { art: 'numberline', from: 0, to: 1000, step: 250, points: [{ at: 850, label: '850 m storm', tone: 'bad' }, { at: 1000, label: '1 km', tone: 'calm' }] },
+      callout: { flavour: 'key', text: '1 km = 1000 m · 1 m = 100 cm · 1 cm = 10 mm.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'uni-fn2',
+      prompt: 'The storm wall is 1.2 km away. How many metres is that?',
+      art: { art: 'numberline', from: 0, to: 2000, step: 500, points: [{ at: 1200, label: '1.2 km', tone: 'bad' }] },
+      options: ['120 m', '1200 m', '12 000 m'],
+      answer: 1,
+      why: '1 km = 1000 m, so 1.2 × 1000 = 1200 m.',
+      steps: [
+        { text: 'Different distance: 2.5 km.' },
+        { text: '2.5 × 1000.' },
+        { text: '= 2500 m.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'uni-fn3',
+      prompt: 'You stack 9 walls straight up. Each wall is about 2.5 m tall. How high is the tower?',
+      art: { art: 'items', rows: [{ icon: 'plank', n: 9, per: 3, label: '9 walls, 2.5 m each' }] },
+      options: ['11.5 m', '22.5 m', '225 m'],
+      answer: 1,
+      why: '9 × 2.5 = 22.5 m.',
+      steps: [
+        { text: 'Different stack: 4 walls at 2.5 m.' },
+        { text: '4 × 2.5.' },
+        { text: '= 10 m.' },
+      ],
+      secs: 50,
     },
   ],
 }

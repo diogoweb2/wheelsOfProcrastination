@@ -134,6 +134,7 @@ export const pack: SePack = {
       title: 'Complementary Angles & Supplementary Angles',
       by: 'Math with Mr. J',
       seconds: 288,
+      watchFor: 'Two totals: one for complementary, one for supplementary.',
       checks: [
         {
           prompt: 'Complementary angles add up to…',
@@ -463,6 +464,7 @@ export const pack: SePack = {
       title: 'Angle basics',
       by: 'Khan Academy',
       seconds: 409,
+      watchFor: 'What two things have to meet to make an angle at all.',
       checks: [
         {
           prompt: 'An angle is made by…',
@@ -596,6 +598,51 @@ export const pack: SePack = {
         { text: 'Other: 50° and 60°.' },
         { text: '180 − 110 = 70°.' },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'ang-fn1',
+      emoji: '🌀',
+      title: 'The 360 spin, and why it is 360',
+      lines: [
+        'Spin all the way round in Fortnite and you have turned 360°.',
+        'Half a spin to check behind you: 180°.',
+        'A quarter turn to face the next wall of your box: 90°.',
+        'Two angles that sit on a straight line always add to 180°. Same 180.',
+      ],
+      art: { art: 'angle', deg: 180, split: 115, labels: ['115°', '65°'] },
+      callout: { flavour: 'key', text: 'A straight line is 180°. A full turn is 360°.' },
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'ang-fn2',
+      prompt: 'You are boxed up. You turn 90° to face the next wall, then 90° again. How far have you turned altogether?',
+      art: { art: 'angle', deg: 90, label: 'one quarter turn' },
+      options: ['45°', '180°', '270°, nearly all the way round'],
+      answer: 1,
+      why: 'Two quarter turns: 90 + 90 = 180°, which is half a spin.',
+      steps: [
+        { text: 'Different one: three quarter turns.' },
+        { text: '90 + 90 + 90.' },
+        { text: '= 270°, three quarters of the way round.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'ang-fn3',
+      prompt: 'Your ramp meets the floor at 35°. On the other side of the ramp, the floor carries straight on. What is that second angle?',
+      art: { art: 'angle', deg: 180, split: 35, labels: ['35°', '?'] },
+      options: ['145°', '35° again', '55°'],
+      answer: 0,
+      why: 'A straight line is 180°, so 180 − 35 = 145°.',
+      steps: [
+        { text: 'Different ramp: it meets the floor at 50°.' },
+        { text: 'A straight line is 180°.' },
+        { text: '180 − 50 = 130°.' },
+      ],
+      secs: 50,
     },
   ],
 }

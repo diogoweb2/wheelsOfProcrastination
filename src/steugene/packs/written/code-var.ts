@@ -211,6 +211,7 @@ export const pack: SePack = {
       title: 'Roblox Lua — variables (and a loop)',
       by: 'ohusq',
       seconds: 157,
+      watchFor: 'What the word local does at the start of a line.',
       checks: [
         {
           prompt: 'local speed = 16 — what does that line do?',
@@ -649,6 +650,7 @@ export const pack: SePack = {
       title: 'Luau scripting — variables in Roblox Studio',
       by: 'RoDev',
       seconds: 282,
+      watchFor: 'What happens to the old value when you write score = score + 1.',
       checks: [
         {
           prompt: 'score = score + 1 means…',

@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'How to Find the Area and Perimeter of a Triangle',
       by: 'Math with Mr. J',
       seconds: 348,
+      watchFor: 'Why the triangle formula has a halving in it.',
       checks: [
         {
           prompt: 'The formula for the area of a triangle is…',
@@ -470,6 +471,7 @@ export const pack: SePack = {
       title: 'Finding the Perimeter and Area of a Composite Shape (L-Shape)',
       by: 'Math with Mr. J',
       seconds: 501,
+      watchFor: 'The trick for an L-shape: what he does to it first.',
       checks: [
         {
           prompt: 'To find the area of an L-shape, you can…',
@@ -536,6 +538,52 @@ export const pack: SePack = {
       ],
       art: { art: 'shape', pts: [[0, 0], [10, 0], [12, 5], [2, 5]], sides: ['base', 'slant (not h)', null, null], heights: [{ from: [2, 0], to: [2, 5], label: 'height' }] },
       secs: 40,
+    },
+    {
+      kind: 'explain',
+      id: 'are-fn1',
+      emoji: '🟫',
+      title: 'The floor of a box fight',
+      lines: [
+        'One Fortnite floor piece covers one square tile.',
+        'A floor 3 tiles by 3 tiles takes 3 × 3 = 9 pieces.',
+        'AREA is how many tiles cover the inside.',
+        'PERIMETER is how many walls you need all the way round the edge.',
+        'Same build. Two completely different questions.',
+      ],
+      art: { art: 'blocks', w: 3, h: 3, tile: 'plank', wLabel: '3 tiles', hLabel: '3 tiles', edge: true, label: '9 pieces inside, 12 walls round it' },
+      callout: { flavour: 'key', text: 'Area = inside. Perimeter = the walk round the edge.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'are-fn2',
+      prompt: 'You lay a floor 6 tiles by 4 tiles. How many floor pieces is that?',
+      art: { art: 'blocks', w: 6, h: 4, tile: 'plank', wLabel: '6', hLabel: '4' },
+      options: ['10', '24', '20'],
+      answer: 1,
+      why: '6 × 4 = 24 floor pieces.',
+      steps: [
+        { text: 'Different floor: 5 by 3.' },
+        { text: '5 × 3.' },
+        { text: '= 15 pieces.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'build',
+      id: 'are-fn3',
+      prompt: 'That same floor is 6 tiles by 4. How many WALLS to close it in all the way round?',
+      art: { art: 'blocks', w: 6, h: 4, tile: 'plank', wLabel: '6', hLabel: '4' },
+      answer: '20',
+      decoys: ['4'],
+      why: 'Round the edge: 6 + 4 + 6 + 4 = 20 walls.',
+      steps: [
+        { text: 'Different floor: 5 by 3.' },
+        { text: '5 + 3 + 5 + 3.' },
+        { text: '= 16 walls.' },
+      ],
+      secs: 60,
     },
   ],
 }

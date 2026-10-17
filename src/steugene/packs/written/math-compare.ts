@@ -143,6 +143,7 @@ export const pack: SePack = {
       title: 'Comparing Rational Numbers',
       by: 'Khan Academy',
       seconds: 419,
+      watchFor: 'His first move when a fraction and a decimal get compared.',
       checks: [
         {
           prompt: 'To compare −3/4 and −0.7, the easiest first move is…',
@@ -637,6 +638,7 @@ export const pack: SePack = {
       title: 'Comparing Fractions',
       by: 'Math with Mr. J',
       seconds: 463,
+      watchFor: 'Why same-bottom fractions are the easy case.',
       checks: [
         {
           prompt: 'Comparing 2/5 and 3/5 is easy because…',
@@ -795,6 +797,21 @@ export const pack: SePack = {
         { text: '$2.85 is cheaper.' },
       ],
       secs: 40,
+    },
+    {
+      kind: 'choice',
+      id: 'cmp-spot1',
+      prompt: 'Someone put −7, −2 and −10 in order, smallest first. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'smallest is the one furthest left on the line'], ['2', '−2 is furthest left, so it goes first'], ['3', 'order: −2, −7, −10']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 picked the wrong end. On the number line −10 is furthest left, so −10 is the smallest.',
+      steps: [
+        { text: 'Try −3, −8 and −1.' },
+        { text: 'Furthest left is −8.' },
+        { text: 'Order: −8, −3, −1.' },
+      ],
+      secs: 55,
     },
   ],
 }

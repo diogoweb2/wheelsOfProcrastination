@@ -120,6 +120,7 @@ export const pack: SePack = {
       title: 'Introduction to Linear Relations: Tables and Graphs',
       by: 'BHNmath',
       seconds: 441,
+      watchFor: 'What the y values do each time x goes up by one.',
       checks: [
         {
           prompt: 'In a table for a LINEAR relation, the y values…',
@@ -478,6 +479,7 @@ export const pack: SePack = {
       title: 'Graphing Linear Equations',
       by: 'numberninja',
       seconds: 290,
+      watchFor: 'What he builds before he plots a single point.',
       checks: [
         {
           prompt: 'To graph y = x + 2, a good first step is…',
@@ -510,6 +512,7 @@ export const pack: SePack = {
       title: 'Graphing Linear Equations using X and Y intercepts',
       by: 'GoTutor Math',
       seconds: 271,
+      watchFor: 'Which axis the y-intercept sits on.',
       checks: [
         {
           prompt: 'The y-intercept is where the line crosses…',
@@ -575,6 +578,51 @@ export const pack: SePack = {
         { text: 'x = 10 minutes.' },
       ],
       secs: 50,
+    },
+    {
+      kind: 'explain',
+      id: 'gra-fn1',
+      emoji: '📈',
+      title: 'XP per match, drawn as a line',
+      lines: [
+        'Say every match gives you 50 XP, and you start the day already on 100.',
+        'After 1 match: 150. After 2: 200. After 3: 250.',
+        'The rule is XP = 50m + 100, where m is matches played.',
+        'Plot those and they sit in a dead straight line. That is what linear means.',
+      ],
+      art: { art: 'plane', x: [0, 6], y: [0, 400], ystep: 100, xName: 'matches', yName: 'XP', lines: [{ m: 50, b: 100, tone: 'good', label: 'XP = 50m + 100' }] },
+      callout: { flavour: 'key', text: 'The number in front of m is what each match adds. The other number is where you started.' },
+      secs: 60,
+    },
+    {
+      kind: 'choice',
+      id: 'gra-fn2',
+      prompt: 'XP = 50m + 100. You have played 4 matches. What is your XP?',
+      art: { art: 'table', head: ['matches', 'XP'], rows: [[0, 100], [1, 150], [2, 200], [3, 250], [4, '?']] },
+      options: ['200', '300', '400'],
+      answer: 1,
+      why: '50 × 4 = 200, and the 100 you started on makes 300.',
+      steps: [
+        { text: 'Different rule: XP = 20m + 50, after 3 matches.' },
+        { text: '20 × 3 = 60, then add the 50.' },
+        { text: '= 110 XP.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'gra-fn3',
+      prompt: 'A line starts at 100 XP and climbs 50 every match. Which rule is it?',
+      art: { art: 'plane', x: [0, 6], y: [0, 400], ystep: 100, xName: 'matches', yName: 'XP', points: [{ x: 0, y: 100, label: 'start', tone: 'focus' }] },
+      options: ['XP = 100m + 50', 'XP = 50m + 100', 'XP = 150m'],
+      answer: 1,
+      why: 'The 50 it climbs each match goes in front of m, and the 100 is the start: XP = 50m + 100.',
+      steps: [
+        { text: 'Different line: starts at 20, climbs 5 each time.' },
+        { text: 'The 5 goes in front of m, the 20 is where it started.' },
+        { text: 'y = 5m + 20.' },
+      ],
+      secs: 55,
     },
   ],
 }

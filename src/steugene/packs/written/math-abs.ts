@@ -135,6 +135,7 @@ export const pack: SePack = {
       title: 'Meaning of absolute value',
       by: 'Khan Academy',
       seconds: 220,
+      watchFor: 'What absolute value measures, and why the sign stops mattering.',
       checks: [
         {
           prompt: 'Absolute value tells you a number\'s…',
@@ -607,6 +608,7 @@ export const pack: SePack = {
       title: 'Absolute value as distance between numbers',
       by: 'Khan Academy',
       seconds: 329,
+      watchFor: 'How he works out the gap between a negative and a positive.',
       checks: [
         {
           prompt: 'How far apart are −3 and 4 on the number line?',
@@ -639,6 +641,7 @@ export const pack: SePack = {
       title: 'How to Compare Absolute Values',
       by: 'Math with Mr. J',
       seconds: 282,
+      watchFor: 'What you do to each number BEFORE you compare them.',
       checks: [
         {
           prompt: 'To compare |−8| and |5|, you first…',
@@ -725,6 +728,21 @@ export const pack: SePack = {
         { text: 'Y 55 is closer, by one block.' },
       ],
       secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'abs-spot1',
+      prompt: 'Someone worked out |−20|. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', '|−20| asks how far −20 is from 0'], ['2', 'the distance is 20 blocks'], ['3', 'so |−20| = −20']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 2,
+      why: 'Step 3 kept the minus. A distance is never negative, so |−20| = 20.',
+      steps: [
+        { text: 'Try |−6|.' },
+        { text: 'How far is −6 from 0? Six.' },
+        { text: '|−6| = 6, with no minus on it.' },
+      ],
+      secs: 55,
     },
   ],
 }

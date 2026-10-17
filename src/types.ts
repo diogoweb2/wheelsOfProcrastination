@@ -1670,6 +1670,15 @@ export interface SeAnswer {
   given: string
   /** What it should have been. */
   expected: string
+  /**
+   * He pressed "I don't get it yet" before answering (§24p).
+   *
+   * A right answer after a nudge is still right — it is not sealed and it is
+   * not a mistake. It is recorded so the Report can tell "he has it" from
+   * "he has it when someone starts him off", which are different things to
+   * sit down with him about.
+   */
+  helped?: boolean
 }
 
 /** The running total for one subtopic. Rebuilt from answers, cached for speed. */
@@ -1683,6 +1692,8 @@ export interface SeStat {
   lastAt: number
   /** Block ids already served here, so a repeat deals different cards. */
   seen: string[]
+  /** Of those attempts, how many he asked for a nudge on first (§24p). */
+  helped?: number
 }
 
 /**

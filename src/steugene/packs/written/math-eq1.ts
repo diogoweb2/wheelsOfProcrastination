@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'How to Solve One-Step Equations',
       by: 'Math with Mr. J',
       seconds: 414,
+      watchFor: 'The move he makes to get x on its own.',
       checks: [
         {
           prompt: 'To solve x − 7 = 12, you…',
@@ -498,6 +499,7 @@ export const pack: SePack = {
       title: 'How to Solve One-Step Equations (Addition and Subtraction)',
       by: 'Math with Mr. J',
       seconds: 300,
+      watchFor: 'What he does to BOTH sides, and why it has to be both.',
       checks: [
         {
           prompt: 'Solve: x + 15 = 40',
@@ -530,6 +532,7 @@ export const pack: SePack = {
       title: 'Solving One-Step Addition and Subtraction Equations',
       by: 'Math with Mr. J',
       seconds: 481,
+      watchFor: 'How he checks the answer once he has x.',
       checks: [
         {
           prompt: 'Solve: x − 12 = 8',
@@ -569,6 +572,21 @@ export const pack: SePack = {
         { text: 's = 5.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'eq1-spot1',
+      prompt: 'Someone solved x + 9 = 14. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'do the same thing to both sides'], ['2', 'add 9 to both sides'], ['3', 'x = 23']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 added 9 when it needed to UNDO the +9. Subtract 9 from both sides and x = 5.',
+      steps: [
+        { text: 'Try x + 4 = 10.' },
+        { text: 'Undo the +4 by subtracting 4 from both sides.' },
+        { text: 'x = 6.' },
+      ],
+      secs: 55,
     },
   ],
 }

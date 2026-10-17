@@ -130,6 +130,7 @@ export const pack: SePack = {
       title: 'Math Antics — Adding and Subtracting Fractions',
       by: 'mathantics',
       seconds: 262,
+      watchFor: 'What has to match before two fractions can be added.',
       checks: [
         {
           prompt: 'Before you can add two fractions, their bottoms must be…',
@@ -525,6 +526,7 @@ export const pack: SePack = {
       title: 'Adding and Subtracting Mixed Numbers with Unlike Denominators',
       by: 'Math with Mr. J',
       seconds: 325,
+      watchFor: 'What he does with the whole numbers, and with the fractions.',
       checks: [
         {
           prompt: 'To work out 2⅓ + 1¼, a good first step is…',
@@ -557,6 +559,7 @@ export const pack: SePack = {
       title: 'Fraction Review: Add, Subtract, Multiply, and Divide',
       by: 'Math with Mr. J',
       seconds: 436,
+      watchFor: 'Which of the four operations needs a common bottom first.',
       checks: [
         {
           prompt: 'Which one NEEDS a common denominator first?',
@@ -626,6 +629,21 @@ export const pack: SePack = {
         { text: 'Two both smaller than 1/2 add to less than 1.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'fad-spot1',
+      prompt: 'Someone added 1/4 + 1/2. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'the slices are different sizes, so make them match'], ['2', 'add the tops and add the bottoms: 2/6'], ['3', 'so 1/4 + 1/2 = 2/6']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 1,
+      why: 'Step 2 added the bottoms, which you never do. Make them match first: 1/4 + 2/4 = 3/4.',
+      steps: [
+        { text: 'Try 1/3 + 1/3.' },
+        { text: 'The bottoms already match, so just add the tops.' },
+        { text: '2/3 — the bottom stays 3.' },
+      ],
+      secs: 55,
     },
   ],
 }

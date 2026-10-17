@@ -14,6 +14,7 @@ import {
   CURRENT_SUBTOPIC,
   SE_SUBJECTS,
   TERM_LABEL,
+  seCanDo,
   seFind,
   seSubtopicsOf,
   type SeSubTopic,
@@ -98,6 +99,8 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
         </div>
       )}
 
+      <CanDo />
+
       {TERMS.map((term) => {
         const subjects = SE_SUBJECTS.filter((s) => s.term === term)
         if (!subjects.length) return null
@@ -122,6 +125,53 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
 
       {picked && <TopicSheet subtopicId={picked} onClose={() => setPicked(null)} setTab={setTab} />}
     </>
+  )
+}
+
+/**
+ * 💪 What I can do now (§24r).
+ *
+ * Four lines of it, newest first, with the rest behind a "+N more" — because
+ * a list of twenty is a wall, and the only lines that carry any charge are
+ * the ones he earned this week.
+ *
+ * It sits above the year on purpose: the screen he opens to pick today's work
+ * should open with what he has already won, not with the fifteen topics he
+ * has not touched.
+ */
+function CanDo() {
+  const { data } = useStore()
+  const can = useMemo(() => seCanDo(data.steugene.stats), [data.steugene.stats])
+  const [all, setAll] = useState(false)
+  if (!can.length) return null
+  const shown = all ? can : can.slice(0, 4)
+
+  return (
+    <div className="card se-can">
+      <div className="se-can__head">
+        <strong>💪 What I can do now</strong>
+        <span className="se-can__count">{can.length}</span>
+      </div>
+      <ul className="se-can__list">
+        {shown.map((c) => (
+          <li key={c.subtopicId}>
+            <span aria-hidden>{c.emoji}</span>
+            <span>{c.can}</span>
+          </li>
+        ))}
+      </ul>
+      {can.length > 4 && (
+        <button
+          className="btn btn--ghost btn--small"
+          onClick={() => {
+            sfx.click()
+            setAll(!all)
+          }}
+        >
+          {all ? 'Show fewer' : `+${can.length - 4} more`}
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -635,6 +685,11 @@ function ReportTab({ admin }: { admin: boolean }) {
       {rows.map(({ id, stat, where }) => {
         const pct = Math.round((stat.right / stat.attempts) * 100)
         const help = pct < 60 && stat.attempts >= 4
+        const nudged = stat.helped ?? 0
+        // §24p — a topic he gets right but keeps asking for a start on is a
+        // different problem from one he gets wrong, and it is invisible in a
+        // percentage. It is worth naming, because it is nearly fixed.
+        const started = !help && stat.attempts >= 4 && nudged / stat.attempts >= 0.4
         return (
           <div key={id} className={`card se-row${help ? ' se-row--help' : ''}`}>
             <div className="se-row__top">
@@ -647,9 +702,11 @@ function ReportTab({ admin }: { admin: boolean }) {
               <div style={{ width: `${pct}%` }} className={pct < 60 ? 'bad' : pct < 80 ? 'mid' : 'good'} />
             </div>
             <div className="muted se-row__meta">
-              {where!.subject.name} · {stat.right}/{stat.attempts} right · {Math.round(stat.seconds / 60)} min ·{' '}
+              {where!.subject.name} · {stat.right}/{stat.attempts} right
+              {nudged > 0 && ` · 🤔 ${nudged} nudged`} · {Math.round(stat.seconds / 60)} min ·{' '}
               {prettyDay(dayKey(new Date(stat.lastAt)))}
               {help && <strong className="se-row__flag"> · needs a hand</strong>}
+              {started && <strong className="se-row__nudge"> · gets there with a nudge</strong>}
             </div>
           </div>
         )

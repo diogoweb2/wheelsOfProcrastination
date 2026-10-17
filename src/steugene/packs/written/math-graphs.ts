@@ -133,6 +133,7 @@ export const pack: SePack = {
       title: 'Interpreting graphs of proportional relationships',
       by: 'Khan Academy',
       seconds: 162,
+      watchFor: 'Where a proportional graph always starts.',
       checks: [
         {
           prompt: 'A graph of a proportional relationship is a straight line that…',
@@ -725,6 +726,7 @@ export const pack: SePack = {
       title: 'Types of graphs, and when to use each one',
       by: 'MooMooMath and Science',
       seconds: 192,
+      watchFor: 'Which graph is the one for change over time.',
       checks: [
         {
           prompt: 'You want to show how your XP changed over 7 days. Which graph?',

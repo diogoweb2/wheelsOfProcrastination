@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'Introduction to transformations',
       by: 'Khan Academy',
       seconds: 442,
+      watchFor: 'Which transformation is the only one that resizes.',
       checks: [
         {
           prompt: 'Which transformation can change a shape\'s size?',
@@ -419,6 +420,7 @@ export const pack: SePack = {
       title: 'The Four Transformations In Maths',
       by: 'Minity Maths',
       seconds: 253,
+      watchFor: 'How a translation gets written down.',
       checks: [
         {
           prompt: 'A translation is described by…',
@@ -451,6 +453,7 @@ export const pack: SePack = {
       title: 'Transformations: Translations, Reflections, and Rotations',
       by: 'Math Defined',
       seconds: 244,
+      watchFor: 'Which of the three keeps the shape exactly the same size.',
       checks: [
         {
           prompt: 'Which of these keeps a shape the same size?',
@@ -488,6 +491,49 @@ export const pack: SePack = {
         'Half the work, and the two sides match perfectly.',
       ],
       art: { art: 'blocks', w: 10, h: 6, tile: 'stone', holes: [[0, 0, 1, 2], [9, 0, 1, 2], [2, 0, 2, 1], [6, 0, 2, 1]], paint: [{ x: 4, y: 3, w: 2, h: 3, tile: 'plank' }] },
+      secs: 45,
+    },
+    {
+      kind: 'explain',
+      id: 'trn-fn1',
+      emoji: '🔄',
+      title: 'Pressing rotate is a transformation',
+      lines: [
+        'Point at a ramp, press rotate. It turns 90° and it is the same ramp.',
+        'That is a ROTATION. The shape did not change, only which way it faces.',
+        'Walking a floor piece sideways is a TRANSLATION — a slide.',
+        'A REFLECTION is a flip. A DILATION resizes, and it is the only one that does.',
+      ],
+      art: { art: 'shape', pts: [[0, 0], [3, 0], [3, 2]], tone: 'focus', label: 'before', also: [{ pts: [[0, 3], [0, 0], [2, 0]], tone: 'good', label: 'rotated 90°' }] },
+      callout: { flavour: 'key', text: 'Slide, flip and turn keep it identical. Only resizing changes the size.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'trn-fn2',
+      prompt: 'You press rotate on a ramp piece. What has actually changed about it?',
+      options: ['its size', 'only which way it faces', 'both its size and its shape'],
+      answer: 1,
+      why: 'A rotation turns it. The size and the shape stay exactly as they were.',
+      steps: [
+        { text: 'Different move: sliding a floor piece two tiles left.' },
+        { text: 'That is a translation.' },
+        { text: 'Its position changed. Its shape and size did not.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'trn-fn3',
+      prompt: 'Of the four moves — slide, flip, turn, resize — which is the only one that changes a shape\'s SIZE?',
+      options: ['a slide, also called a translation', 'a resize', 'a flip'],
+      answer: 1,
+      why: 'A resize — a dilation — is the only one of the four that changes size.',
+      steps: [
+        { text: 'Different one: a rotation.' },
+        { text: 'A rotation turns the shape round.' },
+        { text: 'Same size afterwards, so it is not that one either.' },
+      ],
       secs: 45,
     },
   ],

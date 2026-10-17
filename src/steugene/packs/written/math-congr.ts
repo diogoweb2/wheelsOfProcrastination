@@ -104,6 +104,7 @@ export const pack: SePack = {
       title: 'Congruent and Similar Triangles',
       by: 'Khan Academy',
       seconds: 233,
+      watchFor: 'What similar triangles always share, and what they need not.',
       checks: [
         {
           prompt: 'Similar triangles always have…',
@@ -405,6 +406,7 @@ export const pack: SePack = {
       title: 'What are Congruent Figures?',
       by: 'Math with Mr. J',
       seconds: 500,
+      watchFor: 'What is true about matching sides in congruent shapes.',
       checks: [
         {
           prompt: 'In congruent shapes, matching sides are…',
@@ -437,6 +439,7 @@ export const pack: SePack = {
       title: 'Difference Between Similar & Congruent Figures',
       by: 'Mashup Math',
       seconds: 366,
+      watchFor: 'Whether every congruent pair also counts as similar.',
       checks: [
         {
           prompt: 'Every pair of congruent shapes is also…',
@@ -474,6 +477,50 @@ export const pack: SePack = {
         'Stretch one way only, and it stops being similar: faces look squashed.',
       ],
       art: { art: 'shape', pts: [[0, 0], [8, 0], [8, 5], [0, 5]], label: 'real', also: [{ pts: [[10, 0], [14, 0], [14, 2.5], [10, 2.5]], label: '½ scale', tone: 'focus' }] },
+      secs: 45,
+    },
+    {
+      kind: 'explain',
+      id: 'con-fn1',
+      emoji: '🧱',
+      title: 'Two builds: identical, or just the same shape?',
+      lines: [
+        'Every wall piece you place is identical to every other wall piece.',
+        'Same shape AND same size. That word is CONGRUENT.',
+        'The island on the minimap is the same shape as the real island, shrunk.',
+        'Same shape, different size. That word is SIMILAR.',
+      ],
+      art: { art: 'shape', pts: [[0, 0], [0, 3], [3, 3], [3, 0]], sides: ['3', '3', '3', '3'], tone: 'good', label: 'wall piece', also: [{ pts: [[0, 0], [0, 3], [3, 3], [3, 0]], sides: ['3', '3', '3', '3'], tone: 'good', label: 'another wall piece' }] },
+      callout: { flavour: 'key', text: 'Congruent = same shape and same size. Similar = same shape, resized.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'con-fn2',
+      prompt: 'The minimap shows the whole island shrunk into the corner of the screen. The real island and the minimap one are…',
+      options: ['congruent', 'similar', 'neither of those two things'],
+      answer: 1,
+      why: 'Same shape, different size. That is similar, not congruent.',
+      steps: [
+        { text: 'Different case: two wall pieces out of the same build.' },
+        { text: 'Same shape, same size.' },
+        { text: 'Those are congruent.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'con-fn3',
+      prompt: 'Two ramps are congruent. One of them has a side of 4 m. The matching side on the other one is…',
+      art: { art: 'shape', pts: [[0, 0], [4, 0], [4, 3]], sides: ['4 m', null, null], tone: 'focus', also: [{ pts: [[0, 0], [4, 0], [4, 3]], sides: ['?', null, null], tone: 'calm' }] },
+      options: ['4 m', '8 m', 'there is no way to tell'],
+      answer: 0,
+      why: 'Congruent means identical, so the matching side is 4 m as well.',
+      steps: [
+        { text: 'Different pair: congruent floors, one side is 7 m.' },
+        { text: 'Congruent = identical.' },
+        { text: 'The matching side is 7 m.' },
+      ],
       secs: 45,
     },
   ],

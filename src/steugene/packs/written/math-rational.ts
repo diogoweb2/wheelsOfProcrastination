@@ -166,6 +166,7 @@ export const pack: SePack = {
       title: 'Ordering rational numbers',
       by: 'Khan Academy',
       seconds: 253,
+      watchFor: 'Which end of the number line the smallest one sits at.',
       checks: [
         {
           prompt: 'Smallest to largest: −1.5, −2, 0.5',
@@ -519,6 +520,7 @@ export const pack: SePack = {
       title: 'Rational Numbers Explained',
       by: 'Math with Mr. J',
       seconds: 594,
+      watchFor: 'The one form every rational number can be written in.',
       checks: [
         {
           prompt: 'A rational number is any number that can be written as…',
@@ -641,6 +643,7 @@ export const pack: SePack = {
       title: 'Compare rational numbers using a number line',
       by: 'Khan Academy',
       seconds: 339,
+      watchFor: 'Which direction along the line means bigger.',
       checks: [
         {
           prompt: 'On a number line, the bigger number is always…',
@@ -674,6 +677,7 @@ export const pack: SePack = {
       title: 'Identifying Rational Numbers on a Number Line',
       by: 'Math with Mr. J',
       seconds: 542,
+      watchFor: 'How he names a point sitting between two whole numbers.',
       checks: [
         {
           prompt: 'A point sits exactly halfway between 2 and 3. It is…',
@@ -924,6 +928,21 @@ export const pack: SePack = {
       ],
       art: { art: 'hearts', full: 6.5 },
       secs: 40,
+    },
+    {
+      kind: 'choice',
+      id: 'rat-spot1',
+      prompt: 'Someone worked out what fraction of a 12-slice pizza is left after 5 are eaten. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', '12 slices in the whole pizza'], ['2', '5 eaten, so 7 left'], ['3', 'the answer is 5/12']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 2,
+      why: 'Step 3 names the slices that are GONE. What is LEFT is 7 out of 12, so 7/12.',
+      steps: [
+        { text: 'Try it with 8 slices and 3 eaten.' },
+        { text: 'Gone is 3, left is 5.' },
+        { text: 'The fraction left is 5/8, not 3/8.' },
+      ],
+      secs: 55,
     },
   ],
 }

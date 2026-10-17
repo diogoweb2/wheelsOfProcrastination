@@ -234,6 +234,7 @@ export const pack: SePack = {
       title: 'Computer Science Basics: Sequences, Selections, and Loops',
       by: 'LearnFree',
       seconds: 147,
+      watchFor: 'What "in sequence" means about the ORDER the steps run in.',
       checks: [
         {
           prompt: 'A sequence means the steps run…',
@@ -646,6 +647,7 @@ export const pack: SePack = {
       title: 'Computer Science Basics: Algorithms',
       by: 'LearnFree',
       seconds: 150,
+      watchFor: 'What an algorithm is, in his words, before the examples start.',
       checks: [
         {
           prompt: 'An algorithm is…',

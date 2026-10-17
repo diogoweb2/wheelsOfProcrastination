@@ -119,6 +119,7 @@ export const pack: SePack = {
       title: 'Mean, Median, Mode, and Range',
       by: 'Math with Mr. J',
       seconds: 341,
+      watchFor: 'Which one of the four is just "the most common".',
       checks: [
         {
           prompt: 'The MODE of a data set is…',
@@ -449,6 +450,7 @@ export const pack: SePack = {
       title: 'Finding Mean, Median, and Mode',
       by: 'Math with Mr. J',
       seconds: 391,
+      watchFor: 'The thing you must do to the numbers before taking a median.',
       checks: [
         {
           prompt: 'Before finding the median, you must…',
@@ -538,6 +540,52 @@ export const pack: SePack = {
         { text: 'Put them in order first.' },
         { text: 'Four values → average the middle two.' },
         { text: 'The outlier sits at the end, out of the way.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'explain',
+      id: 'avg-fn1',
+      emoji: '🏆',
+      title: 'Five placements, four different answers',
+      lines: [
+        'Five matches. You finish 12th, 3rd, 50th, 3rd and 7th.',
+        'MEAN: add them and divide by 5. 75 ÷ 5 = 15.',
+        'MEDIAN: line them up — 3, 3, 7, 12, 50 — and take the middle. 7.',
+        'MODE: the one that happens most often. 3rd.',
+        'That one 50th drags the mean miles above the median.',
+      ],
+      art: { art: 'chart', type: 'bar', labels: ['m1', 'm2', 'm3', 'm4', 'm5'], values: [12, 3, 50, 3, 7], title: 'placement (lower is better)' },
+      callout: { flavour: 'gotcha', text: 'One terrible match wrecks the mean and barely moves the median.' },
+      secs: 60,
+    },
+    {
+      kind: 'choice',
+      id: 'avg-fn2',
+      prompt: 'Your five placements were 12th, 3rd, 50th, 3rd, 7th. What is the MEDIAN?',
+      art: { art: 'table', head: ['match', 'placed'], rows: [[1, 12], [2, 3], [3, 50], [4, 3], [5, 7]] },
+      options: ['7', '15', '50'],
+      answer: 0,
+      why: 'In order they are 3, 3, 7, 12, 50, and the middle one is 7.',
+      steps: [
+        { text: 'Different set: 2, 4, 9.' },
+        { text: 'Already in order, and there are three of them.' },
+        { text: 'The middle one is 4.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'avg-fn3',
+      prompt: 'Same five placements: 3, 3, 7, 12, 50. What is the RANGE?',
+      art: { art: 'numberline', from: 0, to: 60, step: 10, points: [{ at: 3, label: 'best', tone: 'good' }, { at: 50, label: 'worst', tone: 'bad' }], span: [3, 50] },
+      options: ['47', '15', '7'],
+      answer: 0,
+      why: 'Range = biggest − smallest: 50 − 3 = 47.',
+      steps: [
+        { text: 'Different set: 4, 9, 20.' },
+        { text: 'Biggest minus smallest: 20 − 4.' },
+        { text: '= 16.' },
       ],
       secs: 50,
     },

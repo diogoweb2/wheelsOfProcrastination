@@ -107,6 +107,7 @@ export const pack: SePack = {
       title: 'Solving Two-Step Equations',
       by: 'Math is Simple!',
       seconds: 220,
+      watchFor: 'Which operation he undoes FIRST, and why that order.',
       checks: [
         {
           prompt: 'In 5x + 4 = 29, what do you undo FIRST?',
@@ -481,6 +482,7 @@ export const pack: SePack = {
       title: 'Solving Two-Step Equations',
       by: 'Math with Mr. J',
       seconds: 553,
+      watchFor: 'The two undos, in the order he does them.',
       checks: [
         {
           prompt: 'Solve: 4x − 6 = 18',
@@ -534,6 +536,21 @@ export const pack: SePack = {
         { text: 'x = −3.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'eq2-spot1',
+      prompt: 'Someone solved 2x − 5 = 11. One step is wrong. Which one?',
+      art: { art: 'table', head: ['step', 'what they wrote'], rows: [['1', 'add 5 to both sides: 2x = 16'], ['2', 'divide both sides by 2'], ['3', 'x = 16']] },
+      options: ['Step 1', 'Step 2', 'Step 3'],
+      answer: 2,
+      why: 'Step 3 forgot to actually do the division. 16 ÷ 2 = 8, so x = 8.',
+      steps: [
+        { text: 'Try 3x − 2 = 13.' },
+        { text: 'Add 2: 3x = 15. Then divide by 3.' },
+        { text: 'x = 5.' },
+      ],
+      secs: 55,
     },
   ],
 }

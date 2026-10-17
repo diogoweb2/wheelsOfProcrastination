@@ -106,6 +106,7 @@ export const pack: SePack = {
       title: 'An Intro to Finding Probability',
       by: 'Math with Mr. J',
       seconds: 503,
+      watchFor: 'What a probability of 0 and a probability of 1 each mean.',
       checks: [
         {
           prompt: 'A probability of 0 means the event is…',
@@ -452,6 +453,7 @@ export const pack: SePack = {
       title: 'Comparing theoretical to experimental probabilities',
       by: 'Khan Academy',
       seconds: 421,
+      watchFor: 'Which of the two comes from actually doing it.',
       checks: [
         {
           prompt: 'THEORETICAL probability is…',
@@ -519,6 +521,51 @@ export const pack: SePack = {
         { text: '= 10.' },
       ],
       secs: 45,
+    },
+    {
+      kind: 'explain',
+      id: 'pro-fn1',
+      emoji: '🎁',
+      title: 'A chest spawn is a probability',
+      lines: [
+        'A named spot has chest locations that only spawn SOME of the time.',
+        'Say one of them gives you a chest 3 landings out of every 5.',
+        'P(chest) = 3/5 = 0.6 = 60%.',
+        'Probability, decimal, percent. One number in three shirts.',
+      ],
+      art: { art: 'spinner', parts: [{ label: 'chest', n: 3, tone: 'good' }, { label: 'nothing', n: 2, tone: 'bad' }] },
+      callout: { flavour: 'key', text: 'P = the ways it happens ÷ all the ways it could go.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'pro-fn2',
+      prompt: 'That chest spawns 3 landings out of 5. You land there 20 times. About how many chests?',
+      art: { art: 'items', rows: [{ icon: 'player', n: 20, per: 5, label: '20 landings' }] },
+      options: ['3', '12', '20'],
+      answer: 1,
+      why: 'Expected = chance × tries: 3/5 × 20 = 12 chests.',
+      steps: [
+        { text: 'Different spot: 1 landing in 4, 20 tries.' },
+        { text: '1/4 × 20.' },
+        { text: 'About 5 chests.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'pro-fn3',
+      prompt: 'A loot pool is 60% common, 30% rare, 10% legendary. What is the chance a drop is NOT legendary?',
+      art: { art: 'circlegraph', slices: [{ label: 'common', value: 60 }, { label: 'rare', value: 30 }, { label: 'legendary', value: 10 }], unit: '%' },
+      options: ['10%', '90%', '30%'],
+      answer: 1,
+      why: 'Every chance adds to 100%, so not-legendary is 100 − 10 = 90%.',
+      steps: [
+        { text: 'Different pool: 25% legendary.' },
+        { text: 'All the chances add to 100%.' },
+        { text: '100 − 25 = 75% not legendary.' },
+      ],
+      secs: 50,
     },
   ],
 }

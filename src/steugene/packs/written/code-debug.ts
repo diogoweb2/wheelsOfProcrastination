@@ -215,6 +215,7 @@ export const pack: SePack = {
       title: 'How to Debug your Code in 4 Simple Steps!',
       by: 'STEM MC',
       seconds: 206,
+      watchFor: 'What the word debugging actually means. It is not writing code.',
       checks: [
         {
           prompt: 'Debugging means…',
@@ -630,6 +631,7 @@ export const pack: SePack = {
       title: 'Print Debugging',
       by: 'Roblox',
       seconds: 182,
+      watchFor: 'Why he adds print() lines before he has found anything.',
       checks: [
         {
           prompt: 'Why add print() lines while you are hunting a bug?',
@@ -654,6 +656,51 @@ export const pack: SePack = {
           ],
         },
       ],
+    },
+    {
+      kind: 'explain',
+      id: 'dbg-fn1',
+      emoji: '➕',
+      title: 'The off-by-one bug',
+      lines: [
+        'Your script should place 10 walls. It places 11.',
+        'for i = 0, 10 counts 0, 1, 2 … 10. That is ELEVEN numbers, not ten.',
+        'Starting at 0 and ending at 10 is the most common bug there is.',
+        'for i = 1, 10 counts ten. So does for i = 0, 9.',
+      ],
+      art: { art: 'code', style: 'text', lines: ['for i = 0, 10 do', '  placeWall(i)', 'end'], hl: [0], out: ['11 walls placed — one too many'] },
+      callout: { flavour: 'gotcha', text: 'Count the numbers, not the gap. 0 to 10 is eleven numbers.' },
+      secs: 55,
+    },
+    {
+      kind: 'choice',
+      id: 'dbg-fn2',
+      prompt: 'How many lines does this print?',
+      art: { art: 'code', style: 'text', lines: ['for i = 0, 5 do', '  print(i)', 'end'] },
+      options: ['5', '6', '0'],
+      answer: 1,
+      why: 'It prints 0, 1, 2, 3, 4, 5 — count them, 6 lines.',
+      steps: [
+        { text: 'Different loop: for i = 0, 3.' },
+        { text: 'It prints 0, 1, 2, 3.' },
+        { text: 'That is 4 lines.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'dbg-fn3',
+      prompt: 'This is meant to HEAL you by 25, but you keep dying. Which line is the bug?',
+      art: { art: 'code', style: 'text', lines: ['local health = 100', 'health = health - 25', 'print(health)'] },
+      options: ['line 1, health should not start at 100', 'line 2', 'line 3, print cannot show a number'],
+      answer: 1,
+      why: 'Line 2 takes 25 away. Healing adds, so it should be health + 25.',
+      steps: [
+        { text: 'Different script: it should take 10 damage, but you gain health instead.' },
+        { text: 'The line says health = health + 10.' },
+        { text: 'Damage takes away, so it should be health - 10.' },
+      ],
+      secs: 55,
     },
   ],
 }

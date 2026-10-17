@@ -35,6 +35,13 @@ export interface SeSubTopic {
   sample: string
   /** Plain-English "this is the one where…", read aloud by the Finder. */
   plain: string
+  /**
+   * First person, past the finish line: what he can DO once he has this
+   * (§24r). It is not the topic reworded — "Wrapping paper, basically" is a
+   * topic, "I can unfold a box in my head" is an ability, and only the second
+   * one belongs on a list of his own wins.
+   */
+  can: string
   emoji: string
 }
 
@@ -57,12 +64,13 @@ export interface SeSubject {
   strands: SeStrand[]
 }
 
-const t = (id: string, title: string, emoji: string, sample: string, plain: string): SeSubTopic => ({
+const t = (id: string, title: string, emoji: string, sample: string, plain: string, can: string): SeSubTopic => ({
   id,
   title,
   emoji,
   sample,
   plain,
+  can,
 })
 
 // --- Term 1: History ---------------------------------------------------------
@@ -79,27 +87,27 @@ const HISTORY: SeSubject = {
       id: 'hist-a',
       title: 'Strand A: New France and British North America, 1713–1800',
       subtopics: [
-        t('hist-a-1713', 'Who was already here in 1713', '🗺️', 'Haudenosaunee · Anishinaabe · Wendat · French · British', 'The people living here before the map had borders on it.'),
-        t('hist-a-fur', 'The fur trade and the alliances it bought', '🦫', 'beaver pelt → musket, kettle, cloth', 'Trade was not shopping. It was how sides were chosen.'),
-        t('hist-a-war', 'The fall of New France, 1754–1763', '🏴', '1759 — the Plains of Abraham', 'Seven years of war, and who ended up holding Quebec.'),
-        t('hist-a-1763', 'The Royal Proclamation of 1763', '📜', '1763 — a line drawn down the map', 'Britain promises land to First Nations, and the settlers ignore it.'),
-        t('hist-a-quebec', 'The Quebec Act, 1774', '⛪', 'French law + Catholic faith, kept', 'Britain lets Quebec stay Quebec — and the Thirteen Colonies rage.'),
-        t('hist-a-loyal', 'The Loyalists arrive', '⛵', '1783 — ~50,000 people move north', 'People who picked the losing side of a revolution, and where they landed.'),
-        t('hist-a-1791', 'The Constitutional Act, 1791', '✂️', 'Upper Canada · Lower Canada', 'One colony cut into two so each could keep its own language.'),
-        t('hist-a-slave', 'Slavery and freedom in early Canada', '⛓️', '1793 — Upper Canada limits slavery', 'The part of the story the old textbooks skipped.'),
+        t('hist-a-1713', 'Who was already here in 1713', '🗺️', 'Haudenosaunee · Anishinaabe · Wendat · French · British', 'The people living here before the map had borders on it.', 'I can name who was already living here in 1713, long before any treaty.'),
+        t('hist-a-fur', 'The fur trade and the alliances it bought', '🦫', 'beaver pelt → musket, kettle, cloth', 'Trade was not shopping. It was how sides were chosen.', 'I can explain why the fur trade was really about who your allies were.'),
+        t('hist-a-war', 'The fall of New France, 1754–1763', '🏴', '1759 — the Plains of Abraham', 'Seven years of war, and who ended up holding Quebec.', 'I can tell you how New France fell, and it was not in one battle.'),
+        t('hist-a-1763', 'The Royal Proclamation of 1763', '📜', '1763 — a line drawn down the map', 'Britain promises land to First Nations, and the settlers ignore it.', 'I can say what the Royal Proclamation promised, and who it promised it to.'),
+        t('hist-a-quebec', 'The Quebec Act, 1774', '⛪', 'French law + Catholic faith, kept', 'Britain lets Quebec stay Quebec — and the Thirteen Colonies rage.', 'I can explain why the Quebec Act pleased one side and enraged the other.'),
+        t('hist-a-loyal', 'The Loyalists arrive', '⛵', '1783 — ~50,000 people move north', 'People who picked the losing side of a revolution, and where they landed.', 'I can explain who the Loyalists were and why they had to leave.'),
+        t('hist-a-1791', 'The Constitutional Act, 1791', '✂️', 'Upper Canada · Lower Canada', 'One colony cut into two so each could keep its own language.', 'I can explain what the Constitutional Act split in two, and why.'),
+        t('hist-a-slave', 'Slavery and freedom in early Canada', '⛓️', '1793 — Upper Canada limits slavery', 'The part of the story the old textbooks skipped.', 'I can tell you that slavery was legal here, and how it ended.'),
       ],
     },
     {
       id: 'hist-b',
       title: 'Strand B: Canada, 1800–1850: Conflict and Challenges',
       subtopics: [
-        t('hist-b-life', 'Life in Upper and Lower Canada', '🏚️', 'a log house, a stump field, no doctor', 'What an ordinary day cost when nothing was built yet.'),
-        t('hist-b-1812', 'The War of 1812', '💥', '1813 — York burns', 'The war that decided Canada would not be American.'),
-        t('hist-b-immig', 'Immigration, 1815–1850', '🚢', 'the Irish famine ships', 'Who came, why they left, and what met them at the dock.'),
-        t('hist-b-reb', 'The Rebellions of 1837–38', '🔥', 'Mackenzie · Papineau', 'Two uprisings, both crushed, both the reason things changed.'),
-        t('hist-b-durham', "Lord Durham's Report", '📝', '1839 — "two nations warring"', 'A British lord looks at the mess and writes what to do about it.'),
-        t('hist-b-union', 'The Act of Union, 1840', '🔗', 'Upper + Lower = the Province of Canada', 'The two halves glued back together, against one half’s will.'),
-        t('hist-b-resp', 'Responsible government, 1848', '🗳️', '1848 — the governor stops deciding', 'The year the people who were elected finally ran things.'),
+        t('hist-b-life', 'Life in Upper and Lower Canada', '🏚️', 'a log house, a stump field, no doctor', 'What an ordinary day cost when nothing was built yet.', 'I can describe an ordinary day in Upper and Lower Canada.'),
+        t('hist-b-1812', 'The War of 1812', '💥', '1813 — York burns', 'The war that decided Canada would not be American.', 'I can explain who won the War of 1812, and why that is a trick question.'),
+        t('hist-b-immig', 'Immigration, 1815–1850', '🚢', 'the Irish famine ships', 'Who came, why they left, and what met them at the dock.', 'I can explain why so many people came here between 1815 and 1850.'),
+        t('hist-b-reb', 'The Rebellions of 1837–38', '🔥', 'Mackenzie · Papineau', 'Two uprisings, both crushed, both the reason things changed.', 'I can explain what the 1837 rebels wanted, and whether they got it.'),
+        t('hist-b-durham', "Lord Durham's Report", '📝', '1839 — "two nations warring"', 'A British lord looks at the mess and writes what to do about it.', 'I can explain what Lord Durham told Britain to do, and what it did.'),
+        t('hist-b-union', 'The Act of Union, 1840', '🔗', 'Upper + Lower = the Province of Canada', 'The two halves glued back together, against one half’s will.', 'I can explain what the Act of Union joined, and who it left out.'),
+        t('hist-b-resp', 'Responsible government, 1848', '🗳️', '1848 — the governor stops deciding', 'The year the people who were elected finally ran things.', 'I can explain what responsible government means in one sentence.'),
       ],
     },
   ],
@@ -119,42 +127,42 @@ const LANGUAGE: SeSubject = {
       id: 'lang-a',
       title: 'Literacy Connections and Applications',
       subtopics: [
-        t('lang-a-real', 'Reading the real world', '🔍', 'an ad, a post, a thing an AI wrote', 'Spotting what a text is actually trying to do to you.'),
-        t('lang-a-talk', 'Talking about what you read', '💬', '"I think X, because the text says Y"', 'Having an opinion and being able to prove it from the page.'),
-        t('lang-a-make', 'Making something out of what you learned', '🛠️', 'poster · script · explainer', 'Turning reading into a thing other people can use.'),
+        t('lang-a-real', 'Reading the real world', '🔍', 'an ad, a post, a thing an AI wrote', 'Spotting what a text is actually trying to do to you.', 'I can read something real — a page, a label, a post — and say what it is doing.'),
+        t('lang-a-talk', 'Talking about what you read', '💬', '"I think X, because the text says Y"', 'Having an opinion and being able to prove it from the page.', 'I can say what I think about a text and point at the line that proves it.'),
+        t('lang-a-make', 'Making something out of what you learned', '🛠️', 'poster · script · explainer', 'Turning reading into a thing other people can use.', 'I can turn something I read into something of my own.'),
       ],
     },
     {
       id: 'lang-b',
       title: 'Foundations of Language',
       subtopics: [
-        t('lang-b-spell', 'Spelling patterns and syllables', '🔤', 'be·cause · re·ceive · ne·ces·sary', 'Why English spells things the way it does, mostly.'),
-        t('lang-b-vocab', 'Prefixes, suffixes and roots', '🧩', 'un + break + able', 'Taking a long word apart to find a word you already know.'),
-        t('lang-b-sent', 'Sentences: subject, predicate, clauses', '🧱', 'The crew | sailed at dawn.', 'What makes a sentence a sentence and not a fragment.'),
-        t('lang-b-punct', 'Punctuation and capitals', '❗', "Let's eat, Zoro. / Let's eat Zoro.", 'The commas that decide whether somebody gets eaten.'),
-        t('lang-b-parts', 'Parts of speech', '🏷️', 'noun · verb · adjective · adverb', 'Naming the jobs the words in a sentence are doing.'),
+        t('lang-b-spell', 'Spelling patterns and syllables', '🔤', 'be·cause · re·ceive · ne·ces·sary', 'Why English spells things the way it does, mostly.', 'I can break a long word into syllables and spell it.'),
+        t('lang-b-vocab', 'Prefixes, suffixes and roots', '🧩', 'un + break + able', 'Taking a long word apart to find a word you already know.', 'I can work out a new word from its prefix, root and suffix.'),
+        t('lang-b-sent', 'Sentences: subject, predicate, clauses', '🧱', 'The crew | sailed at dawn.', 'What makes a sentence a sentence and not a fragment.', 'I can find the subject and the predicate in any sentence.'),
+        t('lang-b-punct', 'Punctuation and capitals', '❗', "Let's eat, Zoro. / Let's eat Zoro.", 'The commas that decide whether somebody gets eaten.', 'I can punctuate a sentence so it means what I meant.'),
+        t('lang-b-parts', 'Parts of speech', '🏷️', 'noun · verb · adjective · adverb', 'Naming the jobs the words in a sentence are doing.', 'I can name what every word in a sentence is doing.'),
       ],
     },
     {
       id: 'lang-c',
       title: 'Comprehension: Understanding and Responding to Texts',
       subtopics: [
-        t('lang-c-main', 'Main idea and supporting details', '🎯', 'the one sentence the rest is about', 'Finding the point, and the three things holding it up.'),
-        t('lang-c-infer', 'Inference — what the text does NOT say', '🕵️', '"He left his plate full." → ?', 'Reading what the writer made you work out yourself.'),
-        t('lang-c-bias', 'Point of view and bias', '⚖️', 'who is telling it, and what they want', 'Two people describe the same fight. Both are "true".'),
-        t('lang-c-feat', 'Text features and structure', '🗂️', 'heading · caption · sidebar · bold', 'Reading the shape of a page before the words.'),
-        t('lang-c-two', 'Comparing two texts', '🔀', 'same event, two writers', 'Putting two accounts side by side and finding the gap.'),
+        t('lang-c-main', 'Main idea and supporting details', '🎯', 'the one sentence the rest is about', 'Finding the point, and the three things holding it up.', 'I can find the main idea and the lines that hold it up.'),
+        t('lang-c-infer', 'Inference — what the text does NOT say', '🕵️', '"He left his plate full." → ?', 'Reading what the writer made you work out yourself.', 'I can work out what a text is saying without saying it.'),
+        t('lang-c-bias', 'Point of view and bias', '⚖️', 'who is telling it, and what they want', 'Two people describe the same fight. Both are "true".', 'I can spot whose side a piece of writing is on.'),
+        t('lang-c-feat', 'Text features and structure', '🗂️', 'heading · caption · sidebar · bold', 'Reading the shape of a page before the words.', 'I can use headings, captions and bold type to find things fast.'),
+        t('lang-c-two', 'Comparing two texts', '🔀', 'same event, two writers', 'Putting two accounts side by side and finding the gap.', 'I can put two texts side by side and say where they disagree.'),
       ],
     },
     {
       id: 'lang-d',
       title: 'Composition: Expressing Ideas and Creating Texts',
       subtopics: [
-        t('lang-d-plan', 'Planning a piece of writing', '🗒️', 'idea → 3 points → order', 'The five minutes that save the next forty.'),
-        t('lang-d-para', 'Paragraphs that hold together', '🧱', 'point · evidence · explain', 'One idea per paragraph, and how to prove it.'),
-        t('lang-d-narr', 'Narrative writing', '📚', 'hook · problem · turn · end', 'Telling a story that someone wants to finish.'),
-        t('lang-d-op', 'Opinion and persuasive writing', '📣', 'claim + reason + proof', 'Arguing on paper without shouting.'),
-        t('lang-d-edit', 'Revising and editing', '✏️', 'cut 10% and it gets better', 'The draft is not the piece.'),
+        t('lang-d-plan', 'Planning a piece of writing', '🗒️', 'idea → 3 points → order', 'The five minutes that save the next forty.', 'I can plan a piece of writing before I start it.'),
+        t('lang-d-para', 'Paragraphs that hold together', '🧱', 'point · evidence · explain', 'One idea per paragraph, and how to prove it.', 'I can write a paragraph that sticks to one idea.'),
+        t('lang-d-narr', 'Narrative writing', '📚', 'hook · problem · turn · end', 'Telling a story that someone wants to finish.', 'I can write a story with an opening that makes you carry on.'),
+        t('lang-d-op', 'Opinion and persuasive writing', '📣', 'claim + reason + proof', 'Arguing on paper without shouting.', 'I can argue for something and back it up.'),
+        t('lang-d-edit', 'Revising and editing', '✏️', 'cut 10% and it gets better', 'The draft is not the piece.', 'I can go back over my own writing and make it better.'),
       ],
     },
   ],
@@ -178,84 +186,84 @@ const MATH: SeSubject = {
       id: 'math-number',
       title: 'Number Sense and Numeration',
       subtopics: [
-        t('math-rational', 'Rational numbers', '➗', '−3 · ½ · 0.75 · 0 — all on one line', 'Slices of a pizza, Y levels below zero — anything you can write as a fraction.'),
-        t('math-compare', 'Comparing and ordering', '📏', '−2.5 < −2 < −¾ < 0.3', 'Which is bigger — deeper in the mine is the smaller Y.'),
-        t('math-abs', 'Absolute value and opposites', '🪞', '|−20| = 20', 'How far you are from spawn, never mind which direction.'),
-        t('math-int-add', 'Adding and subtracting integers', '➕', '−7 + 12 = 5', 'Hearts lost and healed, walking west past spawn.'),
-        t('math-int-mult', 'Multiplying and dividing integers', '✖️', '(−4) × (−6) = 24', 'Two negatives, one positive. The rule and the reason.'),
-        t('math-fdp', 'Fractions, decimals and percents', '🔁', '¾ = 0.75 = 75%', 'A shield at 3/4, 0.75 and 75% — one number, three shirts.'),
-        t('math-frac-add', 'Adding and subtracting fractions', '🍕', '⅔ + ¼ = 11/12', 'Slices have to be the same size before you can add them.'),
-        t('math-frac-mult', 'Multiplying and dividing fractions', '🍰', '⅗ ÷ ¼ = 12/5', 'Half of a half pizza, two thirds of a stack of 64.'),
-        t('math-percent', 'Percents in real life', '🏷️', '$80 shirt, 25% off, +13% HST', 'A skin on sale, 13% HST, and what you really pay.'),
-        t('math-ratio', 'Ratios, rates and proportions', '⚖️', '3 : 5 · 90 km/h · $4.50 / kg', 'K/D, Robux per hour, damage per second — two numbers, one fair comparison.'),
-        t('math-power', 'Powers and square roots', '🔺', '7² = 49 · √144 = 12', 'Exponents, and the button that undoes them.'),
-        t('math-round', 'Rounding and estimating', '🎯', '1 043 221 → 1.0 million', 'A 3,000,000,000 bounty rounded to 3 billion, on purpose.'),
+        t('math-rational', 'Rational numbers', '➗', '−3 · ½ · 0.75 · 0 — all on one line', 'Slices of a pizza, Y levels below zero — anything you can write as a fraction.', 'I can see any number as a fraction — pizza slices, Y levels, anything.'),
+        t('math-compare', 'Comparing and ordering', '📏', '−2.5 < −2 < −¾ < 0.3', 'Which is bigger — deeper in the mine is the smaller Y.', 'I can put any numbers in order, negatives included.'),
+        t('math-abs', 'Absolute value and opposites', '🪞', '|−20| = 20', 'How far you are from spawn, never mind which direction.', 'I can say how far a number is from zero without caring which side.'),
+        t('math-int-add', 'Adding and subtracting integers', '➕', '−7 + 12 = 5', 'Hearts lost and healed, walking west past spawn.', 'I can add and subtract negatives without getting lost.'),
+        t('math-int-mult', 'Multiplying and dividing integers', '✖️', '(−4) × (−6) = 24', 'Two negatives, one positive. The rule and the reason.', 'I can multiply and divide negatives, and say why two make a plus.'),
+        t('math-fdp', 'Fractions, decimals and percents', '🔁', '¾ = 0.75 = 75%', 'A shield at 3/4, 0.75 and 75% — one number, three shirts.', 'I can switch a number between a fraction, a decimal and a percent.'),
+        t('math-frac-add', 'Adding and subtracting fractions', '🍕', '⅔ + ¼ = 11/12', 'Slices have to be the same size before you can add them.', 'I can add fractions that started out cut into different sizes.'),
+        t('math-frac-mult', 'Multiplying and dividing fractions', '🍰', '⅗ ÷ ¼ = 12/5', 'Half of a half pizza, two thirds of a stack of 64.', 'I can multiply and divide fractions.'),
+        t('math-percent', 'Percents in real life', '🏷️', '$80 shirt, 25% off, +13% HST', 'A skin on sale, 13% HST, and what you really pay.', 'I can work out a sale price and the tax on top of it.'),
+        t('math-ratio', 'Ratios, rates and proportions', '⚖️', '3 : 5 · 90 km/h · $4.50 / kg', 'K/D, Robux per hour, damage per second — two numbers, one fair comparison.', 'I can compare two things fairly — K/D, Robux an hour, damage a second.'),
+        t('math-power', 'Powers and square roots', '🔺', '7² = 49 · √144 = 12', 'Exponents, and the button that undoes them.', 'I can do powers and square roots.'),
+        t('math-round', 'Rounding and estimating', '🎯', '1 043 221 → 1.0 million', 'A 3,000,000,000 bounty rounded to 3 billion, on purpose.', 'I can round a huge number and say how much I threw away.'),
       ],
     },
     {
       id: 'math-pattern',
       title: 'Patterning and Algebra',
       subtopics: [
-        t('math-pat', 'Patterns and pattern rules', '🔢', '4, 7, 10, 13, … → 3n + 1', 'Finding the rule, then jumping straight to term 100.'),
-        t('math-var', 'Variables and expressions', '🅰️', '3n + 1 when n = 7', 'A letter is just a box waiting for a number.'),
-        t('math-eq1', 'Solving one-step equations', '⚖️', 'x + 9 = 14', 'Do the same thing to both sides. Always.'),
-        t('math-eq2', 'Solving two-step equations', '⚖️', '2x − 5 = 11', 'Undo in the opposite order you would do it.'),
-        t('math-graph', 'Graphing linear relations', '📈', 'y = 2x + 1', 'A rule, a table, and the straight line they make.'),
+        t('math-pat', 'Patterns and pattern rules', '🔢', '4, 7, 10, 13, … → 3n + 1', 'Finding the rule, then jumping straight to term 100.', 'I can find the rule in a pattern and jump straight to term 100.'),
+        t('math-var', 'Variables and expressions', '🅰️', '3n + 1 when n = 7', 'A letter is just a box waiting for a number.', 'I can read a letter in maths as a box with a number in it.'),
+        t('math-eq1', 'Solving one-step equations', '⚖️', 'x + 9 = 14', 'Do the same thing to both sides. Always.', 'I can solve for x in one move.'),
+        t('math-eq2', 'Solving two-step equations', '⚖️', '2x − 5 = 11', 'Undo in the opposite order you would do it.', 'I can solve for x in two moves, in the right order.'),
+        t('math-graph', 'Graphing linear relations', '📈', 'y = 2x + 1', 'A rule, a table, and the straight line they make.', 'I can turn a rule into a table and a table into a straight line.'),
       ],
     },
     {
       id: 'math-measure',
       title: 'Measurement',
       subtopics: [
-        t('math-area', 'Perimeter and area', '🟦', 'A = b × h', 'Around the edge, and inside the shape.'),
-        t('math-circle', 'Circles: radius, diameter, circumference', '⭕', 'C = π × d', 'The storm circle: radius, diameter, and the run around the edge.'),
-        t('math-circle-area', 'Area of a circle', '🥧', 'A = π r²', 'Why one 12-inch pizza beats two 8-inch ones.'),
-        t('math-surface', 'Surface area of prisms', '📦', 'unfold the box, add the faces', 'Wrapping paper, basically.'),
-        t('math-volume', 'Volume of prisms and cylinders', '🧊', 'V = base area × height', 'How much water fills a 5 × 3 × 2 pool.'),
-        t('math-units', 'Units and conversions', '📐', '2.4 m = 240 cm = 2400 mm', 'One block is one metre, one chunk is sixteen.'),
+        t('math-area', 'Perimeter and area', '🟦', 'A = b × h', 'Around the edge, and inside the shape.', 'I can work out the edge of a shape and the inside of it.'),
+        t('math-circle', 'Circles: radius, diameter, circumference', '⭕', 'C = π × d', 'The storm circle: radius, diameter, and the run around the edge.', 'I can get from radius to diameter to the whole way round.'),
+        t('math-circle-area', 'Area of a circle', '🥧', 'A = π r²', 'Why one 12-inch pizza beats two 8-inch ones.', 'I can work out the area of a circle, and why the big pizza wins.'),
+        t('math-surface', 'Surface area of prisms', '📦', 'unfold the box, add the faces', 'Wrapping paper, basically.', 'I can unfold a box in my head and add up the faces.'),
+        t('math-volume', 'Volume of prisms and cylinders', '🧊', 'V = base area × height', 'How much water fills a 5 × 3 × 2 pool.', 'I can work out how much fits inside a prism or a cylinder.'),
+        t('math-units', 'Units and conversions', '📐', '2.4 m = 240 cm = 2400 mm', 'One block is one metre, one chunk is sixteen.', 'I can convert between mm, cm, m and km without guessing.'),
       ],
     },
     {
       id: 'math-data',
       title: 'Data Management',
       subtopics: [
-        t('math-collect', 'Collecting data and sampling', '📋', 'who did you ask, and was that fair?', 'Asking only your squad if Fortnite is the best game.'),
-        t('math-avg', 'Mean, median, mode and range', '📊', '2, 3, 3, 9 → mean 4.25, median 3', 'Your K/D across five matches, four different ways.'),
-        t('math-graphs', 'Reading and drawing graphs', '📉', 'bar · line · circle · scatter', 'Picking the graph that tells the truth.'),
-        t('math-prob', 'Probability', '🎲', 'P(six) = 1/6', 'Pack odds, chest spawns, and shiny at 1 in 4,096.'),
+        t('math-collect', 'Collecting data and sampling', '📋', 'who did you ask, and was that fair?', 'Asking only your squad if Fortnite is the best game.', 'I can tell a fair question from a loaded one.'),
+        t('math-avg', 'Mean, median, mode and range', '📊', '2, 3, 3, 9 → mean 4.25, median 3', 'Your K/D across five matches, four different ways.', 'I can work out mean, median, mode and range, and say which one lies.'),
+        t('math-graphs', 'Reading and drawing graphs', '📉', 'bar · line · circle · scatter', 'Picking the graph that tells the truth.', 'I can pick the graph that tells the truth, and spot one that does not.'),
+        t('math-prob', 'Probability', '🎲', 'P(six) = 1/6', 'Pack odds, chest spawns, and shiny at 1 in 4,096.', 'I can work out the odds of something — a pack, a chest, a shiny.'),
       ],
     },
     {
       id: 'math-geo',
       title: 'Geometry and Spatial Sense',
       subtopics: [
-        t('math-angles', 'Angles and angle relationships', '📐', 'supplementary: 180° − 115° = 65°', 'Angles that always add to the same thing.'),
-        t('math-shapes', 'Triangles and quadrilaterals', '🔺', 'angles of a triangle = 180°', 'Sorting shapes by what is true about them.'),
-        t('math-congr', 'Congruence and similarity', '🪞', 'same shape · same size?', 'Identical twins versus scaled-up twins.'),
-        t('math-trans', 'Transformations', '🔄', 'slide · flip · turn · resize', 'Moving a shape without changing what it is.'),
-        t('math-cart', 'The Cartesian plane', '📍', '(−3, 4)', 'The F3 screen: X and Z, negatives included.'),
+        t('math-angles', 'Angles and angle relationships', '📐', 'supplementary: 180° − 115° = 65°', 'Angles that always add to the same thing.', 'I can find a missing angle from the ones I already have.'),
+        t('math-shapes', 'Triangles and quadrilaterals', '🔺', 'angles of a triangle = 180°', 'Sorting shapes by what is true about them.', 'I can sort triangles and quadrilaterals by what is true about them.'),
+        t('math-congr', 'Congruence and similarity', '🪞', 'same shape · same size?', 'Identical twins versus scaled-up twins.', 'I can tell same-shape-same-size from same-shape-but-bigger.'),
+        t('math-trans', 'Transformations', '🔄', 'slide · flip · turn · resize', 'Moving a shape without changing what it is.', 'I can slide, flip, turn and resize a shape and say what I did.'),
+        t('math-cart', 'The Cartesian plane', '📍', '(−3, 4)', 'The F3 screen: X and Z, negatives included.', 'I can plot any point on the grid, negatives and all.'),
       ],
     },
     {
       id: 'math-coding',
       title: 'Coding',
       subtopics: [
-        t('code-seq', 'Sequence, input and output', '▶️', 'step 1 → step 2 → step 3', 'A computer does exactly what you said, in order.'),
-        t('code-loop', 'Loops', '🔁', 'repeat 4 [ forward 100, right 90 ]', 'Saying a thing once and having it happen ten times.'),
-        t('code-if', 'Conditionals', '🔀', 'if score > 10 then …', 'Teaching the program to choose.'),
-        t('code-var', 'Variables in code', '📦', 'score = score + 1', 'A box with a name on it.'),
-        t('code-debug', 'Debugging and efficiency', '🐛', 'why does it run 11 times?', 'Finding the one wrong line.'),
+        t('code-seq', 'Sequence, input and output', '▶️', 'step 1 → step 2 → step 3', 'A computer does exactly what you said, in order.', 'I can read code and say exactly what order it happens in.'),
+        t('code-loop', 'Loops', '🔁', 'repeat 4 [ forward 100, right 90 ]', 'Saying a thing once and having it happen ten times.', 'I can write a loop instead of the same line ten times.'),
+        t('code-if', 'Conditionals', '🔀', 'if score > 10 then …', 'Teaching the program to choose.', 'I can make a program choose between two things.'),
+        t('code-var', 'Variables in code', '📦', 'score = score + 1', 'A box with a name on it.', 'I can store something in a variable and change it later.'),
+        t('code-debug', 'Debugging and efficiency', '🐛', 'why does it run 11 times?', 'Finding the one wrong line.', 'I can find the one wrong line in code that nearly works.'),
       ],
     },
     {
       id: 'math-fin',
       title: 'Financial Literacy',
       subtopics: [
-        t('fin-budget', 'Budgets and spending plans', '🧾', 'in $60 · out $47 · left $13', 'Allowance in, Battle Pass out, what is left.'),
-        t('fin-interest', 'Interest: simple and compound', '📈', '$100 at 5% for 3 years', 'Money that grows while you do nothing.'),
-        t('fin-unit', 'Unit price and best buy', '🛒', '$4.50 / 900 g vs $2.80 / 500 g', 'Which V-Bucks bundle is actually cheaper per V-Buck.'),
-        t('fin-tax', 'Taxes, tips and discounts', '💸', '$40 + 13% HST = $45.20', 'Why the till always asks for more than the sticker.'),
-        t('fin-credit', 'Saving, borrowing and credit', '💳', 'minimum payment = a long time', 'Borrowing is renting money.'),
+        t('fin-budget', 'Budgets and spending plans', '🧾', 'in $60 · out $47 · left $13', 'Allowance in, Battle Pass out, what is left.', 'I can build a budget and say what is left at the end of it.'),
+        t('fin-interest', 'Interest: simple and compound', '📈', '$100 at 5% for 3 years', 'Money that grows while you do nothing.', 'I can work out interest, and why compound is the scary one.'),
+        t('fin-unit', 'Unit price and best buy', '🛒', '$4.50 / 900 g vs $2.80 / 500 g', 'Which V-Bucks bundle is actually cheaper per V-Buck.', 'I can work out which bundle is actually cheaper per unit.'),
+        t('fin-tax', 'Taxes, tips and discounts', '💸', '$40 + 13% HST = $45.20', 'Why the till always asks for more than the sticker.', 'I can work out the real price once HST, a tip or a discount lands.'),
+        t('fin-credit', 'Saving, borrowing and credit', '💳', 'minimum payment = a long time', 'Borrowing is renting money.', 'I can explain why paying the minimum takes years.'),
       ],
     },
   ],
@@ -275,44 +283,44 @@ const SCIENCE: SeSubject = {
       id: 'sci-life',
       title: 'Life Systems — Interactions in the Environment',
       subtopics: [
-        t('sci-eco', 'Ecosystems: who needs whom', '🌳', 'producer → consumer → decomposer', 'Nothing in nature lives alone.'),
-        t('sci-web', 'Food chains and food webs', '🕸️', 'remove the wolves → ?', 'Pull one thread and watch the whole thing move.'),
-        t('sci-cycles', 'Water, carbon and nitrogen cycles', '💧', 'the same water, forever', 'Matter goes around. It never leaves.'),
-        t('sci-impact', 'Human impact and invasive species', '🚯', 'zebra mussels in the Great Lakes', 'What happens when something arrives that does not belong.'),
-        t('sci-succ', 'Succession and biodiversity', '🌱', 'bare rock → moss → forest', 'How an empty place fills back up.'),
+        t('sci-eco', 'Ecosystems: who needs whom', '🌳', 'producer → consumer → decomposer', 'Nothing in nature lives alone.', 'I can explain who in an ecosystem needs whom.'),
+        t('sci-web', 'Food chains and food webs', '🕸️', 'remove the wolves → ?', 'Pull one thread and watch the whole thing move.', 'I can trace a food web and say what breaks if one animal goes.'),
+        t('sci-cycles', 'Water, carbon and nitrogen cycles', '💧', 'the same water, forever', 'Matter goes around. It never leaves.', 'I can follow water, carbon and nitrogen all the way round the loop.'),
+        t('sci-impact', 'Human impact and invasive species', '🚯', 'zebra mussels in the Great Lakes', 'What happens when something arrives that does not belong.', 'I can explain what an invasive species does to a place.'),
+        t('sci-succ', 'Succession and biodiversity', '🌱', 'bare rock → moss → forest', 'How an empty place fills back up.', 'I can explain how bare rock turns into a forest.'),
       ],
     },
     {
       id: 'sci-matter',
       title: 'Matter and Energy — Pure Substances and Mixtures',
       subtopics: [
-        t('sci-pure', 'Pure substances and mixtures', '⚗️', 'salt vs salt water', 'One thing, or several things pretending to be one.'),
-        t('sci-sol', 'Solutions and solubility', '🧂', 'how much sugar before it stops dissolving?', 'Saturated, and why heat changes it.'),
-        t('sci-sep', 'Separating mixtures', '🧫', 'filter · evaporate · distil · magnet', 'Getting it back apart again.'),
-        t('sci-particle', 'The particle theory of matter', '🔵', 'solid · liquid · gas', 'Five rules that explain almost everything.'),
-        t('sci-water', 'Water quality and treatment', '🚰', 'from the lake to your tap', 'What happens to Lake Ontario before you drink it.'),
+        t('sci-pure', 'Pure substances and mixtures', '⚗️', 'salt vs salt water', 'One thing, or several things pretending to be one.', 'I can tell a pure substance from a mixture.'),
+        t('sci-sol', 'Solutions and solubility', '🧂', 'how much sugar before it stops dissolving?', 'Saturated, and why heat changes it.', 'I can explain what saturated means and what heat does to it.'),
+        t('sci-sep', 'Separating mixtures', '🧫', 'filter · evaporate · distil · magnet', 'Getting it back apart again.', 'I can pick the right way to get a mixture back apart.'),
+        t('sci-particle', 'The particle theory of matter', '🔵', 'solid · liquid · gas', 'Five rules that explain almost everything.', 'I can use the particle theory to explain solid, liquid and gas.'),
+        t('sci-water', 'Water quality and treatment', '🚰', 'from the lake to your tap', 'What happens to Lake Ontario before you drink it.', 'I can describe what happens to lake water before I drink it.'),
       ],
     },
     {
       id: 'sci-struct',
       title: 'Structures and Mechanisms — Form and Function',
       subtopics: [
-        t('sci-forms', 'Solid, frame and shell structures', '🏗️', 'dam · tower · eggshell', 'Three ways to hold something up.'),
-        t('sci-forces', 'Forces on structures', '🧲', 'compression · tension · shear · torsion', 'The four ways a thing gets pushed apart.'),
-        t('sci-gravity', 'Centre of gravity and stability', '⚖️', 'why a wide base does not fall over', 'Where the weight sits decides whether it tips.'),
-        t('sci-fail', 'Designing so it fails safely', '🧯', 'the part that is MEANT to break', 'Good design plans for the bad day.'),
-        t('sci-mech', 'Mechanisms and mechanical advantage', '⚙️', 'lever · pulley · gear', 'Trading distance for force.'),
+        t('sci-forms', 'Solid, frame and shell structures', '🏗️', 'dam · tower · eggshell', 'Three ways to hold something up.', 'I can tell a solid, a frame and a shell structure apart.'),
+        t('sci-forces', 'Forces on structures', '🧲', 'compression · tension · shear · torsion', 'The four ways a thing gets pushed apart.', 'I can name the four ways a force pulls a structure apart.'),
+        t('sci-gravity', 'Centre of gravity and stability', '⚖️', 'why a wide base does not fall over', 'Where the weight sits decides whether it tips.', 'I can say whether something will tip over, and why.'),
+        t('sci-fail', 'Designing so it fails safely', '🧯', 'the part that is MEANT to break', 'Good design plans for the bad day.', 'I can explain why good design plans for the part that breaks.'),
+        t('sci-mech', 'Mechanisms and mechanical advantage', '⚙️', 'lever · pulley · gear', 'Trading distance for force.', 'I can explain how a lever, a pulley and a gear trade distance for force.'),
       ],
     },
     {
       id: 'sci-earth',
       title: 'Earth and Space Systems — Heat in the Environment',
       subtopics: [
-        t('sci-heat', 'Heat and temperature are not the same', '🌡️', 'a spark vs a bathtub', 'One is energy, the other is how hot it feels.'),
-        t('sci-expand', 'Heat and the particle theory', '🔥', 'things get bigger when they get hot', 'Why bridges have gaps in them.'),
-        t('sci-transfer', 'Conduction, convection, radiation', '♨️', 'spoon · boiling water · the sun', 'The three ways heat travels.'),
-        t('sci-climate', 'Heat in the atmosphere and oceans', '🌊', 'why the lake keeps Toronto warmer', 'Water holds heat. A lot of it.'),
-        t('sci-energy', 'Energy sources and the greenhouse effect', '🌍', 'in stays in', 'Where our heat comes from, and where it is stuck.'),
+        t('sci-heat', 'Heat and temperature are not the same', '🌡️', 'a spark vs a bathtub', 'One is energy, the other is how hot it feels.', 'I can explain why a spark is hotter than a bath but holds less heat.'),
+        t('sci-expand', 'Heat and the particle theory', '🔥', 'things get bigger when they get hot', 'Why bridges have gaps in them.', 'I can explain why bridges are built with gaps in them.'),
+        t('sci-transfer', 'Conduction, convection, radiation', '♨️', 'spoon · boiling water · the sun', 'The three ways heat travels.', 'I can name the three ways heat travels and spot each one.'),
+        t('sci-climate', 'Heat in the atmosphere and oceans', '🌊', 'why the lake keeps Toronto warmer', 'Water holds heat. A lot of it.', 'I can explain why the sea heats up more slowly than the land.'),
+        t('sci-energy', 'Energy sources and the greenhouse effect', '🌍', 'in stays in', 'Where our heat comes from, and where it is stuck.', 'I can explain the greenhouse effect without the shouting.'),
       ],
     },
   ],
@@ -332,22 +340,22 @@ const GEOGRAPHY: SeSubject = {
       id: 'geo-a',
       title: 'Strand A: Physical Patterns in a Changing World',
       subtopics: [
-        t('geo-a-map', 'Reading a physical map', '🗺️', 'latitude · longitude · legend · scale', 'Finding anywhere on Earth with two numbers.'),
-        t('geo-a-land', 'Landforms and plate tectonics', '🏔️', 'plates move ~ as fast as your nails grow', 'Mountains are a collision in slow motion.'),
-        t('geo-a-climate', 'Climate and climate zones', '🌤️', 'latitude · altitude · water · wind', 'Why two cities at the same latitude feel nothing alike.'),
-        t('geo-a-hazard', 'Earthquakes, volcanoes, hurricanes', '🌋', 'the Ring of Fire', 'Natural events, and why they happen where they happen.'),
-        t('geo-a-where', 'Where people live, and why', '🏙️', 'water · flat land · food · trade', 'Population maps are not random.'),
+        t('geo-a-map', 'Reading a physical map', '🗺️', 'latitude · longitude · legend · scale', 'Finding anywhere on Earth with two numbers.', 'I can read a physical map — height, scale and legend.'),
+        t('geo-a-land', 'Landforms and plate tectonics', '🏔️', 'plates move ~ as fast as your nails grow', 'Mountains are a collision in slow motion.', 'I can explain what moving plates build and what they wreck.'),
+        t('geo-a-climate', 'Climate and climate zones', '🌤️', 'latitude · altitude · water · wind', 'Why two cities at the same latitude feel nothing alike.', 'I can explain why two places at the same latitude are nothing alike.'),
+        t('geo-a-hazard', 'Earthquakes, volcanoes, hurricanes', '🌋', 'the Ring of Fire', 'Natural events, and why they happen where they happen.', 'I can explain what causes an earthquake, a volcano and a hurricane.'),
+        t('geo-a-where', 'Where people live, and why', '🏙️', 'water · flat land · food · trade', 'Population maps are not random.', 'I can explain why people settled where they did.'),
       ],
     },
     {
       id: 'geo-b',
       title: 'Strand B: Natural Resources around the World: Use and Sustainability',
       subtopics: [
-        t('geo-b-what', 'What counts as a resource', '💎', 'oil · fish · sunlight · lithium', 'A rock is only a resource when someone wants it.'),
-        t('geo-b-renew', 'Renewable vs non-renewable', '♻️', 'wind forever · oil once', 'The difference that decides the next century.'),
-        t('geo-b-cost', 'Extracting resources: the real cost', '⛏️', 'the mine, the town, the river', 'Somebody always pays, and it is rarely the buyer.'),
-        t('geo-b-water', 'Water as a resource', '🚱', 'Canada has 20% of the fresh water', 'The thing nobody can substitute.'),
-        t('geo-b-sust', 'Sustainability and your own footprint', '👣', 'what you own, where it came from', 'Adding up your own share.'),
+        t('geo-b-what', 'What counts as a resource', '💎', 'oil · fish · sunlight · lithium', 'A rock is only a resource when someone wants it.', 'I can say what turns a thing into a resource.'),
+        t('geo-b-renew', 'Renewable vs non-renewable', '♻️', 'wind forever · oil once', 'The difference that decides the next century.', 'I can tell renewable from non-renewable, and the awkward cases.'),
+        t('geo-b-cost', 'Extracting resources: the real cost', '⛏️', 'the mine, the town, the river', 'Somebody always pays, and it is rarely the buyer.', 'I can name what getting a resource out of the ground really costs.'),
+        t('geo-b-water', 'Water as a resource', '🚱', 'Canada has 20% of the fresh water', 'The thing nobody can substitute.', 'I can explain why fresh water is a resource people argue over.'),
+        t('geo-b-sust', 'Sustainability and your own footprint', '👣', 'what you own, where it came from', 'Adding up your own share.', 'I can work out my own footprint and what would actually shrink it.'),
       ],
     },
   ],
@@ -386,6 +394,55 @@ for (const subject of SE_SUBJECTS) {
 
 export function seFind(subtopicId: string): SeLocation | null {
   return INDEX.get(subtopicId) ?? null
+}
+
+// --- What I can do now (§24r) --------------------------------------------------
+
+/** Four tries, because one lucky guess is not a skill. */
+export const SE_CAN_MIN_ATTEMPTS = 4
+/** And three in four right, because the claim has to be true. */
+export const SE_CAN_MIN_RATE = 0.75
+
+export interface SeCanDone {
+  subtopicId: string
+  /** The first-person line. */
+  can: string
+  emoji: string
+  subject: string
+  /** When he last worked on it — what the list is ordered by. */
+  at: number
+}
+
+/**
+ * Everything he can now do, newest first (§24r).
+ *
+ * The app pays nothing on purpose (§24), so the only reward it has to give
+ * is the fact that he gets it — and until this list existed, that fact was
+ * nowhere on screen. The ⛵ shows progress through ONE lesson and resets; the
+ * Report is percentages, which is Dad's language, not his. This is the year
+ * accumulating, in sentences he would say out loud.
+ *
+ * Deliberately not a percentage and not a tick-list of everything left to do.
+ * A list of what is missing is a list of failures; this one only ever grows.
+ */
+export function seCanDo(
+  stats: Record<string, { attempts: number; right: number; lastAt: number }>,
+): SeCanDone[] {
+  const out: SeCanDone[] = []
+  for (const [id, stat] of Object.entries(stats)) {
+    if (stat.attempts < SE_CAN_MIN_ATTEMPTS) continue
+    if (stat.right / stat.attempts < SE_CAN_MIN_RATE) continue
+    const where = seFind(id)
+    if (!where) continue
+    out.push({
+      subtopicId: id,
+      can: where.subtopic.can,
+      emoji: where.subtopic.emoji,
+      subject: where.subject.name,
+      at: stat.lastAt,
+    })
+  }
+  return out.sort((a, b) => b.at - a.at)
 }
 
 export function seSubjectById(id: string): SeSubject | null {

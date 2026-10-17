@@ -304,6 +304,7 @@ export const pack: SePack = {
       title: 'Introduction to Coordinate Planes + Vocabulary',
       by: 'Math with Mr. J',
       seconds: 385,
+      watchFor: 'The name of the point where the two axes cross.',
       checks: [
         {
           prompt: 'The point (0, 0) is called the…',
@@ -616,6 +617,7 @@ export const pack: SePack = {
       title: 'How to Plot Points on a Coordinate Plane',
       by: 'Math with Mr. J',
       seconds: 342,
+      watchFor: 'Which direction he moves FIRST when plotting a point.',
       checks: [
         {
           prompt: 'To plot (−3, 4), you start at the origin and first go…',
@@ -648,6 +650,7 @@ export const pack: SePack = {
       title: 'Quadrants of the Coordinate Plane',
       by: 'Math with Mr. J',
       seconds: 261,
+      watchFor: 'Where quadrant 1 is, and which way the numbering goes round.',
       checks: [
         {
           prompt: 'The quadrants are numbered…',

@@ -210,6 +210,7 @@ export const pack: SePack = {
       title: 'How to Find Unit Prices',
       by: 'Math with Mr. J',
       seconds: 310,
+      watchFor: 'Which number you divide by to get the price for ONE.',
       checks: [
         {
           prompt: 'To find a unit price, you…',
@@ -512,6 +513,7 @@ export const pack: SePack = {
       title: 'Calculating Best Buys',
       by: 'Mathew Williamson',
       seconds: 338,
+      watchFor: 'What you work out for each pack before you can compare them.',
       checks: [
         {
           prompt: 'To compare two packs, work out…',
