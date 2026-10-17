@@ -17,8 +17,9 @@ import confetti from 'canvas-confetti'
 import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
+import { dayKey } from '../../logic/dates'
 import { packFor } from '../../steugene/packs'
-import { seAvailable, seTiles, seWithChecks } from '../../logic/steugeneLesson'
+import { seAvailable, seForFix, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
@@ -126,8 +127,9 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   const byId = useMemo(() => {
     if (!run) return new Map<string, SeBlock>()
     const generated = seDesk.generated.filter((g) => g.subtopicId === run.subtopicId).flatMap((g) => g.blocks)
-    return new Map(seWithChecks(seAvailable(packFor(run.subtopicId), generated)).map((b) => [b.id, b]))
-  }, [run?.subtopicId, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
+    const blocks = seWithChecks(seAvailable(packFor(run.subtopicId), generated))
+    return new Map((run.fix ? blocks.map(seForFix) : blocks).map((b) => [b.id, b]))
+  }, [run?.subtopicId, run?.fix, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
 
@@ -816,6 +818,12 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   const right = answers.filter((a) => a.right).length
   const wrong = answers.filter((a) => !a.right)
   const pct = answers.length ? Math.round((right / answers.length) * 100) : 100
+  // A fix he got right on the day he missed it is not fixed yet (§24f).
+  const today = dayKey()
+  const missedToday = new Set(
+    data.steugene.locks.flatMap((l) => l.mistakes.filter((m) => dayKey(new Date(m.at)) === today).map((m) => m.id)),
+  )
+  const again = run?.fix ? answers.filter((a) => a.right && missedToday.has(a.id)).length : 0
 
   useEffect(() => {
     stopSpeaking()
@@ -838,6 +846,12 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         <p style={{ marginTop: 10, fontWeight: 800 }}>
           {pct >= 80 ? 'That was a strong run.' : pct >= 50 ? 'Decent. The misses are the interesting part.' : 'Hard one. Now you know which bits to ask about.'}
         </p>
+        {again > 0 && (
+          <p className="muted" style={{ marginTop: 6 }}>
+            🔁 {again === 1 ? 'The one' : `The ${again}`} you got right come{again === 1 ? 's' : ''} back once more tomorrow.
+            Right on a different day is how you know it stuck.
+          </p>
+        )}
       </div>
 
       {wrong.length > 0 && (

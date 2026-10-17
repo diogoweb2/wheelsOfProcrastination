@@ -51,7 +51,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
   const [open, setOpen] = useState<string | null>(seFind(CURRENT_SUBTOPIC)?.subject.id ?? 'math')
   const [picked, setPicked] = useState<string | null>(null)
   const [fixing, setFixing] = useState<string | null>(null)
-  const fixes = seFixGroups(data.steugene.locks)
+  const fixes = seFixGroups(data.steugene.locks, dayKey())
 
   const fix = async (subtopicId: string) => {
     const run = data.steugene.run
@@ -80,7 +80,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
             <button
               key={g.subtopicId}
               className="se-topic se-topic--fix"
-              disabled={!!fixing}
+              disabled={!!fixing || !g.ready.length}
               onClick={() => void fix(g.subtopicId)}
             >
               <span className="se-topic__emoji">🔧</span>
@@ -89,7 +89,11 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
                   {seFind(g.subtopicId)?.subtopic.title ?? g.subtopicId} — mistakes to fix
                 </span>
                 <span className="se-topic__sample">
-                  {fixing === g.subtopicId ? 'Getting it ready…' : 'Dad unlocked these. One more go at each.'}
+                  {fixing === g.subtopicId
+                    ? 'Getting it ready…'
+                    : g.ready.length
+                      ? 'Dad unlocked these. One more go at each.'
+                      : '✅ Right today. One more go tomorrow makes it stick.'}
                 </span>
               </span>
               <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>

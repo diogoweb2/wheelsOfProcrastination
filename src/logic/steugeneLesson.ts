@@ -13,8 +13,13 @@
 import type { SeBlock, SePack } from '../steugene/types'
 import type { SeAnswer, SeFixLock } from '../types'
 
-/** Allowed lesson lengths, in minutes. The middle one is the default. */
-export const SE_LENGTHS = [30, 40, 60] as const
+/**
+ * Allowed lesson lengths, in minutes; 40 is the default (storage.ts). 15 is for
+ * the days 30 is a wall: his first 30-minute lesson ran past an hour of real
+ * time and was never finished, and a finish line he reaches beats one he
+ * does not.
+ */
+export const SE_LENGTHS = [15, 30, 40, 60] as const
 
 /**
  * Deal this much more than the target asks for.
@@ -78,13 +83,24 @@ export function sePlanLesson(available: SeBlock[], seen: string[], targetSeconds
   const asks = deck(seIsQuestion)
   const watches = deck((b) => b.kind === 'video' || b.kind === 'game')
 
+  const byId = new Map(available.map((b) => [b.id, b]))
   const out: SeBlock[] = []
   let budget = 0
+  const push = (b: SeBlock) => {
+    out.push(b)
+    budget += seBlockSeconds(b)
+  }
   const take = (from: SeBlock[]) => {
     const b = from.shift()
     if (!b) return false
-    out.push(b)
-    budget += seBlockSeconds(b)
+    // Its picture first, once per lesson — and out of the reads deck, so it
+    // is not dealt a second time later.
+    const lead = b.lead ? byId.get(b.lead) : undefined
+    if (lead && !out.includes(lead)) {
+      push(lead)
+      if (reads.includes(lead)) reads.splice(reads.indexOf(lead), 1)
+    }
+    push(b)
     return true
   }
 
@@ -111,13 +127,15 @@ export function sePlanLesson(available: SeBlock[], seen: string[], targetSeconds
  * what he is actually here to practise — but it will hand back a read or a
  * game rather than nothing.
  */
-export function seTopUp(available: SeBlock[], used: string[]): SeBlock | null {
+export function seTopUp(available: SeBlock[], used: string[]): SeBlock[] {
   const usedSet = new Set(used)
   const left = available.filter((b) => !usedSet.has(b.id))
-  if (!left.length) return null
+  if (!left.length) return []
   const questions = left.filter(seIsQuestion)
   const pool = questions.length >= 2 ? questions : left
-  return pool[Math.floor(Math.random() * pool.length)]
+  const b = pool[Math.floor(Math.random() * pool.length)]
+  const lead = b.lead && !usedSet.has(b.lead) ? available.find((x) => x.id === b.lead) : undefined
+  return lead ? [lead, b] : [b]
 }
 
 /** Everything that could be served for a subtopic: the pack plus anything the AI added. */
@@ -154,16 +172,39 @@ export function seLockLeft(lock: SeFixLock): SeAnswer[] {
 
 /**
  * What Dad has unlocked and he has not redone yet, one group per subtopic:
- * the "Rational numbers — mistakes to fix" rows. Oldest group first.
+ * the "Rational numbers — mistakes to fix" rows. Oldest group first. `ready`
+ * is what can be dealt `today`; the rest got a right answer today already
+ * and rest until tomorrow (§24f).
  */
-export function seFixGroups(locks: SeFixLock[]): { subtopicId: string; left: SeAnswer[] }[] {
-  const groups = new Map<string, SeAnswer[]>()
+export function seFixGroups(
+  locks: SeFixLock[],
+  today: string,
+): { subtopicId: string; left: SeAnswer[]; ready: SeAnswer[] }[] {
+  const groups = new Map<string, { left: SeAnswer[]; ready: SeAnswer[] }>()
   for (const lock of [...locks].sort((a, b) => a.at - b.at)) {
     if (!lock.allowedAt || lock.clearedAt) continue
     const left = seLockLeft(lock)
-    if (left.length) groups.set(lock.subtopicId, [...(groups.get(lock.subtopicId) ?? []), ...left])
+    if (!left.length) continue
+    const g = groups.get(lock.subtopicId) ?? { left: [], ready: [] }
+    g.left.push(...left)
+    g.ready.push(...left.filter((m) => lock.rightOn?.[m.id] !== today))
+    groups.set(lock.subtopicId, g)
   }
-  return [...groups].map(([subtopicId, left]) => ({ subtopicId, left }))
+  return [...groups].map(([subtopicId, g]) => ({ subtopicId, ...g }))
+}
+
+/**
+ * A miss as "mistakes to fix" deals it (§24f): a choice keeps its options but
+ * in a new order, because he has seen this card — and its right answer — once
+ * already, and "it was the bottom one" is not knowing it.
+ *
+ * Not turned into a build: most choice questions pick from their options
+ * ("which sits between −2 and −1?"), so tiles would mark a right −1.2 wrong.
+ */
+export function seForFix(b: SeBlock): SeBlock {
+  if (b.kind !== 'choice') return b
+  const options = shuffle([...b.options])
+  return { ...b, options, answer: options.indexOf(b.options[b.answer]) }
 }
 
 // --- Build-your-own-answer tiles (§24f) --------------------------------------

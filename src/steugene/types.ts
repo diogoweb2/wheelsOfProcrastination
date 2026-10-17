@@ -249,6 +249,14 @@ interface SeBlockBase {
   id: string
   /** Rough seconds, used only to size the opening queue. Never shown to him. */
   secs?: number
+  /**
+   * An explain card (same pack, by id) that is always shown right before this
+   * block, unless the lesson already showed it — the picture that makes the
+   * question make sense (§24d). Without it the planner deals reads and
+   * questions independently, and the card that explains a question can land
+   * twenty minutes after it.
+   */
+  lead?: string
 }
 
 /** Something to read. Short lines — never a paragraph. */

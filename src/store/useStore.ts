@@ -41,6 +41,7 @@ import type {
   StickerTrade,
   Task,
   SessionDriver,
+  SeAnswer,
 } from '../types'
 import {
   KID_ID,
@@ -1179,14 +1180,32 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   /**
-   * Tick misses off his unlocked locks for a subtopic. A lock with nothing
-   * left is cleared, which drops its row from "mistakes to fix".
+   * Settle a fix run's answers against his unlocked locks for a subtopic
+   * (§24f), and tick off any `gone` misses outright. A lock with nothing left
+   * is cleared, which drops its row from "mistakes to fix".
+   *
+   * Wrong: ticked off here, and sealed afresh by `seFinish` — back to Dad.
+   * Right on a LATER day than the miss: fixed. Right on the same day: that is
+   * the explanation he heard an hour ago, not a fix, so it rests until
+   * tomorrow and needs one more right answer then.
    */
-  function seMarkFixed(d: AppData, subtopicId: string, ids: string[]) {
+  function seSettleFixes(d: AppData, subtopicId: string, answers: SeAnswer[], gone: string[] = []) {
     for (const lock of d.steugene.locks) {
       if (lock.subtopicId !== subtopicId || !lock.allowedAt || lock.clearedAt) continue
-      const mine = new Set(lock.mistakes.map((m) => m.id))
-      lock.fixed = [...new Set([...(lock.fixed ?? []), ...ids.filter((id) => mine.has(id))])]
+      const fixed = new Set(lock.fixed ?? [])
+      for (const miss of lock.mistakes) {
+        if (fixed.has(miss.id)) continue
+        if (gone.includes(miss.id)) {
+          fixed.add(miss.id)
+          continue
+        }
+        const a = answers.find((x) => x.id === miss.id)
+        if (!a) continue
+        const day = dayKey(new Date(a.at))
+        if (!a.right || day > dayKey(new Date(miss.at))) fixed.add(miss.id)
+        else lock.rightOn = { ...lock.rightOn, [miss.id]: day }
+      }
+      lock.fixed = [...fixed]
       if (!seLockLeft(lock).length) lock.clearedAt = Date.now()
     }
   }
@@ -3984,12 +4003,11 @@ export const useStore = create<StoreState>((set, get) => {
       // "Mistakes to fix" is exactly its misses and is never topped up.
       const needMore =
         !run.fix && run.pos >= run.blockIds.length - 2 && run.activeSeconds < run.targetMinutes * 60
-      const extra = needMore
-        ? seTopUp(seBench(data, seDesk, run.subtopicId), run.blockIds)
-        : null
+      // A question tops up together with its lead card, picture first.
+      const extra = needMore ? seTopUp(seBench(data, seDesk, run.subtopicId), run.blockIds) : []
       commit((d) => {
         if (!d.steugene.run) return
-        if (extra) d.steugene.run.blockIds.push(extra.id)
+        d.steugene.run.blockIds.push(...extra.map((b) => b.id))
         d.steugene.run.pos += 1
       })
     },
@@ -4014,9 +4032,7 @@ export const useStore = create<StoreState>((set, get) => {
         // reaches for the bench before it reaches for these again. Only up to
         // `pos`: a lesson closed early leaves the rest of its queue unseen.
         stat.seen = [...new Set([...stat.seen, ...run.blockIds.slice(0, run.pos + 1)])]
-        // Every miss he answered again is redone, right or wrong — a wrong one
-        // is sealed afresh just below, and goes back to Dad (§24f).
-        if (run.fix) seMarkFixed(d, run.subtopicId, run.answers.map((a) => a.id))
+        if (run.fix) seSettleFixes(d, run.subtopicId, run.answers)
         if (wrong.length) {
           d.steugene.locks.push({
             id: `lock-${Date.now().toString(36)}`,
@@ -4032,15 +4048,24 @@ export const useStore = create<StoreState>((set, get) => {
     seStartFix(subtopicId) {
       if (get().data.steugene.run?.answers.length) get().seFinish()
       const { data, seDesk } = get()
-      const left = seFixGroups(data.steugene.locks).find((g) => g.subtopicId === subtopicId)?.left ?? []
-      const dealable = new Set(seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId))).map((b) => b.id))
-      const ids = [...new Set(left.map((m) => m.id))]
+      const ready = seFixGroups(data.steugene.locks, dayKey()).find((g) => g.subtopicId === subtopicId)?.ready ?? []
+      const byId = new Map(
+        seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId))).map((b) => [b.id, b]),
+      )
+      const ids = [...new Set(ready.map((m) => m.id))]
       // A miss whose card has since left the pack can never be redone, so it
-      // is ticked off rather than left in the row for ever.
-      const gone = ids.filter((id) => !dealable.has(id))
-      const blockIds = ids.filter((id) => dealable.has(id))
+      // is ticked off rather than left in the row for ever. (That is why a
+      // pack never renames an id he has played.)
+      const gone = ids.filter((id) => !byId.has(id))
+      // Each miss comes with its lead card in front of it, once (§24d).
+      const blockIds: string[] = []
+      for (const id of ids.filter((x) => byId.has(x))) {
+        const lead = byId.get(id)?.lead
+        if (lead && byId.has(lead) && !blockIds.includes(lead)) blockIds.push(lead)
+        blockIds.push(id)
+      }
       commit((d) => {
-        if (gone.length) seMarkFixed(d, subtopicId, gone)
+        if (gone.length) seSettleFixes(d, subtopicId, [], gone)
         if (!blockIds.length) return
         d.steugene.run = {
           subtopicId,

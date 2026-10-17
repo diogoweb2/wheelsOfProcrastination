@@ -1701,6 +1701,11 @@ export interface SeFixLock {
   allowedAt?: number
   /** Misses he has since redone in "mistakes to fix", by answer id (§24f). */
   fixed?: string[]
+  /**
+   * Misses he got right on the SAME day he missed them, and that day. Not a
+   * fix yet — it rests until a later day, when one more right answer is (§24f).
+   */
+  rightOn?: Record<string, string>
   /** Every miss in it has been redone. */
   clearedAt?: number
 }

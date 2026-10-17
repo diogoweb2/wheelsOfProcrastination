@@ -49,6 +49,14 @@ export async function audit(verbose = false): Promise<boolean> {
       if (WRITTEN_IDS.includes(subtopic.id)) checkWritten(b, fail)
       if (b.kind === 'video') videos++
     }
+    // A lead (§24d) is the picture shown right before its question: it has to
+    // be an explain card in this same pack.
+    for (const b of list) {
+      if (!b.lead) continue
+      const lead = list.find((x) => x.id === b.lead)
+      if (!lead) fail(`${subtopic.id}/${b.id}: lead "${b.lead}" is not in this pack`)
+      else if (lead.kind !== 'explain') fail(`${subtopic.id}/${b.id}: lead "${b.lead}" is a ${lead.kind}, not an explain`)
+    }
 
     const bench = seAvailable(pack, [])
     const minutes = Math.round(bench.reduce((n, b) => n + seBlockSeconds(b), 0) / 60)
