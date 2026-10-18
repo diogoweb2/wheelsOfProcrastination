@@ -6779,3 +6779,62 @@ input, select { font-family: inherit; }
 .se-custom__title { font-size: 14px; font-weight: 900; line-height: 1.3; }
 .se-custom__sub { font-size: 12px; }
 .se-custom > .btn { width: 100%; margin-top: 4px; }
+
+/* 🏫 St. Eugene 7 §24x — his copy of the report opens on what he DID.
+   Four tiles, big numbers, no percentages: the page used to open on his worst
+   chapter, which is the right page for Dad and the wrong one for him. */
+.se-showup { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 12px; }
+.se-showup__tile {
+  background: var(--card2); border: 1px solid var(--line); border-radius: 14px;
+  padding: 9px 4px 8px; text-align: center; min-width: 0;
+}
+.se-showup__emoji { font-size: 16px; line-height: 1; }
+.se-showup__big { font-size: 22px; font-weight: 900; line-height: 1.1; margin-top: 2px; }
+.se-showup__label { font-size: 10px; font-weight: 800; color: var(--muted); line-height: 1.2; margin-top: 2px; }
+@media (max-width: 360px) {
+  .se-showup__big { font-size: 19px; }
+  .se-showup__label { font-size: 9px; }
+}
+
+/* Strongest / worth another look — the bar, without the forensics. */
+.se-band { margin-bottom: 11px; }
+.se-band:last-child { margin-bottom: 0; }
+.se-band__top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+
+/* 🗺️ The year as a map: one dot per chapter in teaching order, and a bar
+   where the calendar says he should be. "How well" was answered; "how far"
+   was not, and that is the question a twelve-year-old actually asks. */
+.se-map__key { font-size: 11px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin: 2px 0 12px; }
+.se-map__row { margin-bottom: 13px; }
+.se-map__row:last-of-type { margin-bottom: 4px; }
+.se-map__top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: 14px; font-weight: 800; margin-bottom: 5px; }
+.se-map__state { flex: none; font-size: 12px; font-weight: 900; color: var(--muted); }
+.se-map__state.is-behind { color: var(--yellow); }
+.se-map__state.is-ahead, .se-map__state.is-on-track { color: var(--profit); }
+.se-map__dots { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.se-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; display: inline-block; }
+.se-dot.is-done { background: var(--profit); }
+.se-dot.is-started { background: var(--yellow); }
+.se-dot.is-todo { background: var(--bg2); border: 1px solid var(--line); }
+.se-map__mark { width: 3px; height: 15px; border-radius: 2px; background: var(--blue); flex: none; display: inline-block; }
+.se-map__foot { font-size: 11px; line-height: 1.4; }
+
+/* 📅 How fast we have to move. One number in minutes a week, because
+   "we are a bit behind" and "two and a half hours a week" are not the
+   same instruction. */
+.se-pace { border: 2px solid var(--blue); }
+.se-pace__big { font-size: 26px; font-weight: 900; line-height: 1.1; margin-bottom: 3px; }
+.se-pace .muted { font-size: 12px; line-height: 1.45; }
+.se-pace__warn {
+  margin-top: 10px; padding: 9px 10px; border-radius: 12px;
+  background: rgba(255, 206, 0, 0.12); border: 1px solid var(--yellow);
+  font-size: 13px; line-height: 1.45;
+}
+.se-pace__next { margin-top: 10px; font-size: 14px; font-weight: 800; line-height: 1.4; }
+
+/* One button, at the bottom, always. Knowing is not doing. */
+.se-next { border: 2px solid var(--profit); font-size: 14px; line-height: 1.45; }
+.se-next .btn { width: 100%; }
+.se-pace__missed { margin-top: 9px; font-size: 12px; line-height: 1.45; }
+.se-map__state.is-done { color: var(--profit); }
+.se-map__state.is-shut, .se-map__state.is-not-yet { color: var(--muted); }

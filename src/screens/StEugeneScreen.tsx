@@ -8,7 +8,7 @@
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
 //   /steugene7/helping   (Dad) the card he is on this second, with the answer key
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { sfx } from '../audio'
@@ -32,6 +32,14 @@ import {
   type SeSubject,
   type SeTerm,
 } from '../logic/steugene'
+import {
+  sePaceBySubject,
+  sePlanOfYear,
+  seShowUp,
+  type SePace,
+  type SePlanOfYear,
+  type SeShowUp,
+} from '../logic/steugenePace'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
 import { SE_LENGTHS, seAvailable, seFixGroups, seLockLeft, seWithChecks } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
@@ -50,7 +58,7 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
       {tab === 'finder' && <FinderTab setTab={setTab} />}
       {tab === 'lesson' && <LessonTab setTab={setTab} />}
       {tab === 'review' && <ReviewTab setTab={setTab} />}
-      {tab === 'report' && <ReportTab admin={isAdmin} />}
+      {tab === 'report' && <ReportTab admin={isAdmin} setTab={setTab} />}
       {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
       {tab === 'helping' && isAdmin && <SeHelping />}
     </div>
@@ -983,7 +991,7 @@ function ReviewTab({ setTab }: { setTab: (tab: string) => void }) {
  * real attempts behind it is flagged, because that is the line where "he is
  * guessing" starts.
  */
-function ReportTab({ admin }: { admin: boolean }) {
+function ReportTab({ admin, setTab }: { admin: boolean; setTab: (tab: string) => void }) {
   const { data, kidData } = useStore()
   const world: AppData | null = admin ? kidData : data
   const [subject, setSubject] = useState<string | 'all'>('all')
@@ -1016,11 +1024,11 @@ function ReportTab({ admin }: { admin: boolean }) {
   // not there. The rows already ignore these, which is why one could read
   // 100% while this list underneath it showed seven misses.
   const retired = seRetired(world.steugene.locks, world.steugene.history)
-  const recent = [...world.steugene.history]
+  const open = [...world.steugene.history]
     .reverse()
     .filter((a) => !a.right && stillWrong.has(a.id) && !retired.has(a.id))
     .filter((a, i, all) => all.findIndex((x) => x.id === a.id) === i)
-    .slice(0, 12)
+  const recent = open.slice(0, 12)
   const repaired = Object.values(nowBy).reduce((n, v) => n + v.repaired, 0)
   // Misses he CANNOT redo because nobody has unsealed them (§24f). Without
   // this the row says "4 still wrong" and reads as his problem, when the
@@ -1033,13 +1041,32 @@ function ReportTab({ admin }: { admin: boolean }) {
   }
   const sealed = Object.values(sealedBy).reduce((n, v) => n + v.size, 0)
 
+  // §24x — the calendar half of the page.
+  const show = seShowUp(world.steugene.history)
+  const paces = sePaceBySubject(world.steugene.stats, world.steugene.history, world.steugene.locks)
+  const plan = sePlanOfYear(world.steugene.stats, world.steugene.history, world.steugene.locks)
+
+  // §24x — his copy leads with his best, mine with his worst. Four tries is
+  // the bar for having an opinion either way (§24r).
+  const ranked = rows.filter((r) => (r.now?.asked ?? r.stat.attempts) >= SE_CAN_MIN_ATTEMPTS)
+  const strong = [...ranked].sort((a, b) => b.pct - a.pct).slice(0, 3)
+  const weak = [...ranked]
+    .filter((r) => r.pct < 90 && !strong.some((x) => x.id === r.id))
+    .sort((a, b) => a.pct - b.pct)
+    .slice(0, 3)
+
   return (
     <>
       <div className="h1">📊 {admin ? 'Ben’s report' : 'How you are doing'}</div>
-      <p className="muted" style={{ marginBottom: 12 }}>
-        {rows.length} topic{rows.length === 1 ? '' : 's'} started · {minutes} min of real work
-        {repaired > 0 && ` · 🔧 ${repaired} question${repaired === 1 ? '' : 's'} missed then fixed`}
-      </p>
+
+      {!admin && <ShowUp show={show} minutes={minutes} />}
+      {admin && (
+        <p className="muted" style={{ marginBottom: 12 }}>
+          {rows.length} topic{rows.length === 1 ? '' : 's'} started · {minutes} min of real work · 🔥 {show.streak} day
+          {show.streak === 1 ? '' : 's'} in a row
+          {repaired > 0 && ` · 🔧 ${repaired} question${repaired === 1 ? '' : 's'} missed then fixed`}
+        </p>
+      )}
 
       {admin && sealed > 0 && (
         <div className="card se-sealedcard">
@@ -1052,70 +1079,309 @@ function ReportTab({ admin }: { admin: boolean }) {
         </div>
       )}
 
-      <div className="se-filter">
-        <button className={`btn btn--small ${subject === 'all' ? 'btn--blue' : 'btn--ghost'}`} onClick={() => setSubject('all')}>
-          All
-        </button>
-        {SE_SUBJECTS.map((s) => (
-          <button
-            key={s.id}
-            className={`btn btn--small ${subject === s.id ? 'btn--blue' : 'btn--ghost'}`}
-            onClick={() => setSubject(s.id)}
-          >
-            {s.emoji}
-          </button>
-        ))}
-      </div>
+      <YearMap paces={paces} admin={admin} />
+      <PaceLine plan={plan} admin={admin} />
 
-      {rows.length === 0 && <div className="card muted">Nothing here yet — finish a lesson and it fills in.</div>}
+      {!admin && (
+        <>
+          {strong.length > 0 && (
+            <div className="card">
+              <div className="h1" style={{ fontSize: 18 }}>💪 You are strongest at</div>
+              {strong.map((r) => (
+                <Band key={r.id} row={r} />
+              ))}
+            </div>
+          )}
+          {weak.length > 0 && (
+            <div className="card">
+              <div className="h1" style={{ fontSize: 18 }}>🎯 Worth another look</div>
+              {weak.map((r) => (
+                <Band key={r.id} row={r} />
+              ))}
+            </div>
+          )}
+          {ranked.length === 0 && <div className="card muted">Finish a lesson and this fills in.</div>}
+          {/* §24x — his copy does NOT print his wrong answers back at him.
+              Re-reading a mistake teaches nobody anything; redoing it does,
+              and 🔁 Review exists for exactly that. The full list stays on my
+              copy, because that is what I plan the ten minutes from. */}
+          <NextUp open={open.length} setTab={setTab} />
+        </>
+      )}
 
-      {rows.map(({ id, stat, now, pct, where }) => {
-        const asked = now?.asked ?? stat.attempts
-        const help = pct < 60 && asked >= SE_CAN_MIN_ATTEMPTS
-        const nudged = stat.helped ?? 0
-        // §24p — a topic he gets right but keeps asking for a start on is a
-        // different problem from one he gets wrong, and it is invisible in a
-        // percentage. It is worth naming, because it is nearly fixed.
-        const started = !help && stat.attempts >= SE_CAN_MIN_ATTEMPTS && nudged / stat.attempts >= 0.4
-        // Nothing left that he gets wrong — say so, because the percentage on
-        // its own cannot distinguish "never missed one" from "fixed them all".
-        const sound = !!now && now.broken === 0 && now.asked >= SE_CAN_MIN_ATTEMPTS
-        const locked = sealedBy[id]?.size ?? 0
-        return (
-          <div key={id} className={`card se-row${help ? ' se-row--help' : ''}`}>
-            <div className="se-row__top">
-              <strong>
-                {where!.subtopic.emoji} {where!.subtopic.title}
-              </strong>
-              <span className={pct < 60 ? 'se-row__bad' : pct < 80 ? 'se-row__mid' : 'se-row__good'}>{pct}%</span>
-            </div>
-            <div className="se-row__bar">
-              <div style={{ width: `${pct}%` }} className={pct < 60 ? 'bad' : pct < 80 ? 'mid' : 'good'} />
-            </div>
-            <div className="muted se-row__meta">
-              {where!.subject.name} · {now ? `${now.right}/${now.asked} right now` : `${stat.right}/${stat.attempts} right`}
-              {now && now.repaired > 0 && ` · 🔧 ${now.repaired} fixed`}
-              {now && now.broken > 0 && ` · ❌ ${now.broken} still wrong`}
-              {nudged > 0 && ` · 🤔 ${nudged} nudged`} · {stat.attempts} tr{stat.attempts === 1 ? 'y' : 'ies'} ·{' '}
-              {Math.round(stat.seconds / 60)} min · {prettyDay(dayKey(new Date(stat.lastAt)))}
-              {help && <strong className="se-row__flag"> · needs a hand</strong>}
-              {started && <strong className="se-row__nudge"> · gets there with a nudge</strong>}
-              {sound && !started && <strong className="se-row__sound"> · nothing left wrong</strong>}
-              {locked > 0 && <strong className="se-row__sealed"> · 🔒 {locked} sealed, waiting for you</strong>}
-            </div>
+      {admin && (
+        <>
+          <div className="se-filter">
+            <button
+              className={`btn btn--small ${subject === 'all' ? 'btn--blue' : 'btn--ghost'}`}
+              onClick={() => setSubject('all')}
+            >
+              All
+            </button>
+            {SE_SUBJECTS.map((s) => (
+              <button
+                key={s.id}
+                className={`btn btn--small ${subject === s.id ? 'btn--blue' : 'btn--ghost'}`}
+                onClick={() => setSubject(s.id)}
+              >
+                {s.emoji}
+              </button>
+            ))}
           </div>
-        )
-      })}
 
-      {recent.length > 0 && (
-        <div className="card">
-          <div className="h1" style={{ fontSize: 18 }}>❌ Still getting these wrong</div>
-          {recent.map((m, i) => (
-            <Miss key={i} miss={m} />
-          ))}
-        </div>
+          {rows.length === 0 && <div className="card muted">Nothing here yet — finish a lesson and it fills in.</div>}
+
+          {rows.map(({ id, stat, now, pct, where }) => {
+            const asked = now?.asked ?? stat.attempts
+            const help = pct < 60 && asked >= SE_CAN_MIN_ATTEMPTS
+            const nudged = stat.helped ?? 0
+            // §24p — a topic he gets right but keeps asking for a start on is a
+            // different problem from one he gets wrong, and it is invisible in a
+            // percentage. It is worth naming, because it is nearly fixed.
+            const started = !help && stat.attempts >= SE_CAN_MIN_ATTEMPTS && nudged / stat.attempts >= 0.4
+            // Nothing left that he gets wrong — say so, because the percentage on
+            // its own cannot distinguish "never missed one" from "fixed them all".
+            const sound = !!now && now.broken === 0 && now.asked >= SE_CAN_MIN_ATTEMPTS
+            const locked = sealedBy[id]?.size ?? 0
+            return (
+              <div key={id} className={`card se-row${help ? ' se-row--help' : ''}`}>
+                <div className="se-row__top">
+                  <strong>
+                    {where!.subtopic.emoji} {where!.subtopic.title}
+                  </strong>
+                  <span className={pct < 60 ? 'se-row__bad' : pct < 80 ? 'se-row__mid' : 'se-row__good'}>{pct}%</span>
+                </div>
+                <div className="se-row__bar">
+                  <div style={{ width: `${pct}%` }} className={pct < 60 ? 'bad' : pct < 80 ? 'mid' : 'good'} />
+                </div>
+                <div className="muted se-row__meta">
+                  {where!.subject.name} · {now ? `${now.right}/${now.asked} right now` : `${stat.right}/${stat.attempts} right`}
+                  {now && now.repaired > 0 && ` · 🔧 ${now.repaired} fixed`}
+                  {now && now.broken > 0 && ` · ❌ ${now.broken} still wrong`}
+                  {nudged > 0 && ` · 🤔 ${nudged} nudged`} · {stat.attempts} tr{stat.attempts === 1 ? 'y' : 'ies'} ·{' '}
+                  {Math.round(stat.seconds / 60)} min · {prettyDay(dayKey(new Date(stat.lastAt)))}
+                  {help && <strong className="se-row__flag"> · needs a hand</strong>}
+                  {started && <strong className="se-row__nudge"> · gets there with a nudge</strong>}
+                  {sound && !started && <strong className="se-row__sound"> · nothing left wrong</strong>}
+                  {locked > 0 && <strong className="se-row__sealed"> · 🔒 {locked} sealed, waiting for you</strong>}
+                </div>
+              </div>
+            )
+          })}
+
+          {recent.length > 0 && (
+            <div className="card">
+              <div className="h1" style={{ fontSize: 18 }}>❌ Still getting these wrong</div>
+              {recent.map((m, i) => (
+                <Miss key={i} miss={m} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </>
+  )
+}
+
+/**
+ * §24x — four numbers about turning up.
+ *
+ * The report used to open on his worst chapter, which is the right page for me
+ * and the wrong one for him. Schoolwork pays no coins on purpose (§24), so
+ * "you fixed eighteen questions" is the only currency this page has, and it
+ * was not on it anywhere.
+ */
+function ShowUp({ show, minutes }: { show: SeShowUp; minutes: number }) {
+  const tiles: [string, string, string][] = [
+    ['🔥', show.streak > 0 ? String(show.streak) : '—', show.streak === 1 ? 'day in a row' : 'days in a row'],
+    ['✅', String(show.answers), 'questions answered'],
+    ['🔧', String(show.fixed), 'missed, then fixed'],
+    ['⏱️', String(minutes), 'minutes of real work'],
+  ]
+  return (
+    <div className="se-showup">
+      {tiles.map(([emoji, big, label]) => (
+        <div key={label} className="se-showup__tile">
+          <div className="se-showup__emoji">{emoji}</div>
+          <div className="se-showup__big">{big}</div>
+          <div className="se-showup__label">{label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** One row of the strongest/worth-a-look lists — the bar without the forensics. */
+function Band({ row }: { row: { id: string; pct: number; where: ReturnType<typeof seFind> } }) {
+  const { pct, where } = row
+  return (
+    <div className="se-band">
+      <div className="se-band__top">
+        <span>
+          {where!.subtopic.emoji} {where!.subtopic.title}
+        </span>
+        <span className={pct < 60 ? 'se-row__bad' : pct < 80 ? 'se-row__mid' : 'se-row__good'}>{pct}%</span>
+      </div>
+      <div className="se-row__bar">
+        <div style={{ width: `${pct}%` }} className={pct < 60 ? 'bad' : pct < 80 ? 'mid' : 'good'} />
+      </div>
+    </div>
+  )
+}
+
+const MONTH = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+
+/**
+ * §24x — the year as a map: a dot per chapter, in the order his class walks
+ * it, with a line where today should be.
+ *
+ * The percentage rows answer "how well"; nothing answered "how far", which is
+ * the question a twelve-year-old actually asks, and the one I need to answer
+ * before deciding whether to leave maths alone for a fortnight and do History.
+ */
+function YearMap({ paces, admin }: { paces: SePace[]; admin: boolean }) {
+  return (
+    <div className="card se-map">
+      <div className="h1" style={{ fontSize: 18 }}>🗺️ The year so far</div>
+      <p className="muted se-map__key">
+        <span className="se-dot is-done" /> done · <span className="se-dot is-started" /> started ·{' '}
+        <span className="se-dot is-todo" /> not yet · <span className="se-map__mark" /> where the calendar says{' '}
+        {admin ? 'he' : 'you'} should be
+      </p>
+      {paces.map((p) => (
+        <div key={p.subjectId} className="se-map__row">
+          <div className="se-map__top">
+            <span>
+              {p.emoji} {p.name}
+            </span>
+            <span className={`se-map__state is-${p.state}`}>
+              {p.done}/{p.total}
+              {p.state === 'done' && ' · finished ✅'}
+              {p.state === 'not-yet' && ' · opens in February'}
+              {p.state === 'shut' && ' · term over'}
+              {p.state === 'behind' && ` · ${p.due - p.done} behind`}
+              {p.state === 'ahead' && ' · ahead ✨'}
+              {p.state === 'on-track' && ' · on track'}
+            </span>
+          </div>
+          <div className="se-map__dots">
+            {p.dots.map((d, i) => (
+              <Fragment key={i}>
+                {i === p.due && p.open && <span className="se-map__mark" />}
+                <span className={`se-dot is-${d}`} />
+              </Fragment>
+            ))}
+            {p.due >= p.dots.length && p.open && <span className="se-map__mark" />}
+          </div>
+        </div>
+      ))}
+      <p className="muted se-map__foot">
+        Geography is Term 2 — it does not start until February, so an empty row there is not behind.
+      </p>
+    </div>
+  )
+}
+
+/**
+ * §24x — how fast we have to move, in minutes a week.
+ *
+ * `minutesEach` is his OWN measured throughput (all the time on the clock
+ * divided by the chapters actually finished), for the same reason the gym
+ * stopped quoting plan time: a pace he cannot hold is a plan that runs out of
+ * year in May.
+ */
+function PaceLine({ plan, admin }: { plan: SePlanOfYear; admin: boolean }) {
+  const hm = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m % 60} m` : ''}`.trim() : `${m} min`)
+  const they = admin ? 'his' : 'your'
+  const last = plan.weeksLeft < 1
+  if (plan.allDone) {
+    return (
+      <div className="card se-pace">
+        <div className="se-pace__big">The whole year is done 🏁</div>
+        <div className="muted">Every chapter on the map, finished. Nothing left to pace.</div>
+      </div>
+    )
+  }
+  return (
+    <div className="card se-pace">
+      <div className="se-pace__big">
+        {last ? `${plan.left} chapter${plan.left === 1 ? '' : 's'} left` : `${hm(plan.minutesPerWeek)} a week`}
+      </div>
+      <div className="muted">
+        {last ? (
+          <>
+            The year ends on {MONTH(plan.year.end)} — that is this week. What is left is left; it keeps until
+            September.
+          </>
+        ) : (
+          <>
+            {plan.left} chapter{plan.left === 1 ? '' : 's'} left · about {plan.minutesEach} min each at {they}{' '}
+            {plan.measured ? 'measured pace' : 'pace (a guess until a chapter is finished)'} ·{' '}
+            {Math.round(plan.weeksLeft)} school weeks to {MONTH(plan.year.end)}
+          </>
+        )}
+      </div>
+      {plan.closing && (
+        <div className="se-pace__warn">
+          ⚠️{' '}
+          <strong>
+            {plan.closing.emoji} {plan.closing.name} shuts on{' '}
+            {MONTH(plan.closing.term === 'term1' ? plan.year.term1End : plan.year.end)}
+          </strong>{' '}
+          —{' '}
+          {plan.closing.total - plan.closing.done} chapters in {Math.round(plan.closing.weeksLeft)} weeks, about{' '}
+          {plan.closing.perWeek.toFixed(1)} a week. Everything except Geography has until June, so this is the one with
+          a deadline.
+        </div>
+      )}
+      {plan.missed.length > 0 && (
+        <div className="muted se-pace__missed">
+          🗓️ {plan.missed.map((p) => `${p.emoji} ${p.name} (${p.done}/${p.total})`).join(' · ')} — that term is over.
+          Still worth doing, but it is not on the clock any more.
+        </div>
+      )}
+      {plan.pickUp && !last && (
+        <div className="se-pace__next">
+          👉 {admin ? 'Worth a fortnight of evenings' : 'Best thing to pick up'}: {plan.pickUp.emoji}{' '}
+          <strong>{plan.pickUp.name}</strong>
+          {plan.pickUp.state === 'behind' && ` — ${plan.pickUp.due - plan.pickUp.done} chapters behind`}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * §24x — one button, at the bottom, always.
+ *
+ * Knowing is not doing. The report used to end in prose, which left the next
+ * move to him: find the right tab, pick a length, start. That is the step
+ * where an evening dies.
+ */
+function NextUp({ open, setTab }: { open: number; setTab: (tab: string) => void }) {
+  return (
+    <div className="card se-next">
+      {open > 0 ? (
+        <>
+          <div>
+            ❌ <strong>
+              {open} question{open === 1 ? '' : 's'}
+            </strong>{' '}
+            {open === 1 ? 'is' : 'are'} still wrong. You can redo {open === 1 ? 'it' : 'them'} right now.
+          </div>
+          <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => setTab('review')}>
+            🔁 Go and fix {open === 1 ? 'it' : 'them'}
+          </button>
+        </>
+      ) : (
+        <>
+          <div>✅ Nothing is wrong right now. Everything you have missed, you have fixed.</div>
+          <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => setTab('subjects')}>
+            ▶️ Start the next chapter
+          </button>
+        </>
+      )}
+    </div>
   )
 }
 

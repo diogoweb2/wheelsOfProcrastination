@@ -2066,11 +2066,40 @@ The second half of the Review tab, and a different thing from the first. 🔁 Re
 - **The counts are true.** Both lists are filtered by whether the question's card is still in a pack: 11 of Ben's 54 answered rational-numbers questions are `rn-…` ids he got *right* before the year was rewritten (§24u) — not retired, because retirement is about what counts *against* him, but not askable either. The page fetches the packs he has worked in before drawing any number, and offers the 43 it can actually deal. `seStartCustomReview` filters again with the real deck in hand, because a screen's filter is advisory and the queue must not contain a card that does not exist.
 - It is **not** scored as clearing a pile — most of it is work he already had right — so the result card does not claim mistakes came off. Any genuine miss in it is sealed like any other (§24f) and lands back on the 🔁 pile.
 
+### 24x. 📊 The report, for him (`/steugene7/report`)
+
+One URL, two pages. §24i wrote this tab for Dad and said so in its own comment — *"the page I actually open"* — and then showed Ben the same thing: his chapters sorted **worst first**, a percentage, his wrong answers printed back at him, and no button. For planning ten minutes with him that is right. For him it is a verdict he cannot act on, and it opened with "1 topic started · 47 min", which reads like he has done nothing when he has answered 81 questions.
+
+**His copy now opens on what he did.** Four tiles: 🔥 days in a row, ✅ questions answered, 🔧 missed-then-fixed, ⏱️ minutes of real work. Schoolwork pays no coins on purpose (§24), so these numbers are the only currency this page has, and none of them were on it. 🔧 is the one that matters — "you fixed 18 questions" is a sentence about learning, which a percentage is not.
+
+**💪 Strongest, then 🎯 worth another look** — three each, best first, four tries minimum to have an opinion either way (§24r). The full worst-first list stays on Dad's copy.
+
+**His wrong answers are not printed on his copy.** Re-reading a mistake teaches nobody anything; redoing it does, and 🔁 Review (§24v) exists for exactly that. He gets the count. Dad keeps the list, because that is what the ten minutes is planned from.
+
+**One button, at the bottom, always.** Mistakes outstanding → 🔁 go and fix them. None → ▶️ start the next chapter. The page used to end in prose, which left the next move to him, and that is the step where an evening dies.
+
+#### The year map and the pace (`src/logic/steugenePace.ts`)
+
+The percentages answered *how well*. Nothing answered **how far**, which is the question a twelve-year-old actually asks — and the question behind "should we leave maths alone for a fortnight and do History?"
+
+- **🗺️ A dot per chapter**, per subject, in the order his class walks it: 🟢 done, 🟡 started, ⚪ not yet — plus a blue bar at the point the calendar says he should have reached. 105 dots, the whole year, on one screen.
+- **"Done" is the §24r bar**, not "opened": four questions asked and three in four right on his latest answers. A chapter he has started badly is yellow, not green.
+- **The calendar is derived, not typed in.** The year is the Tuesday after the first Monday in September to the last Friday in June; History's window shuts on 31 January and Geography's opens on 1 February, because that is how the curriculum arrived (§24). Weeks are **school** weeks — the Christmas fortnight and March break come out, since counting them as working time quietly makes every target too easy. Dates step with `setDate`, not `+= 86_400_000`, so a clock change cannot skip a day and break a streak.
+- **A window closes as well as opening.** In June, History is not "behind", it is **over** — so it is never the thing to pick up tonight, and the card says so separately: still worth doing, no longer on the clock. Geography before February is `not-yet`, never behind, and an empty row there is not a problem.
+- **`due` spreads a subject evenly across its own window.** That is not how a class teaches, but it is how you tell in October whether June is reachable. It is a percentage of the *year*, never of him.
+- **One number in minutes a week.** "We are a bit behind" and "two and a half hours a week" are not the same instruction. `minutesEach` is his **measured throughput** — every second on the clock (§24d) divided by the chapters actually finished — for the same reason the gym stopped quoting plan time (§18z): a pace he cannot hold is a plan that runs out of year in May. Before anything is finished it says so and uses a 45-minute guess.
+- **A shutting window outranks a worse one.** In October maths needs more chapters a week than History does, but History has to be finished by the end of January and maths has until June, so the answer to "what tonight?" is History. Ranking by "furthest behind" alone would say maths right up to the week History became impossible.
+- **Under a week left, it stops quoting a rate.** A hundred chapters over the last two days is a true number and useless advice, so it says what is left and when the year ends.
+
+Dad's copy keeps everything it had and gains the map and the pace line, because the stop-maths-do-Geography call is his to make.
+
+As of 18 October 2026 that reads: 104 chapters left, 47 min each at his own measured pace, **2 h 31 m a week** to finish by 25 June — and ⚠️ History, 15 chapters in 13 weeks, shutting on 31 January.
+
 ### 24j. URLs (§1c)
 
 `/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.
 
-Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the answer key), `src/screens/StEugeneScreen.tsx` (the six pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
+Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the six pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.
