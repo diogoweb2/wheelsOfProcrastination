@@ -74,7 +74,14 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
   const [open, setOpen] = useState<string | null | undefined>(undefined)
   const [picked, setPicked] = useState<string | null>(null)
   const [fixing, setFixing] = useState<string | null>(null)
-  const fixes = seFixGroups(data.steugene.locks, dayKey())
+  // §24f splits these in two, and until now the page did not: `ready` is work
+  // he can actually do, and the rest are misses he already got right TODAY and
+  // that rest until tomorrow. Both were drawn as the same orange
+  // "mistakes to fix" row, so an evening spent fixing every one of them ended
+  // with the page still showing a list of mistakes to fix. It is not one.
+  const fixes = seFixGroups((admin ? world : data)?.steugene.locks ?? [], dayKey())
+  const toFix = fixes.filter((g) => g.ready.length > 0)
+  const resting = fixes.filter((g) => g.ready.length === 0)
   // `undefined` means "nobody has tapped yet" — resolved here rather than in
   // the initialiser because on Dad's phone the stats arrive after the mount.
   const openId = open === undefined ? seOpenSubject(stats) : open
@@ -104,13 +111,13 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
 
       <OpenLesson onIn={() => setTab('lesson')} />
 
-      {fixes.length > 0 && (
+      {toFix.length > 0 && (
         <div style={{ marginBottom: 12 }}>
-          {fixes.map((g) => (
+          {toFix.map((g) => (
             <button
               key={g.subtopicId}
               className="se-topic se-topic--fix"
-              disabled={!!fixing || !g.ready.length}
+              disabled={!!fixing || admin}
               onClick={() => void fix(g.subtopicId)}
             >
               <span className="se-topic__emoji">🔧</span>
@@ -121,16 +128,33 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
                 <span className="se-topic__sample">
                   {fixing === g.subtopicId
                     ? 'Getting it ready…'
-                    : g.ready.length
-                      ? 'Dad unlocked these. One more go at each.'
-                      : '✅ Right today. One more go tomorrow makes it stick.'}
+                    : admin
+                      ? 'Unlocked. Waiting for him to redo them.'
+                      : 'Dad unlocked these. One more go at each.'}
                 </span>
               </span>
-              <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>
+              <span className="se-topic__score">{new Set(g.ready.map((m) => m.id)).size}</span>
             </button>
           ))}
         </div>
       )}
+
+      {resting.map((g) => (
+        <div key={g.subtopicId} className="se-topic se-topic--rested">
+          <span className="se-topic__emoji">✅</span>
+          <span className="se-topic__body">
+            <span className="se-topic__title">
+              {seFind(g.subtopicId)?.subtopic.title ?? g.subtopicId} — fixed today
+            </span>
+            <span className="se-topic__sample">
+              {admin
+                ? 'He got every one of them right today. One more go tomorrow clears them for good.'
+                : 'Nothing to do here. One more go tomorrow and they are off your list for good.'}
+            </span>
+          </span>
+          <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>
+        </div>
+      ))}
 
       <CanDo stats={stats} history={history} admin={admin} />
 

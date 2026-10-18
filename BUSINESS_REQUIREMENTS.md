@@ -2005,6 +2005,9 @@ That is the only screen in the app that shows an answer key, and it exists for t
 
 ### 24u. Where he is NOW, not everywhere he has been
 
+**"Mistakes to fix" means mistakes he can fix.** §24f has always split a fix group in two — `ready` is what he may redo today, and the rest are misses he already got right *today*, which rest until tomorrow because getting it right ten minutes after being told the answer is not evidence of anything. The page drew both as the same orange **🔧 … — mistakes to fix** row, disabled, with the full count still on it. So an evening spent repairing every single miss in a chapter ended with the page still showing a list of mistakes to fix, which is the one thing it was not. A group with nothing ready is now a green **✅ … — fixed today** row, not a button, counting what comes back tomorrow; the orange row only appears when there is something he can actually do, and its badge counts only that. On Dad's copy both are read-only — Ben's misses are his to redo.
+
+
 Two numbers on this app were liars, and they lied in the same direction: they both said he had not moved.
 
 **The 📍 pin was a constant.** `CURRENT_SUBTOPIC` was set by hand and described where the class was the day somebody last edited it. He finished the rational-numbers chapter, redid every sealed miss in it, and the pin was still on rational numbers — because a constant cannot know. The pin is now **the furthest subtopic he has reached in each subject**, read off his own record (`seReached`), in the year's own teaching order. Furthest *reached*, not most *recent*, on purpose: "mistakes to fix" (§24f) and the warm-up (§24q) both send him back to older work, and a pin that followed his last answer would walk backwards every time he did either. Subjects he has not opened get no pin. `CURRENT_SUBTOPIC` survives only as the seed for which card the page opens on before he has done anything.

@@ -6729,3 +6729,10 @@ input, select { font-family: inherit; }
   line-height: 1.45;
   margin-bottom: 12px;
 }
+
+/* 🏫 St. Eugene 7 §24f — a fix group he has already redone today. Green and
+   not a button: there is nothing he can do with it until tomorrow, and an
+   orange "mistakes to fix" row he cannot tap is the page calling finished
+   work unfinished. */
+.se-topic--rested { border-color: var(--profit); cursor: default; margin-bottom: 12px; }
+.se-topic--rested .se-topic__score { color: var(--profit); }
