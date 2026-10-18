@@ -33,7 +33,7 @@ import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { dayKey, prettyDay } from '../logic/dates'
-import type { AppData, SeAnswer, SeStat } from '../types'
+import type { AppData, SeAnswer, SeFixLock, SeStat } from '../types'
 
 export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: string) => void }) {
   const { activeProfileId } = useStore()
@@ -58,6 +58,7 @@ const TERMS: SeTerm[] = ['term1', 'general', 'term2']
 /** Stable empties, so the memos below do not re-run on every render. */
 const NO_STATS: Record<string, SeStat> = {}
 const NO_HISTORY: SeAnswer[] = []
+const NO_LOCKS: SeFixLock[] = []
 
 function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
   const { data, kidData, activeProfileId, seStartFix } = useStore()
@@ -68,6 +69,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
   const world: AppData | null = admin ? kidData : data
   const stats = world?.steugene.stats ?? NO_STATS
   const history = world?.steugene.history ?? NO_HISTORY
+  const locks = world?.steugene.locks ?? NO_LOCKS
   // §24u — the pin and the open card used to be the hand-set
   // `CURRENT_SUBTOPIC`, which could not know he had finished a chapter. They
   // are now read off his own record.
@@ -157,7 +159,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
         </div>
       ))}
 
-      <CanDo stats={stats} history={history} admin={admin} />
+      <CanDo stats={stats} history={history} locks={locks} admin={admin} />
 
       {TERMS.map((term) => {
         const subjects = SE_SUBJECTS.filter((s) => s.term === term)
@@ -172,6 +174,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
                 here={reached[subject.id]}
                 stats={stats}
                 history={history}
+                locks={locks}
                 open={openId === subject.id}
                 onToggle={() => {
                   sfx.click()
@@ -211,14 +214,16 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
 function CanDo({
   stats,
   history,
+  locks,
   admin,
 }: {
   stats: Record<string, SeStat>
   history: SeAnswer[]
+  locks: SeFixLock[]
   /** Dad is reading it, so it is about him, not addressed to him. */
   admin: boolean
 }) {
-  const can = useMemo(() => seCanDo(stats, history), [stats, history])
+  const can = useMemo(() => seCanDo(stats, history, locks), [stats, history, locks])
   const [all, setAll] = useState(false)
   if (!can.length) return null
   const shown = all ? can : can.slice(0, 4)
@@ -257,6 +262,7 @@ function SubjectCard({
   here,
   stats,
   history,
+  locks,
   open,
   onToggle,
   onPick,
@@ -266,6 +272,7 @@ function SubjectCard({
   here?: string
   stats: Record<string, SeStat>
   history: SeAnswer[]
+  locks: SeFixLock[]
   open: boolean
   onToggle: () => void
   onPick: (id: string) => void
@@ -273,7 +280,7 @@ function SubjectCard({
   const written = writtenSubtopics()
   const all = seSubtopicsOf(subject.id)
   const touched = all.filter((s) => stats[s.id]?.attempts).length
-  const nowBy = useMemo(() => seNowBySubtopic(history), [history])
+  const nowBy = useMemo(() => seNowBySubtopic(history, locks), [history, locks])
 
   return (
     <div className="se-subject">
@@ -359,7 +366,8 @@ function TopicSheet({
   const inFlight = data.steugene.run
   const resuming = inFlight?.subtopicId === subtopicId && !inFlight.fix
 
-  const now = useMemo(() => seNowBySubtopic(history)[subtopicId], [history, subtopicId])
+  const sheetLocks = world?.steugene.locks ?? NO_LOCKS
+  const now = useMemo(() => seNowBySubtopic(history, sheetLocks)[subtopicId], [history, sheetLocks, subtopicId])
 
   /**
    * Where every question he still gets wrong is sitting.
@@ -370,8 +378,8 @@ function TopicSheet({
    * they are sealed and waiting on Dad (§24f) rather than anything about him.
    */
   const stuck = useMemo(
-    () => seStuck(world?.steugene.locks ?? [], subtopicId, now?.broken ?? 0, dayKey()),
-    [world?.steugene.locks, subtopicId, now?.broken],
+    () => seStuck(sheetLocks, subtopicId, now?.broken ?? 0, dayKey()),
+    [sheetLocks, subtopicId, now?.broken],
   )
 
   if (!where) return null
@@ -417,6 +425,13 @@ function TopicSheet({
             <ul className="se-break__list">
               {now && now.repaired > 0 && (
                 <li>🔧 {now.repaired} missed, then fixed — these count as right.</li>
+              )}
+              {now && now.retired > 0 && (
+                <li className="muted">
+                  🗑️ {now.retired} older {now.retired === 1 ? 'question' : 'questions'} {admin ? 'he' : 'you'} missed{' '}
+                  {now.retired === 1 ? 'is' : 'are'} not in this lesson any more, so {now.retired === 1 ? 'it' : 'they'}{' '}
+                  cannot be asked again. Not counted either way.
+                </li>
               )}
               {stuck.resting > 0 && (
                 <li>
@@ -792,7 +807,7 @@ function ReportTab({ admin }: { admin: boolean }) {
 
   // §24u — scored on his LATEST answer per question, so a chapter he has
   // repaired reads as repaired. Lifetime attempts stay on the meta line.
-  const nowBy = seNowBySubtopic(world.steugene.history)
+  const nowBy = seNowBySubtopic(world.steugene.history, world.steugene.locks)
   const rows = Object.entries(world.steugene.stats)
     .map(([id, stat]) => ({ id, stat, now: nowBy[id], pct: sePct(nowBy[id], stat) ?? 0, where: seFind(id) }))
     .filter((r) => r.where && r.stat.attempts > 0)

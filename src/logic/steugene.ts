@@ -429,10 +429,70 @@ export interface SeNow {
   repaired: number
   /** …and how many his latest answer still gets wrong. */
   broken: number
+  /**
+   * Wrong answers with no route back — no open lock holds them, usually
+   * because the question itself no longer exists (`seRetired`). Counted in
+   * NEITHER `asked` nor `right`: they are not evidence of anything. Reported
+   * so the arithmetic still adds up on screen.
+   */
+  retired: number
 }
 
-/** Every subtopic he has answered anything in, in one pass over the history. */
-export function seNowBySubtopic(history: SeAnswer[]): Record<string, SeNow> {
+/**
+ * Wrong answers nothing can ever put right, so they stop counting against him.
+ *
+ * §24f puts every miss from a finished lesson into a lock, and a miss leaves
+ * its lock by exactly two honest routes: he redoes it correctly on a later day
+ * (his latest answer is then right, so it is not here), or he redoes it and
+ * misses again (a fresh lock opens holding it, so it is not here either). A
+ * wrong answer sitting in **no open lock** therefore has no route back: there
+ * is no row on his page that will ever offer it to him.
+ *
+ * That is not hypothetical. Ben's rational-numbers topic read 89% and he had
+ * nothing sealed, which looked impossible. Seven of his answers were to block
+ * ids beginning `rn-…`, from before the maths year was rewritten by hand
+ * (§24n) — the pack's ids are all `rat-…` now, so **those seven questions do
+ * not exist any more**, and they were in no lock either. Seven wrong answers
+ * to questions nobody can ask him, holding the topic down for ever, with
+ * nothing he or anyone else could do about it. (§24n is why a pack must never
+ * rename an id he has played. It got renamed anyway.)
+ *
+ * Defined on the locks rather than on the packs deliberately: the real
+ * question is *is there any way for him to put this right?*, the lock system
+ * is the only thing that answers it, and 105 lazily-loaded packs cannot be
+ * consulted to draw a list of percentages. It cannot hide a real miss, because
+ * a real miss always has an open lock until he has actually fixed it.
+ */
+export function seRetired(locks: SeFixLock[], history: SeAnswer[]): Set<string> {
+  const latestWrong = new Set<string>()
+  for (const a of history) {
+    if (a.right) latestWrong.delete(a.id)
+    else latestWrong.add(a.id)
+  }
+  const open = new Set<string>()
+  for (const lock of locks) {
+    if (lock.clearedAt) continue
+    const fixed = new Set(lock.fixed ?? [])
+    for (const miss of lock.mistakes) {
+      if (!fixed.has(miss.id)) open.add(miss.id)
+    }
+  }
+  const out = new Set<string>()
+  for (const id of latestWrong) {
+    if (!open.has(id)) out.add(id)
+  }
+  return out
+}
+
+/**
+ * Every subtopic he has answered anything in, in one pass over the history.
+ *
+ * `locks` is REQUIRED, and deliberately has no default: without them
+ * `seRetired` sees no open lock and forgives every wrong answer in the record.
+ * A caller that forgets them would quietly report 100% for everything.
+ */
+export function seNowBySubtopic(history: SeAnswer[], locks: SeFixLock[]): Record<string, SeNow> {
+  const retired = seRetired(locks, history)
   // History is oldest-first, so the last write per question id wins.
   const latest = new Map<string, SeAnswer>()
   const everWrong = new Set<string>()
@@ -442,7 +502,13 @@ export function seNowBySubtopic(history: SeAnswer[]): Record<string, SeNow> {
   }
   const out: Record<string, SeNow> = {}
   for (const [id, a] of latest) {
-    const now = (out[a.subtopicId] ??= { asked: 0, right: 0, repaired: 0, broken: 0 })
+    const now = (out[a.subtopicId] ??= { asked: 0, right: 0, repaired: 0, broken: 0, retired: 0 })
+    // Out of the denominator entirely, not counted as right: it is not a
+    // question he got right, it is a question that no longer exists.
+    if (retired.has(id)) {
+      now.retired += 1
+      continue
+    }
     now.asked += 1
     if (!a.right) {
       now.broken += 1
@@ -579,12 +645,13 @@ export interface SeCanDone {
  */
 export function seCanDo(
   stats: Record<string, { attempts: number; right: number; lastAt: number }>,
-  history: SeAnswer[] = [],
+  history: SeAnswer[],
+  locks: SeFixLock[],
 ): SeCanDone[] {
   // Measured on where he is NOW (§24u), not on every attempt he ever made —
   // otherwise repairing a chapter can never earn the line, which is backwards:
   // getting it right on the second go is exactly what learning it looks like.
-  const nowBy = seNowBySubtopic(history)
+  const nowBy = seNowBySubtopic(history, locks)
   const out: SeCanDone[] = []
   for (const [id, stat] of Object.entries(stats)) {
     const now = nowBy[id]
