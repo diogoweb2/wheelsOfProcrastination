@@ -208,8 +208,11 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
       <div className="se-lesson__where muted">
         {run.review ? (
           <>
-            🔁 {seFind(run.subs?.[block.id] ?? run.subtopicId)?.strand.title} — review ·{' '}
-            {seFind(run.subs?.[block.id] ?? run.subtopicId)?.subtopic.title}
+            {run.custom ? '🎛️' : '🔁'}{' '}
+            {run.custom && (run.strands?.length ?? 1) > 1
+              ? `${run.strands?.length} chapters`
+              : seFind(run.subs?.[block.id] ?? run.subtopicId)?.strand.title}{' '}
+            — review · {seFind(run.subs?.[block.id] ?? run.subtopicId)?.subtopic.title}
           </>
         ) : (
           <>
@@ -961,7 +964,10 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   const pct = answers.length ? Math.round((right / answers.length) * 100) : 100
   // §24v — on a review, what he has actually just done is clear mistakes off
   // his own pile, and that is the number worth saying back to him.
-  const cleared = run?.review ? right : 0
+  // §24v — on the mistakes review, what he has just done is clear things off
+  // his own pile, and that is the number worth saying back to him. A custom
+  // review is mostly questions he already had right, so it is not that.
+  const cleared = run?.review && !run.custom ? right : 0
 
   useEffect(() => {
     stopSpeaking()
@@ -976,7 +982,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         </div>
         <p className="muted">
           {run?.review
-            ? `🔁 ${seFind(run.subtopicId)?.strand.title} — review`
+            ? run.custom && (run.strands?.length ?? 1) > 1
+              ? `🎛️ Your own review — ${run.strands?.length} chapters`
+              : `${run.custom ? '🎛️' : '🔁'} ${seFind(run.subtopicId)?.strand.title} — review`
             : `${where?.subtopic.title}${run?.fix ? ' — mistakes to fix' : ''}`}
         </p>
         <div className="se-result__bar">

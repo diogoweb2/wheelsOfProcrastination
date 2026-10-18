@@ -2055,6 +2055,17 @@ Every score in the app is now **one answer per question, the most recent one** (
 - **Every finish settles, not just a fix run.** Getting a sealed question right in a review used to leave its lock open, because only a "mistakes to fix" run called the settler. Any route counts now.
 - **`seHealLocks`** runs once per login and clears what the old rule left behind — any lock miss with a right answer on record. Ben's eighteen go to zero the first time he opens the app.
 
+### 24w. 🎛️ Build your own review
+
+The second half of the Review tab, and a different thing from the first. 🔁 Review (§24v) is **what he is getting wrong**, decided for him. This is **what he wants to go over**, decided by him.
+
+- **He picks chapters**, as many as he likes — strands, never subtopics. "Number Sense and Numeration" is a thing he and his class have a name for; "Comparing rational numbers" is a page of it, and nobody revises a page.
+- **The pool is only what he has already answered.** A review of material he has never been taught is a lesson with the explanations taken out, so the questions come from his history — which means a subtopic he has never opened cannot appear, and a chapter he has barely started offers only the handful he has actually met. That is what "topics, not subtopics, and nothing new" means.
+- **He picks the length**, from the same `SE_LENGTHS` chips as a lesson, and one set of chips on the page sets it for both kinds of review.
+- **Mistakes first, coldest first, each with the card that teaches it** (§24d). Then everything he got right, **shuffled**, with no lead cards: he does not need teaching on those and the seconds buy another question instead. Two custom reviews of the same chapters are never the same lesson.
+- **The counts are true.** Both lists are filtered by whether the question's card is still in a pack: 11 of Ben's 54 answered rational-numbers questions are `rn-…` ids he got *right* before the year was rewritten (§24u) — not retired, because retirement is about what counts *against* him, but not askable either. The page fetches the packs he has worked in before drawing any number, and offers the 43 it can actually deal. `seStartCustomReview` filters again with the real deck in hand, because a screen's filter is advisory and the queue must not contain a card that does not exist.
+- It is **not** scored as clearing a pile — most of it is work he already had right — so the result card does not claim mistakes came off. Any genuine miss in it is sealed like any other (§24f) and lands back on the 🔁 pile.
+
 ### 24j. URLs (§1c)
 
 `/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.

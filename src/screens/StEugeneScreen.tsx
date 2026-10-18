@@ -21,6 +21,7 @@ import {
   seNowBySubtopic,
   seOpenSubject,
   sePct,
+  seAnsweredGroups,
   seReached,
   seReviewGroups,
   seStuck,
@@ -31,7 +32,7 @@ import {
   type SeTerm,
 } from '../logic/steugene'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
-import { SE_LENGTHS, seFixGroups, seLockLeft } from '../logic/steugeneLesson'
+import { SE_LENGTHS, seAvailable, seFixGroups, seLockLeft, seWithChecks } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
@@ -776,12 +777,48 @@ function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
  * but it no longer stands between him and a second attempt.
  */
 function ReviewTab({ setTab }: { setTab: (tab: string) => void }) {
-  const { data, seStartReview, seSetMinutes } = useStore()
+  const { data, seDesk, seStartReview, seStartCustomReview, seSetMinutes } = useStore()
   const [opening, setOpening] = useState<string | null>(null)
-  const groups = useMemo(
-    () => seReviewGroups(data.steugene.history, data.steugene.locks),
-    [data.steugene.history, data.steugene.locks],
+  const [picked, setPicked] = useState<string[]>([])
+
+  // Which of his answered questions still EXIST. Both lists count questions,
+  // and a count is a promise — 11 of Ben's own answers are to cards that left
+  // the pack when the maths year was rewritten (§24u), and a card offering
+  // 54 questions that can only deal 43 is lying to him. So the packs he has
+  // worked in are fetched up front and the lists are filtered by what is in
+  // them. `ensurePack` is memoised, so this costs nothing after the first visit.
+  const mine = useMemo(
+    () => [...new Set(data.steugene.history.map((a) => a.subtopicId))].filter(hasPack),
+    [data.steugene.history],
   )
+  const [askable, setAskable] = useState<Set<string> | null>(null)
+  useEffect(() => {
+    let alive = true
+    void Promise.all(mine.map((id) => ensurePack(id))).then(() => {
+      if (!alive) return
+      const ids = new Set<string>()
+      for (const sub of mine) {
+        const generated = seDesk.generated.filter((g) => g.subtopicId === sub).flatMap((g) => g.blocks)
+        for (const b of seWithChecks(seAvailable(packFor(sub), generated))) ids.add(b.id)
+      }
+      setAskable(ids)
+    })
+    return () => {
+      alive = false
+    }
+  }, [mine, seDesk.generated])
+
+  const canAsk = useMemo(() => (askable ? (id: string) => askable.has(id) : undefined), [askable])
+  const groups = useMemo(
+    () => seReviewGroups(data.steugene.history, data.steugene.locks, canAsk),
+    [data.steugene.history, data.steugene.locks, canAsk],
+  )
+  const answered = useMemo(
+    () => seAnsweredGroups(data.steugene.history, data.steugene.locks, canAsk),
+    [data.steugene.history, data.steugene.locks, canAsk],
+  )
+  const chosen = answered.filter((g) => picked.includes(g.strandId))
+  const chosenQs = chosen.reduce((n, g) => n + g.seen.length, 0)
 
   const open = async (g: SeReviewGroup) => {
     sfx.fanfare()
@@ -794,28 +831,43 @@ function ReviewTab({ setTab }: { setTab: (tab: string) => void }) {
     setTab('lesson')
   }
 
+  const openCustom = async () => {
+    if (!chosen.length) return
+    sfx.fanfare()
+    setOpening('custom')
+    await Promise.all([...new Set(chosen.flatMap((g) => g.subtopicIds))].map((id) => ensurePack(id)))
+    seStartCustomReview(chosen.map((g) => g.strandId))
+    walkIn()
+    setTab('lesson')
+  }
+
   return (
     <>
       <div className="h1">🔁 Review</div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        Everything you have got wrong and not yet put right, by chapter. Have another go whenever you want — there is
-        nothing to wait for.
+        Everything you have got wrong and not yet put right, by chapter — or build your own review further down. Have
+        another go whenever you want; there is nothing to wait for.
       </p>
 
-      {groups.length === 0 && (
+      {askable === null && mine.length > 0 && <div className="card">Working out what you have covered…</div>}
+
+      {askable !== null && groups.length === 0 && (
         <div className="card">
           <div style={{ fontSize: 40 }}>🏴‍☠️</div>
-          <div className="h1" style={{ fontSize: 19 }}>Nothing to review</div>
+          <div className="h1" style={{ fontSize: 19 }}>No mistakes to fix</div>
           <p className="muted">
-            There is not a single question you are still getting wrong. Go and do a lesson and come back when there is.
+            There is not a single question you are still getting wrong.
+            {answered.length > 0 && ' You can still build your own review below.'}
           </p>
-          <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => setTab('subjects')}>
-            📚 Open my year
-          </button>
+          {answered.length === 0 && (
+            <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => setTab('subjects')}>
+              📚 Open my year
+            </button>
+          )}
         </div>
       )}
 
-      {groups.length > 0 && (
+      {(groups.length > 0 || answered.length > 0) && (
         <div className="se-length" style={{ marginBottom: 12 }}>
           <span className="muted">How long?</span>
           {SE_LENGTHS.map((m) => (
@@ -865,6 +917,56 @@ function ReviewTab({ setTab }: { setTab: (tab: string) => void }) {
           A review fills the {data.steugene.minutes} minutes you have set and starts with the ones you have left
           longest. Get one right and it comes off the pile for good.
         </p>
+      )}
+
+      {answered.length > 0 && (
+        <div className="card se-custom">
+          <div className="h1" style={{ fontSize: 18 }}>🎛️ Build your own review</div>
+          <p className="muted" style={{ marginBottom: 10 }}>
+            Pick the chapters. You only get questions you have already seen — nothing new, no reading you have not had.
+          </p>
+
+          {answered.map((g) => {
+            const on = picked.includes(g.strandId)
+            return (
+              <button
+                key={g.strandId}
+                className={`se-custom__row${on ? ' is-on' : ''}`}
+                onClick={() => {
+                  sfx.click()
+                  setPicked(on ? picked.filter((x) => x !== g.strandId) : [...picked, g.strandId])
+                }}
+              >
+                <span className="se-custom__tick" aria-hidden>
+                  {on ? '☑' : '☐'}
+                </span>
+                <span className="se-custom__body">
+                  <span className="se-custom__title">
+                    {g.emoji} {g.strandTitle}
+                  </span>
+                  <span className="muted se-custom__sub">
+                    {g.seen.length} question{g.seen.length === 1 ? '' : 's'} you have seen
+                    {g.wrong > 0 && ` · ${g.wrong} still wrong`}
+                  </span>
+                </span>
+              </button>
+            )
+          })}
+
+          <button className="btn btn--blue" disabled={!chosen.length || !!opening} onClick={() => void openCustom()}>
+            {opening === 'custom'
+              ? 'Building it…'
+              : chosen.length
+                ? `▶️ ${data.steugene.minutes} min from ${chosen.length} chapter${chosen.length === 1 ? '' : 's'}`
+                : 'Pick a chapter first'}
+          </button>
+          {chosen.length > 0 && (
+            <p className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+              {chosenQs} question{chosenQs === 1 ? '' : 's'} to draw from. Anything you are getting wrong comes first,
+              with the explanation; the rest are shuffled, so you never get the same review twice.
+            </p>
+          )}
+        </div>
       )}
     </>
   )

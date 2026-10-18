@@ -596,6 +596,87 @@ export interface SeReviewGroup {
   subtopicIds: string[]
 }
 
+/** One question he has answered before, and how it went last time. */
+export interface SeSeenQ {
+  id: string
+  subtopicId: string
+  /** When he last answered it — a custom review starts with the coldest. */
+  at: number
+  /** Whether that last answer was right. */
+  right: boolean
+}
+
+/** One chapter's worth of questions he has already met (§24w). */
+export interface SeAnsweredGroup {
+  strandId: string
+  strandTitle: string
+  subjectId: string
+  subjectName: string
+  emoji: string
+  /** Which packs have to be fetched before this can be dealt. */
+  subtopicIds: string[]
+  /** Every question in it he has an answer on record for. */
+  seen: SeSeenQ[]
+  /** …of those, how many he currently gets wrong. */
+  wrong: number
+}
+
+/**
+ * Everything he has already answered, grouped by STRAND (§24w) — the pool a
+ * custom review is built from.
+ *
+ * Deliberately NOT every question in the chapter: a review is revision, and
+ * revision of something you have never been taught is just a lesson with the
+ * explanations taken out. So the pool comes from his history, which means a
+ * subtopic he has never opened cannot appear in it, and a chapter he has
+ * barely started offers only the handful he has actually seen.
+ *
+ * Retired questions (§24u) are left out: they cannot be asked again.
+ *
+ * `canAsk` is the caller's "is this block still in a pack" test. Without it
+ * the counts overstate: 11 of Ben's 54 answered rational-numbers questions are
+ * `rn-…` ids he got RIGHT before the pack was rewritten (§24u) — not retired,
+ * because retirement is about what counts against him, but not askable
+ * either. A card promising 54 questions that can only deal 43 is a card
+ * telling him something untrue.
+ */
+export function seAnsweredGroups(
+  history: SeAnswer[],
+  locks: SeFixLock[],
+  canAsk?: (id: string) => boolean,
+): SeAnsweredGroup[] {
+  const retired = seRetired(locks, history)
+  const latest = new Map<string, SeAnswer>()
+  for (const a of history) latest.set(a.id, a)
+
+  const groups = new Map<string, SeAnsweredGroup>()
+  for (const [id, a] of latest) {
+    if (retired.has(id)) continue
+    if (canAsk && !canAsk(id)) continue
+    const where = seFind(a.subtopicId)
+    if (!where) continue
+    const group = groups.get(where.strand.id) ?? {
+      strandId: where.strand.id,
+      strandTitle: where.strand.title,
+      subjectId: where.subject.id,
+      subjectName: where.subject.name,
+      emoji: where.subject.emoji,
+      subtopicIds: [],
+      seen: [],
+      wrong: 0,
+    }
+    group.seen.push({ id, subtopicId: a.subtopicId, at: a.at, right: a.right })
+    if (!a.right) group.wrong += 1
+    groups.set(where.strand.id, group)
+  }
+
+  for (const g of groups.values()) {
+    g.seen.sort((x, y) => x.at - y.at)
+    g.subtopicIds = [...new Set(g.seen.map((q) => q.subtopicId))]
+  }
+  return [...groups.values()].sort((a, b) => b.seen.length - a.seen.length)
+}
+
 /**
  * His outstanding mistakes, grouped by STRAND (§24v).
  *
@@ -608,9 +689,14 @@ export interface SeReviewGroup {
  * A miss is outstanding when his LATEST answer to that question is wrong.
  * Locks are consulted only to leave out the retired ones (`seRetired`) —
  * whether Dad has unlocked it does not come into it, because a review he has
- * to ask permission for is the thing this replaced.
+ * to ask permission for is the thing this replaced. `canAsk` leaves out
+ * anything whose card is no longer in a pack, as in `seAnsweredGroups`.
  */
-export function seReviewGroups(history: SeAnswer[], locks: SeFixLock[]): SeReviewGroup[] {
+export function seReviewGroups(
+  history: SeAnswer[],
+  locks: SeFixLock[],
+  canAsk?: (id: string) => boolean,
+): SeReviewGroup[] {
   const retired = seRetired(locks, history)
   const latest = new Map<string, SeAnswer>()
   for (const a of history) latest.set(a.id, a)
@@ -618,6 +704,7 @@ export function seReviewGroups(history: SeAnswer[], locks: SeFixLock[]): SeRevie
   const groups = new Map<string, SeReviewGroup>()
   for (const [id, a] of latest) {
     if (a.right || retired.has(id)) continue
+    if (canAsk && !canAsk(id)) continue
     const where = seFind(a.subtopicId)
     if (!where) continue
     const group = groups.get(where.strand.id) ?? {

@@ -1740,6 +1740,14 @@ export interface SeRun {
    * and the store to look beyond one pack.
    */
   review?: string
+  /**
+   * Every strand the run covers. One for the auto review (§24v); one or more
+   * for a custom one he built himself (§24w). `review` is the first of them
+   * and names the run on screen.
+   */
+  strands?: string[]
+  /** §24w — he chose the chapters and the length; the pool is everything he has seen. */
+  custom?: boolean
   /** Block id → the subtopic it belongs to. Only on a review run. */
   subs?: Record<string, string>
 }

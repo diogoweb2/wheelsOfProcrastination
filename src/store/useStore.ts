@@ -54,8 +54,8 @@ import {
 } from './storage'
 import type { SeDesk, SeBlock } from '../steugene/types'
 import { packFor } from '../steugene/packs'
-import { SE_WARM_INTRO, seAvailable, seFixGroups, seLockLeft, sePlanLesson, seReviewPlan, seTopUp, seWarmCount, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
-import { seFind, seReviewGroups } from '../logic/steugene'
+import { SE_WARM_INTRO, seAvailable, seCustomOrder, seFixGroups, seLockLeft, sePlanLesson, seReviewPlan, seTopUp, seWarmCount, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
+import { seAnsweredGroups, seFind, seReviewGroups } from '../logic/steugene'
 import { generateSeBlocks } from '../logic/steugeneAi'
 import { SE_HISTORY_CAP } from './storage'
 import {
@@ -448,6 +448,8 @@ interface StoreState {
   seStartFix: (subtopicId: string) => void
   /** §24v — a lesson built from his mistakes across one strand. */
   seStartReview: (strandId: string) => void
+  /** §24w — a lesson he built himself from chapters he has already worked in. */
+  seStartCustomReview: (strandIds: string[]) => void
   /** Picking a lesson back up: step past a card he already answered, so it is never a second go (§24f). */
   seResume: () => void
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
@@ -1180,6 +1182,24 @@ export const useStore = create<StoreState>((set, get) => {
 
   function seGenerated(desk: SeDesk, subtopicId: string): SeBlock[] {
     return desk.generated.filter((g) => g.subtopicId === subtopicId).flatMap((g) => g.blocks)
+  }
+
+  /**
+   * Every block from several packs at once, remembering which pack each came
+   * from — what a review is dealt from (§24v, §24w). The packs must already be
+   * fetched; every route into a lesson reads them synchronously.
+   */
+  function seDeck(desk: SeDesk, subtopicIds: string[]) {
+    const byId = new Map<string, SeBlock>()
+    const subs: Record<string, string> = {}
+    for (const subtopicId of subtopicIds) {
+      for (const b of seWithChecks(seAvailable(packFor(subtopicId), seGenerated(desk, subtopicId)))) {
+        if (byId.has(b.id)) continue
+        byId.set(b.id, b)
+        subs[b.id] = subtopicId
+      }
+    }
+    return { byId, subs }
   }
 
   /**
@@ -4155,22 +4175,17 @@ export const useStore = create<StoreState>((set, get) => {
       const group = seReviewGroups(data.steugene.history, data.steugene.locks).find((g) => g.strandId === strandId)
       if (!group) return
 
-      // Every block in every pack of the strand, remembering which pack each
-      // came from — a review's queue is dealt from a dozen of them.
-      const byId = new Map<string, SeBlock>()
-      const subs: Record<string, string> = {}
-      for (const subtopicId of group.subtopicIds) {
-        for (const b of seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId)))) {
-          if (byId.has(b.id)) continue
-          byId.set(b.id, b)
-          subs[b.id] = subtopicId
-        }
-      }
+      const { byId, subs } = seDeck(seDesk, group.subtopicIds)
 
       // A miss whose card has left the pack can never be asked again; it is
       // ticked off here so it stops sitting in the pile for ever (§24u).
       const gone = group.misses.map((m) => m.id).filter((id) => !byId.has(id))
-      const plan = seReviewPlan(byId, group.misses, data.steugene.minutes * 60)
+      // Every one of these is a mistake, so every one gets its lead card.
+      const plan = seReviewPlan(
+        byId,
+        group.misses.map((m) => ({ id: m.id, lead: true })),
+        data.steugene.minutes * 60,
+      )
 
       commit((d) => {
         if (gone.length) seSettleFixes(d, [], gone)
@@ -4185,6 +4200,61 @@ export const useStore = create<StoreState>((set, get) => {
           answers: [],
           fix: true,
           review: strandId,
+          strands: [strandId],
+          subs: Object.fromEntries(plan.map((b) => [b.id, subs[b.id]])),
+        }
+      })
+    },
+
+    /**
+     * 🎛️ A custom review (§24w): he picks the chapters and the length, and the
+     * questions come from everything he has already answered in them.
+     *
+     * Only what he has met before — a review of material he has never been
+     * taught is a lesson with the explanations removed. The pool therefore
+     * comes from his history, so a subtopic he has never opened cannot turn
+     * up in it, which is what "topics, not subtopics, and nothing new" means.
+     *
+     * Mistakes come first with the cards that teach them; everything he got
+     * right follows, shuffled, so the same chapters never give the same
+     * lesson twice (`seCustomOrder`).
+     */
+    seStartCustomReview(strandIds) {
+      if (get().data.steugene.run?.answers.length) get().seFinish()
+      const { data, seDesk } = get()
+      const all = seAnsweredGroups(data.steugene.history, data.steugene.locks).filter((g) =>
+        strandIds.includes(g.strandId),
+      )
+      if (!all.length) return
+
+      const subtopicIds = [...new Set(all.flatMap((g) => g.subtopicIds))]
+      const { byId, subs } = seDeck(seDesk, subtopicIds)
+      // Second pass with the deck in hand: a question whose card has left the
+      // pack (§24u) cannot be dealt, and the screen's own filter is advisory.
+      const groups = seAnsweredGroups(data.steugene.history, data.steugene.locks, (id) => byId.has(id)).filter((g) =>
+        strandIds.includes(g.strandId),
+      )
+      if (!groups.length) return
+      const plan = seReviewPlan(
+        byId,
+        seCustomOrder(groups.flatMap((g) => g.seen)),
+        data.steugene.minutes * 60,
+      )
+      if (!plan.length) return
+
+      commit((d) => {
+        d.steugene.run = {
+          subtopicId: subs[plan[plan.length - 1].id] ?? subtopicIds[0],
+          startedAt: Date.now(),
+          targetMinutes: data.steugene.minutes,
+          activeSeconds: 0,
+          blockIds: plan.map((b) => b.id),
+          pos: 0,
+          answers: [],
+          fix: true,
+          review: groups[0].strandId,
+          strands: groups.map((g) => g.strandId),
+          custom: true,
           subs: Object.fromEntries(plan.map((b) => [b.id, subs[b.id]])),
         }
       })

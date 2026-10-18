@@ -305,13 +305,15 @@ export function seForFix(b: SeBlock): SeBlock {
 /**
  * Deal a review: his own mistakes across a whole strand, coldest first.
  *
- * `byId` holds every block from every pack in the strand (the caller has to
- * have fetched them). `misses` are the question ids still wrong, already
- * sorted coldest-first by `seReviewGroups`.
+ * `byId` holds every block from every pack in the strands involved (the caller
+ * has to have fetched them). `items` are question ids in the order they should
+ * be dealt, each saying whether it wants its `lead` card in front of it.
  *
- * Each question comes with its `lead` card in front of it, once — the picture
- * that teaches it (§24d). A review that only re-asks is a test; the point here
- * is another go at understanding it, so the explanation comes first.
+ * A mistake comes with its `lead` — the picture that teaches it (§24d). A
+ * review that only re-asks is a test; the point there is another go at
+ * understanding it, so the explanation comes first. A question he got right
+ * does not get one (§24w): he does not need teaching, and the seconds buy
+ * another question instead.
  *
  * It fills the lesson length he has chosen and stops. The rest keep for the
  * next review, which is the right outcome: twenty mistakes in one sitting is
@@ -319,7 +321,7 @@ export function seForFix(b: SeBlock): SeBlock {
  */
 export function seReviewPlan(
   byId: Map<string, SeBlock>,
-  misses: { id: string }[],
+  items: { id: string; lead?: boolean }[],
   targetSeconds: number,
 ): SeBlock[] {
   // A normal lesson's queue is a BUFFER — it is deliberately over-dealt by
@@ -334,10 +336,14 @@ export function seReviewPlan(
   const out: SeBlock[] = []
   const taken = new Set<string>()
   let secs = 0
-  for (const miss of misses) {
-    const block = byId.get(miss.id)
+  for (const item of items) {
+    const block = byId.get(item.id)
     if (!block || taken.has(block.id)) continue
-    const lead = block.lead && !taken.has(block.lead) ? byId.get(block.lead) : undefined
+    // `lead` is the caller's call per question: a mistake gets the card that
+    // teaches it, a question he got right does not need teaching again and
+    // the seconds are better spent on another question.
+    const wantLead = item.lead !== false
+    const lead = wantLead && block.lead && !taken.has(block.lead) ? byId.get(block.lead) : undefined
     const cost = (lead ? seBlockSeconds(lead) : 0) + seBlockSeconds(block)
     // Always deal the first one, however long it is: an empty review is worse
     // than one that overruns by a card.
@@ -351,6 +357,26 @@ export function seReviewPlan(
     secs += cost
   }
   return out
+}
+
+/**
+ * The order a CUSTOM review deals in (§24w).
+ *
+ * Mistakes first, coldest first — they are worth the most and he has the most
+ * attention at the start. Then everything he got right, shuffled, so two
+ * custom reviews of the same chapter are never the same lesson.
+ *
+ * A mistake carries its lead card; a question he got right does not.
+ */
+export function seCustomOrder(
+  seen: { id: string; at: number; right: boolean }[],
+): { id: string; lead: boolean }[] {
+  const wrong = seen.filter((q) => !q.right).sort((a, b) => a.at - b.at)
+  const right = shuffle(seen.filter((q) => q.right))
+  return [
+    ...wrong.map((q) => ({ id: q.id, lead: true })),
+    ...right.map((q) => ({ id: q.id, lead: false })),
+  ]
 }
 
 // --- Build-your-own-answer tiles (§24f) --------------------------------------

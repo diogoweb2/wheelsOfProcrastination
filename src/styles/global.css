@@ -6762,3 +6762,20 @@ input, select { font-family: inherit; }
 
 /* Mistakes gone for good, said back to him at the end of a review. */
 .se-result__cleared { margin-top: 8px; font-size: 14px; font-weight: 800; color: var(--profit); }
+
+/* 🏫 St. Eugene 7 §24w — 🎛️ build your own review. Chapters as tick rows: the
+   pool is only what he has already answered, so what he is choosing between
+   is work he has met, never a reading list he has not. */
+.se-custom { border: 2px solid var(--yellow); }
+.se-custom__row {
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+  font: inherit; color: var(--text); cursor: pointer;
+  padding: 9px 10px; margin-bottom: 6px; border-radius: 12px;
+  background: var(--bg2); border: 2px solid transparent;
+}
+.se-custom__row.is-on { border-color: var(--yellow); background: var(--card2); }
+.se-custom__tick { flex: none; font-size: 19px; line-height: 1; color: var(--yellow); }
+.se-custom__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.se-custom__title { font-size: 14px; font-weight: 900; line-height: 1.3; }
+.se-custom__sub { font-size: 12px; }
+.se-custom > .btn { width: 100%; margin-top: 4px; }
