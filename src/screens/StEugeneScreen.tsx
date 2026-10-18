@@ -1,11 +1,12 @@
 // 🏫 St. Eugene 7 (§24) — his actual school year, as an app.
 //
-// Five pages, each its own URL (§1c):
+// Six pages, each its own URL (§1c):
 //   /steugene7/subjects  the year, in the order his class walks it
 //   /steugene7/finder    "what are you learning right now?" — by sight, not by name
 //   /steugene7/lesson    the lesson in flight
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
+//   /steugene7/helping   (Dad) the card he is on this second, with the answer key
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
@@ -24,6 +25,7 @@ import {
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
 import { SE_LENGTHS, seFixGroups } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
+import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { dayKey, prettyDay } from '../logic/dates'
 import type { AppData, SeAnswer, SeStat } from '../types'
@@ -38,7 +40,8 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
       {tab === 'finder' && <FinderTab setTab={setTab} />}
       {tab === 'lesson' && <LessonTab setTab={setTab} />}
       {tab === 'report' && <ReportTab admin={isAdmin} />}
-      {tab === 'desk' && <DeskTab />}
+      {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
+      {tab === 'helping' && isAdmin && <SeHelping />}
     </div>
   )
 }
@@ -744,7 +747,7 @@ function Miss({ miss }: { miss: SeAnswer }) {
 
 // --- Dad's desk ---------------------------------------------------------------------
 
-function DeskTab() {
+function DeskTab({ setTab }: { setTab: (tab: string) => void }) {
   const { seDesk, seBusy, seDecideAi, seAllowFix, kidData, kidDataFresh, aiConfig } = useStore()
   const pending = seDesk.requests.filter((r) => r.status === 'pending')
   const locks = (kidData?.steugene.locks ?? []).filter((l) => !l.allowedAt).sort((a, b) => b.at - a.at)
@@ -756,6 +759,8 @@ function DeskTab() {
       <p className="muted" style={{ marginBottom: 12 }}>
         What Ben asked for, and the mistakes he is not allowed to retry yet.
       </p>
+
+      <SeHelpingBanner onOpen={() => setTab('helping')} />
 
       <div className="card">
         <div className="h1" style={{ fontSize: 18 }}>🔔 Asks ({pending.length})</div>

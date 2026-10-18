@@ -6644,3 +6644,75 @@ input, select { font-family: inherit; }
 .se-can__list li { display: flex; gap: 9px; align-items: flex-start; font-size: 14px; line-height: 1.4; font-weight: 700; }
 .se-can__list li > span:first-child { flex: 0 0 auto; }
 .se-can .btn { margin-top: 10px; }
+
+/* 🏫 St. Eugene 7 §24t — 🤝 Helping him. The only screen in the app that shows
+   an answer key, so it is marked as such: a bronze edge all the way round, and
+   the key itself boxed in green where it cannot be mistaken for the question. */
+.se-help { border: 2px solid var(--bronze); }
+.se-help__kind {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--muted); margin-bottom: 7px;
+}
+.se-help__q { font-size: 19px; font-weight: 900; line-height: 1.32; }
+.se-help__line { margin: 7px 0 0; font-size: 15px; line-height: 1.45; }
+
+.se-help__opts { list-style: none; margin: 11px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.se-help__opts li {
+  display: flex; gap: 9px; align-items: flex-start;
+  padding: 8px 10px; border-radius: 11px;
+  background: var(--bg2); border: 1px solid var(--line);
+  font-size: 15px; font-weight: 700; line-height: 1.35;
+}
+.se-help__opts li.is-key { background: rgba(46, 204, 113, 0.13); border-color: var(--profit); font-weight: 900; }
+.se-help__opts li > span:first-child { flex: 0 0 auto; }
+
+.se-help__key {
+  margin-top: 12px; padding: 9px 12px; border-radius: 12px;
+  background: rgba(46, 204, 113, 0.13); border: 2px solid var(--profit);
+}
+.se-help__keylabel {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; color: var(--profit);
+}
+.se-help__keyval { font-size: 22px; font-weight: 900; line-height: 1.3; margin-top: 2px; }
+.se-help__why { margin: 10px 0 0; font-size: 15px; line-height: 1.45; }
+.se-help__walklabel { color: var(--yellow); }
+
+/* He has answered it already — the conversation is now about what he put. */
+.se-help__given {
+  margin-top: 12px; padding: 8px 11px; border-radius: 11px;
+  font-size: 14px; font-weight: 800; line-height: 1.4;
+  background: var(--card2); border: 1px solid var(--line);
+}
+.se-help__given.is-right { border-color: var(--profit); }
+.se-help__given.is-wrong { border-color: var(--red); }
+
+/* The one line on this page that is a warning rather than information: a wrong
+   tap is final (§24f), so the window for explaining is open only until he taps. */
+.se-help__now {
+  margin-top: 12px; padding: 8px 11px; border-radius: 11px;
+  font-size: 14px; font-weight: 800; line-height: 1.4;
+  background: var(--card2); border: 2px dashed var(--yellow); color: var(--yellow);
+}
+.se-help__stale { margin: 0 0 10px; font-size: 14px; font-weight: 800; color: var(--muted); }
+.se-help__check { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+
+/* The Desk's live line. A pulsing dot, because the whole point of it is that
+   something is happening on the other side of the table right now. */
+.se-help-live {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  font: inherit; color: var(--text); cursor: pointer; border: 2px solid var(--profit);
+}
+.se-help-live__dot {
+  flex: 0 0 auto; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--profit); animation: seLivePulse 1.6s ease-in-out infinite;
+}
+.se-help-live__text { flex: 1; font-size: 15px; line-height: 1.35; }
+.se-help-live__go { flex: 0 0 auto; font-size: 20px; color: var(--profit); font-weight: 900; }
+
+@keyframes seLivePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.74); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-help-live__dot { animation: none; }
+}

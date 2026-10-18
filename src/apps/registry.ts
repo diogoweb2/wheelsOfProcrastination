@@ -357,6 +357,9 @@ export const APPS: AppDef[] = [
     ],
     adminTabs: [
       { id: 'desk', label: 'Desk', icon: '🖊️' },
+      // §24t — the card he is on this second, answer and all. Its own URL, and
+      // parent-only: it is the one page in the app that shows the answer key.
+      { id: 'helping', label: 'Helping', icon: '🤝' },
       { id: 'report', label: 'Report', icon: '📊' },
       { id: 'subjects', label: 'The year', icon: '📚' },
     ],

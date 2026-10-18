@@ -1983,11 +1983,31 @@ The model may only write the three **text** kinds. Videos are hand-picked and mi
 
 The page Dad actually opens. Not a leaderboard: **worst first**, so the ten minutes he has with Ben go on the right thing. Per subtopic — accuracy, attempts, real minutes, last seen — and anything **under 60% with 4+ attempts is flagged "needs a hand"**. Under it, the latest misses with what he said and what it should have been. Ben sees his own; Dad sees Ben's through `kidData`.
 
+### 24t. 🤝 "Helping him" — the answer key, for the person explaining (`/steugene7/helping`)
+
+Dad sits down next to him. Ben is on his tablet, stuck. Dad opens **🤝 Helping** on his own phone and sees **the exact card on Ben's screen** — the prompt, the drawing, the three options — and underneath it, openly:
+
+- ✅ **the answer**, as text,
+- 💡 **the `why`**, the one sentence the card would say either way,
+- 🪜 **the whole walk-through**, every step, with its pictures.
+
+That is the only screen in the app that shows an answer key, and it exists for two reasons. The first is that explaining is a different job from answering, and you cannot do it from behind the same blindfold. The second is honest: **a grade-7 parent does not always know the method either.** The walk-through is written to teach the move, so reading it is how Dad learns it thirty seconds before Ben does.
+
+- **It is parent-only**, by URL and by render. It is not on Ben's bottom menu and `pathToRoute` will not open it for him (§1c).
+- **It needs no new data.** Ben's device already writes `steugene.run` on every answer and every card (§24d), and the parent session already live-syncs his whole world. The page is a pure read — nothing on it can mark an answer, end a lesson, or unseal a miss. Those stay on the Desk (§24f).
+- **The walk-through it shows is worked on different numbers** (§24f). That is exactly what makes it safe to read out loud while the question is still on his screen: it hands over the method, not the answer.
+- **"He has not answered yet" is a warning, not a status.** Once he taps, it is final (§24f) — so the page says so. The window for explaining closes at the tap.
+- **A card he has already answered** shows what he put, right or wrong, and whether he asked for a nudge first (§24p).
+- **A video card** shows what he was told to listen for (§24g) and all of its follow-up questions with their answers, so Dad can read ahead while it plays.
+- **Choice options are NOT re-shuffled here**, unlike a fix run (§24f) — and nothing on the page ever names a position. The answer is always given as text, so Dad reading "the 150 one" can never be wrong about which button that is on Ben's screen.
+- **A run left open since Tuesday is not a lesson in flight.** The page says how long nothing has moved, and the Desk's live line (a green pulsing dot, one tap through) only appears while something has happened in the last **45 minutes**.
+- Dad's phone has usually never loaded that subtopic's pack — nothing on his side started the lesson — so the chunk is fetched on open (§24k).
+
 ### 24j. URLs (§1c)
 
-`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/report`, and for Diogo `/steugene7/desk`.
+`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.
 
-Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video), `src/screens/StEugeneScreen.tsx` (the five pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
+Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the answer key), `src/screens/StEugeneScreen.tsx` (the six pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.
