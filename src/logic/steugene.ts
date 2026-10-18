@@ -536,12 +536,10 @@ export function sePct(now: SeNow | undefined, stat: { attempts: number; right: n
 
 /** Where every question he still gets wrong is sitting, for one subtopic. */
 export interface SeStuck {
-  /** Sealed — he physically cannot try again until Dad unlocks them (§24f). */
+  /** Still sealed, so the 🔧 shortcut row does not offer them (§24f). */
   sealed: number
-  /** Unlocked and waiting for him to redo. */
+  /** Unlocked and waiting in "mistakes to fix". */
   ready: number
-  /** Redone correctly TODAY; they rest until tomorrow. Already counted right. */
-  resting: number
   /** Wrong, and in no list at all. Should be zero; worth saying when it is not. */
   loose: number
 }
@@ -554,30 +552,100 @@ export interface SeStuck {
  * why they are still wrong, and in this app the usual reason is that they are
  * sealed and waiting on Dad (§24f) — which is not about him at all.
  *
- * `broken` is `seNow().broken` for the same subtopic. A resting miss already
- * has a right answer on record, so it is not part of `broken`; only the sealed
- * and the ready ones are, which is what `loose` is measured against.
+ * `broken` is `seNow().broken` for the same subtopic. Every outstanding miss
+ * is reachable through 🔁 Review whatever this says (§24v); the sealed/ready
+ * split only describes the 🔧 shortcut row.
  */
-export function seStuck(locks: SeFixLock[], subtopicId: string, broken: number, today: string): SeStuck {
+export function seStuck(locks: SeFixLock[], subtopicId: string, broken: number): SeStuck {
   const sealed = new Set<string>()
   const ready = new Set<string>()
-  const resting = new Set<string>()
   for (const lock of locks) {
     if (lock.subtopicId !== subtopicId || lock.clearedAt) continue
     const fixed = new Set(lock.fixed ?? [])
     for (const miss of lock.mistakes) {
       if (fixed.has(miss.id)) continue
-      if (!lock.allowedAt) sealed.add(miss.id)
-      else if (lock.rightOn?.[miss.id] === today) resting.add(miss.id)
-      else ready.add(miss.id)
+      if (lock.allowedAt) ready.add(miss.id)
+      else sealed.add(miss.id)
     }
   }
-  return {
-    sealed: sealed.size,
-    ready: ready.size,
-    resting: resting.size,
-    loose: Math.max(0, broken - sealed.size - ready.size),
+  return { sealed: sealed.size, ready: ready.size, loose: Math.max(0, broken - sealed.size - ready.size) }
+}
+
+// --- 🔁 Review (§24v) ---------------------------------------------------------
+
+/** One question he still gets wrong, with enough about it to deal it again. */
+export interface SeMiss {
+  /** The block id. */
+  id: string
+  subtopicId: string
+  subtopicTitle: string
+  /** When he last got it wrong — the review deals the coldest first. */
+  at: number
+  prompt: string
+}
+
+/** Everything he still gets wrong in one strand — "Number Sense and Numeration". */
+export interface SeReviewGroup {
+  strandId: string
+  strandTitle: string
+  subjectId: string
+  subjectName: string
+  emoji: string
+  misses: SeMiss[]
+  /** Which packs have to be fetched before this can be dealt. */
+  subtopicIds: string[]
+}
+
+/**
+ * His outstanding mistakes, grouped by STRAND (§24v).
+ *
+ * By strand rather than by subtopic because that is the unit he and his class
+ * actually think in — "Number Sense and Numeration" is a chapter, where
+ * "Comparing rational numbers" is a page of it — and because a review built
+ * from one subtopic is four questions long and a review built from the strand
+ * is a lesson.
+ *
+ * A miss is outstanding when his LATEST answer to that question is wrong.
+ * Locks are consulted only to leave out the retired ones (`seRetired`) —
+ * whether Dad has unlocked it does not come into it, because a review he has
+ * to ask permission for is the thing this replaced.
+ */
+export function seReviewGroups(history: SeAnswer[], locks: SeFixLock[]): SeReviewGroup[] {
+  const retired = seRetired(locks, history)
+  const latest = new Map<string, SeAnswer>()
+  for (const a of history) latest.set(a.id, a)
+
+  const groups = new Map<string, SeReviewGroup>()
+  for (const [id, a] of latest) {
+    if (a.right || retired.has(id)) continue
+    const where = seFind(a.subtopicId)
+    if (!where) continue
+    const group = groups.get(where.strand.id) ?? {
+      strandId: where.strand.id,
+      strandTitle: where.strand.title,
+      subjectId: where.subject.id,
+      subjectName: where.subject.name,
+      emoji: where.subject.emoji,
+      misses: [],
+      subtopicIds: [],
+    }
+    group.misses.push({
+      id,
+      subtopicId: a.subtopicId,
+      subtopicTitle: where.subtopic.title,
+      at: a.at,
+      prompt: a.prompt,
+    })
+    groups.set(where.strand.id, group)
   }
+
+  // Coldest first: the one he has gone longest without putting right.
+  for (const g of groups.values()) {
+    g.misses.sort((x, y) => x.at - y.at)
+    g.subtopicIds = [...new Set(g.misses.map((m) => m.subtopicId))]
+  }
+  // Biggest pile first — that is where the review is worth most.
+  return [...groups.values()].sort((a, b) => b.misses.length - a.misses.length)
 }
 
 /**

@@ -1712,11 +1712,6 @@ export interface SeFixLock {
   allowedAt?: number
   /** Misses he has since redone in "mistakes to fix", by answer id (§24f). */
   fixed?: string[]
-  /**
-   * Misses he got right on the SAME day he missed them, and that day. Not a
-   * fix yet — it rests until a later day, when one more right answer is (§24f).
-   */
-  rightOn?: Record<string, string>
   /** Every miss in it has been redone. */
   clearedAt?: number
 }
@@ -1735,6 +1730,18 @@ export interface SeRun {
   answers: SeAnswer[]
   /** A "mistakes to fix" run (§24f): only his unlocked misses, no clock, no top-up. */
   fix?: boolean
+  /**
+   * 🔁 Review (§24v): the strand this run is reviewing, e.g. `math-number`.
+   *
+   * A review is the one run that spans SUBTOPICS — a strand is a dozen of
+   * them — so the queue is dealt from a dozen packs and every answer has to be
+   * filed against the subtopic its question actually came from, not against
+   * the run. `subs` is that mapping, and its presence is what tells the player
+   * and the store to look beyond one pack.
+   */
+  review?: string
+  /** Block id → the subtopic it belongs to. Only on a review run. */
+  subs?: Record<string, string>
 }
 
 export interface StEugeneState {

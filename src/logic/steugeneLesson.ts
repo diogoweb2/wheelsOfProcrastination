@@ -32,6 +32,16 @@ export const SE_LENGTHS = [15, 30, 40, 60] as const
  */
 export const SE_PLAN_HEADROOM = 1.35
 
+/**
+ * How much slower he really is than a block's `secs` estimate.
+ *
+ * The estimates are "already knows it" time. His Gym sessions run about 1.4×
+ * their plan (§18z measures it from finished sessions) and the audit prints
+ * the same allowance for these packs. Used to size a 🔁 Review (§24v), whose
+ * queue cannot be topped up and therefore has to be right first time.
+ */
+export const SE_REAL_PACE = 1.4
+
 /** How long we GUESS a block takes. Only ever used to size the opening queue. */
 export function seBlockSeconds(b: SeBlock): number {
   if (b.secs) return b.secs
@@ -255,25 +265,25 @@ export function seLockLeft(lock: SeFixLock): SeAnswer[] {
 
 /**
  * What Dad has unlocked and he has not redone yet, one group per subtopic:
- * the "Rational numbers — mistakes to fix" rows. Oldest group first. `ready`
- * is what can be dealt `today`; the rest got a right answer today already
- * and rest until tomorrow (§24f).
+ * the "Rational numbers — mistakes to fix" rows. Oldest group first.
+ *
+ * There used to be a second half to this: a miss he got right on the same day
+ * he made it was held back until the next day, on the grounds that repeating
+ * an answer you were told an hour ago is not evidence. True, and it still made
+ * for a page that said "mistakes to fix" at an evening spent fixing every one
+ * of them, with no way to act on it. 🔁 Review (§24v) does that job better and
+ * without a locked door: anything he still gets wrong is there, any day,
+ * whenever he wants another go at it.
  */
-export function seFixGroups(
-  locks: SeFixLock[],
-  today: string,
-): { subtopicId: string; left: SeAnswer[]; ready: SeAnswer[] }[] {
-  const groups = new Map<string, { left: SeAnswer[]; ready: SeAnswer[] }>()
+export function seFixGroups(locks: SeFixLock[]): { subtopicId: string; left: SeAnswer[] }[] {
+  const groups = new Map<string, SeAnswer[]>()
   for (const lock of [...locks].sort((a, b) => a.at - b.at)) {
     if (!lock.allowedAt || lock.clearedAt) continue
     const left = seLockLeft(lock)
     if (!left.length) continue
-    const g = groups.get(lock.subtopicId) ?? { left: [], ready: [] }
-    g.left.push(...left)
-    g.ready.push(...left.filter((m) => lock.rightOn?.[m.id] !== today))
-    groups.set(lock.subtopicId, g)
+    groups.set(lock.subtopicId, [...(groups.get(lock.subtopicId) ?? []), ...left])
   }
-  return [...groups].map(([subtopicId, g]) => ({ subtopicId, ...g }))
+  return [...groups].map(([subtopicId, left]) => ({ subtopicId, left }))
 }
 
 /**
@@ -288,6 +298,59 @@ export function seForFix(b: SeBlock): SeBlock {
   if (b.kind !== 'choice') return b
   const options = shuffle([...b.options])
   return { ...b, options, answer: options.indexOf(b.options[b.answer]) }
+}
+
+// --- 🔁 Review (§24v) ---------------------------------------------------------
+
+/**
+ * Deal a review: his own mistakes across a whole strand, coldest first.
+ *
+ * `byId` holds every block from every pack in the strand (the caller has to
+ * have fetched them). `misses` are the question ids still wrong, already
+ * sorted coldest-first by `seReviewGroups`.
+ *
+ * Each question comes with its `lead` card in front of it, once — the picture
+ * that teaches it (§24d). A review that only re-asks is a test; the point here
+ * is another go at understanding it, so the explanation comes first.
+ *
+ * It fills the lesson length he has chosen and stops. The rest keep for the
+ * next review, which is the right outcome: twenty mistakes in one sitting is
+ * not a review, it is a punishment.
+ */
+export function seReviewPlan(
+  byId: Map<string, SeBlock>,
+  misses: { id: string }[],
+  targetSeconds: number,
+): SeBlock[] {
+  // A normal lesson's queue is a BUFFER — it is deliberately over-dealt by
+  // `SE_PLAN_HEADROOM` and the clock ends the lesson, topping up from the
+  // bench if he is quick (§24d). A review has no bench to top up from, so its
+  // queue IS its length, and over-dealing would hand him a 15-minute review
+  // with twenty questions in it. So it goes the other way: the estimates are
+  // "already knows it" seconds and he runs about `SE_REAL_PACE` slower, so the
+  // estimate budget is the real target DIVIDED by that. It lands a 15-minute
+  // review on about the eight questions a 15-minute lesson gets through.
+  const budget = targetSeconds / SE_REAL_PACE
+  const out: SeBlock[] = []
+  const taken = new Set<string>()
+  let secs = 0
+  for (const miss of misses) {
+    const block = byId.get(miss.id)
+    if (!block || taken.has(block.id)) continue
+    const lead = block.lead && !taken.has(block.lead) ? byId.get(block.lead) : undefined
+    const cost = (lead ? seBlockSeconds(lead) : 0) + seBlockSeconds(block)
+    // Always deal the first one, however long it is: an empty review is worse
+    // than one that overruns by a card.
+    if (out.length && secs + cost > budget) break
+    if (lead) {
+      out.push(lead)
+      taken.add(lead.id)
+    }
+    out.push(block)
+    taken.add(block.id)
+    secs += cost
+  }
+  return out
 }
 
 // --- Build-your-own-answer tiles (§24f) --------------------------------------

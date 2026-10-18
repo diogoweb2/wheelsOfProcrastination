@@ -6730,12 +6730,6 @@ input, select { font-family: inherit; }
   margin-bottom: 12px;
 }
 
-/* 🏫 St. Eugene 7 §24f — a fix group he has already redone today. Green and
-   not a button: there is nothing he can do with it until tomorrow, and an
-   orange "mistakes to fix" row he cannot tap is the page calling finished
-   work unfinished. */
-.se-topic--rested { border-color: var(--profit); cursor: default; margin-bottom: 12px; }
-.se-topic--rested .se-topic__score { color: var(--profit); }
 
 /* 🏫 St. Eugene 7 §24u — the breakdown behind a topic's percentage. "Why is it
    89% if he fixed all of them?" has to be answerable from the page: the
@@ -6749,3 +6743,22 @@ input, select { font-family: inherit; }
 .se-break__list li { font-size: 13px; line-height: 1.4; font-weight: 700; }
 .se-break__list li.muted { font-weight: 700; margin-top: 2px; }
 .se-break__blocked { color: var(--yellow); }
+
+/* 🏫 St. Eugene 7 §24v — 🔁 Review. One card per chapter of his own mistakes,
+   with the count as the headline: a pile he can see getting smaller is the
+   whole point, and it is the one retry route with no locked door on it. */
+.se-review { border: 2px solid var(--blue); }
+.se-review__head { display: flex; align-items: center; gap: 10px; }
+.se-review__emoji { font-size: 24px; flex: none; }
+.se-review__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.se-review__title { font-size: 16px; font-weight: 900; line-height: 1.3; }
+.se-review__sub { font-size: 12px; }
+.se-review__count {
+  flex: none; min-width: 34px; padding: 3px 9px; border-radius: 999px;
+  background: var(--blue); color: #0c2338; font-weight: 900; font-size: 15px; text-align: center;
+}
+.se-review__topics { margin: 9px 0 10px; font-size: 13px; line-height: 1.4; }
+.se-review .btn { width: 100%; }
+
+/* Mistakes gone for good, said back to him at the end of a review. */
+.se-result__cleared { margin-top: 8px; font-size: 14px; font-weight: 800; color: var(--profit); }

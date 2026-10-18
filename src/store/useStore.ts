@@ -54,8 +54,8 @@ import {
 } from './storage'
 import type { SeDesk, SeBlock } from '../steugene/types'
 import { packFor } from '../steugene/packs'
-import { SE_WARM_INTRO, seAvailable, seFixGroups, seLockLeft, sePlanLesson, seTopUp, seWarmCount, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
-import { seFind } from '../logic/steugene'
+import { SE_WARM_INTRO, seAvailable, seFixGroups, seLockLeft, sePlanLesson, seReviewPlan, seTopUp, seWarmCount, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
+import { seFind, seReviewGroups } from '../logic/steugene'
 import { generateSeBlocks } from '../logic/steugeneAi'
 import { SE_HISTORY_CAP } from './storage'
 import {
@@ -446,6 +446,8 @@ interface StoreState {
   seStart: (subtopicId: string) => void
   /** Deal his unlocked misses for a subtopic as their own lesson: "mistakes to fix" (§24f). */
   seStartFix: (subtopicId: string) => void
+  /** §24v — a lesson built from his mistakes across one strand. */
+  seStartReview: (strandId: string) => void
   /** Picking a lesson back up: step past a card he already answered, so it is never a second go (§24f). */
   seResume: () => void
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
@@ -1027,6 +1029,7 @@ export const useStore = create<StoreState>((set, get) => {
           d.quiz.selfInit = true // legacy flag; the ladder below supersedes it
           syncTopicUnlocks(d, id)
           syncQuizTasks(d, id)
+          seHealLocks(d)
           // First login on this profile: drop in the trainer brief written for
           // them (age, goals, injuries). It's a starting point — every word of
           // it is editable in Gym → Plan, and we never overwrite an edit.
@@ -1180,31 +1183,61 @@ export const useStore = create<StoreState>((set, get) => {
   }
 
   /**
-   * Settle a fix run's answers against his unlocked locks for a subtopic
-   * (§24f), and tick off any `gone` misses outright. A lock with nothing left
-   * is cleared, which drops its row from "mistakes to fix".
+   * Settle a finished run's answers against every lock it touched, and tick
+   * off any `gone` misses outright. A lock with nothing left is cleared, which
+   * drops its row from "mistakes to fix".
    *
-   * Wrong: ticked off here, and sealed afresh by `seFinish` — back to Dad.
-   * Right on a LATER day than the miss: fixed. Right on the same day: that is
-   * the explanation he heard an hour ago, not a fix, so it rests until
-   * tomorrow and needs one more right answer then.
+   * Any answer settles its miss — right or wrong, sealed or not, whichever
+   * route he came in by. A wrong one is ticked off here and sealed afresh by
+   * `seFinish`, so it is back on the pile; a right one is fixed.
+   *
+   * Two rules used to live here and do not any more. The first was that only a
+   * FIX run settled anything, so getting a sealed question right in a review
+   * left the lock open. The second was that a right answer on the same day as
+   * the miss did not count and had to rest until tomorrow (§24v) — defensible
+   * in theory, and in practice an evening of repairing everything ended on a
+   * page still headed "mistakes to fix" with nothing he could do about it.
    */
-  function seSettleFixes(d: AppData, subtopicId: string, answers: SeAnswer[], gone: string[] = []) {
+  function seSettleFixes(d: AppData, answers: SeAnswer[], gone: string[] = []) {
+    const byId = new Map(answers.map((a) => [a.id, a]))
     for (const lock of d.steugene.locks) {
-      if (lock.subtopicId !== subtopicId || !lock.allowedAt || lock.clearedAt) continue
+      if (lock.clearedAt) continue
       const fixed = new Set(lock.fixed ?? [])
       for (const miss of lock.mistakes) {
         if (fixed.has(miss.id)) continue
-        if (gone.includes(miss.id)) {
-          fixed.add(miss.id)
-          continue
-        }
-        const a = answers.find((x) => x.id === miss.id)
-        if (!a) continue
-        const day = dayKey(new Date(a.at))
-        if (!a.right || day > dayKey(new Date(miss.at))) fixed.add(miss.id)
-        else lock.rightOn = { ...lock.rightOn, [miss.id]: day }
+        if (gone.includes(miss.id) || byId.has(miss.id)) fixed.add(miss.id)
       }
+      lock.fixed = [...fixed]
+      if (!seLockLeft(lock).length) lock.clearedAt = Date.now()
+    }
+  }
+
+  /**
+   * One-time repair for locks left half-settled by the rule §24v removed.
+   *
+   * Under the old rule a miss he got right on the SAME day stayed on its lock,
+   * waiting for a second right answer the next day. Ben finished an evening
+   * having got all 18 of his outstanding misses right, and the page still
+   * said "Rational numbers — mistakes to fix · 18" because none of them had
+   * been ticked off. The rule is gone; this clears what it left behind.
+   *
+   * It applies the rule that replaced it — a right answer on record settles
+   * the miss — so it can safely run on every login. It writes nothing when
+   * there is nothing to settle (`ensure` only commits on a real change).
+   */
+  function seHealLocks(d: AppData) {
+    const latestRight = new Set<string>()
+    for (const a of d.steugene.history) {
+      if (a.right) latestRight.add(a.id)
+      else latestRight.delete(a.id)
+    }
+    for (const lock of d.steugene.locks) {
+      if (lock.clearedAt) continue
+      const fixed = new Set(lock.fixed ?? [])
+      for (const miss of lock.mistakes) {
+        if (latestRight.has(miss.id)) fixed.add(miss.id)
+      }
+      if (fixed.size === (lock.fixed ?? []).length) continue
       lock.fixed = [...fixed]
       if (!seLockLeft(lock).length) lock.clearedAt = Date.now()
     }
@@ -3979,7 +4012,9 @@ export const useStore = create<StoreState>((set, get) => {
     seRecord(a) {
       const run = get().data.steugene.run
       if (!run) return
-      const answer = { ...a, subtopicId: run.subtopicId, at: Date.now() }
+      // §24v — a review spans a whole strand, so the answer belongs to the
+      // subtopic its question came from, not to the run.
+      const answer = { ...a, subtopicId: run.subs?.[a.id] ?? run.subtopicId, at: Date.now() }
       commit((d) => {
         d.steugene.run?.answers.push(answer)
         d.steugene.history.push(answer)
@@ -4026,28 +4061,41 @@ export const useStore = create<StoreState>((set, get) => {
       if (!run) return
       const wrong = run.answers.filter((a) => !a.right)
       commit((d) => {
-        const stat = (d.steugene.stats[run.subtopicId] ??= {
-          attempts: 0,
-          right: 0,
-          seconds: 0,
-          lessons: 0,
-          lastAt: 0,
-          seen: [],
-        })
-        stat.lessons += 1
-        stat.seconds += run.activeSeconds
-        stat.lastAt = Date.now()
+        const statFor = (id: string) =>
+          (d.steugene.stats[id] ??= { attempts: 0, right: 0, seconds: 0, lessons: 0, lastAt: 0, seen: [] })
+        // §24v — a review spans a strand, so its minutes belong to the
+        // subtopics he actually answered in, split evenly between them. Any
+        // other run is one subtopic and gets the lot.
+        const touched = run.review ? [...new Set(run.answers.map((a) => a.subtopicId))] : [run.subtopicId]
+        const share = touched.length ? Math.round(run.activeSeconds / touched.length) : 0
+        for (const id of touched.length ? touched : [run.subtopicId]) {
+          const stat = statFor(id)
+          stat.lessons += 1
+          stat.seconds += run.review ? share : run.activeSeconds
+          stat.lastAt = Date.now()
+        }
         // Every card he was shown is now "seen", so a repeat of this subtopic
         // reaches for the bench before it reaches for these again. Only up to
         // `pos`: a lesson closed early leaves the rest of its queue unseen.
-        stat.seen = [...new Set([...stat.seen, ...run.blockIds.slice(0, run.pos + 1)])]
-        if (run.fix) seSettleFixes(d, run.subtopicId, run.answers)
-        if (wrong.length) {
+        // A review deals nothing but cards he has already seen, so it has
+        // nothing to add here.
+        if (!run.review) {
+          const stat = statFor(run.subtopicId)
+          stat.seen = [...new Set([...stat.seen, ...run.blockIds.slice(0, run.pos + 1)])]
+        }
+        // Every finish settles, whichever route he came in by (§24v).
+        seSettleFixes(d, run.answers)
+        // A fresh miss is sealed per subtopic — a review's wrong answers can
+        // belong to a dozen different ones, and a lock is about one topic.
+        const bySub = new Map<string, SeAnswer[]>()
+        for (const a of wrong) bySub.set(a.subtopicId, [...(bySub.get(a.subtopicId) ?? []), a])
+        let n = 0
+        for (const [subtopicId, mistakes] of bySub) {
           d.steugene.locks.push({
-            id: `lock-${Date.now().toString(36)}`,
-            subtopicId: run.subtopicId,
+            id: `lock-${Date.now().toString(36)}-${n++}`,
+            subtopicId,
             at: Date.now(),
-            mistakes: wrong,
+            mistakes,
           })
         }
         d.steugene.run = null
@@ -4057,7 +4105,7 @@ export const useStore = create<StoreState>((set, get) => {
     seStartFix(subtopicId) {
       if (get().data.steugene.run?.answers.length) get().seFinish()
       const { data, seDesk } = get()
-      const ready = seFixGroups(data.steugene.locks, dayKey()).find((g) => g.subtopicId === subtopicId)?.ready ?? []
+      const ready = seFixGroups(data.steugene.locks).find((g) => g.subtopicId === subtopicId)?.left ?? []
       const byId = new Map(
         seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId))).map((b) => [b.id, b]),
       )
@@ -4074,7 +4122,7 @@ export const useStore = create<StoreState>((set, get) => {
         blockIds.push(id)
       }
       commit((d) => {
-        if (gone.length) seSettleFixes(d, subtopicId, [], gone)
+        if (gone.length) seSettleFixes(d, [], gone)
         if (!blockIds.length) return
         d.steugene.run = {
           subtopicId,
@@ -4085,6 +4133,59 @@ export const useStore = create<StoreState>((set, get) => {
           pos: 0,
           answers: [],
           fix: true,
+        }
+      })
+    },
+
+    /**
+     * 🔁 Review (§24v): a lesson made of his own mistakes across one strand.
+     *
+     * The caller must have fetched every pack in `subtopicIds` first — this
+     * reads them synchronously, like every other way into a lesson.
+     *
+     * It is the one run that spans subtopics, so it carries `subs` (block id →
+     * subtopic) and every answer is filed against the question's own topic.
+     * `fix: true` comes along for the two behaviours it already means: no
+     * top-up from the bench, and a choice's options re-shuffled, because he
+     * has seen this card and its right answer once already.
+     */
+    seStartReview(strandId) {
+      if (get().data.steugene.run?.answers.length) get().seFinish()
+      const { data, seDesk } = get()
+      const group = seReviewGroups(data.steugene.history, data.steugene.locks).find((g) => g.strandId === strandId)
+      if (!group) return
+
+      // Every block in every pack of the strand, remembering which pack each
+      // came from — a review's queue is dealt from a dozen of them.
+      const byId = new Map<string, SeBlock>()
+      const subs: Record<string, string> = {}
+      for (const subtopicId of group.subtopicIds) {
+        for (const b of seWithChecks(seAvailable(packFor(subtopicId), seGenerated(seDesk, subtopicId)))) {
+          if (byId.has(b.id)) continue
+          byId.set(b.id, b)
+          subs[b.id] = subtopicId
+        }
+      }
+
+      // A miss whose card has left the pack can never be asked again; it is
+      // ticked off here so it stops sitting in the pile for ever (§24u).
+      const gone = group.misses.map((m) => m.id).filter((id) => !byId.has(id))
+      const plan = seReviewPlan(byId, group.misses, data.steugene.minutes * 60)
+
+      commit((d) => {
+        if (gone.length) seSettleFixes(d, [], gone)
+        if (!plan.length) return
+        d.steugene.run = {
+          subtopicId: subs[plan[plan.length - 1].id] ?? group.subtopicIds[0],
+          startedAt: Date.now(),
+          targetMinutes: data.steugene.minutes,
+          activeSeconds: 0,
+          blockIds: plan.map((b) => b.id),
+          pos: 0,
+          answers: [],
+          fix: true,
+          review: strandId,
+          subs: Object.fromEntries(plan.map((b) => [b.id, subs[b.id]])),
         }
       })
     },

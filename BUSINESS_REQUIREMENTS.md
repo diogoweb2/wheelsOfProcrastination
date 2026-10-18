@@ -1950,6 +1950,7 @@ Ask him if he is on rational numbers and he does not know. Show him `|−20|` an
 - **Unsealed misses are their own group, not back in the deck.** Unlocking turns them into a row at the top of *My year*: **🔧 ‹topic› — mistakes to fix**, with how many are left. Tapping it deals **exactly those questions**, oldest miss first, and nothing else. There is no clock and no top-up, so it ends when the misses do. A video question comes back as just that question, not the whole video. Until a miss is redone it stays out of the normal deck, so it is never dealt by chance in an ordinary lesson.
 - **Fixed means right on a later day.** In "mistakes to fix", a miss answered right **on a later day than the miss** is ticked off (`fixed` on the lock, and the lock gets `clearedAt` once all its misses are done). Right on the **same** day (Dad unlocked it the evening he missed it) is the explanation he heard an hour ago, not a fix: it goes into `rightOn`, rests until tomorrow, and needs one more right answer then. The row reads *"✅ Right today. One more go tomorrow makes it stick."* when everything left is resting, and the result card says so too. Wrong, and it is ticked off here **and sealed again** in a new lock, back on Dad's desk. A wrong answer is still final.
 - **A redone choice shuffles its options.** He has seen the card and its right answer once already, and "it was the bottom one" is not knowing it. It is not turned into tiles: most choice questions pick from their options ("which sits between −2 and −1?"), so a build would mark a right −1.2 wrong. Leaving a fix run half-done keeps the rest in the row, and ▶️ Resume / 🔄 Start over work as in §24d.
+- **Sealing no longer blocks a retry** — 🔁 Review (§24v) offers every outstanding miss whenever he wants it. What sealing still does is what it was for: record the miss, put it in front of Dad, and get it explained. The 🔧 row is Dad's per-topic shortcut into the same questions.
 - **Choice questions show three options** (§14b's rule, same reasoning), and the right one must never be the longest.
 - **Build questions** hand him the answer in pieces: every character of it, shuffled, plus decoys (`seTiles`). He is being asked whether he knows the answer, not whether he can type.
 
@@ -2037,9 +2038,26 @@ Every score in the app is now **one answer per question, the most recent one** (
 
 **Dad's copy of "The year" reads Ben's world.** It used to read Dad's own, so the one tab that shows the pins and the ✅s showed an empty map to the only person who wanted the overview. What *starts* something still belongs to whoever is logged in: Ben's sealed misses are his to redo.
 
+### 24v. 🔁 Review — his own mistakes, by chapter, with no door on it (`/steugene7/review`)
+
+**The rule this replaced.** A miss he got right on the *same day* he made it did not count: it stayed on its lock and needed one more right answer on a later day. The reasoning was sound — repeating an answer you were told an hour ago proves little. In practice Ben spent an evening repairing every outstanding miss in a chapter, got all eighteen right, and the page still said **"Rational numbers — mistakes to fix · 18"** with no way to act on it. A gate he cannot open, in front of work he has already done, is worth less than the spacing it buys. It is gone: a right answer settles the miss, same day or not.
+
+**What is there instead.** One card per **strand** — the chapter his class names, "Number Sense and Numeration", not "Comparing rational numbers" — carrying every question in it whose **latest answer is wrong**, with the count as the headline. Tap it and he gets a lesson built from them.
+
+- **By strand, not by subtopic**, because that is the unit he thinks in, and because a review drawn from one subtopic is four questions while a review drawn from the strand is a lesson. It is the only run that spans subtopics: `SeRun.subs` maps each dealt block to the pack it came from, every answer is filed against its own subtopic, and the minutes are split between the subtopics he actually answered in.
+- **No permission needed.** Sealed or not, every outstanding miss is on the pile. §24f still records every miss and still puts it on Dad's desk to explain — that is what sealing is *for* — but it no longer stands between him and a second attempt. The 🔧 "mistakes to fix" row remains as Dad's per-topic shortcut; Review is the open door.
+- **Coldest first:** the one he has gone longest without putting right.
+- **Each question comes with its `lead` card** — the picture that teaches it (§24d), once. A review that only re-asks is a test; this is another go at understanding it, so the explanation comes first.
+- **A choice re-shuffles its options** (§24f): he has seen the card and its right answer once already, and "it was the bottom one" is not knowing it.
+- **It fills the length he picked and stops**, and the length chips are on the page. Twenty mistakes in one sitting is not a review, it is a punishment; the rest keep. The budget is **the real target divided by `SE_REAL_PACE` (1.4)**, not multiplied by `SE_PLAN_HEADROOM` like a lesson's: a lesson's queue is a buffer that the clock ends and the bench tops up, while a review's queue *is* its length and there is no bench behind it. That lands a 15-minute review on about ten questions — the eight or so a 15-minute lesson gets through.
+- **Get one right and it is off the pile for good**, said back to him on the result card. Get it wrong and it is sealed afresh and back on the pile, which is the same thing happening again rather than a punishment for trying.
+- **Retired questions are not on it** (§24u): a question that no longer exists cannot be reviewed.
+- **Every finish settles, not just a fix run.** Getting a sealed question right in a review used to leave its lock open, because only a "mistakes to fix" run called the settler. Any route counts now.
+- **`seHealLocks`** runs once per login and clears what the old rule left behind — any lock miss with a right answer on record. Ben's eighteen go to zero the first time he opens the app.
+
 ### 24j. URLs (§1c)
 
-`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.
+`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.
 
 Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the answer key), `src/screens/StEugeneScreen.tsx` (the six pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 

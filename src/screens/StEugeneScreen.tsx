@@ -4,6 +4,7 @@
 //   /steugene7/subjects  the year, in the order his class walks it
 //   /steugene7/finder    "what are you learning right now?" — by sight, not by name
 //   /steugene7/lesson    the lesson in flight
+//   /steugene7/review    his own mistakes, by chapter, whenever he wants
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
 //   /steugene7/helping   (Dad) the card he is on this second, with the answer key
@@ -21,8 +22,10 @@ import {
   seOpenSubject,
   sePct,
   seReached,
+  seReviewGroups,
   seStuck,
   seSubtopicsOf,
+  type SeReviewGroup,
   type SeSubTopic,
   type SeSubject,
   type SeTerm,
@@ -44,6 +47,7 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
       {tab === 'subjects' && <SubjectsTab setTab={setTab} />}
       {tab === 'finder' && <FinderTab setTab={setTab} />}
       {tab === 'lesson' && <LessonTab setTab={setTab} />}
+      {tab === 'review' && <ReviewTab setTab={setTab} />}
       {tab === 'report' && <ReportTab admin={isAdmin} />}
       {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
       {tab === 'helping' && isAdmin && <SeHelping />}
@@ -77,14 +81,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
   const [open, setOpen] = useState<string | null | undefined>(undefined)
   const [picked, setPicked] = useState<string | null>(null)
   const [fixing, setFixing] = useState<string | null>(null)
-  // §24f splits these in two, and until now the page did not: `ready` is work
-  // he can actually do, and the rest are misses he already got right TODAY and
-  // that rest until tomorrow. Both were drawn as the same orange
-  // "mistakes to fix" row, so an evening spent fixing every one of them ended
-  // with the page still showing a list of mistakes to fix. It is not one.
-  const fixes = seFixGroups((admin ? world : data)?.steugene.locks ?? [], dayKey())
-  const toFix = fixes.filter((g) => g.ready.length > 0)
-  const resting = fixes.filter((g) => g.ready.length === 0)
+  const fixes = seFixGroups((admin ? world : data)?.steugene.locks ?? [])
   // `undefined` means "nobody has tapped yet" — resolved here rather than in
   // the initialiser because on Dad's phone the stats arrive after the mount.
   const openId = open === undefined ? seOpenSubject(stats) : open
@@ -114,9 +111,9 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
 
       <OpenLesson onIn={() => setTab('lesson')} />
 
-      {toFix.length > 0 && (
+      {fixes.length > 0 && (
         <div style={{ marginBottom: 12 }}>
-          {toFix.map((g) => (
+          {fixes.map((g) => (
             <button
               key={g.subtopicId}
               className="se-topic se-topic--fix"
@@ -136,28 +133,11 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
                       : 'Dad unlocked these. One more go at each.'}
                 </span>
               </span>
-              <span className="se-topic__score">{new Set(g.ready.map((m) => m.id)).size}</span>
+              <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>
             </button>
           ))}
         </div>
       )}
-
-      {resting.map((g) => (
-        <div key={g.subtopicId} className="se-topic se-topic--rested">
-          <span className="se-topic__emoji">✅</span>
-          <span className="se-topic__body">
-            <span className="se-topic__title">
-              {seFind(g.subtopicId)?.subtopic.title ?? g.subtopicId} — fixed today
-            </span>
-            <span className="se-topic__sample">
-              {admin
-                ? 'He got every one of them right today. One more go tomorrow clears them for good.'
-                : 'Nothing to do here. One more go tomorrow and they are off your list for good.'}
-            </span>
-          </span>
-          <span className="se-topic__score">{new Set(g.left.map((m) => m.id)).size}</span>
-        </div>
-      ))}
 
       <CanDo stats={stats} history={history} locks={locks} admin={admin} />
 
@@ -378,7 +358,7 @@ function TopicSheet({
    * they are sealed and waiting on Dad (§24f) rather than anything about him.
    */
   const stuck = useMemo(
-    () => seStuck(sheetLocks, subtopicId, now?.broken ?? 0, dayKey()),
+    () => seStuck(sheetLocks, subtopicId, now?.broken ?? 0),
     [sheetLocks, subtopicId, now?.broken],
   )
 
@@ -433,23 +413,14 @@ function TopicSheet({
                   cannot be asked again. Not counted either way.
                 </li>
               )}
-              {stuck.resting > 0 && (
-                <li>
-                  ⏳ {stuck.resting} got right today. One more go tomorrow and {stuck.resting === 1 ? 'it is' : 'they are'}{' '}
-                  done.
+              {now && now.broken > 0 && (
+                <li className="se-break__blocked">
+                  ❌ {now.broken} still wrong — {admin ? 'they are' : 'all of them are'} on the 🔁 Review pile for{' '}
+                  {seFind(subtopicId)?.strand.title}, ready whenever {admin ? 'he wants' : 'you want'} another go.
                 </li>
               )}
               {stuck.ready > 0 && (
-                <li>
-                  🔧 {stuck.ready} ready to fix now — the 🔧 row at the top of {admin ? 'his year' : 'My year'}.
-                </li>
-              )}
-              {stuck.sealed > 0 && (
-                <li className="se-break__blocked">
-                  🔒 {stuck.sealed} still sealed. {admin ? 'You have' : 'Dad has'} to unlock{' '}
-                  {stuck.sealed === 1 ? 'it' : 'them'} before {admin ? 'he' : 'you'} can try again — that is what is
-                  holding this number down.
-                </li>
+                <li>🔧 {stuck.ready} also sitting in "mistakes to fix" on {admin ? 'his year' : 'My year'}.</li>
               )}
               {stuck.loose > 0 && (
                 <li className="se-break__blocked">
@@ -783,6 +754,118 @@ function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
       <button className="btn btn--ghost" style={{ marginTop: 10 }} onClick={() => setTab('finder')}>
         🔍 Work out what I am learning
       </button>
+    </>
+  )
+}
+
+// --- 🔁 Review (§24v) -----------------------------------------------------------------
+
+/**
+ * His own mistakes, by chapter, on demand.
+ *
+ * This replaced the rule that a miss he got right on the same day did not
+ * count and had to rest until tomorrow. The rule was not wrong about learning
+ * — repeating an answer you were told an hour ago proves little — but it put a
+ * locked door where the motivation was, and the page it produced said
+ * "mistakes to fix" at a boy who had just fixed every one of them.
+ *
+ * So: no door. Everything he still gets wrong is here, grouped by the chapter
+ * his class calls it ("Number Sense and Numeration", not "Comparing rational
+ * numbers"), and he can have another go any time he likes. Sealed or not —
+ * §24f still records every miss and still puts it on Dad's desk to explain,
+ * but it no longer stands between him and a second attempt.
+ */
+function ReviewTab({ setTab }: { setTab: (tab: string) => void }) {
+  const { data, seStartReview, seSetMinutes } = useStore()
+  const [opening, setOpening] = useState<string | null>(null)
+  const groups = useMemo(
+    () => seReviewGroups(data.steugene.history, data.steugene.locks),
+    [data.steugene.history, data.steugene.locks],
+  )
+
+  const open = async (g: SeReviewGroup) => {
+    sfx.fanfare()
+    setOpening(g.strandId)
+    // A strand is a dozen subtopics and each pack is its own chunk, so they
+    // all have to be here before the queue can be dealt.
+    await Promise.all(g.subtopicIds.map((id) => ensurePack(id)))
+    seStartReview(g.strandId)
+    walkIn()
+    setTab('lesson')
+  }
+
+  return (
+    <>
+      <div className="h1">🔁 Review</div>
+      <p className="muted" style={{ marginBottom: 12 }}>
+        Everything you have got wrong and not yet put right, by chapter. Have another go whenever you want — there is
+        nothing to wait for.
+      </p>
+
+      {groups.length === 0 && (
+        <div className="card">
+          <div style={{ fontSize: 40 }}>🏴‍☠️</div>
+          <div className="h1" style={{ fontSize: 19 }}>Nothing to review</div>
+          <p className="muted">
+            There is not a single question you are still getting wrong. Go and do a lesson and come back when there is.
+          </p>
+          <button className="btn btn--blue" style={{ marginTop: 10 }} onClick={() => setTab('subjects')}>
+            📚 Open my year
+          </button>
+        </div>
+      )}
+
+      {groups.length > 0 && (
+        <div className="se-length" style={{ marginBottom: 12 }}>
+          <span className="muted">How long?</span>
+          {SE_LENGTHS.map((m) => (
+            <button
+              key={m}
+              className={`btn btn--small ${data.steugene.minutes === m ? 'btn--blue' : 'btn--ghost'}`}
+              onClick={() => {
+                sfx.click()
+                seSetMinutes(m)
+              }}
+            >
+              {m} min
+            </button>
+          ))}
+        </div>
+      )}
+
+      {groups.map((g) => {
+        const topics = [...new Set(g.misses.map((m) => m.subtopicTitle))]
+        return (
+          <div key={g.strandId} className="card se-review">
+            <div className="se-review__head">
+              <span className="se-review__emoji" aria-hidden>
+                {g.emoji}
+              </span>
+              <span className="se-review__body">
+                <span className="se-review__title">{g.strandTitle}</span>
+                <span className="muted se-review__sub">{g.subjectName}</span>
+              </span>
+              <span className="se-review__count">{g.misses.length}</span>
+            </div>
+
+            <p className="muted se-review__topics">
+              {topics.slice(0, 3).join(' · ')}
+              {topics.length > 3 && ` · +${topics.length - 3} more`}
+            </p>
+
+            <button className="btn btn--blue" disabled={!!opening} onClick={() => void open(g)}>
+              {opening === g.strandId ? 'Building it…' : `🔁 Review these (${data.steugene.minutes} min)`}
+            </button>
+          </div>
+        )
+      })}
+
+      {groups.length > 0 && (
+        <p className="muted" style={{ marginTop: 4, fontSize: 13 }}>
+          A review fills the {data.steugene.minutes} minutes you have set and starts with the ones you have left
+          longest. Get one right and it comes off the pile for good.
+        </p>
+      )}
     </>
   )
 }

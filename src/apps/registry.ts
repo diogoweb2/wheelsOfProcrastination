@@ -353,6 +353,9 @@ export const APPS: AppDef[] = [
       { id: 'subjects', label: 'My year', icon: '📚' },
       { id: 'finder', label: 'Find it', icon: '🔍' },
       { id: 'lesson', label: 'Lesson', icon: '📘' },
+      // §24v — his own mistakes, by chapter, on demand. His, not Dad's: it is
+      // the one retry route he does not have to be let through.
+      { id: 'review', label: 'Review', icon: '🔁' },
       { id: 'report', label: 'Report', icon: '📊' },
     ],
     adminTabs: [

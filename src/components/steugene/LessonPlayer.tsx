@@ -19,7 +19,6 @@ import confetti from 'canvas-confetti'
 import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
-import { dayKey } from '../../logic/dates'
 import { packFor } from '../../steugene/packs'
 import { SE_WARM_INTRO, seAvailable, seForFix, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
@@ -128,15 +127,19 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   // written mid-lesson.
   const byId = useMemo(() => {
     if (!run) return new Map<string, SeBlock>()
-    const generated = seDesk.generated.filter((g) => g.subtopicId === run.subtopicId).flatMap((g) => g.blocks)
-    const blocks = seWithChecks(seAvailable(packFor(run.subtopicId), generated))
+    // §24v — a review spans a whole strand, so its cards come from every pack
+    // the run touched, not just `run.subtopicId`. Any other run has one.
+    const subtopicIds = run.subs ? [...new Set(Object.values(run.subs))] : [run.subtopicId]
+    const blocks = subtopicIds.flatMap((id) =>
+      seWithChecks(seAvailable(packFor(id), seDesk.generated.filter((g) => g.subtopicId === id).flatMap((g) => g.blocks))),
+    )
     const map = new Map((run.fix ? blocks.map(seForFix) : blocks).map((b) => [b.id, b]))
     // The warm-up's own title card (§24q) belongs to no pack, so it is added
     // here rather than to the bench — the bench is what gets dealt from, and
     // a top-up must never hand him the warm-up sign a second time.
     map.set(SE_WARM_INTRO.id, SE_WARM_INTRO)
     return map
-  }, [run?.subtopicId, run?.fix, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [run?.subtopicId, run?.fix, run?.subs, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
 
@@ -203,8 +206,17 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
       </div>
 
       <div className="se-lesson__where muted">
-        {where?.subject.emoji} {where?.subtopic.title}
-        {run.fix && ' — mistakes to fix'}
+        {run.review ? (
+          <>
+            🔁 {seFind(run.subs?.[block.id] ?? run.subtopicId)?.strand.title} — review ·{' '}
+            {seFind(run.subs?.[block.id] ?? run.subtopicId)?.subtopic.title}
+          </>
+        ) : (
+          <>
+            {where?.subject.emoji} {where?.subtopic.title}
+            {run.fix && ' — mistakes to fix'}
+          </>
+        )}
       </div>
 
       <div key={block.id} className="se-card-in">
@@ -947,12 +959,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   const wrong = answers.filter((a) => !a.right)
   const nudged = answers.filter((a) => a.helped).length
   const pct = answers.length ? Math.round((right / answers.length) * 100) : 100
-  // A fix he got right on the day he missed it is not fixed yet (§24f).
-  const today = dayKey()
-  const missedToday = new Set(
-    data.steugene.locks.flatMap((l) => l.mistakes.filter((m) => dayKey(new Date(m.at)) === today).map((m) => m.id)),
-  )
-  const again = run?.fix ? answers.filter((a) => a.right && missedToday.has(a.id)).length : 0
+  // §24v — on a review, what he has actually just done is clear mistakes off
+  // his own pile, and that is the number worth saying back to him.
+  const cleared = run?.review ? right : 0
 
   useEffect(() => {
     stopSpeaking()
@@ -966,8 +975,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
           {right} / {answers.length} right
         </div>
         <p className="muted">
-          {where?.subtopic.title}
-          {run?.fix && ' — mistakes to fix'}
+          {run?.review
+            ? `🔁 ${seFind(run.subtopicId)?.strand.title} — review`
+            : `${where?.subtopic.title}${run?.fix ? ' — mistakes to fix' : ''}`}
         </p>
         <div className="se-result__bar">
           <div style={{ width: `${pct}%` }} />
@@ -983,10 +993,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
             right move.
           </p>
         )}
-        {again > 0 && (
-          <p className="muted" style={{ marginTop: 6 }}>
-            🔁 {again === 1 ? 'The one' : `The ${again}`} you got right come{again === 1 ? 's' : ''} back once more tomorrow.
-            Right on a different day is how you know it stuck.
+        {cleared > 0 && (
+          <p className="se-result__cleared">
+            ✅ {cleared === 1 ? 'One mistake' : `${cleared} mistakes`} off your pile for good. They do not come back.
           </p>
         )}
       </div>
@@ -995,7 +1004,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         <div className="card">
           <div className="h1" style={{ fontSize: 18 }}>📋 Show Dad these</div>
           <p className="muted" style={{ marginBottom: 10 }}>
-            You cannot have another go at these yet. Dad reads them first, then unlocks them.
+            {run?.review
+              ? 'These went back on your review pile. Get Dad to explain one, then try it again whenever you like.'
+              : 'Ask Dad to go through these with you. They are on your 🔁 Review pile whenever you want another go.'}
           </p>
           {wrong.map((m, i) => (
             <div key={i} className="se-miss">
