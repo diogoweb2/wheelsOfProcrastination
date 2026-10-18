@@ -2003,6 +2003,29 @@ That is the only screen in the app that shows an answer key, and it exists for t
 - **A run left open since Tuesday is not a lesson in flight.** The page says how long nothing has moved, and the Desk's live line (a green pulsing dot, one tap through) only appears while something has happened in the last **45 minutes**.
 - Dad's phone has usually never loaded that subtopic's pack — nothing on his side started the lesson — so the chunk is fetched on open (§24k).
 
+### 24u. Where he is NOW, not everywhere he has been
+
+Two numbers on this app were liars, and they lied in the same direction: they both said he had not moved.
+
+**The 📍 pin was a constant.** `CURRENT_SUBTOPIC` was set by hand and described where the class was the day somebody last edited it. He finished the rational-numbers chapter, redid every sealed miss in it, and the pin was still on rational numbers — because a constant cannot know. The pin is now **the furthest subtopic he has reached in each subject**, read off his own record (`seReached`), in the year's own teaching order. Furthest *reached*, not most *recent*, on purpose: "mistakes to fix" (§24f) and the warm-up (§24q) both send him back to older work, and a pin that followed his last answer would walk backwards every time he did either. Subjects he has not opened get no pin. `CURRENT_SUBTOPIC` survives only as the seed for which card the page opens on before he has done anything.
+
+**The percentage could not be repaired.** It was lifetime accuracy — every attempt he had ever made, over every attempt he had ever made. So the four misses he had just spent an evening fixing stayed in the denominator for ever, the row still read 67%, and the Report flagged a chapter he had finished as one that *needs a hand*. That is the number that decides where my ten minutes with him go, and it was pointing at the one place they were no longer needed.
+
+Every score in the app is now **one answer per question, the most recent one** (`seNowBySubtopic`):
+
+- `asked` — distinct questions he has any answer on record for; `right` — how many his latest answer gets right.
+- `repaired` — of those, how many he had got **wrong** at some point before. This keeps the honest half of the old number: that it took him two goes. It is shown as `🔧 n fixed`, on his row and on mine.
+- `broken` — how many his latest answer **still** gets wrong. This is the only count that should ever pull my attention.
+- **`✅` and "nothing left wrong"** when `broken` is 0 over at least 4 questions. The Report has to be able to say a chapter is finished, and a percentage alone cannot tell "never missed one" from "fixed them all".
+- **"needs a hand" now means he still gets them wrong**, not that he once did.
+- **"Latest misses" became "Still getting these wrong"** — a miss he has since redone correctly is not something to sit down with him about, and listing it was the Report telling me he could not do what he had just proved he could.
+- `seCanDo` (§24r) is measured the same way, because getting it right on the second go is exactly what learning it looks like, and a 💪 line he can never earn by repairing is a line that punishes repair.
+- **Fallback:** the history is capped at `SE_HISTORY_CAP` (600 answers), so a subtopic from early in the year can roll out of it entirely. Where there is no history left to measure, the cached lifetime ratio is used — stale is better than showing a chapter he has done as untouched.
+
+**And the reason a count can be stuck at all is named on the page.** Misses are sealed and only Dad can unseal them (§24f). A row that says `❌ 4 still wrong` with no explanation reads as his failure, when what stands between him and fixing them is a button on my desk — so the row also says `🔒 4 sealed, waiting for you`, and the Report opens with a card telling me how many are waiting and where the button is.
+
+**Dad's copy of "The year" reads Ben's world.** It used to read Dad's own, so the one tab that shows the pins and the ✅s showed an empty map to the only person who wanted the overview. What *starts* something still belongs to whoever is logged in: Ben's sealed misses are his to redo.
+
 ### 24j. URLs (§1c)
 
 `/steugene7/subjects` · `/steugene7/finder` · `/steugene7/lesson` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping`.

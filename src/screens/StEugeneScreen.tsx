@@ -12,18 +12,22 @@ import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { sfx } from '../audio'
 import {
-  CURRENT_SUBTOPIC,
+  SE_CAN_MIN_ATTEMPTS,
   SE_SUBJECTS,
   TERM_LABEL,
   seCanDo,
   seFind,
+  seNowBySubtopic,
+  seOpenSubject,
+  sePct,
+  seReached,
   seSubtopicsOf,
   type SeSubTopic,
   type SeSubject,
   type SeTerm,
 } from '../logic/steugene'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
-import { SE_LENGTHS, seFixGroups } from '../logic/steugeneLesson'
+import { SE_LENGTHS, seFixGroups, seLockLeft } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
@@ -50,12 +54,30 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
 
 const TERMS: SeTerm[] = ['term1', 'general', 'term2']
 
+/** Stable empties, so the memos below do not re-run on every render. */
+const NO_STATS: Record<string, SeStat> = {}
+const NO_HISTORY: SeAnswer[] = []
+
 function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
-  const { data, seStartFix } = useStore()
-  const [open, setOpen] = useState<string | null>(seFind(CURRENT_SUBTOPIC)?.subject.id ?? 'math')
+  const { data, kidData, activeProfileId, seStartFix } = useStore()
+  // Dad's copy of this page is "the year" — a map of Ben's progress, so it
+  // reads Ben's world like the Report does. The buttons that START something
+  // stay on whoever is logged in: Ben's sealed misses are his to redo (§24f).
+  const admin = activeProfileId === PARENT_ID
+  const world: AppData | null = admin ? kidData : data
+  const stats = world?.steugene.stats ?? NO_STATS
+  const history = world?.steugene.history ?? NO_HISTORY
+  // §24u — the pin and the open card used to be the hand-set
+  // `CURRENT_SUBTOPIC`, which could not know he had finished a chapter. They
+  // are now read off his own record.
+  const reached = useMemo(() => seReached(stats), [stats])
+  const [open, setOpen] = useState<string | null | undefined>(undefined)
   const [picked, setPicked] = useState<string | null>(null)
   const [fixing, setFixing] = useState<string | null>(null)
   const fixes = seFixGroups(data.steugene.locks, dayKey())
+  // `undefined` means "nobody has tapped yet" — resolved here rather than in
+  // the initialiser because on Dad's phone the stats arrive after the mount.
+  const openId = open === undefined ? seOpenSubject(stats) : open
 
   const fix = async (subtopicId: string) => {
     const run = data.steugene.run
@@ -69,11 +91,15 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
     setTab('lesson')
   }
 
+  if (admin && !world) return <div className="card">Loading Ben’s year from the cloud…</div>
+
   return (
     <>
       <div className="h1">🏫 St. Eugene 7</div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        Your whole year, in the order your class does it. Tap a topic to start.
+        {admin
+          ? 'Ben’s whole year, in the order his class does it. 📍 is as far as he has got.'
+          : 'Your whole year, in the order your class does it. Tap a topic to start.'}
       </p>
 
       <OpenLesson onIn={() => setTab('lesson')} />
@@ -106,7 +132,7 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
         </div>
       )}
 
-      <CanDo />
+      <CanDo stats={stats} history={history} admin={admin} />
 
       {TERMS.map((term) => {
         const subjects = SE_SUBJECTS.filter((s) => s.term === term)
@@ -118,10 +144,13 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
               <SubjectCard
                 key={subject.id}
                 subject={subject}
-                open={open === subject.id}
+                here={reached[subject.id]}
+                stats={stats}
+                history={history}
+                open={openId === subject.id}
                 onToggle={() => {
                   sfx.click()
-                  setOpen(open === subject.id ? null : subject.id)
+                  setOpen(openId === subject.id ? null : subject.id)
                 }}
                 onPick={setPicked}
               />
@@ -146,9 +175,17 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
  * should open with what he has already won, not with the fifteen topics he
  * has not touched.
  */
-function CanDo() {
-  const { data } = useStore()
-  const can = useMemo(() => seCanDo(data.steugene.stats), [data.steugene.stats])
+function CanDo({
+  stats,
+  history,
+  admin,
+}: {
+  stats: Record<string, SeStat>
+  history: SeAnswer[]
+  /** Dad is reading it, so it is about him, not addressed to him. */
+  admin: boolean
+}) {
+  const can = useMemo(() => seCanDo(stats, history), [stats, history])
   const [all, setAll] = useState(false)
   if (!can.length) return null
   const shown = all ? can : can.slice(0, 4)
@@ -156,7 +193,7 @@ function CanDo() {
   return (
     <div className="card se-can">
       <div className="se-can__head">
-        <strong>💪 What I can do now</strong>
+        <strong>💪 {admin ? 'What he can do now' : 'What I can do now'}</strong>
         <span className="se-can__count">{can.length}</span>
       </div>
       <ul className="se-can__list">
@@ -184,19 +221,26 @@ function CanDo() {
 
 function SubjectCard({
   subject,
+  here,
+  stats,
+  history,
   open,
   onToggle,
   onPick,
 }: {
   subject: SeSubject
+  /** The furthest subtopic he has reached in this subject — the 📍 pin (§24u). */
+  here?: string
+  stats: Record<string, SeStat>
+  history: SeAnswer[]
   open: boolean
   onToggle: () => void
   onPick: (id: string) => void
 }) {
-  const { data } = useStore()
   const written = writtenSubtopics()
   const all = seSubtopicsOf(subject.id)
-  const touched = all.filter((s) => data.steugene.stats[s.id]?.attempts).length
+  const touched = all.filter((s) => stats[s.id]?.attempts).length
+  const nowBy = useMemo(() => seNowBySubtopic(history), [history])
 
   return (
     <div className="se-subject">
@@ -220,12 +264,15 @@ function SubjectCard({
           <div key={strand.id} className="se-strand">
             <div className="se-strand__title">{strand.title}</div>
             {strand.subtopics.map((st) => {
-              const stat = data.steugene.stats[st.id]
-              const pct = stat?.attempts ? Math.round((stat.right / stat.attempts) * 100) : null
+              const now = nowBy[st.id]
+              const pct = sePct(now, stats[st.id])
+              // Nothing left that his latest answer gets wrong, and enough of
+              // them to mean it — the chapter is standing up (§24u).
+              const sound = !!now && now.broken === 0 && now.asked >= SE_CAN_MIN_ATTEMPTS
               return (
                 <button
                   key={st.id}
-                  className={`se-topic${st.id === CURRENT_SUBTOPIC ? ' se-topic--here' : ''}`}
+                  className={`se-topic${st.id === here ? ' se-topic--here' : ''}`}
                   onClick={() => {
                     sfx.click()
                     onPick(st.id)
@@ -235,12 +282,14 @@ function SubjectCard({
                   <span className="se-topic__body">
                     <span className="se-topic__title">
                       {st.title}
-                      {st.id === CURRENT_SUBTOPIC && <em> · 📍 you are here</em>}
+                      {st.id === here && <em> · 📍 you are here</em>}
                     </span>
-                    <span className="se-topic__sample">{st.sample}</span>
+                    <span className="se-topic__sample">
+                      {now?.repaired ? `🔧 ${now.repaired} fixed · ${st.sample}` : st.sample}
+                    </span>
                   </span>
                   <span className="se-topic__score">
-                    {pct === null ? (written.has(st.id) ? '✍️' : '·') : `${pct}%`}
+                    {pct === null ? (written.has(st.id) ? '✍️' : '·') : sound ? `✅ ${pct}%` : `${pct}%`}
                   </span>
                 </button>
               )
@@ -656,21 +705,60 @@ function ReportTab({ admin }: { admin: boolean }) {
   if (admin && !kidData) return <div className="card">Loading Ben’s year from the cloud…</div>
   if (!world) return null
 
+  // §24u — scored on his LATEST answer per question, so a chapter he has
+  // repaired reads as repaired. Lifetime attempts stay on the meta line.
+  const nowBy = seNowBySubtopic(world.steugene.history)
   const rows = Object.entries(world.steugene.stats)
-    .map(([id, stat]) => ({ id, stat, where: seFind(id) }))
+    .map(([id, stat]) => ({ id, stat, now: nowBy[id], pct: sePct(nowBy[id], stat) ?? 0, where: seFind(id) }))
     .filter((r) => r.where && r.stat.attempts > 0)
     .filter((r) => subject === 'all' || r.where!.subject.id === subject)
-    .sort((a, b) => a.stat.right / a.stat.attempts - b.stat.right / b.stat.attempts)
+    .sort((a, b) => a.pct - b.pct)
 
   const minutes = Math.round(Object.values(world.steugene.stats).reduce((n, s: SeStat) => n + s.seconds, 0) / 60)
-  const recent = [...world.steugene.history].reverse().filter((a) => !a.right).slice(0, 12)
+  // Only misses his latest answer still gets wrong. A question he has since
+  // redone correctly is not something to sit down with him about, and leaving
+  // it here was the Report telling me he still could not do what he had just
+  // spent the evening fixing.
+  const stillWrong = new Set<string>()
+  for (const a of world.steugene.history) {
+    if (a.right) stillWrong.delete(a.id)
+    else stillWrong.add(a.id)
+  }
+  const recent = [...world.steugene.history]
+    .reverse()
+    .filter((a) => !a.right && stillWrong.has(a.id))
+    .filter((a, i, all) => all.findIndex((x) => x.id === a.id) === i)
+    .slice(0, 12)
+  const repaired = Object.values(nowBy).reduce((n, v) => n + v.repaired, 0)
+  // Misses he CANNOT redo because nobody has unsealed them (§24f). Without
+  // this the row says "4 still wrong" and reads as his problem, when the
+  // thing standing between him and fixing them is a button on Dad's desk.
+  const sealedBy: Record<string, Set<string>> = {}
+  for (const lock of world.steugene.locks) {
+    if (lock.allowedAt || lock.clearedAt) continue
+    const set = (sealedBy[lock.subtopicId] ??= new Set())
+    for (const miss of seLockLeft(lock)) set.add(miss.id)
+  }
+  const sealed = Object.values(sealedBy).reduce((n, v) => n + v.size, 0)
 
   return (
     <>
       <div className="h1">📊 {admin ? 'Ben’s report' : 'How you are doing'}</div>
       <p className="muted" style={{ marginBottom: 12 }}>
         {rows.length} topic{rows.length === 1 ? '' : 's'} started · {minutes} min of real work
+        {repaired > 0 && ` · 🔧 ${repaired} question${repaired === 1 ? '' : 's'} missed then fixed`}
       </p>
+
+      {admin && sealed > 0 && (
+        <div className="card se-sealedcard">
+          🔒 <strong>
+            {sealed} mistake{sealed === 1 ? '' : 's'} {sealed === 1 ? 'is' : 'are'} sealed
+          </strong>{' '}
+          and he cannot touch {sealed === 1 ? 'it' : 'them'} until you unlock {sealed === 1 ? 'it' : 'them'}. Until you
+          do, {sealed === 1 ? 'it keeps' : 'they keep'} counting against him on the rows below. The 🖊️ Desk tab has the
+          button.
+        </div>
+      )}
 
       <div className="se-filter">
         <button className={`btn btn--small ${subject === 'all' ? 'btn--blue' : 'btn--ghost'}`} onClick={() => setSubject('all')}>
@@ -689,14 +777,18 @@ function ReportTab({ admin }: { admin: boolean }) {
 
       {rows.length === 0 && <div className="card muted">Nothing here yet — finish a lesson and it fills in.</div>}
 
-      {rows.map(({ id, stat, where }) => {
-        const pct = Math.round((stat.right / stat.attempts) * 100)
-        const help = pct < 60 && stat.attempts >= 4
+      {rows.map(({ id, stat, now, pct, where }) => {
+        const asked = now?.asked ?? stat.attempts
+        const help = pct < 60 && asked >= SE_CAN_MIN_ATTEMPTS
         const nudged = stat.helped ?? 0
         // §24p — a topic he gets right but keeps asking for a start on is a
         // different problem from one he gets wrong, and it is invisible in a
         // percentage. It is worth naming, because it is nearly fixed.
-        const started = !help && stat.attempts >= 4 && nudged / stat.attempts >= 0.4
+        const started = !help && stat.attempts >= SE_CAN_MIN_ATTEMPTS && nudged / stat.attempts >= 0.4
+        // Nothing left that he gets wrong — say so, because the percentage on
+        // its own cannot distinguish "never missed one" from "fixed them all".
+        const sound = !!now && now.broken === 0 && now.asked >= SE_CAN_MIN_ATTEMPTS
+        const locked = sealedBy[id]?.size ?? 0
         return (
           <div key={id} className={`card se-row${help ? ' se-row--help' : ''}`}>
             <div className="se-row__top">
@@ -709,11 +801,15 @@ function ReportTab({ admin }: { admin: boolean }) {
               <div style={{ width: `${pct}%` }} className={pct < 60 ? 'bad' : pct < 80 ? 'mid' : 'good'} />
             </div>
             <div className="muted se-row__meta">
-              {where!.subject.name} · {stat.right}/{stat.attempts} right
-              {nudged > 0 && ` · 🤔 ${nudged} nudged`} · {Math.round(stat.seconds / 60)} min ·{' '}
-              {prettyDay(dayKey(new Date(stat.lastAt)))}
+              {where!.subject.name} · {now ? `${now.right}/${now.asked} right now` : `${stat.right}/${stat.attempts} right`}
+              {now && now.repaired > 0 && ` · 🔧 ${now.repaired} fixed`}
+              {now && now.broken > 0 && ` · ❌ ${now.broken} still wrong`}
+              {nudged > 0 && ` · 🤔 ${nudged} nudged`} · {stat.attempts} tr{stat.attempts === 1 ? 'y' : 'ies'} ·{' '}
+              {Math.round(stat.seconds / 60)} min · {prettyDay(dayKey(new Date(stat.lastAt)))}
               {help && <strong className="se-row__flag"> · needs a hand</strong>}
               {started && <strong className="se-row__nudge"> · gets there with a nudge</strong>}
+              {sound && !started && <strong className="se-row__sound"> · nothing left wrong</strong>}
+              {locked > 0 && <strong className="se-row__sealed"> · 🔒 {locked} sealed, waiting for you</strong>}
             </div>
           </div>
         )
@@ -721,7 +817,7 @@ function ReportTab({ admin }: { admin: boolean }) {
 
       {recent.length > 0 && (
         <div className="card">
-          <div className="h1" style={{ fontSize: 18 }}>❌ Latest misses</div>
+          <div className="h1" style={{ fontSize: 18 }}>❌ Still getting these wrong</div>
           {recent.map((m, i) => (
             <Miss key={i} miss={m} />
           ))}

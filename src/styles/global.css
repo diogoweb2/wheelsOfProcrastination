@@ -6716,3 +6716,16 @@ input, select { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .se-help-live__dot { animation: none; }
 }
+
+/* 🏫 St. Eugene 7 §24u — "nothing left wrong". Green, and only on a topic
+   whose every question his LATEST answer gets right. It is the counterpart to
+   "needs a hand": the Report has to be able to say a chapter is finished. */
+.se-row__sound { color: var(--profit); font-weight: 900; }
+.se-row__sealed { color: var(--yellow); font-weight: 900; }
+/* The one card on the Report that is addressed to Dad as a job to do. */
+.se-sealedcard {
+  border: 2px solid var(--yellow);
+  font-size: 14px;
+  line-height: 1.45;
+  margin-bottom: 12px;
+}

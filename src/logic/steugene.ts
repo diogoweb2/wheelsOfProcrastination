@@ -12,6 +12,8 @@
 // belongs until February.
 
 /** The three blocks of the year, in the order they are taught. */
+import type { SeAnswer } from '../types'
+
 export type SeTerm = 'term1' | 'general' | 'term2'
 
 export const TERM_LABEL: Record<SeTerm, string> = {
@@ -368,9 +370,14 @@ const GEOGRAPHY: SeSubject = {
 export const SE_SUBJECTS: SeSubject[] = [HISTORY, LANGUAGE, MATH, SCIENCE, GEOGRAPHY]
 
 /**
- * Where the class actually is, today. Updated by hand as the year moves — it
- * only ever decides which card the Subjects tab opens on and which one wears
- * the "📍 you are here" pin, so being a week stale costs nothing.
+ * Where the year STARTS for him — the seed, not the truth (§24u).
+ *
+ * This used to be the "📍 you are here" pin itself, set by hand. That was
+ * wrong in a way that mattered: he finished the rational-numbers chapter,
+ * fixed every miss in it, and the pin was still sitting on it, because a
+ * constant cannot know he has moved on. The pin is now worked out from his
+ * own record (`seReached`), and this is only the fallback for a subject he
+ * has not opened yet.
  */
 export const CURRENT_SUBTOPIC = 'math-rational'
 
@@ -394,6 +401,105 @@ for (const subject of SE_SUBJECTS) {
 
 export function seFind(subtopicId: string): SeLocation | null {
   return INDEX.get(subtopicId) ?? null
+}
+
+// --- Where he is now, not where he has been (§24u) ----------------------------
+
+/**
+ * One subtopic, scored on his LATEST answer to each question rather than on
+ * every attempt he has ever made.
+ *
+ * This exists because lifetime accuracy cannot be repaired. He finished the
+ * rational-numbers chapter, redid every sealed miss in it until there were
+ * none left — and the number on the row was still 67%, because the misses he
+ * had just fixed were still in the denominator. That number told Dad the
+ * opposite of what had happened, and it is the number that decides what the
+ * Report flags and what he gets credit for.
+ *
+ * So: one answer per question, the most recent one. A question he missed and
+ * has since got right counts as right, and `repaired` keeps the honest part of
+ * the old number — that it took him two goes.
+ */
+export interface SeNow {
+  /** Distinct questions he has any answer on record for. */
+  asked: number
+  /** …of those, how many his latest answer gets right. */
+  right: number
+  /** …of those, how many he had got wrong at some point before that. */
+  repaired: number
+  /** …and how many his latest answer still gets wrong. */
+  broken: number
+}
+
+/** Every subtopic he has answered anything in, in one pass over the history. */
+export function seNowBySubtopic(history: SeAnswer[]): Record<string, SeNow> {
+  // History is oldest-first, so the last write per question id wins.
+  const latest = new Map<string, SeAnswer>()
+  const everWrong = new Set<string>()
+  for (const a of history) {
+    latest.set(a.id, a)
+    if (!a.right) everWrong.add(a.id)
+  }
+  const out: Record<string, SeNow> = {}
+  for (const [id, a] of latest) {
+    const now = (out[a.subtopicId] ??= { asked: 0, right: 0, repaired: 0, broken: 0 })
+    now.asked += 1
+    if (!a.right) {
+      now.broken += 1
+      continue
+    }
+    now.right += 1
+    if (everWrong.has(id)) now.repaired += 1
+  }
+  return out
+}
+
+/**
+ * The percentage to put on a subtopic.
+ *
+ * `seNow` where there is history to measure, and the cached lifetime ratio
+ * where there is not — the history is capped at `SE_HISTORY_CAP` answers, so a
+ * subtopic he worked on early in the year can roll out of it entirely. Falling
+ * back is better than showing a topic he has done as untouched.
+ */
+export function sePct(now: SeNow | undefined, stat: { attempts: number; right: number } | undefined): number | null {
+  if (now?.asked) return Math.round((now.right / now.asked) * 100)
+  if (stat?.attempts) return Math.round((stat.right / stat.attempts) * 100)
+  return null
+}
+
+/**
+ * The 📍 pin: the furthest subtopic he has reached in each subject, by the
+ * year's own teaching order. Subjects he has not opened get no pin.
+ *
+ * Furthest *reached*, not most *recent*, on purpose. "Mistakes to fix" (§24f)
+ * and the warm-up (§24q) both send him back to older work, and a pin that
+ * tracked his last answer would walk backwards every time he did either.
+ */
+export function seReached(stats: Record<string, { attempts: number }>): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const subject of SE_SUBJECTS) {
+    const all = seSubtopicsOf(subject.id)
+    for (let i = all.length - 1; i >= 0; i -= 1) {
+      if (stats[all[i].id]?.attempts) {
+        out[subject.id] = all[i].id
+        break
+      }
+    }
+  }
+  return out
+}
+
+/** Which subject card the Subjects tab opens on: the one he touched last. */
+export function seOpenSubject(stats: Record<string, { attempts: number; lastAt: number }>): string {
+  let best: { subjectId: string; at: number } | null = null
+  for (const [id, stat] of Object.entries(stats)) {
+    if (!stat.attempts || !stat.lastAt) continue
+    const where = seFind(id)
+    if (!where) continue
+    if (!best || stat.lastAt > best.at) best = { subjectId: where.subject.id, at: stat.lastAt }
+  }
+  return best?.subjectId ?? seFind(CURRENT_SUBTOPIC)?.subject.id ?? 'math'
 }
 
 // --- What I can do now (§24r) --------------------------------------------------
@@ -427,11 +533,19 @@ export interface SeCanDone {
  */
 export function seCanDo(
   stats: Record<string, { attempts: number; right: number; lastAt: number }>,
+  history: SeAnswer[] = [],
 ): SeCanDone[] {
+  // Measured on where he is NOW (§24u), not on every attempt he ever made —
+  // otherwise repairing a chapter can never earn the line, which is backwards:
+  // getting it right on the second go is exactly what learning it looks like.
+  const nowBy = seNowBySubtopic(history)
   const out: SeCanDone[] = []
   for (const [id, stat] of Object.entries(stats)) {
-    if (stat.attempts < SE_CAN_MIN_ATTEMPTS) continue
-    if (stat.right / stat.attempts < SE_CAN_MIN_RATE) continue
+    const now = nowBy[id]
+    const asked = now?.asked ?? stat.attempts
+    const right = now?.asked ? now.right : stat.right
+    if (asked < SE_CAN_MIN_ATTEMPTS) continue
+    if (right / asked < SE_CAN_MIN_RATE) continue
     const where = seFind(id)
     if (!where) continue
     out.push({
