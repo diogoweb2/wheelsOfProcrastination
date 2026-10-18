@@ -12,7 +12,7 @@
 // belongs until February.
 
 /** The three blocks of the year, in the order they are taught. */
-import type { SeAnswer } from '../types'
+import type { SeAnswer, SeFixLock } from '../types'
 
 export type SeTerm = 'term1' | 'general' | 'term2'
 
@@ -466,6 +466,52 @@ export function sePct(now: SeNow | undefined, stat: { attempts: number; right: n
   if (now?.asked) return Math.round((now.right / now.asked) * 100)
   if (stat?.attempts) return Math.round((stat.right / stat.attempts) * 100)
   return null
+}
+
+/** Where every question he still gets wrong is sitting, for one subtopic. */
+export interface SeStuck {
+  /** Sealed — he physically cannot try again until Dad unlocks them (§24f). */
+  sealed: number
+  /** Unlocked and waiting for him to redo. */
+  ready: number
+  /** Redone correctly TODAY; they rest until tomorrow. Already counted right. */
+  resting: number
+  /** Wrong, and in no list at all. Should be zero; worth saying when it is not. */
+  loose: number
+}
+
+/**
+ * Why a topic's percentage is not 100%.
+ *
+ * "Why is it 89% if he fixed all the questions?" is a fair question that the
+ * app could not answer: a percentage says how many are wrong and nothing about
+ * why they are still wrong, and in this app the usual reason is that they are
+ * sealed and waiting on Dad (§24f) — which is not about him at all.
+ *
+ * `broken` is `seNow().broken` for the same subtopic. A resting miss already
+ * has a right answer on record, so it is not part of `broken`; only the sealed
+ * and the ready ones are, which is what `loose` is measured against.
+ */
+export function seStuck(locks: SeFixLock[], subtopicId: string, broken: number, today: string): SeStuck {
+  const sealed = new Set<string>()
+  const ready = new Set<string>()
+  const resting = new Set<string>()
+  for (const lock of locks) {
+    if (lock.subtopicId !== subtopicId || lock.clearedAt) continue
+    const fixed = new Set(lock.fixed ?? [])
+    for (const miss of lock.mistakes) {
+      if (fixed.has(miss.id)) continue
+      if (!lock.allowedAt) sealed.add(miss.id)
+      else if (lock.rightOn?.[miss.id] === today) resting.add(miss.id)
+      else ready.add(miss.id)
+    }
+  }
+  return {
+    sealed: sealed.size,
+    ready: ready.size,
+    resting: resting.size,
+    loose: Math.max(0, broken - sealed.size - ready.size),
+  }
 }
 
 /**

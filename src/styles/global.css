@@ -6736,3 +6736,16 @@ input, select { font-family: inherit; }
    work unfinished. */
 .se-topic--rested { border-color: var(--profit); cursor: default; margin-bottom: 12px; }
 .se-topic--rested .se-topic__score { color: var(--profit); }
+
+/* 🏫 St. Eugene 7 §24u — the breakdown behind a topic's percentage. "Why is it
+   89% if he fixed all of them?" has to be answerable from the page: the
+   number alone says how many are wrong and nothing about WHY, and the usual
+   reason here is a lock waiting on Dad, which is not about him at all. */
+.se-break { margin-top: 10px; padding: 10px 11px; border-radius: 12px; background: var(--bg2); border: 1px solid var(--line); }
+.se-break__top { display: flex; align-items: baseline; gap: 9px; }
+.se-break__pct { font-size: 25px; font-weight: 900; }
+.se-break__top .muted { font-size: 13px; line-height: 1.35; }
+.se-break__list { list-style: none; margin: 9px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.se-break__list li { font-size: 13px; line-height: 1.4; font-weight: 700; }
+.se-break__list li.muted { font-weight: 700; margin-top: 2px; }
+.se-break__blocked { color: var(--yellow); }

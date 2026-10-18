@@ -21,6 +21,7 @@ import {
   seOpenSubject,
   sePct,
   seReached,
+  seStuck,
   seSubtopicsOf,
   type SeSubTopic,
   type SeSubject,
@@ -183,7 +184,15 @@ function SubjectsTab({ setTab }: { setTab: (tab: string) => void }) {
         )
       })}
 
-      {picked && <TopicSheet subtopicId={picked} onClose={() => setPicked(null)} setTab={setTab} />}
+      {picked && (
+        <TopicSheet
+          subtopicId={picked}
+          world={world}
+          admin={admin}
+          onClose={() => setPicked(null)}
+          setTab={setTab}
+        />
+      )}
     </>
   )
 }
@@ -327,10 +336,15 @@ function SubjectCard({
 /** The sheet that opens on a topic: start it, or ask Dad for more of it. */
 function TopicSheet({
   subtopicId,
+  world,
+  admin,
   onClose,
   setTab,
 }: {
   subtopicId: string
+  /** Whose record is being READ — Ben's, even when Dad is the one tapping. */
+  world: AppData | null
+  admin: boolean
   onClose: () => void
   setTab: (tab: string) => void
 }) {
@@ -338,12 +352,28 @@ function TopicSheet({
   const [opening, setOpening] = useState(false)
   const where = seFind(subtopicId)
   const written = hasPack(subtopicId)
-  const stat = data.steugene.stats[subtopicId]
+  const stat = world?.steugene.stats[subtopicId]
+  const history = world?.steugene.history ?? NO_HISTORY
   const asks = seDesk.requests.filter((r) => r.subtopicId === subtopicId)
   const pending = asks.filter((r) => r.status === 'pending')
-  const locked = data.steugene.locks.filter((l) => l.subtopicId === subtopicId && !l.allowedAt)
   const inFlight = data.steugene.run
   const resuming = inFlight?.subtopicId === subtopicId && !inFlight.fix
+
+  const now = useMemo(() => seNowBySubtopic(history)[subtopicId], [history, subtopicId])
+
+  /**
+   * Where every question he still gets wrong is sitting.
+   *
+   * "Why is it 89% if he fixed all of them?" is a fair question and the page
+   * could not answer it: a percentage says how many are wrong and nothing
+   * about why they are still wrong, and in this app the usual reason is that
+   * they are sealed and waiting on Dad (§24f) rather than anything about him.
+   */
+  const stuck = useMemo(
+    () => seStuck(world?.steugene.locks ?? [], subtopicId, now?.broken ?? 0, dayKey()),
+    [world?.steugene.locks, subtopicId, now?.broken],
+  )
+
   if (!where) return null
 
   // The pack is its own chunk (see steugene/packs/generated), so it has to
@@ -375,10 +405,48 @@ function TopicSheet({
         <div className="se-sample">{where.subtopic.sample}</div>
 
         {stat?.attempts ? (
-          <p className="muted" style={{ marginTop: 10 }}>
-            {stat.right}/{stat.attempts} right · {stat.lessons} lesson{stat.lessons === 1 ? '' : 's'} ·{' '}
-            {Math.round(stat.seconds / 60)} min of work
-          </p>
+          <div className="se-break">
+            <div className="se-break__top">
+              <strong className="se-break__pct">{sePct(now, stat)}%</strong>
+              <span className="muted">
+                {now
+                  ? `${now.right} of ${now.asked} questions right on ${admin ? 'his' : 'your'} latest go`
+                  : `${stat.right}/${stat.attempts} right`}
+              </span>
+            </div>
+            <ul className="se-break__list">
+              {now && now.repaired > 0 && (
+                <li>🔧 {now.repaired} missed, then fixed — these count as right.</li>
+              )}
+              {stuck.resting > 0 && (
+                <li>
+                  ⏳ {stuck.resting} got right today. One more go tomorrow and {stuck.resting === 1 ? 'it is' : 'they are'}{' '}
+                  done.
+                </li>
+              )}
+              {stuck.ready > 0 && (
+                <li>
+                  🔧 {stuck.ready} ready to fix now — the 🔧 row at the top of {admin ? 'his year' : 'My year'}.
+                </li>
+              )}
+              {stuck.sealed > 0 && (
+                <li className="se-break__blocked">
+                  🔒 {stuck.sealed} still sealed. {admin ? 'You have' : 'Dad has'} to unlock{' '}
+                  {stuck.sealed === 1 ? 'it' : 'them'} before {admin ? 'he' : 'you'} can try again — that is what is
+                  holding this number down.
+                </li>
+              )}
+              {stuck.loose > 0 && (
+                <li className="se-break__blocked">
+                  ❓ {stuck.loose} wrong and in no list. {admin ? '' : 'Tell Dad — '}that should not happen.
+                </li>
+              )}
+              <li className="muted">
+                {stat.lessons} lesson{stat.lessons === 1 ? '' : 's'} · {Math.round(stat.seconds / 60)} min of work ·{' '}
+                {stat.attempts} tr{stat.attempts === 1 ? 'y' : 'ies'} in total
+              </li>
+            </ul>
+          </div>
         ) : null}
 
         <div className="se-length">
@@ -430,13 +498,6 @@ function TopicSheet({
           <p className="muted" style={{ marginTop: 10 }}>
             Starting this one finishes your {seFind(inFlight.subtopicId)?.subtopic.title}
             {inFlight.fix ? ' mistakes to fix' : ' lesson'}.
-          </p>
-        )}
-
-        {locked.length > 0 && (
-          <p className="muted" style={{ marginTop: 10 }}>
-            🔒 {locked.reduce((n, l) => n + l.mistakes.length, 0)} question
-            {locked.reduce((n, l) => n + l.mistakes.length, 0) === 1 ? '' : 's'} are sealed until Dad unlocks them.
           </p>
         )}
 
