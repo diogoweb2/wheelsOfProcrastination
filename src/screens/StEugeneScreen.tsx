@@ -23,6 +23,7 @@ import {
   sePct,
   seAnsweredGroups,
   seReached,
+  seRetired,
   seReviewGroups,
   seStuck,
   seSubtopicsOf,
@@ -1009,9 +1010,15 @@ function ReportTab({ admin }: { admin: boolean }) {
     if (a.right) stillWrong.delete(a.id)
     else stillWrong.add(a.id)
   }
+  // ...and not a question that no longer exists (§24u). A card renamed out of
+  // the pack leaves a wrong answer behind for ever: it cannot be asked, so it
+  // cannot be fixed, and listing it told him to go and redo something that is
+  // not there. The rows already ignore these, which is why one could read
+  // 100% while this list underneath it showed seven misses.
+  const retired = seRetired(world.steugene.locks, world.steugene.history)
   const recent = [...world.steugene.history]
     .reverse()
-    .filter((a) => !a.right && stillWrong.has(a.id))
+    .filter((a) => !a.right && stillWrong.has(a.id) && !retired.has(a.id))
     .filter((a, i, all) => all.findIndex((x) => x.id === a.id) === i)
     .slice(0, 12)
   const repaired = Object.values(nowBy).reduce((n, v) => n + v.repaired, 0)
