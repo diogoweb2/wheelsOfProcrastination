@@ -20,7 +20,7 @@ import { useStore } from '../../store/useStore'
 import { sfx } from '../../audio'
 import { seFind } from '../../logic/steugene'
 import { packFor } from '../../steugene/packs'
-import { SE_WARM_INTRO, seAvailable, seForFix, seTiles, seWithChecks } from '../../logic/steugeneLesson'
+import { SE_WARM_INTRO, seAvailable, seBuildRight, seBuilt, seForFix, seTiles, seWithChecks } from '../../logic/steugeneLesson'
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
@@ -133,13 +133,18 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
     const blocks = subtopicIds.flatMap((id) =>
       seWithChecks(seAvailable(packFor(id), seDesk.generated.filter((g) => g.subtopicId === id).flatMap((g) => g.blocks))),
     )
-    const map = new Map((run.fix ? blocks.map(seForFix) : blocks).map((b) => [b.id, b]))
+    // Seeded on the run (§24y): this memo recomputes whenever his data syncs,
+    // and an unseeded re-shuffle moved the answer buttons mid-question.
+    const map = new Map((run.fix ? blocks.map((b) => seForFix(b, run.startedAt)) : blocks).map((b) => [b.id, b]))
     // The warm-up's own title card (§24q) belongs to no pack, so it is added
     // here rather than to the bench — the bench is what gets dealt from, and
     // a top-up must never hand him the warm-up sign a second time.
     map.set(SE_WARM_INTRO.id, SE_WARM_INTRO)
     return map
-  }, [run?.subtopicId, run?.fix, run?.subs, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
+    // `startedAt` identifies the run; `subs` is fixed for its whole length and
+    // is deliberately NOT a dep — `commit` deep-clones his data, so depending
+    // on the object would rebuild this deck about once a minute.
+  }, [run?.startedAt, run?.subtopicId, run?.fix, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
 
@@ -584,7 +589,7 @@ function BuildCard({
 
   const check = () => {
     if (locked !== null || !built) return
-    const right = built === block.answer
+    const right = seBuildRight(block.answer, built)
     setLocked(right)
     if (right) {
       sfx.gem()
@@ -596,8 +601,9 @@ function BuildCard({
       id: block.id,
       right,
       prompt: block.prompt,
-      given: built,
-      expected: block.answer,
+      // Unit and all, so the report reads "$41" and not "41" (§24y).
+      given: seBuilt(block, built),
+      expected: seBuilt(block, block.answer),
       ...(helped ? { helped: true } : {}),
     })
   }
@@ -612,7 +618,15 @@ function BuildCard({
       {block.art && <SeArtwork art={block.art} />}
 
       <div className={`se-slot${locked === false ? ' se-slot--wrong' : locked ? ' se-slot--right' : ''}`}>
-        {built || <span className="muted">tap the tiles below</span>}
+        {built ? (
+          <span className="se-slot__built">
+            {block.unit?.pre && <span className="se-slot__unit">{block.unit.pre}</span>}
+            {built}
+            {block.unit?.post && <span className="se-slot__unit">{block.unit.post}</span>}
+          </span>
+        ) : (
+          <span className="muted">tap the tiles below</span>
+        )}
       </div>
 
       <div className="se-tiles">

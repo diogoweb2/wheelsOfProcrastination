@@ -12,6 +12,7 @@
 // why every pack carries far more `extra` than `core`.
 import type { SeBlock, SeExplain, SePack } from '../steugene/types'
 import type { SeAnswer, SeFixLock } from '../types'
+import { seFind } from './steugene'
 
 /**
  * Allowed lesson lengths, in minutes; 40 is the default (storage.ts). 15 is for
@@ -231,14 +232,23 @@ export function seTopUp(available: SeBlock[], used: string[]): SeBlock[] {
   return lead ? [lead, b] : [b]
 }
 
-/** Everything that could be served for a subtopic: the pack plus anything the AI added. */
+/**
+ * Everything that could be served for a subtopic: the pack plus anything the
+ * AI added — with every maths question whose answer is a number turned into
+ * tiles (`seAsBuild`, §24y).
+ *
+ * That conversion happens HERE, at the one door every route into a lesson
+ * comes through, so the planner sizes the queue with the right seconds, the
+ * player draws it, and 🤝 Helping him shows Dad the same card Ben has.
+ */
 export function seAvailable(pack: SePack | null, generated: SeBlock[]): SeBlock[] {
+  const maths = !!pack && seFind(pack.subtopicId)?.subject.id === 'math'
   const seen = new Set<string>()
   const out: SeBlock[] = []
   for (const b of [...(pack?.core ?? []), ...(pack?.extra ?? []), ...generated]) {
     if (seen.has(b.id)) continue
     seen.add(b.id)
-    out.push(b)
+    out.push(maths ? seAsBuild(b) : b)
   }
   return out
 }
@@ -291,12 +301,16 @@ export function seFixGroups(locks: SeFixLock[]): { subtopicId: string; left: SeA
  * in a new order, because he has seen this card — and its right answer — once
  * already, and "it was the bottom one" is not knowing it.
  *
- * Not turned into a build: most choice questions pick from their options
- * ("which sits between −2 and −1?"), so tiles would mark a right −1.2 wrong.
+ * The numeric ones are not here at all any more — they were turned into tile
+ * questions when the pack was read (`seAsBuild`, §24y), so what is left to
+ * re-order is the questions that genuinely pick from their own options.
  */
-export function seForFix(b: SeBlock): SeBlock {
+export function seForFix(b: SeBlock, seed: string | number = ''): SeBlock {
   if (b.kind !== 'choice') return b
-  const options = shuffle([...b.options])
+  // Seeded on the card and the run, never on Math.random: the player
+  // re-derives this deck whenever his data syncs, and an order that changes
+  // while he is reading the options is the worst bug on this screen.
+  const options = shuffle([...b.options], rngFor(`${b.id}:${seed}`))
   return { ...b, options, answer: options.indexOf(b.options[b.answer]) }
 }
 
@@ -379,6 +393,113 @@ export function seCustomOrder(
   ]
 }
 
+// --- A number is built, never picked (§24y) -----------------------------------
+//
+// Three buttons with a number on each is a one-in-three guess, and he takes
+// it: on a maths question he cannot do, picking is free and costs him nothing
+// to be wrong. Tiles close that door. There is no list to choose from, so the
+// only way to put "-15" in the slot is to have worked out that it is -15 —
+// and the hand still carries every character he needs, because reading is his
+// difficulty and a blank keypad would test that instead (§24f).
+//
+// It is a CONVERSION, not a rewrite. Every numeric maths question already
+// written stays exactly as authored — same id, same prompt, same picture, same
+// `why`, same walk-through — and is dealt as tiles. The wrong options are not
+// thrown away either: their digits become the decoy tiles, which makes them
+// better decoys than anything generated, because they are the mistakes
+// somebody expected him to make.
+//
+// Two kinds of question stay on three buttons, on purpose:
+//  · Anything that picks from its own options. "Which of these is a perfect
+//    square? 48 / 49 / 50" has no answer to build — the options ARE the
+//    question, and tiles would ask him to invent one.
+//  · Anything whose answer is not a short, plain number: a bounty of
+//    3,000,000,000, a mixed number, a word, a `line 2`. Thirteen taps to
+//    spell an answer is a reading test again.
+
+/** Unicode minus and the dashes authors reach for → the character the tiles use. */
+const seMinus = (s: string) => s.replace(/[−–—]/g, '-')
+
+/** Short enough to tap out: an integer, a 1–2 place decimal, or a simple fraction. */
+const BUILDABLE = /^-?\d{1,4}(?:\.\d{1,2})?$|^-?\d{1,3}\/\d{1,3}$/
+
+/** "$" / "£" / "€" in front — printed beside the slot, not built (see `SeBuild.unit`). */
+const UNIT_PRE = /^[$£€]?$/
+
+/** "%", "°C", " m", " cm²", " blocks" — one unit, after the number. */
+const UNIT_POST = /^$|^°[CF]?$|^[%¢×]$|^ [A-Za-z²³]{1,7}$/
+
+/**
+ * A question that picks from its own options. Tiles cannot ask it, so it
+ * stays as it was written.
+ */
+const PICKS_FROM_OPTIONS = /\bwhich\b|\bpick\b|\bchoose\b|\bclosest\b|\bbest\b/i
+
+/** The packs shout the exclusion: "Which one is NOT a square number?" */
+const SHOUTED_NOT = /\bNOT\b/
+
+/** "$7.50" → { pre: "$", n: "7.50", post: "" }, or null when it is not one number. */
+function seUnitParts(option: string): { pre: string; n: string; post: string } | null {
+  const m = seMinus(option.trim()).match(/^(\D*?)(-?[\d.,/]+)(.*)$/)
+  if (!m) return null
+  const [, pre, n, post] = m
+  if (!BUILDABLE.test(n) || !UNIT_PRE.test(pre) || !UNIT_POST.test(post)) return null
+  return { pre, n, post }
+}
+
+/**
+ * The same question, asked with tiles instead of three buttons — when its
+ * answer is a number he can build. Anything else comes back untouched.
+ */
+export function seAsBuild(b: SeBlock): SeBlock {
+  if (b.kind !== 'choice' || PICKS_FROM_OPTIONS.test(b.prompt) || SHOUTED_NOT.test(b.prompt)) return b
+  const parts = b.options.map(seUnitParts)
+  if (parts.some((p) => !p)) return b
+  const ps = parts as { pre: string; n: string; post: string }[]
+  const { pre, post } = ps[0]
+  if (ps.some((p) => p.pre !== pre || p.post !== post)) return b
+  const answer = ps[b.answer].n
+  // The digits of the wrong answers, minus the ones he already has to have.
+  const has = new Set([...answer])
+  const decoys = [...new Set(ps.filter((_, i) => i !== b.answer).flatMap((p) => [...p.n]))]
+    .filter((c) => !has.has(c))
+    .slice(0, 3)
+  return {
+    kind: 'build',
+    id: b.id,
+    prompt: b.prompt,
+    answer,
+    decoys,
+    why: b.why,
+    ...(b.art ? { art: b.art } : {}),
+    ...(b.steps ? { steps: b.steps } : {}),
+    ...(b.lead ? { lead: b.lead } : {}),
+    ...(pre || post ? { unit: { ...(pre ? { pre } : {}), ...(post ? { post } : {}) } } : {}),
+    // Tiles take longer than three buttons, and the queue is sized off this.
+    ...(b.secs ? { secs: Math.round(b.secs * 1.5) } : {}),
+  }
+}
+
+/** The answer as it is printed and recorded: "$41", "3 °C" — unit and all. */
+export function seBuilt(block: { answer?: string; unit?: { pre?: string; post?: string } }, value: string): string {
+  return `${block.unit?.pre ?? ''}${value}${block.unit?.post ?? ''}`
+}
+
+/**
+ * Is what he built the answer?
+ *
+ * Exact first, then by VALUE for a plain decimal: handed the tiles for "7.50"
+ * he builds "7.5", which is the same number and the same understanding —
+ * marking it wrong would teach him to count zeroes instead of doing maths.
+ * Fractions are compared as text on purpose: "4/8" is not an answer to a
+ * question that asked for lowest terms.
+ */
+export function seBuildRight(answer: string, built: string): boolean {
+  if (built === answer) return true
+  const plain = /^-?\d+(?:\.\d+)?$/
+  return plain.test(answer) && plain.test(built) && Number(answer) === Number(built)
+}
+
 // --- Build-your-own-answer tiles (§24f) --------------------------------------
 
 const FILLER = '0123456789'.split('')
@@ -404,11 +525,40 @@ export function seTiles(answer: string, decoys: string[] = []): string[] {
   return shuffle(tiles)
 }
 
-function shuffle<T>(list: T[]): T[] {
+function shuffle<T>(list: T[], rnd: () => number = Math.random): T[] {
   const out = [...list]
   for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(rnd() * (i + 1))
     ;[out[i], out[j]] = [out[j], out[i]]
   }
   return out
+}
+
+/**
+ * A shuffle that can be repeated — same seed, same order, for ever.
+ *
+ * It exists because of a bug that was invisible from the code and obvious to
+ * the boy: in a review the player re-derives the card it is drawing from the
+ * packs, and `commit` deep-clones his data on every write, so the memo that
+ * holds the deck recomputed about once a minute (the clock banks its seconds
+ * on a timer, §24d). Each recompute re-ran `seForFix` — and the three answer
+ * buttons SILENTLY CHANGED PLACES under his finger, mid-question.
+ *
+ * Seeding it on the block id and the run fixes that at the source: whatever
+ * re-renders, and however often, the order he is looking at is the order the
+ * run dealt him, and a later review still gets a different one.
+ */
+function rngFor(seed: string): () => number {
+  let h = 2166136261
+  for (let i = 0; i < seed.length; i += 1) {
+    h ^= seed.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return () => {
+    h = (h + 0x6d2b79f5) | 0
+    let t = h
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
 }

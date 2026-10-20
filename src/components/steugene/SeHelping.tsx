@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../../store/useStore'
 import { seFind } from '../../logic/steugene'
 import { ensurePack, packFor } from '../../steugene/packs'
-import { SE_WARM_INTRO, seAvailable, seWithChecks } from '../../logic/steugeneLesson'
+import { SE_WARM_INTRO, seAvailable, seBuilt, seWithChecks } from '../../logic/steugeneLesson'
 import { SeArtwork } from './SeArtwork'
 import type { SeAnswer, SeRun } from '../../types'
 import type { SeBlock, SeStep } from '../../steugene/types'
@@ -235,7 +235,7 @@ function HelpCard({ block, given }: { block: SeBlock; given?: SeAnswer }) {
         <div className="se-help__kind">⌨️ He builds the answer out of tiles</div>
         <div className="se-help__q">{block.prompt}</div>
         {block.art && <SeArtwork art={block.art} />}
-        <Key expected={block.answer} why={block.why} steps={block.steps} given={given} />
+        <Key expected={seBuilt(block, block.answer)} why={block.why} steps={block.steps} given={given} />
       </div>
     )
   }

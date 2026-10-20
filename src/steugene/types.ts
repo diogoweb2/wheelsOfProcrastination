@@ -297,6 +297,15 @@ export interface SeBuild extends SeBlockBase {
   answer: string
   /** Decoy tiles. Authored where a good decoy matters; otherwise generated. */
   decoys?: string[]
+  /**
+   * A unit PRINTED beside the slot rather than built out of tiles: "$" in
+   * front, "%", "°C" or " m" after (§24y).
+   *
+   * The tiles are for the number, which is the thing being asked. Making him
+   * assemble `°` and `C` out of the hand tests nothing and reads as clutter,
+   * and a hand with a `$` in it gives the game away on the money questions.
+   */
+  unit?: { pre?: string; post?: string }
   why: string
   steps?: SeStep[]
 }

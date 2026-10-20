@@ -6211,6 +6211,9 @@ input, select { font-family: inherit; }
   background: var(--bg2); border: 2px dashed var(--line);
 }
 .se-slot .muted { font-size: 14px; letter-spacing: 0; }
+.se-slot__built { display: inline-flex; align-items: baseline; gap: 1px; }
+/* the unit is printed, never built out of tiles (§24y) */
+.se-slot__unit { color: var(--muted); font-size: 21px; letter-spacing: 0; }
 .se-slot--right { border-style: solid; border-color: var(--profit); }
 .se-slot--wrong { border-style: solid; border-color: var(--red); }
 
