@@ -6251,6 +6251,7 @@ input, select { font-family: inherit; }
 .se-chip--done { background: rgba(46, 204, 113, 0.22); border-color: var(--profit); }
 .se-chip--held { border-color: var(--yellow); background: rgba(255, 206, 0, 0.18); }
 .se-chip--gone { opacity: 0.25; }
+.se-chip--wrong { background: rgba(215, 0, 0, 0.22); border-color: var(--red); }
 .se-order__done { display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; margin: 10px 0; }
 .se-order__pool { display: flex; flex-wrap: wrap; gap: 8px; }
 .se-pairs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -6264,6 +6265,8 @@ input, select { font-family: inherit; }
 }
 .se-line__spot:last-child { border-right: 2px solid var(--line); }
 .se-line__spot:active { background: rgba(96, 191, 245, 0.2); }
+.se-line__spot--right { background: rgba(46, 204, 113, 0.32); color: var(--text); }
+.se-line__spot--wrong { background: rgba(215, 0, 0, 0.32); }
 
 .se-shake { animation: seShake 380ms; }
 @keyframes seShake {

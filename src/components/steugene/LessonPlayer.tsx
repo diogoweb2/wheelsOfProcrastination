@@ -235,7 +235,9 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
         {block.kind === 'build' && (
           <BuildCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
         )}
-        {block.kind === 'game' && <GameCard block={block} onNext={next} onRecord={seRecord} />}
+        {block.kind === 'game' && (
+          <GameCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
+        )}
         {block.kind === 'video' && (
           <VideoCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
         )}
@@ -745,37 +747,57 @@ function VideoCard({
 
 // --- the minigames --------------------------------------------------------------
 
-function GameCard({ block, onNext, onRecord }: { block: SeGame; onNext: () => void; onRecord: Record_ }) {
-  const [slips, setSlips] = useState(0)
-  const [done, setDone] = useState(false)
+/** What he tapped wrong, and what it should have been — the report's two columns. */
+type Miss = { given: string; expected: string }
 
-  const finish = () => {
-    if (done) return
-    setDone(true)
-    sfx.fanfare()
-    void confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } })
+/**
+ * A game is a question like any other (§24f): the first wrong tap ends it.
+ * Until Oct 2026 a wrong tap only shook, and he could keep tapping until the
+ * game gave in — a second go, and a third, which is the brute-force every
+ * other card on this screen is built to rule out. Now the board freezes on
+ * the right answer and the verdict takes over, same as a choice.
+ */
+function GameCard({
+  block,
+  speakOn,
+  rate,
+  onNext,
+  onRecord,
+}: {
+  block: SeGame
+  speakOn: boolean
+  rate: number
+  onNext: () => void
+  onRecord: Record_
+}) {
+  const [right, setRight] = useState<boolean | null>(null)
+
+  const finish = (miss?: Miss) => {
+    if (right !== null) return
+    setRight(!miss)
+    if (miss) {
+      sfx.error()
+    } else {
+      sfx.fanfare()
+      void confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } })
+    }
     onRecord({
       id: block.id,
-      right: slips === 0,
+      right: !miss,
       prompt: block.title,
-      given: slips === 0 ? 'clean run' : `${slips} wrong tap${slips > 1 ? 's' : ''}`,
-      expected: 'clean run',
+      given: miss?.given ?? 'clean run',
+      expected: miss?.expected ?? 'clean run',
     })
   }
 
   return (
     <div className="card se-card">
       <div className="se-prompt">🎮 {block.title}</div>
-      {block.game.mode === 'order' && <OrderGame game={block.game} onSlip={() => setSlips((n) => n + 1)} onWin={finish} />}
-      {block.game.mode === 'pair' && <PairGame game={block.game} onSlip={() => setSlips((n) => n + 1)} onWin={finish} />}
-      {block.game.mode === 'line' && <LineGame game={block.game} onSlip={() => setSlips((n) => n + 1)} onWin={finish} />}
-      {done && (
-        <>
-          {block.why && <p className="muted" style={{ marginTop: 10 }}>{block.why}</p>}
-          <button className="btn btn--blue se-next" onClick={onNext}>
-            Next →
-          </button>
-        </>
+      {block.game.mode === 'order' && <OrderGame game={block.game} onMiss={finish} onWin={() => finish()} />}
+      {block.game.mode === 'pair' && <PairGame game={block.game} onMiss={finish} onWin={() => finish()} />}
+      {block.game.mode === 'line' && <LineGame game={block.game} onMiss={finish} onWin={() => finish()} />}
+      {right !== null && (
+        <Verdict right={right} why={block.why ?? ''} rate={rate} speakOn={speakOn} onNext={onNext} />
       )}
     </div>
   )
@@ -783,38 +805,38 @@ function GameCard({ block, onNext, onRecord }: { block: SeGame; onNext: () => vo
 
 function OrderGame({
   game,
-  onSlip,
+  onMiss,
   onWin,
 }: {
   game: Extract<SeGame['game'], { mode: 'order' }>
-  onSlip: () => void
+  onMiss: (miss: Miss) => void
   onWin: () => void
 }) {
   const sorted = useMemo(() => [...game.values].sort((a, b) => a.value - b.value), [game.values])
   const shuffled = useMemo(() => [...game.values].sort(() => Math.random() - 0.5), [game.values])
   const [placed, setPlaced] = useState<string[]>([])
-  const [shake, setShake] = useState<string | null>(null)
+  const [missed, setMissed] = useState<string | null>(null)
 
   const tap = (label: string) => {
-    if (placed.includes(label)) return
+    if (missed !== null || placed.includes(label)) return
     if (sorted[placed.length].label === label) {
       sfx.tick()
       const next = [...placed, label]
       setPlaced(next)
       if (next.length === sorted.length) onWin()
     } else {
-      sfx.error()
-      onSlip()
-      setShake(label)
-      setTimeout(() => setShake(null), 400)
+      setMissed(label)
+      onMiss({ given: `${[...placed, label].join(', ')} …`, expected: sorted.map((v) => v.label).join(', ') })
     }
   }
 
   return (
     <>
       <p className="muted">{game.hint ?? 'Tap them smallest first.'}</p>
+      {/* After a miss the row fills in the whole right order: the answer is
+          shown, never left for another go. */}
       <div className="se-order__done">
-        {placed.map((l) => (
+        {(missed !== null ? sorted.map((v) => v.label) : placed).map((l) => (
           <span key={l} className="se-chip se-chip--done">
             {l}
           </span>
@@ -824,8 +846,10 @@ function OrderGame({
         {shuffled.map((v) => (
           <button
             key={v.label}
-            className={`se-chip${placed.includes(v.label) ? ' se-chip--gone' : ''}${shake === v.label ? ' se-shake' : ''}`}
-            disabled={placed.includes(v.label)}
+            className={`se-chip${
+              missed === v.label ? ' se-chip--wrong se-shake' : placed.includes(v.label) || missed !== null ? ' se-chip--gone' : ''
+            }`}
+            disabled={missed !== null || placed.includes(v.label)}
             onClick={() => tap(v.label)}
           >
             {v.label}
@@ -838,32 +862,33 @@ function OrderGame({
 
 function PairGame({
   game,
-  onSlip,
+  onMiss,
   onWin,
 }: {
   game: Extract<SeGame['game'], { mode: 'pair' }>
-  onSlip: () => void
+  onMiss: (miss: Miss) => void
   onWin: () => void
 }) {
-  const rights = useMemo(() => game.pairs.map((p) => p[1]).sort(() => Math.random() - 0.5), [game.pairs])
+  const shuffled = useMemo(() => game.pairs.map((p) => p[1]).sort(() => Math.random() - 0.5), [game.pairs])
   const [held, setHeld] = useState<string | null>(null)
   const [matched, setMatched] = useState<string[]>([])
-  const [shake, setShake] = useState<string | null>(null)
+  const [missed, setMissed] = useState(false)
+  // After a miss the right column lines up with the left, so every row reads
+  // as a correct pair — that is the answer, shown.
+  const rights = missed ? game.pairs.map((p) => p[1]) : shuffled
 
   const tapRight = (r: string) => {
-    if (!held || matched.includes(r)) return
-    const ok = game.pairs.some(([l, rr]) => l === held && rr === r)
-    if (ok) {
+    if (missed || !held || matched.includes(r)) return
+    const partner = game.pairs.find(([l]) => l === held)?.[1]
+    if (partner === r) {
       sfx.tick()
       const next = [...matched, held]
       setMatched(next)
       setHeld(null)
       if (next.length === game.pairs.length) onWin()
     } else {
-      sfx.error()
-      onSlip()
-      setShake(r)
-      setTimeout(() => setShake(null), 400)
+      setMissed(true)
+      onMiss({ given: `${held} ↔ ${r}`, expected: `${held} ↔ ${partner}` })
     }
   }
 
@@ -875,8 +900,8 @@ function PairGame({
           {game.pairs.map(([l]) => (
             <button
               key={l}
-              className={`se-chip${matched.includes(l) ? ' se-chip--done' : held === l ? ' se-chip--held' : ''}`}
-              disabled={matched.includes(l)}
+              className={`se-chip${matched.includes(l) || missed ? ' se-chip--done' : held === l ? ' se-chip--held' : ''}`}
+              disabled={missed || matched.includes(l)}
               onClick={() => {
                 sfx.click()
                 setHeld(l)
@@ -893,8 +918,8 @@ function PairGame({
             return (
               <button
                 key={r}
-                className={`se-chip${taken ? ' se-chip--done' : ''}${shake === r ? ' se-shake' : ''}`}
-                disabled={taken}
+                className={`se-chip${taken || missed ? ' se-chip--done' : ''}`}
+                disabled={missed || taken}
                 onClick={() => tapRight(r)}
               >
                 {r}
@@ -909,30 +934,28 @@ function PairGame({
 
 function LineGame({
   game,
-  onSlip,
+  onMiss,
   onWin,
 }: {
   game: Extract<SeGame['game'], { mode: 'line' }>
-  onSlip: () => void
+  onMiss: (miss: Miss) => void
   onWin: () => void
 }) {
   const [i, setI] = useState(0)
-  const [shake, setShake] = useState<number | null>(null)
+  const [missed, setMissed] = useState<number | null>(null)
   const spots: number[] = []
   for (let v = game.from; v <= game.to + 1e-9; v += game.step) spots.push(Number(v.toFixed(4)))
   const target = game.targets[i]
 
   const tap = (v: number) => {
-    if (!target) return
+    if (missed !== null || !target) return
     if (Math.abs(v - target.at) < 1e-6) {
       sfx.tick()
       if (i + 1 >= game.targets.length) onWin()
       else setI(i + 1)
     } else {
-      sfx.error()
-      onSlip()
-      setShake(v)
-      setTimeout(() => setShake(null), 400)
+      setMissed(v)
+      onMiss({ given: `${target.label} at ${v}`, expected: `${target.label} at ${target.at}` })
     }
   }
 
@@ -945,7 +968,16 @@ function LineGame({
         {spots.map((v) => (
           <button
             key={v}
-            className={`se-line__spot${shake === v ? ' se-shake' : ''}`}
+            className={`se-line__spot${
+              missed === null
+                ? ''
+                : v === missed
+                  ? ' se-line__spot--wrong se-shake'
+                  : target && Math.abs(v - target.at) < 1e-6
+                    ? ' se-line__spot--right'
+                    : ''
+            }`}
+            disabled={missed !== null}
             onClick={() => tap(v)}
             aria-label={String(v)}
           >

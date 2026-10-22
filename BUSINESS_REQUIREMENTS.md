@@ -1802,7 +1802,7 @@ Drawings are a closed set of inline renderers (`SeArtwork.tsx`, with the newer o
 
 Every drawing animates in when its card appears (slices slide out, blocks drop, the storm pulses, lines draw themselves) and stays still under reduced motion. **A drawing on a question shows the situation, never the result**: number-line hops, which literally draw the answer, are only allowed on explanations and walk-throughs, and the audit enforces it (§24l).
 
-Games come in three modes: **order** (tap them in order — smallest first, or a step order with its own `hint`, like crafting a torch), **pair** (match left to right) and **line** (tap the spot on a number line).
+Games come in three modes: **order** (tap them in order — smallest first, or a step order with its own `hint`, like crafting a torch), **pair** (match left to right) and **line** (tap the spot on a number line). **The first wrong tap ends the game** (§24f).
 
 A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the bench). The bench is deliberately bigger than the spine: see §24d.
 
@@ -1953,6 +1953,7 @@ Ask him if he is on rational numbers and he does not know. Show him `|−20|` an
 - **Sealing no longer blocks a retry** — 🔁 Review (§24v) offers every outstanding miss whenever he wants it. What sealing still does is what it was for: record the miss, put it in front of Dad, and get it explained. The 🔧 row is Dad's per-topic shortcut into the same questions.
 - **Choice questions show three options** (§14b's rule, same reasoning), and the right one must never be the longest.
 - **Build questions** hand him the answer in pieces: every character of it, shuffled, plus decoys (`seTiles`). He is being asked whether he knows the answer, not whether he can type.
+- **A game is a question too.** The first wrong tap ends it: the board freezes on the right answer (the whole order filled in, the pairs lined up, the spot on the line lit green), the miss is recorded with what he tapped, and the same ✅ / ❌ verdict and **Next →** follow as on any other card. Until Oct 2026 a wrong tap only shook and he could keep tapping until the game gave in — the one place left in the player where a miss came with a second go.
 
 ### 24g. Videos he cannot walk out of
 
