@@ -2114,4 +2114,28 @@ Three buttons with a number on each is a **one-in-three guess**, and on a questi
 Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the six pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 
 
+## 25. The Sunday email — Ben's week, in my inbox (`npm run email:weekly`)
+
+Two of this app's best pages are pages **I have to remember to open**. The Banker's desk knows Ben has been sitting on three unallocated paydays; the Report knows four of his mistakes are sealed behind a button only I can press (§24f). Neither of them can say so unless I go and look, and the weeks I do not look are exactly the weeks it matters.
+
+So once a week it comes to me instead. Sunday 08:30, by email, read-only.
+
+- **It opens with what I have to do**, never with the numbers. 🎯 *Do this week* is at most **five items, ranked** — sealed mistakes first (they are the only thing in the app that is stuck on me), then an allowance he has not placed, a payback waiting on "Got it", an undecided Shock Test, a failing market feed, and the subject whose window is shutting. No actions outstanding and it says so in one green line. A list of nine is a list nobody acts on.
+- **🏦 The money** (§8b) — total treasure and its week's move, every chest with its balance, what he put in, what it earned and its lifetime return, Dad's RESP, his Berries, and **every transaction of the week** in plain words. A week figure is the **balance** moving, so a $6 transfer out of the Rocket Ship reads −83% and has nothing to do with the Nasdaq; the email says that under the section rather than quietly passing it off as a return.
+- **🏫 St. Eugene 7** (§24) — the pace line (chapters left · his own measured minutes each · hours a week to finish by June), a row per subject with done/total, what the calendar says is due, the weeks left in its window and the state (§24x), the four show-up numbers (§24x), what he actually did **this week** (questions, how many right, days at it, chapters touched), the chapters still under 60%, and the questions his **latest** answer still gets wrong (§24u) as he saw them.
+- **Silence is a finding.** Seven days with no lesson is its own action item, because that is the week it is easiest not to notice.
+
+### How it is built
+
+- **It computes nothing of its own.** `scripts/weekly-email.entry.ts` is TypeScript so it can call the app's own `simulateBank`, `seNowBySubtopic`, `sePaceBySubject`, `sePlanOfYear` and `seShowUp`. A second implementation of "how far behind is History" would drift from the screen within a month, and then the email and the app would disagree about his year.
+- **It never writes.** The bank is caught up to today on a `structuredClone`, so the email quotes today's balance without a cron job mutating Ben's save at half past eight on a Sunday. Both documents it touches (`profiles/ben`, `app/marketData`) are read-only to it.
+- **It spends no AI.** Every sentence in it is assembled from his own data (CLAUDE.md — the OpenRouter key is the app's, not a tool).
+- **Gmail SMTP via nodemailer**, the same shape as the CheckSites page-watch digest. The App Password is read from the **macOS Keychain** at send time (`wheels-gmail`, falling back to the `ryfc-watch-gmail` entry for the same address) so it is never on disk and never in this repo.
+- **Cron, not launchd**: `scripts/weekly-email-cron.sh` at `30 8 * * 0`, beside the existing `bank:market` job at 08:13 — so the balances it quotes come from that morning's market series, not yesterday's.
+- `npm run email:weekly -- --dry-run` prints it and sends nothing; `--out file.html` writes the HTML to open in a browser.
+
+It has no URL, because it has no page: it is a cron job like `bank:market`, not a sub-app (§1c).
+
+Code: `scripts/weekly-email.mjs` (read + send), `scripts/weekly-email.entry.ts` (the report), `scripts/weekly-email-cron.sh` (the schedule).
+
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.
