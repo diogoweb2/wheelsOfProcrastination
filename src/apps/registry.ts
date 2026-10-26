@@ -352,6 +352,10 @@ export const APPS: AppDef[] = [
     tabs: [
       { id: 'subjects', label: 'My year', icon: '📚' },
       { id: 'finder', label: 'Find it', icon: '🔍' },
+      // §24z — the shelf. Every video in the year, by chapter and page. He
+      // learns by watching, and until this existed a video was only reachable
+      // by starting the right lesson and hoping the planner dealt it.
+      { id: 'videos', label: 'Videos', icon: '🎬' },
       { id: 'lesson', label: 'Lesson', icon: '📘' },
       // §24v — his own mistakes, by chapter, on demand. His, not Dad's: it is
       // the one retry route he does not have to be let through.
@@ -365,6 +369,9 @@ export const APPS: AppDef[] = [
       { id: 'helping', label: 'Helping', icon: '🤝' },
       { id: 'report', label: 'Report', icon: '📊' },
       { id: 'subjects', label: 'The year', icon: '📚' },
+      // §24z — the same shelf. Dad's copy is for checking what is on it, so
+      // it never offers to start a lesson in Ben's name.
+      { id: 'videos', label: 'Videos', icon: '🎬' },
     ],
   },
   {

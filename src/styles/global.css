@@ -6324,6 +6324,43 @@ input, select { font-family: inherit; }
 .se-topic__sample { font-size: 12px; color: var(--muted); }
 .se-topic__score { font-size: 13px; font-weight: 900; color: var(--muted); flex: none; }
 
+/* --- 🎬 the shelf (§24z) --- */
+.se-shelf__find {
+  width: 100%; padding: 11px 13px; border-radius: 12px; border: 2px solid var(--line);
+  background: var(--bg2); color: var(--text); font-size: 15px; font-weight: 700; margin-bottom: 12px;
+}
+.se-shelf__find:focus { outline: none; border-color: var(--blue); }
+.se-shelf__find::placeholder { color: var(--muted); font-weight: 600; }
+.se-shelf__page { margin-bottom: 10px; }
+.se-shelf__pagetitle {
+  font-size: 14px; font-weight: 900; margin: 6px 0 5px; display: flex; align-items: center; gap: 6px;
+}
+
+.se-vid {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font: inherit;
+  color: var(--text); cursor: pointer; background: var(--card); border: 2px solid var(--line);
+  border-radius: 12px; padding: 7px; margin-bottom: 7px;
+}
+.se-vid:active { transform: scale(0.99); }
+.se-vid--seen { border-color: rgba(46, 204, 113, 0.5); }
+.se-vid__thumb {
+  position: relative; flex: none; width: 108px; aspect-ratio: 16 / 9; border-radius: 8px;
+  overflow: hidden; background: #000;
+}
+.se-vid__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.se-vid__clock {
+  position: absolute; right: 3px; bottom: 3px; padding: 1px 4px; border-radius: 4px;
+  background: rgba(0, 0, 0, 0.78); font-size: 10px; font-weight: 900; letter-spacing: 0.3px;
+}
+.se-vid__play {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8); opacity: 0.9;
+}
+.se-vid__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.se-vid__title { font-size: 14px; font-weight: 800; line-height: 1.3; }
+.se-vid__meta { font-size: 11px; color: var(--muted); }
+.se-vid__meta em { font-style: normal; color: var(--profit); font-weight: 900; }
+
 /* --- the topic sheet --- */
 .se-sheet {
   position: fixed; inset: 0; z-index: 60; background: rgba(6, 18, 30, 0.72);

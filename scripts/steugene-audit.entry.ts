@@ -10,6 +10,8 @@
 import { SE_SUBJECTS, CURRENT_SUBTOPIC, seFind, seAllSubtopics } from '../src/logic/steugene'
 import { WRITTEN_IDS, ensurePack, writtenSubtopics } from '../src/steugene/packs'
 import { SE_LENGTHS, seAvailable, seBlockSeconds, sePlanLesson, seTiles } from '../src/logic/steugeneLesson'
+import { SE_VIDEOS } from '../src/steugene/videoIndex'
+import { collectVideos } from './steugene-video-index.entry'
 import type { SeArt, SeBlock, SeChoice } from '../src/steugene/types'
 
 export async function audit(verbose = false): Promise<boolean> {
@@ -71,6 +73,15 @@ export async function audit(verbose = false): Promise<boolean> {
         console.log(`   ${String(m).padStart(2)} min → ${plan.length} cards · ${qs} questions`)
       }
     }
+  }
+
+  // 🎬 The shelf's catalogue (§24z) is a COPY of what the packs hold, so it
+  // can go stale the moment anyone adds a video — and a stale shelf is a video
+  // he cannot find or a row that plays nothing. Comparing it here means the
+  // same command that already reads every pack is the one that notices.
+  const fresh = JSON.stringify(await collectVideos())
+  if (fresh !== JSON.stringify(SE_VIDEOS)) {
+    fail(`src/steugene/videoIndex.ts is out of date — run \`npm run se:video-index\` (packs have ${JSON.parse(fresh).length} videos, the index has ${SE_VIDEOS.length})`)
   }
 
   console.log(

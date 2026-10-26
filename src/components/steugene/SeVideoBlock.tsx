@@ -72,6 +72,7 @@ export function SeVideoBlock({
   start,
   end,
   watchFor,
+  free,
   onFinished,
 }: {
   youtube: string
@@ -81,6 +82,13 @@ export function SeVideoBlock({
   end?: number
   /** The one thing to listen for, pinned above the frame (§24g). */
   watchFor?: string
+  /**
+   * 🎬 The shelf (§24z): he opened this himself, so there is no hold on it and
+   * nothing to skip TO. The frame stays shielded — the point of the shield was
+   * never the hold, it is that YouTube's chrome is a corridor out — but the
+   * "skip in 1:12" button does not belong on a video nobody made him watch.
+   */
+  free?: boolean
   /** Fired once: it played out, he let it go after the hold, or it broke. */
   onFinished: (reason: 'ended' | 'broken' | 'skipped') => void
 }) {
@@ -230,7 +238,7 @@ export function SeVideoBlock({
         </div>
       )}
 
-      {state !== 'broken' && state !== 'ended' && (
+      {!free && state !== 'broken' && state !== 'ended' && (
         // Two minutes in, he is allowed to leave. The button says exactly
         // where it goes, because the questions come either way (§24g) and
         // finding that out afterwards would feel like a trick.

@@ -1,14 +1,15 @@
 // 🏫 St. Eugene 7 (§24) — his actual school year, as an app.
 //
-// Six pages, each its own URL (§1c):
+// Seven pages, each its own URL (§1c):
 //   /steugene7/subjects  the year, in the order his class walks it
 //   /steugene7/finder    "what are you learning right now?" — by sight, not by name
+//   /steugene7/videos    the shelf: every video in the year, by chapter (§24z)
 //   /steugene7/lesson    the lesson in flight
 //   /steugene7/review    his own mistakes, by chapter, whenever he wants
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
 //   /steugene7/helping   (Dad) the card he is on this second, with the answer key
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { sfx } from '../audio'
@@ -48,6 +49,10 @@ import { speak } from '../lib/speak'
 import { dayKey, prettyDay } from '../logic/dates'
 import type { AppData, SeAnswer, SeFixLock, SeStat } from '../types'
 
+// 🎬 The shelf (§24z). Lazy on purpose: it carries the catalogue of all 296
+// video titles, which is no use to anyone who never opens the tab.
+const SeVideos = lazy(() => import('../components/steugene/SeVideos').then((m) => ({ default: m.SeVideos })))
+
 export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: string) => void }) {
   const { activeProfileId } = useStore()
   const isAdmin = activeProfileId === PARENT_ID
@@ -57,6 +62,11 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
       {tab === 'subjects' && <SubjectsTab setTab={setTab} />}
       {tab === 'finder' && <FinderTab setTab={setTab} />}
       {tab === 'lesson' && <LessonTab setTab={setTab} />}
+      {tab === 'videos' && (
+        <Suspense fallback={<p className="muted">Opening the shelf…</p>}>
+          <SeVideos onLesson={(id) => void startLesson(id, setTab)} />
+        </Suspense>
+      )}
       {tab === 'review' && <ReviewTab setTab={setTab} />}
       {tab === 'report' && <ReportTab admin={isAdmin} setTab={setTab} />}
       {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
@@ -674,6 +684,21 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
 let walkedInto: number | null = null
 function walkIn() {
   walkedInto = useStore.getState().data.steugene.run?.startedAt ?? null
+}
+
+/**
+ * Open a subtopic's lesson from somewhere that is not the year list — the 🎬
+ * shelf's "do this lesson" (§24z). The same three steps as `TopicSheet`: the
+ * pack is its own chunk (§24k), so it has to land before the queue can be
+ * dealt, and the walk-in flag stops the Lesson tab asking "resume or restart"
+ * about a lesson we just started.
+ */
+async function startLesson(subtopicId: string, setTab: (tab: string) => void) {
+  sfx.fanfare()
+  await ensurePack(subtopicId)
+  useStore.getState().seStart(subtopicId)
+  walkIn()
+  setTab('lesson')
 }
 
 /** ⏸ The lesson still open: ▶️ Resume it, or 🔄 Start it over (§24d). */

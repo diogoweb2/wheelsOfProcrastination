@@ -50,6 +50,21 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
+          {
+            // 🎬 The St. Eugene video shelf (§24z). Its rows are YouTube's own
+            // stills — ~300 of them, ~10 KB each, and the same picture every
+            // time, because a thumbnail is content-addressed by video id. So
+            // the shelf costs its pictures once and scrolls free afterwards,
+            // which on his tablet is the difference between a shelf and a
+            // page of grey rectangles.
+            urlPattern: ({ url }) => /(^|\.)ytimg\.com$/.test(url.hostname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'se-video-thumbs',
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 90 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
       },
       manifest: {
