@@ -2145,7 +2145,7 @@ Plus, per plan, a **stuck list** (try it with an easy number; cross out the word
 
 He taps. No autoplay by default — a picture that moves on before he has finished reading teaches him he is too slow — with ▶️ there for when he wants it to run itself, the question sentence marked in yellow on every example (finding it is the move he skips), and a 🔊 that reads the problem. **Nothing is marked, scored or recorded**: it is a demonstration, and the moment it enters the report it becomes a test. The only state is a ✓ per way in `localStorage`, so the ladder shows him how far he has got.
 
-**Every one of the ten has a second, harder way as well** — the 🏴‍☠️ Grand Line (§24ac). The bar is always what opens; the pirate way is a second tap, never the default.
+**Every one of the ten can be drawn a second way** — as crates on a deck (§24ac). Same moves, same words, same ⭐. One method, two pictures.
 
 - **The plan in words** is still there, collapsed at the bottom of the page, with a drawing on every move and his own pixel sprites bobbing across the card. It is what the bar above has been doing. It is on Dad's menu too — helping him at the kitchen table in different words to the ones the app used is how a boy ends up carrying two methods and trusting neither.
 - **The 🧭 button on the question** is where it is used. It carries the current move's drawing too, re-mounted (and so re-animated) each time he steps on, because the motion is half of what the move is saying. It sits above "🤔 I don't get it yet" on every maths question made of sentences (12 words or more — `seTipFor`; "Work it out: 2/5 × 3" gets nothing, because a button that is not a help is clutter). Opened once, it stays open for the rest of the lesson: re-deciding to ask on every card is the friction it exists to remove.
@@ -2153,39 +2153,32 @@ He taps. No autoplay by default — a picture that moves on before he has finish
 
 **The strategy is taught in the pack as well as offered on the page.** `math-frac-word` (§24a) opens on the five moves rather than on a fraction, and its bench carries **reading cards with no arithmetic in them at all** — "what is this question asking for?", "the 2/3 is two thirds of WHAT?", "which words tell you to start again from the leftover?" — because the move he misses is the one worth practising on its own. Four of its eight videos are about method, not fractions: the 3 Reads strategy on a one-step and a two-step problem, bar models, and turning English into a sum.
 
-### 24ac. 🏴‍☠️ The Grand Line — the same ten problems, in one line (`/steugene7/tips`)
+### 24ac. 🏴‍☠️ The same explanation, drawn a second way (`/steugene7/tips`)
 
-**§24ab's bar is the right first way and the wrong only way.** It is slow, safe and seven or eight moves long every single time, and the method he is actually expected to be writing by the end of grade 7 is one line. So every one of the ten worked examples carries a **second take**, and the second take is a different idea rather than a different skin:
+**There is one method in this app and §24ab is it.** Two methods is the worst thing to hand a boy who already stalls at the paragraph — he would spend his attention choosing. What he can change is the **picture**:
 
-> each sentence of the problem is an **island**, and every island **keeps** a fraction of the hold. Multiply the keeps. That is the answer.
->
-> `500 × 3/5 × 1/2 = 150` — one line, nothing subtracted, ever.
+- **▦ bars** — one bar, cut into equal parts. The spent parts collapse and the leftover stretches out to fill the bar. An **area** model: the whole is a length.
+- **🏴‍☠️ crates** — the same parts as counted crates on the deck of a ship. The spent ones fall in the sea; the survivors renumber from 1. A **set** model: the whole is a pile of things.
 
-Three reasons it is worth having as well as the bar, not instead of it:
+That is the pair a textbook would use, and it is the only axis on which they differ. `SeCrates` reads **the very same `SeWorkStage` data** as `SeBarModel` — so the moves, the words, the arithmetic, the ⭐ and 🔑 and the answer cannot drift apart, because there is only one copy of them. Some days a length makes it obvious; some days counting objects does.
 
-- **It is the method, not a drawing of one question.** The bar shows him what is happening; the chain shows him what to *write*.
-- **It kills the subtraction.** Every wrong answer on his worksheet came from subtracting in the middle and losing the thread. "2/5 goes" is never written down as a take — it is written down as *keeps 3/5*.
-- **Backwards becomes a direction, not a second procedure.** The four level-4 problems sail west again: the ship turns round, the wake reverses, the chips go ↩. Same voyage, read right to left.
+**The ⭐ lands harder on the deck, if anything.** When the leftover becomes the new whole, the doomed crates tip over the side and the survivors **renumber from 1** — the six crates that were 5…10 are now 1…6. "The remaining becomes the new whole" stops being a sentence to remember and becomes a thing he just watched happen to six boxes. The four backwards ones run it in reverse: the crates come back **out** of the water as the whole deck is restocked and multiplied up.
 
-**The map does the explaining** (`SeVoyageMap`), in three strips, and only one of them changes much per move:
+Three distinctions the deck draws that a bar cannot:
 
-1. **the route** — where in the *sentences* he is. One island per sentence, with what it takes and, in yellow, what it keeps. Behind the ship they go green; the island he is at is ringed and the ship is moored under it.
-2. **the hold** — what he has right now, big, over the crates it is packed into (his own pixel sprites, §24b). Crates an island takes are **thrown over the side** and left on screen as ghosts, so "2 of the 5 went" is still readable after the splash.
-3. **the log pose** — the chain of keeps, chip by chip. Grey multiplies, green results and givens, blue turn-arounds. This is the line he has to be able to write.
+- **Spent is not the same as repacked.** A crate that was marked `gone` and then leaves goes in the sea. A crate that leaves without ever being spent was *re-cut* — Victoria's three fifths become ten tenths — and it simply is not on deck any more. Dropping those in the sea would say she threw away the flour she is about to bake with.
+- **What sank stays visible.** The bar's spent parts collapse to nothing; the sea keeps them, faint and tilted, so he can still count what was used.
+- **The bracket becomes a box.** The bar's brace is a dashed box drawn round the crates it names, with the same label.
 
-**The beat repeats, and only three of them exist:** 🧭 *write what the island keeps, never what it takes* (in all ten, early) · ⚓ *the whole voyage on one line* (in all ten, last move) · 🔙 *you know what one part is worth, turn round and multiply up* (the four backwards ones). He is meant to get bored of them.
+Switching picture **keeps the move he is on**, because it is the same move: "draw me *this* bit the other way" is the entire reason for the second picture. The ladder counts **ten**, not twenty — a problem is ✓ when he reaches the end of it in whichever picture he watched, with a ▦ and a 🏴‍☠️ pill showing which. Sound reuses the duel's One Piece clips (§13) and adds no files: the chest cracks when the crates hit the water, the legendary lands on the last move.
 
-Two pieces of content care taken deliberately: a given is written **`1/9 of it` `is 7 days`**, never `1/9 = 7 days`, because that equals sign is a false sentence and he is the last reader who should be shown one; and a turn-around chip **carries the number it restarts from** (`↩ 7` `× 9` `= 63 days`), because `1/9 ↩ × 9 = 63` reads as nonsense left to right. The two level-3-and-up islands that are fractions *of the pay* rather than *of the rest* (Ramon) are added before anything is multiplied — deciding what each fraction is **of** is the whole example.
-
-Sound uses the One Piece clips the Davy Back Duel already ships (§13) and adds no files: the chest cracks when the ship turns round, and the legendary lands on the last move. Data in `src/steugene/voyage.ts`, validated out of band — route bounds, crate counts, one 🧭 and one ⚓ per voyage, no log pose that goes blank, and every chain multiplied out and checked against the answer.
-
-**The ladder counts twenty, not ten.** Each row has a ▦ and a 🏴‍☠️ pill that light when he reaches the end of that way, the 🏴‍☠️ opens straight into the pirate take, and the chosen way is sticky across "next one" — a boy who has decided to try the fast way should not be dropped back into the slow one. On the bar's last move the primary button becomes **🏴‍☠️ The fast way →**, on the same problem he has just watched solved slowly.
+Checked out of band: every move of every example rendered to static markup, the deck always numbered 1…n, every brace carrying its label, and every ⭐ move proved to take crates off the deck and put them in the sea.
 
 ### 24j. URLs (§1c)
 
 `/steugene7/subjects` · `/steugene7/finder` · `/steugene7/videos` · `/steugene7/tips` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping` (plus the same `/steugene7/videos` and `/steugene7/tips`).
 
-Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs + `videoIndex.ts`, the shelf's catalogue + `tips.ts`, the plans, §24ab + `worked.ts` / `voyage.ts`, the two ways through the ten, §24ab/§24ac), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneVideos.ts` (the shelf, §24z), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the shelf, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the eight pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
+Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs + `videoIndex.ts`, the shelf's catalogue + `tips.ts`, the plans, §24ab + `worked.ts`, the ten worked examples and their moves, §24ab/§24ac), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneVideos.ts` (the shelf, §24z), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the shelf, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the eight pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 
 
 ## 25. The Sunday email — Ben's week, in my inbox (`npm run email:weekly`)

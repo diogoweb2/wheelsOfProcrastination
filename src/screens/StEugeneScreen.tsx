@@ -50,7 +50,6 @@ import { speak } from '../lib/speak'
 import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
 import { SE_LEVELS, SE_WORKED } from '../steugene/worked'
 import { SeWorkedPlayer, type SeTake } from '../components/steugene/SeWorked'
-import { SE_VOYAGES, seVoyageFor } from '../steugene/voyage'
 import { SeArtwork } from '../components/steugene/SeArtwork'
 import { SpriteSvg } from '../components/steugene/art/sprites'
 import { dayKey, prettyDay } from '../logic/dates'
@@ -577,8 +576,9 @@ function Verdicts({ subtopicId }: { subtopicId: string }) {
  */
 function TipsTab() {
   const [openEx, setOpenEx] = useState<string | null>(null)
-  // Which way he is watching. Sticky across "next one": a boy who has decided
-  // to try the fast way should not be dropped back into the slow one.
+  // Which PICTURE he is watching — not which method; there is only one method.
+  // Sticky across "next one", because a boy who finds the crates easier to read
+  // should not have to re-pick them on every problem.
   const [take, setTake] = useState<SeTake>('bar')
   const [seen, setSeen] = useState<string[]>(() => {
     try {
@@ -617,7 +617,6 @@ function TipsTab() {
       <SeWorkedPlayer
         key={`${ex.id}:${take}`}
         ex={ex}
-        v2={seVoyageFor(ex.id)}
         open={take}
         onTake={setTake}
         onDone={mark}
@@ -627,25 +626,24 @@ function TipsTab() {
     )
   }
 
-  // Twenty things to watch, not ten: every problem has a slow way and a fast
-  // one, and finishing either is progress worth showing.
-  const ways = SE_WORKED.length + SE_VOYAGES.length
-  const done = seen.filter((id) => SE_WORKED.some((w) => w.id === id || `${w.id}:v2` === id)).length
+  // Ten problems, not twenty things to do. A problem counts as watched once he
+  // has reached the end of it — in whichever picture he watched it in.
+  const done = SE_WORKED.filter((w) => seen.includes(w.id) || seen.includes(`${w.id}:crates`)).length
 
   return (
     <>
       <div className="h1">🧭 Watch one get solved</div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        Two ways on every one. <strong>▦ One bar</strong> cuts it up slowly — start there.{' '}
-        <strong>🏴‍☠️ Grand Line</strong> does the whole thing in one line, and by the hard ones you will
-        have seen that trick ten times.
+        One move per tap. The easy ones first — and by the hard ones you will have seen the trick about
+        eight times. Every one can be drawn as <strong>▦ bars</strong> or as <strong>🏴‍☠️ crates</strong>:
+        same moves, same answer, whichever is easier to look at.
       </p>
 
       {!!done && (
         <div className="card se-wk__progress">
-          <strong>{done} of {ways} watched</strong>
+          <strong>{done} of {SE_WORKED.length} watched</strong>
           <div className="se-wk__track">
-            <div className="se-wk__fill" style={{ width: `${Math.round((done / ways) * 100)}%` }} />
+            <div className="se-wk__fill" style={{ width: `${Math.round((done / SE_WORKED.length) * 100)}%` }} />
           </div>
         </div>
       )}
@@ -660,11 +658,10 @@ function TipsTab() {
             </span>
           </div>
           {SE_WORKED.filter((w) => w.level === lv.level).map((w) => {
-            const v2 = seVoyageFor(w.id)
             const barDone = seen.includes(w.id)
-            const voyDone = seen.includes(`${w.id}:v2`)
+            const crateDone = seen.includes(`${w.id}:crates`)
             return (
-              <div key={w.id} className={`card se-wk__row${barDone && (!v2 || voyDone) ? ' se-wk__row--done' : ''}`}>
+              <div key={w.id} className={`card se-wk__row${barDone || crateDone ? ' se-wk__row--done' : ''}`}>
                 <button className="se-wk__open" onClick={() => show(w.id, 'bar')}>
                   <span className="se-wk__icon">
                     <SpriteSvg icon={w.icon} size={26} />
@@ -677,16 +674,15 @@ function TipsTab() {
                     ▦
                   </span>
                 </button>
-                {v2 && (
-                  <button
-                    className={`se-wk__way se-wk__way--tap${voyDone ? ' se-wk__way--on' : ''}`}
-                    onClick={() => show(w.id, 'voy')}
-                    title={`The Grand Line way: ${v2.idea}`}
-                    aria-label={`${w.title} — the Grand Line way`}
-                  >
-                    🏴‍☠️
-                  </button>
-                )}
+                {/* The same problem, same moves, drawn on the deck instead. */}
+                <button
+                  className={`se-wk__way se-wk__way--tap${crateDone ? ' se-wk__way--on' : ''}`}
+                  onClick={() => show(w.id, 'crates')}
+                  title="The same thing, drawn as crates"
+                  aria-label={`${w.title} — drawn as crates`}
+                >
+                  🏴‍☠️
+                </button>
               </div>
             )
           })}
