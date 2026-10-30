@@ -6676,8 +6676,12 @@ input, select { font-family: inherit; }
 .se-plan__dot--on { background: var(--blue); color: var(--bg); border-color: var(--blue); }
 .se-plan__dot--done { color: var(--text); border-color: var(--blue); }
 .se-plan__do { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; }
+.se-plan__art {
+  margin-top: 9px; padding: 8px 9px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 11px;
+}
 .se-plan__like {
-  margin: 7px 0 0; padding-left: 10px; border-left: 3px solid var(--line);
+  margin: 9px 0 0; padding-left: 10px; border-left: 3px solid var(--line);
   font-size: 14px; color: var(--muted); line-height: 1.45;
 }
 .se-plan__more { margin-top: 11px; width: 100%; }
@@ -6696,13 +6700,34 @@ input, select { font-family: inherit; }
 .se-tips__title .muted { font-size: 13px; line-height: 1.35; }
 .se-tips__chev { font-size: 17px; color: var(--muted); }
 .se-tips__speak { margin-top: 11px; width: 100%; }
-.se-tips__steps { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 11px; }
+.se-tips__steps { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 14px; }
 .se-tips__steps li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+.se-tips__body { display: block; flex: 1; min-width: 0; }
+/* The five moves walk in one after another. A page of instructions is the one
+   page he is least likely to read, so it had better not arrive as a block. */
+.se-tips__step { animation: seTipIn 420ms cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+@keyframes seTipIn { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
 .se-tips__n {
   flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
   display: grid; place-items: center; font-size: 13px; font-weight: 900;
   background: var(--blue); color: var(--bg);
 }
+/* The move, drawn. Indented under its own number so the column still reads
+   as a list and not as five pictures with captions. */
+.se-tips__art {
+  display: block; margin-top: 9px; padding: 9px 10px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 12px;
+}
+.se-tips__art .se-art, .se-plan__art .se-art, .se-tips__herobar .se-art { margin: 0; max-width: 100%; }
+
+/* The one picture the whole page is about. */
+.se-tips__hero { margin-bottom: 14px; }
+.se-tips__herobar { padding: 4px 2px 2px; }
+.se-tips__heroline { margin: 10px 0 0; font-size: 14px; font-weight: 800; line-height: 1.45; color: var(--text); }
+/* His own things, bobbing. Pure decoration, and it is doing a job: this is
+   the page that has to look like it belongs to him and not to a worksheet. */
+.se-tips__parade { display: flex; gap: 10px; justify-content: center; margin-top: 12px; padding: 7px 0; }
+.se-tips__parade > span { display: inline-flex; }
 .se-tips__steps strong { font-size: 15px; font-weight: 800; }
 .se-tips__like {
   display: block; margin-top: 4px; font-style: normal;
@@ -6718,6 +6743,10 @@ input, select { font-family: inherit; }
 .se-tips__words tr + tr th, .se-tips__words tr + tr td { border-top: 1px solid var(--line); }
 .se-tips__stuck { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .se-tips__note { opacity: 0.92; }
+
+@media (prefers-reduced-motion: reduce) {
+  .se-tips__step, .se-tips__parade > span { animation: none; }
+}
 
 /* 🏫 St. Eugene 7 §24g — "Listen for:". Above the frame and it stays there,
    so the two held minutes have a job in them instead of being a wait. */

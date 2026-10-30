@@ -17,11 +17,20 @@
 // question `helped`, because that is a step towards the answer. Reading the
 // plan is not, so it is free and it is not recorded.
 
+import type { SeArt, SeIcon } from './types'
+
 export interface SeTipStep {
   /** The move, as an instruction he can actually carry out. */
   do: string
   /** What it looks like on the worksheet question he is on. */
   like?: string
+  /**
+   * The move, drawn (§24b). He is a visual boy and this is a page of
+   * instructions — the one shape of page he is least likely to read. Every
+   * move gets a picture for the same reason every question in a lesson does,
+   * and they are the same closed set of renderers, so each one is a line.
+   */
+  art?: SeArt
 }
 
 export interface SeTipPlan {
@@ -31,6 +40,8 @@ export interface SeTipPlan {
   /** One line: when this plan is the right one to open. */
   when: string
   steps: SeTipStep[]
+  /** The pixel sprites that parade across the top of the card (§24b). */
+  icons?: SeIcon[]
   /** The short list for when he has done all five and it is still not moving. */
   stuck?: string[]
   /** Word → what it means in maths. The clue table. */
@@ -47,26 +58,54 @@ const WORDS: SeTipPlan = {
   emoji: '🧭',
   title: 'Any word problem — the five moves',
   when: 'The question is a paragraph and you do not know where to start.',
+  icons: ['pizza', 'diamond', 'pokeball', 'vbuck', 'robux', 'ball', 'trophy'],
   steps: [
     {
       do: 'Read it twice. The first time, do not look at a single number.',
       like: 'First read: "a girl has some flour, she bakes twice." That is all you need from read one.',
+      art: {
+        art: 'table',
+        head: ['read', 'what you are hunting for'],
+        rows: [
+          ['1st', 'just the story — no numbers'],
+          ['2nd', 'the numbers, and what they count'],
+        ],
+        hl: { r: 0 },
+      },
     },
     {
       do: 'Find the question. It is nearly always the last sentence.',
       like: '"How much flour is left?" Say it out loud. That is what the answer has to be.',
+      art: {
+        art: 'table',
+        head: ['the sentences'],
+        rows: [['Victoria has 2 kg of flour.'], ['She uses 2/5 of it for a pie.'], ['How much is left? ← the job']],
+        hl: { r: 2 },
+      },
     },
     {
       do: 'Circle every number, and write what it counts beside it.',
       like: '2 kg flour · 2/5 to the pie · 3/10 of the rest to the bread.',
+      art: {
+        art: 'table',
+        head: ['number', 'what it counts'],
+        rows: [
+          ['2 kg', 'flour at the start'],
+          ['2/5', 'goes into the pie'],
+          ['3/10', 'of what is LEFT'],
+        ],
+        hl: { r: 2 },
+      },
     },
     {
       do: 'Draw it. One bar for the whole thing, then cut it.',
       like: 'A bar for the 2 kg. Shade 2 of 5 parts for the pie. What is not shaded is what the next sentence works on.',
+      art: { art: 'bar', parts: 5, filled: 2, tone: 'focus', label: 'the 2 kg — the pie takes 2/5' },
     },
     {
       do: 'Answer the question you found in move 2 — then add the pieces back up.',
       like: 'Pie + bread + left should come to 2 kg. If it does not, something went wrong.',
+      art: { art: 'bar', parts: 5, filled: 5, tone: 'good', label: 'pie + bread + left = the whole' },
     },
   ],
   stuck: [
@@ -93,26 +132,46 @@ const FRAC: SeTipPlan = {
   emoji: '📝',
   title: 'Fractions — "of the remaining"',
   when: 'Something takes a fraction, and then something else takes a fraction too.',
+  icons: ['pizza', 'plank', 'robux', 'vbuck', 'pokeball'],
   steps: [
     {
       do: 'Ask out loud: a fraction of WHAT? Answer it before you multiply.',
       like: '3/10 of the REST, not 3/10 of the 2 kg. Those are different numbers.',
+      art: { art: 'pizza', pies: [{ slices: 4, gone: 1, take: 1, label: 'now take 1/3 of what is LEFT' }] },
     },
     {
       do: 'Work out what is left after the first cut. Write it down on its own line.',
       like: '2 kg, 2/5 gone → 3/5 of 2 kg = 6/5 kg left. That 6/5 is now the whole thing.',
+      art: { art: 'bar', parts: 5, filled: 2, tone: 'bad', label: '2/5 gone — 3/5 is the new whole' },
     },
     {
       do: 'The second fraction works on that leftover, and on nothing else.',
       like: 'Bread takes 3/10 of 6/5 — the 2 kg is finished with.',
+      art: {
+        art: 'table',
+        head: ['the 2 kg bag', 'the 6/5 kg left'],
+        rows: [['finished with', 'the bread works on THIS']],
+        hl: { c: 1 },
+      },
     },
     {
       do: 'Asked what is LEFT? Take the leftover fraction and skip the subtraction.',
       like: '3/10 is used, so 7/10 survives. 7/10 × 6/5 is one step instead of two.',
+      art: {
+        art: 'table',
+        head: ['used up', 'survives'],
+        rows: [
+          ['3/10', '7/10'],
+          ['3/4', '1/4'],
+          ['2/5', '3/5'],
+        ],
+        hl: { c: 1 },
+      },
     },
     {
       do: 'Given only the leftover? Work out what ONE part is worth, then multiply up.',
       like: '7 days is 1/9 of the holiday → 9 × 7 = 63 days in the whole holiday.',
+      art: { art: 'bar', parts: 9, filled: 1, tone: 'focus', label: '1 part = 7 days → 9 = 63 days' },
     },
   ],
   stuck: [

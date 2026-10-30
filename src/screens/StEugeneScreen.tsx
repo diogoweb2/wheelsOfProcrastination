@@ -48,6 +48,8 @@ import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
+import { SeArtwork } from '../components/steugene/SeArtwork'
+import { SpriteSvg } from '../components/steugene/art/sprites'
 import { dayKey, prettyDay } from '../logic/dates'
 import type { AppData, SeAnswer, SeFixLock, SeStat } from '../types'
 
@@ -580,6 +582,17 @@ function TipsTab() {
         You do not have to know the answer to start. You only have to know the first move.
       </p>
 
+      {/* One picture for the whole page: the bar you draw for every single one
+          of them. It grows in on open, which is the move it is teaching. */}
+      <div className="card se-tips__hero">
+        <div className="se-tips__herobar">
+          <SeArtwork art={{ art: 'bar', parts: 5, filled: 2, tone: 'focus', label: 'one bar · cut it · what is left' }} />
+        </div>
+        <p className="se-tips__heroline">
+          Nearly every word problem in maths is this picture. Draw the bar, cut it, and the words stop being in the way.
+        </p>
+      </div>
+
       {SE_TIPS.map((plan) => (
         <PlanCard
           key={plan.id}
@@ -621,6 +634,18 @@ function PlanCard({ plan, open, onOpen }: { plan: SeTipPlan; open: boolean; onOp
         </span>
       </button>
 
+      {/* His own things, drawn as pixel sprites in code (§24b) — no files in
+          public/, and they bob for ever so the page is never still. */}
+      {!!plan.icons?.length && (
+        <div className="se-tips__parade" aria-hidden>
+          {plan.icons.map((icon, i) => (
+            <span key={icon} className="se-a-bob" style={{ animationDelay: `${i * 170}ms` }}>
+              <SpriteSvg icon={icon} size={26} />
+            </span>
+          ))}
+        </div>
+      )}
+
       {open && (
         <>
           <button
@@ -635,11 +660,18 @@ function PlanCard({ plan, open, onOpen }: { plan: SeTipPlan; open: boolean; onOp
 
           <ol className="se-tips__steps">
             {plan.steps.map((st, i) => (
-              <li key={i}>
+              // Staggered, so the five moves arrive one after another instead
+              // of landing as one more paragraph (§24ab).
+              <li key={i} className="se-tips__step" style={{ animationDelay: `${90 + i * 110}ms` }}>
                 <span className="se-tips__n">{i + 1}</span>
-                <span>
+                <span className="se-tips__body">
                   <strong>{st.do}</strong>
                   {st.like && <em className="se-tips__like">{st.like}</em>}
+                  {st.art && (
+                    <span className="se-tips__art">
+                      <SeArtwork art={st.art} />
+                    </span>
+                  )}
                 </span>
               </li>
             ))}

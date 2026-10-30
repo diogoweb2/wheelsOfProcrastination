@@ -17,6 +17,7 @@
 import { useState } from 'react'
 import { sfx } from '../../audio'
 import { speak, canSpeak } from '../../lib/speak'
+import { SeArtwork } from './SeArtwork'
 import type { SeTipPlan } from '../../steugene/tips'
 
 export function SePlanBox({
@@ -86,7 +87,14 @@ export function SePlanBox({
         ))}
       </ol>
 
+      {/* Keyed on the move, so stepping to the next one re-mounts the drawing
+          and it animates in again (§24b) — the motion IS the explanation. */}
       <p className="se-plan__do">{s.do}</p>
+      {s.art && (
+        <div key={step} className="se-plan__art">
+          <SeArtwork art={s.art} />
+        </div>
+      )}
       {s.like && <p className="se-plan__like">{s.like}</p>}
 
       {step < plan.steps.length - 1 ? (

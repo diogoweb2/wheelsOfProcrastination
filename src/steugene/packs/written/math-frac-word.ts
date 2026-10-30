@@ -150,7 +150,7 @@ export const pack: SePack = {
         'That half is half of 300, not half of 500.',
         'Every "of the remaining" starts a fresh bar.',
       ],
-      art: { art: 'bars', rows: [{ label: 'dropped with', value: 500, tone: 'calm' }, { label: 'left after the ramp', value: 300, tone: 'focus' }], unit: 'wood' },
+      art: { art: 'bars', rows: [{ label: 'at the drop', value: 500, tone: 'calm' }, { label: 'after the ramp', value: 300, tone: 'focus' }], unit: ' wood' },
       secs: 55,
     },
     {
@@ -593,7 +593,7 @@ export const pack: SePack = {
         'Same fraction both times, and a different answer.',
         'Always ask yourself: a fraction of WHAT?',
       ],
-      art: { art: 'bars', rows: [{ label: '1/2 of the 500', value: 250, tone: 'focus' }, { label: '1/2 of the 250 left', value: 125, tone: 'calm' }], unit: 'wood' },
+      art: { art: 'bars', rows: [{ label: '1/2 of 500', value: 250, tone: 'focus' }, { label: '1/2 of the rest', value: 125, tone: 'calm' }], unit: ' wood' },
       secs: 50,
     },
     {
@@ -924,7 +924,7 @@ export const pack: SePack = {
         '200 + 150 + 150 = 500. It fits, so it is right.',
         'If the pieces do not add to the whole, something went wrong.',
       ],
-      art: { art: 'bars', rows: [{ label: 'ramp', value: 200, tone: 'focus' }, { label: 'box', value: 150, tone: 'calm' }, { label: 'left', value: 150, tone: 'good' }], unit: 'wood' },
+      art: { art: 'bars', rows: [{ label: 'ramp', value: 200, tone: 'focus' }, { label: 'box', value: 150, tone: 'calm' }, { label: 'left', value: 150, tone: 'good' }], unit: ' wood' },
       secs: 50,
     },
     {
