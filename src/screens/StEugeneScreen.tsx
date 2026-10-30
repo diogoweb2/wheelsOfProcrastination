@@ -10,7 +10,7 @@
 //   /steugene7/report    where he is strong, and where he needs me
 //   /steugene7/desk      (Dad) approve content, unlock mistakes, read the misses
 //   /steugene7/helping   (Dad) the card he is on this second, with the answer key
-import { Fragment, Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { sfx } from '../audio'
@@ -48,6 +48,8 @@ import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
+import { SE_LEVELS, SE_WORKED } from '../steugene/worked'
+import { SeWorkedPlayer } from '../components/steugene/SeWorked'
 import { SeArtwork } from '../components/steugene/SeArtwork'
 import { SpriteSvg } from '../components/steugene/art/sprites'
 import { dayKey, prettyDay } from '../logic/dates'
@@ -573,48 +575,127 @@ function Verdicts({ subtopicId }: { subtopicId: string }) {
  * worksheet, so the plan is never abstract.
  */
 function TipsTab() {
-  const [openId, setOpenId] = useState<string>(SE_TIPS[0]?.id ?? '')
+  const [openEx, setOpenEx] = useState<string | null>(null)
+  const [seen, setSeen] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(WATCHED_KEY) ?? '[]') as string[]
+    } catch {
+      return []
+    }
+  })
+  const [plansOpen, setPlansOpen] = useState(false)
+  const [openPlan, setOpenPlan] = useState(SE_TIPS[0]?.id ?? '')
+
+  const mark = useCallback((id: string) => {
+    setSeen((was) => {
+      if (was.includes(id)) return was
+      const next = [...was, id]
+      try {
+        localStorage.setItem(WATCHED_KEY, JSON.stringify(next))
+      } catch {
+        /* private window — the ticks just do not persist */
+      }
+      return next
+    })
+  }, [])
+
+  const ex = SE_WORKED.find((w) => w.id === openEx)
+  if (ex) {
+    const at = SE_WORKED.indexOf(ex)
+    const after = SE_WORKED[at + 1]
+    return (
+      <SeWorkedPlayer
+        key={ex.id}
+        ex={ex}
+        onDone={mark}
+        onClose={() => setOpenEx(null)}
+        {...(after ? { next: { label: 'Next one', go: () => setOpenEx(after.id) } } : {})}
+      />
+    )
+  }
+
+  const done = seen.length
 
   return (
     <>
-      <div className="h1">🧭 Stuck? Start here.</div>
+      <div className="h1">🧭 Watch one get solved</div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        You do not have to know the answer to start. You only have to know the first move.
+        Same bar every time. The easy ones first — and by the hard ones you will have seen the trick about eight times.
       </p>
 
-      {/* One picture for the whole page: the bar you draw for every single one
-          of them. It grows in on open, which is the move it is teaching. */}
-      <div className="card se-tips__hero">
-        <div className="se-tips__herobar">
-          <SeArtwork art={{ art: 'bar', parts: 5, filled: 2, tone: 'focus', label: 'one bar · cut it · what is left' }} />
+      {!!done && (
+        <div className="card se-wk__progress">
+          <strong>{done} of {SE_WORKED.length} watched</strong>
+          <div className="se-wk__track">
+            <div className="se-wk__fill" style={{ width: `${Math.round((done / SE_WORKED.length) * 100)}%` }} />
+          </div>
         </div>
-        <p className="se-tips__heroline">
-          Nearly every word problem in maths is this picture. Draw the bar, cut it, and the words stop being in the way.
-        </p>
-      </div>
+      )}
 
-      {SE_TIPS.map((plan) => (
-        <PlanCard
-          key={plan.id}
-          plan={plan}
-          open={openId === plan.id}
-          onOpen={() => {
-            sfx.click()
-            setOpenId(openId === plan.id ? '' : plan.id)
-          }}
-        />
+      {SE_LEVELS.map((lv) => (
+        <Fragment key={lv.level}>
+          <div className="se-wk__level">
+            <span className="se-wk__levelno">{lv.level}</span>
+            <span>
+              <strong>{lv.name}</strong>
+              <span className="muted">{lv.blurb}</span>
+            </span>
+          </div>
+          {SE_WORKED.filter((w) => w.level === lv.level).map((w) => (
+            <button
+              key={w.id}
+              className={`card se-wk__row${seen.includes(w.id) ? ' se-wk__row--done' : ''}`}
+              onClick={() => {
+                sfx.click()
+                setOpenEx(w.id)
+              }}
+            >
+              <span className="se-wk__icon">
+                <SpriteSvg icon={w.icon} size={26} />
+              </span>
+              <span className="se-wk__rowtext">
+                <strong>{w.title}</strong>
+                <span className="muted">{w.ask}</span>
+              </span>
+              <span className="se-wk__go" aria-hidden>
+                {seen.includes(w.id) ? '✓' : '▶'}
+              </span>
+            </button>
+          ))}
+        </Fragment>
       ))}
 
-      <div className="card se-tips__note">
-        <div className="h2" style={{ marginBottom: 6 }}>🔊 One more thing</div>
-        <p className="muted" style={{ margin: 0 }}>
-          Every question in a lesson has a 🔊 button. Reading is the hard part, not the maths — so let it read, and
-          listen with your pencil already on the paper.
-        </p>
-      </div>
+      {/* The method in words, underneath, for when he wants it without a
+          question attached. It is what the bar above has been doing. */}
+      <button
+        className="card se-tips__more"
+        onClick={() => {
+          sfx.click()
+          setPlansOpen(!plansOpen)
+        }}
+        aria-expanded={plansOpen}
+      >
+        <span>🗒️ The plan in words</span>
+        <span className="se-tips__chev" aria-hidden>{plansOpen ? '▾' : '▸'}</span>
+      </button>
+      {plansOpen &&
+        SE_TIPS.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            open={openPlan === plan.id}
+            onOpen={() => {
+              sfx.click()
+              setOpenPlan(openPlan === plan.id ? '' : plan.id)
+            }}
+          />
+        ))}
     </>
   )
 }
+
+/** Which worked examples he has reached the end of. His, local, ungraded. */
+const WATCHED_KEY = 'se.worked.seen'
 
 function PlanCard({ plan, open, onOpen }: { plan: SeTipPlan; open: boolean; onOpen: () => void }) {
   const spoken = `${plan.title}. ${plan.steps.map((st, i) => `${i + 1}. ${st.do}`).join(' ')}`

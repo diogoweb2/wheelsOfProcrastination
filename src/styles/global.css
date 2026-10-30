@@ -6687,6 +6687,134 @@ input, select { font-family: inherit; }
 .se-plan__more { margin-top: 11px; width: 100%; }
 .se-plan__foot { margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--blue); }
 
+/* 🏫 St. Eugene 7 §24ab — the bar model that solves it in front of him.
+   ONE bar, and the boxes keep their identity across the moves, so spending
+   part of it is a width transition: the spent boxes shrink to nothing and
+   what is left stretches out to fill the bar. That single movement is the
+   thing the page exists to show — "the remaining becomes the new whole" is a
+   sentence he can read ten times without using, and a bar that does it in
+   front of him is the same idea with nothing left to misread. */
+.bm-wrap { margin: 14px 0 4px; }
+.bm__whole { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; animation: seaFade 420ms ease-out both; }
+.bm__wholetag { font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+.bm__whole strong { font-size: 15px; color: var(--yellow); }
+
+.bm {
+  display: flex; height: 50px; border-radius: 11px; overflow: hidden;
+  border: 2px solid var(--line); background: var(--bg);
+}
+.bm__c {
+  flex-basis: 0; min-width: 0; overflow: hidden;
+  display: grid; place-items: center;
+  box-shadow: inset -2px 0 0 rgba(0, 0, 0, 0.38);
+  transition: flex-grow 640ms cubic-bezier(0.25, 0.9, 0.25, 1), background-color 420ms ease, opacity 320ms ease;
+}
+.bm__c:last-child { box-shadow: none; }
+.bm__cap { font-size: 11px; font-weight: 900; color: var(--bg); white-space: nowrap; padding: 0 2px; }
+.bm__c--plain { background: var(--card2); }
+.bm__c--plain .bm__cap { color: var(--text); }
+/* spent, eaten, used up — and the colour it leaves the bar in */
+.bm__c--gone { background: #7a2020; opacity: 0.55; }
+.bm__c--gone .bm__cap { color: #ffc9c9; }
+/* what is left: the thing the next sentence is about */
+.bm__c--left { background: var(--blue); }
+/* the part this move is taking */
+.bm__c--take { background: var(--yellow); }
+/* the answer, or the part we have just been told the value of */
+.bm__c--answer { background: var(--profit); }
+.bm__c--out { opacity: 0; }
+
+/* The bracket under the boxes it names. Same units as the bar, so it slides
+   with it instead of snapping to the new position. */
+.bm__brace { display: flex; height: 26px; margin-top: 3px; opacity: 0; transition: opacity 300ms ease; }
+.bm__brace--on { opacity: 1; }
+.bm__brace > div { flex-basis: 0; min-width: 0; transition: flex-grow 640ms cubic-bezier(0.25, 0.9, 0.25, 1); }
+.bm__bracket {
+  border-left: 2px solid var(--yellow); border-right: 2px solid var(--yellow); border-bottom: 2px solid var(--yellow);
+  border-radius: 0 0 8px 8px; height: 9px; position: relative;
+}
+.bm__bracelabel {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; font-weight: 900; color: var(--yellow); white-space: nowrap;
+}
+
+/* --- the player --- */
+.se-wk__top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.se-wk__name { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 900; }
+.se-wk__q { background: var(--bg2); border-radius: 12px; padding: 10px 12px; }
+.se-wk__q p { margin: 0 0 4px; font-size: 14.5px; line-height: 1.45; }
+.se-wk__ask { color: var(--yellow); font-weight: 900; margin-top: 7px !important; }
+.se-wk__speak { margin-top: 8px; width: 100%; }
+
+.se-wk__say { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; animation: seTipIn 380ms cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.se-wk__step {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 13px; font-weight: 900;
+  background: var(--blue); color: var(--bg);
+}
+.se-wk__say strong { font-size: 16.5px; font-weight: 800; line-height: 1.4; }
+.se-wk__maths { display: block; margin-top: 5px; font-size: 15px; font-weight: 900; color: var(--yellow); }
+
+/* The repeated beat, drawn the same in every example — that is the point. */
+.se-wk__mark {
+  margin-top: 11px; padding: 9px 11px; border-radius: 12px;
+  font-size: 13.5px; font-weight: 800; line-height: 1.4;
+  animation: seaPop 460ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.se-wk__mark--same { background: rgba(255, 206, 0, 0.16); border: 2px solid var(--yellow); color: var(--yellow); }
+.se-wk__mark--one { background: rgba(46, 204, 113, 0.14); border: 2px solid var(--profit); color: var(--profit); }
+
+.se-wk__answer {
+  margin-top: 12px; padding: 11px 13px; border-radius: 12px;
+  background: rgba(46, 204, 113, 0.14); border: 2px solid var(--profit);
+  display: flex; flex-direction: column; gap: 2px;
+  animation: seaPop 500ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.se-wk__answertag { font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+.se-wk__answer strong { font-size: 21px; color: var(--profit); }
+
+.se-wk__dots { display: flex; gap: 5px; justify-content: center; margin: 14px 0 10px; }
+.se-wk__dot { width: 9px; height: 9px; border-radius: 50%; border: 0; padding: 0; background: var(--line); cursor: pointer; transition: all 220ms ease; }
+.se-wk__dot--done { background: var(--blue); }
+.se-wk__dot--on { background: var(--yellow); width: 22px; border-radius: 5px; }
+.se-wk__bar { display: flex; gap: 8px; align-items: stretch; }
+
+/* --- the ladder --- */
+.se-wk__progress { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.se-wk__track { height: 9px; border-radius: 5px; background: var(--bg2); overflow: hidden; }
+.se-wk__fill { height: 100%; background: var(--profit); border-radius: 5px; transition: width 600ms ease; }
+.se-wk__level { display: flex; gap: 10px; align-items: center; margin: 16px 0 9px; }
+.se-wk__level > span:last-child { display: flex; flex-direction: column; }
+.se-wk__level strong { font-size: 14px; }
+.se-wk__level .muted { font-size: 12.5px; }
+.se-wk__levelno {
+  flex: 0 0 auto; width: 25px; height: 25px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 13px; font-weight: 900;
+  background: var(--line); color: var(--text);
+}
+.se-wk__row {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  margin-bottom: 9px; cursor: pointer; font: inherit; color: var(--text);
+}
+.se-wk__row:active { transform: scale(0.99); }
+.se-wk__row--done { border-color: var(--profit); }
+.se-wk__icon { flex: 0 0 auto; display: inline-flex; }
+.se-wk__rowtext { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.se-wk__rowtext strong { font-size: 15px; }
+.se-wk__rowtext .muted { font-size: 12.5px; line-height: 1.35; }
+.se-wk__go { font-size: 16px; font-weight: 900; color: var(--blue); }
+.se-wk__row--done .se-wk__go { color: var(--profit); }
+.se-tips__more {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  margin-top: 18px; font: inherit; font-size: 15px; font-weight: 800; color: var(--text); cursor: pointer; text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bm__c, .bm__brace, .bm__brace > div, .se-wk__say, .se-wk__mark, .se-wk__answer, .bm__whole, .se-wk__fill {
+    transition: none; animation: none;
+  }
+}
+
 /* The 🧭 Tips page. One plan open at a time — two open at once is the wall of
    text the page exists to take apart. */
 .se-tips { margin-bottom: 12px; }

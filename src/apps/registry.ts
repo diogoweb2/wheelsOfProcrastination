@@ -359,7 +359,7 @@ export const APPS: AppDef[] = [
       // §24ab — how to start, when the question is a wall of words. Its own
       // URL because it is not part of a lesson: it is the page he opens
       // BEFORE one, and the page Dad opens to use the same five words.
-      { id: 'tips', label: 'Tips', icon: '🧭' },
+      { id: 'tips', label: 'How to', icon: '🧭' },
       { id: 'lesson', label: 'Lesson', icon: '📘' },
       // §24v — his own mistakes, by chapter, on demand. His, not Dad's: it is
       // the one retry route he does not have to be let through.
