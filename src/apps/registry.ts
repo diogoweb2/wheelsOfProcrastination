@@ -120,12 +120,18 @@ export const APPS: AppDef[] = [
     tint: ['#ffce00', '#c9820c'],
     tabs: [
       { id: 'chests', label: 'Chests', icon: '💰' },
+      // §8c — his own standing orders to Dad. Its own URL (/bank/bills): a bill
+      // that pays itself every month is not a corner of the chests page.
+      { id: 'bills', label: 'Bills', icon: '📨' },
       { id: 'grow', label: 'Grow', icon: '📈' },
       { id: 'tools', label: 'Tools', icon: '🧮' },
       { id: 'log', label: 'Log', icon: '🧾' },
     ],
     adminTabs: [
       { id: 'vault', label: 'Vault', icon: '💰' },
+      // §8c — the same page from the other side: what he signed himself up for,
+      // what is coming out next, and anything that bounced.
+      { id: 'bills', label: 'Bills', icon: '📨' },
       { id: 'shock', label: 'Shock', icon: '📉' },
       { id: 'rules', label: 'Rules', icon: '⚙️' },
       { id: 'ledger', label: 'Ledger', icon: '🧾' },

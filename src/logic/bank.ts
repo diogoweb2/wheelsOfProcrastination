@@ -7,8 +7,8 @@
 // the habit forms. Three chests + the College/RESP one. Market moves come from a
 // monthly-fetched real series (see scripts/bank-market.mjs); we fall back to the
 // admin's monthly-rate estimate when the series is missing.
-import type { BankAccountId, BankAccountState, BankConfig, BankConverterState, BankState, BankTxn, MarketData } from '../types'
-import { addDays, dayKey, daysUntil, parseDay } from './dates'
+import type { BankAccountId, BankAccountState, BankBill, BankConfig, BankConverterState, BankState, BankTxn, MarketData } from '../types'
+import { addDays, dayKey, dayOfMonth, daysInMonth, daysUntil, monthDayLabel, parseDay } from './dates'
 
 // Real admin fees (MER, %/year) — buying/selling itself is free, like we promised.
 export const XGRO_MER = 0.2
@@ -296,6 +296,10 @@ export function simulateBank(
       })
     }
 
+    // 2b) §8c — the standing orders Ben set up collect themselves, and any bill
+    // left overdue by an empty chest tries again today
+    settleBills(bank, day, onEvent)
+
     // 3) daily snapshot for the sparklines
     for (const id of ACCOUNT_IDS) {
       const a = bank.accounts[id]
@@ -305,6 +309,171 @@ export function simulateBank(
 
     bank.lastDay = day
   }
+}
+
+// --- monthly bills (§8c) ----------------------------------------------------
+
+export const MAX_BILLS = 8 // a kid's whole life fits in eight; more is a list, not a budget
+export const MAX_BILL_DESC = 40
+
+/** Older saves have no `bills` key — read through this everywhere. */
+export function bankBills(bank: BankState): BankBill[] {
+  return bank.bills ?? []
+}
+
+/** `YYYY-MM` of a day key — one bill rings up once per calendar month, no more. */
+export function billMonth(day: string): string {
+  return day.slice(0, 7)
+}
+
+/**
+ * The day of `day`'s own month this bill falls on. A bill set for the 31st
+ * charges on the last day of a month that hasn't got one, so a month is never
+ * silently skipped (same rule as a monthly chore, §2).
+ */
+export function billDayIn(bill: BankBill, day: string): number {
+  return Math.min(bill.dayOfMonth, daysInMonth(day))
+}
+
+/** Is today the day this bill comes out? (Ignores whether it was already paid.) */
+export function billFallsOn(bill: BankBill, day: string): boolean {
+  return dayOfMonth(day) === billDayIn(bill, day)
+}
+
+/** The same day-of-month inside the month `day` belongs to, as a day key. */
+function dayOfMonthKey(day: string, dom: number): string {
+  const d = parseDay(day)
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+  return dayKey(new Date(d.getFullYear(), d.getMonth(), Math.min(dom, last)))
+}
+
+/** The next day this bill will be collected — today counts until it has rung up. */
+export function nextBillDay(bill: BankBill, today: string = dayKey()): string {
+  const thisMonth = dayOfMonthKey(today, bill.dayOfMonth)
+  if (thisMonth >= today && bill.billedMonth !== billMonth(today)) return thisMonth
+  const d = parseDay(today)
+  return dayOfMonthKey(dayKey(new Date(d.getFullYear(), d.getMonth() + 1, 1)), bill.dayOfMonth)
+}
+
+/** Sleeps until the next charge; 0 = today. */
+export function daysToBill(bill: BankBill, today: string = dayKey()): number {
+  return Math.max(0, daysUntil(nextBillDay(bill, today), today))
+}
+
+/** What leaves the Pocket Chest every month, counting only the live bills. */
+export function monthlyBillTotal(bank: BankState): number {
+  return round2(bankBills(bank).filter((b) => !b.paused).reduce((s, b) => s + b.amount, 0))
+}
+
+/** The one bill coming out next, for the "next out" line. */
+export function nextBillDue(bank: BankState, today: string = dayKey()): BankBill | null {
+  const live = bankBills(bank).filter((b) => !b.paused)
+  if (live.length === 0) return null
+  return live.reduce((best, b) => (nextBillDay(b, today) < nextBillDay(best, today) ? b : best))
+}
+
+export type BillStatus = 'paused' | 'overdue' | 'short' | 'ok'
+
+/** 'short' = the next charge is close and the Pocket Chest can't cover it yet. */
+export function billStatus(bill: BankBill, bank: BankState, today: string = dayKey()): BillStatus {
+  if (bill.paused) return 'paused'
+  if (bill.overdueSince) return 'overdue'
+  const covered = bank.accounts.chequing.balance + 0.001 >= bill.amount
+  return !covered && daysToBill(bill, today) <= 5 ? 'short' : 'ok'
+}
+
+/** How Ben's own words read on a bill row: "$5 every 1st". */
+export function billLabel(bill: BankBill): string {
+  return `${fmt$(bill.amount)} every ${monthDayLabel(bill.dayOfMonth)}`
+}
+
+/**
+ * A fresh standing order. Setting one up ON its own day of the month starts it
+ * NEXT month rather than ambushing him the same afternoon — he gets to see it
+ * sitting on the page before it ever takes a dollar.
+ */
+export function newBill(input: { description: string; amount: number; dayOfMonth: number }, today: string = dayKey()): BankBill {
+  const startsToday = Math.min(input.dayOfMonth, daysInMonth(today)) === dayOfMonth(today)
+  return {
+    id: crypto.randomUUID(),
+    description: input.description,
+    amount: input.amount,
+    dayOfMonth: input.dayOfMonth,
+    createdDay: today,
+    paused: false,
+    billedMonth: startsToday ? billMonth(today) : null,
+    lastPaidDay: null,
+    overdueSince: null,
+    paidCount: 0,
+    paidTotal: 0,
+  }
+}
+
+/** The day a bill set up today on this day-of-month would first come out. */
+export function firstBillDay(dom: number, today: string = dayKey()): string {
+  return nextBillDay(newBill({ description: '', amount: 0, dayOfMonth: dom }, today), today)
+}
+
+/**
+ * Collect every bill that is due today, plus any that went overdue earlier and
+ * can finally be paid. Idempotent per bill per month (`billedMonth`), so the
+ * same day simulated twice never charges twice — and safe to call again the
+ * moment money lands in the Pocket Chest, which is how an overdue bill clears
+ * without Ben having to wait for tomorrow.
+ */
+export function settleBills(bank: BankState, day: string = dayKey(), onEvent?: (e: BankSimEvent) => void): void {
+  const month = billMonth(day)
+  for (const bill of bankBills(bank)) {
+    if (bill.paused) continue
+    const dueToday = billFallsOn(bill, day) && bill.billedMonth !== month
+    // the month is rung up the moment it comes due, paid or not: an overdue
+    // bill never doubles up when the next month arrives, and never fines him
+    if (dueToday) bill.billedMonth = month
+    if (!dueToday && !bill.overdueSince) continue
+
+    const chest = bank.accounts.chequing
+    if (chest.balance + 0.001 < bill.amount) {
+      if (!bill.overdueSince) {
+        bill.overdueSince = day
+        onEvent?.({
+          emoji: '📭',
+          title: `${bill.description} didn't go through`,
+          description: `Your Pocket Chest was short of ${fmt$(bill.amount)}. The bill waits — it pays itself the second you have the money. No fine, pirate's honour.`,
+        })
+      }
+      continue
+    }
+
+    const late = !!bill.overdueSince
+    chest.balance -= bill.amount
+    chest.deposited = Math.max(0, chest.deposited - bill.amount)
+    bill.lastPaidDay = day
+    bill.overdueSince = null
+    bill.paidCount += 1
+    bill.paidTotal = round2(bill.paidTotal + bill.amount)
+    pushTxn(bank, {
+      day,
+      type: 'bill',
+      from: 'chequing',
+      to: 'dad',
+      amount: bill.amount,
+      note: `${bill.description}${late ? ' (late)' : ''}`,
+      billId: bill.id,
+      ackAt: null,
+    })
+    onEvent?.({
+      emoji: '📨',
+      title: `${bill.description} paid — ${fmt$(bill.amount)}`,
+      description: late
+        ? `Late, but paid in full. Your Pocket Chest has ${fmt$(chest.balance)} left.`
+        : `Straight out of your Pocket Chest to Dad, right on the ${monthDayLabel(bill.dayOfMonth)}. ${fmt$(chest.balance)} left.`,
+    })
+  }
+}
+
+/** Everything Ben has sent Dad that Dad hasn't ticked off yet — paybacks and bills. */
+export function unackedToDad(bank: BankState): BankTxn[] {
+  return bank.txns.filter((t) => (t.type === 'payback' || t.type === 'bill') && !t.ackAt)
 }
 
 // --- projections ------------------------------------------------------------

@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
-import type { AppData, BankAccountId, BankState, BankTxn, MarketData } from '../types'
+import type { AppData, BankAccountId, BankBill, BankState, BankTxn, MarketData } from '../types'
 import {
   ACCOUNT_IDS,
   ACCOUNT_META,
@@ -19,9 +19,14 @@ import {
   PROJECTION_YEARS,
   QQQ_MER,
   XGRO_MER,
+  bankBills,
+  billLabel,
+  billStatus,
   converterActive,
   converterDaysLeft,
+  firstBillDay,
   crashWorthwhile,
+  daysToBill,
   currencyMeta,
   daysToRecover,
   daysWithoutCrash,
@@ -29,6 +34,9 @@ import {
   fmtPct,
   getConverter,
   lifetimeReturnPct,
+  monthlyBillTotal,
+  nextBillDay,
+  nextBillDue,
   partyName,
   projectAccount,
   randomLuffyQuote,
@@ -36,8 +44,11 @@ import {
   toCad,
   totalTreasure,
   totalWithDad,
+  unackedToDad,
+  MAX_BILLS,
+  MAX_BILL_DESC,
 } from '../logic/bank'
-import { addDays, dayKey } from '../logic/dates'
+import { addDays, dayKey, monthDayLabel, prettyDay } from '../logic/dates'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
 
@@ -178,7 +189,7 @@ function BankKid({ tab }: { tab: string }) {
   const [crashDismissed, setCrashDismissed] = useState(false) // "let me think" hides the alert until the next visit
   const quote = useMemo(() => randomLuffyQuote(), [])
   const bank = data.bank
-  const pendingPaybacks = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
+  const pendingPaybacks = unackedToDad(bank)
   const crashPending = !!bank.shock.crashedDay && bank.shock.decision === null
   const needsAllocation = bank.pending.amount > 0
 
@@ -220,6 +231,11 @@ function BankKid({ tab }: { tab: string }) {
         <div className="muted" style={{ fontSize: 11, marginTop: 8 }}>
           Allowance: {fmt$(bank.config.weeklyAmount)} every {DAY_NAMES[bank.config.payday]}
         </div>
+        {monthlyBillTotal(bank) > 0 && (
+          <div className="muted" style={{ fontSize: 11 }}>
+            Bills: {fmt$(monthlyBillTotal(bank))} a month leaves on its own 📨
+          </div>
+        )}
       </div>
 
       {/* trip mode sits right under the treasure total — it's what he reaches for in a shop */}
@@ -248,6 +264,8 @@ function BankKid({ tab }: { tab: string }) {
             onPayDad={() => setModal({ kind: 'payDad' })}
           />
         ))}
+
+      {tab === 'bills' && <BillsPage bank={bank} />}
 
       {tab === 'grow' && <ProjectionCard />}
 
@@ -713,6 +731,287 @@ function PayDadModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+// --- §8c monthly bills -----------------------------------------------------
+
+/**
+ * Ben's own standing orders. He writes the words, picks the day of the month
+ * and the amount; on that day the money leaves the Pocket Chest for Dad whether
+ * he is looking or not — which is the entire lesson, so the page leads with
+ * what is coming out next and only then offers the form.
+ */
+function BillsPage({ bank }: { bank: BankState }) {
+  const [adding, setAdding] = useState(false)
+  const bills = bankBills(bank)
+  const total = monthlyBillTotal(bank)
+  const next = nextBillDue(bank)
+  const today = dayKey()
+  const full = bills.length >= MAX_BILLS
+
+  return (
+    <>
+      <div className="card" style={{ marginBottom: 10 }}>
+        <div style={{ fontWeight: 900, marginBottom: 2 }}>📨 Your monthly bills</div>
+        <div className="muted" style={{ fontSize: 12 }}>
+          A bill is money that leaves on its own. You choose the day, the words and the dollars — after that it
+          sails to Dad every month whether you remembered it or not. Keep that much in your Pocket Chest and
+          you’ll never feel it.
+        </div>
+        {bills.length > 0 && (
+          <div className="bank-bill-summary">
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ color: 'var(--gold)' }}>
+                <Money value={total} size={24} />
+              </div>
+              <div className="muted" style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+                every month
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 12 }}>
+              {next ? (
+                <>
+                  <div style={{ fontWeight: 800 }}>
+                    Next out: {next.description} · {fmt$(next.amount)}
+                  </div>
+                  <div className="muted" style={{ fontSize: 11 }}>
+                    {prettyDay(nextBillDay(next, today))}
+                    {daysToBill(next, today) === 0 ? ' · today' : ` · in ${daysToBill(next, today)} day${daysToBill(next, today) === 1 ? '' : 's'}`}
+                  </div>
+                </>
+              ) : (
+                <div className="muted">Every bill is paused — nothing is leaving.</div>
+              )}
+              <div className="muted" style={{ fontSize: 11 }}>Pocket Chest right now: {fmt$(bank.accounts.chequing.balance)}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {bills.length === 0 && (
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', marginBottom: 12 }}>
+          <Luffy size={64} />
+          <div className="bubble" style={{ fontSize: 12, flex: 1 }}>
+            No bills yet! Grown-up pirates owe something every single month — a phone, a ship, the meat bill.
+            Set one up and watch it pay itself. Shishishi!
+          </div>
+        </div>
+      )}
+
+      {bills.map((b) => (
+        <BillCard key={b.id} bill={b} bank={bank} />
+      ))}
+
+      {adding ? (
+        <NewBillForm onDone={() => setAdding(false)} />
+      ) : (
+        <button className="btn btn--blue" disabled={full} onClick={() => { sfx.click(); setAdding(true) }}>
+          ➕ Set up a new bill
+        </button>
+      )}
+      {full && (
+        <div className="muted" style={{ fontSize: 11, marginTop: 6, textAlign: 'center' }}>
+          {MAX_BILLS} bills is plenty for one pirate — cancel one to make room.
+        </div>
+      )}
+    </>
+  )
+}
+
+/** One standing order: what it costs, when it next goes, and how to stop it. */
+function BillCard({ bill, bank }: { bill: BankBill; bank: BankState }) {
+  const { setBankBillPaused, removeBankBill, payBankBillNow, pushEvent } = useStore()
+  const [armed, setArmed] = useState(false) // cancelling a bill takes two taps
+  const status = billStatus(bill, bank)
+  const today = dayKey()
+  const days = daysToBill(bill, today)
+  const shortBy = round2(bill.amount - bank.accounts.chequing.balance)
+  const canPayNow = status === 'overdue' && bank.accounts.chequing.balance + 0.001 >= bill.amount
+
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: status === 'overdue' ? 'var(--red)' : status === 'short' ? 'var(--orange)' : undefined }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <div style={{ fontSize: 26, lineHeight: 1 }}>{bill.paused ? '⏸️' : '📨'}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 900, fontSize: 15 }}>{bill.description}</div>
+          <div className="muted" style={{ fontSize: 11 }}>{billLabel(bill)} · to Dad</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontWeight: 900, fontSize: 18 }}>{fmt$(bill.amount)}</div>
+          <div className="muted" style={{ fontSize: 10 }}>per month</div>
+        </div>
+      </div>
+
+      {bill.paused ? (
+        <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+          Paused — nothing comes out until you start it again.
+        </div>
+      ) : (
+        <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+          Next out {prettyDay(nextBillDay(bill, today))}
+          {days === 0 ? ' — today!' : ` — in ${days} day${days === 1 ? '' : 's'}`}
+        </div>
+      )}
+
+      {status === 'overdue' && (
+        <div className="bank-crash-chip">
+          📭 OVERDUE since {prettyDay(bill.overdueSince!)} — your Pocket Chest was short.{' '}
+          {canPayNow ? 'You can pay it right now!' : `Put ${fmt$(shortBy)} in your Pocket Chest and it pays itself.`}
+        </div>
+      )}
+      {status === 'short' && (
+        <div className="bank-bill-chip">
+          ⚠️ {days === 0 ? 'Due today' : `Due in ${days} day${days === 1 ? '' : 's'}`} and your Pocket Chest is {fmt$(shortBy)} short.
+          Sell something or wait for payday — otherwise it bounces.
+        </div>
+      )}
+
+      {bill.paidCount > 0 && (
+        <div className="muted" style={{ fontSize: 11, marginTop: 6, fontWeight: 800 }}>
+          ✅ paid {bill.paidCount}×{bill.lastPaidDay ? ` · last on ${prettyDay(bill.lastPaidDay)}` : ''} · {fmt$(bill.paidTotal)} all time
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+        {canPayNow && (
+          <button
+            className="btn btn--blue btn--small"
+            style={{ flex: 1 }}
+            onClick={() => {
+              if (payBankBillNow(bill.id) === 'ok') sfx.gem()
+              else sfx.error()
+            }}
+          >
+            💰 Pay it now
+          </button>
+        )}
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ flex: 1 }}
+          onClick={() => {
+            sfx.click()
+            setBankBillPaused(bill.id, !bill.paused)
+            pushEvent({
+              type: 'goal',
+              emoji: bill.paused ? '▶️' : '⏸️',
+              title: bill.paused ? `${bill.description} is running again` : `${bill.description} is paused`,
+              description: bill.paused
+                ? `${fmt$(bill.amount)} will leave again on the ${monthDayLabel(bill.dayOfMonth)}.`
+                : 'Nothing comes out until you start it again — the money stays in your Pocket Chest.',
+            })
+          }}
+        >
+          {bill.paused ? '▶️ Start it again' : '⏸️ Pause it'}
+        </button>
+        <button
+          className="btn btn--ghost btn--small"
+          style={{ flex: 1, color: 'var(--red)' }}
+          onClick={() => {
+            if (!armed) {
+              sfx.click()
+              setArmed(true)
+              return
+            }
+            sfx.spend()
+            removeBankBill(bill.id)
+          }}
+        >
+          {armed ? '🗑️ Tap again to cancel it' : '🗑️ Cancel bill'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** The form: his words, his dollars, his day — with the first charge spelled out. */
+function NewBillForm({ onDone }: { onDone: () => void }) {
+  const { addBankBill, pushEvent } = useStore()
+  const [desc, setDesc] = useState('')
+  const [amount, setAmount] = useState('')
+  const [dom, setDom] = useState(1)
+  const amt = Number(amount)
+  const ok = desc.trim().length > 0 && Number.isFinite(amt) && amt > 0
+  const first = firstBillDay(dom)
+
+  return (
+    <div className="card" style={{ marginBottom: 10, borderColor: 'var(--blue)' }}>
+      <div style={{ fontWeight: 900, marginBottom: 8 }}>➕ A new monthly bill</div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>What is it for?</label>
+        <input
+          type="text"
+          value={desc}
+          maxLength={MAX_BILL_DESC}
+          onChange={(e) => setDesc(e.target.value)}
+          placeholder="e.g. my phone 📱"
+        />
+      </div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>How much, every month?</label>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          {[1, 2, 5, 10].map((c) => (
+            <button key={c} className="btn btn--ghost btn--small" style={{ flex: 1 }} onClick={() => { sfx.click(); setAmount(String(c)) }}>
+              ${c}
+            </button>
+          ))}
+        </div>
+        <input type="number" inputMode="decimal" min={0} step="0.25" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+      </div>
+
+      <div className="field" style={{ marginBottom: 10 }}>
+        <label>Which day of the month?</label>
+        <select value={dom} onChange={(e) => { sfx.click(); setDom(Number(e.target.value)) }}>
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+            <option key={d} value={d}>{`the ${monthDayLabel(d)}`}</option>
+          ))}
+        </select>
+        {dom > 28 && (
+          <span className="muted" style={{ fontSize: 10 }}>
+            Short months don’t have a {monthDayLabel(dom)} — then it comes out on the last day instead.
+          </span>
+        )}
+      </div>
+
+      <div className="bank-resp">
+        {ok ? (
+          <>
+            📨 <b>{fmt$(amt)}</b> leaves your Pocket Chest for Dad every {monthDayLabel(dom)} — first time{' '}
+            <b>{prettyDay(first)}</b>. It pays itself; nobody has to remember it.
+          </>
+        ) : (
+          <>Write what it’s for and how much, and I’ll tell you exactly when the first one leaves.</>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button
+          className="btn btn--blue"
+          style={{ flex: 1 }}
+          disabled={!ok}
+          onClick={() => {
+            const res = addBankBill({ description: desc, amount: amt, dayOfMonth: dom })
+            if (res === 'ok') {
+              sfx.gem()
+              pushEvent({
+                type: 'goal',
+                emoji: '📨',
+                title: `${desc.trim()} — ${fmt$(amt)} a month`,
+                description: `Set up! The first one leaves on ${prettyDay(first)}, straight from your Pocket Chest to Dad. Keep it funded, captain.`,
+              })
+              onDone()
+            } else sfx.error()
+          }}
+        >
+          ⚓ Set it up
+        </button>
+        <button className="btn btn--ghost" onClick={() => { sfx.click(); onDone() }}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /**
  * Trip mode for Ben: type what the price tag says, see what it really costs in
  * CAD — plus how much of his Pocket Chest that is, which is the whole point.
@@ -1051,6 +1350,7 @@ function BankAdmin({ tab }: { tab: string }) {
           <AdminAdjust />
         </>
       )}
+      {tab === 'bills' && <AdminBills kidData={kidData} />}
       {tab === 'shock' && <AdminShock kidData={kidData} />}
       {tab === 'rules' && (
         <>
@@ -1092,20 +1392,102 @@ function AdminMarket() {
 
 function AdminPaybacks({ kidData }: { kidData: AppData }) {
   const { ackBankPayback } = useStore()
-  const pending = kidData.bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
+  const pending = unackedToDad(kidData.bank)
   if (pending.length === 0) return null
   return (
     <div className="card" style={{ marginBottom: 10, borderColor: 'var(--blue)' }}>
-      <div style={{ fontWeight: 900, marginBottom: 6 }}>📨 Ben paid you back</div>
+      <div style={{ fontWeight: 900, marginBottom: 6 }}>📨 Ben paid you</div>
       {pending.map((t) => (
         <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--line)', padding: '8px 0' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800 }}>{fmt$(t.amount)}{t.note ? ` — ${t.note}` : ''}</div>
-            <div className="muted" style={{ fontSize: 11 }}>{t.day}</div>
+            <div className="muted" style={{ fontSize: 11 }}>{t.day}{t.type === 'bill' ? ' · monthly bill' : ' · paid you back'}</div>
           </div>
           <button className="btn btn--small" onClick={() => { sfx.gem(); ackBankPayback(t.id) }}>✓ Got it</button>
         </div>
       ))}
+    </div>
+  )
+}
+
+
+/**
+ * §8c from the banker's side: what Ben has signed himself up for, what is
+ * coming out next, and anything that bounced off an empty Pocket Chest. Dad
+ * doesn't approve a bill — he can pause or cancel one, and the charges land in
+ * the "Ben paid you" card above like any other money crossing the table.
+ */
+function AdminBills({ kidData }: { kidData: AppData }) {
+  const { setBankBillPaused, removeBankBill } = useStore()
+  const [armed, setArmed] = useState<string | null>(null)
+  const bank = kidData.bank
+  const bills = bankBills(bank)
+  const today = dayKey()
+  const next = nextBillDue(bank)
+
+  return (
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div style={{ fontWeight: 900, marginBottom: 2 }}>📨 Ben’s monthly bills</div>
+      <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+        Standing orders he set up himself at <b>/bank/bills</b> — amount, day and wording are his. They pay
+        themselves out of the Pocket Chest; a short chest makes a bill overdue, never a fine.
+      </div>
+
+      {bills.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing set up yet.</p>}
+
+      {bills.length > 0 && (
+        <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>
+          {fmt$(monthlyBillTotal(bank))} a month to you
+          {next && ` · next: ${next.description} ${fmt$(next.amount)} on ${prettyDay(nextBillDay(next, today))}`}
+        </div>
+      )}
+
+      {bills.map((b) => {
+        const status = billStatus(b, bank, today)
+        return (
+          <div key={b.id} style={{ borderTop: '1px solid var(--line)', padding: '8px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800 }}>
+                  {b.paused ? '⏸️ ' : ''}
+                  {b.description}
+                </div>
+                <div className="muted" style={{ fontSize: 11 }}>
+                  {billLabel(b)} · set up {prettyDay(b.createdDay)} · paid {b.paidCount}× ({fmt$(b.paidTotal)})
+                </div>
+                <div
+                  className="muted"
+                  style={{ fontSize: 11, color: status === 'overdue' ? 'var(--red)' : status === 'short' ? 'var(--orange)' : undefined }}
+                >
+                  {status === 'paused' && 'paused — nothing leaving'}
+                  {status === 'overdue' && `OVERDUE since ${prettyDay(b.overdueSince!)} — chest was short`}
+                  {status === 'short' && `due ${prettyDay(nextBillDay(b, today))} and the chest can’t cover it`}
+                  {status === 'ok' && `next ${prettyDay(nextBillDay(b, today))}`}
+                </div>
+              </div>
+              <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setBankBillPaused(b.id, !b.paused) }}>
+                {b.paused ? '▶️' : '⏸️'}
+              </button>
+              <button
+                className="btn btn--ghost btn--small"
+                style={{ color: 'var(--red)' }}
+                onClick={() => {
+                  if (armed !== b.id) {
+                    sfx.click()
+                    setArmed(b.id)
+                    return
+                  }
+                  sfx.spend()
+                  removeBankBill(b.id)
+                  setArmed(null)
+                }}
+              >
+                {armed === b.id ? 'sure?' : '🗑️'}
+              </button>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -1403,6 +1785,7 @@ const TXN_ICON: Record<BankTxn['type'], string> = {
   transfer: '⛵',
   match: '🎓',
   payback: '📨',
+  bill: '🔁',
   adjust: '✏️',
   crash: '📉',
   recover: '📈',
@@ -1425,7 +1808,7 @@ function TxnLog({ bank, title }: { bank: BankState; title: string }) {
               {partyName(t.from)} → {partyName(t.to)}
             </span>
             {t.note && <span className="muted"> · {t.note}</span>}
-            <div className="muted" style={{ fontSize: 10 }}>{t.day} · {t.type}{t.type === 'payback' && !t.ackAt ? ' · not acknowledged' : ''}</div>
+            <div className="muted" style={{ fontSize: 10 }}>{t.day} · {t.type}{(t.type === 'payback' || t.type === 'bill') && !t.ackAt ? ' · not acknowledged' : ''}</div>
           </div>
           <span style={{ fontWeight: 900 }}>{fmt$(t.amount)}</span>
         </div>

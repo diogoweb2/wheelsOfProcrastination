@@ -40,6 +40,7 @@ import { appById, tabsFor } from './apps/registry'
 import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { inShell } from './push'
 import { backgroundUrl } from './logic/backgrounds'
+import { unackedToDad } from './logic/bank'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
 import { pendingTopics, unseenTopicAnswers } from './logic/essay'
 import { sfx } from './audio'
@@ -375,9 +376,9 @@ export default function App() {
   // whichever background the user equipped in the Store; none = plain solid color
   const bg = data.backgrounds.active
 
-  // admin-only: Ben's Interac-style paybacks waiting for a "Got it"
-  const pendingPaybacks =
-    activeProfileId === PARENT_ID ? (kidData?.bank.txns.filter((t) => t.type === 'payback' && !t.ackAt) ?? []) : []
+  // admin-only: money Ben sent me that I haven't ticked off — one-off paybacks
+  // and the monthly bills he set up himself (§8c)
+  const pendingPaybacks = activeProfileId === PARENT_ID && kidData ? unackedToDad(kidData.bank) : []
 
   // admin-only persistent warning: unsettled prize purchases (Ben's and Diogo's own)
   const unpaidGifts =
@@ -637,7 +638,9 @@ export default function App() {
           <span style={{ fontSize: 20 }}>📨</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 900, fontSize: 13 }}>Ben paid you ${t.amount.toFixed(2)}{t.note ? ` — ${t.note}` : ''}</div>
-            <div style={{ fontSize: 11, opacity: 0.85 }}>sent {t.day} · straight from his Pocket Chest</div>
+            <div style={{ fontSize: 11, opacity: 0.85 }}>
+              {t.type === 'bill' ? 'monthly bill' : 'sent'} {t.day} · straight from his Pocket Chest
+            </div>
           </div>
           <button
             className="btn btn--small"

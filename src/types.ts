@@ -416,12 +416,38 @@ export interface BankTxn {
   id: string
   day: string // YYYY-MM-DD
   at: string // ISO
-  type: 'allowance' | 'transfer' | 'match' | 'payback' | 'adjust' | 'crash' | 'recover'
+  type: 'allowance' | 'transfer' | 'match' | 'payback' | 'bill' | 'adjust' | 'crash' | 'recover'
   from?: BankAccountId | 'dad' | 'allowance'
   to?: BankAccountId | 'dad'
   amount: number // dollars
   note?: string
-  ackAt?: string | null // paybacks only: set when dad taps "Got it"
+  ackAt?: string | null // paybacks and bills (§8c): set when dad taps "Got it"
+  billId?: string // bill charges only — which standing order rang this up
+}
+
+/**
+ * §8c — a standing order Ben sets up himself: every month, on the day of the
+ * month he picked, this many dollars leave the Pocket Chest and fly to Dad. He
+ * writes the description, picks the day and the amount; nobody approves it.
+ *
+ * It pays itself, which is the whole lesson — the money is gone whether he was
+ * looking or not, so the Pocket Chest has to be ready for it. Short on the day?
+ * The bill goes OVERDUE and pays itself the moment money lands (never twice,
+ * and never a late fee — a bill still overdue when the next month comes round
+ * stays one charge).
+ */
+export interface BankBill {
+  id: string
+  description: string // his words — "phone", "rent", "Netflix"; shown everywhere
+  amount: number // dollars, every month
+  dayOfMonth: number // 1–31; a day this month doesn't have charges on its last day
+  createdDay: string // YYYY-MM-DD
+  paused: boolean // stopped without losing the history (Ben or Dad)
+  billedMonth: string | null // YYYY-MM already rung up — the double-charge guard
+  lastPaidDay: string | null
+  overdueSince: string | null // the day it found the chest short; retried until it clears
+  paidCount: number
+  paidTotal: number
 }
 
 export interface BankAccountState {
@@ -511,6 +537,7 @@ export interface BankState {
   lastDay: string // bank simulated through this day (YYYY-MM-DD)
   shock: BankShockState
   converter?: BankConverterState // trip-mode money converter (absent on older saves)
+  bills?: BankBill[] // §8c — his monthly standing orders to Dad (absent on older saves)
 }
 
 export interface GiftCardPurchase {

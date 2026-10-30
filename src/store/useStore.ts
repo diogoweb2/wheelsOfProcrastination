@@ -206,7 +206,7 @@ import { MAX_PASSES, pickToday, weekOf } from '../logic/today'
 import { newBadges } from '../logic/badges'
 import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowance, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat, type Prize, type PrizeCatalog } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
-import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, applyCrash, crashWorthwhile, fmt$, pickRecoverDay, pushTxn, round2, simulateBank, type BankSimEvent } from '../logic/bank'
+import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, MAX_BILLS, MAX_BILL_DESC, applyCrash, bankBills, crashWorthwhile, fmt$, newBill, pickRecoverDay, pushTxn, round2, settleBills, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
 import { enablePush, inShell } from '../push'
 import {
@@ -615,7 +615,16 @@ interface StoreState {
   bankAllocate: (alloc: Partial<Record<BankAccountId, number>>) => 'ok' | 'bad'
   /** Interac-style payback to dad, from the Pocket Chest only. Dad sees it until he taps "Got it". */
   bankPayDad: (amount: number, note: string) => 'ok' | 'broke'
-  ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback
+  ackBankPayback: (txnId: string) => void // admin: "Got it" on a payback or a bill charge
+  // §8c — Ben's monthly standing orders to Dad. He writes them; they pay themselves.
+  /** Set up a new bill: his words, the dollars, the day of the month. */
+  addBankBill: (bill: { description: string; amount: number; dayOfMonth: number }) => 'ok' | 'bad' | 'full'
+  /** Stop a bill coming out (or start it again) without losing what it has paid. */
+  setBankBillPaused: (billId: string, paused: boolean) => void
+  /** Cancel a bill for good. The charges it already made stay in the ledger. */
+  removeBankBill: (billId: string) => void
+  /** Clear an overdue bill by hand, right now, instead of waiting for the next catch-up. */
+  payBankBillNow: (billId: string) => 'ok' | 'broke'
   setBankConfig: (patch: Partial<BankConfig>) => void // admin: rates, weekly amount, payday, RESP
   bankAdjust: (acct: BankAccountId, delta: number, note: string) => boolean // admin: manual correction / paper-money import; false = Ben's data wasn't loaded, nothing was written
   /** Admin: turn the trip money converter on/off, set the currency, rate and how many days it lives. */
@@ -2685,7 +2694,7 @@ export const useStore = create<StoreState>((set, get) => {
       // College withdrawals can only pull HIS own contributions (Dad's match isn't his to move)
       const maxFrom = from === 'college' ? world.bank.accounts.college.deposited : world.bank.accounts[from].balance
       if (maxFrom < amt - 0.001) return 'broke'
-      commitFor(KID_ID, (d) => {
+      commitFor(KID_ID, (d, events) => {
         const day = dayKey()
         const src = d.bank.accounts[from]
         src.balance -= amt
@@ -2708,6 +2717,8 @@ export const useStore = create<StoreState>((set, get) => {
           dst.matched = round2(dst.matched + amt)
           pushTxn(d.bank, { day, type: 'match', from: 'dad', to: 'college', amount: amt, note: 'Dad matches your college deposit' })
         }
+        // §8c — selling a ship back into the Pocket Chest clears an overdue bill now
+        if (to === 'chequing') settleBills(d.bank, day, (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
       })
       return 'ok'
     },
@@ -2719,7 +2730,7 @@ export const useStore = create<StoreState>((set, get) => {
       const entries = ACCOUNT_IDS.map((id) => [id, round2(alloc[id] ?? 0)] as const).filter(([, v]) => v > 0)
       const sum = round2(entries.reduce((s, [, v]) => s + v, 0))
       if (pool <= 0 || sum > pool + 0.001 || entries.some(([, v]) => v < 0)) return 'bad'
-      commitFor(KID_ID, (d) => {
+      commitFor(KID_ID, (d, events) => {
         const day = dayKey()
         // any unallocated remainder stays as everyday money in the Pocket Chest
         const remainder = round2(pool - sum)
@@ -2740,6 +2751,9 @@ export const useStore = create<StoreState>((set, get) => {
           pushTxn(d.bank, { day, type: 'allowance', from: 'allowance', to: 'chequing', amount: remainder })
         }
         d.bank.pending = { amount: 0, weeks: 0, since: null }
+        // §8c — a bill that bounced on an empty chest pays itself the moment
+        // allowance lands, rather than sitting red until tomorrow's catch-up.
+        settleBills(d.bank, day, (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
       })
       return 'ok'
     },
@@ -2759,8 +2773,53 @@ export const useStore = create<StoreState>((set, get) => {
     ackBankPayback(txnId) {
       commitFor(KID_ID, (d) => {
         const t = d.bank.txns.find((x) => x.id === txnId)
-        if (t && t.type === 'payback' && !t.ackAt) t.ackAt = new Date().toISOString()
+        if (t && (t.type === 'payback' || t.type === 'bill') && !t.ackAt) t.ackAt = new Date().toISOString()
       })
+    },
+
+    // --- §8c monthly bills ----------------------------------------------------
+
+    addBankBill({ description, amount, dayOfMonth }) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      const desc = description.trim().slice(0, MAX_BILL_DESC)
+      const amt = round2(amount)
+      const dom = Math.round(dayOfMonth)
+      if (!world) return 'bad'
+      if (!desc || !(amt > 0) || !Number.isInteger(dom) || dom < 1 || dom > 31) return 'bad'
+      if (bankBills(world.bank).length >= MAX_BILLS) return 'full'
+      // 'bad' also covers the parent-session case where Ben's doc hasn't
+      // arrived yet — never tell him a bill exists when nothing was written.
+      const ok = commitFor(KID_ID, (d) => {
+        d.bank.bills = [...bankBills(d.bank), newBill({ description: desc, amount: amt, dayOfMonth: dom }, dayKey())]
+      })
+      return ok ? 'ok' : 'bad'
+    },
+
+    setBankBillPaused(billId, paused) {
+      commitFor(KID_ID, (d, events) => {
+        const bill = bankBills(d.bank).find((b) => b.id === billId)
+        if (!bill) return
+        bill.paused = paused
+        // Un-pausing with money in the chest settles anything it owes right away.
+        if (!paused) settleBills(d.bank, dayKey(), (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
+      })
+    },
+
+    removeBankBill(billId) {
+      commitFor(KID_ID, (d) => {
+        d.bank.bills = bankBills(d.bank).filter((b) => b.id !== billId)
+      })
+    },
+
+    payBankBillNow(billId) {
+      const world = get().activeProfileId === KID_ID ? get().data : get().kidData
+      const bill = world ? bankBills(world.bank).find((b) => b.id === billId) : undefined
+      if (!world || !bill || !bill.overdueSince) return 'broke'
+      if (world.bank.accounts.chequing.balance + 0.001 < bill.amount) return 'broke'
+      const ok = commitFor(KID_ID, (d, events) => {
+        settleBills(d.bank, dayKey(), (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
+      })
+      return ok ? 'ok' : 'broke'
     },
 
     setBankConfig(patch) {
@@ -2784,12 +2843,14 @@ export const useStore = create<StoreState>((set, get) => {
     bankAdjust(acct, delta, note) {
       const amt = round2(delta)
       if (amt === 0) return false
-      return commitFor(KID_ID, (d) => {
+      return commitFor(KID_ID, (d, events) => {
         const a = d.bank.accounts[acct]
         a.balance = Math.max(0, a.balance + amt)
         if (amt > 0) a.deposited += amt
         else a.deposited = Math.max(0, a.deposited + amt)
         pushTxn(d.bank, { day: dayKey(), type: 'adjust', to: acct, amount: amt, note: note.trim() || 'Banker adjustment' })
+        // §8c — money Dad puts in the Pocket Chest can settle an overdue bill
+        if (acct === 'chequing' && amt > 0) settleBills(d.bank, dayKey(), (e: BankSimEvent) => events.push({ type: 'goal', ...e }))
       })
     },
 

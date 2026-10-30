@@ -18,15 +18,21 @@
 import {
   ACCOUNT_IDS,
   ACCOUNT_META,
+  bankBills,
+  billLabel,
   defaultBankState,
   fmt$,
   fmtPct,
   lifetimeReturnPct,
+  monthlyBillTotal,
+  nextBillDay,
+  nextBillDue,
   partyName,
   round2,
   simulateBank,
   totalTreasure,
   totalWithDad,
+  unackedToDad,
 } from '../src/logic/bank'
 import { addDays, dayKey, prettyDay } from '../src/logic/dates'
 import {
@@ -100,6 +106,8 @@ function txnLine(t: BankTxn): string {
       return `${when} · 🎓 Dad matched ${fmt$(t.amount)} into the College Chest`
     case 'payback':
       return `${when} · 💸 paid you back ${fmt$(t.amount)}${t.note ? ` — “${t.note}”` : ''}${t.ackAt ? '' : ' — NOT acknowledged yet'}`
+    case 'bill':
+      return `${when} · 🔁 monthly bill ${fmt$(t.amount)}${t.note ? ` — “${t.note}”` : ''}${t.ackAt ? '' : ' — NOT acknowledged yet'}`
     case 'crash':
       return `${when} · 📉 Shock Test wiped ${fmt$(t.amount)} off the Rocket Ship`
     case 'recover':
@@ -173,10 +181,33 @@ function money(data: AppData, market: MarketData | null, now: number): MoneyPart
     }
   }
 
+  // §8c — the bills he set up himself. They pay themselves out of the Pocket
+  // Chest, so the thing worth saying once a week is what is leaving and what
+  // bounced off an empty chest.
+  const bills = bankBills(bank)
+  if (bills.length > 0) {
+    const nextBill = nextBillDue(bank)
+    rows.push({
+      label: '📨 His monthly bills',
+      value: `${fmt$(monthlyBillTotal(bank))}/mo`,
+      note: [
+        bills.map((b) => `${b.description} ${billLabel(b)}${b.paused ? ' (paused)' : ''}`).join(' · '),
+        nextBill ? `next out ${prettyDay(nextBillDay(nextBill, today))}` : 'all paused',
+      ].join(' — '),
+      tone: bills.some((b) => b.overdueSince) ? 'bad' : undefined,
+    })
+    for (const b of bills.filter((x) => x.overdueSince)) {
+      actions.push(
+        `📭 His “${b.description}” bill (${fmt$(b.amount)}) has been OVERDUE since ${prettyDay(b.overdueSince!)} — the Pocket Chest was short. It pays itself the moment money lands; nothing is fining him: ${APP}/bank/bills`,
+      )
+    }
+  }
+
   const week = bank.txns.filter((t) => t.day >= weekAgo)
-  const unacked = bank.txns.filter((t) => t.type === 'payback' && !t.ackAt)
+  const unacked = unackedToDad(bank)
   for (const t of unacked) {
-    actions.push(`💸 Ben paid you back ${fmt$(t.amount)} on ${prettyDay(t.day)}${t.note ? ` — “${t.note}”` : ''}. Tap “Got it”: ${APP}/bank/ledger`)
+    const what = t.type === 'bill' ? `paid his ${t.note ? `“${t.note}”` : 'monthly'} bill` : 'paid you back'
+    actions.push(`💸 Ben ${what} ${fmt$(t.amount)} on ${prettyDay(t.day)}. Tap “Got it”: ${APP}/bank/ledger`)
   }
 
   if (bank.shock.crashedDay && !bank.shock.decision) {

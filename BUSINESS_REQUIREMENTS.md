@@ -268,6 +268,50 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 - **Banker's desk (Diogo)**: market-feed health, pending paybacks, Shock Test control, Ben's balances (+ pending allowance), bank rules (weekly amount, payday, XGRO/QQQ fallback rates, RESP balance), manual adjustments (e.g. importing the paper-sheet money) and the **Captain's ledger** — every move Ben makes, for coaching.
 - **Simulation** is deterministic per calendar day (seeded by date), so any device catching the bank up computes identical numbers; the parent's session also advances Ben's bank so it never falls behind. Crashes/recoveries appear in the ledger as 📉/📈 entries.
 
+## 8c. Monthly bills — his own standing orders to Dad (`/bank/bills`)
+
+A bill is the one money lesson the chests can't teach: **money that leaves on its
+own**. Ben sets it up himself — the words, the dollars, the day of the month —
+and from then on it comes out whether he remembered it or not. Keeping the
+Pocket Chest ready for it is the whole exercise.
+
+This does not break §8b's "Ben decides every dollar". He *is* deciding — once,
+in advance, by hand — and he can pause or cancel any bill at any moment. Nothing
+in the app ever creates one for him, and Dad does not approve one.
+
+- **His page, his bills.** `/bank/bills` (kid) — description (his words, 40 chars),
+  amount, and the day of the month, 1–31. Max **8** bills. The form spells out
+  the first charge before he commits: "📨 $5 leaves your Pocket Chest for Dad
+  every 1st — first time Sat, Nov 1".
+- **A bill set up on its own day starts next month**, never the same afternoon —
+  he gets to see it sitting on the page before it takes a dollar.
+- **The 29th–31st**: a month without that day charges on its **last** day, so a
+  month is never silently skipped (same rule as a monthly chore, §2).
+- **It pays itself** out of the **Pocket Chest only**, in `simulateBank`'s daily
+  catch-up, exactly once per calendar month per bill (`billedMonth` is the
+  guard, so a device catching up twice never charges twice). The charge is a
+  `bill` txn in the ledger, Ben → Dad, and it waits for Dad's **"Got it"** like
+  an Interac payback (§8b): banner on his dashboard, the "Ben paid you" card on
+  the desk, and a line in the Sunday email (§25).
+- **Short chest = OVERDUE, never a fine.** A bill that can't be covered on its
+  day goes overdue (red on both sides) and **pays itself the moment money
+  lands** — allowance placed, a ship sold, a banker's adjustment — or on the
+  next daily catch-up, or when Ben taps **Pay it now**. A bill still overdue
+  when the next month comes round **stays one charge**: no stacking, no late
+  fee, no debt spiral in a 12-year-old's bank.
+- **The heads-up**: within 5 days of a charge the Pocket Chest can't cover, the
+  bill shows an orange "due in 2 days and you're $3 short — sell something or
+  wait for payday" chip. That warning is the point of the feature.
+- **Pause** keeps the history and stops the money; **cancel** takes two taps and
+  leaves every charge it already made in the ledger.
+- **Dad's side** (`/bank/bills`, banker's desk): every bill with its next date,
+  what it has paid lifetime, what's overdue, and pause/cancel. He never has to
+  create one — if he wants a bill to exist, he asks Ben to set it up.
+- Implementation: `BankBill` in [src/types.ts](src/types.ts), `settleBills` /
+  `newBill` / `nextBillDay` / `billStatus` in [src/logic/bank.ts](src/logic/bank.ts),
+  `addBankBill` · `setBankBillPaused` · `removeBankBill` · `payBankBillNow` in
+  the store, both pages in [src/screens/BankScreen.tsx](src/screens/BankScreen.tsx).
+
 ## 9. Reports
 
 - Page listing each **repeating** task (habit) with: total completions, current per-habit streak, best streak, last-30-day heatmap strip, completions-per-week mini chart.
@@ -586,6 +630,7 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
   - `npm run gym:demos` (ExerciseDB + claude CLI for ambiguous matches) — animation + still for each exercise (§18l).
   - `npm run gym:videos` (YouTube search + claude CLI for ambiguous picks) — one short demonstration video per exercise (§18n).
   - `npm run quiz:review` (claude CLI, **sonnet**) — weekly refresh of Diogo's fast-moving AI topics: UPDATES outdated questions in place and ADDS up to 5/topic; both get `freshAt` → ✨ **NEW badge** + training priority until seen once. Scheduled via launchd: `~/Library/LaunchAgents/com.wheelsofprocrastination.quiz-review.plist`, Mondays 09:00, log at `~/Library/Logs/wop-quiz-review.log`.
+  - `npm run backup` — **the only backup this app has.** The free Spark plan keeps no Firestore backups and point-in-time recovery reaches back one hour, so Ben's July quiz passes (Science, Critical Thinking, Logic, Canada Geography) vanished from `profiles/ben` with nothing to restore them from; they were re-stamped by hand on 2026-10-30. Reads every doc in `profiles`, `app` and `auditLog` into one gzipped JSON at `~/Backups/wheels-of-procrastination/firestore-YYYY-MM-DD.json.gz`, keeps the last 12. Writes nothing to Firestore. Cron, Saturdays 08:00 (`scripts/firestore-backup-cron.sh`, log `scripts/.firestore-backup.log`). Restore by hand, one field at a time — never the whole snapshot over live data.
 
 ## 17. Question of the Day
 
