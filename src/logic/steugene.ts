@@ -196,6 +196,12 @@ const MATH: SeSubject = {
         t('math-fdp', 'Fractions, decimals and percents', '🔁', '¾ = 0.75 = 75%', 'A shield at 3/4, 0.75 and 75% — one number, three shirts.', 'I can switch a number between a fraction, a decimal and a percent.'),
         t('math-frac-add', 'Adding and subtracting fractions', '🍕', '⅔ + ¼ = 11/12', 'Slices have to be the same size before you can add them.', 'I can add fractions that started out cut into different sizes.'),
         t('math-frac-mult', 'Multiplying and dividing fractions', '🍰', '⅗ ÷ ¼ = 12/5', 'Half of a half pizza, two thirds of a stack of 64.', 'I can multiply and divide fractions.'),
+        // §24: his class's Chapter 3 Practice 5 — "real-world problems:
+        // fractions". The skill is not multiplying fractions, which he already
+        // has two subtopics for: it is that the SECOND fraction is taken of
+        // what is LEFT, and that the leftover is sometimes the only number you
+        // are given. Its own subtopic because that is its own way to be wrong.
+        t('math-frac-word', 'Fraction word problems', '📝', '2/5 gone, then 3/4 of the REST', 'The "of the remaining" ones — one bar, two cuts.', 'I can solve a two-step fraction word problem, and work backwards from what is left.'),
         t('math-percent', 'Percents in real life', '🏷️', '$80 shirt, 25% off, +13% HST', 'A skin on sale, 13% HST, and what you really pay.', 'I can work out a sale price and the tax on top of it.'),
         t('math-ratio', 'Ratios, rates and proportions', '⚖️', '3 : 5 · 90 km/h · $4.50 / kg', 'K/D, Robux per hour, damage per second — two numbers, one fair comparison.', 'I can compare two things fairly — K/D, Robux an hour, damage a second.'),
         t('math-power', 'Powers and square roots', '🔺', '7² = 49 · √144 = 12', 'Exponents, and the button that undoes them.', 'I can do powers and square roots.'),

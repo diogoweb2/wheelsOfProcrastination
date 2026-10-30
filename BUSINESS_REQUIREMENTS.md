@@ -1787,6 +1787,8 @@ It is a **web app in this repo**, not a second native project. His tablet alread
 
 Three levels: **subject → strand → subtopic**. A subtopic is the unit of everything — a lesson, a report row, a Finder card. `CURRENT_SUBTOPIC` marks where the class actually is (October 2025: `math-rational`); it wears a **📍 you are here** pin and the Subjects tab opens on its subject.
 
+**A subtopic is added when a way of being wrong is added, not when a page is.** `math-frac-word` (Chapter 3 Practice 5, "real-world problems: fractions") is not a third fraction chapter — he already multiplies and adds them. It is there because those questions take the second fraction **of what is left**, and of nothing else, and a boy who reads "3/4 of the remaining" as "3/4 of it" gets every sum in the question right and the question wrong. That is its own mistake, so it is its own row in the report.
+
 Each subtopic carries a `sample` — one line as it looks on the board (`|−20| = 20`, `1 043 221 → 1.0 million`) — and a `plain` one-liner. Those two, not the formal title, are what he is ever shown first. See §24e.
 
 ### 24b. What a lesson is made of
@@ -1808,11 +1810,11 @@ A pack (`src/steugene/packs/`) is `core` (the spine, in order) plus `extra` (the
 
 **A block id is never renamed once he has played it.** His sealed mistakes point at block ids, and a miss whose card has left the pack can never be redone, so "mistakes to fix" ticks it off unanswered. (The Oct 2026 hand-written year renamed `rn-*` to `rat-*`; his seven sealed misses were re-pointed by hand.)
 
-**Every subtopic in the year has one.** All 42 Mathematics subtopics — including Coding and Financial Literacy — are hand-written and live in `src/steugene/packs/written/` (§24n). The other 63 (History, Geography, Language, Science) are seeded by `npm run se:seed` (§24k) and sit in `src/steugene/packs/generated/`. Hand-written always wins over generated for the same id, so correcting a generated pack is writing it by hand into `written/` and deleting its generated twin.
+**Every subtopic in the year has one.** All 43 Mathematics subtopics — including Coding and Financial Literacy — are hand-written and live in `src/steugene/packs/written/` (§24n). The other 63 (History, Geography, Language, Science) are seeded by `npm run se:seed` (§24k) and sit in `src/steugene/packs/generated/`. Hand-written always wins over generated for the same id, so correcting a generated pack is writing it by hand into `written/` and deleting its generated twin.
 
 ### 24k. Seeding the year — `npm run se:seed`
 
-Writing 105 packs by hand is not a plan, so the rest of the year is generated, **once, at build time, into committed TypeScript**. Not rows in a database: a lesson has to be reviewable in a diff, correctable by hand, and shipped in the bundle so his tablet has it offline. A model wrote it; the repo owns it.
+Writing 106 packs by hand is not a plan, so the rest of the year is generated, **once, at build time, into committed TypeScript**. Not rows in a database: a lesson has to be reviewable in a diff, correctable by hand, and shipped in the bundle so his tablet has it offline. A model wrote it; the repo owns it.
 
 - Six calls per subtopic, in parallel, each with a different angle — *teach · basics · applied · build · deeper · games* — because a model asked for fifty cards in one breath writes the last twenty carelessly, and one bad call then costs a sixth of a subtopic instead of all of it.
 - Plus one YouTube pass (§24g) and one call that writes two questions per video.
@@ -1820,7 +1822,7 @@ Writing 105 packs by hand is not a plan, so the rest of the year is generated, *
 - A **maths** subtopic also gets the world brief (§24m) bolted onto the system prompt, so a re-seed never undoes it.
 - **Resumable**: a subtopic with a file is skipped, so a dropped connection costs nothing. `--force` rewrites, but a subtopic with a pack in `packs/written/` is never seeded — the script reads that directory, so writing a pack by hand is all it takes to take it out of the generator's hands.
 - Seeded with `anthropic/claude-haiku-5.5` — chosen on price per quality (~US$0.02 a subtopic, about $2 for the year). The in-app "generate more" button (§24h) keeps using whatever model is set in `app/aiConfig`.
-- Packs **load on demand**. 105 of them is ~4 MB of lesson content; bundling it would quadruple everyone's download and push one asset past the service worker's 2 MiB per-file precache limit, costing the tablet its offline mode. Each pack is its own chunk instead (`import.meta.glob`), fetched the first time he opens that subtopic. `hasPack` answers "is there one" without fetching; `ensurePack` fetches.
+- Packs **load on demand**. 106 of them is ~4 MB of lesson content; bundling it would quadruple everyone's download and push one asset past the service worker's 2 MiB per-file precache limit, costing the tablet its offline mode. Each pack is its own chunk instead (`import.meta.glob`), fetched the first time he opens that subtopic. `hasPack` answers "is there one" without fetching; `ensurePack` fetches.
 
 ### 24l. Checking the marking — `npm run se:audit` and `npm run se:verify`
 
@@ -1903,7 +1905,7 @@ So **every lesson opens with up to three questions he got right at least three d
 
 The app pays **nothing** on purpose (§24), so the only reward it has to give is the fact that he gets it — and that fact was nowhere on screen. The ⛵ shows progress through one lesson and resets. The Report is percentages, which is Dad's language.
 
-So the Subjects tab opens with a green card listing, in **his own voice**, what he can now do: *"I can say how far a number is from zero without caring which side."* Every one of the 105 subtopics carries a `can` line (`src/logic/steugene.ts`), authored as an **ability**, not the topic reworded — "Wrapping paper, basically" is a topic; "I can unfold a box in my head and add up the faces" is a win.
+So the Subjects tab opens with a green card listing, in **his own voice**, what he can now do: *"I can say how far a number is from zero without caring which side."* Every one of the 106 subtopics carries a `can` line (`src/logic/steugene.ts`), authored as an **ability**, not the topic reworded — "Wrapping paper, basically" is a topic; "I can unfold a box in my head and add up the faces" is a win.
 
 - **Earned at 4+ attempts and 75% right.** One lucky guess is not a skill, and the claim has to be true.
 - **Four lines, newest first**, with the rest behind a "+N more". Twenty lines is a wall; the ones that carry any charge are the ones from this week.
@@ -2009,7 +2011,7 @@ That is the only screen in the app that shows an answer key, and it exists for t
 
 **A wrong answer with no route back does not count.** Ben's rational-numbers topic read **89%** while he had **nothing sealed**, which looked impossible — and was the clue. Seven of his answers were to block ids beginning `rn-…`, recorded on 16 Oct before the maths year was rewritten by hand (§24n). Every id in that pack is `rat-…` now, so **those seven questions do not exist any more**; they were also in no lock, so no 🔧 row would ever offer them. Seven wrong answers to questions nobody can ask him, holding the topic down for ever, with nothing he or anyone else able to touch them. (§24n is why a pack must never rename an id he has played. It got renamed anyway, and nothing noticed.)
 
-`seRetired` takes them out of the score. It is defined on the **locks**, not on the packs: a miss leaves a lock by exactly two honest routes — redone right on a later day (latest answer right, so not retired) or redone wrong (a fresh lock opens, so not retired) — which makes "wrong and in no open lock" precisely "there is no way for him to put this right". That needs no pack loaded, which matters because the Report draws 105 lazily-loaded subtopics, and it cannot hide a real miss, because a real miss has an open lock until he has actually fixed it. They are counted in **neither** `asked` nor `right` — not credited as correct, just not evidence of anything — and reported on the topic sheet as `🗑️ 7 older questions are not in this lesson any more`, so the arithmetic still adds up on screen. `locks` is a required argument to `seNowBySubtopic` for this reason: a caller that omitted them would see no open locks, forgive every wrong answer on record, and report 100% for everything.
+`seRetired` takes them out of the score. It is defined on the **locks**, not on the packs: a miss leaves a lock by exactly two honest routes — redone right on a later day (latest answer right, so not retired) or redone wrong (a fresh lock opens, so not retired) — which makes "wrong and in no open lock" precisely "there is no way for him to put this right". That needs no pack loaded, which matters because the Report draws 106 lazily-loaded subtopics, and it cannot hide a real miss, because a real miss has an open lock until he has actually fixed it. They are counted in **neither** `asked` nor `right` — not credited as correct, just not evidence of anything — and reported on the topic sheet as `🗑️ 7 older questions are not in this lesson any more`, so the arithmetic still adds up on screen. `locks` is a required argument to `seNowBySubtopic` for this reason: a caller that omitted them would see no open locks, forgive every wrong answer on record, and report 100% for everything.
 
 With that, the topic reads **100% (54 of 54)**, with 18 misses repaired and resting until tomorrow — which is what actually happened.
 
@@ -2083,7 +2085,7 @@ One URL, two pages. §24i wrote this tab for Dad and said so in its own comment 
 
 The percentages answered *how well*. Nothing answered **how far**, which is the question a twelve-year-old actually asks — and the question behind "should we leave maths alone for a fortnight and do History?"
 
-- **🗺️ A dot per chapter**, per subject, in the order his class walks it: 🟢 done, 🟡 started, ⚪ not yet — plus a blue bar at the point the calendar says he should have reached. 105 dots, the whole year, on one screen.
+- **🗺️ A dot per chapter**, per subject, in the order his class walks it: 🟢 done, 🟡 started, ⚪ not yet — plus a blue bar at the point the calendar says he should have reached. 106 dots, the whole year, on one screen.
 - **"Done" is the §24r bar**, not "opened": four questions asked and three in four right on his latest answers. A chapter he has started badly is yellow, not green.
 - **The calendar is derived, not typed in.** The year is the Tuesday after the first Monday in September to the last Friday in June; History's window shuts on 31 January and Geography's opens on 1 February, because that is how the curriculum arrived (§24). Weeks are **school** weeks — the Christmas fortnight and March break come out, since counting them as working time quietly makes every target too easy. Dates step with `setDate`, not `+= 86_400_000`, so a clock change cannot skip a day and break a streak.
 - **A window closes as well as opening.** In June, History is not "behind", it is **over** — so it is never the thing to pick up tonight, and the card says so separately: still worth doing, no longer on the clock. Geography before February is `not-yet`, never behind, and an empty row there is not a problem.
@@ -2111,7 +2113,7 @@ Three buttons with a number on each is a **one-in-three guess**, and on a questi
 
 The videos were always in there. They were only reachable **by luck**: a video lives inside a lesson queue, so getting back to the one that finally explained circumference meant starting the circles lesson again and hoping the planner dealt it. For a boy who learns by watching — the Gym learned the same thing about exercise demos (§18l) — that is backwards. The film is the part he gets most out of, and it was the one part of the app he could not point at.
 
-So **every video in the year is on one page**, laid out in the shape of his year: **subject → chapter → page → the films on it**, in the curriculum's own teaching order (§24a). 296 videos, 27 hours, across all 105 subtopics. A subtopic with no video simply is not on the shelf.
+So **every video in the year is on one page**, laid out in the shape of his year: **subject → chapter → page → the films on it**, in the curriculum's own teaching order (§24a). 300 videos, 27 hours, across all 106 subtopics. A subtopic with no video simply is not on the shelf.
 
 - **It is a shelf, not a lesson.** Nothing is asked afterwards, nothing is recorded, nothing is paid. The video block inside a lesson is held for two minutes and leads to questions because that is the only reason it earned its place there (§24g); a video *he went looking for* needs neither, and a hold on it would just teach him to avoid the shelf.
 - **The shield stays on.** Same locked player, same `youtube-nocookie` through the IFrame API, same transparent shield over the frame, same credit line that is never a link. The shield was never about the hold — YouTube's chrome is a corridor out whatever brought him to the frame (§24g).
@@ -2121,7 +2123,7 @@ So **every video in the year is on one page**, laid out in the shape of his year
 - **Search matches the chapter, not just the title.** He does not remember what a video was called; he remembers that it was the circle one. So the box reads the title, the channel, the `watchFor`, the page and the chapter, and anything with no hits left in it drops out of the list entirely rather than leaving him scrolling past twenty empty chapters.
 - **📘 Do this lesson** sits under the player: the shelf is the one place in the app that names a chapter without being a way into it, and a boy who just watched the circle video is as ready as he will ever be. Dad's copy of the page does not offer it — starting a lesson in Ben's name is not Dad's to do (§24f).
 
-**The catalogue is generated, and checked.** The shelf cannot read the packs: there are 105 of them, one lazy chunk each, ~4 MB in all (§24k), and printing 296 titles is not worth the whole download. So `npm run se:video-index` copies the labels out into `src/steugene/videoIndex.ts` (~60 kB, its own chunk with the page, so nobody who never opens the tab pays for it). The pack stays the only place a video is **authored** — and `npm run se:audit` **fails** when the copy has drifted, because a stale shelf is either a video he cannot find or a row that plays nothing. It spends nothing and asks no API anything.
+**The catalogue is generated, and checked.** The shelf cannot read the packs: there are 106 of them, one lazy chunk each, ~4 MB in all (§24k), and printing 300 titles is not worth the whole download. So `npm run se:video-index` copies the labels out into `src/steugene/videoIndex.ts` (~60 kB, its own chunk with the page, so nobody who never opens the tab pays for it). The pack stays the only place a video is **authored** — and `npm run se:audit` **fails** when the copy has drifted, because a stale shelf is either a video he cannot find or a row that plays nothing. It spends nothing and asks no API anything.
 
 ### 24j. URLs (§1c)
 

@@ -93,6 +93,7 @@ export const SUB_WORLDS = {
   'math-fdp': 'A health bar at 3/4 = 0.75 = 75%; pack odds written three ways; battle pass progress; pass accuracy.',
   'math-frac-add': 'PIZZA FIRST — one large pizza is 8 slices, a party size is 12, and sharing between 4 is where the denominator comes from. Then Minecraft stacks (1/4 of 64 = 16), the hunger bar, halves of a match.',
   'math-frac-mult': 'Half of a half pizza; 2/3 of a stack of 64; doubling a recipe; 3/4 of the 500 wood you are carrying.',
+  'math-frac-word': 'The two-cut story: 500 wood with a ramp then a box, a stack of 64 with a floor then stairs, Robux with a game pass then a skin, a 12-slice party pizza. The second fraction is always OF WHAT IS LEFT, and about a third of them give the leftover and ask for the start.',
   'math-percent': '13% HST on a game or a restaurant bill (never on buying a gift card); a 25% off skin sale; battle pass 70% done; pass accuracy and possession.',
   'math-ratio': 'K/D ratio — eliminations to deaths; Robux per hour of building; damage per second; shots to goals; blocks mined per minute; 3 : 5 wins to losses.',
   'math-power': '2 × 2 × 2 chest doubling; a square base 12 × 12 blocks; 9² blocks in a wall; √ to get back to the side length; big round numbers of visits.',
