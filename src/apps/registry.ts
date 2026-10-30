@@ -356,6 +356,10 @@ export const APPS: AppDef[] = [
       // learns by watching, and until this existed a video was only reachable
       // by starting the right lesson and hoping the planner dealt it.
       { id: 'videos', label: 'Videos', icon: '🎬' },
+      // §24ab — how to start, when the question is a wall of words. Its own
+      // URL because it is not part of a lesson: it is the page he opens
+      // BEFORE one, and the page Dad opens to use the same five words.
+      { id: 'tips', label: 'Tips', icon: '🧭' },
       { id: 'lesson', label: 'Lesson', icon: '📘' },
       // §24v — his own mistakes, by chapter, on demand. His, not Dad's: it is
       // the one retry route he does not have to be let through.
@@ -369,6 +373,9 @@ export const APPS: AppDef[] = [
       { id: 'helping', label: 'Helping', icon: '🤝' },
       { id: 'report', label: 'Report', icon: '📊' },
       { id: 'subjects', label: 'The year', icon: '📚' },
+      // §24ab — the same plan on Dad's side. Helping him with different words
+      // to the ones the app taught him is how a boy ends up with two methods.
+      { id: 'tips', label: 'Tips', icon: '🧭' },
       // §24z — the same shelf. Dad's copy is for checking what is on it, so
       // it never offers to start a lesson in Ben's name.
       { id: 'videos', label: 'Videos', icon: '🎬' },

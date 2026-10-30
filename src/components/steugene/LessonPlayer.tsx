@@ -24,7 +24,10 @@ import { SE_WARM_INTRO, seAvailable, seBuildRight, seBuilt, seForFix, seTiles, s
 import { speak, stopSpeaking, canSpeak } from '../../lib/speak'
 import { SeArtwork } from './SeArtwork'
 import { SeCalculator } from './SeCalculator'
+import { SePlanBox } from './SePlanBox'
 import { SeVideoBlock } from './SeVideoBlock'
+import { seTipFor } from '../../steugene/tips'
+import type { SeTipPlan } from '../../steugene/tips'
 import type { SeBlock, SeChoice, SeBuild, SeExplain, SeGame, SeStep } from '../../steugene/types'
 
 /** Idle longer than this and the clock stops counting (§24d). */
@@ -147,6 +150,9 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   }, [run?.startedAt, run?.subtopicId, run?.fix, seDesk.generated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [finished, setFinished] = useState(false)
+  // §24ab — asked for once, open for the rest of the lesson. Re-deciding to
+  // ask on every card is the friction the plan exists to remove.
+  const [planOpen, setPlanOpen] = useState(false)
 
   if (!run) return null
   const where = seFind(run.subtopicId)
@@ -184,6 +190,14 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
 
   const total = run.blockIds.length
   const sailed = Math.round(((run.pos + 1) / total) * 100)
+
+  // §24ab — the 🧭 plan, but only where it is a help: a maths question made of
+  // sentences. A review spans several packs, so the subtopic is the one this
+  // card came from, not the one the run is filed under.
+  const cardSub = run.subs?.[block.id] ?? run.subtopicId
+  const prompt = block.kind === 'choice' || block.kind === 'build' ? block.prompt : ''
+  const plan =
+    prompt && seFind(cardSub)?.subject.id === 'math' ? seTipFor(prompt, cardSub) : null
 
   return (
     <div className="se-lesson">
@@ -230,10 +244,28 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
       <div key={block.id} className="se-card-in">
         {block.kind === 'explain' && <ExplainCard block={block} speakOn={speakOn} rate={rate} onNext={next} />}
         {block.kind === 'choice' && (
-          <ChoiceCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
+          <ChoiceCard
+            block={block}
+            speakOn={speakOn}
+            rate={rate}
+            plan={plan}
+            planOpen={planOpen}
+            onPlan={() => setPlanOpen(true)}
+            onNext={next}
+            onRecord={seRecord}
+          />
         )}
         {block.kind === 'build' && (
-          <BuildCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
+          <BuildCard
+            block={block}
+            speakOn={speakOn}
+            rate={rate}
+            plan={plan}
+            planOpen={planOpen}
+            onPlan={() => setPlanOpen(true)}
+            onNext={next}
+            onRecord={seRecord}
+          />
         )}
         {block.kind === 'game' && (
           <GameCard block={block} speakOn={speakOn} rate={rate} onNext={next} onRecord={seRecord} />
@@ -488,12 +520,18 @@ function ChoiceCard({
   block,
   speakOn,
   rate,
+  plan,
+  planOpen,
+  onPlan,
   onNext,
   onRecord,
 }: {
   block: SeChoice
   speakOn: boolean
   rate: number
+  plan: SeTipPlan | null
+  planOpen: boolean
+  onPlan: () => void
   onNext: () => void
   onRecord: Record_
 }) {
@@ -547,7 +585,10 @@ function ChoiceCard({
       </div>
 
       {picked === null && (
-        <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+        <>
+          {plan && <SePlanBox plan={plan} open={planOpen} onOpen={onPlan} rate={rate} />}
+          <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+        </>
       )}
 
       {picked !== null && (
@@ -571,12 +612,18 @@ function BuildCard({
   block,
   speakOn,
   rate,
+  plan,
+  planOpen,
+  onPlan,
   onNext,
   onRecord,
 }: {
   block: SeBuild
   speakOn: boolean
   rate: number
+  plan: SeTipPlan | null
+  planOpen: boolean
+  onPlan: () => void
   onNext: () => void
   onRecord: Record_
 }) {
@@ -666,7 +713,10 @@ function BuildCard({
       )}
 
       {locked === null && (
-        <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+        <>
+          {plan && <SePlanBox plan={plan} open={planOpen} onOpen={onPlan} rate={rate} />}
+          <Nudge steps={block.steps} asked={helped} onAsk={() => setHelped(true)} speakOn={speakOn} rate={rate} />
+        </>
       )}
 
       {locked !== null && (
@@ -739,6 +789,11 @@ function VideoCard({
       block={{ ...check, kind: 'choice', id: `${block.id}-q${q}` }}
       speakOn={speakOn}
       rate={rate}
+      // No 🧭 here: a question about the video he just watched is not a word
+      // problem, and the five moves have nothing to say about it.
+      plan={null}
+      planOpen={false}
+      onPlan={() => {}}
       onRecord={onRecord}
       onNext={() => (q + 1 < block.checks.length ? setQ(q + 1) : onNext())}
     />

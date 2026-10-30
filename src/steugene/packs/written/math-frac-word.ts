@@ -20,6 +20,96 @@ export const pack: SePack = {
   subtopicId: 'math-frac-word',
 
   core: [
+    // §24ab — the lesson opens on the METHOD, not on a fraction. He does not
+    // stop at the arithmetic, he stops at the paragraph, and the same five
+    // moves are on the 🧭 button of every question and on /steugene7/tips.
+    {
+      kind: 'explain',
+      id: 'fwp-e0',
+      emoji: '🧭',
+      title: 'Five moves, before any maths',
+      lines: [
+        'Read it twice. The first time, ignore every number.',
+        'Find the question. It is nearly always the last sentence.',
+        'Circle each number and write what it counts.',
+        'Draw one bar, cut it, then answer the question you found.',
+      ],
+      art: {
+        art: 'table',
+        head: ['move', 'what you do'],
+        rows: [
+          ['1 📖', 'read it twice — story first'],
+          ['2 ❓', 'find the question'],
+          ['3 ✏️', 'circle the numbers'],
+          ['4 📊', 'draw one bar'],
+          ['5 ✅', 'answer it, then add the pieces back up'],
+        ],
+      },
+      callout: { flavour: 'key', text: 'The 🧭 button on every question has these five moves on it. Reading them costs you nothing.' },
+      secs: 60,
+    },
+    {
+      kind: 'choice',
+      id: 'fwp-c0',
+      lead: 'fwp-e0',
+      prompt: 'Do no maths on this one. "Ravi has 40 arrows. He uses 1/4 on a raid, then 2/3 of what is left on a boss." What is the question asking for?',
+      options: ['How many arrows he used on the boss', 'How many arrows are left at the end', 'How many arrows he started with'],
+      answer: 1,
+      why: 'The last sentence asks what is LEFT. The 40 and the 1/4 are facts you were given, not the job.',
+      steps: [
+        { text: 'Cover every number with your finger.' },
+        { text: 'Read only the last sentence.' },
+        { text: 'That sentence is always the job.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'fwp-c0b',
+      prompt: 'Same one: 40 arrows, 1/4 used on a raid, then 2/3 of what is left on a boss. The 2/3 is two thirds of WHAT?',
+      options: ['the 40 arrows he had at the start', 'the arrows left after the raid', 'the 10 used on the raid'],
+      answer: 1,
+      why: 'It says "of what is left", so it is 2/3 of the 30 arrows left after the raid.',
+      steps: [
+        { text: 'Different one: 60 coins, 1/3 spent, then 1/2 of the rest.' },
+        { text: 'The 1/2 is half of the 40 left, not half of the 60.' },
+        { text: 'Say "of WHAT?" out loud before you multiply.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'video',
+      id: 'fwp-v0',
+      youtube: 'u5SP8IPIeU4',
+      title: 'Solving a Two-Step Word Problem with the 3 Reads Strategy',
+      by: 'Math (and More) in Minutes',
+      seconds: 247,
+      watchFor: 'What she does on read one, read two and read three.',
+      checks: [
+        {
+          prompt: 'The 3 Reads strategy means you read the problem…',
+          options: ['once, as slowly and carefully as you possibly can', 'three times, for three different things', 'only the last line'],
+          answer: 1,
+          why: 'Three reads: what is the story, what are the numbers, what is the question.',
+          steps: [
+            { text: 'Read one: the story, no numbers.' },
+            { text: 'Read two: the numbers and what they count.' },
+            { text: 'Read three: the question.' },
+          ],
+        },
+        {
+          prompt: 'On the first read you should…',
+          options: ['work out the first step straight away', 'ignore the numbers completely', 'write the answer down'],
+          answer: 1,
+          why: 'Read one is for the story only — the numbers come on read two.',
+          steps: [
+            { text: 'Try it on any question.' },
+            { text: 'Cover the numbers with your hand.' },
+            { text: 'Say what is happening in the story.' },
+          ],
+        },
+      ],
+    },
     {
       kind: 'explain',
       id: 'fwp-e1',
@@ -250,6 +340,144 @@ export const pack: SePack = {
   ],
 
   extra: [
+    // §24ab — reading cards. No arithmetic in them at all: the only thing
+    // being practised is the move he actually misses.
+    {
+      kind: 'choice',
+      id: 'fwp-x-read1',
+      prompt: 'Do no maths. "A barrel is 4/5 full. You use 1/4 of the water on a garden. You split the rest between 3 buckets." What kind of answer must this have?',
+      options: ['A number of litres of water', 'A fraction of a barrel', 'A number of buckets'],
+      answer: 1,
+      why: 'Nothing tells you how big the barrel is, so the answer can only be a fraction of a barrel.',
+      steps: [
+        { text: 'Look for a real unit: litres, kg, minutes.' },
+        { text: 'There is none here — only fractions of a barrel.' },
+        { text: 'So the answer is a fraction too.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'choice',
+      id: 'fwp-x-read2',
+      prompt: 'Which words tell you to start again from the leftover?',
+      options: ['"in total, how many"', '"of the remaining"', '"altogether"'],
+      answer: 1,
+      why: '"Of the remaining" means what is left becomes the new whole thing.',
+      steps: [
+        { text: '"In total" means add the pieces up.' },
+        { text: '"Of the remaining" means start again from what is left.' },
+      ],
+      secs: 45,
+    },
+    {
+      kind: 'choice',
+      id: 'fwp-x-read3',
+      prompt: 'You cannot picture 3/8 of something. What is the best first move?',
+      options: ['Guess, then check it on the calculator later', 'Try it with an easy number like 24', 'Add the two fractions together'],
+      answer: 1,
+      why: '24 splits into eighths neatly, and 3/8 of 24 = 9 shows you the move.',
+      steps: [
+        { text: 'Try 3/8 of 24.' },
+        { text: '24 ÷ 8 = 3 per eighth.' },
+        { text: '3 × 3 = 9. Now do the same move on the hard numbers.' },
+      ],
+      secs: 50,
+    },
+    {
+      kind: 'video',
+      id: 'fwp-x-v4',
+      youtube: 'xZzePWYoc3k',
+      title: 'Solving a One-Step Word Problem with the 3 Reads Strategy',
+      by: 'Math (and More) in Minutes',
+      seconds: 222,
+      watchFor: 'The three questions she asks herself, in order.',
+      checks: [
+        {
+          prompt: 'Read two of the 3 Reads is for…',
+          options: ['the numbers, and what each one counts', 'deciding on the answer', 'reading the whole thing out loud to somebody else'],
+          answer: 0,
+          why: 'Read two finds the numbers and what they count: 2 kg, 2/5, 3/10.',
+          steps: [
+            { text: 'Read one is the story.' },
+            { text: 'Read two is the numbers.' },
+            { text: 'Read three is the question.' },
+          ],
+        },
+        {
+          prompt: 'Why read the question last?',
+          options: ['so you know what you are looking for', 'because it is always the hardest sentence in the whole thing', 'to save time'],
+          answer: 0,
+          why: 'Knowing what you are looking for is what tells you which sum to do.',
+          steps: [
+            { text: 'Find the question first on your next one.' },
+            { text: 'Write it at the top of your page.' },
+          ],
+        },
+      ],
+    },
+    {
+      kind: 'video',
+      id: 'fwp-x-v5',
+      youtube: 'XyDSY5NIpDo',
+      title: 'Fractions Word Problem Grade 6 — Bar Models',
+      by: 'Good Questions to Ask in Math Class',
+      seconds: 170,
+      watchFor: 'How many boxes he draws, and what one box stands for.',
+      checks: [
+        {
+          prompt: 'In a bar model, every box in the bar is…',
+          options: ['a different size, to show the fractions', 'the same size as every other box', 'the answer'],
+          answer: 1,
+          why: 'The boxes are equal parts — that is what makes 3 shaded of 5 boxes mean 3/5.',
+          steps: [
+            { text: 'Draw 5 equal boxes for fifths.' },
+            { text: 'Shade 3 of them for 3/5.' },
+          ],
+        },
+        {
+          prompt: 'To show 2/5 of 500 you draw…',
+          options: ['5 boxes of 100, and shade 2', 'two boxes with 500 written in each', '500 tiny boxes'],
+          answer: 0,
+          why: '500 ÷ 5 = 100 in each box, and 2 shaded boxes make 200.',
+          steps: [
+            { text: 'Try 3/4 of 80.' },
+            { text: '4 boxes of 20 each.' },
+            { text: 'Shade 3 of them for 60.' },
+          ],
+        },
+      ],
+    },
+    {
+      kind: 'video',
+      id: 'fwp-x-v6',
+      youtube: 'N_8srGGX0kk',
+      title: 'Solving Word Problems (Simplifying Math)',
+      by: 'Buffington',
+      seconds: 359,
+      watchFor: 'How he turns the English words into a sum.',
+      checks: [
+        {
+          prompt: '"Altogether" in a word problem usually means…',
+          options: ['subtract one from the other', 'add the pieces up', 'multiply them'],
+          answer: 1,
+          why: '"Altogether" means add: 3 red and 5 blue is 8 altogether.',
+          steps: [
+            { text: 'Try: 3 red and 5 blue altogether.' },
+            { text: '3 + 5 = 8.' },
+          ],
+        },
+        {
+          prompt: '"How many are left" usually means…',
+          options: ['you add every single number up', 'something gets taken away', 'you count the start again'],
+          answer: 1,
+          why: '"Left" means take away what went: 40 - 10 = 30 left.',
+          steps: [
+            { text: 'Try: 40 arrows, 10 used.' },
+            { text: '40 - 10 = 30 left.' },
+          ],
+        },
+      ],
+    },
     {
       kind: 'choice',
       id: 'fwp-x-c1',

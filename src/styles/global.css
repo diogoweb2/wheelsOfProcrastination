@@ -6653,6 +6653,72 @@ input, select { font-family: inherit; }
 .se-nudge__foot { margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--yellow); }
 .se-result__nudged { margin-top: 8px; font-size: 14px; font-weight: 800; color: var(--yellow); }
 
+/* 🏫 St. Eugene 7 §24ab — 🧭 the plan, on the question and on its own page.
+   Blue, not yellow: the yellow dashed box is the nudge (§24p), which moves
+   the ANSWER towards him and is recorded. This moves nothing towards him —
+   it is the same five words on every question in the year — so it must not
+   look like the same offer. */
+.se-plan__ask { margin-top: 12px; width: 100%; opacity: 0.85; }
+.se-plan {
+  margin-top: 12px;
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 2px solid var(--blue);
+}
+.se-plan__bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.se-plan__name { font-size: 13px; font-weight: 900; color: var(--blue); }
+.se-plan__dots { display: flex; gap: 6px; list-style: none; padding: 0; margin: 9px 0 10px; }
+.se-plan__dot {
+  width: 30px; height: 30px; border-radius: 50%; font: inherit; font-size: 14px; font-weight: 900;
+  background: var(--bg2); color: var(--muted); border: 2px solid var(--line); cursor: pointer;
+}
+.se-plan__dot--on { background: var(--blue); color: var(--bg); border-color: var(--blue); }
+.se-plan__dot--done { color: var(--text); border-color: var(--blue); }
+.se-plan__do { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.4; }
+.se-plan__like {
+  margin: 7px 0 0; padding-left: 10px; border-left: 3px solid var(--line);
+  font-size: 14px; color: var(--muted); line-height: 1.45;
+}
+.se-plan__more { margin-top: 11px; width: 100%; }
+.se-plan__foot { margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--blue); }
+
+/* The 🧭 Tips page. One plan open at a time — two open at once is the wall of
+   text the page exists to take apart. */
+.se-tips { margin-bottom: 12px; }
+.se-tips__head {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+}
+.se-tips__emoji { font-size: 30px; line-height: 1; }
+.se-tips__title { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.se-tips__title strong { font-size: 16px; }
+.se-tips__title .muted { font-size: 13px; line-height: 1.35; }
+.se-tips__chev { font-size: 17px; color: var(--muted); }
+.se-tips__speak { margin-top: 11px; width: 100%; }
+.se-tips__steps { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 11px; }
+.se-tips__steps li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+.se-tips__n {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 13px; font-weight: 900;
+  background: var(--blue); color: var(--bg);
+}
+.se-tips__steps strong { font-size: 15px; font-weight: 800; }
+.se-tips__like {
+  display: block; margin-top: 4px; font-style: normal;
+  font-size: 13.5px; color: var(--muted); line-height: 1.45;
+}
+.se-tips__sub { margin: 15px 0 7px; font-size: 12px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+.se-tips__words { width: 100%; border-collapse: collapse; font-size: 14px; }
+.se-tips__words th {
+  text-align: left; vertical-align: top; padding: 6px 10px 6px 0; white-space: nowrap;
+  font-weight: 900; color: var(--yellow);
+}
+.se-tips__words td { padding: 6px 0; color: var(--muted); line-height: 1.4; }
+.se-tips__words tr + tr th, .se-tips__words tr + tr td { border-top: 1px solid var(--line); }
+.se-tips__stuck { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.se-tips__note { opacity: 0.92; }
+
 /* 🏫 St. Eugene 7 §24g — "Listen for:". Above the frame and it stays there,
    so the two held minutes have a job in them instead of being a wait. */
 .se-video__watch {

@@ -2113,7 +2113,7 @@ Three buttons with a number on each is a **one-in-three guess**, and on a questi
 
 The videos were always in there. They were only reachable **by luck**: a video lives inside a lesson queue, so getting back to the one that finally explained circumference meant starting the circles lesson again and hoping the planner dealt it. For a boy who learns by watching — the Gym learned the same thing about exercise demos (§18l) — that is backwards. The film is the part he gets most out of, and it was the one part of the app he could not point at.
 
-So **every video in the year is on one page**, laid out in the shape of his year: **subject → chapter → page → the films on it**, in the curriculum's own teaching order (§24a). 300 videos, 27 hours, across all 106 subtopics. A subtopic with no video simply is not on the shelf.
+So **every video in the year is on one page**, laid out in the shape of his year: **subject → chapter → page → the films on it**, in the curriculum's own teaching order (§24a). 304 videos, 27 hours, across all 106 subtopics. A subtopic with no video simply is not on the shelf.
 
 - **It is a shelf, not a lesson.** Nothing is asked afterwards, nothing is recorded, nothing is paid. The video block inside a lesson is held for two minutes and leads to questions because that is the only reason it earned its place there (§24g); a video *he went looking for* needs neither, and a hold on it would just teach him to avoid the shelf.
 - **The shield stays on.** Same locked player, same `youtube-nocookie` through the IFrame API, same transparent shield over the frame, same credit line that is never a link. The shield was never about the hold — YouTube's chrome is a corridor out whatever brought him to the frame (§24g).
@@ -2123,13 +2123,33 @@ So **every video in the year is on one page**, laid out in the shape of his year
 - **Search matches the chapter, not just the title.** He does not remember what a video was called; he remembers that it was the circle one. So the box reads the title, the channel, the `watchFor`, the page and the chapter, and anything with no hits left in it drops out of the list entirely rather than leaving him scrolling past twenty empty chapters.
 - **📘 Do this lesson** sits under the player: the shelf is the one place in the app that names a chapter without being a way into it, and a boy who just watched the circle video is as ready as he will ever be. Dad's copy of the page does not offer it — starting a lesson in Ben's name is not Dad's to do (§24f).
 
-**The catalogue is generated, and checked.** The shelf cannot read the packs: there are 106 of them, one lazy chunk each, ~4 MB in all (§24k), and printing 300 titles is not worth the whole download. So `npm run se:video-index` copies the labels out into `src/steugene/videoIndex.ts` (~60 kB, its own chunk with the page, so nobody who never opens the tab pays for it). The pack stays the only place a video is **authored** — and `npm run se:audit` **fails** when the copy has drifted, because a stale shelf is either a video he cannot find or a row that plays nothing. It spends nothing and asks no API anything.
+**The catalogue is generated, and checked.** The shelf cannot read the packs: there are 106 of them, one lazy chunk each, ~4 MB in all (§24k), and printing 304 titles is not worth the whole download. So `npm run se:video-index` copies the labels out into `src/steugene/videoIndex.ts` (~60 kB, its own chunk with the page, so nobody who never opens the tab pays for it). The pack stays the only place a video is **authored** — and `npm run se:audit` **fails** when the copy has drifted, because a stale shelf is either a video he cannot find or a row that plays nothing. It spends nothing and asks no API anything.
+
+### 24ab. 🧭 Tips — how to start, when the question is a wall of words (`/steugene7/tips`)
+
+**He can do the maths.** Ask him 3/4 of 64 and he has it before you finish the sentence. Put the same sum inside four lines of English and he stops — not at the arithmetic, at the paragraph. Word problems are the thing in grade 7 that actually defeats him, and "read it again" is not a method.
+
+So the first move is written down, and it is the same first move every time:
+
+1. **Read it twice.** The first time, ignore every number.
+2. **Find the question.** Nearly always the last sentence. Say it out loud.
+3. **Circle each number** and write what it counts.
+4. **Draw one bar.** Cut it with the first fraction.
+5. **Answer the question from move 2** — then add the pieces back up and see if they make the whole.
+
+Plus, per plan, a **stuck list** (try it with an easy number; cross out the words that are not maths; read only as far as the first full stop) and a **clue table** (*of* → ×, *the remaining* → start again from what is left, *each* → ÷). The plans live as data in `src/steugene/tips.ts`, which is what lets the same five words appear in three places instead of three versions of them appearing in three places.
+
+- **The page** (`/steugene7/tips`) is where it is learned, with nothing at stake. One plan open at a time, one move at a time, read aloud on a button (§24c). **It is on Dad's menu too** — helping him at the kitchen table in different words to the ones the app taught him is how a boy ends up carrying two methods and trusting neither.
+- **The 🧭 button on the question** is where it is used. It sits above "🤔 I don't get it yet" on every maths question made of sentences (12 words or more — `seTipFor`; "Work it out: 2/5 × 3" gets nothing, because a button that is not a help is clutter). Opened once, it stays open for the rest of the lesson: re-deciding to ask on every card is the friction it exists to remove.
+- **It is not a nudge, and it is not recorded.** §24p's "I don't get it yet" works the same question on different numbers and marks the answer `helped`, because that is the answer moving towards him. The plan is the same four lines on every question in the year and moves nothing — so it costs him nothing, shows up nowhere, and he never has to weigh "will Dad see that I looked". The nudge is yellow and dashed; the plan is blue and solid. Two different offers must not look like one.
+
+**The strategy is taught in the pack as well as offered on the page.** `math-frac-word` (§24a) opens on the five moves rather than on a fraction, and its bench carries **reading cards with no arithmetic in them at all** — "what is this question asking for?", "the 2/3 is two thirds of WHAT?", "which words tell you to start again from the leftover?" — because the move he misses is the one worth practising on its own. Four of its eight videos are about method, not fractions: the 3 Reads strategy on a one-step and a two-step problem, bar models, and turning English into a sum.
 
 ### 24j. URLs (§1c)
 
-`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/videos` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping` (plus the same `/steugene7/videos`).
+`/steugene7/subjects` · `/steugene7/finder` · `/steugene7/videos` · `/steugene7/tips` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping` (plus the same `/steugene7/videos` and `/steugene7/tips`).
 
-Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs + `videoIndex.ts`, the shelf's catalogue), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneVideos.ts` (the shelf, §24z), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the shelf, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the seven pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
+Code: `src/logic/steugene.ts` (the year), `src/steugene/` (types + packs + `videoIndex.ts`, the shelf's catalogue + `tips.ts`, the plans, §24ab), `src/logic/steugeneLesson.ts` (the planner and the tiles), `src/logic/steugeneVideos.ts` (the shelf, §24z), `src/logic/steugeneAi.ts` (§24h), `src/lib/speak.ts` (§24c), `src/components/steugene/` (the player, the drawings, the locked video, the shelf, the answer key), `src/logic/steugenePace.ts` (the school calendar and the pace, §24x), `src/screens/StEugeneScreen.tsx` (the eight pages), `onStEugeneWrite` in `functions/index.js` (the pushes).
 
 
 ## 25. The Sunday email — Ben's week, in my inbox (`npm run email:weekly`)

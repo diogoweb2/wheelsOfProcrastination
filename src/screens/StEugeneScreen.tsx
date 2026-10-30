@@ -1,9 +1,10 @@
 // 🏫 St. Eugene 7 (§24) — his actual school year, as an app.
 //
-// Seven pages, each its own URL (§1c):
+// Eight pages, each its own URL (§1c):
 //   /steugene7/subjects  the year, in the order his class walks it
 //   /steugene7/finder    "what are you learning right now?" — by sight, not by name
 //   /steugene7/videos    the shelf: every video in the year, by chapter (§24z)
+//   /steugene7/tips      how to start, when the question is a wall of words (§24ab)
 //   /steugene7/lesson    the lesson in flight
 //   /steugene7/review    his own mistakes, by chapter, whenever he wants
 //   /steugene7/report    where he is strong, and where he needs me
@@ -46,6 +47,7 @@ import { SE_LENGTHS, seAvailable, seFixGroups, seLockLeft, seWithChecks } from '
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
+import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
 import { dayKey, prettyDay } from '../logic/dates'
 import type { AppData, SeAnswer, SeFixLock, SeStat } from '../types'
 
@@ -67,6 +69,7 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
           <SeVideos onLesson={(id) => void startLesson(id, setTab)} />
         </Suspense>
       )}
+      {tab === 'tips' && <TipsTab />}
       {tab === 'review' && <ReviewTab setTab={setTab} />}
       {tab === 'report' && <ReportTab admin={isAdmin} setTab={setTab} />}
       {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
@@ -555,6 +558,124 @@ function Verdicts({ subtopicId }: { subtopicId: string }) {
 }
 
 // --- the Finder ------------------------------------------------------------------
+
+/**
+ * 🧭 Tips (§24ab) — how to start, when the question is a wall of words.
+ *
+ * Its own page, not a panel inside a lesson, for two reasons. He can read it
+ * when nothing is at stake, which is the only time anybody learns a method;
+ * and Dad can open it at the kitchen table and help him in the SAME five
+ * words the app used, instead of teaching him a second way to do it.
+ *
+ * One move at a time, and the example under each move is the one off his
+ * worksheet, so the plan is never abstract.
+ */
+function TipsTab() {
+  const [openId, setOpenId] = useState<string>(SE_TIPS[0]?.id ?? '')
+
+  return (
+    <>
+      <div className="h1">🧭 Stuck? Start here.</div>
+      <p className="muted" style={{ marginBottom: 12 }}>
+        You do not have to know the answer to start. You only have to know the first move.
+      </p>
+
+      {SE_TIPS.map((plan) => (
+        <PlanCard
+          key={plan.id}
+          plan={plan}
+          open={openId === plan.id}
+          onOpen={() => {
+            sfx.click()
+            setOpenId(openId === plan.id ? '' : plan.id)
+          }}
+        />
+      ))}
+
+      <div className="card se-tips__note">
+        <div className="h2" style={{ marginBottom: 6 }}>🔊 One more thing</div>
+        <p className="muted" style={{ margin: 0 }}>
+          Every question in a lesson has a 🔊 button. Reading is the hard part, not the maths — so let it read, and
+          listen with your pencil already on the paper.
+        </p>
+      </div>
+    </>
+  )
+}
+
+function PlanCard({ plan, open, onOpen }: { plan: SeTipPlan; open: boolean; onOpen: () => void }) {
+  const spoken = `${plan.title}. ${plan.steps.map((st, i) => `${i + 1}. ${st.do}`).join(' ')}`
+
+  return (
+    <div className="card se-tips">
+      <button className="se-tips__head" onClick={onOpen} aria-expanded={open}>
+        <span className="se-tips__emoji" aria-hidden>
+          {plan.emoji}
+        </span>
+        <span className="se-tips__title">
+          <strong>{plan.title}</strong>
+          <span className="muted">{plan.when}</span>
+        </span>
+        <span className="se-tips__chev" aria-hidden>
+          {open ? '▾' : '▸'}
+        </span>
+      </button>
+
+      {open && (
+        <>
+          <button
+            className="btn btn--ghost btn--small se-tips__speak"
+            onClick={() => {
+              sfx.click()
+              speak(spoken, 1)
+            }}
+          >
+            🔊 Read the plan to me
+          </button>
+
+          <ol className="se-tips__steps">
+            {plan.steps.map((st, i) => (
+              <li key={i}>
+                <span className="se-tips__n">{i + 1}</span>
+                <span>
+                  <strong>{st.do}</strong>
+                  {st.like && <em className="se-tips__like">{st.like}</em>}
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          {!!plan.words?.length && (
+            <>
+              <div className="se-tips__sub">The words that tell you what to do</div>
+              <table className="se-tips__words">
+                <tbody>
+                  {plan.words.map((w) => (
+                    <tr key={w.word}>
+                      <th scope="row">{w.word}</th>
+                      <td>{w.means}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {!!plan.stuck?.length && (
+            <>
+              <div className="se-tips__sub">Still stuck after all five?</div>
+              <ul className="se-tips__stuck">
+                {plan.stuck.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
 
 /**
  * §24e — "What are you learning right now?"
