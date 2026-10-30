@@ -49,7 +49,8 @@ import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
 import { SE_LEVELS, SE_WORKED } from '../steugene/worked'
-import { SeWorkedPlayer } from '../components/steugene/SeWorked'
+import { SeWorkedPlayer, type SeTake } from '../components/steugene/SeWorked'
+import { SE_VOYAGES, seVoyageFor } from '../steugene/voyage'
 import { SeArtwork } from '../components/steugene/SeArtwork'
 import { SpriteSvg } from '../components/steugene/art/sprites'
 import { dayKey, prettyDay } from '../logic/dates'
@@ -576,6 +577,9 @@ function Verdicts({ subtopicId }: { subtopicId: string }) {
  */
 function TipsTab() {
   const [openEx, setOpenEx] = useState<string | null>(null)
+  // Which way he is watching. Sticky across "next one": a boy who has decided
+  // to try the fast way should not be dropped back into the slow one.
+  const [take, setTake] = useState<SeTake>('bar')
   const [seen, setSeen] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem(WATCHED_KEY) ?? '[]') as string[]
@@ -599,14 +603,23 @@ function TipsTab() {
     })
   }, [])
 
+  const show = (id: string, way: SeTake) => {
+    sfx.click()
+    setTake(way)
+    setOpenEx(id)
+  }
+
   const ex = SE_WORKED.find((w) => w.id === openEx)
   if (ex) {
     const at = SE_WORKED.indexOf(ex)
     const after = SE_WORKED[at + 1]
     return (
       <SeWorkedPlayer
-        key={ex.id}
+        key={`${ex.id}:${take}`}
         ex={ex}
+        v2={seVoyageFor(ex.id)}
+        open={take}
+        onTake={setTake}
         onDone={mark}
         onClose={() => setOpenEx(null)}
         {...(after ? { next: { label: 'Next one', go: () => setOpenEx(after.id) } } : {})}
@@ -614,20 +627,25 @@ function TipsTab() {
     )
   }
 
-  const done = seen.length
+  // Twenty things to watch, not ten: every problem has a slow way and a fast
+  // one, and finishing either is progress worth showing.
+  const ways = SE_WORKED.length + SE_VOYAGES.length
+  const done = seen.filter((id) => SE_WORKED.some((w) => w.id === id || `${w.id}:v2` === id)).length
 
   return (
     <>
       <div className="h1">🧭 Watch one get solved</div>
       <p className="muted" style={{ marginBottom: 12 }}>
-        Same bar every time. The easy ones first — and by the hard ones you will have seen the trick about eight times.
+        Two ways on every one. <strong>▦ One bar</strong> cuts it up slowly — start there.{' '}
+        <strong>🏴‍☠️ Grand Line</strong> does the whole thing in one line, and by the hard ones you will
+        have seen that trick ten times.
       </p>
 
       {!!done && (
         <div className="card se-wk__progress">
-          <strong>{done} of {SE_WORKED.length} watched</strong>
+          <strong>{done} of {ways} watched</strong>
           <div className="se-wk__track">
-            <div className="se-wk__fill" style={{ width: `${Math.round((done / SE_WORKED.length) * 100)}%` }} />
+            <div className="se-wk__fill" style={{ width: `${Math.round((done / ways) * 100)}%` }} />
           </div>
         </div>
       )}
@@ -641,27 +659,37 @@ function TipsTab() {
               <span className="muted">{lv.blurb}</span>
             </span>
           </div>
-          {SE_WORKED.filter((w) => w.level === lv.level).map((w) => (
-            <button
-              key={w.id}
-              className={`card se-wk__row${seen.includes(w.id) ? ' se-wk__row--done' : ''}`}
-              onClick={() => {
-                sfx.click()
-                setOpenEx(w.id)
-              }}
-            >
-              <span className="se-wk__icon">
-                <SpriteSvg icon={w.icon} size={26} />
-              </span>
-              <span className="se-wk__rowtext">
-                <strong>{w.title}</strong>
-                <span className="muted">{w.ask}</span>
-              </span>
-              <span className="se-wk__go" aria-hidden>
-                {seen.includes(w.id) ? '✓' : '▶'}
-              </span>
-            </button>
-          ))}
+          {SE_WORKED.filter((w) => w.level === lv.level).map((w) => {
+            const v2 = seVoyageFor(w.id)
+            const barDone = seen.includes(w.id)
+            const voyDone = seen.includes(`${w.id}:v2`)
+            return (
+              <div key={w.id} className={`card se-wk__row${barDone && (!v2 || voyDone) ? ' se-wk__row--done' : ''}`}>
+                <button className="se-wk__open" onClick={() => show(w.id, 'bar')}>
+                  <span className="se-wk__icon">
+                    <SpriteSvg icon={w.icon} size={26} />
+                  </span>
+                  <span className="se-wk__rowtext">
+                    <strong>{w.title}</strong>
+                    <span className="muted">{w.ask}</span>
+                  </span>
+                  <span className={`se-wk__way${barDone ? ' se-wk__way--on' : ''}`} aria-hidden>
+                    ▦
+                  </span>
+                </button>
+                {v2 && (
+                  <button
+                    className={`se-wk__way se-wk__way--tap${voyDone ? ' se-wk__way--on' : ''}`}
+                    onClick={() => show(w.id, 'voy')}
+                    title={`The Grand Line way: ${v2.idea}`}
+                    aria-label={`${w.title} — the Grand Line way`}
+                  >
+                    🏴‍☠️
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </Fragment>
       ))}
 
