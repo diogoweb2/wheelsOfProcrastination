@@ -134,7 +134,7 @@ Fields when creating a task:
 - **Nothing in this mode is ever fined.** Rollover skips the missed-must-do charge and the abandoned-pick charge entirely while `dailyMode` is `'today'` — including for a quest that picks up a `penalty` later, which must not start charging for the days before it did.
 - **A new day is a new card.** At rollover `data.today` is thrown away and rebuilt: yesterday's pick, its clock and the things waved off all go. The Today card is never a backlog of its own.
 - **The card self-heals.** A held task that gets archived from the Quests page, ticked off on another device, or edited out of today's schedule is detected as stale and replaced on the next render.
-- **The evening reminder names the task.** In today mode the daily nudge (§10, `reminderHour`) is the *cue*, not an invitation to come and decide: it reads **"👒 Garagem arrumar — waiting 56 days. Press START, that's the whole ask."** A notification that says "open the app and pick something" is the part that doesn't happen. Once the day is closed it says so instead.
+- ~~**The evening reminder names the task.**~~ Removed 2026-10-30 — there is no daily reminder any more (§10).
 - Implementation: [src/logic/today.ts](src/logic/today.ts) (ranking, candidates, backlog), [src/screens/TodayScreen.tsx](src/screens/TodayScreen.tsx), state in `AppData.today`.
 
 ## 2c. The Sunday pick — the only list this mode shows
@@ -274,18 +274,13 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
 
 ## 10. Notifications
 
-- Daily local reminder (user picks the hour) to do 1 task.
-- If yesterday was missed: message motivates AND warns to buy a freeze before the streak dies.
-- The **daily reminder** is still a best-effort local notification: it fires only while the PWA/service worker is alive (there's no scheduled server-side send).
-- **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Ben's freeze ask, Dad's grant, sticker trade offers:
+- **No reminders about tasks — for anyone.** There is no daily reminder and no 9:30pm "last call": nothing buzzes Diogo or Ben about what is still open today, or about a missed day. (Both existed; both were removed on 2026-10-30 at Diogo's request.) The streak, freezes and the Today card still work exactly as before — only the nudges are gone.
+- **Diogo is only ever notified about St. Eugene 7** (§24h — Ben asking for more questions or another explanation). Every other push to him is dropped, enforced in `pushTo` itself so a runtime-targeted push (a trade offer, a freeze gift) can't slip through; his browser's local pings are off too. His **in-app** banners and badges (freeze asks, essays to mark, paybacks, trades) are unchanged — they show when he opens the app, they just don't buzz.
+- Ben still gets his pings: freeze gifts, Roblox time, final test opened, essays back/graded, topic answers, trade offers, game challenges, St. Eugene answers.
+- **Web push (FCM)** covers the cross-crew pings that must reach a **closed** app — Dad's freeze grant, trade offers, St. Eugene asks and answers:
   - Each crewmate turns it on per device in **Me → Settings → 📲 Push to this device**. That asks permission, registers `public/firebase-messaging-sw.js` on its own scope (`/firebase-cloud-messaging-push-scope`, so it coexists with the Workbox PWA worker), and saves the FCM token to `profiles/{id}.pushTokens`. iOS only allows this once the app is added to the Home Screen.
   - **On Ben's tablet the push device is the Android shell** (`android/`, §1d). A WebView has neither service-worker push nor the Notification API, so the shell fetches a **native FCM token** and hands it to the site over `window.WheelsShell` (`src/push.ts` → `inShell()`). It lands on `profiles/{id}.pushTokens` like any browser's, labelled "Android app", and the site asks for it on the same open-after-PIN pass — Android's own permission dialog stands in for the browser's. Because a token from the app is not a webpush token, the fan-out sends a platform-neutral `notification` (Android channel `crew_pings`) and lets the `webpush` block override it for browsers; the `data.link` it carries is the screen a tap opens.
   - Sending needs a service-account key, which a browser can't hold, so the fan-out lives in **Cloud Functions** (`functions/index.js`): `onFreezeDeskWrite` watches `app/freezeRequests`, `onStickerTradeWrite` watches `app/stickerTrades`, `onFinalTestWrite` watches `app/finalTests` and `onEssaysWrite` watches `app/essays` (§19i). Each diffs before/after **by id**, so unrelated writes to the doc (e.g. marking a gift seen, or an essay draft autosaving) never re-send an old notification. Tokens FCM rejects as dead are pruned from the profile.
-- **9:30pm last call** (`nightlyLastCall`, scheduled `30 21 * * *` America/Toronto) — fires before the midnight rollover that burns freezes and penalizes abandoned picks:
-  - Each crewmate gets **their own** count of what's still open today: unticked **required** checklist items + tasks still on the plate (`daily.pendingPicks`, counted only while `daily.day` is actually today, so yesterday's leftovers never inflate it). Phrased "2 must-dos + 1 on the plate", naming up to 3.
-  - **Diogo gets a second, separate push about Ben's** leftovers ("👦 Ben still has 2 must-dos") so he can remind him before bed.
-  - **Silent when nothing is outstanding** — a clean day never buzzes, so the ping keeps meaning something.
-  - The function mirrors `isAvailableOn`/`isRequiredOn` from `src/logic/wheel.ts` in plain JS (kept in sync by hand — changing the required-window or dayScope rules means updating both).
   - The public VAPID key comes from `VITE_FCM_VAPID_KEY` (see `.env.example`); it ships in the client bundle by design. Deploy the senders with `firebase deploy --only functions` (requires the Blaze plan).
 
 ## 11. Security / Access
@@ -305,7 +300,7 @@ Design principle: **Ben decides every dollar himself — no auto-invest, no auto
   - `src/store/storage.ts` — now local-only helpers: default/merge of an `AppData` blob, the seed roster, the per-device active login, and one-time readers for migrating an old localStorage save up to the cloud.
   - Auth is **anonymous** (`signInAnonymously`); Firestore rules (`firestore.rules`) require `request.auth != null`. Deploy config in `firebase.json` / `.firebaserc`.
 - All art is original inline SVG (Luffy mascot with mood poses in `src/components/Luffy.tsx`; Zoro/Chopper/Nami busts in `src/components/Crew.tsx`; the Straw Hat Jolly Roger in the wheel hub in `src/components/JollyRoger.tsx`, which does a silly squash-and-wobble while the wheel spins); all sounds synthesized with WebAudio (no external assets). No official One Piece artwork is bundled — everything is hand-drawn fan art, fine for this private, unpublished app.
-- FCM web push is wired for the cross-crew pings (freeze asks/grants, trade offers) via Cloud Functions in `functions/` — see §10. The daily reminder remains local-only.
+- FCM web push is wired for the cross-crew pings (freeze grants, trade offers, St. Eugene) via Cloud Functions in `functions/` — see §10. There is no daily reminder.
 
 ## 13. Tone
 
@@ -1514,7 +1509,7 @@ Somebody is sitting there holding a phone, so the essay desk does **not** use th
 
 ### 19i. Notifications
 
-`onEssaysWrite` pushes to a closed app: Diogo when an essay is handed in, Ben when the notes come back, Ben when the grade lands, Ben once (never once per topic) when new topics go up, Diogo when Ben suggests a topic, and Ben when that suggestion is answered either way (§19c-1). Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
+`onEssaysWrite` pushes to a closed app: Ben when the notes come back, Ben when the grade lands, Ben once (never once per topic) when new topics go up, and Ben when a topic he suggested is answered either way (§19c-1). Diogo is not pushed about essays (§10) — a hand-in or a suggested topic shows on his Essays desk and badge instead. Diffed by id + status, so the autosaving draft — which writes that doc every second while he types — stays silent.
 
 ## 20. Roblox bank (the 🎮 Roblox app)
 

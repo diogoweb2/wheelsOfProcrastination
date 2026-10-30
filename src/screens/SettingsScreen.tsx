@@ -5,7 +5,6 @@ import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import { Luffy } from '../components/Luffy'
 import { sfx } from '../audio'
-import { ensurePermission, scheduleDailyReminder } from '../notifications'
 
 export function SettingsScreen({ tab }: { tab: string }) {
   return (
@@ -107,8 +106,7 @@ function DailyModeCard() {
 }
 
 function AlertsTab() {
-  const { data, setSettings, registerPushDevice } = useStore()
-  const [notifState, setNotifState] = useState<string | null>(null)
+  const { data, registerPushDevice } = useStore()
   const [pushState, setPushState] = useState<string | null>(null)
   const [pushBusy, setPushBusy] = useState(false)
   const registered = data.pushTokens.length > 0
@@ -122,43 +120,12 @@ function AlertsTab() {
     else sfx.gem()
   }
 
-  async function enableNotifications() {
-    const ok = await ensurePermission()
-    setNotifState(ok ? 'Reminders on! I\'ll call you for adventure every day! 👒' : 'Blocked. No worries — spin whenever you\'re ready!')
-    if (ok) await scheduleDailyReminder(data)
-  }
-
   return (
     <>
-      <div className="h2">🔔 Reminders</div>
+      <div className="h2">🔔 Alerts</div>
       <div className="card">
-        <div className="field">
-          <label>Daily reminder hour</label>
-          <select
-            value={data.settings.reminderHour}
-            onChange={(e) => {
-              setSettings({ reminderHour: Number(e.target.value) })
-              void scheduleDailyReminder({ ...data, settings: { ...data.settings, reminderHour: Number(e.target.value) } })
-            }}
-          >
-            {Array.from({ length: 24 }, (_, h) => (
-              <option key={h} value={h}>
-                {String(h).padStart(2, '0')}:00
-              </option>
-            ))}
-          </select>
-        </div>
-        <button className="btn btn--blue" onClick={enableNotifications}>
-          🔔 Enable daily reminders
-        </button>
-        {notifState && <p className="muted" style={{ marginTop: 8 }}>{notifState}</p>}
-        <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>
-          Daily reminders fire while the app is installed/open. For pings that reach you with the app CLOSED
-          (freeze asks, trades), turn on push below.
-        </p>
-
         {/* web push — the only thing that reaches a closed app */}
-        <div style={{ borderTop: '1px solid var(--line)', marginTop: 12, paddingTop: 12 }}>
+        <div>
           <div style={{ fontWeight: 900, marginBottom: 4 }}>📲 Push to this device</div>
           <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
             {registered

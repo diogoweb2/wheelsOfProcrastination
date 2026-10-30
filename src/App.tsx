@@ -38,7 +38,6 @@ import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
-import { scheduleDailyReminder } from './notifications'
 import { inShell } from './push'
 import { backgroundUrl } from './logic/backgrounds'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
@@ -166,27 +165,11 @@ export default function App() {
     void registerPushDevice() // errors surface on the Settings screen's button instead
   }, [unlocked, registerPushDevice])
 
-  useEffect(() => {
-    if (unlocked && 'Notification' in window && Notification.permission === 'granted') {
-      void scheduleDailyReminder(data)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unlocked, data.settings.reminderHour, data.completions.length])
-
-  // best-effort local ping when a new payback from Ben lands while Diogo's app is open
-  const paybackCount =
-    activeProfileId === PARENT_ID ? (kidData?.bank.txns.filter((t) => t.type === 'payback' && !t.ackAt).length ?? 0) : 0
-  const prevPaybacks = useRef(paybackCount)
-  useEffect(() => {
-    if (paybackCount > prevPaybacks.current && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification('📨 Ben paid you back!', { body: 'Open the Bank app to see it and tap “Got it”.' })
-      } catch {
-        /* notifications unavailable; the in-app banner still shows */
-      }
-    }
-    prevPaybacks.current = paybackCount
-  }, [paybackCount])
+  // The local pings below are for Ben. Diogo's device only buzzes for St.
+  // Eugene 7 (§10), and that push comes from the server — his in-app banners
+  // and badges still show everything else.
+  const canPing = () =>
+    activeProfileId !== PARENT_ID && 'Notification' in window && Notification.permission === 'granted'
 
   // Duels: a finished board pays out and goes into the W/L record. Both phones
   // run this off the same shared doc and each one only banks its own side, so it
@@ -243,8 +226,7 @@ export default function App() {
       duelPing &&
       duelPing !== prevCall.current &&
       document.visibilityState === 'hidden' &&
-      'Notification' in window &&
-      Notification.permission === 'granted'
+      canPing()
     ) {
       try {
         new Notification(duelCall ? '🃏 A card-game challenge!' : '🃏 Your move!', {
@@ -271,8 +253,7 @@ export default function App() {
       boardPing &&
       boardPing !== prevBoard.current &&
       document.visibilityState === 'hidden' &&
-      'Notification' in window &&
-      Notification.permission === 'granted'
+      canPing()
     ) {
       const game = (boardCall ?? myBoard)!.kind === 'chess' ? 'Chess' : 'Checkers'
       try {
@@ -295,8 +276,7 @@ export default function App() {
       seaPing &&
       seaPing !== prevSea.current &&
       document.visibilityState === 'hidden' &&
-      'Notification' in window &&
-      Notification.permission === 'granted'
+      canPing()
     ) {
       try {
         new Notification(seaCall ? '🚢 A Sea Battle challenge!' : '🚢 Your shot!', {
@@ -317,7 +297,7 @@ export default function App() {
   const prevTrades = useRef(tradePing)
   useEffect(() => {
     const fresh = openTrades.length > 0 && tradePing !== prevTrades.current
-    if (fresh && 'Notification' in window && Notification.permission === 'granted') {
+    if (fresh && canPing()) {
       try {
         new Notification('🤝 A trade offer!', { body: 'Someone wants to swap stickers. Open the Stickers app.' })
       } catch {
@@ -327,25 +307,13 @@ export default function App() {
     prevTrades.current = tradePing
   }, [tradePing]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Essays: the parent hears about a submission, the writer hears about the
-  // notes coming back. Both sides of the same loop, one effect each way.
+  // Essays: the parent sees a submission on his desk, the writer hears about the
+  // notes coming back.
   const essaysToMark = activeProfileId === PARENT_ID ? essays.filter((e) => e.status === 'submitted') : []
-  const prevToMark = useRef(essaysToMark.length)
-  useEffect(() => {
-    if (essaysToMark.length > prevToMark.current && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification('✍️ An essay landed on your desk!', { body: 'Open the Essays app to mark it up.' })
-      } catch {
-        /* notifications unavailable; the in-app banner still shows */
-      }
-    }
-    prevToMark.current = essaysToMark.length
-  }, [essaysToMark.length])
-
   const essaysToFix = essays.filter((e) => e.authorId === activeProfileId && e.status === 'returned')
   const prevToFix = useRef(essaysToFix.length)
   useEffect(() => {
-    if (essaysToFix.length > prevToFix.current && 'Notification' in window && Notification.permission === 'granted') {
+    if (essaysToFix.length > prevToFix.current && canPing()) {
       try {
         new Notification('🔍 Your essay came back!', { body: 'Phase 2: see what’s circled and fix it.' })
       } catch {
@@ -353,28 +321,15 @@ export default function App() {
       }
     }
     prevToFix.current = essaysToFix.length
-  }, [essaysToFix.length])
+  }, [essaysToFix.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Topic suggestions: the parent hears that Ben asked for one, Ben hears the
-  // answer. Same two-sided shape as the essay itself — an ask nobody answers is
-  // worse than no ask at all.
+  // Topic suggestions: the parent sees that Ben asked for one, Ben hears the
+  // answer. An ask nobody answers is worse than no ask at all.
   const topicAsks = activeProfileId === PARENT_ID ? pendingTopics(essayTopics) : []
-  const prevAskCount = useRef(topicAsks.length)
-  useEffect(() => {
-    if (topicAsks.length > prevAskCount.current && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification('🙋 Ben suggested an essay topic!', { body: 'Open the Essays app → Topics to say yes or no.' })
-      } catch {
-        /* notifications unavailable; the in-app banner still shows */
-      }
-    }
-    prevAskCount.current = topicAsks.length
-  }, [topicAsks.length])
-
   const topicAnswers = unseenTopicAnswers(essayTopics, activeProfileId)
   const prevAnswers = useRef(topicAnswers.length)
   useEffect(() => {
-    if (topicAnswers.length > prevAnswers.current && 'Notification' in window && Notification.permission === 'granted') {
+    if (topicAnswers.length > prevAnswers.current && canPing()) {
       try {
         new Notification('💡 Dad answered your topic!', { body: 'Open the Essays app → Ideas to see what he said.' })
       } catch {
@@ -382,24 +337,11 @@ export default function App() {
       }
     }
     prevAnswers.current = topicAnswers.length
-  }, [topicAnswers.length])
+  }, [topicAnswers.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ping Diogo when Ben asks for a free freeze (his streak is usually on the line)
+  // Ben's free-freeze asks, for the banner on Diogo's screen
   const freezeAsks =
     activeProfileId === PARENT_ID ? freezeRequests.filter((r) => r.status === 'pending' && r.fromId === KID_ID) : []
-  const prevAsks = useRef(freezeAsks.length)
-  useEffect(() => {
-    if (freezeAsks.length > prevAsks.current && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification('🆘 Ben needs a Streak Freeze!', {
-          body: 'His streak is on the line. Open the Parent app to send one.',
-        })
-      } catch {
-        /* notifications unavailable; the in-app banner still shows */
-      }
-    }
-    prevAsks.current = freezeAsks.length
-  }, [freezeAsks.length])
 
   if (cloudError) {
     return (
