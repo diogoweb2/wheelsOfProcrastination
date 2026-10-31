@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 scripts/.bank-market.log
+scripts/.firestore-backup.log
 
 # local env (holds VITE_FCM_VAPID_KEY — see .env.example)
 .env

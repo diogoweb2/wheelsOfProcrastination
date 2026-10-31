@@ -34,7 +34,8 @@
     "se:verify": "node scripts/steugene-verify.mjs",
     "se:world": "node scripts/steugene-world.mjs",
     "gym:audit": "node scripts/gym-audit.mjs",
-    "frontier:audit": "node scripts/frontier-audit.mjs"
+    "frontier:audit": "node scripts/frontier-audit.mjs",
+    "backup": "node scripts/firestore-backup.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
