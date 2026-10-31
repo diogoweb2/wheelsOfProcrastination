@@ -3,7 +3,7 @@
 import type { QuizQuestion } from '../types'
 import { grade7 } from './grade7'
 
-const { choice, write, match, order } = grade7('g7-geo')
+const { choice, match, order } = grade7('g7-geo')
 
 export const G7_GEO_SEED: QuizQuestion[] = [
   // --- geo-a-map · reading a physical map ------------------------------------------------
@@ -95,8 +95,8 @@ export const G7_GEO_SEED: QuizQuestion[] = [
     emoji: '❄️',
     why: 'Long, dark, freezing winters, permafrost and a short growing season.',
   }),
-  write('g7g-20', 'geo-a-where', 'The number of people living in each square kilometre is called population ________. Type the missing word:', ['density'], {
-    emoji: '✍️',
+  choice('g7g-20', 'geo-a-where', 'The number of people living in each square kilometre is called population ________. Which word is it?', 'density', ['densety', 'dencity', 'densitty', 'densaty', 'dennsity'], {
+    emoji: '🔍',
     why: 'Toronto is crowded; Nunavut is nearly empty. Density is how you compare them.',
   }),
 

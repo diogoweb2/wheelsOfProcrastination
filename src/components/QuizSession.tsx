@@ -33,6 +33,7 @@ import {
 } from '../logic/quiz'
 import { sfx } from '../audio'
 import { lessonById } from '../quiz/lessons'
+import { canSpeak, speak, stopSpeaking } from '../lib/speak'
 import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
 
@@ -506,7 +507,24 @@ function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTest
 
 // --- question renderers ----------------------------------------------------
 
+/**
+ * What 🔊 says: the question, then what is on screen to pick from — reading is
+ * the part that stops him (§24c), so the options are read too, in the order
+ * they are drawn. A blank ("______") is said as "blank".
+ */
+function readAloudText(q: QuizQuestion, options: string[]): string {
+  const prompt = q.prompt.replace(/_{2,}/g, ' blank ')
+  if (q.type === 'choice') return `${prompt} Is it: ${options.join('? ')}?`
+  if (q.type === 'order') return `${prompt} ${(q.sequence ?? []).join('. ')}.`
+  if (q.type === 'match') return `${prompt} ${(q.pairs ?? []).map((p) => p.left).join('. ')}.`
+  return prompt
+}
+
 export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
+  // picked here, not in ChoiceQ, so 🔊 reads the options in the order they are drawn
+  const options = useMemo(() => (q.type === 'choice' ? pickChoiceOptions(q) : []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const rate = useStore((s) => s.data.steugene?.speak?.rate ?? 0.9) // the same voice speed he chose in St. Eugene
+  useEffect(() => stopSpeaking, [q.id]) // a new question cuts the old one off mid-sentence
   return (
     <div className="card">
       {fresh && (
@@ -514,14 +532,27 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
           ✨ NEW
         </span>
       )}
-      <div style={{ fontWeight: 900, fontSize: 17, marginBottom: 10 }}>
-        {q.emoji && <span style={{ marginRight: 6 }}>{q.emoji}</span>}
-        {q.prompt}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
+        <div style={{ fontWeight: 900, fontSize: 17, flex: 1 }}>
+          {q.emoji && <span style={{ marginRight: 6 }}>{q.emoji}</span>}
+          {q.prompt}
+        </div>
+        {canSpeak() && (
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ width: 'auto', flexShrink: 0, fontSize: 20, padding: '4px 10px' }}
+            onClick={() => speak(readAloudText(q, options), rate)}
+            aria-label="Read the question out loud"
+            title="Read the question out loud"
+          >
+            🔊
+          </button>
+        )}
       </div>
       {q.image && (
         <img className="quiz-illus" src={q.image} alt="question illustration" draggable={false} />
       )}
-      {q.type === 'choice' && <ChoiceQ q={q} onAnswer={onAnswer} instantMark={instantMark} />}
+      {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
       {q.type === 'match' && <MatchQ q={q} onAnswer={onAnswer} />}
       {q.type === 'order' && <OrderQ q={q} onAnswer={onAnswer} />}
@@ -529,8 +560,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
   )
 }
 
-function ChoiceQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
-  const options = useMemo(() => pickChoiceOptions(q), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
+function ChoiceQ({ q, options, onAnswer, instantMark }: { q: QuizQuestion; options: string[]; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
   const [picked, setPicked] = useState<string | null>(null)
   return (
     <div style={{ display: 'grid', gap: 8 }}>

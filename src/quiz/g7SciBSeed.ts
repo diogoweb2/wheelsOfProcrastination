@@ -3,7 +3,7 @@
 import type { QuizQuestion } from '../types'
 import { grade7 } from './grade7'
 
-const { choice, write, match } = grade7('g7-sci-b')
+const { choice, match } = grade7('g7-sci-b')
 
 export const G7_SCI_B_SEED: QuizQuestion[] = [
   // --- sci-forms · solid, frame and shell -------------------------------------------------
@@ -132,8 +132,8 @@ export const G7_SCI_B_SEED: QuizQuestion[] = [
     emoji: '🫙',
     why: 'Metals expand more than glass when heated, so the lid loosens its grip.',
   }),
-  write('g7sb-28', 'sci-expand', 'Particles that are heated move faster and spread apart, so the object gets bigger. Type the one-word name for that:', ['expansion', 'expands', 'expand', 'thermal expansion'], {
-    emoji: '✍️',
+  choice('g7sb-28', 'sci-expand', 'Heated particles move faster and spread apart, so the object gets bigger. What is that called?', 'expansion', ['expantion', 'expension', 'expanshun', 'expansian', 'ixpansion'], {
+    emoji: '🔍',
     why: 'Expansion — and contraction when it cools. Not the particles growing: the gaps growing.',
   }),
 
