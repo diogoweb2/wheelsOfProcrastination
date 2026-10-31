@@ -43,6 +43,7 @@ import {
   type SeShowUp,
 } from '../logic/steugenePace'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
+import { walkIn, walkedIntoRun } from '../steugene/open'
 import { SE_LENGTHS, seAvailable, seFixGroups, seLockLeft, seWithChecks } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
 import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
@@ -933,16 +934,7 @@ function FinderTab({ setTab }: { setTab: (tab: string) => void }) {
 
 // --- the lesson --------------------------------------------------------------------
 
-/**
- * The lesson this app session has already walked into, by its `startedAt`.
- * One that is open but is not this one — the app was closed mid-lesson, or he
- * came in by the 📘 tab — is asked about first: ▶️ Resume or 🔄 Start over.
- * Module state on purpose: it is forgotten exactly when the app is.
- */
-let walkedInto: number | null = null
-function walkIn() {
-  walkedInto = useStore.getState().data.steugene.run?.startedAt ?? null
-}
+// The walk-in flag lives in src/steugene/open.ts, so the Quiz app can start a lesson too.
 
 /**
  * Open a subtopic's lesson from somewhere that is not the year list — the 🎬
@@ -1033,7 +1025,7 @@ function LessonTab({ setTab }: { setTab: (tab: string) => void }) {
   }, [!!run, ready, resumed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (run && !ready) return <div className="card">Opening your lesson…</div>
-  if (run && walkedInto !== run.startedAt) return <OpenLesson onIn={() => rerender((n) => n + 1)} />
+  if (run && walkedIntoRun() !== run.startedAt) return <OpenLesson onIn={() => rerender((n) => n + 1)} />
   if (run) return <LessonPlayer onLeave={() => setTab('subjects')} />
   return (
     <>

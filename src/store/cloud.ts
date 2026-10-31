@@ -36,7 +36,11 @@ import { AGENTS_SEED } from '../quiz/agentsSeed'
 import { SCIENCE_6_SEED } from '../quiz/science6Seed'
 import { CRITICAL_THINKING_6_SEED } from '../quiz/criticalThinking6Seed'
 import { LOGIC_6_SEED } from '../quiz/logic6Seed'
-import { ASIAD_VOCAB_SEED } from '../quiz/asiadVocabSeed'
+import { G7_HIST_A_SEED } from '../quiz/g7HistASeed'
+import { G7_HIST_B_SEED } from '../quiz/g7HistBSeed'
+import { G7_SCI_A_SEED } from '../quiz/g7SciASeed'
+import { G7_SCI_B_SEED } from '../quiz/g7SciBSeed'
+import { G7_GEO_SEED } from '../quiz/g7GeoSeed'
 
 const ALL_SEEDS = [
   ...CANADA_GEOGRAPHY_SEED,
@@ -49,7 +53,11 @@ const ALL_SEEDS = [
   ...SCIENCE_6_SEED,
   ...CRITICAL_THINKING_6_SEED,
   ...LOGIC_6_SEED,
-  ...ASIAD_VOCAB_SEED,
+  ...G7_HIST_A_SEED,
+  ...G7_HIST_B_SEED,
+  ...G7_SCI_A_SEED,
+  ...G7_SCI_B_SEED,
+  ...G7_GEO_SEED,
 ]
 
 const rosterRef = () => doc(firestore, 'app', 'roster')

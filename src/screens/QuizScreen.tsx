@@ -23,6 +23,8 @@ import { LessonView } from '../components/Lesson'
 import { QuestionManager } from '../components/QuestionManager'
 import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
+import { SE_SUBJECTS } from '../logic/steugene'
+import { openSeLesson } from '../steugene/open'
 import { sfx } from '../audio'
 
 /**
@@ -40,6 +42,7 @@ export function QuizScreen({
   const [session, setSession] = useState<{ mode: QuizMode; topicId: string } | null>(null)
   const [study, setStudy] = useState<string | null>(null) // topicId whose reading list is open
   const [manage, setManage] = useState<string | null>(null) // admin: topicId whose question bank is open
+  const [seShelf, setSeShelf] = useState<QuizTopic | null>(null) // a Grade 7 topic's St. Eugene lessons
 
   useEffect(() => {
     if (!trainTopicId) return
@@ -62,6 +65,10 @@ export function QuizScreen({
         onClose={() => setSession(null)}
       />
     )
+  }
+
+  if (seShelf) {
+    return <SeShelf topic={seShelf} data={data} onClose={() => setSeShelf(null)} />
   }
 
   if (study) {
@@ -120,6 +127,7 @@ export function QuizScreen({
                 selfOfficial={isAdmin}
                 onStart={(mode) => setSession({ mode, topicId: t.id })}
                 onStudy={() => setStudy(t.id)}
+                onSeShelf={t.seStrands ? () => setSeShelf(t) : undefined}
                 onManage={isAdmin ? () => setManage(t.id) : undefined}
               />
             ))}
@@ -364,6 +372,54 @@ function ProgressBoard({ topics, data, bank }: { topics: QuizTopic[]; data: AppD
   )
 }
 
+// --- the St. Eugene lessons behind a Grade 7 topic ----------------------------
+
+/**
+ * Every St. Eugene 7 subtopic a Grade 7 quiz checks, in the year's own order,
+ * each one a tap away from its lesson. The ones he has never opened are marked,
+ * because a quiz on a chapter nobody taught him yet is a quiz he can only guess.
+ */
+function SeShelf({ topic, data, onClose }: { topic: QuizTopic; data: AppData; onClose: () => void }) {
+  const strands = SE_SUBJECTS.flatMap((s) => s.strands).filter((st) => topic.seStrands?.includes(st.id))
+  return (
+    <div className="quiz-full">
+      <div className="quiz-full-head">
+        <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>🏫 {topic.title} — the lessons</div>
+        <button className="btn btn--ghost btn--small" style={{ whiteSpace: 'nowrap' }} onClick={onClose}>
+          ⚓ Back to the ship
+        </button>
+      </div>
+      <div className="quiz-full-body">
+        <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
+          Every question in this quiz comes from one of these. Learn the chapter, then come back and train.
+        </p>
+        {strands.map((st) => (
+          <div key={st.id} style={{ marginBottom: 14 }}>
+            <div className="h2" style={{ fontSize: 14, marginBottom: 6 }}>{st.title}</div>
+            {st.subtopics.map((sub) => {
+              const done = data.steugene.stats[sub.id]?.lessons ?? 0
+              return (
+                <button key={sub.id} className="quiz-opt" style={{ marginBottom: 8 }} onClick={() => void openSeLesson(sub.id)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ fontSize: 24 }}>{sub.emoji}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 900, fontSize: 14 }}>{sub.title}</div>
+                      <div className="muted" style={{ fontSize: 11 }}>
+                        {done > 0 ? `✅ ${done} lesson${done === 1 ? '' : 's'} done` : '🆕 not started yet'} · {sub.plain}
+                      </div>
+                    </div>
+                    <div style={{ color: 'var(--gold)' }}>➜</div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // --- the reading list: every lesson a topic's questions can teach ------------
 
 function StudyList({ topicId, bank, onClose }: { topicId: string; bank: QuizQuestion[]; onClose: () => void }) {
@@ -406,6 +462,7 @@ function TopicCard({
   selfOfficial,
   onStart,
   onStudy,
+  onSeShelf,
   onManage,
 }: {
   topic: QuizTopic
@@ -414,6 +471,7 @@ function TopicCard({
   selfOfficial: boolean // admin may run his own official final test
   onStart: (mode: QuizMode) => void
   onStudy: () => void
+  onSeShelf?: () => void // Grade 7 topics: the St. Eugene lessons this quiz checks
   onManage?: () => void // admin only: open the topic's question bank to review/remove
 }) {
   const passed = data.quiz.passedTopics.includes(topic.id)
@@ -470,6 +528,11 @@ function TopicCard({
             {hasLessons && (
               <button className="btn btn--ghost btn--small" style={{ flexBasis: '100%' }} onClick={() => { sfx.click(); onStudy() }}>
                 📖 Study the lessons
+              </button>
+            )}
+            {onSeShelf && (
+              <button className="btn btn--ghost btn--small" style={{ flexBasis: '100%' }} onClick={() => { sfx.click(); onSeShelf() }}>
+                🏫 Learn it first in St. Eugene 7
               </button>
             )}
             {onManage && (

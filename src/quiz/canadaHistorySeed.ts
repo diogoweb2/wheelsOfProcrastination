@@ -1,7 +1,8 @@
-// Canada History — 50 seed questions, tuned for Ben (born Feb 2014, Ontario grade 6).
-// Deliberately light on dates: the story matters, the calendar doesn't. Where a year
-// IS asked, every wrong option is centuries away so the answer is reachable by feel
-// rather than by memorising. Nothing here needs a textbook the night before.
+// Canada History — 62 seed questions, tuned for Ben (born Feb 2014, Ontario grade 6).
+// Started deliberately light on dates, with every wrong year centuries away. In Oct
+// 2026 he was passing too easily, so the year questions now have NEIGHBOURING years
+// as distractors (1867 sits next to 1841 and 1871, not 1066), and ch-51…62 add the
+// post-Confederation story as match / order / write-in as well as choice.
 // Core material (weight 2): First Peoples, explorers, New France, Confederation, the
 // railway, the wars, the modern country.
 // Fun extras (weight 1): famous Canadians, symbols, inventions.
@@ -10,6 +11,7 @@
 import type { QuizQuestion } from '../types'
 
 const AT = '2026-08-17T00:00:00.000Z'
+const AT_2 = '2026-10-30T00:00:00.000Z'
 const T = 'canada-history'
 
 const choice = (
@@ -150,7 +152,7 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
     emoji: '🧳',
     funFact: 'Tens of thousands walked north after the American Revolution — including thousands of Black Loyalists.',
   }),
-  choice('ch-21', 'In the War of 1812, who invaded Canada?', ['France', 'the United States', 'Britain', 'Spain', 'Russia', 'Mexico', 'Holland'], 'the United States', {
+  choice('ch-21', 'In the War of 1812, who invaded Canada?', ['France', 'the United States', 'Britain', 'Spain', 'the Fenians', 'Mexico', 'Russia'], 'the United States', {
     emoji: '💥',
     funFact: 'The invasion failed. Canadians, British troops and First Nations warriors fought it off together.',
   }),
@@ -162,7 +164,7 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
     emoji: '🪶',
     funFact: 'Tecumseh tried to unite many nations into one alliance to protect their land. He died in the fighting.',
   }),
-  choice('ch-24', 'The Underground Railroad brought people to Canada who were escaping what?', ['a famine', 'slavery in the USA', 'a war in Europe', 'a flood', 'high taxes', 'a plague', 'a volcano'], 'slavery in the USA', {
+  choice('ch-24', 'The Underground Railroad brought people to Canada who were escaping what?', ['the Irish famine', 'slavery in the USA', 'a war in Europe', 'the gold rush', 'high taxes in Britain', 'a cholera plague', 'a drought on the farms'], 'slavery in the USA', {
     emoji: '🕯️',
     funFact: 'It was not a railway at all — just secret routes, safe houses and very brave people.',
   }),
@@ -172,7 +174,7 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
   }),
 
   // --- Confederation & building the country ---------------------------------
-  choice('ch-26', 'In which year did Canada become a country?', ['1492', '1867', '1776', '1965', '1999', '1215', '1066'], '1867', {
+  choice('ch-26', 'In which year did Canada become a country?', ['1841', '1867', '1812', '1871', '1885', '1848', '1905'], '1867', {
     emoji: '🎂',
     funFact: 'Canada is younger than the piano and older than the light bulb.',
   }),
@@ -256,7 +258,7 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
   }),
 
   // --- the modern country ---------------------------------------------------
-  choice('ch-42', 'In which year did Canada get its red-and-white maple leaf flag?', ['1867', '1965', '1776', '1492', '1999', '2010', '1812'], '1965', {
+  choice('ch-42', 'In which year did Canada get its red-and-white maple leaf flag?', ['1867', '1965', '1945', '1931', '1982', '1949', '1957'], '1965', {
     emoji: '🍁',
     funFact: 'Before that Canada flew a British-style flag. The debate about changing it lasted for months and got LOUD.',
   }),
@@ -332,4 +334,120 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
     createdAt: AT,
     funFact: 'Whole trading empires, forts and cities exist because Europeans wanted hats made of beaver felt.',
   },
+  // --- Oct 2026: after Confederation, and harder shapes ----------------------------
+  {
+    id: 'ch-51',
+    topicId: T,
+    type: 'match',
+    prompt: 'Match each year to what happened:',
+    emoji: '🗓️',
+    pairs: [
+      { left: '1867', right: 'Canada becomes a country' },
+      { left: '1885', right: 'the last spike of the railway' },
+      { left: '1949', right: 'Newfoundland joins Canada' },
+      { left: '1999', right: 'Nunavut is created' },
+    ],
+    weight: 2,
+    points: 10,
+    status: 'active',
+    createdAt: AT_2,
+    funFact: 'From four provinces to ten provinces and three territories in 132 years.',
+  },
+  choice('ch-52', 'Which FOUR provinces joined together in 1867?', ['Ontario, Quebec, Nova Scotia, New Brunswick', 'Ontario, Quebec, Manitoba, New Brunswick', 'Ontario, Quebec, Nova Scotia, Prince Edward Island', 'Ontario, Quebec, British Columbia, Nova Scotia', 'Quebec, Nova Scotia, New Brunswick, Newfoundland', 'Ontario, Manitoba, Nova Scotia, New Brunswick'], 'Ontario, Quebec, Nova Scotia, New Brunswick', {
+    emoji: '🧩',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'PEI hosted the first Confederation meeting in 1864 — and then said no, until 1873.',
+  }),
+  choice('ch-53', 'Why did British Columbia agree to join Canada in 1871?', ['Canada promised it a railway', 'Britain paid it to join', 'the USA threatened to invade', 'its gold mines had closed', 'it wanted French schools', 'the fur trade had ended'], 'Canada promised it a railway', {
+    emoji: '🚂',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'The promise was a railway within ten years. It took fourteen — the last spike went in at Craigellachie in 1885.',
+  }),
+  choice('ch-54', 'What was the Chinese Head Tax?', ['a fee only Chinese immigrants paid', 'a tax on Chinese restaurants', 'a reward for railway workers', 'a tax China put on Canada', 'a fee to cross the Rockies', 'a bonus for learning English'], 'a fee only Chinese immigrants paid', {
+    emoji: '💵',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'Once the railway was built, Canada charged Chinese newcomers $50, later $500. Canada apologised in 2006.',
+  }),
+  {
+    id: 'ch-55',
+    topicId: T,
+    type: 'write',
+    prompt: 'Insulin was discovered in Toronto in 1921 by Frederick ______ and Charles Best. Type the missing name:',
+    emoji: '💉',
+    accept: ['Banting', 'Frederick Banting'],
+    weight: 1,
+    points: 10,
+    status: 'active',
+    createdAt: AT_2,
+    funFact: 'Banting sold the patent for $1 so that everyone with diabetes could afford it.',
+  },
+  {
+    id: 'ch-56',
+    topicId: T,
+    type: 'order',
+    prompt: 'Put these in order, EARLIEST first:',
+    emoji: '⏳',
+    sequence: [
+      'Most women win the vote in federal elections',
+      'The Persons Case says women are “persons”',
+      'The maple leaf flag is raised',
+      'The Charter of Rights and Freedoms',
+    ],
+    weight: 2,
+    points: 10,
+    status: 'active',
+    createdAt: AT_2,
+    funFact: '1918 · 1929 · 1965 · 1982. Many Indigenous people and Asian Canadians waited decades longer for the vote.',
+  },
+  choice('ch-57', 'What did the 1929 Persons Case decide?', ['women could sit in the Senate', 'children must go to school', 'every adult could vote', 'Canada could make its own laws', 'French was an official language', 'Indigenous people could vote'], 'women could sit in the Senate', {
+    emoji: '👩‍⚖️',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'Five Alberta women — the Famous Five — fought for it. The law had said “persons” meant only men.',
+  }),
+  choice('ch-58', 'What happened to many Japanese Canadians during the Second World War?', ['they were forced from their homes', 'they were given free land', 'they were made soldiers', 'they were made to join the navy', 'they were made to learn French', 'they were moved to Newfoundland'], 'they were forced from their homes', {
+    emoji: '🏚️',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'About 22,000 people were moved to camps inland and their property sold. Canada apologised in 1988.',
+  }),
+  choice('ch-59', 'What does the Charter of Rights and Freedoms (1982) protect?', ['rights like free speech and equality', 'the price of food and housing', 'the borders of every province', 'the right to hunt anywhere', 'the Queen’s land in Canada', 'the money in your bank'], 'rights like free speech and equality', {
+    emoji: '📜',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'It is part of the Constitution, so even Parliament has to follow it.',
+  }),
+  {
+    id: 'ch-60',
+    topicId: T,
+    type: 'match',
+    prompt: 'Match each Canadian to what they did:',
+    emoji: '⭐',
+    pairs: [
+      { left: 'Frederick Banting', right: 'helped discover insulin' },
+      { left: 'Roberta Bondar', right: 'first Canadian woman in space' },
+      { left: 'Viola Desmond', right: 'challenged a segregated cinema' },
+      { left: 'Terry Fox', right: 'the Marathon of Hope' },
+    ],
+    weight: 1,
+    points: 10,
+    status: 'active',
+    createdAt: AT_2,
+    funFact: 'Bondar flew on the space shuttle Discovery in 1992 — she is a doctor and a photographer too.',
+  },
+  choice('ch-61', 'Why is Remembrance Day on November 11?', ['the First World War ended that day', 'the Second World War began that day', 'Canada’s first soldier died that day', 'the poppy was invented that day', 'Vimy Ridge was won that day', 'the army was founded that day'], 'the First World War ended that day', {
+    emoji: '🌺',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'At 11 o’clock, on the 11th day of the 11th month, 1918, the guns went quiet.',
+  }),
+  choice('ch-62', 'What was the Truth and Reconciliation Commission about?', ['the harm of residential schools', 'the cost of the railway', 'the borders of Nunavut', 'the end of the fur trade', 'the War of 1812', 'the new Canadian flag'], 'the harm of residential schools', {
+    emoji: '🧡',
+    points: 10,
+    createdAt: AT_2,
+    funFact: 'Survivors told their stories for six years. Its 2015 report made 94 Calls to Action.',
+  }),
 ]

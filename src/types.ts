@@ -307,6 +307,7 @@ export interface QuizQuestion {
   createdAt: string
   freshAt?: string // set when the weekly AI review adds/updates a question → "NEW" badge + training priority until seen again
   lessonId?: string // deep-dive explanation offered after a wrong answer (see src/quiz/lessons.ts)
+  seSubtopic?: string // the St. Eugene 7 lesson that teaches this (§24a id) — offered after a wrong answer
 }
 
 // --- Lessons (the "I got it wrong, teach me properly" layer) -----------------

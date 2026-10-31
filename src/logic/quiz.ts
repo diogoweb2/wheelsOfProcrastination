@@ -33,6 +33,12 @@ export interface QuizTopic {
   optionCount?: number
   /** Where the material came from, printed on the card ("All Summer in a Day"). */
   source?: string
+  /**
+   * The St. Eugene 7 strands (§24a) this topic quizzes. The card offers each of
+   * their lessons — the quiz checks, St. Eugene teaches — and the questions
+   * point at one subtopic each (`QuizQuestion.seSubtopic`).
+   */
+  seStrands?: string[]
 }
 
 /** Sections on the Academy screen, in display order. */
@@ -43,6 +49,11 @@ export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
     blurb: 'Six levels, vendor-neutral. Pass a level’s final test to unlock the next one.',
   },
   { id: 'tooling', title: '🧰 Tooling & day job', blurb: 'The specific tools you actually type into.' },
+  {
+    id: 'grade7',
+    title: '🏫 Grade 7 — St. Eugene',
+    blurb: 'Your real school year. Learn it in St. Eugene 7, prove it here. One opens at a time.',
+  },
   {
     id: 'school',
     title: '🏫 School quiz',
@@ -119,18 +130,65 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     description: 'Riddles, patterns and puzzles. No math calculations, promise.',
     targetCount: 50,
   },
-  // --- Ben: school quizzes (§14b) — the stuff his teacher actually set ---
+  // --- Ben: grade 7, the St. Eugene year (§14, §24) ---
+  // A ladder, one rung at a time: each opens when the one before is passed, so
+  // he has one quiz must-do on the checklist, not five. The order follows his
+  // school year: History is term 1, Science runs all year, Geography is term 2.
+  // The St. Eugene 7 app teaches every question here (`seStrands`, `seSubtopic`).
   {
-    id: 'asiad-vocab',
+    id: 'g7-hist-a',
     owner: 'ben',
-    title: 'All Summer in a Day — Words',
-    emoji: '☔',
-    description: 'The 25 vocabulary words, used in real moments instead of memorised off a sheet.',
-    source: 'ELA · “All Summer in a Day” by Ray Bradbury',
-    track: 'school',
-    school: true,
-    optionCount: 3,
-    targetCount: 50,
+    title: 'New France & British North America',
+    emoji: '🏴',
+    description: 'Grade 7 History, 1713–1800: the fur trade, the fall of New France, 1763, the Loyalists, 1791.',
+    targetCount: 40,
+    track: 'grade7',
+    unlockAfter: 'canada-history',
+    seStrands: ['hist-a'],
+  },
+  {
+    id: 'g7-hist-b',
+    owner: 'ben',
+    title: 'Canada 1800–1850',
+    emoji: '💥',
+    description: 'Grade 7 History: settler life, 1812, the famine ships, 1837, Durham, the Union and 1848.',
+    targetCount: 35,
+    track: 'grade7',
+    unlockAfter: 'g7-hist-a',
+    seStrands: ['hist-b'],
+  },
+  {
+    id: 'g7-sci-a',
+    owner: 'ben',
+    title: 'Ecosystems & Mixtures',
+    emoji: '🔬',
+    description: 'Grade 7 Science: food webs, cycles, invaders, succession — then mixtures, solutions and clean water.',
+    targetCount: 40,
+    track: 'grade7',
+    unlockAfter: 'g7-hist-b',
+    seStrands: ['sci-life', 'sci-matter'],
+  },
+  {
+    id: 'g7-sci-b',
+    owner: 'ben',
+    title: 'Structures & Heat',
+    emoji: '🏗️',
+    description: 'Grade 7 Science: forces, stability and machines — then heat, its travel and the greenhouse effect.',
+    targetCount: 40,
+    track: 'grade7',
+    unlockAfter: 'g7-sci-a',
+    seStrands: ['sci-struct', 'sci-earth'],
+  },
+  {
+    id: 'g7-geo',
+    owner: 'ben',
+    title: 'Physical Patterns & Resources',
+    emoji: '🌍',
+    description: 'Grade 7 Geography: maps, plates, climate and hazards — then resources, water and your footprint.',
+    targetCount: 40,
+    track: 'grade7',
+    unlockAfter: 'g7-sci-b',
+    seStrands: ['geo-a', 'geo-b'],
   },
   // --- Diogo: the Agent Engineer path (vendor-neutral, six levels) ---
   // Deliberately free of provider names: model APIs churn every few months, the
@@ -307,6 +365,7 @@ export function nextTopicToUnlock(d: AppData, ownerId: string, passedTopicId: st
       !t.school && // homework is never the prize for passing something else
       t.id !== passedTopicId &&
       !d.quiz.unlockedTopics.includes(t.id) &&
+      !d.quiz.passedTopics.includes(t.id) && // a conquered topic leaves the unlocked list, but is not the prize
       (!t.unlockAfter || d.quiz.passedTopics.includes(t.unlockAfter)),
   )
 }
@@ -319,14 +378,15 @@ export function prerequisiteOf(topic: QuizTopic): QuizTopic | undefined {
 // --- economy ---------------------------------------------------------------
 
 export const REPEAT_FACTOR = 0.5 // reward halves once a question has ever been answered correctly
-export const PASS_PCT = 80
+export const PASS_PCT = 85 // raised from 80 (Oct 2026): he was clearing tests too easily
 export const PRIZE_WINDOW_DAYS = 30 // the rolling window every prize limit is counted over
-export const TEST_TIME_BUDGET_MS = 13 * 60_000 // keep the whole test under ~15 min
-export const TEST_MIN_QUESTIONS = 10
-export const TEST_MAX_QUESTIONS = 14
+export const TEST_TIME_BUDGET_MS = 18 * 60_000 // keep the whole test under ~20 min
+export const TEST_MIN_QUESTIONS = 15
+export const TEST_MAX_QUESTIONS = 20
 export const DEFAULT_ANSWER_TIME_MS = 45_000 // assumed pace for questions he's never trained on
-export const REVIEW_PASS_PCT = 70 // the warm-up round is meant to be passed
-export const REVIEW_BASE_QUESTIONS = 10 // one old topic to keep fresh = 10 questions; each extra topic adds half of the previous
+export const REVIEW_PASS_PCT = 75 // the warm-up is a real check, not a formality
+export const REVIEW_BASE_QUESTIONS = 14 // one old topic to keep fresh = 14 questions; each extra topic adds half of the previous
+export const REVIEW_HARD_SHARE = 0.4 // of each topic's warm-up share, how much comes from his weak/unseen questions
 
 export interface Prize {
   id: string
@@ -353,6 +413,8 @@ export const DEFAULT_PRIZES: PrizeCatalog = {
     { id: 'roblox-hour', label: 'Roblox 1 hour', emoji: '⏳', cost: 2, perMonth: 0, minutes: 60, logo: '/prizes/roblox.png' },
     { id: 'dollarama-candy', label: 'Dollarama candy', emoji: '🍬', cost: 2, perMonth: 1, logo: '/prizes/dollarama.png' },
     { id: 'costco-sushi', label: 'Costco Sushi', emoji: '🍣', cost: 6, perMonth: 1, logo: '/prizes/costco.png' },
+    // $15 + HST ≈ $17: priced at five passed topics, so a month of real tests buys it (Oct 2026)
+    { id: 'fortnite-crew', label: 'Fortnite Crew (1 month)', emoji: '🦙', cost: 5, perMonth: 1 },
   ],
   diogo: [{ id: 'lcbo10', label: 'LCBO $10', emoji: '🍷', cost: 3, perMonth: 1, logo: '/prizes/lcbo.png' }],
 }
@@ -646,8 +708,8 @@ function estTime(q: QuizQuestion, stats: Record<string, QuizStat>): number {
 /**
  * Build an official/simulated final test:
  *  - sized by his real answering pace so the whole thing fits the time budget
- *  - ~60% questions he's strong at, ~40% weak/unseen → lands near the 80% pass
- *    line ("possible to fail, but don't fail too hard")
+ *  - ~40% questions he's strong at, ~60% weak/unseen — he was clearing the old
+ *    60/40 mix too easily, so the test now has to be studied for
  *  - strong/weak interleaved so he never faces a wall of hard ones
  *  - `excludeIds` = the previous failed attempt's questions (a retry must differ)
  */
@@ -669,9 +731,9 @@ export function buildFinalTest(
   const byPlan: QuizQuestion[] = []
   const takeStrong = shuffle(strong)
   const takeWeak = shuffle(weak)
-  // interleave S S W S W … (~60/40), topping from whichever side still has questions
+  // interleave W S W S W … (~40/60), topping from whichever side still has questions
   while (byPlan.length < TEST_MAX_QUESTIONS && (takeStrong.length > 0 || takeWeak.length > 0)) {
-    const wantStrong = byPlan.length % 5 !== 2 && byPlan.length % 5 !== 4 // 3 of every 5
+    const wantStrong = byPlan.length % 5 === 1 || byPlan.length % 5 === 3 // 2 of every 5
     const next = (wantStrong ? takeStrong.shift() ?? takeWeak.shift() : takeWeak.shift() ?? takeStrong.shift())!
     const t = estTime(next, stats)
     if (byPlan.length >= TEST_MIN_QUESTIONS && est + t > TEST_TIME_BUDGET_MS) break
@@ -694,8 +756,8 @@ export function reviewTopicIds(data: AppData, ownerId: string, aboutToSit: strin
 }
 
 /**
- * How long the warm-up is: 10 questions for the first old topic, then half again
- * for each extra one (10 + 5 + 2.5 + …), rounded up. It keeps growing far more
+ * How long the warm-up is: 14 questions for the first old topic, then half again
+ * for each extra one (14 + 7 + 3.5 + …), rounded up. It keeps growing far more
  * slowly than the pile of conquered topics does.
  */
 export function reviewSize(topicCount: number): number {
@@ -716,9 +778,9 @@ export interface ReviewTopicScore {
  * banks allow across the conquered topics, and interleaved so he hops between
  * seas instead of grinding one.
  *
- * The pass mark is only 70% and the point is to keep old material fresh, so the
- * mix leans on things he has answered right before (~75%) with a few of his
- * weak ones mixed in to make it a real check.
+ * The point is to keep old material fresh, but a warm-up he cannot fail proves
+ * nothing: ~60% things he has answered right before, ~40% his weak or unseen
+ * ones (`REVIEW_HARD_SHARE`), pass mark 75%.
  */
 export function buildReviewTest(
   bank: QuizQuestion[],
@@ -741,7 +803,7 @@ export function buildReviewTest(
     if (pool.length < want) pool = activeQuestions(bank, topicId) // small bank: allow last attempt's questions back
     const strong = shuffle(pool.filter((q) => successRate(stats[q.id]) >= 0.6))
     const weak = shuffle(pool.filter((q) => successRate(stats[q.id]) < 0.6))
-    const hard = Math.min(weak.length, Math.round(want * 0.25)) // "some hard questions, but he should pass"
+    const hard = Math.min(weak.length, Math.round(want * REVIEW_HARD_SHARE))
     const picked = [...weak.slice(0, hard), ...strong.slice(0, want - hard)]
     // one side ran dry — top up from whatever is left
     if (picked.length < want) {
@@ -778,16 +840,16 @@ export function reviewBreakdown(bank: QuizQuestion[], results: { qid: string; co
 }
 
 /**
- * Live mercy rule: with 2+ wrong in a row, serve the remaining question he's
- * strongest at next; otherwise follow the plan. Never 3 misses in a row if we
- * can help it.
+ * Live mercy rule: with 3 wrong in a row, serve the remaining question he's
+ * strongest at next; otherwise follow the plan. Never 4 misses in a row if we
+ * can help it (it was 2 → 3 until the tests got harder, Oct 2026).
  */
 export function nextTestQuestion(
   remaining: QuizQuestion[],
   stats: Record<string, QuizStat>,
-  lastTwoWrong: boolean,
+  lastThreeWrong: boolean,
 ): QuizQuestion {
-  if (!lastTwoWrong || remaining.length === 1) return remaining[0]
+  if (!lastThreeWrong || remaining.length === 1) return remaining[0]
   return [...remaining].sort((a, b) => successRate(stats[b.id]) - successRate(stats[a.id]))[0]
 }
 

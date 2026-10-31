@@ -34,6 +34,7 @@ import {
 import { sfx } from '../audio'
 import { lessonById } from '../quiz/lessons'
 import { LessonView } from './Lesson'
+import { SeLessonButton } from './SeLessonButton'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
 
@@ -111,8 +112,8 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const remaining = useMemo(() => plan.filter((q) => !results.some((r) => r.qid === q.id)), [plan, results])
   const testCurrent = useMemo(() => {
     if (mode === 'training' || remaining.length === 0) return null
-    const lastTwoWrong = results.length >= 2 && !results[results.length - 1].correct && !results[results.length - 2].correct
-    return nextTestQuestion(remaining, stats, lastTwoWrong)
+    const lastThreeWrong = results.length >= 3 && results.slice(-3).every((r) => !r.correct)
+    return nextTestQuestion(remaining, stats, lastThreeWrong)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining, results, mode])
 
@@ -372,6 +373,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
               </button>
             )
           })()}
+          <SeLessonButton subtopicId={feedback.q.seSubtopic} />
           <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q, sessionCorrect)}>
             Next question ➜
           </button>
@@ -489,6 +491,7 @@ function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTest
                     📖 Read the lesson · {lessonById(q.lessonId)!.minutes} min
                   </button>
                 )}
+                {!r.correct && <SeLessonButton subtopicId={q.seSubtopic} small />}
               </div>
             </div>
           </div>
