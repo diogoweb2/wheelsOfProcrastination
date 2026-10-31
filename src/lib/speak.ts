@@ -84,20 +84,43 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   })
 }
 
-/** Say it. Anything already being said is cut off — the newest card wins. */
-export function speak(text: string, rate = 0.9): void {
+/** Roughly how long the voice takes to say it: ~2.5 words a second at rate 1, plus the engine's warm-up. */
+function sayingMs(text: string, rate: number): number {
+  const words = text.split(/\s+/).filter(Boolean).length
+  return 500 + (words / (2.5 * rate)) * 1000
+}
+
+/**
+ * Say it. Anything already being said is cut off — the newest card wins.
+ * `onDone` fires once, when the voice finishes. The Android shell has no
+ * "finished" callback and Chrome sometimes never sends one, so a timer sized
+ * to the sentence is the backstop — the game never waits on a silent engine.
+ */
+export function speak(text: string, rate = 0.9, onDone?: () => void): void {
   const clean = speakable(text)
-  if (!clean) return
+  let fired = false
+  const done = () => {
+    if (fired) return
+    fired = true
+    onDone?.()
+  }
+  if (!clean) return done()
   const shell = inShell()
   if (shell?.speak) {
     shell.stopSpeaking?.()
     shell.speak(clean, rate)
+    if (onDone) window.setTimeout(done, sayingMs(clean, rate))
     return
   }
   const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
-  if (!synth) return
+  if (!synth) return done()
   synth.cancel()
   const u = new SpeechSynthesisUtterance(clean)
+  if (onDone) {
+    u.onend = done
+    u.onerror = done
+    window.setTimeout(done, sayingMs(clean, rate) + 1500)
+  }
   u.rate = rate
   u.pitch = 1
   const voice = pickVoice()

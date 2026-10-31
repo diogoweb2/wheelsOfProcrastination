@@ -552,7 +552,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
       {q.image && (
         <img className="quiz-illus" src={q.image} alt="question illustration" draggable={false} />
       )}
-      {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} />}
+      {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} rate={rate} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
       {q.type === 'match' && <MatchQ q={q} onAnswer={onAnswer} />}
       {q.type === 'order' && <OrderQ q={q} onAnswer={onAnswer} />}
@@ -560,8 +560,10 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
   )
 }
 
-function ChoiceQ({ q, options, onAnswer, instantMark }: { q: QuizQuestion; options: string[]; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
+function ChoiceQ({ q, options, onAnswer, instantMark, rate }: { q: QuizQuestion; options: string[]; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean; rate: number }) {
   const [picked, setPicked] = useState<string | null>(null)
+  const gone = useRef(false) // closed mid-sentence: don't answer for him after he left
+  useEffect(() => () => { gone.current = true }, [])
   return (
     <div style={{ display: 'grid', gap: 8 }}>
       {options.map((opt) => {
@@ -575,7 +577,10 @@ function ChoiceQ({ q, options, onAnswer, instantMark }: { q: QuizQuestion; optio
             style={mark ? { borderColor: opt === q.answer ? 'var(--green)' : 'var(--red)' } : undefined}
             onClick={() => {
               setPicked(opt)
-              window.setTimeout(() => onAnswer(opt === q.answer, { text: opt }), instantMark ? 250 : 120)
+              const answer = () => { if (!gone.current) onAnswer(opt === q.answer, { text: opt }) }
+              // the voice says the option he tapped, and only then the next card comes
+              if (canSpeak()) speak(opt, rate, answer)
+              else window.setTimeout(answer, instantMark ? 250 : 120)
             }}
           >
             {opt}
