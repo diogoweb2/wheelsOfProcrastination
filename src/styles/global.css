@@ -6263,6 +6263,14 @@ input, select { font-family: inherit; }
 .se-video__bar > div { height: 100%; background: var(--blue); transition: width 500ms linear; }
 .se-video__meta { font-size: 13px; margin-top: 7px; }
 .se-video__controls { display: flex; gap: 8px; margin-top: 9px; }
+/* ⛶ the whole block goes fullscreen, shield and our controls with it (§24g) */
+.se-video--full {
+  position: fixed; inset: 0; z-index: 1000; margin: 0; display: flex; flex-direction: column;
+  padding: max(8px, env(safe-area-inset-top)) 12px max(10px, env(safe-area-inset-bottom));
+  background: #000; color: var(--text);
+}
+.se-video--full .se-video__frame { flex: 1; min-height: 0; aspect-ratio: auto; border-radius: 0; }
+.se-video--full .se-video__watch { margin-bottom: 8px; padding: 6px 10px; }
 
 /* --- the minigames --- */
 .se-chip {

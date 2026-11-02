@@ -22,6 +22,12 @@
 // `watchFor` is the other half of making those two minutes count: one thing
 // to listen for, pinned above the frame before he presses play, so watching
 // has a target instead of being a wait.
+//
+// ⛶ Fullscreen is ours too, not YouTube's (`fs: 0` stays). What goes
+// fullscreen is the whole block — frame, shield, our controls, the skip — so
+// the shield still covers everything and nothing new becomes a door. The
+// Fullscreen API is best-effort (iOS refuses it on a div), so the block also
+// pins itself over the viewport with CSS, which is fullscreen enough without it.
 import { useEffect, useRef, useState } from 'react'
 import { sfx } from '../../audio'
 
@@ -99,6 +105,8 @@ export function SeVideoBlock({
   /** Seconds of actual playback. Not position — rewinding is still watching. */
   const [watched, setWatched] = useState(0)
   const playing = useRef(false)
+  const root = useRef<HTMLDivElement>(null)
+  const [full, setFull] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -172,6 +180,45 @@ export function SeVideoBlock({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [youtube, start, end])
 
+  const leaveFull = () => {
+    setFull(false)
+    const orientation = screen.orientation as ScreenOrientation & { unlock?: () => void }
+    orientation?.unlock?.()
+    if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {})
+  }
+  const toggleFull = () => {
+    sfx.click()
+    if (full) return leaveFull()
+    setFull(true)
+    void root.current?.requestFullscreen?.().catch(() => {})
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (to: string) => Promise<void> }
+    void orientation?.lock?.('landscape').catch(() => {})
+  }
+
+  // The system back gesture / Esc leaves real fullscreen without asking us;
+  // follow it so the CSS overlay does not stay pinned on its own.
+  useEffect(() => {
+    if (!full) return
+    const onChange = () => {
+      if (!document.fullscreenElement) setFull(false)
+    }
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [full])
+
+  // The questions are below the block, so the moment the video is over (or
+  // broken) he is let out of fullscreen to see them. Unmounting does the same.
+  useEffect(() => {
+    if (full && (state === 'ended' || state === 'broken')) leaveFull()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
+  useEffect(
+    () => () => {
+      if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {})
+    },
+    [],
+  )
+
   const toggle = () => {
     sfx.click()
     if (state === 'playing') player.current?.pauseVideo()
@@ -193,7 +240,7 @@ export function SeVideoBlock({
   const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`
 
   return (
-    <div className="se-video">
+    <div ref={root} className={`se-video${full ? ' se-video--full' : ''}`}>
       {/* Above the frame, and it STAYS there while it plays — the whole point
           is that he can look back at what he is hunting for. */}
       {watchFor && (
@@ -235,6 +282,14 @@ export function SeVideoBlock({
           <button className="btn btn--small btn--ghost" onClick={replay} disabled={state === 'loading'}>
             🔁
           </button>
+          <button
+            className="btn btn--small btn--ghost"
+            onClick={toggleFull}
+            disabled={state === 'loading'}
+            aria-label={full ? 'Exit fullscreen' : 'Fullscreen'}
+          >
+            {full ? '✕' : '⛶'}
+          </button>
         </div>
       )}
 
@@ -248,6 +303,7 @@ export function SeVideoBlock({
           onClick={() => {
             sfx.click()
             player.current?.pauseVideo()
+            leaveFull()
             onFinished('skipped')
           }}
         >

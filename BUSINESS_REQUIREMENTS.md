@@ -2017,6 +2017,8 @@ So none of it is reachable. `youtube-nocookie.com` through the IFrame API with `
 
 The hold counts **playing seconds only**, so pausing it and walking away buys him nothing; rewinding still counts, because rewinding is watching. Skipping goes to the **questions**, not past them, and the button says so — the questions are the entire reason a video is here, and discovering them after pressing skip would read as a trick.
 
+**⛶ Fullscreen is ours, not YouTube's.** A ⛶ button sits with the other controls (lesson and shelf, §24z). What goes fullscreen is the **whole block** — frame, shield, our controls, the skip and the *Listen for* line — so the shield still covers everything; YouTube's own fullscreen stays off (`fs: 0`). It asks for the Fullscreen API and a landscape lock (the Android shell already hosts element fullscreen through `onShowCustomView`), and pins itself over the viewport with CSS either way, because iOS refuses both. ✕, back or Esc leaves it, and so does the video ending, breaking or being skipped — the questions are below the block and he has to see them.
+
 The Android shell closes the last gap — `isYouTube()` lets YouTube's frames load inside the WebView but swallows any **main-frame** navigation to them, so the watch page is unreachable even if something slips.
 
 Videos are hand-picked with `npm run se:videos "<search>"`, which reads YouTube's search page and checks each candidate against the oEmbed endpoint — the single best test of "will this actually play in an iframe". No API key.
