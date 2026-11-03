@@ -1,0 +1,81 @@
+// Canada Geography II (the physical map) — other wordings (§14 "Same
+// question, many wordings"). Written by hand, 2026-11-03. Names keep their one
+// wording; the variety is in the asking.
+import type { VariantBank } from './index'
+
+export const CANADA_GEOGRAPHY_2_VARIANTS: VariantBank = {
+  'cg2-01': { prompts: ['By area, Canada ranks ___ in the world.', 'Only Russia is bigger than Canada. So Canada is the ___ largest country.'] },
+  'cg2-02': { prompts: ['Canada is split into how many time zones?', 'From Newfoundland to BC, how many time zones does Canada cross?'] },
+  'cg2-03': { prompts: ['Roughly how many people live in Canada?', 'What is Canada’s population, roughly?'] },
+  'cg2-04': { prompts: ['Which province has the biggest population?', 'More Canadians live in this province than any other. Which one?'] },
+  'cg2-05': {
+    prompts: ['Most people in Canada live near which line?', 'If you mark where most Canadians live, they crowd close to which line?'],
+    answers: ['the US border', 'the American border'],
+  },
+  'cg2-06': { prompts: ['Which territory covers the most land?', 'Of the three territories, which is the BIGGEST?'] },
+  'cg2-07': { prompts: ['Which huge bay reaches deep into the centre of Canada?', 'Which giant bay sits right in the middle of Canada’s map?'] },
+  'cg2-08': { prompts: ['The world’s highest tides are found in which bay?', 'Which bay’s tides rise higher than anywhere else on Earth?'] },
+  'cg2-09': {
+    prompts: ['Which two provinces is the Bay of Fundy between?', 'The Bay of Fundy separates which two provinces?'],
+    answers: ['Nova Scotia and New Brunswick'],
+  },
+  'cg2-10': { prompts: ['Ships sail from the Great Lakes to the Atlantic along which river?', 'Which river links the Great Lakes with the Atlantic Ocean?'] },
+  'cg2-11': { prompts: ['Which river is Canada’s longest?', 'The longest river in Canada flows into the Arctic. Which is it?'] },
+  'cg2-12': { prompts: ['Which province is the salmon-filled Fraser River in?', 'The Fraser River flows through which province?'] },
+  'cg2-13': { prompts: ['Of the five Great Lakes, which is the BIGGEST?', 'Which Great Lake covers the most area?'] },
+  'cg2-14': { prompts: ['Which Great Lake doesn’t touch Canada at all?', 'Only one Great Lake lies completely in the USA. Which?'] },
+  'cg2-15': { prompts: ['By area, which Great Lake is the smallest?', 'Which of the five Great Lakes covers the least area?'] },
+  'cg2-16': { prompts: ['Which is the biggest lake that lies completely within Canada?', 'Not counting lakes shared with the USA, which is Canada’s largest lake?'] },
+  'cg2-17': { prompts: ['Which is Canada’s tallest mountain?', 'Which mountain is the highest point in Canada?'] },
+  'cg2-18': { prompts: ['Which territory is Mount Logan in?', 'To climb Mount Logan, which territory would you go to?'] },
+  'cg2-19': {
+    prompts: ['Which mountains run along the WEST of Canada?', 'Which range of mountains stretches down western Canada?'],
+    answers: ['the Rockies'],
+  },
+  'cg2-20': {
+    prompts: ['Which older, worn-down mountains are in EASTERN Canada?', 'Eastern Canada has an old, rounded mountain range. Which?'],
+    answers: ['the Appalachian Mountains'],
+  },
+  'cg2-21': { prompts: ['What is the giant region of very old rock around Hudson Bay called?', 'Which region of ancient rock surrounds Hudson Bay?'] },
+  'cg2-22': { prompts: ['What do we call the wide belt of evergreen forest across Canada?', 'Which forest of spruce and pine stretches right across Canada?'] },
+  'cg2-23': { prompts: ['What is the name for the cold, treeless land in the far north?', 'Up north, where it’s too cold for trees, the land is called…'] },
+  'cg2-24': { prompts: ['Which island is the biggest in Canada?', 'Canada’s largest island is which one?'] },
+  'cg2-25': { prompts: ['Which territory is Baffin Island part of?', 'Iqaluit is on Baffin Island. Which territory is that?'] },
+  'cg2-26': {
+    prompts: ['Which three provinces make up the Prairies?', 'Name the three Prairie provinces.'],
+    answers: ['Manitoba, Saskatchewan, Alberta', 'Saskatchewan, Alberta, Manitoba'],
+  },
+  'cg2-27': {
+    prompts: ['Which three provinces make up the Maritimes?', 'Name the three Maritime provinces.'],
+    answers: ['PEI, NS, NB', 'NB, PEI, NS'],
+  },
+  'cg2-28': {
+    prompts: ['Which two provinces don’t touch any ocean?', 'Two provinces are completely landlocked. Which?'],
+    answers: ['Saskatchewan and Alberta'],
+  },
+  'cg2-29': { prompts: ['Which province grows the most wheat?', 'Canada’s biggest wheat-growing province is which?'] },
+  'cg2-30': { prompts: ['Most of Canada’s maple syrup comes from which province?', 'Which province makes nearly all of Canada’s maple syrup?'] },
+  'cg2-31': { prompts: ['The oil sands are in which province?', 'Which province is known for its oil sands?'] },
+  'cg2-32': { prompts: ['What is the bridge that joins PEI to the mainland?', 'You can drive to Prince Edward Island over which bridge?'] },
+  'cg2-33': {
+    prompts: ['What is the highway that runs across all of Canada called?', 'Which road takes you from coast to coast across Canada?'],
+    answers: ['the Trans-Canada'],
+  },
+  'cg2-34': { prompts: ['Across the water to the northeast of Canada lies which country?', 'Which big island country is Canada’s neighbour to the northeast?'] },
+  'cg2-35': { prompts: ['Which animal is on the nickel, Canada’s five-cent coin?', 'Flip a Canadian nickel. Which animal is on it?'] },
+  'cg2-36': { prompts: ['Which province is Vancouver Island part of?', 'Vancouver Island is in which province?'] },
+  'cg2-37': { prompts: ['Niagara Falls is on the border of Ontario and which US state?', 'Across the falls from Ontario is which American state?'] },
+  'cg2-38': { prompts: ['Which imaginary line runs across Canada’s far north?', 'In the far north of Canada, which imaginary line do you cross?'] },
+  'cg2-39': { prompts: ['Which city in Canada is nearest to Europe?', 'Fly east from Canada to Europe. Which Canadian city is closest?'] },
+  'cg2-40': { prompts: ['What is the giant bay in the centre of Canada called? Pick the right spelling.', 'Which spelling of the big bay in the middle of Canada is right?'] },
+  'cg2-41': { prompts: ['Pick the right spelling of the biggest Great Lake:', 'Which spelling of the largest Great Lake is right?'] },
+  'cg2-42': { prompts: ['Montreal and Quebec City sit on which river? Pick the right spelling.', 'Which spelling is right for the river that flows past Montreal?'] },
+  'cg2-43': { prompts: ['Pick the right spelling of the mountains in western Canada:', 'Which spelling is right for western Canada’s big mountain range?'] },
+  'cg2-44': { prompts: ['Type Canada’s national animal:', 'Which animal is Canada’s official national animal? (type it)'] },
+  'cg2-45': { prompts: ['Type Canada’s official national winter sport:', 'Which winter sport is Canada’s national sport? (type it)'] },
+  'cg2-46': { prompts: ['Where is each landmark? Match them:', 'Connect each landmark to its province or territory:'] },
+  'cg2-47': { prompts: ['Which province or territory does each river flow through? Match them:', 'Connect each river to where it flows:'] },
+  'cg2-48': { prompts: ['Which province fits each region best? Match them:', 'Connect each region to the province it describes:'] },
+  'cg2-49': { prompts: ['Rank these Great Lakes by size, BIGGEST first:', 'Order these Great Lakes from largest to smallest:'] },
+  'cg2-50': { prompts: ['Order these cities from the farthest NORTH to the farthest south:', 'Travel south: put the cities in the order you’d reach them, starting in the north:'] },
+}
