@@ -378,7 +378,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - *Mock Final Test* (labelled that way to contrast with "Train") — anyone, any unlocked topic, no rewards.
   - Size auto-chosen from real per-question answer times (**15–20 questions**, ≤ ~18 min budget).
   - Selection: **~40% strong + ~60% weak/unseen**, interleaved; live mercy rule = after **3** wrong in a row the next question is the strongest remaining. Made harder in Oct 2026 (was 10–14 questions, 60/40, 80%, mercy after 2): Ben was clearing tests without studying for them.
-  - Score revealed **only at the end**, with a mistakes review. Pass = **85%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).
+  - Score revealed **only at the end**, with a mistakes review. Pass = **80%+** → "CONQUERED" stamp + **1 Devil Fruit 🍇** (once per topic, ever). Fail → retry another day with different questions (previous attempt's questions excluded).
 - **Warm-up review round** (every OFFICIAL test, once at least one topic is conquered — mock tests skip it): old material must stay fresh, so a new topic is earned only by proving the old ones didn't fade.
   - **Length** — 14 questions for the first conquered topic, then half again for each extra one (14 + 7 + 3.5 + …), rounded up: 1 topic → 14, 2 → 21, 3 → 25, 4 → 27. Split as evenly as the banks allow and interleaved topic by topic.
   - **Mix** — ~60% questions he's strong at + ~40% weak or unseen ones (`REVIEW_HARD_SHARE`): a warm-up he cannot fail proves nothing. Last round's questions are excluded.

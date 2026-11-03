@@ -378,7 +378,7 @@ export function prerequisiteOf(topic: QuizTopic): QuizTopic | undefined {
 // --- economy ---------------------------------------------------------------
 
 export const REPEAT_FACTOR = 0.5 // reward halves once a question has ever been answered correctly
-export const PASS_PCT = 85 // raised from 80 (Oct 2026): he was clearing tests too easily
+export const PASS_PCT = 80 // back to 80 (Oct 2026): 85 made a single slip cost the whole test
 export const PRIZE_WINDOW_DAYS = 30 // the rolling window every prize limit is counted over
 export const TEST_TIME_BUDGET_MS = 18 * 60_000 // keep the whole test under ~20 min
 export const TEST_MIN_QUESTIONS = 15
