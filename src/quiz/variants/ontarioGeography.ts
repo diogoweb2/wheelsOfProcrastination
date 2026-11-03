@@ -1,0 +1,81 @@
+// Ontario Geography — other wordings (§14 "Same question, many wordings").
+// Written by hand, 2026-11-03. Names keep their one wording; the variety is in
+// the asking.
+import type { VariantBank } from './index'
+
+export const ONTARIO_GEOGRAPHY_VARIANTS: VariantBank = {
+  'og-01': { prompts: ['Ontario has a shore on how many of the five Great Lakes?', 'Count the Great Lakes that touch Ontario. How many?'] },
+  'og-02': { prompts: ['Which is the one Great Lake that never touches Ontario?', 'Ontario touches every Great Lake except one. Which?'] },
+  'og-03': { prompts: ['Which big bay is on Ontario’s side of Lake Huron?', 'The huge bay off Lake Huron, full of rocky islands, is called what?'] },
+  'og-04': { prompts: ['Ontario has the world’s biggest island in fresh water. Which is it?', 'Which Ontario island is the largest freshwater island on Earth?'] },
+  'og-05': { prompts: ['Which Great Lake is Manitoulin Island in?', 'Manitoulin Island is surrounded by which Great Lake?'] },
+  'og-06': { prompts: ['Which is the biggest lake completely inside Ontario?', 'Not counting the Great Lakes, which lake inside Ontario is the largest?'] },
+  'og-07': { prompts: ['Which lake north of Toronto fills with ice-fishing huts every winter?', 'In winter, which lake near Barrie is covered in ice-fishing huts?'] },
+  'og-08': { prompts: ['Which Great Lake is the warmest and least deep?', 'Of the Great Lakes, which one is shallowest and warmest?'] },
+  'og-09': { prompts: ['Most of the Ontario–Quebec border follows which river?', 'Which river separates most of Ontario from Quebec?'] },
+  'og-10': { prompts: ['How do big ships get past Niagara Falls? Through which canal?', 'Which canal carries ships around Niagara Falls?'] },
+  'og-11': { prompts: ['Which old canal becomes the world’s longest skating rink in winter?', 'People skate to work in Ottawa on which frozen canal?'] },
+  'og-12': { prompts: ['Near Kingston, what is the cluster of islands in the St. Lawrence called?', 'Which group of islands in the St. Lawrence River lies near Kingston?'] },
+  'og-13': { prompts: ['Which province is Ontario’s neighbour to the WEST?', 'Cross Ontario’s western border and you’re in which province?'] },
+  'og-14': { prompts: ['Across the river from Windsor is which US state?', 'Windsor faces Detroit. Which state is Detroit in?'] },
+  'og-15': { prompts: ['Which bay is on Ontario’s far NORTHERN edge?', 'Ontario’s northern coast touches which bay?'] },
+  'og-16': { prompts: ['Which river is the longest in Ontario?', 'Ontario’s longest river flows north to James Bay. Which is it?'] },
+  'og-17': { prompts: ['Most of NORTHERN Ontario sits on which ancient rocky region?', 'What is the old, rocky region that covers northern Ontario called?'] },
+  'og-18': { prompts: ['What is the long line of cliffs from Niagara to Tobermory called?', 'Which long ridge of cliffs runs from Niagara up to the Bruce Peninsula?'] },
+  'og-19': { prompts: ['Which long hiking trail runs along the Niagara Escarpment?', 'Hike the Niagara Escarpment and you are on which trail?'] },
+  'og-20': { prompts: ['Which peninsula separates Georgian Bay from Lake Huron?', 'Tobermory is at the tip of which peninsula?'] },
+  'og-21': {
+    prompts: ['Which Ontario park is best known for canoeing, moose and howling wolves?', 'Where in Ontario do people canoe, see moose and join a wolf howl?'],
+    answers: ['Algonquin Park'],
+  },
+  'og-22': { prompts: ['Which area is Ontario’s best-known cottage country?', 'When Torontonians “go to the cottage”, they often head to which region?'] },
+  'og-23': { prompts: ['Mainland Canada’s southernmost point is in Ontario. What is it called?', 'Which point in Ontario is the farthest south in mainland Canada?'] },
+  'og-24': { prompts: ['What do we call the crowded region that curves around the west end of Lake Ontario?', 'Toronto, Hamilton and Niagara form a curved urban region called what?'] },
+  'og-25': {
+    prompts: ['Where in Ontario do almost all of its people live?', 'Most Ontarians live in which part of the province?'],
+    answers: ['the southern part'],
+  },
+  'og-26': { prompts: ['By area, Ontario is the ___ biggest province.', 'Only Quebec is bigger. So Ontario is the ___ largest province.'] },
+  'og-27': { prompts: ['Which Ontario city is Canada’s capital?', 'Canada’s capital is in Ontario. Which city?'] },
+  'og-28': { prompts: ['Which Ontario city, at the west end of Lake Ontario, is known for steel?', 'Which city is called Steeltown and sits at the tip of Lake Ontario?'] },
+  'og-29': { prompts: ['Which city in northern Ontario was built on nickel mining?', 'The Big Nickel stands in which northern Ontario city?'] },
+  'og-30': { prompts: ['Which Ontario city is a major port on Lake Superior?', 'Ships load grain at which big Lake Superior port in Ontario?'] },
+  'og-31': { prompts: ['Lake Ontario flows into the St. Lawrence at which city?', 'Which city is where Lake Ontario turns into the St. Lawrence River?'] },
+  'og-32': { prompts: ['Which city in southwestern Ontario has its own Thames River?', 'Which Ontario city sits on a river called the Thames?'] },
+  'og-33': {
+    prompts: ['Which two Ontario cities form a tech hub with a big university?', 'The University of Waterloo and many tech companies are in which pair of cities?'],
+    answers: ['Waterloo and Kitchener'],
+  },
+  'og-34': {
+    prompts: ['Which part of Ontario is known for wine and peaches?', 'Vineyards and peach orchards fill which Ontario region?'],
+    answers: ['the Niagara Region'],
+  },
+  'og-35': { prompts: ['Which Ontario town claims the world’s longest freshwater beach?', 'Where is “the world’s longest freshwater beach”?'] },
+  'og-36': { prompts: ['Near Thunder Bay, which rock formation looks like a figure lying down?', 'Which landmark near Thunder Bay looks like a giant asleep on the water?'] },
+  'og-37': {
+    prompts: ['Which flower is Ontario’s official flower?', 'Which bloom is Ontario’s floral emblem?'],
+    answers: ['the white trillium'],
+  },
+  'og-38': {
+    prompts: ['Which tree is Ontario’s official tree?', 'Ontario chose which tree as its official symbol?'],
+    answers: ['the eastern white pine'],
+  },
+  'og-39': {
+    prompts: ['“Ontario” comes from an Indigenous word. What does it mean?', 'What is the meaning of the Indigenous word that gave Ontario its name?'],
+    answers: ['sparkling water', 'lovely water'],
+  },
+  'og-40': {
+    prompts: ['Which far-north Ontario park is named after an Arctic animal?', 'Ontario’s most northern park is named for which animal?'],
+    answers: ['Polar Bear Park'],
+  },
+  'og-41': { prompts: ['Which ski resort near Collingwood is Ontario’s best known?', 'Ontario’s most famous ski hill is near Collingwood. Which one?'] },
+  'og-42': { prompts: ['Pick the right spelling of the world’s largest freshwater island:', 'Which spelling is right for the biggest island in a freshwater lake?'] },
+  'og-43': { prompts: ['Thunder Bay sits on which Great Lake? Pick the right spelling.', 'Which spelling is right for the Great Lake at Thunder Bay?'] },
+  'og-44': { prompts: ['Pick the right spelling of the canal around Niagara Falls:', 'Which spelling is right for the canal that bypasses Niagara Falls?'] },
+  'og-45': { prompts: ['Pick the right spelling of Ontario’s official flower:', 'Which spelling is right for Ontario’s flower?'] },
+  'og-46': { prompts: ['Which water is each city on? Match them:', 'Connect each Ontario city to its lake or river:'] },
+  'og-47': { prompts: ['What is each place famous for? Match them:', 'Connect each Ontario place to what it’s known for:'] },
+  'og-48': { prompts: ['Where is each landform? Match them:', 'Connect each landform to its place in Ontario:'] },
+  'og-49': { prompts: ['Follow the water downstream: order the Great Lakes, starting upstream.', 'Which way does Great Lakes water flow? Order the lakes from upstream to downstream:'] },
+  'og-50': { prompts: ['Order these Ontario cities from the farthest SOUTH to the farthest north:', 'Drive north: put these cities in the order you’d reach them, starting in the south:'] },
+}

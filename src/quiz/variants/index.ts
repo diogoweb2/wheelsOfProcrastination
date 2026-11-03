@@ -33,6 +33,7 @@ import { SCIENCE_6_VARIANTS } from './science6'
 import { CRITICAL_THINKING_6_VARIANTS } from './criticalThinking6'
 import { LOGIC_6_VARIANTS } from './logic6'
 import { CANADA_GEOGRAPHY_2_VARIANTS } from './canadaGeography2'
+import { ONTARIO_GEOGRAPHY_VARIANTS } from './ontarioGeography'
 
 export const QUESTION_VARIANTS: VariantBank = {
   ...CANADA_HISTORY_VARIANTS,
@@ -46,4 +47,5 @@ export const QUESTION_VARIANTS: VariantBank = {
   ...CRITICAL_THINKING_6_VARIANTS,
   ...LOGIC_6_VARIANTS,
   ...CANADA_GEOGRAPHY_2_VARIANTS,
+  ...ONTARIO_GEOGRAPHY_VARIANTS,
 }
