@@ -28,7 +28,9 @@ export function audit(verbose = false): boolean {
       const longest = Math.max(...wrong.map((c) => c.length))
       for (const a of v.answers) {
         if (wrong.some((c) => c.toLowerCase() === a.toLowerCase())) problems.push(`${id}: answer wording “${a}” is also a distractor`)
-        if (a.length > longest * TOWER && a.length - longest > 8) problems.push(`${id}: answer wording “${a}” (${a.length}) towers over the longest distractor (${longest})`)
+        // never longer than the seed's own answer by more than a few letters: a variant must not make a tell worse
+        const bar = Math.max(longest * TOWER, longest + 8, q.answer!.length + 4)
+        if (a.length > bar) problems.push(`${id}: answer wording “${a}” (${a.length}) towers over the distractors (longest ${longest}, seed answer ${q.answer!.length})`)
       }
       const answers = [q.answer, ...v.answers]
       if (new Set(answers.map((a) => a!.toLowerCase())).size !== answers.length) problems.push(`${id}: two answer wordings are the same`)

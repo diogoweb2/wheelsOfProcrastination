@@ -22,4 +22,8 @@ export interface QuestionVariants {
 
 export type VariantBank = Record<string, QuestionVariants>
 
-export const QUESTION_VARIANTS: VariantBank = {}
+import { CANADA_HISTORY_VARIANTS } from './canadaHistory'
+
+export const QUESTION_VARIANTS: VariantBank = {
+  ...CANADA_HISTORY_VARIANTS,
+}
