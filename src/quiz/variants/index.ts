@@ -24,8 +24,10 @@ export type VariantBank = Record<string, QuestionVariants>
 
 import { CANADA_HISTORY_VARIANTS } from './canadaHistory'
 import { G7_HIST_A_VARIANTS } from './g7HistA'
+import { G7_HIST_B_VARIANTS } from './g7HistB'
 
 export const QUESTION_VARIANTS: VariantBank = {
   ...CANADA_HISTORY_VARIANTS,
   ...G7_HIST_A_VARIANTS,
+  ...G7_HIST_B_VARIANTS,
 }
