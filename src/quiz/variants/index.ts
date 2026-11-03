@@ -28,6 +28,7 @@ import { G7_HIST_B_VARIANTS } from './g7HistB'
 import { G7_SCI_A_VARIANTS } from './g7SciA'
 import { G7_SCI_B_VARIANTS } from './g7SciB'
 import { G7_GEO_VARIANTS } from './g7Geo'
+import { CANADA_GEOGRAPHY_VARIANTS } from './canadaGeography'
 
 export const QUESTION_VARIANTS: VariantBank = {
   ...CANADA_HISTORY_VARIANTS,
@@ -36,4 +37,5 @@ export const QUESTION_VARIANTS: VariantBank = {
   ...G7_SCI_A_VARIANTS,
   ...G7_SCI_B_VARIANTS,
   ...G7_GEO_VARIANTS,
+  ...CANADA_GEOGRAPHY_VARIANTS,
 }
