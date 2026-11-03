@@ -75,7 +75,7 @@ export function QuestionOfTheDay() {
               Nail it for <b style={{ color: 'var(--gold)' }}>+{win} 🪙</b> · miss it and it’s{' '}
               <b style={{ color: 'var(--red)' }}>−{loss} 🪙</b>
             </p>
-            <QuestionCard key={q.id} q={q} onAnswer={answer} instantMark />
+            <QuestionCard key={q.id} q={q} turn={data.quiz.stats[q.id]?.seen ?? 0} onAnswer={answer} instantMark />
             {daily.state === 'unseen' && (
               <button
                 className="btn btn--ghost btn--small"
@@ -101,14 +101,14 @@ export function QuestionOfTheDay() {
               {result.correct ? `+${result.delta} 🪙` : `${result.delta} 🪙`}
             </div>
             {result.correct ? (
-              <p style={{ fontWeight: 800 }}>YOSH! Still sharp as a captain’s blade. {result.given.nearMiss ? `(it’s spelled “${correctAnswerText(q)}”)` : ''}</p>
+              <p style={{ fontWeight: 800 }}>YOSH! Still sharp as a captain’s blade. {result.given.nearMiss ? `(it’s spelled “${correctAnswerText(result.given.shown ?? q)}”)` : ''}</p>
             ) : (
               <>
                 {result.given.text && (
                   <p className="muted" style={{ margin: '2px 0' }}>You said: ❌ {result.given.text}</p>
                 )}
                 <p style={{ fontWeight: 800 }}>
-                  Right answer: <b style={{ color: 'var(--green)' }}>{correctAnswerText(q)}</b>
+                  Right answer: <b style={{ color: 'var(--green)' }}>{correctAnswerText(result.given.shown ?? q)}</b>
                 </p>
               </>
             )}

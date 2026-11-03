@@ -30,6 +30,7 @@
     "se:videos": "node scripts/steugene-videos.mjs",
     "se:video-index": "node scripts/steugene-video-index.mjs",
     "se:audit": "node scripts/steugene-audit.mjs",
+    "quiz:variants": "node scripts/quiz-variants-audit.mjs",
     "se:seed": "node scripts/steugene-seed.mjs",
     "se:verify": "node scripts/steugene-verify.mjs",
     "se:world": "node scripts/steugene-world.mjs",

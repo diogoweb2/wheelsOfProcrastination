@@ -36,6 +36,7 @@ import { lessonById } from '../quiz/lessons'
 import { canSpeak, speak, stopSpeaking } from '../lib/speak'
 import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
+import { showingOf } from '../logic/quizVariants'
 
 export type QuizMode = 'training' | 'simulation' | 'official'
 
@@ -45,6 +46,8 @@ export interface Given {
   text?: string
   /** Right answer, but misspelled — full points, gentle spelling nudge. */
   nearMiss?: boolean
+  /** The wording he was actually shown (§14 variants) — feedback and reviews echo that one, not the seed's. */
+  shown?: QuizQuestion
 }
 
 interface Props {
@@ -98,6 +101,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [answered, setAnswered] = useState(0)
   // training: wrong answers pause on a correction card; right answers just flow on
   const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
+  const shownRef = useRef(new Map<string, QuizQuestion>()) // test: the wording each question wore, for the review
   const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
   // the deep-dive lesson currently being read (opened from a wrong answer, or from the test review)
   const [reading, setReading] = useState<{ lessonId: string; then: 'advance' | 'back' } | null>(null)
@@ -190,7 +194,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
         // a misspelled-but-right answer still pays, it just gets the spelling shown
         const base = preview ? '✓ Correct (preview)' : earned > 0 ? `+${earned} 🪙` : '✓ Correct — already earned today'
         setFlash({
-          text: given.nearMiss ? `${base} · almost! it's “${correctAnswerText(question)}”` : base,
+          text: given.nearMiss ? `${base} · almost! it's “${correctAnswerText(given.shown ?? question)}”` : base,
           muted: earned === 0,
           key: Date.now(),
         })
@@ -200,10 +204,11 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
         window.setTimeout(() => advanceTraining(q, correctIds), 350)
       } else {
         sfx.error()
-        setFeedback({ q: question, given })
+        setFeedback({ q: given.shown ?? question, given })
       }
     } else {
       sfx.click()
+      if (given.shown) shownRef.current.set(question.id, given.shown)
       setResults((r) => [...r, { qid: question.id, correct }])
     }
   }
@@ -274,7 +279,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
 
   // ---- results screen (tests) ----
   if (finished) {
-    return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} onRead={(id) => setReading({ lessonId: id, then: 'back' })} />
+    return <TestResults record={finished} plan={plan} shown={shownRef.current} mode={mode} onClose={onClose} onRead={(id) => setReading({ lessonId: id, then: 'back' })} />
   }
 
   // ---- training: nothing due (cleared this session, or all resting) ----
@@ -339,7 +344,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       )}
 
       {question && !feedback && (
-        <QuestionCard key={question.id} q={question} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
+        <QuestionCard key={question.id} q={question} turn={stats[question.id]?.seen ?? 0} fresh={isFresh(question, stats[question.id])} onAnswer={submit} instantMark={mode === 'training'} />
       )}
 
       {/* training: only WRONG answers pause the flow, so the right answer sinks in */}
@@ -443,8 +448,9 @@ function ReviewFailed({ record, bank, topicTitle, onClose }: { record: QuizTestR
 
 // --- results ---------------------------------------------------------------
 
-function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTestRecord; plan: QuizQuestion[]; mode: QuizMode; onClose: () => void; onRead: (lessonId: string) => void }) {
-  const byId = new Map(plan.map((q) => [q.id, q]))
+function TestResults({ record, plan, shown, mode, onClose, onRead }: { record: QuizTestRecord; plan: QuizQuestion[]; shown: Map<string, QuizQuestion>; mode: QuizMode; onClose: () => void; onRead: (lessonId: string) => void }) {
+  // the review reads back the wording he was shown, not the seed's
+  const byId = new Map(plan.map((q) => [q.id, shown.get(q.id) ?? q]))
   const right = record.results.filter((r) => r.correct).length
   return (
     <Full onClose={onClose} title={mode === 'official' ? '🎓 Final Test — result' : '🧪 Mock Final Test — result'}>
@@ -520,9 +526,18 @@ function readAloudText(q: QuizQuestion, options: string[]): string {
   return prompt
 }
 
-export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuestion; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
+/**
+ * One question on screen. `turn` (how many times this profile has seen it)
+ * picks which wording of the prompt and of the right answer it wears this time
+ * (§14 variants); without one, a random wording. Everything below — the 🔊, the
+ * options, the grading — uses that wording, and it is handed back in `given.shown`
+ * so the feedback card names the answer the way it was offered.
+ */
+export function QuestionCard({ q: bankQ, turn, fresh, onAnswer: report, instantMark }: { q: QuizQuestion; turn?: number; fresh?: boolean; onAnswer: (correct: boolean, given?: Given) => void; instantMark: boolean }) {
+  const q = useMemo(() => showingOf(bankQ, turn), [bankQ.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const onAnswer = (correct: boolean, given: Given = {}) => report(correct, { ...given, shown: q })
   // picked here, not in ChoiceQ, so 🔊 reads the options in the order they are drawn
-  const options = useMemo(() => (q.type === 'choice' ? pickChoiceOptions(q) : []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const options = useMemo(() => (q.type === 'choice' ? pickChoiceOptions(q) : []), [q]) // eslint-disable-line react-hooks/exhaustive-deps
   const rate = useStore((s) => s.data.steugene?.speak?.rate ?? 0.9) // the same voice speed he chose in St. Eugene
   useEffect(() => stopSpeaking, [q.id]) // a new question cuts the old one off mid-sentence
   return (

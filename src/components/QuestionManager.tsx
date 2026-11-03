@@ -9,6 +9,7 @@ import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { QuizQuestion } from '../types'
 import { correctAnswerText, topicsFor } from '../logic/quiz'
+import { variantsOf } from '../logic/quizVariants'
 import { sfx } from '../audio'
 
 /** The answer(s) as the reviewer needs to see them — choices listed, correct one starred. */
@@ -29,10 +30,26 @@ function QuestionBody({ q }: { q: QuizQuestion }) {
           ✔ <b>{correctAnswerText(q)}</b>
         </div>
       )}
+      <Wordings q={q} />
       <div className="muted" style={{ fontSize: 11, marginTop: 4 }}>
         {q.type} · weight {q.weight} · 🪙{q.points}
       </div>
     </>
+  )
+}
+
+/** The other wordings this question rotates through (§14 variants), so a bad one can be spotted. */
+function Wordings({ q }: { q: QuizQuestion }) {
+  const { prompts, answers } = variantsOf(q)
+  if (prompts.length < 2 && answers.length < 2) return null
+  return (
+    <details style={{ fontSize: 12, marginTop: 4 }}>
+      <summary className="muted">🔁 {prompts.length} wordings{answers.length > 1 ? ` · ${answers.length} ways to say the answer` : ''}</summary>
+      <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
+        {prompts.slice(1).map((p) => <li key={p}>{p}</li>)}
+        {answers.slice(1).map((a) => <li key={a} style={{ color: 'var(--green)' }}>✔ {a}</li>)}
+      </ul>
+    </details>
   )
 }
 
