@@ -30,6 +30,7 @@ import { G7_SCI_B_VARIANTS } from './g7SciB'
 import { G7_GEO_VARIANTS } from './g7Geo'
 import { CANADA_GEOGRAPHY_VARIANTS } from './canadaGeography'
 import { SCIENCE_6_VARIANTS } from './science6'
+import { CRITICAL_THINKING_6_VARIANTS } from './criticalThinking6'
 
 export const QUESTION_VARIANTS: VariantBank = {
   ...CANADA_HISTORY_VARIANTS,
@@ -40,4 +41,5 @@ export const QUESTION_VARIANTS: VariantBank = {
   ...G7_GEO_VARIANTS,
   ...CANADA_GEOGRAPHY_VARIANTS,
   ...SCIENCE_6_VARIANTS,
+  ...CRITICAL_THINKING_6_VARIANTS,
 }
