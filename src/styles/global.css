@@ -7264,3 +7264,40 @@ input, select { font-family: inherit; }
 .se-pace__missed { margin-top: 9px; font-size: 12px; line-height: 1.45; }
 .se-map__state.is-done { color: var(--profit); }
 .se-map__state.is-shut, .se-map__state.is-not-yet { color: var(--muted); }
+
+/* --- 📝 Tests (§24ad) — the real papers, and what he lost on them --- */
+.se-test { border: 2px solid var(--yellow); }
+.se-test__head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 9px; }
+.se-test__name { flex: 1; min-width: 0; }
+.se-test__title { font-size: 19px; font-weight: 900; line-height: 1.25; }
+.se-test__paper { margin: 3px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.se-test__count { flex: 0 0 auto; font-size: 20px; font-weight: 900; color: var(--muted); }
+.se-test__count.is-done { color: var(--profit); }
+.se-test__thread { margin: 10px 0 0; font-size: 14px; line-height: 1.45; font-weight: 700; }
+.se-test__clear { margin: 11px 0 0; font-size: 14.5px; font-weight: 800; color: var(--profit); line-height: 1.4; }
+.se-test__go { width: 100%; margin-top: 11px; }
+.se-test__more {
+  display: block; width: 100%; margin-top: 11px; padding: 8px 0 0; text-align: left;
+  background: none; border: 0; border-top: 1px dashed var(--line);
+  font: inherit; font-size: 13px; font-weight: 800; color: var(--muted); cursor: pointer;
+}
+.se-testq { margin-top: 13px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.se-testq__top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.se-testq__no { font-size: 15px; font-weight: 900; }
+.se-testq__state {
+  font-size: 11px; font-weight: 900; letter-spacing: 0.3px;
+  padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
+}
+.se-testq__state.is-right { border-color: var(--profit); color: var(--profit); }
+.se-testq__state.is-wrong { border-color: var(--orange); color: var(--orange); }
+.se-testq__how { margin-top: 5px; font-size: 13px; font-weight: 800; color: var(--muted); }
+.se-testq__put { color: var(--red); font-weight: 900; }
+.se-testq__slip { margin: 6px 0 0; font-size: 14px; line-height: 1.45; }
+.se-testq__say {
+  margin-top: 11px; padding: 10px 11px; border-radius: 12px;
+  background: var(--bg2); border: 1px solid var(--yellow);
+}
+.se-testq__saylabel {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: var(--yellow);
+}
+.se-testq__say p { margin: 7px 0 0; font-size: 14.5px; line-height: 1.45; }

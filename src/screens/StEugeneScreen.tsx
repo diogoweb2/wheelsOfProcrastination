@@ -1,10 +1,11 @@
 // 🏫 St. Eugene 7 (§24) — his actual school year, as an app.
 //
-// Eight pages, each its own URL (§1c):
+// Nine pages, each its own URL (§1c):
 //   /steugene7/subjects  the year, in the order his class walks it
 //   /steugene7/finder    "what are you learning right now?" — by sight, not by name
 //   /steugene7/videos    the shelf: every video in the year, by chapter (§24z)
 //   /steugene7/tips      how to start, when the question is a wall of words (§24ab)
+//   /steugene7/tests     the real papers, and the questions he lost on them (§24ad)
 //   /steugene7/lesson    the lesson in flight
 //   /steugene7/review    his own mistakes, by chapter, whenever he wants
 //   /steugene7/report    where he is strong, and where he needs me
@@ -29,7 +30,9 @@ import {
   seReviewGroups,
   seStuck,
   seSubtopicsOf,
+  seTestStanding,
   type SeReviewGroup,
+  type SeTestState,
   type SeSubTopic,
   type SeSubject,
   type SeTerm,
@@ -44,9 +47,10 @@ import {
 } from '../logic/steugenePace'
 import { ensurePack, hasPack, packFor, writtenSubtopics } from '../steugene/packs'
 import { walkIn, walkedIntoRun } from '../steugene/open'
+import { SE_TESTS } from '../steugene/tests'
 import { SE_LENGTHS, seAvailable, seFixGroups, seLockLeft, seWithChecks } from '../logic/steugeneLesson'
 import { LessonPlayer } from '../components/steugene/LessonPlayer'
-import { SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
+import { HelpCard, SeHelping, SeHelpingBanner } from '../components/steugene/SeHelping'
 import { speak } from '../lib/speak'
 import { SE_TIPS, type SeTipPlan } from '../steugene/tips'
 import { SE_LEVELS, SE_WORKED } from '../steugene/worked'
@@ -55,6 +59,7 @@ import { SeArtwork } from '../components/steugene/SeArtwork'
 import { SpriteSvg } from '../components/steugene/art/sprites'
 import { dayKey, prettyDay } from '../logic/dates'
 import type { AppData, SeAnswer, SeFixLock, SeStat } from '../types'
+import type { SeBlock, SeTest, SeTestQ } from '../steugene/types'
 
 // 🎬 The shelf (§24z). Lazy on purpose: it carries the catalogue of all 296
 // video titles, which is no use to anyone who never opens the tab.
@@ -75,6 +80,7 @@ export function StEugeneScreen({ tab, setTab }: { tab: string; setTab: (tab: str
         </Suspense>
       )}
       {tab === 'tips' && <TipsTab />}
+      {tab === 'tests' && <TestsTab admin={isAdmin} setTab={setTab} />}
       {tab === 'review' && <ReviewTab setTab={setTab} />}
       {tab === 'report' && <ReportTab admin={isAdmin} setTab={setTab} />}
       {tab === 'desk' && isAdmin && <DeskTab setTab={setTab} />}
@@ -1770,5 +1776,221 @@ function DeskTab({ setTab }: { setTab: (tab: string) => void }) {
           ))}
       </div>
     </>
+  )
+}
+
+// --- 📝 Tests (§24ad) ----------------------------------------------------------
+
+/**
+ * The real papers he has sat, and only the questions on them he got wrong or
+ * left blank.
+ *
+ * The tab is one page with two renders, like the Report (§24x). His copy is a
+ * pile to clear: how many are still on it, a button that deals them, and what
+ * went wrong in each — with no answers anywhere on it. Dad's copy is the same
+ * list opened out into the answer key and a script for each one (§24t),
+ * because helping him in different words to the ones the app used is how a
+ * boy ends up carrying two methods and trusting neither (§24ab).
+ *
+ * Adding the next paper is a new file in `src/steugene/tests/` and one line in
+ * its index. Nothing on this page knows anything about Math test 2.
+ */
+function TestsTab({ admin, setTab }: { admin: boolean; setTab: (tab: string) => void }) {
+  const { data, kidData, seStartTest } = useStore()
+  // Dad's copy reads Ben's world — it is a page about his paper, and on Dad's
+  // own record every question on it is untouched.
+  const world: AppData | null = admin ? kidData : data
+  const history = world?.steugene.history ?? NO_HISTORY
+  const [opening, setOpening] = useState<string | null>(null)
+  const [open, setOpen] = useState<string | null>(admin ? (SE_TESTS[0]?.id ?? null) : null)
+
+  const start = async (testId: string) => {
+    sfx.fanfare()
+    setOpening(testId)
+    await ensurePack(testId)
+    seStartTest(testId)
+    walkIn()
+    setTab('lesson')
+  }
+
+  if (!SE_TESTS.length) {
+    return (
+      <>
+        <div className="h1">📝 Tests</div>
+        <div className="card muted">No test papers yet.</div>
+      </>
+    )
+  }
+
+  if (admin && !kidData) return <div className="card">Loading Ben’s world from the cloud…</div>
+
+  return (
+    <>
+      <div className="h1">📝 {admin ? 'His test papers' : 'Tests'}</div>
+      <p className="muted" style={{ marginBottom: 12 }}>
+        {admin
+          ? 'Every question he got wrong or left blank on a real paper, with the answer, the reason and what to say about it. The walk-throughs are on different numbers on purpose — read them out while the question is still in front of him.'
+          : 'The questions off your real tests that got a red circle, plus the ones you did not start. Not the whole paper — the ones you got right are done.'}
+      </p>
+
+      {SE_TESTS.map((test) => (
+        <TestCard
+          key={test.id}
+          test={test}
+          history={history}
+          admin={admin}
+          busy={opening === test.id}
+          open={open === test.id}
+          onOpen={() => {
+            sfx.click()
+            setOpen(open === test.id ? null : test.id)
+          }}
+          onStart={() => void start(test.id)}
+        />
+      ))}
+    </>
+  )
+}
+
+function TestCard({
+  test,
+  history,
+  admin,
+  busy,
+  open,
+  onOpen,
+  onStart,
+}: {
+  test: SeTest
+  history: SeAnswer[]
+  admin: boolean
+  busy: boolean
+  open: boolean
+  onOpen: () => void
+  onStart: () => void
+}) {
+  const standing = seTestStanding(test, history)
+  const total = test.questions.length
+  const put = test.questions.filter((q) => standing[q.id] === 'right').length
+  const left = total - put
+  // Through `seAvailable` so the cards are exactly the ones he is dealt,
+  // tiles and all (§24y) — Dad must not be reading a different question.
+  const byId = useMemo(() => new Map(seAvailable(test.pack, []).map((b) => [b.id, b])), [test.pack])
+  const answers = useMemo(() => {
+    const out = new Map<string, SeAnswer>()
+    for (const a of history) if (a.subtopicId === test.id) out.set(a.id, a)
+    return out
+  }, [history, test.id])
+
+  return (
+    <div className="card se-test">
+      <div className="se-test__head">
+        <div className="se-test__name">
+          <div className="se-test__title">📝 {test.title}</div>
+          <div className="se-test__paper">
+            {prettyDay(test.on)} · {test.paper}
+          </div>
+        </div>
+        <div className={`se-test__count${left ? '' : ' is-done'}`}>
+          {put}/{total}
+        </div>
+      </div>
+
+      <div className="se-wk__track">
+        <div className="se-wk__fill" style={{ width: `${Math.round((put / total) * 100)}%` }} />
+      </div>
+
+      <p className="se-test__thread">{test.thread}</p>
+      {admin && test.score && <p className="se-test__paper">Marked: {test.score}</p>}
+
+      {!admin &&
+        (left ? (
+          <button className="btn btn--blue se-test__go" disabled={busy} onClick={onStart}>
+            {busy ? 'Getting it ready…' : `▶️ ${left === total ? 'Start' : 'Carry on'} · ${left} to put right`}
+          </button>
+        ) : (
+          <>
+            <p className="se-test__clear">✅ Every question off this paper is put right. That is the whole thing cleared.</p>
+            <button className="btn btn--ghost se-test__go" disabled={busy} onClick={onStart}>
+              {busy ? 'Getting it ready…' : '🔄 Sit the whole paper again'}
+            </button>
+          </>
+        ))}
+
+      <button className="se-test__more" onClick={onOpen}>
+        {open ? '⌄' : '›'}{' '}
+        {admin ? `the notes, question by question (${total})` : `what went wrong · ${total} question${total === 1 ? '' : 's'}`}
+      </button>
+
+      {open &&
+        test.questions.map((q) => (
+          <TestQ
+            key={q.id}
+            q={q}
+            state={standing[q.id]}
+            block={byId.get(q.id)}
+            given={answers.get(q.id)}
+            admin={admin}
+          />
+        ))}
+    </div>
+  )
+}
+
+/** How it was lost on the paper — the same words on both copies of the page. */
+const HOW: Record<SeTestQ['how'], string> = {
+  wrong: '❌ Marked wrong',
+  blank: '⬜ Not attempted',
+  marks: '✍️ Right, but marks lost',
+}
+
+/** Where it stands NOW — his latest answer in the app, not what the paper said. */
+const STATE: Record<SeTestState, { pill: string; label: string }> = {
+  todo: { pill: 'is-todo', label: '⏳ Not had a go yet' },
+  wrong: { pill: 'is-wrong', label: '🔁 Still getting it wrong' },
+  right: { pill: 'is-right', label: '✅ Put right' },
+}
+
+function TestQ({
+  q,
+  state,
+  block,
+  given,
+  admin,
+}: {
+  q: SeTestQ
+  state: SeTestState
+  block?: SeBlock
+  given?: SeAnswer
+  admin: boolean
+}) {
+  return (
+    <div className="se-testq">
+      <div className="se-testq__top">
+        <span className="se-testq__no">Q{q.no}</span>
+        <span className={`se-testq__state ${STATE[state].pill}`}>{STATE[state].label}</span>
+      </div>
+      <div className="se-testq__how">
+        {HOW[q.how]}
+        {q.put && (
+          <>
+            {' · '}
+            <span className="se-testq__put">{q.put}</span>
+          </>
+        )}
+      </div>
+      <p className="se-testq__slip">{q.slip}</p>
+
+      {/* The answer key is parent-only, by render as well as by menu (§24t). */}
+      {admin && block && <HelpCard block={block} {...(given ? { given } : {})} />}
+      {admin && (
+        <div className="se-testq__say">
+          <div className="se-testq__saylabel">🗣️ What to say</div>
+          {q.say.map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

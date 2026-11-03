@@ -13,6 +13,8 @@
 
 /** The three blocks of the year, in the order they are taught. */
 import type { SeAnswer, SeFixLock } from '../types'
+import type { SeTest } from '../steugene/types'
+import { SE_TESTS } from '../steugene/tests'
 
 export type SeTerm = 'term1' | 'general' | 'term2'
 
@@ -405,8 +407,42 @@ for (const subject of SE_SUBJECTS) {
   }
 }
 
+/**
+ * 📝 The tests (§24ad), findable by id and absent from the map.
+ *
+ * A test is not a chapter of the year, so it is NOT in `SE_SUBJECTS`: it
+ * never shows up in the Subjects tab, the Finder, the 📍 pin or `seNext`,
+ * all of which walk the year rather than ask `seFind`. But every answer he
+ * gives on one is filed under the test's id, and about twenty places — the
+ * lesson header, 🤝 Helping, the Desk's lock rows, the Report, the §24y tile
+ * conversion — need to turn that id into a title and a subject. So it gets
+ * its own index, consulted here and nowhere else.
+ *
+ * The subject is the real Mathematics object on purpose: a test question is a
+ * maths question, so `seAsBuild` (§24y) turns its numbers into tiles and the
+ * 🧭 plan (§24ab) offers itself on the word problems, with no special case.
+ * The strand is the test itself, which is what makes "📝 Math test 2" its own
+ * card on 🔁 Review when he gets one wrong (§24v).
+ */
+const TEST_INDEX = new Map<string, SeLocation>()
+for (const test of SE_TESTS) {
+  const subtopic: SeSubTopic = {
+    id: test.id,
+    title: test.title,
+    emoji: '📝',
+    sample: test.sample,
+    plain: test.plain,
+    can: test.can,
+  }
+  TEST_INDEX.set(test.id, {
+    subject: MATH,
+    strand: { id: `strand-${test.id}`, title: `📝 ${test.title}`, subtopics: [subtopic] },
+    subtopic,
+  })
+}
+
 export function seFind(subtopicId: string): SeLocation | null {
-  return INDEX.get(subtopicId) ?? null
+  return INDEX.get(subtopicId) ?? TEST_INDEX.get(subtopicId) ?? null
 }
 
 // --- Where he is now, not where he has been (§24u) ----------------------------
@@ -575,6 +611,41 @@ export function seStuck(locks: SeFixLock[], subtopicId: string, broken: number):
     }
   }
   return { sealed: sealed.size, ready: ready.size, loose: Math.max(0, broken - sealed.size - ready.size) }
+}
+
+// --- 📝 Tests (§24ad) ---------------------------------------------------------
+
+/** Where one question off a paper stands: not had a go, still wrong, or put right. */
+export type SeTestState = 'todo' | 'wrong' | 'right'
+
+/**
+ * Every question on a test, by his LATEST answer to it (§24u) — never by how
+ * many goes it took. A question he missed on the paper, missed again here and
+ * then got is `right`, because that is what putting it right looks like.
+ */
+export function seTestStanding(test: SeTest, history: SeAnswer[]): Record<string, SeTestState> {
+  const latest = new Map<string, SeAnswer>()
+  for (const a of history) if (a.subtopicId === test.id) latest.set(a.id, a)
+  const out: Record<string, SeTestState> = {}
+  for (const q of test.questions) {
+    const a = latest.get(q.id)
+    out[q.id] = !a ? 'todo' : a.right ? 'right' : 'wrong'
+  }
+  return out
+}
+
+/**
+ * What a ▶️ on the test card should deal, in paper order.
+ *
+ * Right once and it is off the pile for good, same rule as 🔁 Review (§24v) —
+ * a paper he has cleared is not a paper he has to sit again. When there is
+ * nothing left, this hands back the whole ten: that is the 🔄 re-sit, and it
+ * is the only way a cleared test is ever dealt again.
+ */
+export function seTestLeft(test: SeTest, history: SeAnswer[]): string[] {
+  const standing = seTestStanding(test, history)
+  const left = test.questions.filter((q) => standing[q.id] !== 'right').map((q) => q.id)
+  return left.length ? left : test.questions.map((q) => q.id)
 }
 
 // --- 🔁 Review (§24v) ---------------------------------------------------------

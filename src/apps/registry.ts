@@ -367,6 +367,10 @@ export const APPS: AppDef[] = [
       // BEFORE one, and the page Dad opens to use the same five words.
       { id: 'tips', label: 'How to', icon: '🧭' },
       { id: 'lesson', label: 'Lesson', icon: '📘' },
+      // §24ad — the real test papers, and the questions on them he got wrong
+      // or left blank. Its own URL because a test is not a chapter of the
+      // year and does not belong anywhere in the year's map.
+      { id: 'tests', label: 'Tests', icon: '📝' },
       // §24v — his own mistakes, by chapter, on demand. His, not Dad's: it is
       // the one retry route he does not have to be let through.
       { id: 'review', label: 'Review', icon: '🔁' },
@@ -378,6 +382,9 @@ export const APPS: AppDef[] = [
       // parent-only: it is the one page in the app that shows the answer key.
       { id: 'helping', label: 'Helping', icon: '🤝' },
       { id: 'report', label: 'Report', icon: '📊' },
+      // §24ad — the same papers, with the answer key and what to say about
+      // each miss at the kitchen table. Parent-only by render.
+      { id: 'tests', label: 'Tests', icon: '📝' },
       { id: 'subjects', label: 'The year', icon: '📚' },
       // §24ab — the same plan on Dad's side. Helping him with different words
       // to the ones the app taught him is how a boy ends up with two methods.

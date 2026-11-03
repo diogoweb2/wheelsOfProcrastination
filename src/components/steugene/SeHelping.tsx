@@ -114,7 +114,9 @@ export function SeHelping() {
       <div className="h1">🤝 Helping him</div>
       <p className="muted" style={{ marginBottom: 12 }}>
         {where?.subtopic.emoji} {where?.subtopic.title}
-        {run.fix && ' — mistakes to fix'} · card {run.pos + 1} of {run.blockIds.length} ·{' '}
+        {/* §24ad — a test run is `fix` too, but it is a paper, not a pile. */}
+        {run.fix && (run.test ? ' — putting it right' : ' — mistakes to fix')} · card {run.pos + 1} of{' '}
+        {run.blockIds.length} ·{' '}
         {run.answers.length ? `${right}/${run.answers.length} right so far` : 'nothing answered yet'}
       </p>
 
@@ -198,7 +200,12 @@ function Line({ a }: { a: SeAnswer }) {
 
 // --- the card he is on -------------------------------------------------------
 
-function HelpCard({ block, given }: { block: SeBlock; given?: SeAnswer }) {
+/**
+ * One card with its answer key, open. Exported because 📝 Tests (§24ad) shows
+ * Dad exactly this for every question on a paper — one answer key, written
+ * once, so the live lesson and the test notes can never drift apart.
+ */
+export function HelpCard({ block, given }: { block: SeBlock; given?: SeAnswer }) {
   if (block.kind === 'explain') {
     return (
       <div className="card se-help">

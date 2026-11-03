@@ -55,7 +55,8 @@ import {
 import type { SeDesk, SeBlock } from '../steugene/types'
 import { packFor } from '../steugene/packs'
 import { SE_WARM_INTRO, seAvailable, seCustomOrder, seFixGroups, seLockLeft, sePlanLesson, seReviewPlan, seTopUp, seWarmCount, seWarmUp, seWithChecks } from '../logic/steugeneLesson'
-import { seAnsweredGroups, seFind, seReviewGroups } from '../logic/steugene'
+import { seAnsweredGroups, seFind, seReviewGroups, seTestLeft } from '../logic/steugene'
+import { seTestById } from '../steugene/tests'
 import { generateSeBlocks } from '../logic/steugeneAi'
 import { SE_HISTORY_CAP } from './storage'
 import {
@@ -450,6 +451,8 @@ interface StoreState {
   seStartReview: (strandId: string) => void
   /** §24w — a lesson he built himself from chapters he has already worked in. */
   seStartCustomReview: (strandIds: string[]) => void
+  /** §24ad — the questions off one real test paper that he has not put right yet. */
+  seStartTest: (testId: string) => void
   /** Picking a lesson back up: step past a card he already answered, so it is never a second go (§24f). */
   seResume: () => void
   /** Add active seconds to the lesson in flight (§24d). Called in batches, never per tick. */
@@ -4317,6 +4320,52 @@ export const useStore = create<StoreState>((set, get) => {
           strands: groups.map((g) => g.strandId),
           custom: true,
           subs: Object.fromEntries(plan.map((b) => [b.id, subs[b.id]])),
+        }
+      })
+    },
+
+    /**
+     * 📝 A test (§24ad): the questions off one real paper he has not put
+     * right yet, in the order they were printed.
+     *
+     * In paper order and not coldest-first like a review, because he sat it
+     * in that order and the thread through it was written to be walked that
+     * way — the borrow move is taught once at question 18 and then wanted
+     * again at 19, 20, 28, 30 and 31b.
+     *
+     * `fix: true` for the two things it already means — no clock and no
+     * top-up from a bench, and a choice re-shuffled because he has seen the
+     * card once (§24f) — and `test` for the name on the header.
+     */
+    seStartTest(testId) {
+      if (get().data.steugene.run?.answers.length) get().seFinish()
+      const { data, seDesk } = get()
+      const test = seTestById(testId)
+      if (!test) return
+      const byId = new Map(
+        seWithChecks(seAvailable(packFor(testId), seGenerated(seDesk, testId))).map((b) => [b.id, b]),
+      )
+      // Each question comes with its lead card, once (§24d) — the picture
+      // that teaches the move, in front of the question that wants it.
+      const blockIds: string[] = []
+      for (const id of seTestLeft(test, data.steugene.history)) {
+        if (!byId.has(id)) continue
+        const lead = byId.get(id)?.lead
+        if (lead && byId.has(lead) && !blockIds.includes(lead)) blockIds.push(lead)
+        blockIds.push(id)
+      }
+      if (!blockIds.length) return
+      commit((d) => {
+        d.steugene.run = {
+          subtopicId: testId,
+          startedAt: Date.now(),
+          targetMinutes: data.steugene.minutes,
+          activeSeconds: 0,
+          blockIds,
+          pos: 0,
+          answers: [],
+          fix: true,
+          test: testId,
         }
       })
     },

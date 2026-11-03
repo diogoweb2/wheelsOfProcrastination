@@ -9,6 +9,7 @@
 //   but it is a content backlog, not a bug, so it reports and moves on.
 import { SE_SUBJECTS, CURRENT_SUBTOPIC, seFind, seAllSubtopics } from '../src/logic/steugene'
 import { WRITTEN_IDS, ensurePack, writtenSubtopics } from '../src/steugene/packs'
+import { SE_TESTS } from '../src/steugene/tests'
 import { SE_LENGTHS, seAvailable, seBlockSeconds, sePlanLesson, seTiles } from '../src/logic/steugeneLesson'
 import { SE_VIDEOS } from '../src/steugene/videoIndex'
 import { collectVideos } from './steugene-video-index.entry'
@@ -73,6 +74,40 @@ export async function audit(verbose = false): Promise<boolean> {
         console.log(`   ${String(m).padStart(2)} min → ${plan.length} cards · ${qs} questions`)
       }
     }
+  }
+
+  // 📝 The tests (§24ad) are hand-written and held to the same bar as the
+  // written year — a broken card on a test paper is worse, if anything: it is
+  // the one place he already knows he got it wrong. They are not on the map
+  // (`seAllSubtopics`), so the loop above never reaches them.
+  for (const test of SE_TESTS) {
+    const list = [...test.pack.core, ...test.pack.extra]
+    const ids = new Set<string>()
+    if (test.pack.subtopicId !== test.id) fail(`${test.id}: its pack is keyed "${test.pack.subtopicId}"`)
+    if (!seFind(test.id)) fail(`${test.id}: not findable — is it in src/steugene/tests/index.ts?`)
+    for (const b of list) {
+      if (ids.has(b.id)) fail(`${test.id}: duplicate block id "${b.id}"`)
+      ids.add(b.id)
+      checkBlock(b, test.id, fail)
+      checkWritten(b, fail)
+      if (b.lead) {
+        const lead = list.find((x) => x.id === b.lead)
+        if (!lead) fail(`${test.id}/${b.id}: lead "${b.lead}" is not in this pack`)
+        else if (lead.kind !== 'explain') fail(`${test.id}/${b.id}: lead "${b.lead}" is a ${lead.kind}`)
+      }
+    }
+    // Every question on the paper has to be a question in the pack, or the
+    // 📝 page counts a miss it can never deal and the card says "9 to put
+    // right" over a run of eight.
+    for (const q of test.questions) {
+      const block = list.find((b) => b.id === q.id)
+      if (!block) fail(`${test.id}: question ${q.no} points at "${q.id}", which is not in its pack`)
+      else if (block.kind !== 'choice' && block.kind !== 'build') fail(`${test.id}/${q.id}: a ${block.kind} is not something he can get right`)
+      if (!q.say.length) fail(`${test.id}/${q.id}: nothing for Dad to say (§24t)`)
+      if (!q.slip.trim()) fail(`${test.id}/${q.id}: no "what went wrong"`)
+    }
+    blocks += list.length
+    console.log(`📝 ${test.title} (${test.on}) — ${test.questions.length} questions off the paper, ${list.length} blocks`)
   }
 
   // 🎬 The shelf's catalogue (§24z) is a COPY of what the packs hold, so it

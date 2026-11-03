@@ -442,3 +442,68 @@ export interface SeVideoRef {
   /** On the bench (`pack.extra`) rather than in the spine (`pack.core`). */
   bench?: boolean
 }
+
+// --- 📝 Tests (§24ad) ---------------------------------------------------------
+
+/**
+ * One question off a real paper that he got wrong or left blank.
+ *
+ * The block itself is an ordinary `SeBlock` in the test's pack — the player
+ * cannot tell a test question from a lesson question, and that is the point.
+ * What this adds is everything the PAPER knows and the pack does not: which
+ * number it was, what he actually wrote, and what to say to him about it.
+ */
+export interface SeTestQ {
+  /** The block id in the test's pack. Permanent, like every other block id. */
+  id: string
+  /** Its number on the paper — "18", "31b", "32a (bonus)". */
+  no: string
+  /** How he lost it. `blank` is "not attempted"; `marks` is right but under-written. */
+  how: 'wrong' | 'blank' | 'marks'
+  /** Verbatim from the paper, when there was anything to read. */
+  put?: string
+  /** The one sentence about what actually went wrong. Shown to both of us. */
+  slip: string
+  /**
+   * Dad's script (§24t): how to say it at the kitchen table, in the app's own
+   * words. Parent-only, because it contains the answer.
+   *
+   * It is written out rather than left to me because helping him in different
+   * words to the ones the app used is how a boy ends up carrying two methods
+   * and trusting neither (§24ab).
+   */
+  say: string[]
+}
+
+/**
+ * One real test, as a section of the app (§24ad).
+ *
+ * `pack` is an ordinary pack keyed by `id`, so every route into a lesson —
+ * the player, the tiles, the walk-throughs, 🤝 Helping, 🔁 Review, the locks —
+ * works on it with no special case. The test is not part of the year's map
+ * (`SE_SUBJECTS`): it is findable by id and invisible to the Subjects tab,
+ * the Finder and the pin, because a test is not a chapter.
+ */
+export interface SeTest {
+  /** `test-math-2`. Also the subtopic id every answer to it is filed under. */
+  id: string
+  /** "Math test 2" — what he and I call it. */
+  title: string
+  /** The day he sat it, `YYYY-MM-DD`. */
+  on: string
+  /** The paper itself: "Online Workbook 7A · Chapter 3 Review/Test". */
+  paper: string
+  /** What the teacher wrote at the bottom, if anything. */
+  score?: string
+  /** The one thread through the misses — what this test is really about. */
+  thread: string
+  /** One line he would recognise, for the report row (§24e). */
+  sample: string
+  /** Plain English, read aloud. */
+  plain: string
+  /** First person, past the finish line (§24r). */
+  can: string
+  /** In paper order — that is the order he sat them and the order he redoes them. */
+  questions: SeTestQ[]
+  pack: SePack
+}

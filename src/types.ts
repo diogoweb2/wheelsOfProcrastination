@@ -1776,6 +1776,16 @@ export interface SeRun {
   strands?: string[]
   /** §24w — he chose the chapters and the length; the pool is everything he has seen. */
   custom?: boolean
+  /**
+   * 📝 §24ad — the test this run is putting right, e.g. `test-math-2`.
+   *
+   * It rides along with `fix: true`, which already means the two things a
+   * test wants (no clock, no top-up from a bench, and a choice re-shuffled
+   * because he has seen the card once already). What this adds is the NAME:
+   * without it the header reads "Math test 2 — mistakes to fix", which is
+   * both wrong and unkind. The paper is the thing, not the mistakes.
+   */
+  test?: string
   /** Block id → the subtopic it belongs to. Only on a review run. */
   subs?: Record<string, string>
 }

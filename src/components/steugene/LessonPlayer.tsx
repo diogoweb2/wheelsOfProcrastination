@@ -233,6 +233,10 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
               : seFind(run.subs?.[block.id] ?? run.subtopicId)?.strand.title}{' '}
             — review · {seFind(run.subs?.[block.id] ?? run.subtopicId)?.subtopic.title}
           </>
+        ) : run.test ? (
+          /* 📝 §24ad — the paper is the thing. "Math test 2 — mistakes to
+             fix" is both wrong (two of these he never attempted) and unkind. */
+          <>📝 {where?.subtopic.title} — putting it right</>
         ) : (
           <>
             {where?.subject.emoji} {where?.subtopic.title}
@@ -1068,7 +1072,7 @@ function LessonResult({ onClose }: { onClose: () => void }) {
   // §24v — on the mistakes review, what he has just done is clear things off
   // his own pile, and that is the number worth saying back to him. A custom
   // review is mostly questions he already had right, so it is not that.
-  const cleared = run?.review && !run.custom ? right : 0
+  const cleared = (run?.review && !run.custom) || run?.test ? right : 0
 
   useEffect(() => {
     stopSpeaking()
@@ -1086,7 +1090,9 @@ function LessonResult({ onClose }: { onClose: () => void }) {
             ? run.custom && (run.strands?.length ?? 1) > 1
               ? `🎛️ Your own review — ${run.strands?.length} chapters`
               : `${run.custom ? '🎛️' : '🔁'} ${seFind(run.subtopicId)?.strand.title} — review`
-            : `${where?.subtopic.title}${run?.fix ? ' — mistakes to fix' : ''}`}
+            : run?.test
+              ? `📝 ${where?.subtopic.title} — putting it right`
+              : `${where?.subtopic.title}${run?.fix ? ' — mistakes to fix' : ''}`}
         </p>
         <div className="se-result__bar">
           <div style={{ width: `${pct}%` }} />
@@ -1113,9 +1119,11 @@ function LessonResult({ onClose }: { onClose: () => void }) {
         <div className="card">
           <div className="h1" style={{ fontSize: 18 }}>📋 Show Dad these</div>
           <p className="muted" style={{ marginBottom: 10 }}>
-            {run?.review
-              ? 'These went back on your review pile. Get Dad to explain one, then try it again whenever you like.'
-              : 'Ask Dad to go through these with you. They are on your 🔁 Review pile whenever you want another go.'}
+            {run?.test
+              ? 'Still on the paper. Dad has the notes for every one of these on his 📝 Tests page — ask him for one, then have another go whenever you like.'
+              : run?.review
+                ? 'These went back on your review pile. Get Dad to explain one, then try it again whenever you like.'
+                : 'Ask Dad to go through these with you. They are on your 🔁 Review pile whenever you want another go.'}
           </p>
           {wrong.map((m, i) => (
             <div key={i} className="se-miss">
