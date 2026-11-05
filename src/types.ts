@@ -376,7 +376,11 @@ export interface QuizTestRecord {
   topicId: string
   day: string // YYYY-MM-DD
   official: boolean // true = parent-launched, counts for the Devil Fruit
-  /** The warm-up round on already-conquered topics that gates this test. Pass mark 70%; `topicId` is the test it guards. */
+  /**
+   * A warm-up round on already-conquered topics. Pass mark 75%; `topicId` is the
+   * test it guards — or `_warmup` (§14c) when he ran the round on its own, for
+   * practice, and it guards nothing.
+   */
   review?: boolean
   results: { qid: string; correct: boolean }[]
   scorePct: number

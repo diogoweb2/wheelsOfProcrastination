@@ -205,7 +205,7 @@ import {
 import { buildEntries, eligibleTasks, isAvailableOn, isRequiredOn, missedSince, pickWeighted, studyLockedIds } from '../logic/wheel'
 import { MAX_PASSES, pickToday, weekOf } from '../logic/today'
 import { newBadges } from '../logic/badges'
-import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, reviewBreakdown, prizeAllowance, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat, type Prize, type PrizeCatalog } from '../logic/quiz'
+import { DEFAULT_PRIZES, PASS_PCT, REVIEW_PASS_PCT, WARMUP_KEEP, WARMUP_TOPIC_ID, reviewBreakdown, prizeAllowance, nextTopicToUnlock, pickDailyQuestion, prizesFor, qotdPenalty, qotdReward, syncQuizTasks, syncTopicUnlocks, trainingReward, updatedStat, type Prize, type PrizeCatalog } from '../logic/quiz'
 import { flyBerries } from '../logic/fx'
 import { ACCOUNT_IDS, BOUNCE_MULT, DEFAULT_CONVERTER, MAX_BILLS, MAX_BILL_DESC, applyCrash, bankBills, crashWorthwhile, fmt$, newBill, pickRecoverDay, pushTxn, round2, settleBills, simulateBank, type BankSimEvent } from '../logic/bank'
 import { setMuted } from '../audio'
@@ -558,11 +558,18 @@ interface StoreState {
    */
   finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
   /**
-   * Close the warm-up review round that gates an official test (70% to pass).
+   * Close the warm-up review round that gates an official test (75% to pass).
    * A fail ends the whole attempt: the new topic is never sat, and Dad's banner
    * carries the per-topic tally instead of a score.
    */
   finishReviewTest: (targetId: string, topicId: string, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
+  /**
+   * §14c — a warm-up round he ran on his own, for practice. Filed like any
+   * review (pass mark 75%) but `official: false` and under `WARMUP_TOPIC_ID`,
+   * so it never counts for a Devil Fruit and never touches the exclusion list
+   * of a real test's warm-up.
+   */
+  finishWarmupTest: (targetId: string, results: { qid: string; correct: boolean }[]) => QuizTestRecord
 
   // --- remote final tests: Dad authorises, another grown-up invigilates on Ben's device ---
   /** Admin: allow ONE official test on the target's device, guarded by a 4-digit code. */
@@ -2436,6 +2443,33 @@ export const useStore = create<StoreState>((set, get) => {
           reviewBreakdown: reviewBreakdown(get().quizBank, results),
         })
       }
+      return record
+    },
+
+    finishWarmupTest(targetId, results) {
+      const scorePct = results.length === 0 ? 0 : Math.round((results.filter((r) => r.correct).length / results.length) * 100)
+      const record: QuizTestRecord = {
+        id: crypto.randomUUID(),
+        topicId: WARMUP_TOPIC_ID,
+        day: dayKey(),
+        official: false,
+        review: true,
+        results,
+        scorePct,
+        passed: scorePct >= REVIEW_PASS_PCT,
+      }
+      commitFor(targetId, (d) => {
+        d.quiz.tests.push(record)
+        // Keep only the last few of these: the 60-row cap below is shared with
+        // his official tests, and a round he can run at will would otherwise
+        // push every real result out of his record.
+        const mine = d.quiz.tests.filter((t) => t.review && t.topicId === WARMUP_TOPIC_ID)
+        if (mine.length > WARMUP_KEEP) {
+          const drop = new Set(mine.slice(0, mine.length - WARMUP_KEEP).map((t) => t.id))
+          d.quiz.tests = d.quiz.tests.filter((t) => !drop.has(t.id))
+        }
+        if (d.quiz.tests.length > 60) d.quiz.tests = d.quiz.tests.slice(-60)
+      })
       return record
     },
 

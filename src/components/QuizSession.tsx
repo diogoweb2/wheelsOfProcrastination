@@ -1,12 +1,18 @@
-// The quiz player. Three modes:
+// The quiz player. Four modes:
 //  - training:    Ben practices; instant feedback, fun facts, Berries (once/question/day, half after first mastery)
 //  - simulation:  Ben rehearses a final test; result only at the end, no rewards
 //  - official:    parent-launched final test; counts for the topic checkmark + Devil Fruit
+//  - warmup:      Ben rehearses the WARM-UP ROUND alone (§14c), across every sea he has conquered
 //
 // An official test on someone who has already conquered topics opens with a
 // WARM-UP REVIEW ROUND on that old material (see buildReviewTest): shorter,
-// 70% to pass, and a miss ends the run before the new topic is ever sat — the
+// 75% to pass, and a miss ends the run before the new topic is ever sat — the
 // point is that conquered seas stay fresh instead of fading away.
+//
+// `warmup` mode is that same round with no test behind it: same pool, same
+// length, same pass mark, nothing at stake, and — unlike the gating round — it
+// shows him every answer afterwards, because practice that hides the answer
+// teaches nothing.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
@@ -30,6 +36,8 @@ import {
   reviewTopicIds,
   shuffle,
   topicById,
+  warmupAttempts,
+  warmupTopicIds,
 } from '../logic/quiz'
 import { sfx } from '../audio'
 import { lessonById } from '../quiz/lessons'
@@ -37,7 +45,7 @@ import { canSpeak, speak, stopSpeaking } from '../lib/speak'
 import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
 
-export type QuizMode = 'training' | 'simulation' | 'official'
+export type QuizMode = 'training' | 'simulation' | 'official' | 'warmup'
 
 /** What the player actually gave, so feedback can show it back to them. */
 export interface Given {
@@ -49,6 +57,7 @@ export interface Given {
 
 interface Props {
   mode: QuizMode
+  /** The topic being trained or tested. In `warmup` mode it is `WARMUP_TOPIC_ID`: the round spans every conquered sea, so no one topic owns it. */
   topicId: string
   /** Whose data this session reads/writes: the active profile, or Ben when the admin runs his official test. */
   targetId: string
@@ -62,7 +71,8 @@ interface Props {
 }
 
 export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onClose }: Props) {
-  const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest } = useStore()
+  const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest, finishWarmupTest } = useStore()
+  const isWarmup = mode === 'warmup'
   const topic = topicById(topicId)
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
 
@@ -72,6 +82,14 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // ---- test plan (fixed once per session) ----
   const [testPlan] = useState<QuizQuestion[]>(() => {
     if (mode === 'training') return []
+    // §14c — a standalone warm-up is the gating round with no test behind it:
+    // the same builder over every conquered sea, minus last rehearsal's
+    // questions, so running it twice in a row is two different rounds.
+    if (isWarmup) {
+      if (!target) return []
+      const exclude = warmupAttempts(target).at(-1)?.results.map((r) => r.qid) ?? []
+      return buildReviewTest(quizBank, stats, warmupTopicIds(target, targetId, quizBank), exclude)
+    }
     const exclude = mode === 'official' && target ? (lastOfficialAttempt(target, topicId)?.results.map((r) => r.qid) ?? []) : []
     return buildFinalTest(pool, stats, exclude).questions
   })
@@ -139,7 +157,9 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     }
 
     {
-      const record = finishQuizTest(targetId, topicId, mode === 'official', results, authId)
+      const record = isWarmup
+        ? finishWarmupTest(targetId, results)
+        : finishQuizTest(targetId, topicId, mode === 'official', results, authId)
       setFinished(record)
       if (record.passed) {
         sfx.bigWin()
@@ -209,7 +229,8 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   }
 
   // ---- guards ----
-  if (!topic || pool.length === 0) {
+  // a warm-up belongs to no single topic, so neither guard below applies to it
+  if (!isWarmup && (!topic || pool.length === 0)) {
     return (
       <Full onClose={onClose} title="Quiz">
         <p className="muted">No questions in this topic yet. The crew is still writing them!</p>
@@ -218,8 +239,12 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   }
   if (mode !== 'training' && plan.length === 0) {
     return (
-      <Full onClose={onClose} title="Final Test">
-        <p className="muted">Couldn’t build a test — the question bank looks empty.</p>
+      <Full onClose={onClose} title={isWarmup ? '🧠 Warm-up rehearsal' : 'Final Test'}>
+        <p className="muted">
+          {isWarmup
+            ? 'Nothing to warm up on yet — conquer a sea in a final test and it starts coming back here.'
+            : 'Couldn’t build a test — the question bank looks empty.'}
+        </p>
       </Full>
     )
   }
@@ -238,6 +263,11 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       />
     )
   }
+
+  // Below here `topic` is set for every mode but the §14c warm-up, which spans
+  // every conquered sea and so belongs to no single one.
+  const topicTitle = topic?.title ?? 'the old seas'
+  const topicEmoji = topic?.emoji ?? '🧠'
 
   // ---- warm-up review verdict ----
   if (stage === 'review-passed' && reviewRecord) {
@@ -261,7 +291,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
               setStage('test')
             }}
           >
-            ⚔️ Start the {topic.title} final test
+            ⚔️ Start the {topicTitle} final test
           </button>
         </div>
       </Full>
@@ -269,18 +299,27 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   }
 
   if (stage === 'review-failed' && reviewRecord) {
-    return <ReviewFailed record={reviewRecord} bank={quizBank} topicTitle={topic.title} onClose={onClose} />
+    return <ReviewFailed record={reviewRecord} bank={quizBank} topicTitle={topicTitle} onClose={onClose} />
   }
 
   // ---- results screen (tests) ----
   if (finished) {
-    return <TestResults record={finished} plan={plan} mode={mode} onClose={onClose} onRead={(id) => setReading({ lessonId: id, then: 'back' })} />
+    return (
+      <TestResults
+        record={finished}
+        plan={plan}
+        mode={mode}
+        bank={quizBank}
+        onClose={onClose}
+        onRead={(id) => setReading({ lessonId: id, then: 'back' })}
+      />
+    )
   }
 
   // ---- training: nothing due (cleared this session, or all resting) ----
   if (mode === 'training' && (trainingDone || !current)) {
     return (
-      <Full onClose={onClose} title={`${topic.emoji} Training`}>
+      <Full onClose={onClose} title={`${topicEmoji} Training`}>
         <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: 'var(--gold)' }}>
           <div style={{ fontSize: 56 }}>🍖😴</div>
           <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>NICE WORK, PIRATE!</div>
@@ -312,11 +351,13 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const header =
     mode === 'training'
       ? preview
-        ? `${topic.emoji} Training (preview — nothing saved)`
-        : `${topic.emoji} Training · +🪙${sessionEarned}`
+        ? `${topicEmoji} Training (preview — nothing saved)`
+        : `${topicEmoji} Training · +🪙${sessionEarned}`
       : stage === 'review'
         ? `🧠 Warm-up review · ${results.length + 1}/${plan.length}`
-        : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
+        : isWarmup
+          ? `🧠 Mock Warm-up · ${results.length + 1}/${plan.length}`
+          : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
 
   return (
     <Full onClose={onClose} title={header} confirmClose={mode !== 'training' && results.length > 0}>
@@ -329,7 +370,13 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       )}
       {stage === 'review' && (
         <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
-          Seas you already conquered — clear {REVIEW_PASS_PCT}% of these and the {topic.title} final test opens.
+          Seas you already conquered — clear {REVIEW_PASS_PCT}% of these and the {topicTitle} final test opens.
+        </p>
+      )}
+      {isWarmup && (
+        <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
+          Every sea you have conquered, mixed together. Nothing at stake — {REVIEW_PASS_PCT}% is what the real warm-up
+          will want.
         </p>
       )}
       {mode === 'training' && (
@@ -443,27 +490,61 @@ function ReviewFailed({ record, bank, topicTitle, onClose }: { record: QuizTestR
 
 // --- results ---------------------------------------------------------------
 
-function TestResults({ record, plan, mode, onClose, onRead }: { record: QuizTestRecord; plan: QuizQuestion[]; mode: QuizMode; onClose: () => void; onRead: (lessonId: string) => void }) {
+function TestResults({ record, plan, mode, bank, onClose, onRead }: { record: QuizTestRecord; plan: QuizQuestion[]; mode: QuizMode; bank: QuizQuestion[]; onClose: () => void; onRead: (lessonId: string) => void }) {
   const byId = new Map(plan.map((q) => [q.id, q]))
   const right = record.results.filter((r) => r.correct).length
+  const isWarmup = mode === 'warmup'
+  // §14c — the rehearsal's own verdict: which seas leaked, weakest first. The
+  // gating round gives Dad this tally and gives Ben nothing; here it is his,
+  // alongside every answer, because that is the whole point of a rehearsal.
+  const fog = isWarmup ? reviewBreakdown(bank, record.results) : []
   return (
-    <Full onClose={onClose} title={mode === 'official' ? '🎓 Final Test — result' : '🧪 Mock Final Test — result'}>
+    <Full
+      onClose={onClose}
+      title={isWarmup ? '🧠 Mock Warm-up — result' : mode === 'official' ? '🎓 Final Test — result' : '🧪 Mock Final Test — result'}
+    >
       <div className="card" style={{ textAlign: 'center', marginBottom: 14, borderColor: record.passed ? 'var(--green)' : 'var(--orange)' }}>
-        <div style={{ fontSize: 56 }}>{record.passed ? '🏴‍☠️' : '⛈️'}</div>
+        <div style={{ fontSize: 56 }}>{record.passed ? (isWarmup ? '🧠⚡' : '🏴‍☠️') : isWarmup ? '🌫️' : '⛈️'}</div>
         <div style={{ fontSize: 44, fontWeight: 900, color: record.passed ? 'var(--green)' : 'var(--orange)' }}>{record.scorePct}%</div>
         <div className="muted" style={{ fontWeight: 800 }}>
-          {right}/{record.results.length} correct · pass mark {PASS_PCT}%
+          {right}/{record.results.length} correct · pass mark {isWarmup ? REVIEW_PASS_PCT : PASS_PCT}%
         </div>
         <p style={{ marginTop: 10, fontWeight: 800 }}>
           {record.passed
-            ? mode === 'official'
-              ? 'PASSED! The topic is conquered — check your treasure! 🍇'
-              : 'You would PASS the real one. Tell Dad you’re ready! 💪'
-            : mode === 'official'
-              ? 'Not this time — train a bit more and try again another day. Luffy lost to Crocodile twice, remember?'
-              : 'Almost! A little more training and the flag is yours.'}
+            ? isWarmup
+              ? 'Old seas still yours! The warm-up before your next final test won’t catch you out. 🧠'
+              : mode === 'official'
+                ? 'PASSED! The topic is conquered — check your treasure! 🍇'
+                : 'You would PASS the real one. Tell Dad you’re ready! 💪'
+            : isWarmup
+              ? 'Fog on some of the old seas — and better found here than in the real warm-up, where it shuts the final test. Train them and run this again. 💪'
+              : mode === 'official'
+                ? 'Not this time — train a bit more and try again another day. Luffy lost to Crocodile twice, remember?'
+                : 'Almost! A little more training and the flag is yours.'}
         </p>
       </div>
+
+      {fog.length > 0 && (
+        <>
+          <div className="h2">🗺️ Sea by sea</div>
+          {fog.map((r) => {
+            const t = topicById(r.topicId)
+            const pct = Math.round((r.right / r.total) * 100)
+            const ok = pct >= REVIEW_PASS_PCT
+            return (
+              <div key={r.topicId} className="card" style={{ marginBottom: 8, borderColor: ok ? 'var(--green)' : 'var(--red)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ fontSize: 22 }}>{t?.emoji ?? '📘'}</div>
+                  <div style={{ flex: 1, fontWeight: 900, fontSize: 15 }}>{t?.title ?? r.topicId}</div>
+                  <div style={{ fontWeight: 900, color: ok ? 'var(--green)' : 'var(--red)' }}>
+                    {r.right}/{r.total} · {pct}%
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
 
       <div className="h2">📋 Review — where the points escaped</div>
       {record.results.map((r) => {

@@ -9,12 +9,19 @@ import { PARENT_ID } from '../store/storage'
 import type { AppData, QuizLesson, QuizQuestion } from '../types'
 import {
   QUIZ_TRACKS,
+  REVIEW_PASS_PCT,
+  WARMUP_KEEP,
+  WARMUP_TOPIC_ID,
   activeQuestions,
   duePool,
   isFresh,
   lastOfficialAttempt,
   prerequisiteOf,
+  reviewSize,
+  topicById,
   topicsFor,
+  warmupAttempts,
+  warmupTopicIds,
   type QuizTopic,
 } from '../logic/quiz'
 import { lessonsForTopic } from '../quiz/lessons'
@@ -144,6 +151,15 @@ export function QuizScreen({
         />
       )}
 
+      {tab === 'warmup' && (
+        <WarmupShelf
+          data={data}
+          ownerId={activeProfileId}
+          bank={quizBank}
+          onStart={() => setSession({ mode: 'warmup', topicId: WARMUP_TOPIC_ID })}
+        />
+      )}
+
       {tab === 'study' && <StudyShelf topics={topics} bank={quizBank} onOpen={setStudy} />}
 
       {tab === 'progress' && <ProgressBoard topics={topics} data={data} bank={quizBank} />}
@@ -244,6 +260,101 @@ function SchoolShelf({
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// --- Warm-up tab: the gating round, rehearsed on its own (§14c) ---------------
+
+/**
+ * The warm-up review, with no final test behind it.
+ *
+ * Every official test opens with a round on the seas he already conquered, and
+ * missing it shuts the test (§14) — which made the one round that can cost him
+ * a Devil Fruit the only one he could never practise. This is that round:
+ * the same pool, the same length, the same 75%, nothing at stake, and a
+ * different draw every time (last rehearsal's questions are excluded, and the
+ * mix is re-shuffled per topic).
+ *
+ * It pays no Berries — a mock never does — but the answers still count towards
+ * each question's record, so the weak ones he meets here are the weak ones the
+ * real round will stop picking.
+ */
+function WarmupShelf({
+  data,
+  ownerId,
+  bank,
+  onStart,
+}: {
+  data: AppData
+  ownerId: string
+  bank: QuizQuestion[]
+  onStart: () => void
+}) {
+  const topicIds = warmupTopicIds(data, ownerId, bank)
+  const runs = [...warmupAttempts(data)].reverse().slice(0, WARMUP_KEEP)
+  const size = reviewSize(topicIds.length)
+
+  return (
+    <div>
+      <div className="h2" style={{ marginBottom: 2 }}>🧠 Mock Warm-up</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        Every final test opens with a warm-up on the seas you already conquered — miss it and the test never starts.
+        This is that round on its own: a new mix every time, no Berries, nothing to lose.
+      </p>
+
+      {topicIds.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 44 }}>🧠</div>
+          <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+            Nothing to warm up on yet. Conquer a sea in a final test and it starts coming back here, so it never goes
+            foggy.
+          </p>
+        </div>
+      ) : (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 900, fontSize: 16 }}>
+            {size} question{size === 1 ? '' : 's'} · {REVIEW_PASS_PCT}% to clear
+          </div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Drawn from {topicIds.length} conquered sea{topicIds.length === 1 ? '' : 's'}, hopping between them — about
+            60% ones you are strong at, 40% the shaky ones.
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+            {topicIds.map((id) => {
+              const t = topicById(id)
+              return (
+                <span key={id} className="chip">
+                  {t?.emoji ?? '📘'} {t?.title ?? id}
+                </span>
+              )
+            })}
+          </div>
+          <button className="btn" style={{ marginTop: 14 }} onClick={() => { sfx.click(); onStart() }}>
+            ⚡ Start the warm-up
+          </button>
+        </div>
+      )}
+
+      {runs.length > 0 && (
+        <>
+          <div className="h2">📈 Your last runs</div>
+          {runs.map((r) => (
+            <div key={r.id} className="card" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ flex: 1, fontWeight: 800, fontSize: 14 }}>
+                {r.results.filter((x) => x.correct).length}/{r.results.length} right
+              </div>
+              <div className="muted" style={{ fontSize: 12 }}>{r.day}</div>
+              <span
+                className="chip"
+                style={r.passed ? { background: 'var(--green)', color: '#10230a' } : { background: 'var(--orange)', color: '#1a1000' }}
+              >
+                {r.scorePct}%
+              </span>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   )
 }

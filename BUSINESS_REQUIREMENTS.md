@@ -384,7 +384,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - **Mix** — ~60% questions he's strong at + ~40% weak or unseen ones (`REVIEW_HARD_SHARE`): a warm-up he cannot fail proves nothing. Last round's questions are excluded.
   - **Pass = 75%.** Clear it and the real final test starts right after. **Miss it and the run ends there** — the new topic is never sat, and the single authorisation is spent.
   - A miss shows **no answers** — only a per-topic tally, weakest first (`Canada Geography 4/8 · 50%`), i.e. what to go study. Dad gets the same tally in his banner + push.
-  - A **conquered topic stays trainable in the Academy** (it only leaves the wheel), so there's always a way to blow the fog off before the next test.
+  - A **conquered topic stays trainable in the Academy** (it only leaves the wheel), so there's always a way to blow the fog off before the next test. And the round itself can be **rehearsed on demand** — see §14c.
 - **Remote final test (a grown-up beside him, not Dad)** — shared `app/finalTests` doc, live-synced both ways:
   - Diogo authorises ONE run from the Admin desk: he picks a **4-digit code** and writes a **note for the grown-up** ("~15 min, no help, no phone"). Only one open authorisation per topic — a new one replaces it. He can withdraw it while it's unused.
   - Ben's device pops it up immediately: **do it now**, or **later** → a red top banner with **Start** nags until he does. Push notification reaches a closed app.
@@ -410,6 +410,18 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **Illustrations cost nothing**: questions point `image` at stickers already shipped in `public/stickers/` (the album's art). No new files (see CLAUDE.md on image storage). The picture drifts in and keeps breathing (`.quiz-illus`), the subject emoji bobs and the card carries a slow chalk-dust sheen (`.school-card`) — all disabled under `prefers-reduced-motion`.
 - **No live unit** right now. The first one, `asiad-vocab` (*"All Summer in a Day"* vocabulary), was retired on 2026-10-30 when the unit ended: topic and seed deleted from the code, its 50 questions flagged `removed` in the bank (not deleted, so an out-of-date client cannot re-seed them), and the id dropped from Ben's unlocked list. The tab shows its empty state until the next worksheet arrives.
 - **Adding the next unit**: one seed file in `src/quiz/`, one line in `ALL_SEEDS` (`src/store/cloud.ts`), one entry in `QUIZ_TOPICS` with `owner: 'ben'`, `track: 'school'`, `school: true`, `optionCount: 3`. It auto-unlocks once and appears on the School tab; nothing else to register.
+
+## 14c. Mock Warm-up (the 🧠 tab of the Quiz app, `/academy/warmup`)
+
+**The round that gates every final test, rehearsable on its own.** Every official test opens with a warm-up review on the seas he already conquered, and missing it shuts the test and spends the authorisation (§14) — which made the one round that can cost him a Devil Fruit the only one he could never practise. Now he can run it whenever he likes.
+
+- **Its own URL** (§1c): `/academy/warmup`. It belongs to no single topic, so it could not live on a topic card.
+- **The same round, not a lighter one.** Same pool (`warmupTopicIds` = every conquered topic he owns that still has questions), same length (`reviewSize(n)` — 1 sea → 14, 2 → 21, 3 → 25, 4 → 27), same ~60/40 strong-to-shaky mix, same **75% to clear**. A rehearsal at an easier setting rehearses nothing.
+- **Different every time.** The topic shares are re-shuffled per run and **last rehearsal's questions are excluded** (`warmupAttempts`), so two runs back to back are two different rounds. Topics with an empty bank are dropped before the split, so the count the card promises is the count he gets.
+- **Nothing at stake, and it shows its work.** No Berries (a mock never pays), no Devil Fruit, no effect on any topic's lock. Unlike the gating round — which deliberately reveals **no answers**, because that material has to be earned back by studying — the rehearsal shows him **every answer plus the per-topic tally**, weakest first, with the 📖 lesson and 🏫 St. Eugene buttons on each miss. Hiding the answer in a practice round teaches nothing.
+- **The misses go straight back into training.** Answers count towards each question's record like any other (`updatedStat`): a right one rests for its streak's worth of days, a wrong one has its due date cleared and is back in tomorrow's training rotation. So the fog he finds here is the fog his daily practice picks up next.
+- **Filed as `review: true`, `official: false`, under `topicId: '_warmup'`** (`WARMUP_TOPIC_ID`, `finishWarmupTest`). The pseudo-topic matters: `lastReviewAttempt` keys the official exclusion list off `topicId`, so a rehearsal filed under a real topic would start eating the questions the gating round before that test is allowed to ask. The Progress tab's final-test record is unaffected (it filters `official && !review`); the Warm-up tab shows his **last five runs**, and only those five are kept (`WARMUP_KEEP`) — `quiz.tests` is capped at 60 rows, and a round he can run at will would otherwise push every real test result, and the retry-exclusion list with it, out of his record.
+- **Empty state is the honest one**: with no conquered topics there is no warm-up to rehearse, and the card says so rather than inventing a pool.
 
 ## 15. Store pages & Treasures (prizes)
 

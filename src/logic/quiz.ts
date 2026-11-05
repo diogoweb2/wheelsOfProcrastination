@@ -1,5 +1,5 @@
 // Grand Line Academy — quiz rules. Keep in sync with BUSINESS_REQUIREMENTS.md §14–15.
-import type { AppData, QuizQuestion, QuizQuestionType, QuizState, QuizStat } from '../types'
+import type { AppData, QuizQuestion, QuizQuestionType, QuizState, QuizStat, QuizTestRecord } from '../types'
 import { addDays, dayKey, daysUntil } from './dates'
 
 // --- topics ----------------------------------------------------------------
@@ -970,4 +970,46 @@ export function lastReviewAttempt(data: AppData, topicId: string) {
     if (t.review && t.topicId === topicId) return t
   }
   return null
+}
+
+// --- the standalone warm-up (§14c) ------------------------------------------
+
+/**
+ * The pseudo-topic every standalone warm-up is filed under.
+ *
+ * It guards no test, so it must not borrow a real topic's id: `lastReviewAttempt`
+ * keys the official exclusion list off `topicId`, and a rehearsal filed under
+ * `g7-sci-a` would start eating the questions the real warm-up before that test
+ * is allowed to ask.
+ */
+export const WARMUP_TOPIC_ID = '_warmup'
+
+/**
+ * The whole pool a standalone warm-up draws on: every topic he has officially
+ * conquered that still has questions in the bank.
+ *
+ * Same pool as the real thing (`reviewTopicIds`) with nothing held back, since
+ * there is no test coming that one of them has to be excluded for. Topics with
+ * an empty bank are dropped here rather than inside `buildReviewTest`, so the
+ * count the screen promises is the count he actually gets.
+ */
+export function warmupTopicIds(data: AppData, ownerId: string, bank: QuizQuestion[]): string[] {
+  return reviewTopicIds(data, ownerId, '').filter((id) => activeQuestions(bank, id).length > 0)
+}
+
+/**
+ * How many standalone warm-ups stay on his record.
+ *
+ * `quiz.tests` is capped at 60 rows to keep the blob small, and that cap is
+ * shared with his official final tests. A round he can run as often as he likes
+ * would quietly push every real test result out of the window — and with them
+ * the "last final test" line on Progress and the exclusion list that stops a
+ * retry re-asking the questions he just failed. So these are pruned to the five
+ * the Warm-up tab actually shows, and the cap never sees them pile up.
+ */
+export const WARMUP_KEEP = 5
+
+/** Every standalone warm-up he has run, oldest first. */
+export function warmupAttempts(data: AppData): QuizTestRecord[] {
+  return data.quiz.tests.filter((t) => t.review && t.topicId === WARMUP_TOPIC_ID)
 }

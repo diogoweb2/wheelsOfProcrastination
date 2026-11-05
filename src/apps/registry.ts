@@ -108,6 +108,10 @@ export const APPS: AppDef[] = [
       // §14b — school quizzes are their own category, so they get their own URL
       // (/academy/school) rather than a section buried in the topic list.
       { id: 'school', label: 'School', icon: '🏫' },
+      // §14c — the warm-up round on its own, so he can rehearse the thing that
+      // gates every final test. Its own URL (/academy/warmup): it belongs to no
+      // single topic, so it cannot live on a topic card.
+      { id: 'warmup', label: 'Warm-up', icon: '🧠' },
       { id: 'study', label: 'Study', icon: '📖' },
       { id: 'progress', label: 'Progress', icon: '📊' },
     ],
