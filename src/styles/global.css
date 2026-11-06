@@ -1175,6 +1175,63 @@ input, select { font-family: inherit; }
   .quiz-illus { animation: none; }
 }
 
+/* --- 📚 Subjects (§14d) -------------------------------------------------------
+   A subject is a big painted card; tapping it unfolds its chapters, numbered,
+   in teaching order. The ▶ row is the one place to start. */
+.subject-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  font-family: var(--font);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 30%);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+}
+.subject-card:active { transform: scale(0.98); }
+.subject-card__emoji { font-size: 34px; line-height: 1; animation: float 3.4s ease-in-out infinite; }
+.subject-card__chev { font-size: 22px; font-weight: 900; transition: transform 0.2s; }
+.subject-card__chev--open { transform: rotate(90deg); }
+.subject-strand { margin-top: 10px; animation: quiz-illus-in 0.3s ease-out; }
+.subject-strand__title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; margin: 0 4px 6px; }
+.subject-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.subject-row--next { border-color: var(--gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent); }
+.subject-row__n {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--yellow);
+  color: #3a2000;
+  font-size: 12px;
+  font-weight: 900;
+}
+.subject-row__emoji { font-size: 24px; flex-shrink: 0; }
+.subject-row .quiz-bar { margin-top: 6px; }
+
+/* The miss card's "here is the idea" box (§14d) */
+.miss-idea {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--blue) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue) 40%, transparent);
+}
+.miss-idea__head { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 13px; margin-bottom: 6px; }
+.miss-idea__line { font-size: 14px; line-height: 1.4; margin: 0 0 4px; }
+.miss-idea__line:last-child { margin-bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .subject-card__emoji,
+  .subject-strand { animation: none; }
+}
+
 /* prize logos spin like the Luffy tab icon */
 .prize-logo { object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; flex-shrink: 0; }
 
@@ -7301,3 +7358,62 @@ input, select { font-family: inherit; }
   font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: var(--yellow);
 }
 .se-testq__say p { margin: 7px 0 0; font-size: 14.5px; line-height: 1.45; }
+
+/* ---------- 📈 Usage (§26): the analytics report, Diogo only ---------- */
+.use-window {
+  font-size: 11px; font-weight: 900; letter-spacing: 0.4px; text-transform: uppercase;
+  color: var(--muted); margin: 2px 0 8px;
+}
+.use-row { padding: 7px 2px; }
+.use-row-top { display: flex; align-items: baseline; gap: 8px; }
+.use-row-name {
+  flex: 1; min-width: 0; font-size: 13px; font-weight: 800;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.use-row-val { flex: none; font-size: 12px; font-weight: 900; color: var(--muted); }
+.use-bar { height: 9px; border-radius: 6px; background: var(--bg2); overflow: hidden; margin-top: 5px; }
+.use-bar i { display: block; height: 100%; border-radius: 6px; }
+.use-row-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 5px; }
+.use-split { display: inline-flex; gap: 5px; flex-wrap: wrap; }
+.use-who {
+  font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.3px;
+  padding: 2px 6px; border-radius: 999px; background: var(--bg2); color: var(--muted);
+}
+.use-who--diogo { background: var(--blue-dark); color: #fff; }
+.use-who--ben { background: var(--green-dark); color: #fff; }
+.use-who--locked { background: var(--line); color: var(--muted); }
+
+.use-app { margin-bottom: 10px; }
+.use-app summary { cursor: pointer; }
+.use-app-head { display: flex; align-items: center; gap: 10px; }
+.use-app-icon { font-size: 22px; flex: none; }
+.use-app-name { display: block; font-size: 15px; font-weight: 900; }
+.use-app-sub { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; }
+
+.use-dead { margin-bottom: 8px; border-color: var(--line); }
+.use-dead--whole { border-color: var(--red); }
+.use-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+/* 24 bars, one per hour of the day — when the app actually gets used */
+.use-hours { display: flex; align-items: flex-end; gap: 2px; height: 48px; margin-bottom: 12px; }
+.use-hours > span {
+  position: relative; flex: 1; height: 100%;
+  display: flex; align-items: flex-end;
+  background: var(--bg2); border-radius: 3px;
+}
+.use-hours i { display: block; width: 100%; min-height: 1px; background: var(--gold); border-radius: 3px; }
+.use-hours em {
+  position: absolute; bottom: -12px; left: 0; font-size: 9px; font-style: normal;
+  font-weight: 800; color: var(--muted);
+}
+
+.use-log { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.use-log-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font-size: 11.5px; padding: 5px 7px; border-radius: 8px; background: var(--bg2);
+}
+.use-log-at { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 800; }
+.use-log-key { font-weight: 900; overflow-wrap: anywhere; }
+.use-log-p { color: var(--muted); overflow-wrap: anywhere; }
+.use-log-v { font-weight: 900; color: var(--gold); }
+.use-log-r { margin-left: auto; font-size: 10px; font-weight: 800; color: var(--muted); }

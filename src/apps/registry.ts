@@ -105,6 +105,10 @@ export const APPS: AppDef[] = [
     tint: ['#2e63a4', '#12315a'],
     tabs: [
       { id: 'topics', label: 'Topics', icon: '🎓' },
+      // §14d — one quiz per chapter of his school year, grouped by subject and
+      // in the order his class teaches it. Its own URL (/academy/subjects):
+      // sixty-odd quizzes are a shelf of their own, not a section of Topics.
+      { id: 'subjects', label: 'Subjects', icon: '📚' },
       // §14b — school quizzes are their own category, so they get their own URL
       // (/academy/school) rather than a section buried in the topic list.
       { id: 'school', label: 'School', icon: '🏫' },
@@ -445,6 +449,39 @@ export const APPS: AppDef[] = [
       { id: 'alerts', label: 'Alerts', icon: '🔔' },
       { id: 'sound', label: 'Sound', icon: '🔊' },
       { id: 'about', label: 'About', icon: 'ℹ️' },
+    ],
+  },
+  {
+    // §14e — Ben's quizzes from Dad's side: the one running now, every answer
+    // afterwards, and what he misses most. Its own app rather than three more
+    // tabs on Parent, whose menu is already full.
+    id: 'watch',
+    name: 'Quiz Watch',
+    icon: '👀',
+    tint: ['#2e63a4', '#5c0000'],
+    adminOnly: true,
+    tabs: [
+      { id: 'live', label: 'Live', icon: '🔴' },
+      { id: 'answers', label: 'Answers', icon: '📝' },
+      { id: 'mistakes', label: 'Mistakes', icon: '🎯' },
+    ],
+  },
+  {
+    // §26 — 📈 Usage: what Ben and I actually open, tap and do, so a feature
+    // nobody has touched in a month can be found and taken out. Parent-only,
+    // and the only app whose whole subject is the app itself.
+    id: 'usage',
+    name: 'Usage',
+    icon: '📈',
+    tint: ['#0a7d3c', '#0c2338'],
+    adminOnly: true,
+    tabs: [
+      { id: 'apps', label: 'Apps', icon: '📈' },
+      // the cleanup list gets its own URL: it is the page I act on
+      { id: 'unused', label: 'Unused', icon: '🪦' },
+      { id: 'actions', label: 'Actions', icon: '👆' },
+      { id: 'people', label: 'People', icon: '👥' },
+      { id: 'log', label: 'Log', icon: '🧾' },
     ],
   },
   {

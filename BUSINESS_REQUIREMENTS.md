@@ -1,7 +1,7 @@
 # Wheels of Procrastination — Business Requirements
 
 > Living document. Update this file whenever a rule changes. The code should always match this doc.
-> Last updated: 2026-09-25
+> Last updated: 2026-11-06
 
 ## 1. Concept
 
@@ -48,6 +48,8 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | 💡 **Ideas** | Open · Done · New |
 | 🕐 **Clocks** | Clocks *(single page)* |
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
+| 👀 **Quiz Watch** (Diogo only) | Live · Answers · Mistakes |
+| 📈 **Usage** (Diogo only) | Apps · Unused · Actions · People · Log |
 | 👨‍👦 **Parent** (Diogo only) | Freezes · Limits · Quizzes · Prizes · Audit |
 
 - **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
@@ -356,11 +358,15 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 - **Topics** (registry in `src/logic/quiz.ts`, each with an `owner`):
   - **Ben** (born Feb 2014 — Ontario grade-6 level): Canada Geography, Science, Critical Thinking (scams/fake news), Logic, Canada History — all live, 50 seed questions each.
-  - **Ben — 🏫 Grade 7 · St. Eugene** (track `grade7`, added 2026-10-30): his real school year (§24) as five Academy topics, **195 questions written by hand** from the St. Eugene packs — `g7-hist-a` New France & British North America (40) · `g7-hist-b` Canada 1800–1850 (35) · `g7-sci-a` Ecosystems & Mixtures (40) · `g7-sci-b` Structures & Heat (40) · `g7-geo` Physical Patterns & Resources (40). No Mathematics — that lives in St. Eugene only. Seeds in `src/quiz/g7*Seed.ts`, built with `src/quiz/grade7.ts`.
+  - **Ben — 🏫 Grade 7 · St. Eugene** (track `grade7`, added 2026-10-30): his real school year (§24) as five Academy topics, **195 questions written by hand** from the St. Eugene packs — `g7-hist-a` New France & British North America (40) · `g7-hist-b` Canada 1800–1850 (35) · `g7-sci-a` Ecosystems & Mixtures (40) · `g7-sci-b` Structures & Heat (40) · `g7-geo` Physical Patterns & Resources (40). No Mathematics — that lives in St. Eugene only. Seeds in `src/quiz/g7*Seed.ts`, built with `src/quiz/grade7.ts`. The same year, chapter by chapter, is on the 📚 Subjects tab (§14d).
     - **A ladder, one rung at a time** (`unlockAfter`): Canada History → History A → History B → Science A → Science B → Geography. Each opens when the one before is passed, so his checklist carries one quiz must-do, never five (the ADHD rule: one task a day). The order is his school year's: History is term 1, Science all year, Geography term 2.
     - **St. Eugene teaches, the quiz checks.** Every question carries `seSubtopic`, the St. Eugene lesson that teaches it. A wrong training answer and every miss in the final-test review offer **🏫 Learn it in St. Eugene 7**, which starts that lesson and lands on `/steugene7/lesson` (`src/steugene/open.ts`, `SeLessonButton`). The topic card has **🏫 Learn it first in St. Eugene 7**: every subtopic its strands cover (`seStrands`), each marked ✅ lessons done or 🆕 not started — because a quiz on a chapter nobody has taught him yet is a quiz he can only guess.
     - **Harder than the grade-6 banks on purpose**: dates and names asked straight, distractors drawn from the neighbouring chapter (the 1812 battle offered against the 1759 one), and about a fifth of each bank is match / put-in-order / type-it, which elimination can't crack.
   - **Canada History reviewed** (2026-10-30): the year questions no longer offer 1066 next to 1867 — every wrong year is a neighbouring one — and `ch-51…62` add the post-Confederation story (BC and the railway, the Head Tax, the Persons Case, the Charter, Japanese Canadian internment, the TRC) as match, order and write-in as well as choice. Written but held back behind `comingSoon` until Dad opens them: Canada Geography II (physical geography — mountains, rivers, regions), Ontario Geography (Great Lakes, the Shield, cities outside Toronto), Toronto Geography (the city he lives in). The three geography banks are deliberately non-overlapping: book I owns provinces/capitals/flags, book II owns the physical map, Ontario stays out of Toronto, and Toronto owns the city.
+  - **Canada Politics** (`canada-politics`, added 2026-11-06): **how the country he lives in is actually run** — 64 questions written by hand (`src/quiz/canadaPoliticsSeed.ts`). The three levels and who does what (Canada / Ontario / Toronto, with the school board as a fourth plausible answer), who you elect to each (MP · MPP · councillor · trustee; riding vs ward), how a government forms (seats not votes, majority vs minority, the job of the Opposition), how a bill becomes law (Commons → Senate → royal assent, and a bylaw is the city’s own), where the money comes from (13% HST split 5/8, the city lives on property tax and is not allowed to charge income tax) and the courts’ power to strike a law down. It ends on the First Nations’ own elected Chief and Council and on Treaty 13, the land Toronto stands on.
+    - **Almost name-free, on purpose.** The only people named are the **Prime Minister of Canada, the Premier of Ontario and the Mayor of Toronto** — the three he can point at from his own street (`cp-14…16`, plus the match `cp-17`). Every other question survives the next election, which is why the head of state is “the King” and never a name, and why no question asks who leads a party.
+    - **Usage, not definitions** (the §14b rule). Eleven questions are the ones he will actually meet: the TTC fare went up, a new health card, a passport, a pothole (311, not 911), an unshovelled sidewalk, the school roof, who wrote the law against stealing, and what a 12-year-old can really do to get a skatepark built.
+    - **Live from the day it was written** — no `unlockAfter`, no `comingSoon`, so it opens itself once like his other grade-6 topics and joins his checklist. Unlike the three geography books, this one was asked for to be used.
   - **Diogo** (senior frontend dev; goal = practical AI-for-dev market edge, NO ML training theory). Two tracks (`QUIZ_TRACKS`, shown as sections):
     - **🛠️ The Agent Engineer Path** — six gated levels, deliberately **vendor-neutral** (no provider names: APIs churn, the ideas don't), each explained through his React/frontend background. L1 What a model actually is · L2 Talking to models on purpose · L3 Tools & the agent loop · L4 Context engineering & memory · L5 Agent architectures · L6 Shipping agents for real. 105 seed questions (`src/quiz/agentsSeed.ts`).
     - **🧰 Tooling & day job** — the products that *do* churn: AI in Software Dev, GitHub Copilot, Claude Code (~20 seed questions each, target 50 — `quiz:regen` tops them up).
@@ -422,6 +428,40 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **The misses go straight back into training.** Answers count towards each question's record like any other (`updatedStat`): a right one rests for its streak's worth of days, a wrong one has its due date cleared and is back in tomorrow's training rotation. So the fog he finds here is the fog his daily practice picks up next.
 - **Filed as `review: true`, `official: false`, under `topicId: '_warmup'`** (`WARMUP_TOPIC_ID`, `finishWarmupTest`). The pseudo-topic matters: `lastReviewAttempt` keys the official exclusion list off `topicId`, so a rehearsal filed under a real topic would start eating the questions the gating round before that test is allowed to ask. The Progress tab's final-test record is unaffected (it filters `official && !review`); the Warm-up tab shows his **last five runs**, and only those five are kept (`WARMUP_KEEP`) — `quiz.tests` is capped at 60 rows, and a round he can run at will would otherwise push every real test result, and the retry-exclusion list with it, out of his record.
 - **Empty state is the honest one**: with no conquered topics there is no warm-up to rehearse, and the card says so rather than inventing a pool.
+
+## 14d. Subjects — one quiz per chapter of his year (the 📚 tab of the Quiz app, `/academy/subjects`)
+
+**Every non-maths chapter of St. Eugene 7 as its own quiz, grouped by subject, in the order his class teaches it.** 63 chapters — History 15, Language 18, Science 20, Geography 10 — 315 ideas, 944 questions, written by hand in session (CLAUDE.md: never with the OpenRouter key). This sits beside the five-topic Grade 7 ladder (§14), it does not replace it: the ladder is what he sits a final test on, the chapters are how he studies.
+
+- **Its own URL** (§1c): `/academy/subjects`. Chapter topics are removed from `/academy/topics`, so a topic is on exactly one page.
+- **The shelf.** Four painted subject cards. Tapping one unfolds its chapters (one subject open at a time, remembered per device), numbered, under their strand titles, in `SE_SUBJECTS` order. The first chapter he does not own yet is marked ▶, so there is always one obvious place to start rather than sixty to choose from.
+- **Generated from the map.** `CHAPTER_TOPICS` in `src/logic/quiz.ts` builds one `QuizTopic` per subtopic, `id` = `se7-<subtopic>`, `chapter` = the subtopic id, so names and order can never disagree with St. Eugene. Maths (and with it Coding and Financial Literacy) stays out, as in §14.
+- **Berries only, like a school quiz** (`berriesOnly`): no Devil Fruit, no official final test, no CONQUERED stamp, never the prize for passing something else, and **no daily must-do**. Sixty quizzes on the checklist would break the one-task-a-day rule, and sixty fruits would break the shelf's prices. No mock test either: a chapter holds five ideas and a test wants fifteen questions. They open themselves, Dad can 🔒 any of them from the Parent desk, where they fold away by subject, and a question he has got right can come up as a Question of the Day.
+- **Three options** (`optionCount: 3`), the St. Eugene rule (§24f), sampled from a pool of four or five so the set changes every showing. All the §14 rules apply, above all **no length tell**.
+- **An idea, in versions.** The unit of writing is an IDEA (about five a chapter), asked in about three VERSIONS — forwards, backwards, as a scene from his world, as a match or an order. Versions share `QuizQuestion.family`:
+  - A right answer clears the **whole family** for the session (`sessionPool`): he showed he knows the fact. A clean run is about five cards, a few minutes.
+  - A miss comes back as a **different version** while one is left, so he cannot pass it by remembering the card. The twin is never the very next card (that would be reading the answer off the last one), and a missed idea is twice as likely to be picked after that (`pickTraining`).
+  - Tomorrow the other versions are still due, so the fact keeps being asked in new words.
+  - Progress counts **ideas**, not questions (`ideaProgress`): an idea is his once any version of it has been answered right.
+- **A miss teaches** (`src/components/QuizMissHelp.tsx`). On the wrong-answer card, under the right answer and its 💡 line: **📖 Here's the idea** — two to five short lines with a 🔊, the idea rather than this card's answer — and **🎬 Watch a video about it**, a St. Eugene video chosen per idea (from any chapter, whichever teaches it best), played in the same shielded frame as the 🎬 shelf (§24g, §24z) with no hold, and with a `watchFor` line of its own where one is written. **🏫 Learn it in St. Eugene 7** stays below, as on the ladder.
+- **Where the words live.** Questions go in the bank; `explain`, `video` and `watchFor` stay in code (`src/quiz/se7/`), keyed by family, because three copies of every explanation would be dead weight in a Firestore document. The chapter quizzes are their own lazy chunk.
+- **A second bank document.** `app/quizBank` is one document with a 1 MB ceiling and was already ~580 KB, so the chapter questions live in **`app/quizBankSe7`** (~480 KB). The app sees one bank: both are read, merged and watched together, and a save writes back only the half that changed (`src/store/cloud.ts`). `quiz:regen` and `quiz:review` only know `app/quizBank`, so they cannot touch these.
+- **Question ids are permanent.** `se7-<subtopic>-<idea>-<n>` is positional: add versions at the END of an idea, never rename a key or reorder, or his history lands on the wrong card. Retire a bad version from the Parent desk (it is flagged `removed`, not deleted).
+- **`npm run quiz:audit`** checks the banks structurally and costs nothing: every chapter present, every idea with at least two versions, a real video and an explanation, no match with two equal right-hand cards (MatchQ pairs by text, so such a card could never be finished), no answer much longer than its distractors, and the shard under 90% of a Firestore document. It cannot tell whether an answer is TRUE.
+
+## 14e. Quiz Watch (the 👀 app, Diogo only — `/watch/live`, `/watch/answers`, `/watch/mistakes`)
+
+Ben's quizzes from Dad's side. The point is to see **what** he gets wrong, not just the score — a result of 64% says nothing about which ideas are missing.
+
+- **Its own app, its own URLs** (§1c): three pages, each bookmarkable. `adminOnly`, so Ben has no icon and the URLs fall back for him. It is not on the Parent app because that menu is already full.
+- **One record does both jobs.** Every sitting is one document, `quizSessions/{id}` (`QuizSessionLog`), written after each question and each answer. While it runs it is the live view; afterwards it is the report. It lives outside his profile because that blob caps tests at 60 and answers are the bulkiest thing the app could put in it.
+- **What is logged:** Ben's sittings only — training, mock tests, mock warm-ups, warm-up rounds, final tests. Never Diogo's own, never a preview. The Question of the Day is not a sitting, so it is not in Live or Answers; it does count in Mistakes.
+- **Each answer keeps the words he saw** (prompt and right answer are copied in), so editing or removing a question later does not rewrite the record. Match and order answers are spelled out as he set them.
+- **Sittings:** one starts at its first question. Backing out before answering leaves nothing. An official run is two sittings — the warm-up round closes when graded, the final test opens a new one. A test left early stays on the record as *left early*.
+- **Logging never touches Ben's quiz.** A failed write only warns in the console: no banner, no retry, no change to what he sees.
+- **🔴 Live** (`/watch/live`) — updates by itself. Shows the quiz he is in: running tally, the question on his screen with a timer and its answer, then his answers newest first, wrong ones in red with what he said. A sitting counts as live until it ends or goes **10 minutes** silent (`LIVE_WINDOW_MS`), since a killed app never says goodbye. Nothing running → his last quiz, opened.
+- **📝 Answers** (`/watch/answers`) — the last 200 sittings by day. Each opens in place to every question: his answer, the right one, and the seconds it took. Starts empty: answers were never stored before this, only right or wrong.
+- **🎯 Mistakes** (`/watch/mistakes`) — % wrong, worst first, ties broken by how many times he missed it. **By question** (all quizzes, or pick one) and **By quiz** (tap one to see its questions). Reads his lifetime `quiz.stats`, so it covers **everything he has ever answered**, from day one. Active questions only. Defaults to questions asked at least **2×**, because 1 of 1 wrong is 100% and proves nothing; 1× and 3× are a tap away. Shows the worst 100.
 
 ## 15. Store pages & Treasures (prizes)
 
@@ -2291,5 +2331,58 @@ So once a week it comes to me instead. Sunday 08:30, by email, read-only.
 It has no URL, because it has no page: it is a cron job like `bank:market`, not a sub-app (§1c).
 
 Code: `scripts/weekly-email.mjs` (read + send), `scripts/weekly-email.entry.ts` (the report), `scripts/weekly-email-cron.sh` (the schedule).
+
+
+## 26. Usage — what we actually use (the 📈 Usage app, Diogo only)
+
+This app has grown to twenty-odd sub-apps and a hundred-odd pages, and **nobody knows which of them anybody opens**. A feature that Ben used twice in July is indistinguishable, from the inside, from the one he opens every evening — so nothing can safely be deleted, and every new idea is piled on top of a floor that may be rotten.
+
+So the app measures itself. For a week, then a month, it writes down everything that happens in it, and `/usage/unused` answers the only question that matters for cleanup: **which pages did nobody open?**
+
+### 26a. What is logged
+
+Four kinds of event, and none of them needs a line of code in the feature being measured:
+
+- **`view:<app>-<tab>`** — every page open. `App.tsx` logs the router, not the screens, so a page added next month is measured the day it ships and cannot be forgotten.
+- **`act:<action>`** — every store action that ran. `useStore`'s whole returned object is wrapped once (`instrumentActions`), so *using* a feature is distinguishable from merely *opening* it: `/bank/grow` opened eleven times with no `bankAllocate` means he looks at the chart and never allocates.
+- **`tap:<label>`** — every tap anywhere, named by what it says on it ("✓ Got it", "Spin", "Start session"). One capturing click listener on the document, no instrumented buttons.
+- **`ses:open` / `ses:login`** — the app being opened, and someone getting past the PIN.
+
+…plus **page time** (`seconds` per `app-tab`) and **the hour it happened in** (`hours`). Page time is counted, not measured: a beat every 15 seconds adds itself to the open page while the screen is visible **and** somebody has touched it in the last ten minutes. A phone left face-up on the table stops counting; a video playing with a tap a minute ago keeps counting.
+
+**What is never logged**: the value of any input, and anything a `data-usage-off` ancestor covers. A `data-usage` attribute on a container relabels every tap inside it — that is how the PIN pad and the final-test code pad report `pin key` / `code key` rather than the digits, in order (`src/components/PinLock.tsx`, `src/components/FinalTest.tsx`).
+
+**What is deliberately NOT logged**: selectors the UI calls while rendering, timers (`rollover`, `seTick`), and "I have seen it" writes that a banner appearing causes rather than a finger. They are listed in `SILENT` in `src/lib/usage.ts`; counting them would bury everything that is actually a person doing something. Nested calls count once — an action calling another action through `get()` is one thing happening, not two.
+
+### 26b. Where it goes
+
+`usage/{profileId}__{date}__{deviceId}` — **one document per person per day per device**.
+
+- Per **device** because a device then owns its document outright: it rewrites it whole on every flush, needs no merge logic, and can never clobber what the tablet wrote. The report just sums them; everything in the document is additive.
+- Per **day** because that is the unit the sweep deletes and every query filters on.
+- It is **one document, not one per event**: a day of heavy use is ~2 writes a minute at worst, not a thousand documents. `counts` is uncapped (bar a 600-key ceiling, past which free-text labels fold into `tap:other`); `events` is a 500-entry trail, at most 20 per key, so a day of tapping `pin key` cannot become the whole trail. Anything not in the trail is still in the counts.
+- Reloading the app mid-day folds in what the server already holds for that device-day before the first write, so a refresh never throws the morning away.
+- Writes are debounced 30s, forced when the page is hidden, and swept every 5 minutes for page time. Every failure is swallowed: **a logger that can break the app it watches is worse than no logger** (same rule as `src/lib/errorLog.ts`).
+
+### 26c. The pages
+
+- **`/usage/apps`** — time on screen, page opens, everything logged, unused pages; then every app ranked by opens, each expanding into its own pages with time, opens and who.
+- **`/usage/unused`** — **the cleanup list**: every route `registry.ts` can reach that nobody opened in the window, whole-cold apps first. Underneath, the opposite direction: pages that *were* opened and no longer exist in the registry, which is how a stale bookmark or a half-removed feature shows up.
+- **`/usage/actions`** — actions and taps, ranked, with a filter box. The answer to "is this feature used, or just visited?".
+- **`/usage/people`** — Ben and me side by side: days, logins, page opens, actions, taps, devices, our top apps, and a 24-bar histogram of the hours we each use it. Events before the PIN are their own person ("Before the PIN"), so an app opened fourteen times and never unlocked is visible.
+- **`/usage/log`** — the raw trail, newest first, filterable by person and by text, plus the housekeeping panel and 🧹 **Start the week over** (two taps, deletes every day file).
+
+### 26d. It forgets
+
+**Nothing older than 30 days survives.** Once a day, the first device to open the app deletes every `usage` document whose `date` is older than the cutoff. Thirty days is the whole retention policy: it is long enough to tell a real habit from a quiet week, and short enough that the collection stays a handful of small documents on the free plan.
+
+### 26e. Reading it a week later
+
+`npm run usage` prints the same report in the terminal (`-- 7` for a week, `-- 7 json` for the raw documents). It shares `src/logic/usageReport.ts` with the screen on purpose: the terminal and `/usage/apps` can never disagree about what got used.
+
+It costs nothing and spends no AI (CLAUDE.md — the OpenRouter key is the app's, not a tool).
+
+Code: `src/lib/usage.ts` (the collector, the writer, the sweep), `src/logic/usageReport.ts` (the arithmetic, shared), `src/screens/UsageScreen.tsx` (the five pages), `instrumentActions` in `src/store/useStore.ts` (one line), `trackView` in `src/App.tsx` (one effect), `scripts/usage-report.mjs` + `scripts/usage-report.entry.ts` (`npm run usage`).
+
 
 > Keep this document in sync with any rule change — it is the canonical spec for the app's game rules.

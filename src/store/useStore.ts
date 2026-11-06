@@ -111,6 +111,7 @@ import {
 import type { AuditCategory, AuditEntry, Season, TrainingBlock } from '../types'
 import type { SessionLength } from '../logic/gymBlock'
 import { addDays, dayKey } from '../logic/dates'
+import { instrumentActions } from '../lib/usage'
 import { BACKGROUND_CATALOG } from '../logic/backgrounds'
 import {
   PACK_COST,
@@ -558,14 +559,14 @@ interface StoreState {
    */
   finishQuizTest: (targetId: string, topicId: string, official: boolean, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
   /**
-   * Close the warm-up review round that gates an official test (75% to pass).
+   * Close the warm-up review round that gates an official test (70% to pass).
    * A fail ends the whole attempt: the new topic is never sat, and Dad's banner
    * carries the per-topic tally instead of a score.
    */
   finishReviewTest: (targetId: string, topicId: string, results: { qid: string; correct: boolean }[], authId?: string) => QuizTestRecord
   /**
    * §14c — a warm-up round he ran on his own, for practice. Filed like any
-   * review (pass mark 75%) but `official: false` and under `WARMUP_TOPIC_ID`,
+   * review (pass mark 70%) but `official: false` and under `WARMUP_TOPIC_ID`,
    * so it never counts for a Devil Fruit and never touches the exclusion list
    * of a real test's warm-up.
    */
@@ -1633,7 +1634,11 @@ export const useStore = create<StoreState>((set, get) => {
     fireAndForget(saveQuizBank(questions))
   }
 
-  return {
+  // 📈 §26 — every action below is wrapped so that calling it is logged. One
+  // line here instead of a `track()` call in two hundred components, and a
+  // feature shipped later cannot quietly go unmeasured. The wrapper skips
+  // selectors, timers and "I have seen it" writes (SILENT in lib/usage.ts).
+  return instrumentActions({
     data: defaultData(),
     profiles: seedProfiles(),
     activeProfileId: null,
@@ -5642,5 +5647,5 @@ export const useStore = create<StoreState>((set, get) => {
       set({ aiConfig: next })
       fireAndForget(saveAiConfig(next))
     },
-  }
+  })
 })

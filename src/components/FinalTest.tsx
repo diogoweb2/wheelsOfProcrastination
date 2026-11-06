@@ -170,7 +170,8 @@ function CodeGate({ auth, onPass, onCancel }: { auth: FinalTestAuth; onPass: () 
             <div key={i} className={`pin-dot ${i < entry.length ? 'on' : ''}`} />
           ))}
         </div>
-        <div className="pinpad">
+        {/* §26 — one "code key" per tap: the usage log never sees the test code. */}
+        <div className="pinpad" data-usage="code key">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map((k, i) =>
             k === '' ? (
               <div key={i} />

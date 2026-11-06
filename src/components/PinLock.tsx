@@ -109,7 +109,8 @@ export function PinLock() {
             <div key={i} className={`pin-dot ${i < entry.length ? 'on' : ''}`} />
           ))}
         </div>
-        <div className="pinpad">
+        {/* §26 — every digit logs as one "pin key": the usage log never sees a PIN. */}
+        <div className="pinpad" data-usage="pin key">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map((k, i) =>
             k === '' ? (
               <div key={i} />

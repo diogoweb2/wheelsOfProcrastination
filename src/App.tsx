@@ -7,6 +7,8 @@ import { StreakPrompts } from './components/StreakPrompts'
 import { RequiredDeadline } from './components/RequiredDeadline'
 import { QuestionOfTheDay } from './components/QuestionOfTheDay'
 import { FinalTest } from './components/FinalTest'
+import { QuizWatchScreen } from './screens/QuizWatchScreen'
+import { UsageScreen } from './screens/UsageScreen'
 import { AppHeader, AppTabBar } from './components/AppShell'
 import { AdminSection } from './components/AdminSection'
 import { NightWatch } from './components/NightWatch'
@@ -39,6 +41,7 @@ import { LogPoseScreen } from './screens/LogPoseScreen'
 import { appById, tabsFor } from './apps/registry'
 import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { inShell } from './push'
+import { trackView, usageProfile } from './lib/usage'
 import { backgroundUrl } from './logic/backgrounds'
 import { unackedToDad } from './logic/bank'
 import { awaitsAnswer, tradeGems, tradeRound } from './logic/album'
@@ -112,6 +115,21 @@ export default function App() {
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [activeProfileId, dailyMode])
+
+  // 📈 §26 — every page open, and who is looking at it, goes to the usage log.
+  // One effect here rather than a call in each screen: a page added later can
+  // never be forgotten, because the router is the thing being watched.
+  useEffect(() => {
+    if (!unlocked) {
+      trackView('lock', 'pin')
+      return
+    }
+    trackView(open?.app ?? 'home', open?.tab ?? null)
+  }, [open, unlocked])
+
+  useEffect(() => {
+    usageProfile(activeProfileId)
+  }, [activeProfileId])
 
   // process missed days on open and whenever the app regains focus (day may have flipped)
   useEffect(() => {
@@ -825,6 +843,10 @@ function AppBodyRouter({
       return <LogPoseScreen />
     case 'settings':
       return <SettingsScreen tab={open.tab} />
+    case 'watch':
+      return <QuizWatchScreen tab={open.tab} />
+    case 'usage':
+      return <UsageScreen tab={open.tab} />
     case 'admin':
       return <div className="screen"><AdminSection tab={open.tab} /></div>
     default:

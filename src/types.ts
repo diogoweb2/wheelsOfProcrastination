@@ -308,6 +308,14 @@ export interface QuizQuestion {
   freshAt?: string // set when the weekly AI review adds/updates a question → "NEW" badge + training priority until seen again
   lessonId?: string // deep-dive explanation offered after a wrong answer (see src/quiz/lessons.ts)
   seSubtopic?: string // the St. Eugene 7 lesson that teaches this (§24a id) — offered after a wrong answer
+  /**
+   * §14d — versions of the same idea share a family: the same fact asked
+   * another way. Training treats a family as one idea (one right answer clears
+   * it for the session) and brings a miss back as a DIFFERENT version, so he
+   * learns the fact rather than the card. Its explanation and video live in
+   * code, keyed by family (`src/quiz/se7/`).
+   */
+  family?: string
 }
 
 // --- Lessons (the "I got it wrong, teach me properly" layer) -----------------
@@ -377,7 +385,7 @@ export interface QuizTestRecord {
   day: string // YYYY-MM-DD
   official: boolean // true = parent-launched, counts for the Devil Fruit
   /**
-   * A warm-up round on already-conquered topics. Pass mark 75%; `topicId` is the
+   * A warm-up round on already-conquered topics. Pass mark 70%; `topicId` is the
    * test it guards — or `_warmup` (§14c) when he ran the round on its own, for
    * practice, and it guards nothing.
    */
@@ -385,6 +393,42 @@ export interface QuizTestRecord {
   results: { qid: string; correct: boolean }[]
   scorePct: number
   passed: boolean // scorePct >= 80 (>= 70 on a review round)
+}
+
+/** §14e — one answer exactly as it happened, with the words he saw at the time. */
+export interface QuizLogAnswer {
+  qid: string
+  prompt: string // copied, not looked up: a question edited later must not rewrite what he was asked
+  rightAnswer: string
+  given?: string // what he picked, typed, paired or ordered
+  correct: boolean
+  nearMiss?: boolean // right, but misspelled
+  timeMs: number
+  at: string // ISO
+}
+
+export type QuizLogKind = 'training' | 'simulation' | 'official' | 'warmup' | 'review'
+
+/**
+ * §14e — one sitting of Ben's, in Firestore `quizSessions/{id}`. The same
+ * document is the live view while it runs and the report afterwards. It lives
+ * outside his profile because that blob is capped (60 tests) and answers are
+ * the bulkiest thing the app would ever put in it.
+ */
+export interface QuizSessionLog {
+  id: string
+  targetId: string
+  topicId: string
+  kind: QuizLogKind
+  total: number // questions planned; 0 = training, which has no set length
+  startedAt: string
+  updatedAt: string
+  endedAt?: string // absent while it runs — or if the app died mid-quiz
+  outcome?: 'finished' | 'left' // left = walked out of a test before the end
+  scorePct?: number // the graded score; training and abandoned tests have none
+  passed?: boolean
+  current: { qid: string; prompt: string; rightAnswer: string; shownAt: string } | null
+  answers: QuizLogAnswer[]
 }
 
 /**
@@ -1987,4 +2031,58 @@ export interface FcLockState {
     /** Which teams the batch was fetched for — a changed favourite invalidates it. */
     forKey: string
   }
+}
+
+// ---------------------------------------------------------------------------
+// 📈 Usage analytics (§26) — what actually gets used, so dead features can go.
+// ---------------------------------------------------------------------------
+
+/**
+ * §26 — one logged moment. The field names are one letter each on purpose: a
+ * day document holds up to 1 200 of them and Firestore charges by the byte.
+ */
+export interface UsageEvent {
+  /** When, as epoch milliseconds. */
+  t: number
+  /** `view:gym-train`, `act:completeTask`, `tap:Start-session`, `ses:open`. */
+  k: string
+  /** The detail worth keeping: the tapped label in full, an action's first argument. */
+  p?: string
+  /** A number worth keeping (Berries paid, minutes picked). */
+  v?: number
+  /** The page it happened on — omitted on `view:`, where the key IS the page. */
+  r?: string
+}
+
+/**
+ * §26 — one person, one day, one device, in Firestore `usage/{id}` where the id
+ * is `${profileId}__${date}__${deviceId}`.
+ *
+ * Split that way because each device owns its own document: two devices can
+ * then rewrite their own day whole, with no merge logic and no chance of one
+ * clobbering the other. Everything is additive, so the report just sums them.
+ *
+ * `counts` is the analysis; `events` is the trailing tail kept for reading the
+ * order things happened in. Nothing here lives longer than a month (§26d).
+ */
+export interface UsageDay {
+  id: string
+  profileId: string
+  /** Local day, `YYYY-MM-DD` — the sweep and every query key off this. */
+  date: string
+  deviceId: string
+  /** Human label for the device: `tablet (android shell)`, `mac`, `android (installed)`. */
+  device: string
+  firstAt: string // ISO
+  lastAt: string // ISO
+  /** Event key → how many times it happened. The whole report is built from this. */
+  counts: Record<string, number>
+  /** `app-tab` → seconds with that page actually in front of someone. */
+  seconds: Record<string, number>
+  /** Hour of the local day (`'0'`…`'23'`) → events in it. */
+  hours: Record<string, number>
+  /** The last [TAIL] events, oldest first. */
+  events: UsageEvent[]
+  /** Events that fell off the tail (still counted in `counts`). */
+  dropped: number
 }
