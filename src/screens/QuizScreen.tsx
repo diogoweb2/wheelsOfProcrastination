@@ -272,7 +272,7 @@ function SchoolShelf({
  * Every official test opens with a round on the seas he already conquered, and
  * missing it shuts the test (§14) — which made the one round that can cost him
  * a Devil Fruit the only one he could never practise. This is that round:
- * the same pool, the same length, the same 75%, nothing at stake, and a
+ * the same pool, the same length, the same 70%, nothing at stake, and a
  * different draw every time (last rehearsal's questions are excluded, and the
  * mix is re-shuffled per topic).
  *

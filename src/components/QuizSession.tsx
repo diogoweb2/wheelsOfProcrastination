@@ -6,7 +6,7 @@
 //
 // An official test on someone who has already conquered topics opens with a
 // WARM-UP REVIEW ROUND on that old material (see buildReviewTest): shorter,
-// 75% to pass, and a miss ends the run before the new topic is ever sat — the
+// 70% to pass, and a miss ends the run before the new topic is ever sat — the
 // point is that conquered seas stay fresh instead of fading away.
 //
 // `warmup` mode is that same round with no test behind it: same pool, same

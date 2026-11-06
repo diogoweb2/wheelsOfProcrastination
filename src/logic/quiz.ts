@@ -384,7 +384,7 @@ export const TEST_TIME_BUDGET_MS = 18 * 60_000 // keep the whole test under ~20 
 export const TEST_MIN_QUESTIONS = 15
 export const TEST_MAX_QUESTIONS = 20
 export const DEFAULT_ANSWER_TIME_MS = 45_000 // assumed pace for questions he's never trained on
-export const REVIEW_PASS_PCT = 75 // the warm-up is a real check, not a formality
+export const REVIEW_PASS_PCT = 70 // the warm-up is a real check, not a formality
 export const REVIEW_BASE_QUESTIONS = 14 // one old topic to keep fresh = 14 questions; each extra topic adds half of the previous
 export const REVIEW_HARD_SHARE = 0.4 // of each topic's warm-up share, how much comes from his weak/unseen questions
 
@@ -780,7 +780,7 @@ export interface ReviewTopicScore {
  *
  * The point is to keep old material fresh, but a warm-up he cannot fail proves
  * nothing: ~60% things he has answered right before, ~40% his weak or unseen
- * ones (`REVIEW_HARD_SHARE`), pass mark 75%.
+ * ones (`REVIEW_HARD_SHARE`), pass mark 70%.
  */
 export function buildReviewTest(
   bank: QuizQuestion[],
