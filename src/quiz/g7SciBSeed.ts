@@ -132,7 +132,7 @@ export const G7_SCI_B_SEED: QuizQuestion[] = [
     emoji: '🫙',
     why: 'Metals expand more than glass when heated, so the lid loosens its grip.',
   }),
-  choice('g7sb-28', 'sci-expand', 'Heated particles move faster and spread apart, so the object gets bigger. What is that called?', 'expansion', ['expantion', 'expension', 'expanshun', 'expansian', 'ixpansion'], {
+  choice('g7sb-28', 'sci-expand', 'Heated particles move faster and spread apart, so the object gets bigger. What is that called?', 'expansion', ['contraction', 'conduction', 'convection', 'evaporation', 'condensation'], {
     emoji: '🔍',
     why: 'Expansion — and contraction when it cools. Not the particles growing: the gaps growing.',
   }),

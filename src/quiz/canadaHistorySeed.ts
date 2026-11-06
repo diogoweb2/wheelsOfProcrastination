@@ -377,7 +377,7 @@ export const CANADA_HISTORY_SEED: QuizQuestion[] = [
     type: 'choice',
     prompt: 'Insulin was discovered in Toronto in 1921 by Frederick ______ and Charles Best. Which name is it?',
     emoji: '💉',
-    choices: ['Banting', 'Bunting', 'Banning', 'Banteng', 'Bantin', 'Benting'],
+    choices: ['Banting', 'Fleming', 'Bell', 'Penfield', 'Pasteur', 'Salk'],
     answer: 'Banting',
     weight: 1,
     points: 10,
