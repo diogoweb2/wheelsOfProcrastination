@@ -1,8 +1,10 @@
 // Firestore data layer. Three shapes:
 //   app/roster            → { profiles: Profile[] }     the crew + their PIN hashes (synced across devices)
 //   app/quizBank          → { questions: QuizQuestion[] } the shared question bank (incl. removed/pending flags)
+//   app/quizBankSe7       → { questions: QuizQuestion[] } the same, for the §14d chapter quizzes only
 //   app/prizeCatalog      → { prizes: PrizeCatalog }   the treasures on each crewmate's shelf
 //   profiles/{id}         → AppData                     one whole world per crewmate
+//   quizSessions/{id}     → QuizSessionLog              one sitting of Ben's, answer by answer (§14e)
 // The active login (which profile is signed in) stays local, per device (see storage.ts).
 import {
   Timestamp,
@@ -22,13 +24,14 @@ import {
 } from 'firebase/firestore'
 import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { app, ensureAuth, firestore } from '../lib/firebase'
-import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, SeaMatch, StickerTrade } from '../types'
+import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, QuizSessionLog, SeaMatch, StickerTrade } from '../types'
 import type { SeDesk } from '../steugene/types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
-import { DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
+import { CHAPTER_PREFIX, DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { CANADA_GEOGRAPHY_2_SEED } from '../quiz/canadaGeography2Seed'
 import { CANADA_HISTORY_SEED } from '../quiz/canadaHistorySeed'
+import { CANADA_POLITICS_SEED } from '../quiz/canadaPoliticsSeed'
 import { ONTARIO_GEOGRAPHY_SEED } from '../quiz/ontarioGeographySeed'
 import { TORONTO_GEOGRAPHY_SEED } from '../quiz/torontoGeographySeed'
 import { AI_DEV_SEED } from '../quiz/aiDevSeed'
@@ -46,6 +49,7 @@ const ALL_SEEDS = [
   ...CANADA_GEOGRAPHY_SEED,
   ...CANADA_GEOGRAPHY_2_SEED,
   ...CANADA_HISTORY_SEED,
+  ...CANADA_POLITICS_SEED,
   ...ONTARIO_GEOGRAPHY_SEED,
   ...TORONTO_GEOGRAPHY_SEED,
   ...AI_DEV_SEED,
@@ -63,6 +67,15 @@ const ALL_SEEDS = [
 const rosterRef = () => doc(firestore, 'app', 'roster')
 const dataRef = (id: string) => doc(firestore, 'profiles', id)
 const bankRef = () => doc(firestore, 'app', 'quizBank')
+/**
+ * §14d — the chapter quizzes get a document of their own. A Firestore document
+ * stops at 1 MB and `app/quizBank` already holds ~580 KB; nine hundred more
+ * questions in it would have hit the ceiling and failed every write after.
+ * The app still sees ONE bank: the two are read, merged and watched together,
+ * and a save writes back only the half that changed.
+ */
+const se7BankRef = () => doc(firestore, 'app', 'quizBankSe7')
+const isChapterQ = (q: QuizQuestion) => q.topicId.startsWith(CHAPTER_PREFIX)
 
 /**
  * Load the roster, seeding Firestore on first run. If the cloud roster is
@@ -175,29 +188,63 @@ export function fireAndForget(p: Promise<unknown>): void {
  */
 export async function loadQuizBank(): Promise<QuizQuestion[]> {
   await ensureAuth()
-  const snap = await getDoc(bankRef())
+  // a chunk of its own: ~900 questions nobody needs before the bank loads
+  const { SE7_SEED } = await import('../quiz/se7')
+  const [main, se7] = await Promise.all([loadShard(bankRef(), ALL_SEEDS), loadShard(se7BankRef(), SE7_SEED)])
+  shards.main = main
+  shards.se7 = se7
+  return [...main, ...se7]
+}
+
+/** Each half of the bank as last read or written — what a save compares against. */
+const shards: { main: QuizQuestion[] | null; se7: QuizQuestion[] | null } = { main: null, se7: null }
+
+async function loadShard(ref: ReturnType<typeof bankRef>, seeds: QuizQuestion[]): Promise<QuizQuestion[]> {
+  const snap = await getDoc(ref)
   const existing: QuizQuestion[] = snap.exists() ? ((snap.data() as { questions?: QuizQuestion[] }).questions ?? []) : []
   const known = new Set(existing.map((q) => q.id))
-  const missing = ALL_SEEDS.filter((q) => !known.has(q.id))
+  const missing = seeds.filter((q) => !known.has(q.id))
   if (missing.length > 0) {
     const questions = [...existing, ...missing]
-    await setDoc(bankRef(), { questions })
+    await setDoc(ref, { questions })
     return questions
   }
   return existing
 }
 
-/** Live bank updates (another device removing/approving questions, or the regen script). */
+/** Live bank updates (another device removing/approving questions, or the regen script). Both halves, merged. */
 export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () => void {
-  return onSnapshot(bankRef(), (snap) => {
-    const data = snap.data() as { questions?: QuizQuestion[] } | undefined
-    if (data?.questions) cb(data.questions)
-  })
+  const emit = () => {
+    if (shards.main && shards.se7) cb([...shards.main, ...shards.se7])
+  }
+  const watch = (ref: ReturnType<typeof bankRef>, half: 'main' | 'se7') =>
+    onSnapshot(ref, (snap) => {
+      const data = snap.data() as { questions?: QuizQuestion[] } | undefined
+      if (!data?.questions) return
+      shards[half] = data.questions
+      emit()
+    })
+  const offMain = watch(bankRef(), 'main')
+  const offSe7 = watch(se7BankRef(), 'se7')
+  return () => {
+    offMain()
+    offSe7()
+  }
 }
 
 export async function saveQuizBank(questions: QuizQuestion[]): Promise<void> {
   await ensureAuth()
-  await setDoc(bankRef(), { questions })
+  const main = questions.filter((q) => !isChapterQ(q))
+  const se7 = questions.filter(isChapterQ)
+  // only the half that changed is written: removing one question must not
+  // rewrite a megabyte of the other one
+  const same = (a: QuizQuestion[] | null, b: QuizQuestion[]) => a !== null && JSON.stringify(a) === JSON.stringify(b)
+  const writes: Promise<void>[] = []
+  if (!same(shards.main, main)) writes.push(setDoc(bankRef(), { questions: main }))
+  if (!same(shards.se7, se7)) writes.push(setDoc(se7BankRef(), { questions: se7 }))
+  shards.main = main
+  shards.se7 = se7
+  await Promise.all(writes)
 }
 
 // --- ideas (shared wishlist both crewmates write to) ------------------------
@@ -600,3 +647,38 @@ export function subscribeAudit(max: number, cb: (entries: AuditEntry[]) => void)
   })
 }
 
+// --- quiz sittings (§14e: Dad's live view, and the report afterwards) --------
+
+const quizSessionsCol = () => collection(firestore, 'quizSessions')
+
+/**
+ * Write one sitting whole — it is a few KB, and rewriting it keeps the answers
+ * in order with no merge logic. Watching a quiz must never get in the way of
+ * sitting one, so a failure warns and goes no further: unlike `fireAndForget`,
+ * it does not reach the store's error reporter and put a banner in front of Ben.
+ */
+export function saveQuizSession(log: QuizSessionLog): void {
+  void ensureAuth()
+    .then(() => setDoc(doc(quizSessionsCol(), log.id), log))
+    .catch((e) => console.warn('quiz session write failed', e))
+}
+
+/** A sitting that never got an answer is noise: he opened it and backed out. */
+export function deleteQuizSession(id: string): void {
+  void ensureAuth()
+    .then(() => deleteDoc(doc(quizSessionsCol(), id)))
+    .catch((e) => console.warn('quiz session delete failed', e))
+}
+
+/** Live-sync the most recent sittings (newest first). Returns unsubscribe. */
+export function subscribeQuizSessions(max: number, cb: (sessions: QuizSessionLog[]) => void): () => void {
+  const q = query(quizSessionsCol(), orderBy('startedAt', 'desc'), limit(max))
+  return onSnapshot(
+    q,
+    (snap) => cb(snap.docs.map((d) => d.data() as QuizSessionLog)),
+    (e) => {
+      console.warn('quiz sessions read failed', e)
+      cb([])
+    },
+  )
+}

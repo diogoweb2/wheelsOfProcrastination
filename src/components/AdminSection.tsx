@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
-import { activeQuestions, correctAnswerText, lastOfficialAttempt, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
+import { CHAPTER_PREFIX, CHAPTER_SUBJECTS, activeQuestions, berriesOnly, correctAnswerText, lastOfficialAttempt, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
 import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
@@ -69,18 +69,46 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
             ⚔️ Ben’s academy
           </div>
           {!kidData && <p className="muted">Loading Ben’s log from the cloud…</p>}
-          {topicsFor(KID_ID).map((t) => (
-            <AdminTopicCard
-              key={t.id}
-              topic={t}
-              targetId={KID_ID}
-              targetData={kidData}
-              // §14b — a school quiz has no official final test: school runs that part
-              onTest={t.school ? undefined : () => setSession({ kind: 'ben-official', topicId: t.id })}
-              onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
-              onManage={() => setManaging(t.id)}
-            />
-          ))}
+          {topicsFor(KID_ID)
+            .filter((t) => !t.chapter)
+            .map((t) => (
+              <AdminTopicCard
+                key={t.id}
+                topic={t}
+                targetId={KID_ID}
+                targetData={kidData}
+                // §14b — a school quiz has no official final test: school runs that part
+                onTest={berriesOnly(t) ? undefined : () => setSession({ kind: 'ben-official', topicId: t.id })}
+                onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
+                onManage={() => setManaging(t.id)}
+              />
+            ))}
+
+          {/* §14d — sixty-odd chapter quizzes, folded away by subject so the desk stays a desk */}
+          {CHAPTER_SUBJECTS.map((subject) => {
+            const mine = topicsFor(KID_ID).filter((t) => t.chapter && subject.strands.some((st) => st.subtopics.some((s) => CHAPTER_PREFIX + s.id === t.id)))
+            if (mine.length === 0) return null
+            const questions = mine.reduce((n, t) => n + activeQuestions(quizBank, t.id).length, 0)
+            return (
+              <details key={subject.id} className="card" style={{ marginBottom: 10 }}>
+                <summary style={{ fontWeight: 900, cursor: 'pointer' }}>
+                  📚 {subject.emoji} {subject.name} chapter quizzes · {mine.length} · {questions} questions
+                </summary>
+                <div style={{ marginTop: 10 }}>
+                  {mine.map((t) => (
+                    <AdminTopicCard
+                      key={t.id}
+                      topic={t}
+                      targetId={KID_ID}
+                      targetData={kidData}
+                      onPreview={() => setSession({ kind: 'ben-preview', topicId: t.id })}
+                      onManage={() => setManaging(t.id)}
+                    />
+                  ))}
+                </div>
+              </details>
+            )
+          })}
 
           <div className="muted" style={{ fontSize: 12, margin: '14px 0 6px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
             🏴‍☠️ My academy
@@ -867,7 +895,7 @@ function AdminTopicCard({
             ⚔️ Preview
           </button>
         )}
-        {!topic.school && (
+        {!berriesOnly(topic) && (
         <button
           className="btn btn--blue btn--small"
           style={{ flex: 1 }}
@@ -886,7 +914,7 @@ function AdminTopicCard({
           +1 🍇
         </button>
         )}
-        {!topic.school && (
+        {!berriesOnly(topic) && (
         <button
           className="btn btn--ghost btn--small"
           disabled={!targetData || (targetData?.economy.devilFruits ?? 0) <= 0}
@@ -905,6 +933,8 @@ function AdminTopicCard({
           −1 🍇
         </button>
         )}
+        {/* §14d — a chapter quiz is never conquered: a stamp would send it into every warm-up */}
+        {!topic.chapter && (
         <button
           className="btn btn--ghost btn--small"
           disabled={!targetData}
@@ -922,6 +952,7 @@ function AdminTopicCard({
         >
           {passed ? '↩︎ Un-conquer' : '⚓ Mark conquered'}
         </button>
+        )}
         <button className="btn btn--ghost btn--small" onClick={() => { sfx.click(); onManage() }}>
           📋 Questions
         </button>

@@ -34,6 +34,7 @@ import {
   pickTraining,
   reviewBreakdown,
   reviewTopicIds,
+  sessionPool,
   shuffle,
   topicById,
   warmupAttempts,
@@ -44,6 +45,8 @@ import { lessonById } from '../quiz/lessons'
 import { canSpeak, speak, stopSpeaking } from '../lib/speak'
 import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
+import { QuizMissHelp } from './QuizMissHelp'
+import { useQuizSessionLog } from './useQuizSessionLog'
 
 export type QuizMode = 'training' | 'simulation' | 'official' | 'warmup'
 
@@ -53,6 +56,8 @@ export interface Given {
   text?: string
   /** Right answer, but misspelled — full points, gentle spelling nudge. */
   nearMiss?: boolean
+  /** §14e — a match or order answer, spelled out for Dad's report. Kept apart from `text` so Ben's feedback card stays as it was. */
+  logged?: string
 }
 
 interface Props {
@@ -111,6 +116,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [results, setResults] = useState<{ qid: string; correct: boolean }[]>([])
   const [recent, setRecent] = useState<string[]>([]) // training: recently shown, to avoid instant repeats
   const [sessionCorrect, setSessionCorrect] = useState<string[]>([]) // training: answered right this session — never re-asked today's run
+  const [sessionMissed, setSessionMissed] = useState<string[]>([]) // training: missed this session — retried as another version of the idea when there is one (§14d)
   const [trainingDone, setTrainingDone] = useState(false) // training: whole topic cleared this session
   const [sessionEarned, setSessionEarned] = useState(0)
   const [answered, setAnswered] = useState(0)
@@ -138,9 +144,23 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
 
   const question = mode === 'training' ? current : testCurrent
 
+  // §14e — Dad's live view and his report. Only Ben's sittings, never a preview.
+  const log = useQuizSessionLog({
+    enabled: targetId === KID_ID && !preview,
+    targetId,
+    topicId,
+    kind: stage === 'review' ? 'review' : mode,
+    total: mode === 'training' ? 0 : plan.length,
+  })
+
   useEffect(() => {
     startRef.current = Date.now()
   }, [question?.id])
+
+  useEffect(() => {
+    if (question && !feedback) log.showing(question)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question?.id, feedback])
 
   // ---- test: finish when all answered ----
   useEffect(() => {
@@ -149,6 +169,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     // the warm-up round grades itself first — a fail stops the run here
     if (stage === 'review') {
       const record = finishReviewTest(targetId, topicId, results, authId)
+      log.finish(record)
       setReviewRecord(record)
       setStage(record.passed ? 'review-passed' : 'review-failed')
       if (record.passed) sfx.gem()
@@ -160,6 +181,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       const record = isWarmup
         ? finishWarmupTest(targetId, results)
         : finishQuizTest(targetId, topicId, mode === 'official', results, authId)
+      log.finish(record)
       setFinished(record)
       if (record.passed) {
         sfx.bigWin()
@@ -171,12 +193,14 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results.length])
 
-  function advanceTraining(q: QuizQuestion, correctIds: string[]) {
-    // questions answered RIGHT this session don't come back; wrong ones may return for another try
-    const remainingPool = pool.filter((x) => !correctIds.includes(x.id))
+  function advanceTraining(q: QuizQuestion, correctIds: string[], missedIds: string[] = sessionMissed) {
+    // questions answered RIGHT this session don't come back (nor, §14d, do the
+    // other versions of the same idea); wrong ones return, as another version
+    // when the idea has one
+    const remainingPool = sessionPool(pool, correctIds, missedIds)
     setFeedback(null)
     const shown = [...recent, q.id]
-    const next = pickTraining(remainingPool, stats, shown, ignoreRest)
+    const next = pickTraining(remainingPool, stats, shown, ignoreRest, missedIds, pool)
     if (!next) {
       // nothing left that's due today — the topic is clear (for now)
       setTrainingDone(true)
@@ -190,7 +214,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
 
   /** "Practice anyway" from the caught-up screen: drop the rest filter and keep going. */
   function practiceAnyway() {
-    const next = pickTraining(pool.filter((x) => !sessionCorrect.includes(x.id)), stats, recent, true)
+    const next = pickTraining(sessionPool(pool, sessionCorrect, sessionMissed), stats, recent, true, sessionMissed, pool)
     if (!next) return
     setIgnoreRest(true)
     setTrainingDone(false)
@@ -201,6 +225,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     if (!question) return
     const timeMs = Date.now() - startRef.current
     const earned = preview ? 0 : recordQuizAnswer(targetId, question.id, correct, timeMs, mode === 'training')
+    log.answered(question, correct, given, timeMs)
     setAnswered((n) => n + 1)
     if (mode === 'training') {
       if (correct) {
@@ -220,6 +245,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
         window.setTimeout(() => advanceTraining(q, correctIds), 350)
       } else {
         sfx.error()
+        setSessionMissed((m) => (m.includes(question.id) ? m : [...m, question.id]))
         setFeedback({ q: question, given })
       }
     } else {
@@ -421,8 +447,20 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
               </button>
             )
           })()}
+          {/* §14d — a chapter quiz's miss teaches: the idea in a few lines, and a video */}
+          <QuizMissHelp q={feedback.q} />
           <SeLessonButton subtopicId={feedback.q.seSubtopic} />
-          <button className="btn" style={{ marginTop: 12 }} onClick={() => advanceTraining(feedback.q, sessionCorrect)}>
+          <button
+            className="btn"
+            style={{ marginTop: 12 }}
+            onClick={() =>
+              advanceTraining(
+                feedback.q,
+                sessionCorrect,
+                sessionMissed.includes(feedback.q.id) ? sessionMissed : [...sessionMissed, feedback.q.id],
+              )
+            }
+          >
             Next question ➜
           </button>
           <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
@@ -702,7 +740,7 @@ function WriteQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean, given
 
 const PAIR_COLORS = ['#ffce00', '#60bff5', '#7ce87c', '#ff9bd0', '#ffa04d', '#b39dff']
 
-function MatchQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => void }) {
+function MatchQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void }) {
   const pairs = q.pairs ?? []
   const rights = useMemo(() => shuffle(pairs.map((p) => p.right)), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [sel, setSel] = useState<string | null>(null) // selected left
@@ -734,7 +772,7 @@ function MatchQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => vo
   function check() {
     if (done) return
     setDone(true)
-    onAnswer(pairs.every((p) => map[p.left] === p.right))
+    onAnswer(pairs.every((p) => map[p.left] === p.right), { logged: pairs.map((p) => `${p.left} → ${map[p.left]}`).join(' · ') })
   }
 
   return (
@@ -779,7 +817,7 @@ function MatchQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => vo
   )
 }
 
-function OrderQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => void }) {
+function OrderQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void }) {
   const items = useMemo(() => shuffle(q.sequence ?? []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [chosen, setChosen] = useState<string[]>([])
   const [done, setDone] = useState(false)
@@ -793,7 +831,7 @@ function OrderQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean) => vo
   function check() {
     if (done) return
     setDone(true)
-    onAnswer((q.sequence ?? []).every((s, i) => chosen[i] === s))
+    onAnswer((q.sequence ?? []).every((s, i) => chosen[i] === s), { logged: chosen.join(' → ') })
   }
 
   return (

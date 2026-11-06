@@ -1,6 +1,7 @@
 // Grand Line Academy — quiz rules. Keep in sync with BUSINESS_REQUIREMENTS.md §14–15.
 import type { AppData, QuizQuestion, QuizQuestionType, QuizState, QuizStat, QuizTestRecord } from '../types'
 import { addDays, dayKey, daysUntil } from './dates'
+import { SE_SUBJECTS } from './steugene'
 
 // --- topics ----------------------------------------------------------------
 
@@ -39,6 +40,19 @@ export interface QuizTopic {
    * point at one subtopic each (`QuizQuestion.seSubtopic`).
    */
   seStrands?: string[]
+  /**
+   * §14d — a CHAPTER QUIZ: one St. Eugene 7 subtopic, studied on the 📚
+   * Subjects tab (`/academy/subjects`) and named by its subtopic id. Berries
+   * only, like a school quiz: no Devil Fruit, no final test, no daily must-do,
+   * never the prize for passing something else. There are sixty-odd of them,
+   * and the economy and the one-task-a-day rule were sized for a handful.
+   */
+  chapter?: string
+}
+
+/** §14b + §14d — Berries and nothing else: no final test, no 🍇, no must-do, never a prize. */
+export function berriesOnly(t: QuizTopic): boolean {
+  return !!t.school || !!t.chapter
 }
 
 /** Sections on the Academy screen, in display order. */
@@ -60,6 +74,33 @@ export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
     blurb: 'Real homework, pirate paint. Berries only — no Devil Fruits, no final test.',
   },
 ]
+
+/** §14d — chapter quiz ids are the subtopic's, prefixed. Also how the bank shards them (`src/store/cloud.ts`). */
+export const CHAPTER_PREFIX = 'se7-'
+
+/** The subjects that get chapter quizzes, in the year's order. Maths stays in St. Eugene (§14). */
+export const CHAPTER_SUBJECTS = SE_SUBJECTS.filter((s) => s.id !== 'math')
+
+/**
+ * §14d — one quiz per St. Eugene subtopic, generated from the year's map so
+ * the Subjects tab can never disagree with it about names or order.
+ */
+const CHAPTER_TOPICS: QuizTopic[] = CHAPTER_SUBJECTS.flatMap((subject) =>
+  subject.strands.flatMap((strand) =>
+    strand.subtopics.map(
+      (sub): QuizTopic => ({
+        id: CHAPTER_PREFIX + sub.id,
+        owner: 'ben',
+        title: sub.title,
+        emoji: sub.emoji,
+        description: sub.plain,
+        targetCount: 15,
+        optionCount: 3, // the St. Eugene rule (§24f): three options, one right
+        chapter: sub.id,
+      }),
+    ),
+  ),
+)
 
 export const QUIZ_TOPICS: QuizTopic[] = [
   // --- Ben (grade 6, born Feb 2014) ---
@@ -87,6 +128,17 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     emoji: '📜',
     description: 'First Peoples, explorers, the fur trade, Confederation, the railway and the wars.',
     targetCount: 50,
+  },
+  // §14 — how the country he lives in is actually run. Deliberately almost
+  // name-free: only the Prime Minister, the Premier of Ontario and the Mayor of
+  // Toronto are named, because the rest of the bank has to survive an election.
+  {
+    id: 'canada-politics',
+    owner: 'ben',
+    title: 'Canada Politics',
+    emoji: '🏛️',
+    description: 'Three levels, one country: what Ottawa, Queen’s Park and City Hall each decide — and who you elect.',
+    targetCount: 64,
   },
   {
     id: 'ontario-geography',
@@ -292,6 +344,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     track: 'tooling',
     targetCount: 50,
   },
+  ...CHAPTER_TOPICS,
 ]
 
 export function topicById(id: string): QuizTopic | undefined {
@@ -362,7 +415,7 @@ export function nextTopicToUnlock(d: AppData, ownerId: string, passedTopicId: st
   return topicsFor(ownerId).find(
     (t) =>
       !t.comingSoon &&
-      !t.school && // homework is never the prize for passing something else
+      !berriesOnly(t) && // homework (and a chapter quiz) is never the prize for passing something else
       t.id !== passedTopicId &&
       !d.quiz.unlockedTopics.includes(t.id) &&
       !d.quiz.passedTopics.includes(t.id) && // a conquered topic leaves the unlocked list, but is not the prize
@@ -618,6 +671,9 @@ export function pickTraining(
   stats: Record<string, QuizStat>,
   recentIds: string[],
   ignoreRest = false,
+  missedIds: string[] = [],
+  /** The topic's whole bank: a card he just missed has left `pool`, but its family still counts. */
+  all: QuizQuestion[] = pool,
 ): QuizQuestion | null {
   if (pool.length === 0) return null
   const due = ignoreRest ? pool : duePool(pool, stats)
@@ -625,14 +681,64 @@ export function pickTraining(
   const recent = new Set(recentIds.slice(-6))
   let candidates = due.filter((q) => !recent.has(q.id))
   if (candidates.length === 0) candidates = due
+  // §14d — the version of an idea he just saw does not get a twin straight
+  // after it: that would be reading the answer off the last card. One card in
+  // between, at least, whenever there is anything else to ask.
+  const byId = new Map(all.map((q) => [q.id, q]))
+  const lastFamilies = new Set(recentIds.slice(-2).map((id) => byId.get(id)?.family).filter(Boolean))
+  const apart = candidates.filter((q) => !q.family || !lastFamilies.has(q.family))
+  if (apart.length > 0) candidates = apart
+  // …and an idea he missed this session comes back sooner, in another version
+  const hot = new Set(missedIds.map((id) => byId.get(id)?.family).filter(Boolean))
   const weights = candidates.map((q) => {
     const stat = stats[q.id]
     const novelty = !stat || stat.seen === 0 ? 2.5 : 1
     const struggle = 1.6 - successRate(stat) // weak questions come back more often
     const fresh = isFresh(q, stat) ? 3 : 1 // weekly-review additions/updates jump the queue
-    return q.weight * novelty * struggle * fresh
+    const missed = q.family && hot.has(q.family) ? 2 : 1
+    return q.weight * novelty * struggle * fresh * missed
   })
   return weightedPick(candidates, weights)
+}
+
+/**
+ * §14d — how many IDEAS of a pool he owns. An idea is a family (or a lone
+ * question); he owns it once any version of it has ever been answered right.
+ * Counting questions instead would make a chapter of five ideas look like
+ * fifteen things to learn.
+ */
+export function ideaProgress(pool: QuizQuestion[], stats: Record<string, QuizStat>): { total: number; known: number } {
+  const ideas = new Map<string, boolean>()
+  for (const q of pool) {
+    const key = q.family ?? q.id
+    ideas.set(key, (ideas.get(key) ?? false) || !!stats[q.id]?.everCorrect)
+  }
+  let known = 0
+  for (const v of ideas.values()) if (v) known++
+  return { total: ideas.size, known }
+}
+
+/**
+ * §14d — what training may still ask in this session, with the versions of
+ * one idea treated as one idea.
+ *
+ * - A right answer clears its whole FAMILY for the session: he showed he knows
+ *   the fact, and the other versions are the same fact in other words.
+ * - A missed card does not come back as itself while another version of it is
+ *   still left — the retry is the same idea, asked differently, so he cannot
+ *   pass it by remembering where the answer sat.
+ *
+ * Questions without a family behave exactly as before: only a right answer
+ * takes them out.
+ */
+export function sessionPool(pool: QuizQuestion[], correctIds: string[], missedIds: string[]): QuizQuestion[] {
+  const right = new Set(correctIds)
+  const missed = new Set(missedIds)
+  const solved = new Set(pool.filter((q) => q.family && right.has(q.id)).map((q) => q.family))
+  const left = pool.filter((q) => !right.has(q.id) && !(q.family && solved.has(q.family)))
+  return left.filter(
+    (q) => !q.family || !missed.has(q.id) || !left.some((o) => o.family === q.family && !missed.has(o.id)),
+  )
 }
 
 // --- Question of the Day ----------------------------------------------------
@@ -923,7 +1029,8 @@ export function syncQuizTasks(d: AppData, ownerId: string): void {
     const id = QUIZ_TASK_PREFIX + t.id
     // §14b — a school quiz never becomes a forever-daily must-do: the unit ends,
     // the habit wouldn't. An already-created one gets archived on the next sync.
-    const unlocked = d.quiz.unlockedTopics.includes(t.id) && !t.school
+    // §14d — nor do the sixty chapter quizzes: one task a day, not sixty.
+    const unlocked = d.quiz.unlockedTopics.includes(t.id) && !berriesOnly(t)
     const task = d.tasks.find((x) => x.id === id)
     if (unlocked) {
       if (!task) {

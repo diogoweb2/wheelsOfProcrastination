@@ -8,12 +8,16 @@ import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import type { AppData, QuizLesson, QuizQuestion } from '../types'
 import {
+  CHAPTER_PREFIX,
+  CHAPTER_SUBJECTS,
   QUIZ_TRACKS,
   REVIEW_PASS_PCT,
   WARMUP_KEEP,
   WARMUP_TOPIC_ID,
   activeQuestions,
+  berriesOnly,
   duePool,
+  ideaProgress,
   isFresh,
   lastOfficialAttempt,
   prerequisiteOf,
@@ -89,8 +93,10 @@ export function QuizScreen({
 
   // §14b — school quizzes have their own tab (/academy/school), so the academy's
   // own topic list leaves them out entirely rather than showing them twice.
-  const academyTopics = topics.filter((t) => !t.school)
+  const academyTopics = topics.filter((t) => !berriesOnly(t))
   const schoolTopics = topics.filter((t) => t.school)
+  // §14d — and the chapter quizzes have the Subjects tab
+  const chapterTopics = topics.filter((t) => t.chapter)
 
   // topics grouped into their tracks, with anything untracked falling through last
   const sections = [
@@ -141,6 +147,15 @@ export function QuizScreen({
           </div>
         ))}
 
+      {tab === 'subjects' && (
+        <SubjectsShelf
+          topics={chapterTopics}
+          data={data}
+          bank={quizBank}
+          onStart={(topicId) => setSession({ mode: 'training', topicId })}
+        />
+      )}
+
       {tab === 'school' && (
         <SchoolShelf
           topics={schoolTopics}
@@ -163,6 +178,167 @@ export function QuizScreen({
       {tab === 'study' && <StudyShelf topics={topics} bank={quizBank} onOpen={setStudy} />}
 
       {tab === 'progress' && <ProgressBoard topics={topics} data={data} bank={quizBank} />}
+    </div>
+  )
+}
+
+// --- Subjects tab: one quiz per chapter of his school year (§14d) -------------
+
+const OPEN_SUBJECT_KEY = 'academy.subjects.open'
+
+function readOpenSubject(): string | null {
+  try {
+    return localStorage.getItem(OPEN_SUBJECT_KEY)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * His grade-7 year as quizzes: History, Language, Science, Geography, each a
+ * card that opens onto its chapters IN THE ORDER HIS CLASS TEACHES THEM.
+ *
+ * One subject open at a time, and inside it one chapter marked ▶ — the first
+ * he does not own yet — so there is always an obvious place to start rather
+ * than sixty to choose from. Progress counts IDEAS, not questions: five things
+ * to know, each asked a few ways.
+ */
+function SubjectsShelf({
+  topics,
+  data,
+  bank,
+  onStart,
+}: {
+  topics: QuizTopic[]
+  data: AppData
+  bank: QuizQuestion[]
+  onStart: (topicId: string) => void
+}) {
+  const [open, setOpen] = useState<string | null>(readOpenSubject)
+  const owned = new Set(topics.map((t) => t.id))
+
+  if (topics.length === 0) {
+    return (
+      <div className="card" style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 44 }}>📚</div>
+        <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+          Ben’s grade 7 subjects live here — one quiz per chapter. Open the Quiz app on his profile to see them.
+        </p>
+      </div>
+    )
+  }
+
+  const toggle = (id: string) => {
+    sfx.click()
+    const next = open === id ? null : id
+    setOpen(next)
+    try {
+      if (next) localStorage.setItem(OPEN_SUBJECT_KEY, next)
+      else localStorage.removeItem(OPEN_SUBJECT_KEY)
+    } catch {
+      /* a private window just forgets which one was open */
+    }
+  }
+
+  const progressOf = (topicId: string) => {
+    const pool = activeQuestions(bank, topicId)
+    return { pool, ...ideaProgress(pool, data.quiz.stats), due: duePool(pool, data.quiz.stats).length }
+  }
+
+  return (
+    <div>
+      <div className="h2" style={{ marginBottom: 2 }}>📚 Your grade 7 subjects</div>
+      <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+        One quiz per chapter, in the order your class teaches it. Miss one and it shows you the idea and a video.
+        Pays Berries 🪙 — no Devil Fruits here.
+      </p>
+
+      {CHAPTER_SUBJECTS.map((subject) => {
+        const chapters = subject.strands.flatMap((st) => st.subtopics).filter((sub) => owned.has(CHAPTER_PREFIX + sub.id))
+        if (chapters.length === 0) return null
+        const rows = chapters.map((sub) => ({ sub, ...progressOf(CHAPTER_PREFIX + sub.id) }))
+        const total = rows.reduce((n, r) => n + r.total, 0)
+        const known = rows.reduce((n, r) => n + r.known, 0)
+        const isOpen = open === subject.id
+        // ▶ the first chapter that is written, open, and not yet his
+        const next = rows.find(
+          (r) => r.total > 0 && r.known < r.total && data.quiz.unlockedTopics.includes(CHAPTER_PREFIX + r.sub.id),
+        )
+        return (
+          <div key={subject.id} style={{ marginBottom: 12 }}>
+            <button
+              className="subject-card"
+              style={{ background: `linear-gradient(135deg, ${subject.tint[0]}, ${subject.tint[1]})` }}
+              onClick={() => toggle(subject.id)}
+              aria-expanded={isOpen}
+            >
+              <span className="subject-card__emoji">{subject.emoji}</span>
+              <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <span style={{ display: 'block', fontWeight: 900, fontSize: 18 }}>{subject.name}</span>
+                <span style={{ display: 'block', fontSize: 12, opacity: 0.85 }}>
+                  {chapters.length} chapters · {known}/{total} ideas learned
+                </span>
+              </span>
+              <span className={`subject-card__chev${isOpen ? ' subject-card__chev--open' : ''}`}>▸</span>
+            </button>
+
+            {isOpen &&
+              subject.strands.map((strand) => {
+                const mine = rows.filter((r) => strand.subtopics.some((s) => s.id === r.sub.id))
+                if (mine.length === 0) return null
+                return (
+                  <div key={strand.id} className="subject-strand">
+                    <div className="muted subject-strand__title">{strand.title}</div>
+                    {mine.map((r) => {
+                      const n = rows.indexOf(r) + 1
+                      const id = CHAPTER_PREFIX + r.sub.id
+                      const unlocked = data.quiz.unlockedTopics.includes(id)
+                      const ready = r.total > 0 && unlocked
+                      const done = r.total > 0 && r.known === r.total
+                      const isNext = next === r
+                      const pct = r.total > 0 ? Math.round((r.known / r.total) * 100) : 0
+                      return (
+                        <button
+                          key={r.sub.id}
+                          className={`quiz-opt subject-row${isNext ? ' subject-row--next' : ''}`}
+                          disabled={!ready}
+                          style={{ opacity: ready ? 1 : 0.55 }}
+                          onClick={() => {
+                            sfx.click()
+                            onStart(id)
+                          }}
+                        >
+                          <span className="subject-row__n">{n}</span>
+                          <span className="subject-row__emoji">{r.sub.emoji}</span>
+                          <span style={{ flex: 1, minWidth: 0 }}>
+                            <span style={{ display: 'block', fontWeight: 900, fontSize: 14 }}>{r.sub.title}</span>
+                            <span className="muted" style={{ display: 'block', fontSize: 11 }}>{r.sub.sample}</span>
+                            {ready && (
+                              <>
+                                <span className="quiz-bar" style={{ display: 'block' }}>
+                                  <span className="quiz-bar-fill" style={{ display: 'block', width: `${pct}%` }} />
+                                </span>
+                                <span className="muted" style={{ display: 'block', fontSize: 11, marginTop: 2 }}>
+                                  {r.known}/{r.total} ideas
+                                  {r.due > 0 ? ` · ${r.due} to practise today` : ' · all caught up today 😴'}
+                                </span>
+                              </>
+                            )}
+                            {r.total === 0 && <span className="muted" style={{ display: 'block', fontSize: 11 }}>🚧 not written yet</span>}
+                            {r.total > 0 && !unlocked && <span className="muted" style={{ display: 'block', fontSize: 11 }}>🔒 put away by Dad</span>}
+                          </span>
+                          <span style={{ color: 'var(--gold)', fontWeight: 900, flexShrink: 0 }}>
+                            {done ? '✔' : isNext ? '▶' : '➜'}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -412,7 +588,17 @@ function StudyShelf({
 // --- Progress tab: mastery per topic + the official test record --------------
 
 function ProgressBoard({ topics, data, bank }: { topics: QuizTopic[]; data: AppData; bank: QuizQuestion[] }) {
+  // §14d — sixty chapter quizzes would bury every other row; they get one line per subject below
+  const chapterIds = new Set(topics.filter((t) => t.chapter).map((t) => t.id))
+  const subjectRows = CHAPTER_SUBJECTS.map((subject) => {
+    const pool = subject.strands
+      .flatMap((st) => st.subtopics)
+      .filter((sub) => chapterIds.has(CHAPTER_PREFIX + sub.id))
+      .flatMap((sub) => activeQuestions(bank, CHAPTER_PREFIX + sub.id))
+    return { subject, ...ideaProgress(pool, data.quiz.stats) }
+  }).filter((r) => r.total > 0)
   const rows = topics
+    .filter((t) => !t.chapter)
     .map((t) => {
       const pool = activeQuestions(bank, t.id)
       return {
@@ -464,6 +650,24 @@ function ProgressBoard({ topics, data, bank }: { topics: QuizTopic[]; data: AppD
           </div>
         </div>
       ))}
+
+      {subjectRows.length > 0 && (
+        <>
+          <div className="h2">📚 Subjects</div>
+          {subjectRows.map(({ subject, total, known }) => (
+            <div key={subject.id} className="card" style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>{subject.emoji}</span>
+                <div style={{ fontWeight: 900, flex: 1, minWidth: 0 }}>{subject.name}</div>
+              </div>
+              <div className="quiz-bar" title={`${known}/${total} ideas`}>
+                <div className="quiz-bar-fill" style={{ width: `${Math.round((known / total) * 100)}%` }} />
+              </div>
+              <div className="muted" style={{ fontSize: 11, marginTop: 3 }}>{known}/{total} ideas learned</div>
+            </div>
+          ))}
+        </>
+      )}
 
       {officials.length > 0 && (
         <>
