@@ -369,6 +369,17 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     firstGoal: { one: 'province', many: 'provinces', everyInTest: true },
   },
   {
+    id: WORLD_PREFIX + 'physical',
+    owner: 'ben',
+    title: 'Where Is This? Physical World',
+    emoji: '🌐',
+    description: 'Continents and oceans first — then the great rivers, mountain ranges and deserts.',
+    targetCount: 58,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-canada',
+    firstGoal: { one: 'place', many: 'continents and oceans' },
+  },
+  {
     id: 'where-gta',
     owner: 'ben',
     title: 'Where Is This? Toronto & GTA',
@@ -376,8 +387,29 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     description: 'Home turf: the six areas and two rivers first — then the cities around Toronto and the 401, 404, 407 and 427.',
     targetCount: 57,
     track: MAPS_TRACK,
-    unlockAfter: 'where-canada',
+    unlockAfter: WORLD_PREFIX + 'physical',
     firstGoal: { one: 'place', many: 'places' },
+  },
+  {
+    id: WORLD_PREFIX + 'ttc',
+    owner: 'ben',
+    title: 'Where Is This? TTC',
+    emoji: '🚇',
+    description: 'The five lines first — then the key stations, and where to change to get around on your own.',
+    targetCount: 43,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-gta',
+    firstGoal: { one: 'line', many: 'lines' },
+  },
+  {
+    id: WORLD_PREFIX + 'canada-history',
+    owner: 'ben',
+    title: 'Where Did It Happen? Canada',
+    emoji: '📜',
+    description: 'History on the map: tap the province where it happened.',
+    targetCount: 36,
+    track: MAPS_TRACK,
+    unlockAfter: WORLD_PREFIX + 'ttc',
   },
   {
     id: 'where-usa',
@@ -387,7 +419,7 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     description: 'All 50 states on the map first — then every state capital.',
     targetCount: 150,
     track: MAPS_TRACK,
-    unlockAfter: 'where-gta',
+    unlockAfter: WORLD_PREFIX + 'canada-history',
     firstGoal: { one: 'state', many: 'states' },
   },
   {
@@ -434,6 +466,27 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     unlockAfter: WORLD_PREFIX + 'africa',
     firstGoal: { one: 'country', many: 'countries' },
   },
+  {
+    id: WORLD_PREFIX + 'flags',
+    owner: 'ben',
+    title: 'Whose Flag Is This?',
+    emoji: '🚩',
+    description: 'A flag and a map: tap the country it belongs to.',
+    targetCount: 59,
+    track: MAPS_TRACK,
+    unlockAfter: WORLD_PREFIX + 'asia-oceania',
+  },
+  {
+    id: WORLD_PREFIX + 'body',
+    owner: 'ben',
+    title: 'Where Is This? Human Body',
+    emoji: '🫀',
+    description: 'The organs first — then what each one does, and the big bones.',
+    targetCount: 34,
+    track: MAPS_TRACK,
+    unlockAfter: WORLD_PREFIX + 'flags',
+    firstGoal: { one: 'organ', many: 'organs' },
+  },
   ...CHAPTER_TOPICS,
 ]
 
@@ -458,6 +511,14 @@ export function topicsFor(ownerId: string): QuizTopic[] {
  *
  * Returns true if anything changed (callers only save when it did).
  */
+/** §14 — profiles that work on one academy topic at a time. Berries-only shelves don't count. */
+const ONE_TOPIC_OWNERS = ['ben']
+
+function isWorkingOn(id: string, passed: string[]): boolean {
+  const t = topicById(id)
+  return !!t && !berriesOnly(t) && !passed.includes(id)
+}
+
 export function syncTopicUnlocks(d: AppData, ownerId: string): boolean {
   const q = d.quiz
   let changed = false
@@ -478,6 +539,8 @@ export function syncTopicUnlocks(d: AppData, ownerId: string): boolean {
     if (t.comingSoon || q.autoUnlocked.includes(t.id)) continue
     const ready = !t.unlockAfter || q.passedTopics.includes(t.unlockAfter)
     if (!ready) continue
+    // §14 — nothing opens beside the topic he is trying to pass; the pass opens the next
+    if (ONE_TOPIC_OWNERS.includes(ownerId) && !berriesOnly(t) && q.unlockedTopics.some((id) => isWorkingOn(id, q.passedTopics))) continue
     q.autoUnlocked.push(t.id)
     if (!q.unlockedTopics.includes(t.id)) q.unlockedTopics.push(t.id)
     changed = true

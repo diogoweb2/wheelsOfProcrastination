@@ -5,7 +5,7 @@
 // question he cannot physically tap tests his finger, not his geography.
 import { useEffect, useState } from 'react'
 import type { QuizMapSpec } from '../types'
-import type { MapDrawing, MapFeature, MapId } from '../quiz/maps/types'
+import type { MapDrawing, MapFeature, MapId, MapPick } from '../quiz/maps/types'
 import { MAP_NAMES } from '../quiz/maps/names'
 import { sfx } from '../audio'
 
@@ -19,6 +19,10 @@ const LOADERS: Record<MapId, () => Promise<{ MAP: MapDrawing }>> = {
   africa: () => import('../quiz/maps/africa.generated'),
   asia: () => import('../quiz/maps/asia.generated'),
   oceania: () => import('../quiz/maps/oceania.generated'),
+  world: () => import('../quiz/maps/world.generated'),
+  ttc: () => import('../quiz/maps/ttc.generated'),
+  organs: () => import('../quiz/maps/organs.generated'),
+  skeleton: () => import('../quiz/maps/skeleton.generated'),
 }
 
 const loaded = new Map<MapId, MapDrawing>()
@@ -66,7 +70,12 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
   const view = zoom ?? whole
   const span = Number(view.split(' ')[2]) // labels and rings keep their size on screen when zoomed
   const areas = drawing.features.filter((f) => f.kind === 'area')
-  const lines = pick === 'area' ? [] : drawing.features.filter((f) => f.kind === pick)
+  // only what the question is about is drawn: a map of every river and range at once is noise
+  const asked = (...kinds: MapPick[]) => drawing.features.filter((f) => kinds.includes(f.kind) && (f.kind === pick || (f.kind === 'subway' && pick === 'stop')))
+  const oceans = asked('ocean')
+  const patches = asked('range', 'desert')
+  const lines = asked('river', 'highway', 'subway')
+  const stops = asked('stop')
   const canTap = (f: MapFeature) => !!onTap && f.kind === pick
 
   const state = (f: MapFeature) => {
@@ -87,7 +96,7 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
     <div className="map-wrap">
       {/* §26 — one "map tap" per tap: the usage log never reads the answer */}
       <svg
-        className="map-board"
+        className={`map-board ${spec.id === 'organs' || spec.id === 'skeleton' ? 'map-board--body' : ''}`}
         viewBox={view}
         role="img"
         aria-label="Map with no names on it"
@@ -95,8 +104,17 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
       >
         <path className="map-land" d={drawing.backdrop} />
         {drawing.water && <path className="map-water" d={drawing.water} />}
+        {oceans.map((f) => (
+          <path key={f.id} className={cls('map-ocean', f)} d={f.d} onClick={tap(f)} />
+        ))}
         {areas.map((f) => (
           <path key={f.id} className={cls('map-area', f)} d={f.d} fillRule="evenodd" onClick={tap(f)} />
+        ))}
+        {patches.map((f) => (
+          <g key={f.id}>
+            <path className={cls('map-patch', f) + ` map-patch--${f.kind}`} d={f.d} onClick={tap(f)} />
+            {f.small && canTap(f) && <path className="map-hit" d={f.d} onClick={tap(f)} />}
+          </g>
         ))}
         {areas
           .filter((f) => f.small && canTap(f))
@@ -105,9 +123,16 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
           ))}
         {lines.map((f) => (
           <g key={f.id}>
-            <path className={cls('map-line', f) + ` map-line--${f.kind}`} d={f.d} />
+            <path
+              className={cls('map-line', f) + ` map-line--${f.kind}`}
+              d={f.d}
+              style={f.color && !state(f) ? { stroke: f.color } : undefined}
+            />
             {canTap(f) && <path className="map-hit map-hit--line" d={f.d} onClick={tap(f)} />}
           </g>
+        ))}
+        {stops.map((f) => (
+          <circle key={f.id} className={cls('map-stop', f)} cx={f.at![0]} cy={f.at![1]} r={span * 0.011} onClick={tap(f)} />
         ))}
         {ringed.map((f) => (
           <circle
@@ -125,7 +150,7 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
           </text>
         ))}
       </svg>
-      {drawing.zooms.length > 0 && pick === 'area' && (
+      {drawing.zooms.length > 0 && (pick === 'area' || pick === 'stop') && (
         <div className="map-zooms">
           {drawing.zooms.map((z) => (
             <button

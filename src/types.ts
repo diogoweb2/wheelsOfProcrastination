@@ -313,6 +313,7 @@ export interface QuizQuestion {
   pairs?: { left: string; right: string }[] // match: correct pairings
   sequence?: string[] // order: items in the correct order
   map?: QuizMapSpec // map: what to tap (`answer` holds the names) · choice: the place to name
+  bigEmoji?: string // shown large above the map: the flag he has to place (§14f)
   /** §14f — the topic's first goal: training asks nothing else until these are known. */
   firstGoal?: boolean
   weight: number // 2 = core knowledge (provinces/capitals/languages), 1 = fun extras

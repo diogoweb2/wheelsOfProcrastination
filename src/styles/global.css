@@ -7494,3 +7494,37 @@ input, select { font-family: inherit; }
 .map-zooms { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .map-zooms .btn { width: auto; flex: 1; }
 .map-zoom--on { border-color: var(--yellow); }
+
+/* §14f — the world map's oceans and regions, the TTC's stops, the body quiz */
+.map-ocean { fill: #4f93c1; stroke: #3c7ba6; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.map-ocean--tap { cursor: pointer; }
+@media (hover: hover) { .map-ocean--tap:hover { fill: #6fb0da; } }
+.map-ocean--on { fill: var(--yellow); }
+.map-ocean--right { fill: var(--green); }
+.map-ocean--wrong { fill: var(--red); }
+.map-patch { stroke: #3d2a10; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.map-patch--range { fill: #8b5a2b; }
+.map-patch--desert { fill: #e0b040; }
+.map-patch--tap { cursor: pointer; }
+.map-patch--on { fill: var(--yellow); stroke-width: 2px; }
+.map-patch--right { fill: var(--green); stroke-width: 2px; }
+.map-patch--wrong { fill: var(--red); stroke-width: 2px; }
+.map-stop {
+  fill: #fff;
+  stroke: #111;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.map-stop--tap { cursor: pointer; }
+.map-stop--on { fill: var(--yellow); }
+.map-stop--right { fill: var(--green); }
+.map-stop--wrong { fill: var(--red); }
+.map-line--subway { stroke-width: 5px; }
+.map-board--body { background: #16324f; }
+.map-board--body .map-land { fill: #e3c4a4; }
+.map-board--body .map-area { fill: #f4ece0; }
+.map-board--body .map-area--on { fill: var(--yellow); }
+.map-board--body .map-area--show { fill: var(--yellow); }
+.map-board--body .map-area--right { fill: var(--green); }
+.map-board--body .map-area--wrong { fill: var(--red); }
+.quiz-flag { font-size: 84px; line-height: 1.1; text-align: center; margin-bottom: 8px; }

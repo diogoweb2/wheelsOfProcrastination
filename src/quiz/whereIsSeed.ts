@@ -21,7 +21,7 @@ const POINTS = 5
 
 type Extra = Partial<QuizQuestion>
 
-const base = (topicId: string, id: string, prompt: string, extra: Extra): QuizQuestion => ({
+export const base = (topicId: string, id: string, prompt: string, extra: Extra): QuizQuestion => ({
   id,
   topicId,
   type: 'map',
@@ -34,7 +34,7 @@ const base = (topicId: string, id: string, prompt: string, extra: Extra): QuizQu
 })
 
 /** A tap question. The answer text is spelled out here so the bank never needs the drawings. */
-function tap(topicId: string, mapId: MapId, id: string, prompt: string, targets: string[], extra: Extra = {}, pick?: MapPick): QuizQuestion {
+export function tap(topicId: string, mapId: MapId, id: string, prompt: string, targets: string[], extra: Extra = {}, pick?: MapPick): QuizQuestion {
   const map: QuizMapSpec = { id: mapId, targets, ...(pick ? { pick } : {}) }
   return base(topicId, id, prompt, { map, answer: targets.map((t) => MAP_NAMES[mapId][t]).join(' · '), ...extra })
 }

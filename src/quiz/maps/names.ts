@@ -309,6 +309,93 @@ export const OCEANIA_COUNTRIES: Place[] = [
   ['to', 'Tonga', 'Nuku’alofa'],
 ]
 
+export const WORLD_NAMES: Record<string, string> = {
+  na: 'North America',
+  sa: 'South America',
+  eu: 'Europe',
+  af: 'Africa',
+  as: 'Asia',
+  oc: 'Australia & Oceania',
+  an: 'Antarctica',
+  pacific: 'Pacific Ocean',
+  atlantic: 'Atlantic Ocean',
+  indian: 'Indian Ocean',
+  arctic: 'Arctic Ocean',
+  southern: 'Southern Ocean',
+  nile: 'Nile River',
+  amazon: 'Amazon River',
+  mississippi: 'Mississippi River',
+  yangtze: 'Yangtze River',
+  ganges: 'Ganges River',
+  danube: 'Danube River',
+  congo: 'Congo River',
+  volga: 'Volga River',
+  mackenzie: 'Mackenzie River',
+  himalayas: 'Himalayas',
+  andes: 'Andes',
+  rockies: 'Rocky Mountains',
+  alps: 'Alps',
+  urals: 'Ural Mountains',
+  appalachians: 'Appalachian Mountains',
+  atlas: 'Atlas Mountains',
+  sahara: 'Sahara Desert',
+  gobi: 'Gobi Desert',
+  kalahari: 'Kalahari Desert',
+  arabian: 'Arabian Desert',
+  outback: 'Great Victoria Desert',
+}
+
+export const TTC_NAMES: Record<string, string> = {
+  line1: 'Line 1 Yonge-University',
+  line2: 'Line 2 Bloor-Danforth',
+  line4: 'Line 4 Sheppard',
+  line5: 'Line 5 Eglinton',
+  line6: 'Line 6 Finch West',
+  union: 'Union',
+  queen: 'Queen',
+  stgeorge: 'St. George',
+  spadina: 'Spadina',
+  bloor: 'Bloor-Yonge',
+  eglinton: 'Eglinton',
+  sheppard: 'Sheppard-Yonge',
+  finch: 'Finch',
+  vmc: 'Vaughan Metropolitan Centre',
+  yorkdale: 'Yorkdale',
+  yorku: 'York University',
+  finchwest: 'Finch West',
+  cedarvale: 'Cedarvale',
+  kipling: 'Kipling',
+  kennedy: 'Kennedy',
+  donmills: 'Don Mills',
+  mountdennis: 'Mount Dennis',
+  humbercollege: 'Humber College',
+}
+
+export const ORGAN_NAMES: Record<string, string> = {
+  brain: 'Brain',
+  lungs: 'Lungs',
+  heart: 'Heart',
+  liver: 'Liver',
+  stomach: 'Stomach',
+  kidneys: 'Kidneys',
+  largeintestine: 'Large intestine',
+  smallintestine: 'Small intestine',
+  bladder: 'Bladder',
+}
+
+export const BONE_NAMES: Record<string, string> = {
+  skull: 'Skull',
+  collarbone: 'Collarbone',
+  ribs: 'Ribs',
+  spine: 'Spine',
+  humerus: 'Humerus (upper arm)',
+  radius: 'Radius (forearm)',
+  pelvis: 'Pelvis',
+  femur: 'Femur (thigh)',
+  kneecap: 'Kneecap',
+  tibia: 'Tibia (shin)',
+}
+
 const namesOf = (table: Place[]) => Object.fromEntries(table.map(([id, name]) => [id, name]))
 
 export const MAP_NAMES: Record<MapId, Record<string, string>> = {
@@ -321,4 +408,8 @@ export const MAP_NAMES: Record<MapId, Record<string, string>> = {
   africa: namesOf(AFRICA_COUNTRIES),
   asia: namesOf(ASIA_COUNTRIES),
   oceania: namesOf(OCEANIA_COUNTRIES),
+  world: WORLD_NAMES,
+  ttc: TTC_NAMES,
+  organs: ORGAN_NAMES,
+  skeleton: BONE_NAMES,
 }

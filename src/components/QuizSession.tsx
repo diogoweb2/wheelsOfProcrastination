@@ -774,6 +774,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
       {q.image && (
         <img className="quiz-illus" src={q.image} alt="question illustration" draggable={false} />
       )}
+      {q.bigEmoji && <div className="quiz-flag">{q.bigEmoji}</div>}
       {q.type === 'choice' && q.map && <MapBoard spec={q.map} />}
       {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} rate={rate} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
