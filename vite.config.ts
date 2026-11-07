@@ -22,7 +22,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // `prompt`, not `autoUpdate`: the page decides WHEN to take a new build
+      // (src/lib/fresh.ts), because autoUpdate reloads the moment the new worker
+      // activates — and that moment can be the last question of a final test.
+      registerType: 'prompt',
       includeAssets: ['icon.svg'],
       workbox: {
         // the FCM worker registers itself on its own scope (see src/push.ts) —

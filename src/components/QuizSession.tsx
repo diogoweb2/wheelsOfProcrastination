@@ -54,6 +54,7 @@ import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
 import { QuizMissHelp } from './QuizMissHelp'
 import { useQuizSessionLog } from './useQuizSessionLog'
+import { holdFreshen } from '../lib/fresh'
 import { MapBoard } from './MapBoard'
 import { MAP_NAMES } from '../quiz/maps/names'
 
@@ -173,6 +174,10 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     kind: stage === 'review' ? 'review' : mode,
     total: mode === 'training' ? 0 : plan.length,
   })
+
+  // A new build must not land in the middle of a sitting (src/lib/fresh.ts):
+  // the reload would cost him the attempt. It is taken the moment he is out.
+  useEffect(() => holdFreshen(), [])
 
   useEffect(() => {
     startRef.current = Date.now()

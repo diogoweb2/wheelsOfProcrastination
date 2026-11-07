@@ -27,6 +27,7 @@ import { SeCalculator } from './SeCalculator'
 import { SePlanBox } from './SePlanBox'
 import { SeVideoBlock } from './SeVideoBlock'
 import { seTipFor } from '../../steugene/tips'
+import { holdFreshen } from '../../lib/fresh'
 import type { SeTipPlan } from '../../steugene/tips'
 import type { SeBlock, SeChoice, SeBuild, SeExplain, SeGame, SeStep } from '../../steugene/types'
 
@@ -123,6 +124,10 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
   const rate = data.steugene.speak.rate
 
   const flushNow = useActiveClock(!!run, seTick)
+
+  // A reload mid-lesson loses his place in it, so a waiting build holds off
+  // until he is out of the lesson (src/lib/fresh.ts).
+  useEffect(() => holdFreshen(), [])
 
   // Everything that could be dealt, by id — video questions on their own too,
   // which is how "mistakes to fix" deals one. Note this is NOT filtered by the
