@@ -82,6 +82,11 @@ a WebView shell over the live site ([android/](android/README.md)).
   off-site links (Roblox) leave for Chrome, and the screen stays awake while the
   app is in front — spin, rest and gym timers were the reason.
 - **Push is the one native part** — see §10.
+- **A new build says so.** The first open of a build this device hasn't seen
+  shows a 🔄 "This got updated <day> at <time>" modal (build time, device
+  clock), once. No modal means it is still the same build — so a deploy that
+  didn't reach the tablet is visible at a glance. A device's very first visit
+  stays quiet (`src/components/UpdatedModal.tsx`, localStorage `wheels.lastBuild`).
 - Portrait-locked, matching the PWA manifest. Installed by sideload
   (`./gradlew assembleRelease`, `adb install -r`), never published to Play.
 

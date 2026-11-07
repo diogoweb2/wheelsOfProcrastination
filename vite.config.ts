@@ -17,8 +17,12 @@ const BUILD_ID = new Intl.DateTimeFormat('en-CA', {
   .format(new Date())
   .replace(/\D/g, '')
 
+// The same moment as an ISO instant, for the "this got updated" modal
+// (src/components/UpdatedModal.tsx) — it renders in the DEVICE's own clock.
+const BUILD_TIME = new Date().toISOString()
+
 export default defineConfig({
-  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID), __BUILD_TIME__: JSON.stringify(BUILD_TIME) },
   plugins: [
     react(),
     VitePWA({

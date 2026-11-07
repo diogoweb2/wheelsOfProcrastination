@@ -3,6 +3,7 @@ import { useStore } from './store/useStore'
 import { PARENT_ID, KID_ID } from './store/storage'
 import { PinLock } from './components/PinLock'
 import { EventModal } from './components/EventModal'
+import { UpdatedModal } from './components/UpdatedModal'
 import { StreakPrompts } from './components/StreakPrompts'
 import { RequiredDeadline } from './components/RequiredDeadline'
 import { QuestionOfTheDay } from './components/QuestionOfTheDay'
@@ -721,6 +722,7 @@ export default function App() {
 
       <QuestionOfTheDay />
       <EventModal />
+      <UpdatedModal />
       <StreakPrompts />
       {/* mandatory decision — rendered last so it sits above the other prompts */}
       <RequiredDeadline />
