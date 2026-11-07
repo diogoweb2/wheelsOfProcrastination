@@ -13,18 +13,25 @@
 // length, same pass mark, nothing at stake, and — unlike the gating round — it
 // shows him every answer afterwards, because practice that hides the answer
 // teaches nothing.
+//
+// A topic with a FIRST GOAL (§14f) trains in rounds: only those questions, up to
+// ten at a time, until each has been right twice running. Then the rest opens.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
 import type { QuizQuestion, QuizStat, QuizTestRecord } from '../types'
 import {
+  DRILL_ROUND,
+  FIRST_GOAL_STREAK,
   PASS_PCT,
   REVIEW_PASS_PCT,
   activeQuestions,
-  buildFinalTest,
   buildReviewTest,
+  buildTopicTest,
   correctAnswerText,
+  firstGoalGaps,
+  firstGoalProgress,
   gradeWrite,
   isFresh,
   lastOfficialAttempt,
@@ -47,8 +54,13 @@ import { LessonView } from './Lesson'
 import { SeLessonButton } from './SeLessonButton'
 import { QuizMissHelp } from './QuizMissHelp'
 import { useQuizSessionLog } from './useQuizSessionLog'
+import { MapBoard } from './MapBoard'
+import { MAP_NAMES } from '../quiz/maps/names'
 
 export type QuizMode = 'training' | 'simulation' | 'official' | 'warmup'
+
+/** §14f — one round of first-goal drilling. */
+const roundOf = (gaps: QuizQuestion[]): string[] => gaps.slice(0, DRILL_ROUND).map((q) => q.id)
 
 /** What the player actually gave, so feedback can show it back to them. */
 export interface Given {
@@ -58,6 +70,8 @@ export interface Given {
   nearMiss?: boolean
   /** §14e — a match or order answer, spelled out for Dad's report. Kept apart from `text` so Ben's feedback card stays as it was. */
   logged?: string
+  /** §14f — what he tapped on the map, so the correction can show it in red. */
+  tapped?: string[]
 }
 
 interface Props {
@@ -96,7 +110,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       return buildReviewTest(quizBank, stats, warmupTopicIds(target, targetId, quizBank), exclude)
     }
     const exclude = mode === 'official' && target ? (lastOfficialAttempt(target, topicId)?.results.map((r) => r.qid) ?? []) : []
-    return buildFinalTest(pool, stats, exclude).questions
+    return buildTopicTest(topic, pool, stats, exclude)
   })
 
   // ---- warm-up review round on the topics he already conquered ----
@@ -128,8 +142,15 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
   // training: true once he opts to keep practising past the spaced-repetition rest
   const [ignoreRest, setIgnoreRest] = useState(false)
+  // §14f — the round of first-goal questions being drilled; empty once there are none left to learn.
+  // A preview saves nothing, so a round could never end: Dad just sees the whole bank.
+  const [drill, setDrill] = useState<string[]>(() =>
+    mode === 'training' && !preview && topic?.firstGoal ? roundOf(firstGoalGaps(pool, stats)) : [],
+  )
+  const [drillEnded, setDrillEnded] = useState(false) // training: round over, between rounds
+  const trainPool = useMemo(() => (drill.length > 0 ? pool.filter((q) => drill.includes(q.id)) : pool), [pool, drill])
   const [current, setCurrent] = useState<QuizQuestion | null>(() =>
-    mode === 'training' ? pickTraining(pool, stats, []) : null,
+    mode === 'training' ? pickTraining(trainPool, stats, [], drill.length > 0) : null,
   )
   const startRef = useRef(Date.now())
 
@@ -138,7 +159,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const testCurrent = useMemo(() => {
     if (mode === 'training' || remaining.length === 0) return null
     const lastThreeWrong = results.length >= 3 && results.slice(-3).every((r) => !r.correct)
-    return nextTestQuestion(remaining, stats, lastThreeWrong)
+    return nextTestQuestion(remaining, stats, lastThreeWrong, !!topic?.firstGoal?.everyInTest)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining, results, mode])
 
@@ -197,10 +218,16 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     // questions answered RIGHT this session don't come back (nor, §14d, do the
     // other versions of the same idea); wrong ones return, as another version
     // when the idea has one
-    const remainingPool = sessionPool(pool, correctIds, missedIds)
+    const remainingPool = sessionPool(trainPool, correctIds, missedIds)
     setFeedback(null)
     const shown = [...recent, q.id]
-    const next = pickTraining(remainingPool, stats, shown, ignoreRest, missedIds, pool)
+    // §14f — a first-goal round is a drill: it does not wait for a question's rest
+    const next = pickTraining(remainingPool, stats, shown, ignoreRest || drill.length > 0, missedIds, pool)
+    if (!next && drill.length > 0) {
+      sfx.gem()
+      setDrillEnded(true)
+      return
+    }
     if (!next) {
       // nothing left that's due today — the topic is clear (for now)
       setTrainingDone(true)
@@ -210,6 +237,28 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     }
     setRecent(shown)
     setCurrent(next)
+  }
+
+  /** §14f — the next round: what he still does not know, up to ten of it. */
+  function nextRound() {
+    sfx.click()
+    const ids = roundOf(firstGoalGaps(pool, stats))
+    setDrill(ids)
+    setSessionCorrect([])
+    setSessionMissed([])
+    setRecent([])
+    setDrillEnded(false)
+    setCurrent(pickTraining(pool.filter((q) => ids.includes(q.id)), stats, [], true))
+  }
+
+  /** §14f — first goal met: the rest of the topic, still in this sitting. */
+  function openTheRest() {
+    sfx.click()
+    const next = pickTraining(sessionPool(pool, sessionCorrect, sessionMissed), stats, [], ignoreRest, sessionMissed, pool)
+    setDrill([])
+    setDrillEnded(false)
+    if (next) setCurrent(next)
+    else setTrainingDone(true)
   }
 
   /** "Practice anyway" from the caught-up screen: drop the rest filter and keep going. */
@@ -342,6 +391,37 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     )
   }
 
+  // ---- training: a first-goal round just ended ----
+  if (mode === 'training' && drillEnded && topic?.firstGoal) {
+    const { one, many } = topic.firstGoal
+    const { known, total } = firstGoalProgress(pool, stats)
+    const done = known === total
+    return (
+      <Full onClose={onClose} title={`${topicEmoji} Training · +🪙${sessionEarned}`}>
+        <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: done ? 'var(--green)' : 'var(--gold)' }}>
+          <div style={{ fontSize: 56 }}>{done ? '🏆' : '🗺️'}</div>
+          <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>
+            {done ? `ALL ${total} ${many.toUpperCase()} LOCKED IN!` : `${known} of ${total} ${many} locked in`}
+          </div>
+          <div className="quiz-bar" style={{ marginTop: 10 }}>
+            <div className="quiz-bar-fill" style={{ width: `${Math.round((known / total) * 100)}%` }} />
+          </div>
+          <p style={{ marginTop: 10, fontWeight: 800 }}>
+            {done
+              ? 'First goal done. The rest of this quiz is open!'
+              : `A ${one} locks in when you get it right ${FIRST_GOAL_STREAK} times in a row. The rest of the quiz opens when all ${total} are in.`}
+          </p>
+          <button className="btn" style={{ marginTop: 14 }} onClick={done ? openTheRest : nextRound}>
+            {done ? 'Keep going ➜' : 'Next round ➜'}
+          </button>
+          <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
+            {`Done for now (+🪙${sessionEarned})`}
+          </button>
+        </div>
+      </Full>
+    )
+  }
+
   // ---- training: nothing due (cleared this session, or all resting) ----
   if (mode === 'training' && (trainingDone || !current)) {
     return (
@@ -405,9 +485,22 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
           will want.
         </p>
       )}
-      {mode === 'training' && (
+      {mode === 'training' && drill.length === 0 && (
         <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
           Answered {answered} · earn Berries for right answers (first time pays double!)
+        </p>
+      )}
+      {mode === 'training' && drill.length > 0 && topic?.firstGoal && (
+        <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
+          🎯 First goal: {firstGoalProgress(pool, stats).known} of {firstGoalProgress(pool, stats).total}{' '}
+          {topic.firstGoal.many} locked in
+        </p>
+      )}
+      {mode !== 'training' && stage === 'test' && topic?.firstGoal?.everyInTest && question && (
+        <p className="muted" style={{ marginBottom: 10, fontSize: 13 }}>
+          {question.firstGoal
+            ? `Part 1 — every ${topic.firstGoal.one}, one by one.`
+            : 'Part 2 — everything else.'}
         </p>
       )}
 
@@ -428,6 +521,11 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
             <div className="quiz-answer-label">Right answer</div>
             <div className="quiz-answer-text quiz-answer-text--big">✅ {correctAnswerText(feedback.q)}</div>
           </div>
+          {feedback.q.map && (
+            <div style={{ marginTop: 10 }}>
+              <MapBoard spec={feedback.q.map} reveal wrong={feedback.given.tapped} />
+            </div>
+          )}
           {feedback.q.funFact && (
             <p className="muted" style={{ fontSize: 13, marginTop: 10, textAlign: 'center' }}>
               💡 {feedback.q.funFact}
@@ -599,6 +697,11 @@ function TestResults({ record, plan, mode, bank, onClose, onRead }: { record: Qu
                     Right answer: <b style={{ color: 'var(--green)' }}>{correctAnswerText(q)}</b>
                   </div>
                 )}
+                {!r.correct && q.map && (
+                  <div style={{ marginTop: 8 }}>
+                    <MapBoard spec={q.map} reveal />
+                  </div>
+                )}
                 {!r.correct && q.funFact && (
                   <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>💡 {q.funFact}</div>
                 )}
@@ -671,10 +774,12 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
       {q.image && (
         <img className="quiz-illus" src={q.image} alt="question illustration" draggable={false} />
       )}
+      {q.type === 'choice' && q.map && <MapBoard spec={q.map} />}
       {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} rate={rate} />}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
       {q.type === 'match' && <MatchQ q={q} onAnswer={onAnswer} />}
       {q.type === 'order' && <OrderQ q={q} onAnswer={onAnswer} />}
+      {q.type === 'map' && <MapQ q={q} onAnswer={onAnswer} instantMark={instantMark} />}
     </div>
   )
 }
@@ -856,6 +961,49 @@ function OrderQ({ q, onAnswer }: { q: QuizQuestion; onAnswer: (c: boolean, given
           {complete ? 'Check the order ⚓' : 'Keep tapping…'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/**
+ * §14f — tap the map. In training one tap answers: a slip costs nothing, the
+ * card just comes back. In a test a slip counts, so he picks, can change his
+ * mind and locks it in. A question with several answers always locks in.
+ */
+function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean }) {
+  const spec = q.map!
+  const targets = spec.targets ?? []
+  const several = targets.length > 1
+  const locks = several || !instantMark
+  const [picked, setPicked] = useState<string[]>([])
+  const [done, setDone] = useState(false)
+
+  function finish(ids: string[]) {
+    setDone(true)
+    const right = ids.length === targets.length && ids.every((id) => targets.includes(id))
+    onAnswer(right, { text: ids.map((id) => MAP_NAMES[spec.id][id] ?? id).join(' · '), tapped: ids })
+  }
+  function tap(id: string) {
+    if (done) return
+    sfx.click()
+    if (!locks) {
+      setPicked([id])
+      finish([id])
+    } else if (several) {
+      setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
+    } else {
+      setPicked([id])
+    }
+  }
+
+  return (
+    <div>
+      <MapBoard spec={spec} selected={picked} onTap={tap} />
+      {locks && (
+        <button className="btn" disabled={picked.length === 0 || done} onClick={() => finish(picked)}>
+          {picked.length === 0 ? 'Tap the map…' : 'Lock it in ⚓'}
+        </button>
+      )}
     </div>
   )
 }

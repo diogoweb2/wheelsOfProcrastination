@@ -7417,3 +7417,80 @@ input, select { font-family: inherit; }
 .use-log-p { color: var(--muted); overflow-wrap: anywhere; }
 .use-log-v { font-weight: 900; color: var(--gold); }
 .use-log-r { margin-left: auto; font-size: 10px; font-weight: 800; color: var(--muted); }
+
+/* --- 🗺️ Where Is This? (§14f) ------------------------------------------------
+   The map has no names on it, so the borders do all the work. Strokes do not
+   scale: a close-up must not turn them into ropes. */
+.map-wrap { margin-bottom: 10px; }
+.map-board {
+  display: block;
+  width: 100%;
+  max-height: 62vh;
+  border-radius: 12px;
+  background: #5fa3cf;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.map-board--loading { aspect-ratio: 5 / 4; opacity: 0.5; }
+.map-land { fill: #a9ad9c; }
+.map-water { fill: #5fa3cf; }
+.map-area {
+  fill: #eadcb4;
+  stroke: #6b4a1e;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  transition: fill 0.12s;
+}
+.map-area--tap { cursor: pointer; }
+@media (hover: hover) { .map-area--tap:hover { fill: #f6e68f; } }
+.map-area--on { fill: var(--yellow); stroke-width: 2px; }
+.map-area--show { fill: var(--yellow); stroke-width: 2px; }
+.map-area--right { fill: var(--green); stroke-width: 2px; }
+.map-area--wrong { fill: var(--red); stroke-width: 2px; }
+.map-line {
+  fill: none;
+  stroke-width: 4px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.map-line--river { stroke: #1a66d6; }
+.map-line--highway { stroke: #b3261e; }
+.map-line--on { stroke: var(--yellow); stroke-width: 6px; }
+.map-line--right { stroke: var(--green); stroke-width: 6px; }
+.map-line--wrong { stroke: var(--red); stroke-width: 6px; }
+.map-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.map-hit--line { stroke-width: 22px; stroke-linecap: round; }
+.map-ring {
+  fill: transparent;
+  stroke: #6b4a1e;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.map-ring--tap { cursor: pointer; }
+.map-ring--on, .map-ring--show { stroke: var(--yellow); stroke-width: 3px; }
+.map-ring--right { stroke: var(--green); stroke-width: 3px; }
+.map-ring--wrong { stroke: var(--red); stroke-width: 3px; }
+.map-label {
+  fill: #1b1405;
+  stroke: #fff8e0;
+  stroke-width: 3px;
+  paint-order: stroke;
+  vector-effect: non-scaling-stroke;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.map-zooms { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.map-zooms .btn { width: auto; flex: 1; }
+.map-zoom--on { border-color: var(--yellow); }

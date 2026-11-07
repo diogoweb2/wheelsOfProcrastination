@@ -6,6 +6,7 @@ import type { BoardKind as BoardGameKind, BoardState } from './logic/boardGames'
 import type { CurfewSettings } from './logic/curfew'
 import type { SeaState } from './logic/seaBattle'
 import type { OptcgDeck, OptcgState } from './logic/optcg'
+import type { MapId, MapPick } from './quiz/maps/types'
 
 export type { BoardGameKind }
 
@@ -285,7 +286,18 @@ export interface Idea {
 
 // --- Quiz (Grand Line Academy) ---------------------------------------------
 
-export type QuizQuestionType = 'choice' | 'write' | 'match' | 'order'
+export type QuizQuestionType = 'choice' | 'write' | 'match' | 'order' | 'map'
+
+/** §14f — the map under a question. */
+export interface QuizMapSpec {
+  id: MapId
+  /** A `map` question: what he has to tap. One = tap it; several = tap them all, then lock it in. */
+  targets?: string[]
+  /** What is tappable and drawn on top. Areas unless it says otherwise. */
+  pick?: MapPick
+  /** A `choice` question: the place lit up, for him to name. */
+  show?: string
+}
 
 /** One question in the shared bank (Firestore app/quizBank). Removed questions stay, flagged, so AI regeneration can avoid repeats. */
 export interface QuizQuestion {
@@ -300,6 +312,9 @@ export interface QuizQuestion {
   accept?: string[] // write: accepted answers (first one is the canonical shown in reviews)
   pairs?: { left: string; right: string }[] // match: correct pairings
   sequence?: string[] // order: items in the correct order
+  map?: QuizMapSpec // map: what to tap (`answer` holds the names) · choice: the place to name
+  /** §14f — the topic's first goal: training asks nothing else until these are known. */
+  firstGoal?: boolean
   weight: number // 2 = core knowledge (provinces/capitals/languages), 1 = fun extras
   points: number // Berries for a first-ever correct answer in training
   funFact?: string // shown after answering in training

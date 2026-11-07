@@ -34,7 +34,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | App | Bottom menu |
 |---|---|
 | 📋 **Tasks** *(the wheel + the daily loop)* | Spin · Quests · Streak · Map · Record — *on `dailyMode: 'today'` (§2b):* Today · Week · Quests · Streak · Record |
-| 🎓 **Quiz** | Topics · Study · Progress |
+| 🎓 **Quiz** | Topics · Maps · Subjects · School · Warm-up · Study · Progress |
 | 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
 | 🛒 **Shop** | Wallpapers · Treasures · Orders |
 | 🎴 **One Piece Album** | Binder · Packs · Trade |
@@ -448,6 +448,30 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 - **A second bank document.** `app/quizBank` is one document with a 1 MB ceiling and was already ~580 KB, so the chapter questions live in **`app/quizBankSe7`** (~480 KB). The app sees one bank: both are read, merged and watched together, and a save writes back only the half that changed (`src/store/cloud.ts`). `quiz:regen` and `quiz:review` only know `app/quizBank`, so they cannot touch these.
 - **Question ids are permanent.** `se7-<subtopic>-<idea>-<n>` is positional: add versions at the END of an idea, never rename a key or reorder, or his history lands on the wrong card. Retire a bad version from the Parent desk (it is flagged `removed`, not deleted).
 - **`npm run quiz:audit`** checks the banks structurally and costs nothing: every chapter present, every idea with at least two versions, a real video and an explanation, no match with two equal right-hand cards (MatchQ pairs by text, so such a card could never be finished), no answer much longer than its distractors, and the shard under 90% of a Firestore document. It cannot tell whether an answer is TRUE.
+
+## 14f. Where Is This? — tap the map (the 🗺️ tab of the Quiz app, `/academy/maps`)
+
+**A map with no names on it, and he taps the place.** Four quizzes, 389 questions written by hand in session (`src/quiz/whereIsSeed.ts`): 🍁 Canada (59), 🏙️ Toronto & GTA (57), 🗽 USA (150), 🏰 Europe (123).
+
+- **Its own URL** (§1c): `/academy/maps`. Map topics (`track: 'maps'`) are removed from `/academy/topics`, so a topic is on exactly one page.
+- **A ladder, one open at a time** (`unlockAfter`): Canada → Toronto & GTA → USA → Europe. Each is a normal Academy topic — Berries, a final test, a Devil Fruit, a daily must-do — so four open at once would be four must-dos (the one-task-a-day rule). Dad can open any of them early from the Parent app → Quizzes.
+- **Two question shapes.** A `map` question has `map.targets`: one target is tap-and-done, several are tap-them-all-then-lock-it-in. A `choice` question with `map.show` lights a place up and asks him to name it. `map.pick` makes rivers or highways the tappable thing, and lines are drawn only when they are the question.
+- **One tap in training, lock it in on a test.** A slip in training costs nothing. A slip on a test counts, so he picks, can change his mind, and confirms.
+- **A miss shows the map**: the right place in green, what he tapped in red, both named. Final-test reviews show the same map under each miss.
+- **🔍 close-ups.** PEI is a few pixels wide on a phone, so crowded corners have a zoom button (East coast · Northeast · Central · Balkans). Same drawing, smaller window. Very thin places also get an invisible wider edge, and Malta a visible ring.
+- **The first goal comes first** (`QuizTopic.firstGoal`, `QuizQuestion.firstGoal`). Where things are, before anything about them: the 10 provinces · the 6 Toronto areas and the Humber and Don · the 50 states · the 41 countries.
+  - **Training asks nothing else until they are known.** Known = right **2 times in a row** (`FIRST_GOAL_STREAK`), read from the question's `streak`.
+  - **It runs in rounds of up to 10** (`DRILL_ROUND`), in bank order, so a USA round is neighbours. Rounds ignore the spaced-repetition rest: it is a drill. Between rounds he sees how many are locked in, then **Next round**. At the last one: **ALL 10 PROVINCES LOCKED IN!** and the rest opens in the same sitting.
+  - **A slip brings it back.** Miss a province later and its streak resets, so his next training opens with that province until it is locked in again.
+  - A parent preview saves nothing, so a round could never end. Previews skip rounds and show the whole bank.
+- **Canada's final test is longer, and only Canada's** (`firstGoal.everyInTest`, `buildTopicTest`): **Part 1 asks all 10 provinces, one by one, then Part 2 is the usual 15–20 on everything else**, 25–30 in all, mock and official alike. The mercy rule stays inside the part he is in. Pass mark stays 80% over the whole test. The other three sit the normal 15–20.
+- **What each one covers.** *Canada*: provinces, capitals, Ottawa (capital of Canada, in Ontario), Vancouver/Calgary/Montreal, one famous place per province with a photo (no photos for the territories, too specific), ocean access, the St. Lawrence, the Rockies, languages, the 3 territories. *Toronto & GTA*: the six former municipalities, the two rivers (the Rouge is drawn too, as a wrong answer), 12 GTA cities, the 401, 404, 407 and 427. No neighbourhoods. *USA and Europe*: where it is and its capital, nothing else.
+- **Ocean access means salt water, Hudson Bay included**: 8 provinces. Only Alberta and Saskatchewan have none.
+- **Europe leaves out the five microstates** (Andorra, Monaco, Liechtenstein, San Marino, Vatican City): too small to tap. Crimea is drawn as Ukraine, Canada’s position, and Kosovo as a country.
+- **Tap questions pay 5 Berries, not 8**: they are quick and there are hundreds of them.
+- **The maps** are SVG paths in `src/quiz/maps/*.generated.ts`, loaded one at a time, so a map costs nothing until a question needs it. Sources are named at the top of each file: Natural Earth (public domain), City of Toronto Open Data, OpenStreetMap (ODbL). Names live apart in `src/quiz/maps/names.ts`, and answers are written into the bank as text, so the bank never needs a drawing.
+- **Photos** are in `public/where-is/`, 288 KB for all ten, with credits in `CREDITS.txt`.
+- **The questions sit in `app/quizBank`**, about 120 KB, which takes that document to roughly 770 KB of its 1 MB ceiling. The next big set needs a shard of its own, as §14d did.
 
 ## 14e. Quiz Watch (the 👀 app, Diogo only — `/watch/live`, `/watch/answers`, `/watch/mistakes`)
 

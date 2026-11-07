@@ -14,9 +14,11 @@ import {
   REVIEW_PASS_PCT,
   WARMUP_KEEP,
   WARMUP_TOPIC_ID,
+  MAPS_TRACK,
   activeQuestions,
   berriesOnly,
   duePool,
+  firstGoalProgress,
   ideaProgress,
   isFresh,
   lastOfficialAttempt,
@@ -93,7 +95,9 @@ export function QuizScreen({
 
   // §14b — school quizzes have their own tab (/academy/school), so the academy's
   // own topic list leaves them out entirely rather than showing them twice.
-  const academyTopics = topics.filter((t) => !berriesOnly(t))
+  const academyTopics = topics.filter((t) => !berriesOnly(t) && t.track !== MAPS_TRACK)
+  // §14f — and the Where Is This? quizzes have the Maps tab
+  const mapTopics = topics.filter((t) => t.track === MAPS_TRACK)
   const schoolTopics = topics.filter((t) => t.school)
   // §14d — and the chapter quizzes have the Subjects tab
   const chapterTopics = topics.filter((t) => t.chapter)
@@ -146,6 +150,29 @@ export function QuizScreen({
             ))}
           </div>
         ))}
+
+      {tab === 'maps' && (
+        <>
+          <div className="h2" style={{ marginBottom: 2 }}>🗺️ Where Is This?</div>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+            {mapTopics.length > 0
+              ? 'A map with no names on it. Tap the right place. Pass a final test to open the next map.'
+              : 'Ben’s map quizzes live here. Open the Quiz app on his profile to play them, or preview them from the Parent app → Quizzes.'}
+          </p>
+          {mapTopics.map((t) => (
+            <TopicCard
+              key={t.id}
+              topic={t}
+              data={data}
+              bank={quizBank}
+              selfOfficial={isAdmin}
+              onStart={(mode) => setSession({ mode, topicId: t.id })}
+              onStudy={() => setStudy(t.id)}
+              onManage={isAdmin ? () => setManage(t.id) : undefined}
+            />
+          ))}
+        </>
+      )}
 
       {tab === 'subjects' && (
         <SubjectsShelf
@@ -770,6 +797,17 @@ function StudyList({ topicId, bank, onClose }: { topicId: string; bank: QuizQues
   )
 }
 
+/** §14f — the goal that comes before everything else on the card. */
+function FirstGoalLine({ topic, pool, stats }: { topic: QuizTopic; pool: QuizQuestion[]; stats: AppData['quiz']['stats'] }) {
+  const { known, total } = firstGoalProgress(pool, stats)
+  return (
+    <div style={{ fontSize: 12, marginTop: 8, fontWeight: 800, color: 'var(--gold)' }}>
+      🎯 First goal: {known}/{total} {topic.firstGoal?.many} locked in
+      {known === total ? ' ✅' : ' — the rest of the quiz opens after'}
+    </div>
+  )
+}
+
 function TopicCard({
   topic,
   data,
@@ -821,6 +859,10 @@ function TopicCard({
       </div>
       {topic.outcome && (
         <div style={{ fontSize: 12, marginTop: 8, fontWeight: 800, color: 'var(--gold)' }}>🎯 {topic.outcome}</div>
+      )}
+
+      {unlocked && pool.length > 0 && topic.firstGoal && (
+        <FirstGoalLine topic={topic} pool={pool} stats={data.quiz.stats} />
       )}
 
       {unlocked && pool.length > 0 && (

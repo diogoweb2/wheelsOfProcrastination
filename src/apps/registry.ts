@@ -105,6 +105,9 @@ export const APPS: AppDef[] = [
     tint: ['#2e63a4', '#12315a'],
     tabs: [
       { id: 'topics', label: 'Topics', icon: '🎓' },
+      // §14f — the Where Is This? quizzes: a map with no names, tap the place.
+      // Its own URL (/academy/maps), and off the Topics list, like School.
+      { id: 'maps', label: 'Maps', icon: '🗺️' },
       // §14d — one quiz per chapter of his school year, grouped by subject and
       // in the order his class teaches it. Its own URL (/academy/subjects):
       // sixty-odd quizzes are a shelf of their own, not a section of Topics.

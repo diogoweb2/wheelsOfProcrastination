@@ -48,6 +48,12 @@ export interface QuizTopic {
    * and the economy and the one-task-a-day rule were sized for a handful.
    */
   chapter?: string
+  /**
+   * §14f — this topic has a FIRST GOAL: the questions marked `firstGoal`. Until
+   * he knows them, training asks nothing else. `everyInTest` makes the final
+   * test ask every one of them, one by one, before the usual test begins.
+   */
+  firstGoal?: { one: string; many: string; everyInTest?: boolean }
 }
 
 /** §14b + §14d — Berries and nothing else: no final test, no 🍇, no must-do, never a prize. */
@@ -74,6 +80,9 @@ export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
     blurb: 'Real homework, pirate paint. Berries only — no Devil Fruits, no final test.',
   },
 ]
+
+/** §14f — the Where Is This? quizzes live on their own tab (/academy/maps). */
+export const MAPS_TRACK = 'maps'
 
 /** §14d — chapter quiz ids are the subtopic's, prefixed. Also how the bank shards them (`src/store/cloud.ts`). */
 export const CHAPTER_PREFIX = 'se7-'
@@ -344,6 +353,51 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     track: 'tooling',
     targetCount: 50,
   },
+  // --- Ben: Where Is This? (§14f) — tap the map, on the 🗺️ Maps tab ---
+  // A ladder like Grade 7: four quizzes must not be four daily must-dos.
+  {
+    id: 'where-canada',
+    owner: 'ben',
+    title: 'Where Is This? Canada',
+    emoji: '🍁',
+    description: 'A map with no names. Find every province first — then capitals, coasts, rivers and famous places.',
+    targetCount: 59,
+    track: MAPS_TRACK,
+    firstGoal: { one: 'province', many: 'provinces', everyInTest: true },
+  },
+  {
+    id: 'where-gta',
+    owner: 'ben',
+    title: 'Where Is This? Toronto & GTA',
+    emoji: '🏙️',
+    description: 'Home turf: the six areas and two rivers first — then the cities around Toronto and the 401, 404, 407 and 427.',
+    targetCount: 57,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-canada',
+    firstGoal: { one: 'place', many: 'places' },
+  },
+  {
+    id: 'where-usa',
+    owner: 'ben',
+    title: 'Where Is This? USA',
+    emoji: '🗽',
+    description: 'All 50 states on the map first — then every state capital.',
+    targetCount: 150,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-gta',
+    firstGoal: { one: 'state', many: 'states' },
+  },
+  {
+    id: 'where-europe',
+    owner: 'ben',
+    title: 'Where Is This? Europe',
+    emoji: '🏰',
+    description: 'Every country on the map first — then every capital.',
+    targetCount: 123,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-usa',
+    firstGoal: { one: 'country', many: 'countries' },
+  },
   ...CHAPTER_TOPICS,
 ]
 
@@ -578,6 +632,8 @@ export function correctAnswerText(q: QuizQuestion): string {
       return (q.pairs ?? []).map((p) => `${p.left} → ${p.right}`).join(' · ')
     case 'order':
       return (q.sequence ?? []).join(' → ')
+    case 'map':
+      return q.answer ?? ''
   }
 }
 
@@ -699,6 +755,23 @@ export function pickTraining(
     return q.weight * novelty * struggle * fresh * missed
   })
   return weightedPick(candidates, weights)
+}
+
+// --- first goal (§14f) ------------------------------------------------------
+
+/** Right this many times running, and a first-goal question counts as known. */
+export const FIRST_GOAL_STREAK = 2
+/** How many he is drilled on at a time: fifty states at once is a wall. */
+export const DRILL_ROUND = 10
+
+/** The first-goal questions he does not know yet, in bank order, so a round is neighbours. */
+export function firstGoalGaps(pool: QuizQuestion[], stats: Record<string, QuizStat>): QuizQuestion[] {
+  return pool.filter((q) => q.firstGoal && (stats[q.id]?.streak ?? 0) < FIRST_GOAL_STREAK)
+}
+
+export function firstGoalProgress(pool: QuizQuestion[], stats: Record<string, QuizStat>): { total: number; known: number } {
+  const total = pool.filter((q) => q.firstGoal).length
+  return { total, known: total - firstGoalGaps(pool, stats).length }
 }
 
 /**
@@ -849,6 +922,23 @@ export function buildFinalTest(
   return { questions: byPlan, estimatedMs: est }
 }
 
+/**
+ * The test a topic actually sits. §14f — a topic with `everyInTest` opens with
+ * every first-goal question, one by one, and the usual test on the rest follows.
+ * Retries ask those same questions again: the whole point is that all of them
+ * get asked.
+ */
+export function buildTopicTest(
+  topic: QuizTopic | undefined,
+  pool: QuizQuestion[],
+  stats: Record<string, QuizStat>,
+  excludeIds: string[] = [],
+): QuizQuestion[] {
+  if (!topic?.firstGoal?.everyInTest) return buildFinalTest(pool, stats, excludeIds).questions
+  const rest = pool.filter((q) => !q.firstGoal)
+  return [...shuffle(pool.filter((q) => q.firstGoal)), ...buildFinalTest(rest, stats, excludeIds).questions]
+}
+
 // --- warm-up review round (before every official final test) ----------------
 
 /**
@@ -954,9 +1044,12 @@ export function nextTestQuestion(
   remaining: QuizQuestion[],
   stats: Record<string, QuizStat>,
   lastThreeWrong: boolean,
+  /** §14f — the test comes in two parts: the mercy pick must not jump out of the one he is in. */
+  stayInPart = false,
 ): QuizQuestion {
   if (!lastThreeWrong || remaining.length === 1) return remaining[0]
-  return [...remaining].sort((a, b) => successRate(stats[b.id]) - successRate(stats[a.id]))[0]
+  const part = stayInPart ? remaining.filter((q) => !!q.firstGoal === !!remaining[0].firstGoal) : remaining
+  return [...part].sort((a, b) => successRate(stats[b.id]) - successRate(stats[a.id]))[0]
 }
 
 /** How many options a choice question shows on screen, however big its distractor pool is. */
