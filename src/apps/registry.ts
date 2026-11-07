@@ -106,24 +106,22 @@ export const APPS: AppDef[] = [
     tabs: [
       { id: 'topics', label: 'Topics', icon: '🎓' },
       // §14f — the Where Is This? quizzes: a map with no names, tap the place.
-      // Its own URL (/academy/maps), and off the Topics list, like School.
+      // Its own URL (/academy/maps), and off the Topics list, like Subjects.
       { id: 'maps', label: 'Maps', icon: '🗺️' },
       // §14d — one quiz per chapter of his school year, grouped by subject and
       // in the order his class teaches it. Its own URL (/academy/subjects):
       // sixty-odd quizzes are a shelf of their own, not a section of Topics.
       { id: 'subjects', label: 'Subjects', icon: '📚' },
-      // §14b — school quizzes are their own category, so they get their own URL
-      // (/academy/school) rather than a section buried in the topic list.
-      { id: 'school', label: 'School', icon: '🏫' },
+      // §14g — the questions he gets wrong most, with the right answers on
+      // them. It took the School tab's slot: homework quizzes come and go (the
+      // tab sat on its empty state most of the year) and now ride at the
+      // bottom of /academy/topics, while this page is useful every day.
+      { id: 'mistakes', label: 'Mistakes', icon: '🎯' },
       // §14c — the warm-up round on its own, so he can rehearse the thing that
       // gates every final test. Its own URL (/academy/warmup): it belongs to no
       // single topic, so it cannot live on a topic card.
       { id: 'warmup', label: 'Warm-up', icon: '🧠' },
       { id: 'study', label: 'Study', icon: '📖' },
-      // §14g — the questions he gets wrong most, with the right answers on
-      // them. Its own URL (/academy/mistakes): it is the same report Dad reads
-      // on 👀 Quiz Watch, and it is a study page, not a corner of Progress.
-      { id: 'mistakes', label: 'Mistakes', icon: '🎯' },
       { id: 'progress', label: 'Progress', icon: '📊' },
     ],
   },

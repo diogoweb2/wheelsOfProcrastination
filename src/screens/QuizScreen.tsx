@@ -94,8 +94,8 @@ export function QuizScreen({
     return <QuestionManager topicId={manage} onClose={() => setManage(null)} />
   }
 
-  // §14b — school quizzes have their own tab (/academy/school), so the academy's
-  // own topic list leaves them out entirely rather than showing them twice.
+  // §14b — a school quiz is its own section at the bottom of this list
+  // (SchoolShelf), so the tracks above leave them out rather than show them twice.
   const academyTopics = topics.filter((t) => !berriesOnly(t) && t.track !== MAPS_TRACK)
   // §14f — and the Where Is This? quizzes have the Maps tab
   const mapTopics = topics.filter((t) => t.track === MAPS_TRACK)
@@ -152,6 +152,20 @@ export function QuizScreen({
           </div>
         ))}
 
+      {/* §14b — a live school unit rides at the BOTTOM of the topic list. It had
+          its own tab until 🎯 Mistakes took the slot: homework comes home a few
+          times a year, and for the rest of it that tab was an empty state. When
+          nothing is set there is nothing here, rather than a card saying so. */}
+      {tab === 'topics' && schoolTopics.length > 0 && (
+        <SchoolShelf
+          topics={schoolTopics}
+          data={data}
+          bank={quizBank}
+          onStart={(mode, topicId) => setSession({ mode, topicId })}
+          onManage={isAdmin ? setManage : undefined}
+        />
+      )}
+
       {tab === 'maps' && (
         <>
           <div className="h2" style={{ marginBottom: 2 }}>🗺️ Where Is This?</div>
@@ -181,16 +195,6 @@ export function QuizScreen({
           data={data}
           bank={quizBank}
           onStart={(topicId) => setSession({ mode: 'training', topicId })}
-        />
-      )}
-
-      {tab === 'school' && (
-        <SchoolShelf
-          topics={schoolTopics}
-          data={data}
-          bank={quizBank}
-          onStart={(mode, topicId) => setSession({ mode, topicId })}
-          onManage={isAdmin ? setManage : undefined}
         />
       )}
 
