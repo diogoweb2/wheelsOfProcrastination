@@ -34,6 +34,7 @@ import { lessonsForTopic } from '../quiz/lessons'
 import { QuizSession, type QuizMode } from '../components/QuizSession'
 import { LessonView } from '../components/Lesson'
 import { QuestionManager } from '../components/QuestionManager'
+import { MyMistakes } from '../components/MyMistakes'
 import { DevilFruit } from '../components/DevilFruit'
 import { dayKey } from '../logic/dates'
 import { SE_SUBJECTS } from '../logic/steugene'
@@ -203,6 +204,16 @@ export function QuizScreen({
       )}
 
       {tab === 'study' && <StudyShelf topics={topics} bank={quizBank} onOpen={setStudy} />}
+
+      {/* §14g — his own mistakes, with the right answers on them */}
+      {/* the empty state ("answer some questions first") would be a lie while the bank is still coming down */}
+      {tab === 'mistakes' && quizBankLoaded && (
+        <MyMistakes
+          bank={quizBank}
+          data={data}
+          onTrain={(topicId) => setSession({ mode: 'training', topicId })}
+        />
+      )}
 
       {tab === 'progress' && <ProgressBoard topics={topics} data={data} bank={quizBank} />}
     </div>

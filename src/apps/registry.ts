@@ -120,6 +120,10 @@ export const APPS: AppDef[] = [
       // single topic, so it cannot live on a topic card.
       { id: 'warmup', label: 'Warm-up', icon: '🧠' },
       { id: 'study', label: 'Study', icon: '📖' },
+      // §14g — the questions he gets wrong most, with the right answers on
+      // them. Its own URL (/academy/mistakes): it is the same report Dad reads
+      // on 👀 Quiz Watch, and it is a study page, not a corner of Progress.
+      { id: 'mistakes', label: 'Mistakes', icon: '🎯' },
       { id: 'progress', label: 'Progress', icon: '📊' },
     ],
   },

@@ -497,6 +497,19 @@ Ben's quizzes from Dad's side. The point is to see **what** he gets wrong, not j
 - **📝 Answers** (`/watch/answers`) — the last 200 sittings by day. Each opens in place to every question: his answer, the right one, and the seconds it took. Starts empty: answers were never stored before this, only right or wrong.
 - **🎯 Mistakes** (`/watch/mistakes`) — % wrong, worst first, ties broken by how many times he missed it. **By question** (all quizzes, or pick one) and **By quiz** (tap one to see its questions). Reads his lifetime `quiz.stats`, so it covers **everything he has ever answered**, from day one. Active questions only. Defaults to questions asked at least **2×**, because 1 of 1 wrong is 100% and proves nothing; 1× and 3× are a tap away. Shows the worst 100.
 
+## 14g. 🎯 My mistakes — the same report, for him (the 🎯 tab of the Quiz app, `/academy/mistakes`)
+
+The Mistakes report (§14e) was the best page in the app that Ben could not see. It knows exactly which ideas are missing, and it was telling only me — so the one person who could do something about it had to wait for me to open a parent-only URL and read it out.
+
+- **Its own URL** (§1c): `/academy/mistakes`, a tab on the Quiz app. Not a corner of 📊 Progress: Progress is how far he has got, this is what to do next.
+- **The same arithmetic, shared** (`src/logic/quizReport.ts`): worst first, ties broken by how many times he missed it, over his lifetime `quiz.stats` — **everything he has ever answered**, active questions only. **By question** (all his quizzes, or pick one) and **By quiz**, defaulting to questions asked at least **2×** with 1× and 3× a tap away, worst 100. Dad's page and his page can never disagree about what he is getting wrong, because neither one owns the maths.
+- **It answers the question it raises.** A list of what you get wrong with no way to find out the answer is a scoreboard, not a study page. So **every row opens onto the right answer** — and with it the map revealed in green (§14f), the flag, the picture, the 💡 fun fact, and 📖 *Here's the idea* with its video where the question has one (§14d).
+- **The answers start hidden, one tap away.** Handing them over before he has tried to remember makes the page something he reads rather than something he studies. **👀 Show answers** opens them all at once for when reading down the list is the point.
+- **🔊 Read it to me** on each open row — the question and its answer, in the same voice the lessons use (§24r).
+- **⚔️ Train this quiz** once he has picked one, so the page ends in a go at fixing them rather than in a number.
+- **Written in his words, not mine.** It leads with **how many questions there are to go over**, and the percentage it prints large is the share he got **right**. The % wrong stays on each row, where it is information about a question rather than a grade on him.
+- Diogo gets the same tab for his own quizzes, from his own stats — it reads whoever is signed in.
+
 ## 15. Store pages & Treasures (prizes)
 
 - Store pages: **🖼️ Wallpapers** (mystery gacha), **🍇 Treasures**, and **🧾 Orders** (every treasure ever ordered + its paid/pending status). Each profile shops from its OWN shelf with its OWN 🍇; prize logos live in `public/prizes/` and spin like the Luffy tab icon, and a prize **without** a logo spins its emoji instead.
