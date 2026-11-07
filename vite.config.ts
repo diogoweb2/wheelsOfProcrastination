@@ -22,12 +22,20 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // `prompt`, not `autoUpdate`: the page decides WHEN to take a new build
-      // (src/lib/fresh.ts), because autoUpdate reloads the moment the new worker
-      // activates — and that moment can be the last question of a final test.
+      // `prompt`, not `autoUpdate`: the page decides WHEN to reload for a new
+      // build (src/lib/fresh.ts), because autoUpdate reloads the moment the new
+      // worker activates — and that moment can be the last question of a final
+      // test. The WORKER still activates itself (`skipWaiting` below): a worker
+      // that waits to be asked is a worker a stale client never takes, which is
+      // exactly how Ben's tablet downloaded a fix and then sat on it.
       registerType: 'prompt',
       includeAssets: ['icon.svg'],
       workbox: {
+        // Take over as soon as you are installed, and take over the page that is
+        // already open. Together these are what let a device heal itself: the
+        // old page is claimed, notices it, and reloads when it is safe to.
+        skipWaiting: true,
+        clientsClaim: true,
         // the FCM worker registers itself on its own scope (see src/push.ts) —
         // Workbox must not precache or serve it
         globIgnores: ['**/firebase-messaging-sw.js'],
