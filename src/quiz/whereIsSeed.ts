@@ -11,7 +11,7 @@
 // This file only seeds Firestore (app/quizBank): an id already in the bank is
 // never rewritten. To correct a live question, edit it in Firestore as well.
 import type { QuizMapSpec, QuizQuestion } from '../types'
-import { CANADA_NAMES, EUROPE_COUNTRIES, GTA_NAMES, MAP_NAMES, TORONTO_NAMES, US_STATES } from './maps/names'
+import { CANADA_NAMES, EUROPE_COUNTRIES, GTA_NAMES, MAP_NAMES, TORONTO_NAMES, US_STATES, type Place } from './maps/names'
 import type { MapId, MapPick } from './maps/types'
 
 const AT = '2026-11-06T00:00:00.000Z'
@@ -228,28 +228,26 @@ const GTA: QuizQuestion[] = [
 
 // --- 🗽 USA and 🏰 Europe: where it is, and its capital ----------------------
 
-function placesAndCapitals(
-  topicId: string,
-  mapId: MapId,
-  prefix: string,
-  noun: string,
-  table: [string, string, string, string?][],
-): QuizQuestion[] {
-  const capitals = table.map(([, , capital]) => capital)
+/** Every place on the map, then its capital both ways. Same questions as the first map quiz of this kind, Europe. */
+export function placesAndCapitals(topicId: string, mapId: MapId, prefix: string, noun: string, table: Place[]): QuizQuestion[] {
+  const withCapital = table.filter(([, , capital]) => capital)
+  const capitals = withCapital.map(([, , capital]) => capital)
+  const fact = ([, place, capital, guess, note]: Place): Extra =>
+    note ? { funFact: note } : guess ? { funFact: `${capital}, not ${guess}, is the capital of ${place}.` } : {}
   return [
     ...table.map(([id, place]) => tap(topicId, mapId, `${prefix}-loc-${id}`, `Where is ${place}?`, [id], { emoji: '📍', firstGoal: true })),
-    ...table.map(([id, place, capital, guess]) =>
-      tap(topicId, mapId, `${prefix}-cap-${id}`, `${capital} is the capital of which ${noun}?`, [id], {
+    ...withCapital.map((row) =>
+      tap(topicId, mapId, `${prefix}-cap-${row[0]}`, `${row[2]} is the capital of which ${noun}?`, [row[0]], {
         emoji: '🏛️',
-        family: `${prefix}-capital-${id}`,
-        ...(guess ? { funFact: `${capital}, not ${guess}, is the capital of ${place}.` } : {}),
+        family: `${prefix}-capital-${row[0]}`,
+        ...fact(row),
       }),
     ),
-    ...table.map(([id, place, capital, guess], i) =>
-      name(topicId, mapId, `${prefix}-capq-${id}`, `What is the capital of ${place}?`, id, capital, [capital, ...around(capitals, i, 6)], {
+    ...withCapital.map((row, i) =>
+      name(topicId, mapId, `${prefix}-capq-${row[0]}`, `What is the capital of ${row[1]}?`, row[0], row[2], [row[2], ...around(capitals, i, 6)], {
         emoji: '🏛️',
-        family: `${prefix}-capital-${id}`,
-        ...(guess ? { funFact: `${capital}, not ${guess}, is the capital of ${place}.` } : {}),
+        family: `${prefix}-capital-${row[0]}`,
+        ...fact(row),
       }),
     ),
   ]

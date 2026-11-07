@@ -61,8 +61,14 @@ export const GTA_NAMES: Record<string, string> = {
   h427: 'Highway 427',
 }
 
-/** [id, state, capital, the city people wrongly guess] — grouped by region, so a round of ten is neighbours. */
-export const US_STATES: [string, string, string, string?][] = [
+/**
+ * [id, place, capital, the city people wrongly guess, a line that says it better].
+ * An empty capital means the place is asked on the map only (see ASIA_COUNTRIES).
+ */
+export type Place = [string, string, string, string?, string?]
+
+/** Grouped by region, so a round of ten is neighbours. */
+export const US_STATES: Place[] = [
   ['wa', 'Washington', 'Olympia', 'Seattle'],
   ['or', 'Oregon', 'Salem', 'Portland'],
   ['ca', 'California', 'Sacramento', 'Los Angeles'],
@@ -120,7 +126,7 @@ export const US_STATES: [string, string, string, string?][] = [
  * the map. The five microstates (Andorra, Monaco, Liechtenstein, San Marino,
  * Vatican City) are left out: too small to tap on any screen he owns.
  */
-export const EUROPE_COUNTRIES: [string, string, string, string?][] = [
+export const EUROPE_COUNTRIES: Place[] = [
   ['gb', 'United Kingdom', 'London'],
   ['ie', 'Ireland', 'Dublin'],
   ['fr', 'France', 'Paris'],
@@ -164,10 +170,155 @@ export const EUROPE_COUNTRIES: [string, string, string, string?][] = [
   ['cy', 'Cyprus', 'Nicosia'],
 ]
 
+export const SOUTH_AMERICA_COUNTRIES: Place[] = [
+  ['co', 'Colombia', 'Bogota', 'Medellin'],
+  ['ve', 'Venezuela', 'Caracas'],
+  ['gy', 'Guyana', 'Georgetown'],
+  ['sr', 'Suriname', 'Paramaribo'],
+  ['ec', 'Ecuador', 'Quito', 'Guayaquil'],
+  ['pe', 'Peru', 'Lima'],
+  ['br', 'Brazil', 'Brasilia', 'Rio de Janeiro'],
+  ['bo', 'Bolivia', 'Sucre', undefined, 'Sucre is Bolivia’s official capital. Its government sits in La Paz.'],
+  ['py', 'Paraguay', 'Asuncion'],
+  ['cl', 'Chile', 'Santiago'],
+  ['ar', 'Argentina', 'Buenos Aires'],
+  ['uy', 'Uruguay', 'Montevideo'],
+]
+
+/**
+ * Grouped by corner of the map. The small island nations (Cabo Verde, Comoros,
+ * Mauritius, Sao Tome and Principe, Seychelles) are left out, like Europe's
+ * microstates. Western Sahara is drawn but not asked: its status is unresolved.
+ */
+export const AFRICA_COUNTRIES: Place[] = [
+  ['ma', 'Morocco', 'Rabat', 'Casablanca'],
+  ['dz', 'Algeria', 'Algiers'],
+  ['tn', 'Tunisia', 'Tunis'],
+  ['ly', 'Libya', 'Tripoli'],
+  ['eg', 'Egypt', 'Cairo'],
+  ['sd', 'Sudan', 'Khartoum'],
+  ['ss', 'South Sudan', 'Juba'],
+  ['er', 'Eritrea', 'Asmara'],
+  ['dj', 'Djibouti', 'Djibouti City'],
+  ['et', 'Ethiopia', 'Addis Ababa'],
+  ['mr', 'Mauritania', 'Nouakchott'],
+  ['sn', 'Senegal', 'Dakar'],
+  ['gm', 'Gambia', 'Banjul'],
+  ['gw', 'Guinea-Bissau', 'Bissau'],
+  ['gn', 'Guinea', 'Conakry'],
+  ['sl', 'Sierra Leone', 'Freetown'],
+  ['lr', 'Liberia', 'Monrovia'],
+  ['ci', 'Ivory Coast', 'Yamoussoukro', 'Abidjan'],
+  ['gh', 'Ghana', 'Accra'],
+  ['tg', 'Togo', 'Lome'],
+  ['bj', 'Benin', 'Porto-Novo', 'Cotonou'],
+  ['ng', 'Nigeria', 'Abuja', 'Lagos'],
+  ['ml', 'Mali', 'Bamako'],
+  ['bf', 'Burkina Faso', 'Ouagadougou'],
+  ['ne', 'Niger', 'Niamey'],
+  ['td', 'Chad', 'N’Djamena'],
+  ['cm', 'Cameroon', 'Yaounde', 'Douala'],
+  ['cf', 'Central African Republic', 'Bangui'],
+  ['gq', 'Equatorial Guinea', 'Ciudad de la Paz', 'Malabo', 'A brand-new capital: Ciudad de la Paz took over from Malabo in January 2026.'],
+  ['ga', 'Gabon', 'Libreville'],
+  ['cg', 'Republic of the Congo', 'Brazzaville'],
+  ['cd', 'Democratic Republic of the Congo', 'Kinshasa'],
+  ['ug', 'Uganda', 'Kampala'],
+  ['rw', 'Rwanda', 'Kigali'],
+  ['bi', 'Burundi', 'Gitega', 'Bujumbura'],
+  ['ke', 'Kenya', 'Nairobi'],
+  ['so', 'Somalia', 'Mogadishu'],
+  ['tz', 'Tanzania', 'Dodoma', 'Dar es Salaam'],
+  ['ao', 'Angola', 'Luanda'],
+  ['zm', 'Zambia', 'Lusaka'],
+  ['mw', 'Malawi', 'Lilongwe'],
+  ['mz', 'Mozambique', 'Maputo'],
+  ['mg', 'Madagascar', 'Antananarivo'],
+  ['zw', 'Zimbabwe', 'Harare'],
+  ['bw', 'Botswana', 'Gaborone'],
+  ['na', 'Namibia', 'Windhoek'],
+  ['za', 'South Africa', 'Pretoria', undefined, 'South Africa has 3 capitals: Pretoria runs the government, Cape Town has parliament and Bloemfontein the top court.'],
+  ['ls', 'Lesotho', 'Maseru'],
+  ['sz', 'Eswatini', 'Mbabane', undefined, 'Mbabane is where the government runs. Parliament and the royal home are in Lobamba.'],
+]
+
+/**
+ * Grouped by corner of the map. The Maldives are left out: too small to tap.
+ * Israel and Palestine are on the map but have no capital question, because
+ * both capitals are disputed and a quiz should not rule on it.
+ */
+export const ASIA_COUNTRIES: Place[] = [
+  ['tr', 'Turkey', 'Ankara', 'Istanbul'],
+  ['ge', 'Georgia', 'Tbilisi'],
+  ['am', 'Armenia', 'Yerevan'],
+  ['az', 'Azerbaijan', 'Baku'],
+  ['sy', 'Syria', 'Damascus'],
+  ['lb', 'Lebanon', 'Beirut'],
+  ['il', 'Israel', ''],
+  ['ps', 'Palestine', ''],
+  ['jo', 'Jordan', 'Amman'],
+  ['iq', 'Iraq', 'Baghdad'],
+  ['ir', 'Iran', 'Tehran'],
+  ['sa', 'Saudi Arabia', 'Riyadh', 'Jeddah'],
+  ['ye', 'Yemen', 'Sanaa'],
+  ['om', 'Oman', 'Muscat'],
+  ['ae', 'United Arab Emirates', 'Abu Dhabi', 'Dubai'],
+  ['qa', 'Qatar', 'Doha'],
+  ['bh', 'Bahrain', 'Manama'],
+  ['kw', 'Kuwait', 'Kuwait City'],
+  ['kz', 'Kazakhstan', 'Astana', 'Almaty'],
+  ['uz', 'Uzbekistan', 'Tashkent'],
+  ['tm', 'Turkmenistan', 'Ashgabat'],
+  ['kg', 'Kyrgyzstan', 'Bishkek'],
+  ['tj', 'Tajikistan', 'Dushanbe'],
+  ['af', 'Afghanistan', 'Kabul'],
+  ['pk', 'Pakistan', 'Islamabad', 'Karachi'],
+  ['in', 'India', 'New Delhi', 'Mumbai'],
+  ['np', 'Nepal', 'Kathmandu'],
+  ['bt', 'Bhutan', 'Thimphu'],
+  ['bd', 'Bangladesh', 'Dhaka'],
+  ['lk', 'Sri Lanka', 'Colombo', undefined, 'Colombo is the capital and biggest city. Parliament sits next door, in Sri Jayawardenepura Kotte.'],
+  ['cn', 'China', 'Beijing', 'Shanghai'],
+  ['mn', 'Mongolia', 'Ulaanbaatar'],
+  ['kp', 'North Korea', 'Pyongyang'],
+  ['kr', 'South Korea', 'Seoul'],
+  ['jp', 'Japan', 'Tokyo', 'Osaka'],
+  ['tw', 'Taiwan', 'Taipei'],
+  ['mm', 'Myanmar', 'Naypyidaw', 'Yangon'],
+  ['th', 'Thailand', 'Bangkok'],
+  ['la', 'Laos', 'Vientiane'],
+  ['vn', 'Vietnam', 'Hanoi', 'Ho Chi Minh City'],
+  ['kh', 'Cambodia', 'Phnom Penh'],
+  ['my', 'Malaysia', 'Kuala Lumpur'],
+  ['sg', 'Singapore', 'Singapore', undefined, 'Singapore is a city and a country at once.'],
+  ['bn', 'Brunei', 'Bandar Seri Begawan'],
+  ['id', 'Indonesia', 'Jakarta'],
+  ['ph', 'Philippines', 'Manila'],
+  ['tl', 'Timor-Leste', 'Dili'],
+]
+
+/** The tiny Pacific nations (Kiribati, Marshall Islands, Micronesia, Nauru, Palau, Tuvalu) are left out: specks on any screen. */
+export const OCEANIA_COUNTRIES: Place[] = [
+  ['au', 'Australia', 'Canberra', 'Sydney'],
+  ['nz', 'New Zealand', 'Wellington', 'Auckland'],
+  ['pg', 'Papua New Guinea', 'Port Moresby'],
+  ['sb', 'Solomon Islands', 'Honiara'],
+  ['vu', 'Vanuatu', 'Port Vila'],
+  ['fj', 'Fiji', 'Suva'],
+  ['ws', 'Samoa', 'Apia'],
+  ['to', 'Tonga', 'Nuku’alofa'],
+]
+
+const namesOf = (table: Place[]) => Object.fromEntries(table.map(([id, name]) => [id, name]))
+
 export const MAP_NAMES: Record<MapId, Record<string, string>> = {
   canada: CANADA_NAMES,
   toronto: TORONTO_NAMES,
   gta: GTA_NAMES,
-  usa: Object.fromEntries(US_STATES.map(([id, name]) => [id, name])),
-  europe: Object.fromEntries(EUROPE_COUNTRIES.map(([id, name]) => [id, name])),
+  usa: namesOf(US_STATES),
+  europe: namesOf(EUROPE_COUNTRIES),
+  samerica: namesOf(SOUTH_AMERICA_COUNTRIES),
+  africa: namesOf(AFRICA_COUNTRIES),
+  asia: namesOf(ASIA_COUNTRIES),
+  oceania: namesOf(OCEANIA_COUNTRIES),
 }

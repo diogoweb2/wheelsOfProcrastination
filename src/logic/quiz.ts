@@ -84,6 +84,9 @@ export const QUIZ_TRACKS: { id: string; title: string; blurb: string }[] = [
 /** §14f — the Where Is This? quizzes live on their own tab (/academy/maps). */
 export const MAPS_TRACK = 'maps'
 
+/** §14f — these map topics keep their questions in `app/quizBankWorld` (`src/store/cloud.ts`). */
+export const WORLD_PREFIX = 'world-'
+
 /** §14d — chapter quiz ids are the subtopic's, prefixed. Also how the bank shards them (`src/store/cloud.ts`). */
 export const CHAPTER_PREFIX = 'se7-'
 
@@ -396,6 +399,39 @@ export const QUIZ_TOPICS: QuizTopic[] = [
     targetCount: 123,
     track: MAPS_TRACK,
     unlockAfter: 'where-usa',
+    firstGoal: { one: 'country', many: 'countries' },
+  },
+  {
+    id: WORLD_PREFIX + 'south-america',
+    owner: 'ben',
+    title: 'Where Is This? South America',
+    emoji: '🌎',
+    description: 'Every country on the map first — then every capital.',
+    targetCount: 36,
+    track: MAPS_TRACK,
+    unlockAfter: 'where-europe',
+    firstGoal: { one: 'country', many: 'countries' },
+  },
+  {
+    id: WORLD_PREFIX + 'africa',
+    owner: 'ben',
+    title: 'Where Is This? Africa',
+    emoji: '🌍',
+    description: 'Every country on the map first — then every capital.',
+    targetCount: 147,
+    track: MAPS_TRACK,
+    unlockAfter: WORLD_PREFIX + 'south-america',
+    firstGoal: { one: 'country', many: 'countries' },
+  },
+  {
+    id: WORLD_PREFIX + 'asia-oceania',
+    owner: 'ben',
+    title: 'Where Is This? Asia & Oceania',
+    emoji: '🌏',
+    description: 'Every country on the map first — then every capital.',
+    targetCount: 161,
+    track: MAPS_TRACK,
+    unlockAfter: WORLD_PREFIX + 'africa',
     firstGoal: { one: 'country', many: 'countries' },
   },
   ...CHAPTER_TOPICS,

@@ -15,6 +15,10 @@ const LOADERS: Record<MapId, () => Promise<{ MAP: MapDrawing }>> = {
   europe: () => import('../quiz/maps/europe.generated'),
   gta: () => import('../quiz/maps/gta.generated'),
   toronto: () => import('../quiz/maps/toronto.generated'),
+  samerica: () => import('../quiz/maps/samerica.generated'),
+  africa: () => import('../quiz/maps/africa.generated'),
+  asia: () => import('../quiz/maps/asia.generated'),
+  oceania: () => import('../quiz/maps/oceania.generated'),
 }
 
 const loaded = new Map<MapId, MapDrawing>()

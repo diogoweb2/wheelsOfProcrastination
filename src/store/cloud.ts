@@ -27,7 +27,7 @@ import { app, ensureAuth, firestore } from '../lib/firebase'
 import type { AiConfig, AppData, AuditEntry, BoardMatch, CardDuel, Essay, EssayTopic, EssayWord, EssayWordTest, FinalTestAuth, FreezeGift, FreezeRequest, GymCatalog, Idea, MarketData, OptcgMatch, Profile, QuizQuestion, QuizSessionLog, SeaMatch, StickerTrade } from '../types'
 import type { SeDesk } from '../steugene/types'
 import { mergeData, readLocalData, readLocalRoster, seedProfiles } from './storage'
-import { CHAPTER_PREFIX, DEFAULT_PRIZES, type PrizeCatalog } from '../logic/quiz'
+import { CHAPTER_PREFIX, DEFAULT_PRIZES, WORLD_PREFIX, type PrizeCatalog } from '../logic/quiz'
 import { CANADA_GEOGRAPHY_SEED } from '../quiz/canadaGeographySeed'
 import { CANADA_GEOGRAPHY_2_SEED } from '../quiz/canadaGeography2Seed'
 import { CANADA_HISTORY_SEED } from '../quiz/canadaHistorySeed'
@@ -78,6 +78,9 @@ const bankRef = () => doc(firestore, 'app', 'quizBank')
  */
 const se7BankRef = () => doc(firestore, 'app', 'quizBankSe7')
 const isChapterQ = (q: QuizQuestion) => q.topicId.startsWith(CHAPTER_PREFIX)
+/** §14f — and the last three map quizzes get a third: `app/quizBank` had reached ~770 KB. */
+const worldBankRef = () => doc(firestore, 'app', 'quizBankWorld')
+const isWorldQ = (q: QuizQuestion) => q.topicId.startsWith(WORLD_PREFIX)
 
 /**
  * Load the roster, seeding Firestore on first run. If the cloud roster is
@@ -191,15 +194,24 @@ export function fireAndForget(p: Promise<unknown>): void {
 export async function loadQuizBank(): Promise<QuizQuestion[]> {
   await ensureAuth()
   // a chunk of its own: ~900 questions nobody needs before the bank loads
-  const { SE7_SEED } = await import('../quiz/se7')
-  const [main, se7] = await Promise.all([loadShard(bankRef(), ALL_SEEDS), loadShard(se7BankRef(), SE7_SEED)])
+  const [{ SE7_SEED }, { WORLD_SEED }] = await Promise.all([import('../quiz/se7'), import('../quiz/worldSeed')])
+  const [main, se7, world] = await Promise.all([
+    loadShard(bankRef(), ALL_SEEDS),
+    loadShard(se7BankRef(), SE7_SEED),
+    loadShard(worldBankRef(), WORLD_SEED),
+  ])
   shards.main = main
   shards.se7 = se7
-  return [...main, ...se7]
+  shards.world = world
+  return [...main, ...se7, ...world]
 }
 
-/** Each half of the bank as last read or written — what a save compares against. */
-const shards: { main: QuizQuestion[] | null; se7: QuizQuestion[] | null } = { main: null, se7: null }
+/** Each part of the bank as last read or written — what a save compares against. */
+const shards: { main: QuizQuestion[] | null; se7: QuizQuestion[] | null; world: QuizQuestion[] | null } = {
+  main: null,
+  se7: null,
+  world: null,
+}
 
 async function loadShard(ref: ReturnType<typeof bankRef>, seeds: QuizQuestion[]): Promise<QuizQuestion[]> {
   const snap = await getDoc(ref)
@@ -214,12 +226,12 @@ async function loadShard(ref: ReturnType<typeof bankRef>, seeds: QuizQuestion[])
   return existing
 }
 
-/** Live bank updates (another device removing/approving questions, or the regen script). Both halves, merged. */
+/** Live bank updates (another device removing/approving questions, or the regen script). Every part, merged. */
 export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () => void {
   const emit = () => {
-    if (shards.main && shards.se7) cb([...shards.main, ...shards.se7])
+    if (shards.main && shards.se7 && shards.world) cb([...shards.main, ...shards.se7, ...shards.world])
   }
-  const watch = (ref: ReturnType<typeof bankRef>, half: 'main' | 'se7') =>
+  const watch = (ref: ReturnType<typeof bankRef>, half: 'main' | 'se7' | 'world') =>
     onSnapshot(ref, (snap) => {
       const data = snap.data() as { questions?: QuizQuestion[] } | undefined
       if (!data?.questions) return
@@ -228,24 +240,29 @@ export function subscribeQuizBank(cb: (questions: QuizQuestion[]) => void): () =
     })
   const offMain = watch(bankRef(), 'main')
   const offSe7 = watch(se7BankRef(), 'se7')
+  const offWorld = watch(worldBankRef(), 'world')
   return () => {
     offMain()
     offSe7()
+    offWorld()
   }
 }
 
 export async function saveQuizBank(questions: QuizQuestion[]): Promise<void> {
   await ensureAuth()
-  const main = questions.filter((q) => !isChapterQ(q))
+  const main = questions.filter((q) => !isChapterQ(q) && !isWorldQ(q))
   const se7 = questions.filter(isChapterQ)
-  // only the half that changed is written: removing one question must not
-  // rewrite a megabyte of the other one
+  const world = questions.filter(isWorldQ)
+  // only the part that changed is written: removing one question must not
+  // rewrite a megabyte of the others
   const same = (a: QuizQuestion[] | null, b: QuizQuestion[]) => a !== null && JSON.stringify(a) === JSON.stringify(b)
   const writes: Promise<void>[] = []
   if (!same(shards.main, main)) writes.push(setDoc(bankRef(), { questions: main }))
   if (!same(shards.se7, se7)) writes.push(setDoc(se7BankRef(), { questions: se7 }))
+  if (!same(shards.world, world)) writes.push(setDoc(worldBankRef(), { questions: world }))
   shards.main = main
   shards.se7 = se7
+  shards.world = world
   await Promise.all(writes)
 }
 
