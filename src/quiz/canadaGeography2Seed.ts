@@ -356,31 +356,44 @@ export const CANADA_GEOGRAPHY_2_SEED: QuizQuestion[] = [
     },
   ),
 
-  // --- order ----------------------------------------------------------------
-  {
-    id: 'cg2-49',
-    topicId: T,
-    type: 'order',
-    prompt: 'Put these Great Lakes in order from BIGGEST to smallest:',
-    emoji: '💧',
-    sequence: ['Lake Superior', 'Lake Huron', 'Lake Erie', 'Lake Ontario'],
-    weight: 2,
-    points: 10,
-    status: 'active',
-    createdAt: AT,
-    funFact: 'Superior, Huron, Michigan, Erie, Ontario — that is the whole set, biggest to smallest.',
-  },
-  {
-    id: 'cg2-50',
-    topicId: T,
-    type: 'order',
-    prompt: 'Put these cities in order from NORTH to SOUTH:',
-    emoji: '🧭',
-    sequence: ['Whitehorse', 'Edmonton', 'Toronto', 'Windsor'],
-    weight: 2,
-    points: 10,
-    status: 'active',
-    createdAt: AT,
-    funFact: 'Windsor is so far south it sits BELOW parts of California’s northern border.',
-  },
+  // --- the two order questions that used to be here (2026-11-08) ------------
+  // cg2-49 (Great Lakes, biggest first) and cg2-50 (cities, north to south) are
+  // RETIRED for the same reason as the match questions above and on the same
+  // evidence: 0 right out of 8. Tapping a column in the order it is drawn
+  // produces a complete, confidently wrong answer, and "put these in order"
+  // never told him what the first tap meant.
+  //
+  // The three below are the ends of both ladders, which is what the ordering
+  // was actually teaching. The middles were already there: cg2-13 names the
+  // largest Great Lake and cg2-15 the smallest.
+  choice(
+    'cg2-55',
+    'Which Great Lake is the SECOND largest by area?',
+    ['Lake Huron', 'Lake Michigan', 'Lake Erie', 'Lake Ontario', 'Lake Superior', 'Great Bear Lake', 'Lake Winnipeg'],
+    'Lake Huron',
+    {
+      emoji: '💧',
+      funFact: 'Biggest to smallest: Superior, Huron, Michigan, Erie, Ontario. Superior on its own holds more water than the other four put together.',
+    },
+  ),
+  choice(
+    'cg2-56',
+    'Which of these Canadian cities is the FARTHEST SOUTH?',
+    ['Windsor', 'Toronto', 'Montreal', 'Vancouver', 'Victoria', 'Halifax', 'Calgary'],
+    'Windsor',
+    {
+      emoji: '🧭',
+      funFact: 'Windsor is the southernmost city in Canada — and the one place where you look NORTH across the river to see the United States, because Detroit is up there.',
+    },
+  ),
+  choice(
+    'cg2-57',
+    'Which of these Canadian cities is the FARTHEST NORTH?',
+    ['Whitehorse', 'Edmonton', 'Winnipeg', 'Vancouver', 'Toronto', 'Montreal', 'Halifax'],
+    'Whitehorse',
+    {
+      emoji: '🌄',
+      funFact: 'Whitehorse is the capital of Yukon. In midsummer the sun barely sets there; in midwinter it barely rises.',
+    },
+  ),
 ]
