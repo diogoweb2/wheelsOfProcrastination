@@ -297,62 +297,64 @@ export const CANADA_GEOGRAPHY_2_SEED: QuizQuestion[] = [
     createdAt: AT,
     funFact: 'The official summer sport is lacrosse, a game invented by First Nations peoples.',
   },
-
-  // --- match ----------------------------------------------------------------
-  {
-    id: 'cg2-46',
-    topicId: T,
-    type: 'match',
-    prompt: 'Match each landmark to where it is:',
-    emoji: '🔗',
-    pairs: [
-      { left: 'Mount Logan', right: 'Yukon' },
-      { left: 'Baffin Island', right: 'Nunavut' },
-      { left: 'Bay of Fundy', right: 'New Brunswick' },
-      { left: 'Niagara Falls', right: 'Ontario' },
-    ],
-    weight: 2,
-    points: 10,
-    status: 'active',
-    createdAt: AT,
-    funFact: 'Highest peak, biggest island, biggest tides, loudest waterfall — four records, four places.',
-  },
-  {
-    id: 'cg2-47',
-    topicId: T,
-    type: 'match',
-    prompt: 'Match each river to the province or territory it flows through:',
-    emoji: '🌊',
-    pairs: [
-      { left: 'Fraser River', right: 'British Columbia' },
-      { left: 'Mackenzie River', right: 'Northwest Territories' },
-      { left: 'St. Lawrence River', right: 'Quebec' },
-      { left: 'Red River', right: 'Manitoba' },
-    ],
-    weight: 2,
-    points: 10,
-    status: 'active',
-    createdAt: AT,
-    funFact: 'The Red River runs north into Winnipeg — one of the few rivers in Canada that flows upward on a map.',
-  },
-  {
-    id: 'cg2-48',
-    topicId: T,
-    type: 'match',
-    prompt: 'Match each region to the province it best describes:',
-    emoji: '🗺️',
-    pairs: [
-      { left: 'The Prairies', right: 'Saskatchewan' },
-      { left: 'The Rockies', right: 'Alberta' },
-      { left: 'The Maritimes', right: 'Prince Edward Island' },
-      { left: 'The Arctic', right: 'Nunavut' },
-    ],
-    weight: 1,
-    points: 6,
-    status: 'active',
-    createdAt: AT,
-    funFact: 'Canadians say "out west", "back east" and "up north" — three words that cover 10 million km².',
-  },
+  // --- the three match questions that used to be here (2026-11-08) ----------
+  // cg2-46 landmarks, cg2-47 rivers, cg2-48 regions are RETIRED, flagged
+  // `removed` in the bank rather than deleted (§14, the asiad-vocab rule) so no
+  // out-of-date client can re-seed them. He was 2 of 22 on the match and order
+  // questions in this topic while answering the same facts correctly as plain
+  // choice questions — every logged answer was the right four values pinned to
+  // the wrong rows, which is what tapping straight down two columns produces.
+  // Two columns side by side read as rows, and the instruction above them is a
+  // grey line he skips. cg2-48 was also unfair: Alberta IS a Prairie province,
+  // and the key wanted Saskatchewan there.
+  //
+  // The four questions below carry the facts those three owned that nothing
+  // else in the bank asked: Mackenzie → NWT, Red River → Manitoba, Rockies →
+  // Alberta (book I only), Maritimes → PEI. The rest were already covered
+  // (cg2-08/09 Fundy, cg2-12 Fraser, cg2-17/18 Logan, cg2-24/25 Baffin,
+  // cg2-37 Niagara, cg2-42 St. Lawrence).
+  choice(
+    'cg2-51',
+    'Which river flows through the Northwest Territories to the Arctic Ocean?',
+    ['Mackenzie River', 'Fraser River', 'Red River', 'St. Lawrence River', 'Yukon River', 'Churchill River', 'Ottawa River'],
+    'Mackenzie River',
+    {
+      emoji: '🌊',
+      funFact: 'It starts at Great Slave Lake and never leaves the Northwest Territories — 4,241 km, the longest river in Canada.',
+    },
+  ),
+  choice(
+    'cg2-52',
+    'The Red River flows north through Winnipeg. Which province is it in?',
+    ['Manitoba', 'Saskatchewan', 'Alberta', 'Ontario', 'Quebec', 'British Columbia', 'Nova Scotia'],
+    'Manitoba',
+    {
+      emoji: '🧭',
+      funFact: 'Nearly every other river in Canada runs south or east. The Red River runs north into Lake Winnipeg — on a map it looks like it is flowing uphill.',
+    },
+  ),
+  choice(
+    'cg2-53',
+    'The Rocky Mountains form the border between British Columbia and which province?',
+    ['Alberta', 'Saskatchewan', 'Manitoba', 'Yukon', 'Ontario', 'Quebec', 'Nunavut'],
+    'Alberta',
+    {
+      emoji: '🏔️',
+      funFact: 'Banff and Jasper are on the Alberta side, Yoho and Glacier on the BC side — one mountain range, two provinces.',
+    },
+  ),
+  choice(
+    'cg2-54',
+    'Which region of Canada is Prince Edward Island part of?',
+    ['the Maritimes', 'the Prairies', 'the Rockies', 'the Arctic', 'the Great Lakes', 'the Canadian Shield', 'the boreal forest'],
+    'the Maritimes',
+    {
+      emoji: '🦞',
+      weight: 1,
+      points: 6,
+      funFact: 'The Maritimes are Nova Scotia, New Brunswick and PEI. Add Newfoundland and Labrador and the four together are Atlantic Canada.',
+    },
+  ),
 
   // --- order ----------------------------------------------------------------
   {

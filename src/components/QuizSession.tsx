@@ -751,7 +751,15 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
   // picked here, not in ChoiceQ, so 🔊 reads the options in the order they are drawn
   const options = useMemo(() => (q.type === 'choice' ? pickChoiceOptions(q) : []), [q.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const rate = useStore((s) => s.data.steugene?.speak?.rate ?? 0.9) // the same voice speed he chose in St. Eugene
-  useEffect(() => stopSpeaking, [q.id]) // a new question cuts the old one off mid-sentence
+  /**
+   * §14 — a new question cuts the old one off mid-sentence (the card is keyed by
+   * question id, so this runs on every advance). The ONE exception is the
+   * read-back of the option he just tapped: that is deliberately still being
+   * said as the next card arrives, and killing it here is what made every tap
+   * wait a second and a half for the voice to get out of the way.
+   */
+  const keepTalking = useRef(false)
+  useEffect(() => () => { if (!keepTalking.current) stopSpeaking() }, [])
   return (
     <div className="card">
       {fresh && (
@@ -781,7 +789,16 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
       )}
       {q.bigEmoji && <div className="quiz-flag">{q.bigEmoji}</div>}
       {q.type === 'choice' && q.map && <MapBoard spec={q.map} />}
-      {q.type === 'choice' && <ChoiceQ q={q} options={options} onAnswer={onAnswer} instantMark={instantMark} rate={rate} />}
+      {q.type === 'choice' && (
+        <ChoiceQ
+          q={q}
+          options={options}
+          onAnswer={onAnswer}
+          instantMark={instantMark}
+          rate={rate}
+          onSpoke={() => { keepTalking.current = true }}
+        />
+      )}
       {q.type === 'write' && <WriteQ q={q} onAnswer={onAnswer} />}
       {q.type === 'match' && <MatchQ q={q} onAnswer={onAnswer} />}
       {q.type === 'order' && <OrderQ q={q} onAnswer={onAnswer} />}
@@ -790,7 +807,7 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
   )
 }
 
-function ChoiceQ({ q, options, onAnswer, instantMark, rate }: { q: QuizQuestion; options: string[]; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean; rate: number }) {
+function ChoiceQ({ q, options, onAnswer, instantMark, rate, onSpoke }: { q: QuizQuestion; options: string[]; onAnswer: (c: boolean, given?: Given) => void; instantMark: boolean; rate: number; onSpoke?: () => void }) {
   const [picked, setPicked] = useState<string | null>(null)
   const gone = useRef(false) // closed mid-sentence: don't answer for him after he left
   useEffect(() => () => { gone.current = true }, [])
@@ -808,9 +825,19 @@ function ChoiceQ({ q, options, onAnswer, instantMark, rate }: { q: QuizQuestion;
             onClick={() => {
               setPicked(opt)
               const answer = () => { if (!gone.current) onAnswer(opt === q.answer, { text: opt }) }
-              // the voice says the option he tapped, and only then the next card comes
-              if (canSpeak()) speak(opt, rate, answer)
-              else window.setTimeout(answer, instantMark ? 250 : 120)
+              // §14 — the voice says the option he tapped WHILE the next card
+              // comes, not in front of it. Waiting for it to finish cost 1.4 s
+              // on a two-word answer and 2.7 s on a five-word one — and in the
+              // Android shell, which has no "finished" signal, every tap paid
+              // the full worst-case timer whether the voice spoke or not. Over
+              // a 20-question test that is most of a minute spent watching a
+              // dead screen. `speak` cancels whatever was playing, so a half-
+              // read 🔊 question still gets cut off by the tap.
+              if (canSpeak()) {
+                speak(opt, rate)
+                onSpoke?.()
+              }
+              window.setTimeout(answer, instantMark ? 250 : 120)
             }}
           >
             {opt}
