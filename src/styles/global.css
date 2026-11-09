@@ -7495,121 +7495,131 @@ input, select { font-family: inherit; }
 .map-zooms .btn { width: auto; flex: 1; }
 .map-zoom--on { border-color: var(--yellow); }
 
-/* The map's own full screen, portrait defaults first. */
-.map-stage-bar { display: none; }
 .quiz-feedback-map { margin-top: 10px; }
 
-/* §14f — LANDSCAPE: the map gets the whole screen (2026-11-08).
-   Portrait on a phone gives a 390-wide map, and PEI inside the East coast
-   close-up came out a few pixels across: he was failing the finger, not the
-   geography. Short-and-wide only (<=620px tall) so a tablet or a desktop keeps
-   the normal card -- they already have the room. The chrome moves off the map
-   instead of shrinking it: the question becomes a pill on top, zooms and the
-   lock button float in the corners, and ⤡ drops back to the normal card
-   (a full-screen map with no way out is a trap -- the close button is in the
-   session header, which this covers). Answering unmounts the whole stage, so
-   the right answer and the next question arrive in the ordinary view. */
-@media (orientation: landscape) and (max-height: 620px) {
-  .map-stage:not(.map-stage--off) {
-    position: fixed;
-    inset: 0;
-    z-index: 60; /* over .quiz-full (55) */
-    background: var(--bg);
-  }
-  .map-stage:not(.map-stage--off) .map-wrap { position: absolute; inset: 0; margin: 0; }
-  .map-stage:not(.map-stage--off) .map-board {
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    border-radius: 0;
-  }
-  .map-stage:not(.map-stage--off) .map-stage-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: absolute;
-    z-index: 2;
-    top: 6px;
-    left: calc(8px + env(safe-area-inset-left));
-    right: calc(8px + env(safe-area-inset-right));
-    /* the pill is over the map: taps go through it to the land underneath */
-    pointer-events: none;
-  }
-  .map-stage-ask {
-    /* hugs its text rather than spanning the top, so it covers as little as it can */
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: calc(100% - 64px);
-    background: rgba(6, 18, 31, 0.82);
-    color: #fff;
-    border-radius: 999px;
-    padding: 7px 14px;
-    font-size: 14px;
-    font-weight: 900;
-    line-height: 1.25;
-  }
-  .map-stage-out {
-    pointer-events: auto;
-    flex: none;
-    margin-left: auto;
-    width: auto;
-    background: rgba(6, 18, 31, 0.82);
-    font-size: 18px;
-    padding: 4px 10px;
-  }
-  .map-stage:not(.map-stage--off) .map-zooms {
-    position: absolute;
-    z-index: 2;
-    margin: 0;
-    width: auto;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    right: calc(8px + env(safe-area-inset-right));
-    bottom: calc(8px + env(safe-area-inset-bottom));
-  }
-  .map-stage:not(.map-stage--off) .map-zooms .btn {
-    width: auto;
-    flex: none;
-    background: rgba(6, 18, 31, 0.82);
-  }
-  .map-stage:not(.map-stage--off) .map-stage-lock {
-    position: absolute;
-    z-index: 2;
-    width: auto;
-    left: calc(8px + env(safe-area-inset-left));
-    bottom: calc(8px + env(safe-area-inset-bottom));
-  }
+/* §14f — WIDE MODE: the quiz laid out along the long side of the screen
+   (2026-11-08). Portrait on a phone gives the map about 340px across, and
+   inside the East coast close-up PEI came out a fingertip wide: he was failing
+   the finger, not the geography.
 
-  /* the session's own chrome gives up its padding — height is the scarce axis */
-  .quiz-full-head { padding: 7px 12px 5px; }
-  .quiz-full-body { padding: 8px 12px 20px; }
-
-  /* a map question WITH options, and the answer card after it: map on one side,
-     words on the other, so neither needs a scroll to be read */
-  .quiz-card--map,
-  .quiz-feedback--map {
-    display: grid;
-    column-gap: 14px;
-    align-items: start;
-  }
-  .quiz-card--map { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
-  .quiz-feedback--map { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
-  .quiz-card--map > * { grid-column: 2; }
-  .quiz-card--map > .map-wrap {
-    grid-column: 1;
-    grid-row: 1 / span 30;
-    margin-bottom: 0;
-  }
-  .quiz-feedback--map > * { grid-column: 1; }
-  .quiz-feedback--map > .quiz-feedback-map {
-    grid-column: 2;
-    grid-row: 1 / span 30;
-    margin-top: 0;
-  }
-  .quiz-card--map .map-board,
-  .quiz-feedback--map .map-board { max-height: 78vh; }
+   `.quiz-full--wide` is set by the app, not by a media query, because the
+   Android shell and the PWA manifest both pin the app to portrait -- rotating
+   the phone did nothing. ⤢ turns the panel itself (`--turned`), and the same
+   class comes on by itself when the screen really is landscape and short. Map
+   quizzes only. */
+.quiz-full--turned {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  width: 100vh;
+  height: 100vw;
+  width: 100dvh;
+  height: 100dvw;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
+
+/* height is the scarce axis now: the chrome gives up its padding */
+.quiz-full--wide .quiz-full-head { padding: 7px 12px 5px; }
+.quiz-full--wide .quiz-full-body { padding: 8px 12px 20px; }
+
+/* A map question takes the whole panel, header and all. The map is the
+   question; everything else floats over it. */
+.quiz-full--wide .map-stage {
+  position: absolute; /* .quiz-full is the containing block (fixed, or rotated) */
+  inset: 0;
+  z-index: 2;
+  background: var(--bg);
+}
+.quiz-full--wide .map-stage .map-wrap { position: absolute; inset: 0; margin: 0; }
+.quiz-full--wide .map-stage .map-board {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+.map-stage-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  left: calc(8px + env(safe-area-inset-left));
+  right: calc(8px + env(safe-area-inset-right));
+  /* the pill sits over the map: taps go through it to the land underneath */
+  pointer-events: none;
+}
+.map-stage-ask {
+  /* hugs its text rather than spanning the top, so it covers as little as it can */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(100% - 64px);
+  background: rgba(6, 18, 31, 0.82);
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+.map-stage-out {
+  pointer-events: auto;
+  flex: none;
+  margin-left: auto;
+  width: auto;
+  background: rgba(6, 18, 31, 0.82);
+  font-size: 18px;
+  padding: 4px 10px;
+}
+.quiz-full--wide .map-stage .map-zooms {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  width: auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  right: calc(8px + env(safe-area-inset-right));
+  bottom: calc(8px + env(safe-area-inset-bottom));
+}
+.quiz-full--wide .map-stage .map-zooms .btn {
+  width: auto;
+  flex: none;
+  background: rgba(6, 18, 31, 0.82);
+}
+.quiz-full--wide .map-stage-lock {
+  position: absolute;
+  z-index: 2;
+  width: auto;
+  left: calc(8px + env(safe-area-inset-left));
+  bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+/* A map question WITH options, and the answer card after it: map on one side,
+   words on the other, so neither needs a scroll to be read. */
+.quiz-full--wide .quiz-card--map,
+.quiz-full--wide .quiz-feedback--map {
+  display: grid;
+  column-gap: 14px;
+  align-items: start;
+}
+.quiz-full--wide .quiz-card--map { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.quiz-full--wide .quiz-feedback--map { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+.quiz-full--wide .quiz-card--map > * { grid-column: 2; }
+.quiz-full--wide .quiz-card--map > .map-wrap {
+  grid-column: 1;
+  grid-row: 1 / span 30;
+  margin-bottom: 0;
+}
+.quiz-full--wide .quiz-feedback--map > * { grid-column: 1; }
+.quiz-full--wide .quiz-feedback--map > .quiz-feedback-map {
+  grid-column: 2;
+  grid-row: 1 / span 30;
+  margin-top: 0;
+}
+.quiz-full--wide .quiz-card--map .map-board,
+.quiz-full--wide .quiz-feedback--map .map-board { max-height: 78vh; }
 
 /* §14f — the world map's oceans and regions, the TTC's stops, the body quiz */
 .map-ocean { fill: #4f93c1; stroke: #3c7ba6; stroke-width: 1px; vector-effect: non-scaling-stroke; }

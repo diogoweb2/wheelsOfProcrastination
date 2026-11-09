@@ -89,7 +89,8 @@ export default defineConfig({
         theme_color: '#0c2338',
         background_color: '#0c2338',
         display: 'standalone',
-        orientation: 'portrait',
+        // §14f — map quizzes turn sideways; the rest of the app is laid out portrait
+        orientation: 'any',
         start_url: '/',
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },

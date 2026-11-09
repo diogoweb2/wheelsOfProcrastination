@@ -37,6 +37,12 @@ interface ShellBridge {
   stopSpeaking?(): void
   /** True once the engine has a voice installed and loaded. */
   canSpeak?(): boolean
+  /**
+   * §14f — the shell is locked to portrait, which is right everywhere but the
+   * map quizzes. They ask for the lock to come off while a sitting lasts.
+   * Optional, so an older shell still runs (it just will not rotate).
+   */
+  allowLandscape?(on: boolean): void
 }
 
 declare global {

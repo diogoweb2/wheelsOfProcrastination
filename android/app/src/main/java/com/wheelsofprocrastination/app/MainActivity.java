@@ -518,4 +518,23 @@ public class MainActivity extends Activity {
         web.destroy();
         super.onDestroy();
     }
+
+    /**
+     * §14f — Where Is This? asks for the portrait lock to come off.
+     *
+     * Everything else in the app is a column of buttons and is laid out for
+     * portrait, so the activity stays pinned (`android:screenOrientation` in
+     * the manifest). A map is the one screen that is wider than it is tall, and
+     * on a phone the portrait map was too small to tap, so the quiz turns the
+     * lock off for the length of a map sitting and back on when it ends.
+     *
+     * SENSOR rather than USER on purpose: a tablet with auto-rotate switched
+     * off would otherwise still be stuck in portrait, which is the whole
+     * problem we are fixing.
+     */
+    void setLandscapeAllowed(boolean on) {
+        setRequestedOrientation(on
+                ? ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 }

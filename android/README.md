@@ -36,8 +36,17 @@ Bump `versionCode` / `versionName` in `app/build.gradle` when shipping a new one
 | Screen | stays awake while the app is in front (spin and rest timers) |
 | Push | native FCM, so pings land with the app closed (see below) |
 
-Locked to portrait, matching the PWA manifest. To allow landscape, drop
-`android:screenOrientation` from `app/src/main/AndroidManifest.xml`.
+Locked to portrait, because every other screen is a column of buttons laid out
+for it. The **map quizzes are the exception** (§14f): the site calls
+`WheelsShell.allowLandscape(true)` when a Where Is This? sitting opens and
+`false` when it ends, and `MainActivity.setLandscapeAllowed` flips the activity
+between `SCREEN_ORIENTATION_SENSOR` and `SCREEN_ORIENTATION_PORTRAIT`. SENSOR,
+not USER, so a device with auto-rotate switched off still turns. The activity
+handles `orientation` in `configChanges`, so nothing is recreated and the quiz
+keeps its place. An APK older than this has no such method and simply stays in
+portrait — the site then turns the map itself (⤢). To allow landscape
+everywhere, drop `android:screenOrientation` from
+`app/src/main/AndroidManifest.xml`.
 
 ## Push
 

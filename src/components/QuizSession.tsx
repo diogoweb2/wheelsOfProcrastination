@@ -16,7 +16,7 @@
 //
 // A topic with a FIRST GOAL (§14f) trains in rounds: only those questions, up to
 // ten at a time, until each has been right twice running. Then the rest opens.
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { useStore } from '../store/useStore'
 import { KID_ID } from '../store/storage'
@@ -44,6 +44,7 @@ import {
   sessionPool,
   shuffle,
   topicById,
+  MAPS_TRACK,
   warmupAttempts,
   warmupTopicIds,
 } from '../logic/quiz'
@@ -57,6 +58,7 @@ import { useQuizSessionLog } from './useQuizSessionLog'
 import { holdFreshen } from '../lib/fresh'
 import { MapBoard } from './MapBoard'
 import { MAP_NAMES } from '../quiz/maps/names'
+import { inShell } from '../push'
 
 export type QuizMode = 'training' | 'simulation' | 'official' | 'warmup'
 
@@ -94,6 +96,21 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest, finishWarmupTest } = useStore()
   const isWarmup = mode === 'warmup'
   const topic = topicById(topicId)
+  // §14f — a map quiz may be laid out along the long side of the screen
+  const isMapQuiz = topic?.track === MAPS_TRACK
+  /**
+   * §14f — the Android shell pins every screen to portrait, which is right for
+   * a list of buttons and wrong for a map. A map sitting asks for the lock to
+   * come off and puts it back on the way out. `allowLandscape` is optional on
+   * the bridge: an older APK simply does not rotate, which is why the web side
+   * can turn the panel itself (⤢).
+   */
+  useEffect(() => {
+    if (!isMapQuiz) return
+    const bridge = inShell()
+    bridge?.allowLandscape?.(true)
+    return () => bridge?.allowLandscape?.(false)
+  }, [isMapQuiz])
   const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
 
   // the target's data from wherever we stand, for retry-exclusion
@@ -312,14 +329,14 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // a warm-up belongs to no single topic, so neither guard below applies to it
   if (!isWarmup && (!topic || pool.length === 0)) {
     return (
-      <Full onClose={onClose} title="Quiz">
+      <Full landscape={isMapQuiz} onClose={onClose} title="Quiz">
         <p className="muted">No questions in this topic yet. The crew is still writing them!</p>
       </Full>
     )
   }
   if (mode !== 'training' && plan.length === 0) {
     return (
-      <Full onClose={onClose} title={isWarmup ? '🧠 Warm-up rehearsal' : 'Final Test'}>
+      <Full landscape={isMapQuiz} onClose={onClose} title={isWarmup ? '🧠 Warm-up rehearsal' : 'Final Test'}>
         <p className="muted">
           {isWarmup
             ? 'Nothing to warm up on yet — conquer a sea in a final test and it starts coming back here.'
@@ -352,7 +369,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // ---- warm-up review verdict ----
   if (stage === 'review-passed' && reviewRecord) {
     return (
-      <Full onClose={onClose} title="🧠 Warm-up review — cleared">
+      <Full landscape={isMapQuiz} onClose={onClose} title="🧠 Warm-up review — cleared">
         <div className="card" style={{ textAlign: 'center', borderColor: 'var(--green)' }}>
           <div style={{ fontSize: 56 }}>🧠⚡</div>
           <div style={{ fontSize: 44, fontWeight: 900, color: 'var(--green)' }}>{reviewRecord.scorePct}%</div>
@@ -402,7 +419,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     const { known, total } = firstGoalProgress(pool, stats)
     const done = known === total
     return (
-      <Full onClose={onClose} title={`${topicEmoji} Training · +🪙${sessionEarned}`}>
+      <Full landscape={isMapQuiz} onClose={onClose} title={`${topicEmoji} Training · +🪙${sessionEarned}`}>
         <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: done ? 'var(--green)' : 'var(--gold)' }}>
           <div style={{ fontSize: 56 }}>{done ? '🏆' : '🗺️'}</div>
           <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>
@@ -430,7 +447,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // ---- training: nothing due (cleared this session, or all resting) ----
   if (mode === 'training' && (trainingDone || !current)) {
     return (
-      <Full onClose={onClose} title={`${topicEmoji} Training`}>
+      <Full landscape={isMapQuiz} onClose={onClose} title={`${topicEmoji} Training`}>
         <div className="card quiz-feedback" style={{ textAlign: 'center', borderColor: 'var(--gold)' }}>
           <div style={{ fontSize: 56 }}>🍖😴</div>
           <div style={{ fontWeight: 900, fontSize: 20, marginTop: 6 }}>NICE WORK, PIRATE!</div>
@@ -471,7 +488,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
           : `${mode === 'official' ? '🎓 FINAL TEST' : '🧪 Mock Final Test'} · ${results.length + 1}/${plan.length}`
 
   return (
-    <Full onClose={onClose} title={header} confirmClose={mode !== 'training' && results.length > 0}>
+    <Full landscape={isMapQuiz} onClose={onClose} title={header} confirmClose={mode !== 'training' && results.length > 0}>
       {mode !== 'training' && (
         <div className="quiz-progress">
           {plan.map((_, i) => (
@@ -1016,21 +1033,13 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
   const [picked, setPicked] = useState<string[]>([])
   const [done, setDone] = useState(false)
   /**
-   * §14f — turn the phone sideways and the map takes the whole screen.
-   *
-   * Portrait on a phone leaves the map about 390x310: on the East coast that is
-   * a PEI he cannot hit, and he was giving up rather than guessing (2026-11-08).
-   * Landscape has the width the map wants, so in landscape the stage goes over
-   * everything, the question rides on top of the map as a pill, and the zoom
-   * and lock buttons float in the corners. Nothing is hidden: it is the same
-   * card, with the chrome moved off the map.
-   *
-   * It lasts exactly as long as the tap: answering unmounts this, so the right
-   * answer and the next question arrive in the normal (scrollable) view. And
-   * the pill carries a shrink button, because a full-screen map with no way out
-   * is a trap -- the session's own close button lives up in the header.
+   * §14f — in wide mode a map question takes the whole panel: the map edge to
+   * edge, the question on top of it as a pill that taps fall through, and the
+   * zooms and Lock it in in the corners. It covers the session header, so the
+   * pill carries the way out (⤡) — a full-screen map with no way back is a
+   * trap. Portrait is untouched: the same card it has always been.
    */
-  const [shrunk, setShrunk] = useState(false)
+  const { wide, exit } = useContext(Wide)
 
   function finish(ids: string[]) {
     setDone(true)
@@ -1051,8 +1060,9 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
   }
 
   return (
-    <div className={`map-stage ${shrunk ? 'map-stage--off' : ''}`}>
-      {/* landscape only: the question, over the map, because the card's own copy is behind it */}
+    <div className="map-stage">
+      {/* wide only: the question, over the map, because the card's own copy is behind it */}
+      {wide && (
       <div className="map-stage-bar">
         <div className="map-stage-ask">
           {q.emoji && <span style={{ marginRight: 4 }}>{q.emoji}</span>}
@@ -1061,13 +1071,14 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
         <button
           type="button"
           className="btn btn--ghost btn--small map-stage-out"
-          onClick={() => { sfx.click(); setShrunk(true) }}
-          aria-label="Leave full screen"
-          title="Leave full screen"
+          onClick={() => { sfx.click(); exit() }}
+          aria-label="Back to the upright card"
+          title="Back to the upright card"
         >
           ⤡
         </button>
       </div>
+      )}
       <MapBoard spec={spec} selected={picked} onTap={tap} />
       {locks && (
         <button
@@ -1084,12 +1095,58 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
 
 // --- full-screen shell -----------------------------------------------------
 
-function Full({ title, onClose, confirmClose, children }: { title: string; onClose: () => void; confirmClose?: boolean; children: React.ReactNode }) {
+/**
+ * §14f — WIDE MODE: the quiz laid out along the long side of the screen.
+ *
+ * It is on when the screen really is landscape, and also when he taps ⤢ on a
+ * phone that will not rotate — which is every phone running the Android shell,
+ * because the shell is locked to portrait (`android:screenOrientation`) and so
+ * is the PWA manifest. Rather than wait for an APK install, ⤢ turns the quiz
+ * panel 90° itself: he turns the phone and reads it.
+ *
+ * Only map quizzes offer it. A map is the one thing in the app that is wider
+ * than it is tall, and a map a child cannot tap tests his finger, not his
+ * geography.
+ */
+const Wide = createContext<{ wide: boolean; exit: () => void }>({ wide: false, exit: () => {} })
+
+/** True when the screen is already wide and short: a phone actually in landscape. */
+const WIDE_SCREEN = '(orientation: landscape) and (max-height: 620px)'
+function useWideScreen(): boolean {
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(WIDE_SCREEN).matches)
+  useEffect(() => {
+    const m = window.matchMedia(WIDE_SCREEN)
+    const sync = () => setOn(m.matches)
+    sync()
+    m.addEventListener('change', sync)
+    return () => m.removeEventListener('change', sync)
+  }, [])
+  return on
+}
+
+
+function Full({ title, onClose, confirmClose, landscape = false, children }: { title: string; onClose: () => void; confirmClose?: boolean; landscape?: boolean; children: React.ReactNode }) {
   const [confirming, setConfirming] = useState(false)
+  const wideScreen = useWideScreen()
+  const [turned, setTurned] = useState(false) // he asked for it on a screen that will not rotate
+  const [off, setOff] = useState(false) // ...or asked for the ordinary card back
+  const wide = landscape && !off && (wideScreen || turned)
+  const exit = () => { setTurned(false); setOff(true) }
   return (
-    <div className="quiz-full">
+    <div className={`quiz-full ${wide ? 'quiz-full--wide' : ''} ${wide && !wideScreen ? 'quiz-full--turned' : ''}`}>
       <div className="quiz-full-head">
         <div style={{ fontWeight: 900, flex: 1, fontSize: 15 }}>{title}</div>
+        {landscape && (
+          <button
+            className="btn btn--ghost btn--small"
+            style={{ width: 'auto', fontSize: 18, padding: '4px 10px' }}
+            aria-label={wide ? 'Back to the upright card' : 'Turn the map sideways'}
+            title={wide ? 'Back to the upright card' : 'Turn the map sideways'}
+            onClick={() => { sfx.click(); if (wide) exit(); else { setOff(false); setTurned(true) } }}
+          >
+            {wide ? '⤡' : '⤢'}
+          </button>
+        )}
         <button
           className="btn btn--ghost btn--small"
           style={{ whiteSpace: 'nowrap' }}
@@ -1105,7 +1162,9 @@ function Full({ title, onClose, confirmClose, children }: { title: string; onClo
           {confirming ? '⛵ Abandon ship?!' : '⚓ Back to the ship'}
         </button>
       </div>
-      <div className="quiz-full-body">{children}</div>
+      <div className="quiz-full-body">
+        <Wide.Provider value={{ wide, exit }}>{children}</Wide.Provider>
+      </div>
     </div>
   )
 }

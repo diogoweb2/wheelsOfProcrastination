@@ -69,4 +69,15 @@ public class PushBridge {
     public void requestPush() {
         activity.runOnUiThread(activity::startPushRequest);
     }
+
+    /**
+     * §14f — Where Is This? (the map quizzes) asks for the portrait lock to
+     * come off while a sitting lasts, and puts it back on the way out. The
+     * site treats this as optional, so an older APK keeps working — it just
+     * stays in portrait and turns the map itself.
+     */
+    @JavascriptInterface
+    public void allowLandscape(boolean on) {
+        activity.runOnUiThread(() -> activity.setLandscapeAllowed(on));
+    }
 }
