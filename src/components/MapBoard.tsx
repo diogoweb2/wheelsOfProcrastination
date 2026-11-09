@@ -25,6 +25,25 @@ const LOADERS: Record<MapId, () => Promise<{ MAP: MapDrawing }>> = {
   skeleton: () => import('../quiz/maps/skeleton.generated'),
 }
 
+/**
+ * §14f — hand-tuned close-ups, overriding the builder's boxes by label.
+ *
+ * The builder crops tight to the places it is about, and a crop that tight
+ * takes away the only thing he has to navigate by: the neighbours. The East
+ * coast box put the Maritimes on screen with nothing around them, so "where is
+ * New Brunswick" became "guess which of these four blobs" (2026-11-08, Ben on
+ * a phone). 1.5x wider (226 -> 340 units across) gets the Gulf, eastern Quebec
+ * and the island of Newfoundland back in the frame -- the old box cut the
+ * island off at the top -- and PEI still lands at about 39x29 CSS px in
+ * portrait and 84x62 in landscape, well past a fingertip.
+ *
+ * This lives here and not in `*.generated.ts` because the map builder is not in
+ * the repo: a regenerated file would silently take the fix back.
+ */
+const ZOOM_FIX: Partial<Record<MapId, Record<string, string>>> = {
+  canada: { 'East coast': '700 368 340 274' },
+}
+
 const loaded = new Map<MapId, MapDrawing>()
 
 function useDrawing(id: MapId): MapDrawing | null {
@@ -77,6 +96,7 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
   const lines = asked('river', 'highway', 'subway')
   const stops = asked('stop')
   const canTap = (f: MapFeature) => !!onTap && f.kind === pick
+  const zooms = drawing.zooms.map((z) => ({ ...z, viewBox: ZOOM_FIX[spec.id]?.[z.label] ?? z.viewBox }))
 
   const state = (f: MapFeature) => {
     if (reveal && right.includes(f.id)) return 'right'
@@ -150,9 +170,9 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
           </text>
         ))}
       </svg>
-      {drawing.zooms.length > 0 && (pick === 'area' || pick === 'stop') && (
+      {zooms.length > 0 && (pick === 'area' || pick === 'stop') && (
         <div className="map-zooms">
-          {drawing.zooms.map((z) => (
+          {zooms.map((z) => (
             <button
               key={z.label}
               type="button"

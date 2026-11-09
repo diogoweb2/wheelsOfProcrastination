@@ -515,7 +515,10 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
 
       {/* training: only WRONG answers pause the flow, so the right answer sinks in */}
       {feedback && (
-        <div className="card quiz-feedback" style={{ borderColor: 'var(--red)' }}>
+        <div
+          className={`card quiz-feedback ${feedback.q.map ? 'quiz-feedback--map' : ''}`}
+          style={{ borderColor: 'var(--red)' }}
+        >
           {feedback.given.text && (
             <div className="quiz-answer quiz-answer--wrong">
               <div className="quiz-answer-label">You said</div>
@@ -527,7 +530,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
             <div className="quiz-answer-text quiz-answer-text--big">✅ {correctAnswerText(feedback.q)}</div>
           </div>
           {feedback.q.map && (
-            <div style={{ marginTop: 10 }}>
+            <div className="quiz-feedback-map">
               <MapBoard spec={feedback.q.map} reveal wrong={feedback.given.tapped} />
             </div>
           )}
@@ -760,8 +763,10 @@ export function QuestionCard({ q, fresh, onAnswer, instantMark }: { q: QuizQuest
    */
   const keepTalking = useRef(false)
   useEffect(() => () => { if (!keepTalking.current) stopSpeaking() }, [])
+  // §14f — a map question with options puts the map beside them in landscape
+  const sideBySide = q.type === 'choice' && !!q.map
   return (
-    <div className="card">
+    <div className={`card ${sideBySide ? 'quiz-card--map' : ''}`}>
       {fresh && (
         <span className="chip" style={{ background: 'var(--green)', color: '#06121f', marginBottom: 8, display: 'inline-block' }}>
           ✨ NEW
@@ -1010,6 +1015,22 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
   const locks = several || !instantMark
   const [picked, setPicked] = useState<string[]>([])
   const [done, setDone] = useState(false)
+  /**
+   * §14f — turn the phone sideways and the map takes the whole screen.
+   *
+   * Portrait on a phone leaves the map about 390x310: on the East coast that is
+   * a PEI he cannot hit, and he was giving up rather than guessing (2026-11-08).
+   * Landscape has the width the map wants, so in landscape the stage goes over
+   * everything, the question rides on top of the map as a pill, and the zoom
+   * and lock buttons float in the corners. Nothing is hidden: it is the same
+   * card, with the chrome moved off the map.
+   *
+   * It lasts exactly as long as the tap: answering unmounts this, so the right
+   * answer and the next question arrive in the normal (scrollable) view. And
+   * the pill carries a shrink button, because a full-screen map with no way out
+   * is a trap -- the session's own close button lives up in the header.
+   */
+  const [shrunk, setShrunk] = useState(false)
 
   function finish(ids: string[]) {
     setDone(true)
@@ -1030,10 +1051,30 @@ function MapQ({ q, onAnswer, instantMark }: { q: QuizQuestion; onAnswer: (c: boo
   }
 
   return (
-    <div>
+    <div className={`map-stage ${shrunk ? 'map-stage--off' : ''}`}>
+      {/* landscape only: the question, over the map, because the card's own copy is behind it */}
+      <div className="map-stage-bar">
+        <div className="map-stage-ask">
+          {q.emoji && <span style={{ marginRight: 4 }}>{q.emoji}</span>}
+          {q.prompt}
+        </div>
+        <button
+          type="button"
+          className="btn btn--ghost btn--small map-stage-out"
+          onClick={() => { sfx.click(); setShrunk(true) }}
+          aria-label="Leave full screen"
+          title="Leave full screen"
+        >
+          ⤡
+        </button>
+      </div>
       <MapBoard spec={spec} selected={picked} onTap={tap} />
       {locks && (
-        <button className="btn" disabled={picked.length === 0 || done} onClick={() => finish(picked)}>
+        <button
+          className="btn map-stage-lock"
+          disabled={picked.length === 0 || done}
+          onClick={() => finish(picked)}
+        >
           {picked.length === 0 ? 'Tap the map…' : 'Lock it in ⚓'}
         </button>
       )}
