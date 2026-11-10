@@ -2354,6 +2354,15 @@ The script is written down rather than left to me for the reason §24ab already 
 
 **Adding the next paper is a file and one line.** `src/steugene/tests/math-test-3.ts` (the misses only, each with its `lead` and a walk-through on different numbers), then the top of `SE_TESTS` in `src/steugene/tests/index.ts`. Nothing on the page knows anything about Math test 2. `npm run se:audit` holds a test pack to the **hand-written bar** (§24n): three options, the right one never the longest, a `why` that agrees with its own key, tiles that can spell the answer, a walk-through on every question, every `lead` an explain card in the same pack — plus that every question on the paper points at a block that exists and has something for Dad to say about it. **Block ids are permanent** (§24b): `t2-…` for Math test 2, `t3-…` for the next one.
 
+### 24ae. 🔤 Language "build the word" is multiple choice (`/steugene7/lesson`)
+
+All 129 Language `build` blocks (`lang-*`) are dealt as **3-option choice cards**, not letter tiles — the Language questions are about the word, not about assembling it. The block, its id, answer and history are unchanged ([src/steugene/langChoices.ts](src/steugene/langChoices.ts) maps each id to two hand-written wrong options and one alternate wording); only the card changes.
+
+- **The options always rotate.** New order every time the card is dealt, and the right answer never lands in the same slot twice running.
+- **The question sometimes changes, the answer never does.** Half the time the card asks the same thing another way (`alt`).
+- **Wrong options are real things of the same kind** (other words from the chapter, a real homonym, or the classic misspelling on the spelling cards) — never random letters.
+- Blocks without an entry (e.g. ones Ben's ✨ button generates later) stay as tiles.
+
 ### 24j. URLs (§1c)
 
 `/steugene7/subjects` · `/steugene7/finder` · `/steugene7/videos` · `/steugene7/tips` · `/steugene7/tests` · `/steugene7/lesson` · `/steugene7/review` · `/steugene7/report`, and for Diogo `/steugene7/desk` and `/steugene7/helping` (plus the same `/steugene7/videos`, `/steugene7/tips` and `/steugene7/tests`).

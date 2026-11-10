@@ -27,6 +27,7 @@ import { SeCalculator } from './SeCalculator'
 import { SePlanBox } from './SePlanBox'
 import { SeVideoBlock } from './SeVideoBlock'
 import { seTipFor } from '../../steugene/tips'
+import { hasLangChoice, langAsChoice } from '../../steugene/langChoices'
 import { holdFreshen } from '../../lib/fresh'
 import type { SeTipPlan } from '../../steugene/tips'
 import type { SeBlock, SeChoice, SeBuild, SeExplain, SeGame, SeStep } from '../../steugene/types'
@@ -264,7 +265,19 @@ export function LessonPlayer({ onLeave }: { onLeave: () => void }) {
             onRecord={seRecord}
           />
         )}
-        {block.kind === 'build' && (
+        {block.kind === 'build' && hasLangChoice(block.id) && (
+          <LangChoiceCard
+            block={block}
+            speakOn={speakOn}
+            rate={rate}
+            plan={plan}
+            planOpen={planOpen}
+            onPlan={() => setPlanOpen(true)}
+            onNext={next}
+            onRecord={seRecord}
+          />
+        )}
+        {block.kind === 'build' && !hasLangChoice(block.id) && (
           <BuildCard
             block={block}
             speakOn={speakOn}
@@ -616,6 +629,16 @@ function ChoiceCard({
 }
 
 // --- build-your-own answer ----------------------------------------------------
+
+/**
+ * A Language build block dealt as multiple choice: options re-ordered and the
+ * question sometimes re-worded each time it comes up, answer unchanged.
+ */
+function LangChoiceCard({ block, ...rest }: Omit<React.ComponentProps<typeof ChoiceCard>, 'block'> & { block: SeBuild }) {
+  const choice = useMemo(() => langAsChoice(block), [block])
+  if (!choice) return null
+  return <ChoiceCard block={choice} {...rest} />
+}
 
 function BuildCard({
   block,
