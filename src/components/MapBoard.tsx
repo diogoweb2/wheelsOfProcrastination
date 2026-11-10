@@ -3,7 +3,7 @@
 //
 // Crowded corners have 🔍 close-ups: PEI is a few pixels wide on a phone, and a
 // question he cannot physically tap tests his finger, not his geography.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { QuizMapSpec } from '../types'
 import type { MapDrawing, MapFeature, MapId, MapPick } from '../quiz/maps/types'
 import { MAP_NAMES } from '../quiz/maps/names'
@@ -80,14 +80,55 @@ interface Props {
 
 export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTap }: Props) {
   const drawing = useDrawing(spec.id)
-  const [zoom, setZoom] = useState<string | null>(null)
+  // the window onto the drawing: a preset close-up, or wherever he has pinched / dragged to
+  const [box, setBox] = useState<number[] | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const down = useRef({ x: 0, y: 0 })
+  const moved = useRef(false) // a drag must never count as a tap
+  const boxRef = useRef<number[] | null>(null)
+  const limits = useRef<number[]>([0, 0, 1, 1])
+
+  // `at` is where on screen (px) the zoom is centred, so that spot stays under his fingers
+  const zoomBy = (factor: number, cx: number, cy: number) => {
+    const el = svgRef.current
+    const b = boxRef.current
+    if (!el || !b) return
+    const r = el.getBoundingClientRect()
+    const [lx, ly, lw, lh] = limits.current
+    const upp = Math.max(b[2] / r.width, b[3] / r.height)
+    const w = Math.min(lw, Math.max(lw / 40, b[2] / factor))
+    const k = w / b[2]
+    // the svg is letter-boxed (meet), so measure from the middle of the element
+    const ux = b[0] + b[2] / 2 + (cx - r.left - r.width / 2) * upp
+    const uy = b[1] + b[3] / 2 + (cy - r.top - r.height / 2) * upp
+    const h = b[3] * k
+    const x = Math.min(lx + lw - w * 0.2, Math.max(lx - w * 0.8, ux - (ux - b[0]) * k))
+    const y = Math.min(ly + lh - h * 0.2, Math.max(ly - h * 0.8, uy - (uy - b[1]) * k))
+    setBox([x, y, w, h])
+  }
+  const zoomByRef = useRef(zoomBy)
+  zoomByRef.current = zoomBy
+  useEffect(() => {
+    const el = svgRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      zoomByRef.current(Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [drawing])
+
   if (!drawing) return <div className="map-board map-board--loading" />
 
   const pick = spec.pick ?? 'area'
   const right = spec.targets ?? (spec.show ? [spec.show] : [])
   const whole = `0 0 ${drawing.width} ${drawing.height}`
-  const view = zoom ?? whole
-  const span = Number(view.split(' ')[2]) // labels and rings keep their size on screen when zoomed
+  const view = box ? box.join(' ') : whole
+  limits.current = [0, 0, drawing.width, drawing.height]
+  boxRef.current = box ?? [0, 0, drawing.width, drawing.height]
+  const span = boxRef.current[2] // labels and rings keep their size on screen when zoomed
   const areas = drawing.features.filter((f) => f.kind === 'area')
   // only what the question is about is drawn: a map of every river and range at once is noise
   const asked = (...kinds: MapPick[]) => drawing.features.filter((f) => kinds.includes(f.kind) && (f.kind === pick || (f.kind === 'subway' && pick === 'stop')))
@@ -117,7 +158,54 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
       {/* §26 — one "map tap" per tap: the usage log never reads the answer */}
       <svg
         className={`map-board ${spec.id === 'organs' || spec.id === 'skeleton' ? 'map-board--body' : ''}`}
+        ref={svgRef}
         viewBox={view}
+        style={{ touchAction: 'none' }}
+        onPointerDown={(e) => {
+          if (pointers.current.size === 0) {
+            moved.current = false
+            down.current = { x: e.clientX, y: e.clientY }
+          }
+          pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+        }}
+        onPointerMove={(e) => {
+          const prev = pointers.current.get(e.pointerId)
+          const b = boxRef.current
+          if (!prev || !b || !svgRef.current) return
+          const others = [...pointers.current.entries()].filter(([id]) => id !== e.pointerId).map(([, v]) => v)
+          const now = { x: e.clientX, y: e.clientY }
+          if (others.length === 0) {
+            const r = svgRef.current.getBoundingClientRect()
+            // small jitters under a finger are still a tap
+            if (!moved.current && Math.hypot(now.x - down.current.x, now.y - down.current.y) < 8) return
+            moved.current = true
+            const upp = Math.max(b[2] / r.width, b[3] / r.height)
+            const [lx, ly, lw, lh] = limits.current
+            const x = Math.min(lx + lw - b[2] * 0.2, Math.max(lx - b[2] * 0.8, b[0] - (now.x - prev.x) * upp))
+            const y = Math.min(ly + lh - b[3] * 0.2, Math.max(ly - b[3] * 0.8, b[1] - (now.y - prev.y) * upp))
+            setBox([x, y, b[2], b[3]])
+            pointers.current.set(e.pointerId, now)
+          } else {
+            moved.current = true
+            const o = others[0]
+            const before = Math.hypot(prev.x - o.x, prev.y - o.y)
+            const after = Math.hypot(now.x - o.x, now.y - o.y)
+            pointers.current.set(e.pointerId, now)
+            if (before > 0 && after > 0) zoomBy(after / before, (now.x + o.x) / 2, (now.y + o.y) / 2)
+          }
+        }}
+        onPointerUp={(e) => {
+          pointers.current.delete(e.pointerId)
+        }}
+        onPointerCancel={(e) => {
+          pointers.current.delete(e.pointerId)
+        }}
+        onClickCapture={(e) => {
+          if (moved.current) {
+            e.stopPropagation()
+            moved.current = false
+          }
+        }}
         role="img"
         aria-label="Map with no names on it"
         data-usage="map tap"
@@ -176,17 +264,17 @@ export function MapBoard({ spec, selected = [], reveal = false, wrong = [], onTa
             <button
               key={z.label}
               type="button"
-              className={`btn btn--ghost btn--small ${zoom === z.viewBox ? 'map-zoom--on' : ''}`}
+              className={`btn btn--ghost btn--small ${view === z.viewBox ? 'map-zoom--on' : ''}`}
               onClick={() => {
                 sfx.click()
-                setZoom(zoom === z.viewBox ? null : z.viewBox)
+                setBox(view === z.viewBox ? null : z.viewBox.split(' ').map(Number))
               }}
             >
               🔍 {z.label}
             </button>
           ))}
-          {zoom && (
-            <button type="button" className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setZoom(null) }}>
+          {box && (
+            <button type="button" className="btn btn--ghost btn--small" onClick={() => { sfx.click(); setBox(null) }}>
               🗺️ Whole map
             </button>
           )}
