@@ -397,6 +397,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
   - **Mix** — ~60% questions he's strong at + ~40% weak or unseen ones (`REVIEW_HARD_SHARE`): a warm-up he cannot fail proves nothing. Last round's questions are excluded.
   - **Pass = 70%.** Clear it and the real final test starts right after. **Miss it and the run ends there** — the new topic is never sat, and the single authorisation is spent.
   - A miss shows **no answers** — only a per-topic tally, weakest first (`Canada Geography 4/8 · 50%`), i.e. what to go study. Dad gets the same tally in his banner + push.
+  - **Cleared it today? It is not asked again today.** If he passed the warm-up and then failed the final test, the next official test the same day goes straight to the questions (`passedWarmupToday`). A *failed* warm-up never counts, and neither does a rehearsal (§14c). The next day it comes back as normal.
   - A **conquered topic stays trainable in the Academy** (it only leaves the wheel), so there's always a way to blow the fog off before the next test. And the round itself can be **rehearsed on demand** — see §14c.
 - **Remote final test (a grown-up beside him, not Dad)** — shared `app/finalTests` doc, live-synced both ways:
   - Diogo authorises ONE run from the Admin desk: he picks a **4-digit code** and writes a **note for the grown-up** ("~15 min, no help, no phone"). Only one open authorisation per topic — a new one replaces it. He can withdraw it while it's unused.

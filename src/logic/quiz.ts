@@ -1271,6 +1271,17 @@ export function lastReviewAttempt(data: AppData, topicId: string) {
   return null
 }
 
+/**
+ * §14 — has he already CLEARED the gating warm-up today? Then a second official
+ * test the same day (he failed the first, or Dad authorised another) skips the
+ * round: he proved the old seas are fresh a few hours ago, and sitting it again
+ * only taxes him for the test that failed. A failed warm-up does not count, and
+ * neither does a rehearsal (those are `official: false`).
+ */
+export function passedWarmupToday(data: AppData, today: string = dayKey()): boolean {
+  return data.quiz.tests.some((t) => t.official && t.review && t.passed && t.day === today)
+}
+
 // --- the standalone warm-up (§14c) ------------------------------------------
 
 /**

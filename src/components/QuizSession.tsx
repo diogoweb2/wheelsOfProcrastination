@@ -36,6 +36,7 @@ import {
   isFresh,
   lastOfficialAttempt,
   lastReviewAttempt,
+  passedWarmupToday,
   nextTestQuestion,
   pickChoiceOptions,
   pickTraining,
@@ -134,6 +135,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // ---- warm-up review round on the topics he already conquered ----
   const [reviewPlan] = useState<QuizQuestion[]>(() => {
     if (mode !== 'official' || !target || preview) return []
+    if (passedWarmupToday(target)) return [] // §14 — cleared it today already
     const topics = reviewTopicIds(target, targetId, topicId)
     const exclude = lastReviewAttempt(target, topicId)?.results.map((r) => r.qid) ?? []
     return buildReviewTest(quizBank, stats, topics, exclude)
