@@ -156,6 +156,18 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [answered, setAnswered] = useState(0)
   // training: wrong answers pause on a correction card; right answers just flow on
   const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
+  // training: the voice reads the right answer + explanation after a miss; Next stays locked until it is done
+  const [explaining, setExplaining] = useState(false)
+  const explainRate = useStore((s) => s.data.steugene?.speak?.rate ?? 0.9)
+  useEffect(() => {
+    if (!feedback) { setExplaining(false); return }
+    if (!canSpeak()) { setExplaining(false); return }
+    let live = true
+    setExplaining(true)
+    const say = `The right answer is: ${correctAnswerText(feedback.q)}.${feedback.q.funFact ? ' ' + feedback.q.funFact : ''}`
+    speak(say, explainRate, () => { if (live) setExplaining(false) })
+    return () => { live = false; stopSpeaking() }
+  }, [feedback]) // eslint-disable-line react-hooks/exhaustive-deps
   const [flash, setFlash] = useState<{ text: string; muted: boolean; key: number } | null>(null)
   // the deep-dive lesson currently being read (opened from a wrong answer, or from the test review)
   const [reading, setReading] = useState<{ lessonId: string; then: 'advance' | 'back' } | null>(null)
@@ -578,6 +590,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
           <button
             className="btn"
             style={{ marginTop: 12 }}
+            disabled={explaining}
             onClick={() =>
               advanceTraining(
                 feedback.q,
@@ -586,7 +599,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
               )
             }
           >
-            Next question ➜
+            {explaining ? '🔊 Listening…' : 'Next question ➜'}
           </button>
           <button className="btn btn--ghost" style={{ marginTop: 8 }} onClick={onClose}>
             {preview ? 'Done previewing' : `Done for now (+🪙${sessionEarned})`}
