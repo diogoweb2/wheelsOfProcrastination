@@ -1262,6 +1262,19 @@ export function lastOfficialAttempt(data: AppData, topicId: string) {
   return null
 }
 
+/** Official final tests allowed per topic per day. The warm-up round never counts (it is filed `review`), so it can be failed any number of times. */
+export const OFFICIAL_TRIES_PER_DAY = 2
+
+/** Official final tests sat on this topic today (a rehearsal or warm-up round is not one). */
+export function officialTriesToday(data: AppData, topicId: string, today: string = dayKey()): number {
+  return data.quiz.tests.filter((t) => t.official && !t.review && t.topicId === topicId && t.day === today).length
+}
+
+/** Out of tries for today? Only failed tests can leave him here: a pass conquers the topic. */
+export function outOfTriesToday(data: AppData, topicId: string): boolean {
+  return officialTriesToday(data, topicId) >= OFFICIAL_TRIES_PER_DAY
+}
+
 /** The warm-up round of the previous attempt — its questions don't come back. */
 export function lastReviewAttempt(data: AppData, topicId: string) {
   for (let i = data.quiz.tests.length - 1; i >= 0; i--) {
@@ -1305,6 +1318,27 @@ export const WARMUP_TOPIC_ID = '_warmup'
  */
 export function warmupTopicIds(data: AppData, ownerId: string, bank: QuizQuestion[]): string[] {
   return reviewTopicIds(data, ownerId, '').filter((id) => activeQuestions(bank, id).length > 0)
+}
+
+/**
+ * §14c/§14h — the 🔁 Review "topic": always open, and its questions are the ones
+ * available for review = every active question of the seas he has conquered
+ * (the warm-up's own pool). A pseudo-topic: it lives in no bank and no ladder,
+ * so it never shows on the wheel, in Progress, or as a daily must-do.
+ */
+export const REVIEW_TOPIC_ID = '_review'
+export const REVIEW_TOPIC: QuizTopic = {
+  id: REVIEW_TOPIC_ID,
+  owner: 'ben',
+  title: 'Review',
+  emoji: '🔁',
+  description: 'Every question from the seas you already conquered.',
+  targetCount: 0,
+}
+
+/** The questions Review trains on. */
+export function reviewPool(data: AppData, ownerId: string, bank: QuizQuestion[]): QuizQuestion[] {
+  return warmupTopicIds(data, ownerId, bank).flatMap((id) => activeQuestions(bank, id))
 }
 
 /**

@@ -26,7 +26,10 @@ import {
   FIRST_GOAL_STREAK,
   PASS_PCT,
   REVIEW_PASS_PCT,
+  REVIEW_TOPIC,
+  REVIEW_TOPIC_ID,
   activeQuestions,
+  reviewPool,
   buildReviewTest,
   buildTopicTest,
   correctAnswerText,
@@ -60,6 +63,9 @@ import { holdFreshen } from '../lib/fresh'
 import { MapBoard } from './MapBoard'
 import { MAP_NAMES } from '../quiz/maps/names'
 import { inShell } from '../push'
+
+/** Misses on one question (lifetime) from which the correction is read with a warning. "More than 2x" = the 3rd. */
+const REPEAT_MISS_WARNING = 3
 
 export type QuizMode = 'training' | 'simulation' | 'official' | 'warmup'
 
@@ -96,7 +102,7 @@ interface Props {
 export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onClose }: Props) {
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest, finishWarmupTest } = useStore()
   const isWarmup = mode === 'warmup'
-  const topic = topicById(topicId)
+  const topic = topicId === REVIEW_TOPIC_ID ? REVIEW_TOPIC : topicById(topicId)
   // §14f — a map quiz may be laid out along the long side of the screen
   const isMapQuiz = topic?.track === MAPS_TRACK
   /**
@@ -112,10 +118,13 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     bridge?.allowLandscape?.(true)
     return () => bridge?.allowLandscape?.(false)
   }, [isMapQuiz])
-  const pool = useMemo(() => activeQuestions(quizBank, topicId), [quizBank, topicId])
-
   // the target's data from wherever we stand, for retry-exclusion
   const target = activeProfileId === targetId ? data : targetId === KID_ID ? kidData : null
+  const pool = useMemo(
+    () => (topicId === REVIEW_TOPIC_ID ? (target ? reviewPool(target, targetId, quizBank) : []) : activeQuestions(quizBank, topicId)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [quizBank, topicId, targetId],
+  )
 
   // ---- test plan (fixed once per session) ----
   const [testPlan] = useState<QuizQuestion[]>(() => {
@@ -155,7 +164,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [sessionEarned, setSessionEarned] = useState(0)
   const [answered, setAnswered] = useState(0)
   // training: wrong answers pause on a correction card; right answers just flow on
-  const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given } | null>(null)
+  const [feedback, setFeedback] = useState<{ q: QuizQuestion; given: Given; misses: number } | null>(null)
   // training: the voice reads the right answer + explanation after a miss; Next stays locked until it is done
   const [explaining, setExplaining] = useState(false)
   const explainRate = useStore((s) => s.data.steugene?.speak?.rate ?? 0.9)
@@ -164,7 +173,9 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
     if (!canSpeak()) { setExplaining(false); return }
     let live = true
     setExplaining(true)
-    const say = `The right answer is: ${correctAnswerText(feedback.q)}.${feedback.q.funFact ? ' ' + feedback.q.funFact : ''}`
+    // a question he keeps missing is named out loud, with the count, before the explanation
+    const warn = feedback.misses >= REPEAT_MISS_WARNING ? `Careful. You have missed this question ${feedback.misses} times. Listen to why. ` : ''
+    const say = `${warn}The right answer is: ${correctAnswerText(feedback.q)}.${feedback.q.funFact ? ' ' + feedback.q.funFact : ''}`
     speak(say, explainRate, () => { if (live) setExplaining(false) })
     return () => { live = false; stopSpeaking() }
   }, [feedback]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -331,7 +342,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
       } else {
         sfx.error()
         setSessionMissed((m) => (m.includes(question.id) ? m : [...m, question.id]))
-        setFeedback({ q: question, given })
+        setFeedback({ q: question, given, misses: (stats[question.id]?.wrong ?? 0) + 1 })
       }
     } else {
       sfx.click()
@@ -550,6 +561,11 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
           className={`card quiz-feedback ${feedback.q.map ? 'quiz-feedback--map' : ''}`}
           style={{ borderColor: 'var(--red)' }}
         >
+          {feedback.misses >= REPEAT_MISS_WARNING && (
+            <div className="quiz-answer quiz-answer--wrong" style={{ textAlign: 'center', fontWeight: 900 }}>
+              ⚠️ You have missed this one {feedback.misses} times. Read why, then get it next time.
+            </div>
+          )}
           {feedback.given.text && (
             <div className="quiz-answer quiz-answer--wrong">
               <div className="quiz-answer-label">You said</div>

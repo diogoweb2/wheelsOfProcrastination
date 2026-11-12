@@ -13,7 +13,9 @@ import {
   QUIZ_TRACKS,
   REVIEW_PASS_PCT,
   WARMUP_KEEP,
+  REVIEW_TOPIC_ID,
   WARMUP_TOPIC_ID,
+  reviewPool,
   MAPS_TRACK,
   activeQuestions,
   berriesOnly,
@@ -22,6 +24,7 @@ import {
   ideaProgress,
   isFresh,
   lastOfficialAttempt,
+  outOfTriesToday,
   prerequisiteOf,
   reviewSize,
   topicById,
@@ -36,7 +39,6 @@ import { LessonView } from '../components/Lesson'
 import { QuestionManager } from '../components/QuestionManager'
 import { MyMistakes } from '../components/MyMistakes'
 import { DevilFruit } from '../components/DevilFruit'
-import { dayKey } from '../logic/dates'
 import { SE_SUBJECTS } from '../logic/steugene'
 import { openSeLesson } from '../steugene/open'
 import { sfx } from '../audio'
@@ -198,12 +200,13 @@ export function QuizScreen({
         />
       )}
 
-      {tab === 'warmup' && (
-        <WarmupShelf
+      {tab === 'review' && (
+        <ReviewShelf
           data={data}
           ownerId={activeProfileId}
           bank={quizBank}
-          onStart={() => setSession({ mode: 'warmup', topicId: WARMUP_TOPIC_ID })}
+          onTrain={() => setSession({ mode: 'training', topicId: REVIEW_TOPIC_ID })}
+          onMock={() => setSession({ mode: 'warmup', topicId: WARMUP_TOPIC_ID })}
         />
       )}
 
@@ -498,40 +501,57 @@ function SchoolShelf({
  * each question's record, so the weak ones he meets here are the weak ones the
  * real round will stop picking.
  */
-function WarmupShelf({
+function ReviewShelf({
   data,
   ownerId,
   bank,
-  onStart,
+  onTrain,
+  onMock,
 }: {
   data: AppData
   ownerId: string
   bank: QuizQuestion[]
-  onStart: () => void
+  onTrain: () => void
+  onMock: () => void
 }) {
+  const pool = reviewPool(data, ownerId, bank)
+  const dueCount = duePool(pool, data.quiz.stats).length
   const topicIds = warmupTopicIds(data, ownerId, bank)
   const runs = [...warmupAttempts(data)].reverse().slice(0, WARMUP_KEEP)
   const size = reviewSize(topicIds.length)
 
   return (
     <div>
-      <div className="h2" style={{ marginBottom: 2 }}>🧠 Mock Warm-up</div>
+      <div className="h2" style={{ marginBottom: 2 }}>🔁 Review</div>
       <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
-        Every final test opens with a warm-up on the seas you already conquered — miss it and the test never starts.
-        This is that round on its own: a new mix every time, no Berries, nothing to lose.
+        Always open. Every question from the seas you already conquered — train on them, or sit the mock warm-up that
+        guards every final test.
       </p>
 
       {topicIds.length === 0 ? (
         <div className="card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 44 }}>🧠</div>
+          <div style={{ fontSize: 44 }}>🔁</div>
           <p className="muted" style={{ marginTop: 6, fontSize: 13 }}>
-            Nothing to warm up on yet. Conquer a sea in a final test and it starts coming back here, so it never goes
+            Nothing to review yet. Conquer a sea in a final test and it starts coming back here, so it never goes
             foggy.
           </p>
         </div>
       ) : (
+        <>
+        <div className="card" style={{ marginBottom: 10 }}>
+          <div style={{ fontWeight: 900, fontSize: 16 }}>🏋️ Train</div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            {pool.length} questions from {topicIds.length} conquered sea{topicIds.length === 1 ? '' : 's'} ·{' '}
+            {dueCount > 0 ? `${dueCount} ready today` : 'all rested — practise anyway'}
+          </div>
+          <button className="btn" style={{ marginTop: 10 }} onClick={() => { sfx.click(); onTrain() }}>
+            🏋️ Start training
+          </button>
+        </div>
         <div className="card" style={{ marginBottom: 14 }}>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>
+          <div style={{ fontWeight: 900, fontSize: 16 }}>🧠 Mock Warm-up</div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>A new mix every time, no Berries, nothing to lose.</div>
+          <div style={{ fontWeight: 900, fontSize: 14, marginTop: 8 }}>
             {size} question{size === 1 ? '' : 's'} · {REVIEW_PASS_PCT}% to clear
           </div>
           <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
@@ -548,10 +568,11 @@ function WarmupShelf({
               )
             })}
           </div>
-          <button className="btn" style={{ marginTop: 14 }} onClick={() => { sfx.click(); onStart() }}>
-            ⚡ Start the warm-up
+          <button className="btn" style={{ marginTop: 14 }} onClick={() => { sfx.click(); onMock() }}>
+            ⚡ Start the mock warm-up
           </button>
         </div>
+        </>
       )}
 
       {runs.length > 0 && (
@@ -850,8 +871,7 @@ function TopicCard({
   const mastered = pool.filter((q) => data.quiz.stats[q.id]?.everCorrect).length
   const freshCount = pool.filter((q) => isFresh(q, data.quiz.stats[q.id])).length
   const dueCount = duePool(pool, data.quiz.stats).length
-  const last = lastOfficialAttempt(data, topic.id)
-  const failedToday = !!last && !last.passed && last.day === dayKey()
+  const failedToday = outOfTriesToday(data, topic.id)
   const prereq = prerequisiteOf(topic)
   const hasLessons = lessonsForTopic(bank, topic.id).length > 0
 
@@ -919,7 +939,7 @@ function TopicCard({
                 disabled={failedToday}
                 onClick={() => { sfx.click(); onStart('official') }}
               >
-                🎓 {failedToday ? 'Failed today — retry tomorrow' : 'Official Final Test (for the 🍇)'}
+                🎓 {failedToday ? '2 tries used today — back tomorrow' : 'Official Final Test (for the 🍇)'}
               </button>
             )}
           </div>

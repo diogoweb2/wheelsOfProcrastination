@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
-import { CHAPTER_PREFIX, CHAPTER_SUBJECTS, activeQuestions, berriesOnly, correctAnswerText, lastOfficialAttempt, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
+import { CHAPTER_PREFIX, CHAPTER_SUBJECTS, activeQuestions, berriesOnly, correctAnswerText, lastOfficialAttempt, outOfTriesToday, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
 import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
@@ -860,7 +860,7 @@ function AdminTopicCard({
   const unlocked = targetData?.quiz.unlockedTopics.includes(topic.id) ?? false
   const passed = targetData?.quiz.passedTopics.includes(topic.id) ?? false
   const last = targetData ? lastOfficialAttempt(targetData, topic.id) : null
-  const failedToday = !!last && !last.passed && last.day === dayKey()
+  const failedToday = !!targetData && outOfTriesToday(targetData, topic.id)
   const mastered = targetData ? pool.filter((q) => targetData.quiz.stats[q.id]?.everCorrect).length : 0
 
   return (
@@ -887,7 +887,7 @@ function AdminTopicCard({
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
         {onTest && !passed && (
           <button className="btn btn--small" style={{ flex: 2 }} disabled={!targetData || pool.length === 0 || failedToday} onClick={() => { sfx.click(); onTest() }}>
-            🎓 {failedToday ? 'Retry tomorrow' : 'Final Test (hand Ben the phone)'}
+            🎓 {failedToday ? '2 tries used — tomorrow' : 'Final Test (hand Ben the phone)'}
           </button>
         )}
         {onPreview && (
@@ -959,7 +959,7 @@ function AdminTopicCard({
       </div>
 
       {/* Ben only: let the test run on HIS device, with another grown-up invigilating */}
-      {onTest && !passed && <RemoteTestDesk topic={topic} targetId={targetId} disabled={!targetData || pool.length === 0} />}
+      {onTest && !passed && <RemoteTestDesk topic={topic} targetId={targetId} disabled={!targetData || pool.length === 0 || failedToday} />}
     </div>
   )
 }

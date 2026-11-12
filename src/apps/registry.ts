@@ -117,10 +117,10 @@ export const APPS: AppDef[] = [
       // tab sat on its empty state most of the year) and now ride at the
       // bottom of /academy/topics, while this page is useful every day.
       { id: 'mistakes', label: 'Mistakes', icon: '🎯' },
-      // §14c — the warm-up round on its own, so he can rehearse the thing that
-      // gates every final test. Its own URL (/academy/warmup): it belongs to no
-      // single topic, so it cannot live on a topic card.
-      { id: 'warmup', label: 'Warm-up', icon: '🧠' },
+      // §14c/§14h — Review: an always-open pseudo-topic over every conquered
+      // sea, with training AND the mock warm-up (it replaced the Warm-up tab).
+      // Its own URL (/academy/review): it belongs to no single topic.
+      { id: 'review', label: 'Review', icon: '🔁' },
       { id: 'study', label: 'Study', icon: '📖' },
       { id: 'progress', label: 'Progress', icon: '📊' },
     ],
