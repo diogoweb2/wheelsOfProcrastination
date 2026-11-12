@@ -429,7 +429,7 @@ Upbeat, hype-man energy, never mean about the user's actual life — Luffy roots
 
 ## 14c. Review + Mock Warm-up (the 🔁 tab of the Quiz app, `/academy/review`)
 
-**Review is a pseudo-topic that is always open** (`REVIEW_TOPIC_ID`, 2026-11-12). Its questions are the ones available for review: every active question of the seas he has conquered (`reviewPool` = the warm-up's pool). The tab holds **🏋️ Train** (normal training over that pool: spaced repetition, Berries once/question/day) and the **🧠 Mock Warm-up** below. It replaced the Warm-up tab, so `/academy/warmup` no longer exists. Never on the wheel, in Progress or the daily must-do.
+**Review is a pseudo-topic that is always open** (`REVIEW_TOPIC_ID`, 2026-11-12). Its questions are the ones available for review: every active question of the seas he has conquered (`reviewPool` = the warm-up's pool). The tab also lists **every question the warm-up can draw, by sea, with its right answer** (collapsible), so he can study them. The tab also lists **every question the warm-up can draw, by sea, with its right answer** (collapsible), so he can study them. The tab holds **🏋️ Train** (normal training over that pool: spaced repetition, Berries once/question/day) and the **🧠 Mock Warm-up** below. It replaced the Warm-up tab, so `/academy/warmup` no longer exists. Never on the wheel, in Progress or the daily must-do.
 
 **The round that gates every final test, rehearsable on its own.** Every official test opens with a warm-up review on the seas he already conquered, and missing it shuts the test and spends the authorisation (§14) — which made the one round that can cost him a Devil Fruit the only one he could never practise. Now he can run it whenever he likes.
 

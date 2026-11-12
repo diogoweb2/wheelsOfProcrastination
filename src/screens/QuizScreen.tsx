@@ -18,6 +18,7 @@ import {
   reviewPool,
   MAPS_TRACK,
   activeQuestions,
+  correctAnswerText,
   berriesOnly,
   duePool,
   firstGoalProgress,
@@ -572,6 +573,29 @@ function ReviewShelf({
             ⚡ Start the mock warm-up
           </button>
         </div>
+
+        {/* every question the warm-up can draw, by sea, with the right answer */}
+        <div className="h2">📋 Every question in the warm-up</div>
+        <p className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          {pool.length} questions. Any of them can come up. Open a sea and learn them.
+        </p>
+        {topicIds.map((id) => {
+          const t = topicById(id)
+          const qs = activeQuestions(bank, id)
+          return (
+            <details key={id} className="card" style={{ marginBottom: 8 }}>
+              <summary style={{ fontWeight: 800, fontSize: 14, cursor: 'pointer' }}>
+                {t?.emoji ?? '📘'} {t?.title ?? id} · {qs.length}
+              </summary>
+              {qs.map((q) => (
+                <div key={q.id} style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,.08)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{q.emoji ? `${q.emoji} ` : ''}{q.prompt}</div>
+                  <div style={{ fontSize: 13, color: 'var(--green)', marginTop: 2 }}>✅ {correctAnswerText(q)}</div>
+                </div>
+              ))}
+            </details>
+          )
+        })}
         </>
       )}
 
