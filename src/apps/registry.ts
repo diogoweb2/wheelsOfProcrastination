@@ -12,6 +12,11 @@ export interface AppTabDef {
   id: string
   label: string
   icon: string // emoji — the bottom menu renders it directly
+  /**
+   * Off the bottom menu by default, but still routable at its own URL. The
+   * parent can turn it back on per person at /admin/apps (§1e).
+   */
+  hidden?: boolean
 }
 
 export interface AppDef {
@@ -135,10 +140,12 @@ export const APPS: AppDef[] = [
       { id: 'chests', label: 'Chests', icon: '💰' },
       // §8c — his own standing orders to Dad. Its own URL (/bank/bills): a bill
       // that pays itself every month is not a corner of the chests page.
-      { id: 'bills', label: 'Bills', icon: '📨' },
-      { id: 'grow', label: 'Grow', icon: '📈' },
-      { id: 'tools', label: 'Tools', icon: '🧮' },
-      { id: 'log', label: 'Log', icon: '🧾' },
+      // §1e — in the first usage week he opened Chests and nothing else, so
+      // the other four are off his menu by default. Still at their URLs.
+      { id: 'bills', label: 'Bills', icon: '📨', hidden: true },
+      { id: 'grow', label: 'Grow', icon: '📈', hidden: true },
+      { id: 'tools', label: 'Tools', icon: '🧮', hidden: true },
+      { id: 'log', label: 'Log', icon: '🧾', hidden: true },
     ],
     adminTabs: [
       { id: 'vault', label: 'Vault', icon: '💰' },
@@ -168,6 +175,7 @@ export const APPS: AppDef[] = [
     // tab on `album`, so each collection keeps its own progress and its own
     // swap table.
     id: 'binder',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'One Piece Album',
     inheritSlotFrom: 'album',
     icon: '🎴',
@@ -196,6 +204,7 @@ export const APPS: AppDef[] = [
   {
     // the sticker album's cards, played as a TCG
     id: 'duel',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Card Game',
     icon: '🃏',
     img: '/app-duel.webp',
@@ -212,6 +221,7 @@ export const APPS: AppDef[] = [
     // own app rather than a tab on `duel`, which is the sticker album's own
     // made-up TCG and stays exactly as it is.
     id: 'optcg',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'One Piece TCG',
     icon: '🏴‍☠️',
     tint: ['#c9302c', '#2b0b0b'],
@@ -226,6 +236,7 @@ export const APPS: AppDef[] = [
   {
     // official chess, One Piece paint. Straw Hats vs Marines, head-to-head only.
     id: 'chess',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Chess',
     icon: '♟️',
     tint: ['#8fb4dc', '#123252'],
@@ -240,6 +251,7 @@ export const APPS: AppDef[] = [
     // Battleship, played on the Grand Line. The only game here with an AI —
     // hiding a fleet works on one phone in a way a chess board never does.
     id: 'seabattle',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Sea Battle',
     icon: '🚢',
     tint: ['#2e63a4', '#0c2338'],
@@ -255,6 +267,7 @@ export const APPS: AppDef[] = [
     // Rivals. It used to be a tab inside FC Lock — wrong home. FC Lock is about
     // real football on TV; this is a game you play, so it sits with the games.
     id: 'rivals',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Rivals',
     icon: '⚽',
     tint: ['#2f6bff', '#0a1226'],
@@ -271,6 +284,7 @@ export const APPS: AppDef[] = [
     // the show — read the telegraph, roll through it, and hope the wolf doesn't
     // leave a mark. Its own app in the Games folder, its own four URLs.
     id: 'frontier',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Frontier',
     icon: '🐦',
     tint: ['#7b2ff7', '#0a0a1a'],
@@ -285,6 +299,7 @@ export const APPS: AppDef[] = [
   {
     // official 8×8 English draughts — the checkers board everyone in Canada owns
     id: 'checkers',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Checkers',
     icon: '🔴',
     tint: ['#ff9600', '#8c3d00'],
@@ -299,6 +314,7 @@ export const APPS: AppDef[] = [
     // write an essay, get it marked up, fix it, get graded — the parent holds
     // the red pen and the AI does the reading
     id: 'essay',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Essays',
     icon: '✍️',
     tint: ['#60bff5', '#123252'],
@@ -409,6 +425,7 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'gym',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Gym',
     icon: '💪',
     tint: ['#ff9600', '#8c3d00'],
@@ -426,6 +443,7 @@ export const APPS: AppDef[] = [
   },
   {
     id: 'ideas',
+    hidden: true, // §1e — nobody opened it in the first usage week
     name: 'Ideas',
     icon: '💡',
     tint: ['#ffce00', '#af6528'],
@@ -502,12 +520,53 @@ export const APPS: AppDef[] = [
       { id: 'academies', label: 'Quizzes', icon: '🎓' },
       { id: 'prizes', label: 'Prizes', icon: '🎁' },
       { id: 'audit', label: 'Audit', icon: '📜' },
+      // §1e — what each of us sees on the home screen and in each bottom menu
+      { id: 'apps', label: 'Apps', icon: '👁️' },
     ],
   },
 ]
 
 export function appById(id: string): AppDef | undefined {
   return APPS.find((a) => a.id === id)
+}
+
+/**
+ * §1e — the parent's per-person overrides of what is shown, stored in that
+ * person's `settings.appVisibility`. Keys are an app id (`chess`) or an app
+ * and tab (`bank/grow`); `true` = shown, `false` = hidden. A missing key means
+ * the roster's default (`hidden` on the app or the tab).
+ */
+export type AppVisibility = Record<string, boolean>
+
+/** Never hideable: the page that does the hiding, and the app it lives in. */
+export const VISIBILITY_LOCKED = ['admin', 'admin/apps']
+
+export function appShown(app: AppDef, vis?: AppVisibility): boolean {
+  if (VISIBILITY_LOCKED.includes(app.id)) return true
+  return vis?.[app.id] ?? !app.hidden
+}
+
+export function tabShown(app: AppDef, tab: AppTabDef, vis?: AppVisibility): boolean {
+  const key = `${app.id}/${tab.id}`
+  if (VISIBILITY_LOCKED.includes(key)) return true
+  return vis?.[key] ?? !tab.hidden
+}
+
+/**
+ * The bottom menu actually drawn: [tabsFor] minus the hidden tabs. A hidden
+ * tab is still a page (§1c), so when it is the one open — a bookmark, a link
+ * from a widget — it stays on the menu while you are on it. Never empty.
+ */
+export function menuTabs(
+  app: AppDef,
+  profileId: string | null,
+  dailyMode: DailyMode | undefined,
+  vis: AppVisibility | undefined,
+  current?: string,
+): AppTabDef[] {
+  const all = tabsFor(app, profileId, dailyMode)
+  const shown = all.filter((t) => t.id === current || tabShown(app, t, vis))
+  return shown.length ? shown : all.slice(0, 1)
 }
 
 /** The bottom menu this profile sees for an app (the parent gets their own version). */
@@ -517,9 +576,14 @@ export function tabsFor(app: AppDef, profileId: string | null, dailyMode?: Daily
 }
 
 /** Apps this profile may open right now, in the user's saved home-screen order. */
-export function appsFor(profileId: string | null, order: string[] | undefined, gates: Gates): AppDef[] {
+export function appsFor(
+  profileId: string | null,
+  order: string[] | undefined,
+  gates: Gates,
+  vis?: AppVisibility,
+): AppDef[] {
   const allowed = APPS.filter(
-    (a) => !a.hidden && (!a.adminOnly || profileId === PARENT_ID) && (!a.gate || gates[a.gate]),
+    (a) => appShown(a, vis) && (!a.adminOnly || profileId === PARENT_ID) && (!a.gate || gates[a.gate]),
   )
   if (!order?.length) return allowed
   const rank = new Map(order.map((id, i) => [id, i]))
@@ -555,8 +619,13 @@ export interface HomeTile {
  * keeps the Games folder sitting where the Davy Back icon used to sit for
  * everyone who already had a layout.
  */
-export function homeTiles(profileId: string | null, order: string[] | undefined, gates: Gates): HomeTile[] {
-  const apps = appsFor(profileId, order, gates)
+export function homeTiles(
+  profileId: string | null,
+  order: string[] | undefined,
+  gates: Gates,
+  vis?: AppVisibility,
+): HomeTile[] {
+  const apps = appsFor(profileId, order, gates, vis)
   const rank = new Map((order ?? []).map((id, i) => [id, i]))
   const tiles: HomeTile[] = []
   const placed = new Set<string>()

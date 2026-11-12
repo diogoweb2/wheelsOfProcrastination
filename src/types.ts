@@ -196,6 +196,12 @@ export interface Settings {
    * save; `defaultCurfew()` fills it in on load.
    */
   curfew?: CurfewSettings
+  /**
+   * §1e — what this person sees on the home screen and in each bottom menu,
+   * set by the captain at /admin/apps. Keys: `app` or `app/tab`; true = shown.
+   * Missing = the roster's default (see `appShown` / `tabShown` in registry.ts).
+   */
+  appVisibility?: Record<string, boolean>
 }
 
 /** One device registered for web push, so a closed app can still be reached. */

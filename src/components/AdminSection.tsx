@@ -12,7 +12,8 @@ import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
 import { QuizSession } from './QuizSession'
 import { QuestionManager } from './QuestionManager'
 import { dayKey } from '../logic/dates'
-import { APPS } from '../apps/registry'
+import { APPS, appShown } from '../apps/registry'
+import { AppVisibilityDesk } from './AppVisibilityDesk'
 import { ALWAYS_OPEN, DEFAULT_ALLOW, clockLabel, curfewActive, defaultCurfew, type CurfewSettings } from '../logic/curfew'
 import { sfx } from '../audio'
 
@@ -54,6 +55,8 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
       )}
 
       {tab === 'audit' && <AuditLog />}
+
+      {tab === 'apps' && <AppVisibilityDesk />}
 
       {tab === 'prizes' && (
         <>
@@ -170,7 +173,7 @@ function NightWatchDesk() {
 
   // everything that has an icon on his home screen; Settings and the Parent app
   // are never on the list because they are never closed
-  const choices = APPS.filter((a) => !a.hidden && !a.adminOnly && !ALWAYS_OPEN.includes(a.id))
+  const choices = APPS.filter((a) => appShown(a, kidData?.settings.appVisibility) && !a.adminOnly && !ALWAYS_OPEN.includes(a.id))
   const games = choices.filter((a) => a.folder === 'games')
   const rest = choices.filter((a) => a.folder !== 'games')
 

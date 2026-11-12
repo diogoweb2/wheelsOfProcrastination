@@ -4,7 +4,8 @@
 // prints the exact window and counts down to the minute it lifts, and then
 // points at the apps that ARE open right now. Nothing here can be dismissed —
 // there is no "continue anyway", because a curfew with a back door isn't one.
-import { appById } from '../apps/registry'
+import { appById, appShown } from '../apps/registry'
+import { useStore } from '../store/useStore'
 import { clockLabel } from '../logic/curfew'
 import type { CurfewNow } from '../hooks/useCurfew'
 import { sfx } from '../audio'
@@ -19,8 +20,9 @@ export function NightWatch({
   onOpen: (appId: string) => void
 }) {
   const { curfew, opensAt, left } = curfewNow
+  const vis = useStore((s) => s.data.settings.appVisibility)
   const app = appById(appId)
-  const stillOpen = curfew.allow.map(appById).filter((a): a is NonNullable<typeof a> => !!a && !a.hidden)
+  const stillOpen = curfew.allow.map(appById).filter((a): a is NonNullable<typeof a> => !!a && appShown(a, vis))
 
   return (
     <div className="screen" style={{ textAlign: 'center' }}>

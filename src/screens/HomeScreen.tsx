@@ -50,9 +50,9 @@ export function HomeScreen({
   const gates: Gates = { converter: !!watchedBank && converterActive(watchedBank) }
 
   const tiles = useMemo(
-    () => homeTiles(activeProfileId, data.settings.homeOrder, gates),
+    () => homeTiles(activeProfileId, data.settings.homeOrder, gates, data.settings.appVisibility),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeProfileId, data.settings.homeOrder, gates.converter],
+    [activeProfileId, data.settings.homeOrder, gates.converter, data.settings.appVisibility],
   )
 
   // which folder is open, if any — a folder tile shows its apps on their own

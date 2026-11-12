@@ -35,7 +35,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 |---|---|
 | 📋 **Tasks** *(the wheel + the daily loop)* | Spin · Quests · Streak · Map · Record — *on `dailyMode: 'today'` (§2b):* Today · Week · Quests · Streak · Record |
 | 🎓 **Quiz** | Topics · Maps · Subjects · School · Warm-up · Study · Progress |
-| 🏦 **Bank** | *Ben:* Chests · Grow · Tools · Log — *Diogo:* Vault · Shock · Rules · Ledger |
+| 🏦 **Bank** | *Ben:* Chests *(Bills · Grow · Tools · Log hidden by default, §1e)* — *Diogo:* Vault · Bills · Shock · Rules · Ledger |
 | 🛒 **Shop** | Wallpapers · Treasures · Orders |
 | 🎴 **One Piece Album** | Binder · Packs · Trade |
 | 🖼️ **Stickers** *(hidden — still at `/album/*`)* | Album · Packs · Trade |
@@ -50,7 +50,7 @@ The app is organised like a phone, not like a tab bar. There is **no global tab 
 | ⚙️ **Settings** | Profile · Alerts · Sound · About |
 | 👀 **Quiz Watch** (Diogo only) | Live · Answers · Mistakes |
 | 📈 **Usage** (Diogo only) | Apps · Unused · Actions · People · Log |
-| 👨‍👦 **Parent** (Diogo only) | Freezes · Limits · Quizzes · Prizes · Audit |
+| 👨‍👦 **Parent** (Diogo only) | Freezes · Limits · Quizzes · Prizes · Audit · Apps |
 
 - **The Wheel app owns the whole daily loop.** Its **Streak** page (streak hero, goal, freeze shop, ask-Dad), **Map** page (§7) and **Record** page (trophy shelf §8 + training log + lifetime stats and the last-8-weeks bar chart) used to be a separate "Voyage" app; they belong beside the wheel that feeds them.
 - **Folders.** An app may declare a `folder`, and every app naming the same one collapses into a single Dashboard tile that opens onto them — exactly what a phone does. **🎮 Games** holds ⚔️ Davy Back, ♟️ Chess, 🔴 Checkers and 🚢 Sea Battle; four games in a row of icons is four games' worth of noise. The folder tile carries a strip of the icons inside it and **one red badge summing everything waiting in there**, so nothing gets buried by being grouped. Dragging still works: the saved order (`settings.homeOrder`) holds tile ids, and a folder that has never been dragged inherits the earliest slot any app inside it held — which is why the Games folder appears where the Davy Back icon used to be rather than at the end.
@@ -89,6 +89,17 @@ a WebView shell over the live site ([android/](android/README.md)).
   stays quiet (`src/components/UpdatedModal.tsx`, localStorage `wheels.lastBuild`).
 - Portrait-locked, matching the PWA manifest. Installed by sideload
   (`./gradlew assembleRelease`, `adb install -r`), never published to Play.
+
+## 1e. Show and hide — the parent decides what each of us sees (`/admin/apps`)
+
+The first usage week (§26, Nov 7–12 2026) showed Ben in three apps — St. Eugene 7, the Quiz and Tasks — and nobody opening sixteen others. Those are now **hidden by default**, and the Parent app has a page to change that by hand, per person, at any time.
+
+- **Hidden is not deleted.** A hidden app has no home-screen icon; a hidden tab is off its bottom menu. Both keep working at their own URL (§1c) and keep every byte of data. Open a hidden tab by URL and it sits on the menu while you are on it.
+- **Defaults live in the roster.** `hidden: true` on an app or a tab in [src/apps/registry.ts](src/apps/registry.ts). Hidden by default since 2026-11-12: One Piece Album, Card Game, One Piece TCG, Chess, Sea Battle, Rivals, Frontier, Checkers, Essays, Gym, Ideas (and Stickers, hidden earlier) — and on Ben's Bank menu, Bills · Grow · Tools · Log, so his Bank is the Chests page alone. Clocks stays as it was: it only appears during trip mode, so a week without a trip says nothing about it.
+- **Overrides live with the person.** `settings.appVisibility` in that person's own world — keys `app` (`chess`) or `app/tab` (`bank/grow`), `true` = shown, `false` = hidden. Only what differs from the default is stored, so a default changed later still reaches him. Ben's half is written through `kidData` and only once his doc has come from the server (same rule as the night watch).
+- **The page**: every app, a ✓/· switch for Diogo and one for Ben; ▸ opens its pages with the same two switches. Parent-only apps have no Ben switch. "Back to the defaults" per person clears their overrides.
+- **What can't be hidden**: the Parent app and `/admin/apps` itself (no locking yourself out), and the last tab showing on someone's menu (an app with no menu is a dead end).
+- **Night watch follows it.** The list of apps that stay open through the curfew (§23) only offers apps Ben can actually see.
 
 ## 2. Tasks
 
@@ -738,6 +749,7 @@ The Me screen is split into sub-tabs — **👤 Me** (streak, goal, freezes) · 
 - Manage BOTH academies (Ben's and his own): 🔒 lock/unlock any topic, **⚓ Mark conquered / ↩︎ Un-conquer** (stamps a topic passed by hand — a test sat off-app, or one the app failed to record; it also drops the topic off the wheel and opens the next one, exactly like a real pass, but hands out **no** 🍇 — use +1 🍇 for that. Un-conquering puts the topic back on the wheel), **+1 🍇** bonus grants, per-topic question manager (view every Q&A, remove — flagged `status: "removed"` in the DB row so AI regen won't recreate it — and restore), Ben's official final-test launcher (on the spot **or** 📡 allowed on his device with a code + note for a nearby grown-up, result reported back here), ⚔️ preview of Ben's training (records nothing).
 - **⏳ Limits**: how many **training-hall card matches vs the AI** each crewmate may start per day (§13) — separate dials for Ben and Diogo, default **2**, 0 to shut the hall, 20 max, each row showing what has been played today and a one-tap reset to the default. Ben's dial is written into his world through the `kidData` subscription, so it only moves once his doc has arrived from the server. The same tab also holds **🌙 Night watch** — Ben's daily curfew (§23) — and **⏱️ Move clock** — seconds per move for the board games and for the card game (§15e), 5-second steps up to 60, 0 to switch the clock off, written into **both** worlds at once because a clock only works if both sides of the board are on it.
 - **🧊 Free freezes for Ben** (top of the desk): answer his freeze asks or gift unprompted — count + custom message, revives a dead streak for free. See §6.
+- **👁️ Apps** (`/admin/apps`): show or hide each app and each bottom-menu tab, per person — see §1e.
 - Review queue: AI-regenerated questions arrive `status: "pending"` → approve/remove card at the top of the desk.
 - Prize settlement: "Prizes to settle" list + topbar banners, and the **treasure shelves** themselves — add/edit/delete a prize and set its 30-day limit, per profile (see §15).
 - **Scripts** (both talk to Firestore via the public web config + anonymous auth):

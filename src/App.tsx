@@ -39,7 +39,7 @@ import { RobloxScreen } from './screens/RobloxScreen'
 import { formatMinutes, unseenGrants } from './logic/roblox'
 import { EssayScreen } from './screens/EssayScreen'
 import { LogPoseScreen } from './screens/LogPoseScreen'
-import { appById, tabsFor } from './apps/registry'
+import { appById, menuTabs, tabsFor } from './apps/registry'
 import { landingFor, pathToRoute, routeToPath, sameRoute, type OpenApp } from './lib/route'
 import { inShell } from './push'
 import { trackView, usageProfile } from './lib/usage'
@@ -72,7 +72,9 @@ export default function App() {
     const app = appById(appId)
     if (!app) return
     const tabs = tabsFor(app, activeProfileId, dailyMode)
-    setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : tabs[0].id })
+    // no tab asked for → the first one on the menu he actually sees (§1e)
+    const first = menuTabs(app, activeProfileId, dailyMode, data.settings.appVisibility)[0]
+    setOpen({ app: appId, tab: tabId && tabs.some((t) => t.id === tabId) ? tabId : first.id })
   }
 
   // Who's looking decides which apps exist, so the URL is only trustworthy once
@@ -424,7 +426,7 @@ export default function App() {
   }
 
   const openDef = open ? appById(open.app) : undefined
-  const openTabs = openDef ? tabsFor(openDef, activeProfileId, dailyMode) : []
+  const openTabs = openDef ? menuTabs(openDef, activeProfileId, dailyMode, data.settings.appVisibility, open?.tab) : []
 
   return (
     <div
