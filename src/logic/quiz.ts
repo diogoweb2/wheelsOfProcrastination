@@ -1262,6 +1262,18 @@ export function lastOfficialAttempt(data: AppData, topicId: string) {
   return null
 }
 
+/**
+ * §14 — Ben may sit an official final test only when every active question of the
+ * topic is RIGHT: answered correctly, and not missed since (a wrong answer resets
+ * `streak`; an old blob without a streak counts as right). These are the ones left.
+ */
+export function finalTestGaps(pool: QuizQuestion[], stats: Record<string, QuizStat>): QuizQuestion[] {
+  return pool.filter((q) => {
+    const s = stats[q.id]
+    return !(s && s.everCorrect && (s.streak ?? 1) > 0)
+  })
+}
+
 /** Official final tests allowed per topic per day. The warm-up round never counts (it is filed `review`), so it can be failed any number of times. */
 export const OFFICIAL_TRIES_PER_DAY = 2
 

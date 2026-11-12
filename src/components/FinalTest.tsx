@@ -11,7 +11,8 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { PARENT_ID } from '../store/storage'
 import type { FinalTestAuth } from '../types'
-import { reviewTopicIds, topicById } from '../logic/quiz'
+import { activeQuestions, finalTestGaps, reviewTopicIds, topicById } from '../logic/quiz'
+import { FinalTestGate } from './FinalTestGate'
 import { QuizSession } from './QuizSession'
 import { Luffy } from './Luffy'
 import { sfx } from '../audio'
@@ -28,7 +29,7 @@ export function FinalTest() {
 // --- Ben's side -------------------------------------------------------------
 
 function KidFinalTest() {
-  const { data, activeProfileId, finalTests, postponeFinalTest, startFinalTest, abandonFinalTest } = useStore()
+  const { data, quizBank, activeProfileId, finalTests, postponeFinalTest, startFinalTest, abandonFinalTest } = useStore()
   const [phase, setPhase] = useState<'idle' | 'code' | 'running'>('idle')
   const [authId, setAuthId] = useState<string | null>(null)
 
@@ -73,7 +74,13 @@ function KidFinalTest() {
   if (phase === 'code') {
     const auth = mine.find((t) => t.id === authId)
     if (!auth || auth.status !== 'pending') return null
-    return <CodeGate auth={auth} onPass={unlocked} onCancel={() => { setAuthId(null); setPhase('idle') }} />
+    const cancel = () => { setAuthId(null); setPhase('idle') }
+    // §14 — the attempt is only spent after every question is right in training
+    return (
+      <FinalTestGate topicId={auth.topicId} targetId={auth.targetId} stats={data.quiz.stats} onCancel={cancel}>
+        <CodeGate auth={auth} onPass={unlocked} onCancel={cancel} />
+      </FinalTestGate>
+    )
   }
 
   if (!open || !topic) return null
@@ -111,6 +118,11 @@ function KidFinalTest() {
           <p className="muted" style={{ margin: '0 0 16px' }}>
             🧠 It opens with a short <b>warm-up review</b> of the seas you already conquered — clear 70% of that and the
             real test begins.
+          </p>
+        )}
+        {finalTestGaps(activeQuestions(quizBank, open.topicId), data.quiz.stats).length > 0 && (
+          <p className="muted" style={{ margin: '0 0 16px' }}>
+            📚 First, finish the questions you still have wrong in training. The game will take you there.
           </p>
         )}
         <button className="btn" onClick={() => begin(open)}>

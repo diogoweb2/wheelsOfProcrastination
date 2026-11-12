@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore'
 import { KID_ID, PARENT_ID } from '../store/storage'
 import type { AppData, AuditCategory, QuizQuestion } from '../types'
+import { FinalTestGate } from './FinalTestGate'
 import { CHAPTER_PREFIX, CHAPTER_SUBJECTS, activeQuestions, berriesOnly, correctAnswerText, lastOfficialAttempt, outOfTriesToday, prizesFor, topicsFor, type Prize, type QuizTopic } from '../logic/quiz'
 import { DUEL_MOVE_SECONDS, SOLO_PLAY_LIMIT_DEFAULT } from '../logic/cardGame'
 import { BOARD_MOVE_SECONDS } from '../logic/boardGames'
@@ -25,7 +26,7 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
   const pending = quizBank.filter((q) => q.status === 'pending')
 
   if (session && kidData) {
-    return (
+    const player = (
       <QuizSession
         mode={session.kind === 'ben-official' ? 'official' : 'training'}
         preview={session.kind === 'ben-preview'}
@@ -34,6 +35,14 @@ export function AdminSection({ tab = 'freezes' }: { tab?: string } = {}) {
         stats={kidData.quiz.stats}
         onClose={() => setSession(null)}
       />
+    )
+    // §14 — Ben's official test sits behind "every question right in training"
+    return session.kind === 'ben-official' ? (
+      <FinalTestGate topicId={session.topicId} targetId={KID_ID} stats={kidData.quiz.stats} onCancel={() => setSession(null)}>
+        {player}
+      </FinalTestGate>
+    ) : (
+      player
     )
   }
   if (managing) {

@@ -96,10 +96,12 @@ interface Props {
   preview?: boolean
   /** Remote-authorised official test (see FinalTestAuth): the result is reported back to Dad's desk. */
   authId?: string
+  /** Training only: restrict the pool to these questions (the final-test gate, §14). */
+  onlyIds?: string[]
   onClose: () => void
 }
 
-export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onClose }: Props) {
+export function QuizSession({ mode, topicId, targetId, stats, preview = false, authId, onlyIds, onClose }: Props) {
   const { quizBank, data, activeProfileId, kidData, recordQuizAnswer, finishQuizTest, finishReviewTest, finishWarmupTest } = useStore()
   const isWarmup = mode === 'warmup'
   const topic = topicId === REVIEW_TOPIC_ID ? REVIEW_TOPIC : topicById(topicId)
@@ -121,9 +123,12 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   // the target's data from wherever we stand, for retry-exclusion
   const target = activeProfileId === targetId ? data : targetId === KID_ID ? kidData : null
   const pool = useMemo(
-    () => (topicId === REVIEW_TOPIC_ID ? (target ? reviewPool(target, targetId, quizBank) : []) : activeQuestions(quizBank, topicId)),
+    () => {
+      const all = topicId === REVIEW_TOPIC_ID ? (target ? reviewPool(target, targetId, quizBank) : []) : activeQuestions(quizBank, topicId)
+      return onlyIds ? all.filter((q) => onlyIds.includes(q.id)) : all
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [quizBank, topicId, targetId],
+    [quizBank, topicId, targetId, onlyIds],
   )
 
   // ---- test plan (fixed once per session) ----
@@ -184,7 +189,7 @@ export function QuizSession({ mode, topicId, targetId, stats, preview = false, a
   const [reading, setReading] = useState<{ lessonId: string; then: 'advance' | 'back' } | null>(null)
   const [finished, setFinished] = useState<QuizTestRecord | null>(null)
   // training: true once he opts to keep practising past the spaced-repetition rest
-  const [ignoreRest, setIgnoreRest] = useState(false)
+  const [ignoreRest, setIgnoreRest] = useState(!!onlyIds)
   // §14f — the round of first-goal questions being drilled; empty once there are none left to learn.
   // A preview saves nothing, so a round could never end: Dad just sees the whole bank.
   const [drill, setDrill] = useState<string[]>(() =>
