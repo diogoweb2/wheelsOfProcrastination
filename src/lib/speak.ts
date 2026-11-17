@@ -44,6 +44,7 @@ const SAY: [RegExp, string | ((match: string) => string)][] = [
   [/°C/g, ' degrees Celsius'],
   [/π/g, ' pi '],
   [/…/g, ' and so on'],
+  [/_+/g, ' blank '], // a fill-in gap ____ is one "blank", never "underscore underscore…"
   [/\|([^|]+)\|/g, ' the absolute value of $1 '], // |−20|
   [/\s+/g, ' '],
 ]
