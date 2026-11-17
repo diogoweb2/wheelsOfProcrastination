@@ -158,7 +158,12 @@ export function SeVideoBlock({
         ticker = setInterval(() => {
           const p = player.current
           if (!p?.getDuration) return
-          if (playing.current) setWatched((w) => (w >= HOLD_SECONDS ? w : w + 0.5))
+          if (playing.current) {
+            setWatched((w) => (w >= HOLD_SECONDS ? w : w + 0.5))
+            // Watching is studying: a playing video keeps the lesson clock
+            // running though nobody is tapping (§24d).
+            window.dispatchEvent(new Event('se-activity'))
+          }
           const dur = (end ?? p.getDuration()) - (start ?? 0)
           if (dur > 0) setProgress(Math.min(1, (p.getCurrentTime() - (start ?? 0)) / dur))
         }, 500)

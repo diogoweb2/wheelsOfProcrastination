@@ -2101,6 +2101,8 @@ Two engines (`src/lib/speak.ts`): Android's native `TextToSpeech` through the sh
 
 He picks 15, 30, 40 or 60 (40 is the default). **15 is there because 30 was a wall**: his first 30-minute lesson ran past an hour of real time, with a 38-minute break in the middle, and was never finished. A finish line he reaches beats one he does not. The engine deals a run it believes is about that long, then **measures the real thing**: one second is banked only while the tab is visible **and** something has happened in the last 60 seconds. Walk away and the minutes do not accrue.
 
+**The real length is logged, for good.** Every finished lesson writes one row to `steugene.sessions` (`SeSessionLog`: subtopic, kind, the length he picked, `activeSeconds`, `wallSeconds`, cards, right; capped at 400). Dad reads it on **St. Eugene → Desk → ⏱️ Study time**: per picked length, how many lessons, the average real minutes and how many reached the full length, then the last 12 lessons. That table is how to check whether 15 / 30 / 40 / 60 are the right menu. A playing video counts as active (the video block fires `se-activity` every half second while it plays), so watching is never lost to the 60-second idle rule.
+
 **There is no visible clock, ever.** A timer on screen turns the lesson into something to outlast. The only progress he sees is a ⛵ sailing along the top, and it moves **per card**, so sitting still gains nothing.
 
 Working faster than the plan tops the queue up from the bench (`seTopUp`), two cards of lookahead ahead of him. Running out of content before the time is up is the one failure that matters, which is why packs carry far more `extra` than `core`.

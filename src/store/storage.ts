@@ -93,6 +93,8 @@ export function defaultStEugeneState(): AppData['steugene'] {
 
 /** The mistake history is uncapped by nature, so it is capped here. */
 export const SE_HISTORY_CAP = 600
+/** One small row per finished lesson; a year of daily lessons fits. */
+export const SE_SESSIONS_CAP = 400
 
 /** Merge a stored (possibly older/partial) blob over fresh defaults so new fields never break old saves. */
 export function mergeData(parsed: Partial<AppData> | undefined): AppData {
@@ -130,6 +132,7 @@ export function mergeData(parsed: Partial<AppData> | undefined): AppData {
       // trimmed on load, so a long year never grows the profile doc past
       // Firestore's 1 MB ceiling
       history: (parsed.steugene?.history ?? []).slice(-SE_HISTORY_CAP),
+      sessions: (parsed.steugene?.sessions ?? []).slice(-SE_SESSIONS_CAP),
       speak: { ...base.steugene.speak, ...parsed.steugene?.speak },
     },
     // the bag and the kill list are objects, so they merge a level deeper —

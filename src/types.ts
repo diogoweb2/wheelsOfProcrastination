@@ -1860,8 +1860,30 @@ export interface SeRun {
   subs?: Record<string, string>
 }
 
+/**
+ * One finished lesson, as it was really spent (§24d). `activeSeconds` is the
+ * clock the lesson ran on — banked only while the screen was in front of him
+ * and he was tapping, typing or watching a video — so it is the number to hold
+ * the 15 / 30 / 40 / 60 menu up against.
+ */
+export interface SeSessionLog {
+  /** When it finished (ms). */
+  at: number
+  subtopicId: string
+  kind: 'lesson' | 'review' | 'fix'
+  /** The length he picked, in minutes. 0 on a run with no clock. */
+  targetMinutes: number
+  activeSeconds: number
+  /** Start to finish on the wall clock, breaks included. */
+  wallSeconds: number
+  cards: number
+  right: number
+}
+
 export interface StEugeneState {
   run: SeRun | null
+  /** Every finished lesson, newest last, capped — how long he really studies. */
+  sessions?: SeSessionLog[]
   stats: Record<string, SeStat>
   locks: SeFixLock[]
   /** Every answer, newest last, capped — the Report's raw material. */

@@ -1682,6 +1682,48 @@ function Miss({ miss }: { miss: SeAnswer }) {
 
 // --- Dad's desk ---------------------------------------------------------------------
 
+/** §24d — how long he really studies, set against the length he picked. */
+function StudyTime({ sessions }: { sessions: NonNullable<AppData['steugene']['sessions']> }) {
+  const mins = (sec: number) => Math.round(sec / 60)
+  const timed = sessions.filter((s) => s.kind !== 'fix')
+  const byTarget = new Map<number, typeof timed>()
+  for (const s of timed) byTarget.set(s.targetMinutes, [...(byTarget.get(s.targetMinutes) ?? []), s])
+  const recent = [...sessions].reverse().slice(0, 12)
+  return (
+    <div className="card">
+      <div className="h2">⏱️ Study time</div>
+      <p className="muted" style={{ marginBottom: 8 }}>
+        Only while the screen is on and he is tapping, typing or watching a video (a minute of thinking still counts).
+      </p>
+      {!sessions.length && <p className="muted">No finished lesson yet.</p>}
+      {[...byTarget.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([target, rows]) => {
+          const avg = rows.reduce((n, r) => n + r.activeSeconds, 0) / rows.length
+          const done = rows.filter((r) => r.activeSeconds >= target * 60).length
+          return (
+            <div key={target}>
+              <b>{target} min lessons</b>: {rows.length} done, average <b>{mins(avg)} min</b> of real study, {done} of{' '}
+              {rows.length} reached the full length
+            </div>
+          )
+        })}
+      {recent.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          {recent.map((s) => (
+            <div key={s.at} className="muted">
+              {prettyDay(dayKey(new Date(s.at)))} · {seFind(s.subtopicId)?.subtopic.title ?? s.subtopicId}
+              {s.kind !== 'lesson' ? ` (${s.kind})` : ''} · <b>{mins(s.activeSeconds)} min</b>
+              {s.targetMinutes ? ` of ${s.targetMinutes}` : ''} · {s.wallSeconds ? `${mins(s.wallSeconds)} min on the clock` : ''} · {s.right}/
+              {s.cards} right
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function DeskTab({ setTab }: { setTab: (tab: string) => void }) {
   const { seDesk, seBusy, seDecideAi, seAllowFix, kidData, kidDataFresh, aiConfig } = useStore()
   const pending = seDesk.requests.filter((r) => r.status === 'pending')
@@ -1696,6 +1738,8 @@ function DeskTab({ setTab }: { setTab: (tab: string) => void }) {
       </p>
 
       <SeHelpingBanner onOpen={() => setTab('helping')} />
+
+      <StudyTime sessions={kidData?.steugene.sessions ?? []} />
 
       <div className="card">
         <div className="h1" style={{ fontSize: 18 }}>🔔 Asks ({pending.length})</div>

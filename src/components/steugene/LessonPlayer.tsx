@@ -58,7 +58,7 @@ function useActiveClock(enabled: boolean, flush: (seconds: number) => void) {
     const touch = () => {
       last.current = Date.now()
     }
-    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const
+    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'se-activity'] as const
     for (const e of events) window.addEventListener(e, touch, { passive: true })
 
     const tick = setInterval(() => {

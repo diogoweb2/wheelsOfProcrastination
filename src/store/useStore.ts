@@ -58,7 +58,7 @@ import { SE_WARM_INTRO, seAvailable, seCustomOrder, seFixGroups, seLockLeft, seP
 import { seAnsweredGroups, seFind, seReviewGroups, seTestLeft } from '../logic/steugene'
 import { seTestById } from '../steugene/tests'
 import { generateSeBlocks } from '../logic/steugeneAi'
-import { SE_HISTORY_CAP } from './storage'
+import { SE_HISTORY_CAP, SE_SESSIONS_CAP } from './storage'
 import {
   loadQuizBank,
   loadRoster,
@@ -4220,6 +4220,20 @@ export const useStore = create<StoreState>((set, get) => {
             at: Date.now(),
             mistakes,
           })
+        }
+        // The honest length of this lesson, kept for good (§24d).
+        if (run.activeSeconds > 0 || run.answers.length) {
+          (d.steugene.sessions ??= []).push({
+            at: Date.now(),
+            subtopicId: run.subtopicId,
+            kind: run.review ? 'review' : run.fix ? 'fix' : 'lesson',
+            targetMinutes: run.fix ? 0 : run.targetMinutes,
+            activeSeconds: Math.round(run.activeSeconds),
+            wallSeconds: Math.max(0, Math.round((Date.now() - run.startedAt) / 1000)),
+            cards: run.answers.length,
+            right: run.answers.filter((a) => a.right).length,
+          })
+          if (d.steugene.sessions.length > SE_SESSIONS_CAP) d.steugene.sessions.splice(0, d.steugene.sessions.length - SE_SESSIONS_CAP)
         }
         d.steugene.run = null
       })
